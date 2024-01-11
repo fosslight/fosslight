@@ -37,20 +37,20 @@
         	_rowPrjId = rowData.prjId;
         	_rowPrjDivision = rowData.prjDivision;
 			var param = {"prjId" : rowData.prjId, "prjDivision" : rowData.prjDivision};
-			comment_fn.getCommentsList(param);
+			fn_comment.getCommentsList(param);
         });
         
         $(document).on("click", "[name ='commentModifyBtn']", function (e){
         	e.preventDefault();
         	_referenceDiv = $(this).nextAll('input').val();
         	var successCallbackParam = {"prjId" : _rowPrjId, "prjDivision" : _rowPrjDivision};
-        	comment_fn.editComments($(this).attr("data-commId"), _rowPrjId, _referenceDiv, successCallbackParam);
+        	fn_comment.editComments($(this).attr("data-commId"), _rowPrjId, _referenceDiv, successCallbackParam);
         });
         
         $(document).on("click", "[name ='commentDeleteBtn']", function (e){
         	e.preventDefault();
         	var successCallbackParam = {"prjId" : _rowPrjId, "prjDivision" : _rowPrjDivision};
-        	comment_fn.deleteComments($(this).attr("data-commId"), successCallbackParam);
+        	fn_comment.deleteComments($(this).attr("data-commId"), successCallbackParam);
         });
         
         var list = {
@@ -389,7 +389,7 @@
         	}
         }
         
-        var comment_fn = {
+        var fn_comment = {
         	getCommentsList : function(param) {
                	$.ajax({
         			url : '/dashboard/commentsListAjax',
@@ -430,16 +430,35 @@
     				dataType : 'html',
     				cache : false,
     				success : function(res){
-    					alertify.confirm(res)
-    					.set('title', 'Comments Edit')
-    					.set('onok', function(closeEvent){
-    						comment_fn.updateComments(_commId, _prjId, _referenceDiv, successCallbackParam);
-    					})
-    					.set('oncancel', function(closeEvent){
-    						return;
-    					})
-    					.set('resizable', true).resizeTo('950px', '450px');
+    					if(!alertify.editComments){
+    						alertify.dialog('editComments', function() {
+    							return {
+    								setup: function() {
+    									var settings = alertify.confirm().settings;
+    									
+    									for (var prop in settings) {
+    										this.settings[prop] = settings[prop];
+    									}
+    									
+    									var setup = alertify.confirm().setup();
+    									setup.buttons = [];
+    									setup.focus.element = 1;
+    									
+    									return setup;
+    								},
+    							    hooks: {
+    							    	onshow: function() {
+    							        	this.elements.dialog.style.maxWidth = 'none';
+    							          	this.elements.dialog.style.width = '750px';
+    							        }
+    								}
+    							};
+    						}, false, 'alert');
+                    	}
     					
+    					alertify.editComments(res).set('title', 'Edit Comments');
+    					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_prjId+", "+successCallbackParam+")");
+    					$(".row.custom-layout").attr("style", "margin-top: 10px")
     					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
     				}
         		});
@@ -455,7 +474,7 @@
                     data : param,
                     success : function(json){
                         alertify.success([[#{msg.common.success}]]);
-            			comment_fn.getCommentsList(successCallbackParam);
+            			fn_comment.getCommentsList(successCallbackParam);
                     },
                     error : function(){
                         alertify.error([[#{msg.common.valid2}]], 0);
@@ -483,6 +502,9 @@
             			return false;
             		}
             	});
+        	},
+        	closeAlertifyView : function () {
+        		$(".ajs-close").trigger("click");
         	}
         }
     </script>

@@ -198,10 +198,10 @@
                     display += "<span class=\"badge badge-primary mr-1\">Multi</span>";
                 }
                 if (cellvalue.includes("D")) {
-                    display += "<span class=\"badge badge-info mr-1\">Dual</span>";
+                    display += "<span class=\"badge badge-purple mr-1\">Dual</span>";
                 }
                 if (cellvalue.includes("V")) {
-                    display += "<span class=\"badge badge-success mr-1\">v-Diff</span>";
+                    display += "<span class=\"badge badge-yellow mr-1\">v-Diff</span>";
                 }
 
                 return display;
@@ -279,13 +279,13 @@
                 var _url = '/vulnerability/vulnpopup?ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion + '&vulnType=';
 
                 if (parseInt(cellvalue) >= 9.0) {
-                    display = "<span class=\"iconSet vulCritical\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">" + cellvalue + "</span>";
+                    display = "<span class=\"badge badge-dark\" style=\"cursor: pointer;\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">CRITICAL</span>";
                 } else if (parseInt(cellvalue) >= 7.0) {
-                    display = "<span class=\"iconSet vulHigh\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">" + cellvalue + "</span>";
+                    display = "<span class=\"badge badge-danger\" style=\"cursor: pointer;\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">HIGH</span>";
                 } else if (parseInt(cellvalue) >= 4.0) {
-                    display = "<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">" + cellvalue + "</span>";
+                    display = "<span class=\"badge badge-orange\" style=\"cursor: pointer;\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">MEDIUM</span>";
                 } else if (parseInt(cellvalue) > 0) {
-                    display = "<span class=\"iconSet vulLow\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">" + cellvalue + "</span>";
+                    display = "<span class=\"badge badge-warning\" style=\"cursor: pointer;\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">LOW</span>";
                 } else if (parseInt(cellvalue) == 0 || cellvalue == undefined) {
                     display = "<span style=\"font-size:0;\"></span>";
                 } else {

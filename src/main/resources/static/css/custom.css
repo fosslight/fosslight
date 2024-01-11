@@ -249,6 +249,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .badge.badge-blue { background-color: #0080ff; color: #fff; }
 .badge.badge-orange { background-color: #ffa500; color: #fff; }
 .badge.badge-yellow2 { background-color: #ffff00; color: #000; }
+.badge.badge-purple { background-color: #f5a9f2; color: #fff; }
 
 /* text color */
 .custom-layout .text-gray { color: #555555; }
@@ -681,7 +682,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 
 .ui-jqgrid .ui-jqgrid-view button:hover {
     border: none;
-    background-color: #c4e2ff;
+/*	background-color: #c4e2ff; */
 }
 
 .ui-jqgrid .ui-pg-input {
@@ -717,10 +718,13 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
     border: .8px solid #ced4da;
     border-radius: 4px;
     padding: 2px;
-    text-align: center;
     font-size: .7rem;
     height: auto;
     margin: 0 5px;
+}
+
+.ui-jqgrid .ui-jqgrid-view textarea {
+    width: 100%;
 }
 
 .ui-corner-all,
@@ -793,3 +797,5 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 .alertify .ajs-footer .ajs-buttons .ajs-button.ajs-warning {
   color: #e22563;
 }
+
+td .retxt, div .retxt {padding-top:2px; font-size:11px; color:red !important;}

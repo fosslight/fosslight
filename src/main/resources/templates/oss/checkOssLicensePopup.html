@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
-<th:block th:replace="oss/fragments/checkOssLicensePopup-script :: contentScript"></th:block>
+<th:block th:replace="oss/checkOssLicensePopup-script :: contentScript"></th:block>
 <body>
 	<div class="card-body">
 		<div class="form-group" style="margin-bottom: 0;">
@@ -17,12 +17,12 @@
 		</div>
 		<div class="row pl-2" style="width: 100%;">
 			<div class="col-md-12 outerJqGridSet">
-				<table id="ossList"><tr><td></td></tr></table>
-			</div>
+            	<table id="ossList"><tr><td></td></tr></table>
+       		</div>
 		</div>
 		<div class="row pl-2 float-left custom-layout" style="margin-top: 10px;">
-			<button type="button" id="btnChangeOss" class="btn btn-teal-01 btn-sm width-9rem px-3" th:text="'Change License'"></button>
-		</div>
+        	<button type="button" id="btnChangeOss" class="btn btn-teal-01 btn-sm width-9rem px-3" th:text="'Change License'"></button>
+    	</div>
 	</div>
 </body>
 </html>

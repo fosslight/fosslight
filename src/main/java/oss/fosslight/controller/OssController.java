@@ -1438,7 +1438,7 @@ public class OssController extends CoTopComponent{
 	public String checkOssLicense(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 		model.addAttribute("projectInfo", bean);
 
-		return "oss/fragments/checkOssLicensePopup";
+		return "oss/checkOssLicensePopup";
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1519,7 +1519,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
 		
-		return "oss/fragments/checkOssNamePopup";
+		return "oss/checkOssNamePopup";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -2310,7 +2310,7 @@ public class OssController extends CoTopComponent{
 		model.addAttribute("rowId", rowId);
 		model.addAttribute("target", target);
 		
-		return OSS.OSS_BULK_EDIT_POPUP_JSP;
+		return "oss/ossBulkEditPopup";
 	}
 	
 	@PostMapping(value = OSS.CHECK_OSS_VERSION_DIFF)

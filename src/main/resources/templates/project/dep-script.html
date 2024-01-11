@@ -311,7 +311,7 @@ var dep_fn = {
 	saveMakeData : function(){
 		cleanErrMsg("depList");
 		var target = $("#depList");
-		var prjId = '${project.prjId}';
+		var prjId = [[${project.prjId}]];
 		var csvFileId = $('#depCsvFileId').val();
 		var fileData = dep_evt.csvDelFileSeq;
 		var csvFiles = $(".depCsvFileArea").find("input[type=hidden]");
@@ -865,11 +865,11 @@ var dep_fn = {
     displayVulnerability : function(cellvalue, options, rowObject){
     	var display = "";
 		var _url = "";
-		var prjId = '${project.prjId}';
+		var prjId = [[${project.prjId}]];
 		var ossName = "";
 		if (typeof rowObject.refOssName !== "undefined") {
 			ossName = rowObject.refOssName.replace(' ','_');
-		} else {
+		} else if (typeof rowObject.ossName !== "undefined") {
 			ossName = rowObject.ossName.replace(' ','_');
 		}
 		
@@ -880,13 +880,13 @@ var dep_fn = {
 		}
 		
 		if(parseInt(cellvalue) >= 9.0 ) {
-			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+			display="<span class=\"badge badge-dark\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">CRITICAL</span>";
 		} else if(parseInt(cellvalue) >= 7.0 ) {
-			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+			display="<span class=\"badge badge-danger\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">HIGH</span>";
 		} else if(parseInt(cellvalue) >= 4.0) {
-			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+			display="<span class=\"badge badge-orange\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">MEDIUM</span>";
 		} else if(parseInt(cellvalue) > 0) {
-			display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+			display="<span class=\"badge badge-warning\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">LOW</span>";
 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
 			display="<span style=\"font-size:0;\"></span>";
 		} else {
@@ -983,7 +983,7 @@ var dep_grid = {
  						dataInit: function (e) {
 								var licenseNameId = $(e).attr("id").split('_')[0];
 								var licenseNameTd = $(e).parent();
-
+								
 								var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
 								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
 								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
@@ -1015,20 +1015,21 @@ var dep_grid = {
 										if("" != e.value && e.value == licenseNames[i].value){
 											var licenseIds = $('#'+rowid+'_licenseId').val();
 											
-											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+											mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
 											multText = licenseNames[i].value;
 											break;
 										}
 									}
 											
 									if(mult == null){
-										mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+										mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
 										multText = e.value;
 									}
 									 
 									var rowLicenseNames = [];
-									$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
-										rowLicenseNames.push($(this).text());
+									$('#'+rowid+'_licenseNameBtn').find('.btn.btn-outline-secondary.btn-sm').each(function(i, item){
+										var licenseName = $(this).text();
+										rowLicenseNames.push(licenseName.slice(0, -1));
 									});
 									
 									if (multText != null){
@@ -1061,21 +1062,21 @@ var dep_grid = {
 										for(var i in licenseNames){
 											if("" != e.value && e.value == licenseNames[i].value){
 												var licenseIds = $('#'+rowid+'_licenseId').val();
-												
-												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+												mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
 												multText = licenseNames[i].value;
 												break;
 											}
 										}
 
 										if(mult == null){
-											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+											mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
 											multText = e.value;
 										}
 
 										var rowLicenseNames = [];
-										$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
-											rowLicenseNames.push($(this).text());
+										$('#'+rowid+'_licenseNameBtn').find('.btn.btn-outline-secondary.btn-sm').each(function(i, item){
+											var licenseName = $(this).text();
+											rowLicenseNames.push(licenseName.slice(0, -1));
 										});
 										
 										if (multText != null){
@@ -1301,8 +1302,7 @@ var dep_grid = {
 
 				result.forEach(function(cur,idx){
 					if(cur != ""){
-						var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
-
+						var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
 						$('#'+rowid+'_licenseNameBtn').append(mult);
 					}
 				});

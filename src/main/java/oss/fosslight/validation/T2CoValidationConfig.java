@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.config.AppConstBean;
 
-@Component
+@Component("t2CoValidationConfig")
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_VALIDATION_PROPERTIES)})
 public class T2CoValidationConfig extends CoTopComponent {
     private static T2CoValidationConfig instance = null;

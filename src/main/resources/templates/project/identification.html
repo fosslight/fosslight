@@ -671,11 +671,11 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
-                                        <button th:if="${project.dropYn ne 'Y' and @CommonFunction.isAdmin()}" 
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
-                                        <button th:if="${project.dropYn ne 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag eq 'N')}"
+                                        <button th:if="${project.dropYn != 'Y' and @CommonFunction.isAdmin()}" 
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.checkOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
+                                        <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
-                                        <button th:if="${project.dropYn ne 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag eq 'N')}"
+                                        <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
                                     </div>
                                 </div>
@@ -688,8 +688,8 @@
 												<a th:onclick="|dep_fn.selectDownloadFile('YAML')|" style="display: block;" th:text="'FOSSLight Report (YAML)'"></a>
 											</div>
 										</div>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="depResetUp" th:text="Reset"></button>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="depSaveUp" th:text="Save"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="depResetUp" th:text="Reset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="depSaveUp" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -706,11 +706,11 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
-                                        <button th:if="${project.dropYn ne 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag eq 'N')}"
+                                        <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Check Oss Name'"></button>
-                                        <button th:if="${project.dropYn ne 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag eq 'N')}"
+                                        <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'Check License'"></button>
-                                        <button th:if="${project.dropYn ne 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag eq 'N')}"
+                                        <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('SRC')|" th:text="'Bulk Edit'"></button>
                                     </div>
                                 </div>
@@ -723,8 +723,8 @@
 												<a th:onclick="|src_fn.selectDownloadFile('YAML')|" style="display: block;" th:text="'FOSSLight Report (YAML)'"></a>
 											</div>
 										</div>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="srcResetUp" th:text="Reset"></button>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="srcSaveUp" th:text="Save"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="srcResetUp" th:text="Reset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="srcSaveUp" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -741,11 +741,11 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
-                                        <button th:if="${project.dropYn ne 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag eq 'N')}"
+                                        <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
-                                        <button th:if="${project.dropYn ne 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag eq 'N')}"
+                                        <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
-                                        <button th:if="${project.dropYn ne 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag eq 'N')}"
+                                        <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
                                     </div>
                                 </div>
@@ -758,8 +758,8 @@
 												<a th:onclick="|bin_fn.selectDownloadFile('YAML')|" style="display: block;" th:text="'FOSSLight Report (YAML)'"></a>
 											</div>
 										</div>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="binReset" th:text="Reset"></button>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="binSave" th:text="Save"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="binReset" th:text="Reset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="binSave" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -776,17 +776,17 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
-                                        <button th:if="${autoAnalysisFlag and @CommonFunction.isAdmin() and project.dropYn ne 'Y'}"
+                                        <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${autoAnalysisFlag and project.dropYn != 'Y'}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Auto Analysis'" th:onclick="|bom_fn.analysisValidation()|"></button>
-                                        <button th:if="${autoAnalysisFlag and @CommonFunction.isAdmin() and project.dropYn ne 'Y'}"
+                                        <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${autoAnalysisFlag and project.dropYn != 'Y'}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
-                                        <button th:if="${@CommonFunction.isAdmin() and project.dropYn ne 'Y'}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg(${project.prjId},'13')"></button>
+                                        <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${project.dropYn != 'Y'}"
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
-                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="bom_fn.binaryDBSave(${project.prjId})" th:text="'Save (Binary DB)'"></button>
+                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])" th:text="'Save (Binary DB)'"></button>
                                         <div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
                                         	<button type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|bom_fn.exportList(this)|" th:text="Export"></button>
 											<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
@@ -801,8 +801,8 @@
 												<a th:onclick="|bom_fn.selectDownloadFile('cdxXML')|" style="display: block;" th:text="'CycloneDX (XML)'"></a>
 											</div>
 										</div>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="bomResetUp" th:text="Reset"></button>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="bomSaveUp" th:text="Save"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="bomResetUp" th:text="Reset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="bomSaveUp" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -848,5 +848,10 @@
 			</div>
 		</div>
 	</div>
+	
+	<form id="bulkEditForm" method="post" th:action="@{/oss/ossBulkEditPopup}" th:target="bulkEditViewProjectPopup">
+		<input type="hidden" name="rowId" value=""/>
+		<input type="hidden" name="target" value=""/>
+	</form>
 </body>
 </html>
