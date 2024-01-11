@@ -5535,6 +5535,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						if (mergeList.size() > 0) {
+							mergeList = mergeList.stream().distinct().collect(Collectors.toList());
+							
 							String str = "";
 							for (int j=0; j<mergeList.size(); j++) {
 								str += mergeList.get(j);
