@@ -1949,6 +1949,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				Type 				projectType = new TypeToken<Project>(){}.getType();
 				Project 			project 	= (Project) fromJson(dataStr, projectType);
+				
+				List<String> watcherList = new ArrayList<>();
+				String[] watchers = project.getWatchers();
+				for (String watcher : watchers) {
+					if (!isEmpty(watcher)) watcherList.add(watcher);
+				}
+				project.setWatchers(watcherList.toArray(new String[watcherList.size()]));
+				
 				project.setStartIndex(0);
 				project.setPageListSize(MAX_RECORD_CNT);
 				project.setExcelDownloadFlag(CoConstDef.FLAG_YES);
@@ -2076,6 +2084,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						partner.setArrStatuses(arrStatuses);
 					}
 				}
+				
+				List<String> partnerWatcherList = new ArrayList<>();
+				String[] partnerWatchers = partner.getWatchers();
+				for (String partnerWatcher : partnerWatchers) {
+					if (!isEmpty(partnerWatcher)) partnerWatcherList.add(partnerWatcher);
+				}
+				partner.setWatchers(partnerWatcherList.toArray(new String[partnerWatcherList.size()]));
 				
 				partner.setStartIndex(0);
 				partner.setPageListSize(MAX_RECORD_CNT);
