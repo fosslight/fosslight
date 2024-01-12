@@ -18,31 +18,33 @@
                                 <div class="card card-dark card-outline collapsed-card search-form mb-3">
                                     <div class="card-header" style="border-bottom: none;">
                                         <div class="row">
-                                        	<div class="col-md-4">
-                                                <div class="form-group mb-2">
-                                                    <div class="form-check mb-1" style="font-size: .85rem">
-                                                        <input class="form-check-input" id="ossNameAllSearchFlag" th:checked="${searchBean.ossNameAllSearchFlag == 'Y'}" type="checkbox"/>
-                                                        <label class="form-check-label text-blue-gray" for="ossNameAllSearchFlag" th:text="'Exact Match'"></label>
-                                                        <input name="ossNameAllSearchFlag" th:value="${searchBean.ossNameAllSearchFlag}" type="hidden"/>
-                                                    </div>
-                                                    <div class="input-group">
-                                                    	<input class="form-control autoComOss" name="ossName" placeholder="Oss Name" th:value="${searchBean.ossName}" type="text"/>
-                                                    	<div class="input-group-append">
-                                                    		<button class="btn btn-default" id="search" type="submit"><i class="fa fa-search"></i></button>
-                                                    	</div>
-                                                    	<div class="col-md-3 d-flex justify-content-start mx-2">
-                                                			<div class="input-group-appen d-flex align-items-center">
-                                                    			<a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse" th:text="'+ Advanced Search'"></a>
-                                                			</div>
-                                            			</div>
-                                                    </div>
+                                        	<div class="col-md-7 d-flex">
+                                                <div class="form-check width-8rem p-2 pl-3" style="font-size: .85rem; margin-left: 0.3rem">
+                                                    <input class="form-check-input" id="ossNameAllSearchFlag" th:checked="${searchBean.ossNameAllSearchFlag == 'Y' }" type="checkbox">
+                                                    <label class="form-check-label text-blue-gray" for="ossNameAllSearchFlag" style="font-weight: normal;" th:text="'Exact Match'"></label>
+                                                    <input name="ossNameAllSearchFlag" th:value="${searchBean.ossNameAllSearchFlag}" type="hidden"/>
                                                 </div>
+                                                <div class="w-100">
+                                                    <div class="input-group">
+                                                        <input class="form-control autoComOss" name="ossName" placeholder="Oss Name" th:value="${searchBean.ossName}" type="text">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default" id="search" type="submit">
+                                                                <i class="fa fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                  	</div>
+                                              	</div>
                                             </div>
+                                            <div class="col-md-2 d-flex justify-content-start mx-2">
+                                           		<div class="input-group-appen d-flex align-items-center">
+                                                    <a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse" th:text="'+ Advanced Search'"></a>
+												</div>
+											</div>
                                         </div>
                                     </div>
                                     <div class="card-body py-1">
                                         <div class="row">
-                                            <div class="col-md-3">
+                                            <div class="col-md-5">
                                                 <div class="form-group mb-2">
                                                     <div class="form-check mb-1" style="font-size: .85rem">
                                                         <input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y'}" type="checkbox"/>
@@ -52,7 +54,7 @@
                                                     <input class="form-control autoComLicense" name="licenseName" placeholder="License Name" th:value="${searchBean.licenseName}" type="text"/>
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-5">
                                                 <div class="form-group mb-2">
                                                     <div class="form-check mb-1" style="font-size: .85rem">
                                                         <input class="form-check-input text-orange" id="homepageAllSearchFlag" th:checked="${searchBean.homepageAllSearchFlag == 'Y'}" type="checkbox">
@@ -62,24 +64,26 @@
                                                     <input class="form-control" name="homepage" placeholder="Website" th:value="${searchBean.homepage}" type="text">
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
+                                        </div>
+                                        <div class="row">
+                                        	<div class="col-md-5">
                                                 <div class="form-group mb-2">
-                                                    <textarea class="form-control" name="copyrights" placeholder="Copyright Text" rows="2" th:text="${searchBean.copyright}"></textarea>
+                                                    <textarea class="form-control" name="copyrights" placeholder="Copyright Text" rows="3" th:text="${searchBean.copyright}"></textarea>
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-5">
                                                 <div class="form-group mb-2">
-                                                    <textarea class="form-control" name="summaryDescription" placeholder="Description" rows="2" th:text="${searchBean.summaryDescription}"></textarea>
+                                                    <textarea class="form-control" name="summaryDescription" placeholder="Description" rows="3" th:text="${searchBean.summaryDescription}"></textarea>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-3">
+                                            <div class="col-md-5">
                                                 <div class="form-group mb-2">
                                                     <input class="form-control" id="cvssScoreInput" name="cvssScore" placeholder="Vulnerability (>=)" th:value="${searchBean.cvssScore}" type="text">
                                                 </div>
                                             </div>
-                                            <div class="col-md-3 d-flex justify-content-start mx-2">
+                                            <div class="col-md-5 d-flex justify-content-start mx-2">
                                             	<div class="form-group mb-2 d-flex align-items-center">
                                                     <div class="form-check mb-1" style="font-size: .85rem">
                                                         <input class="form-check-input text-orange" id="deactivateFlag" th:checked="${searchBean.deactivateFlag == 'Y'}" type="checkbox">
