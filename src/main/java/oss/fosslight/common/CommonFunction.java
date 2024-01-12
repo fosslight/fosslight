@@ -3791,19 +3791,21 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				OssAnalysis successOssInfo = ossService.getAutoAnalysisSuccessOssInfo(userData.getReferenceOssId());
 				
-				if (!isEmpty(successOssInfo.getDownloadLocationGroup())) {
-					successOssInfo.setDownloadLocation(successOssInfo.getDownloadLocationGroup());
+				if (successOssInfo != null) {
+					if (!isEmpty(successOssInfo.getDownloadLocationGroup())) {
+						successOssInfo.setDownloadLocation(successOssInfo.getDownloadLocationGroup());
+					}
+					
+					successOssInfo.setTitle("사용자 등록 정보");
+					successOssInfo.setGroupId(userData.getGroupId());
+					successOssInfo.setGridId(userData.getGridId());
+					successOssInfo.setResult("true");
+					successOssInfo.setCompleteYn(userData.getCompleteYn());
+					successOssInfo.setReferenceOssId(userData.getReferenceOssId());
+					changeAnalysisResultList.add(successOssInfo);
+					
+					continue;
 				}
-				
-				successOssInfo.setTitle("사용자 등록 정보");
-				successOssInfo.setGroupId(userData.getGroupId());
-				successOssInfo.setGridId(userData.getGridId());
-				successOssInfo.setResult("true");
-				successOssInfo.setCompleteYn(userData.getCompleteYn());
-				successOssInfo.setReferenceOssId(userData.getReferenceOssId());
-				changeAnalysisResultList.add(successOssInfo);
-				
-				continue;
 			}
 			
 			userData.setTitle("사용자 작성 정보");
