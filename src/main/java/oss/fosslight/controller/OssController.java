@@ -262,16 +262,9 @@ public class OssController extends CoTopComponent{
 			List<String> downloadLocationList = new ArrayList<>();
 			downloadLocationList.add(avoidNull(bean.getDownloadLocation()));
 			model.addAttribute("downloadLocationList", toJson(downloadLocationList));
-		} else {
-			// 신규 등록시에도 ossNickList 은 필수(empty array를 설정)
-			List<String> nickList = new ArrayList<>();
-			model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
-			
-			List<String> downloadLocationList = new ArrayList<>();
-			model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
 		}
 		
-		return "/oss/edit :: content";
+		return "/oss/edit";
 	}
 
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")
@@ -334,7 +327,7 @@ public class OssController extends CoTopComponent{
 		
 		List<String> downloadLocationList = new ArrayList<>();
 		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
-		return "oss/edit :: content";
+		return "oss/edit";
 //		return CommonFunction.isAdmin() ? "oss/edit :: content" : "oss/view :: content";
 	}
 	
