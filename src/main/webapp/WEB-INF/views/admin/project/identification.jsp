@@ -285,7 +285,7 @@
 									<label>Project Id</label>
 									<input type="text" class="autoComProjectIdConf" name="prjId"/>
 								</dd>
-								<dd class="sBtnArea"><input id="depProjectSearchBtn" type="button" value="Search" class="btnColor black wauto srcBtn" /></dd>
+								<dd class="sBtnArea"><input id="depProjectSearchBtn" type="button" value="Search" class="btnColor black wauto depBtn" /></dd>
 							</dl>
 						</form>
 					</fieldset>
@@ -337,9 +337,9 @@
                     <span class="left">
 						<c:set var="isAdmin" value="${ct:isAdmin()}"/>
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
-							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('DEP')" style="width: 115px;" <c:choose> <c:when test="${isAdmin == 'true'}">class="btnColor red srcBtn"</c:when> <c:otherwise>class="btnColor gray disabled srcBtn" disabled</c:otherwise> </c:choose> />
-							<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('DEP')" class="btnColor red srcBtn" style="width: 100px;" />
-							<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('DEP')" <c:choose> <c:when test="${isAdmin == 'true'}">class="btnColor red idenEdit"</c:when> <c:otherwise>class="btnColor gray disabled idenEdit" disabled</c:otherwise> </c:choose>/>
+							<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('DEP')" style="width: 115px;" <c:choose> <c:when test="${isAdmin == 'true'}">class="btnColor red depBtn"</c:when> <c:otherwise>class="btnColor gray disabled depBtn" disabled</c:otherwise> </c:choose> />
+							<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('DEP')" class="btnColor red depBtn" style="width: 100px;" />
+							<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('DEP')" <c:choose> <c:when test="${isAdmin == 'true'}">class="depBtn btnColor red idenEdit"</c:when> <c:otherwise>class="depBtn btnColor gray disabled idenEdit" disabled</c:otherwise> </c:choose>/>
 						</c:if>
                     </span>
 					<span class="right">
@@ -351,7 +351,7 @@
 							</div>
 						</div>
                         <c:if test="${project.dropYn ne 'Y'}">
-							<input id="depResetUp" type="button" value="Reset" class="btnColor btnReset srcBtn idenReset" />
+							<input id="depResetUp" type="button" value="Reset" class="btnColor btnReset depBtn idenReset" />
 							<input id="depSaveUp" type="button" value="Save" class="btnSave btnColor red idenSave"/>
 						</c:if>
 						<!-- Popup -->
@@ -497,7 +497,7 @@
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
                     		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 115px;" />
                     		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('SRC')" class="btnColor red srcBtn btnCheck" style="width: 100px;" />
-                    		<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('SRC')" class="btnColor btnColor red idenEdit" />
+                    		<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('SRC')" class="srcBtn btnColor btnColor red idenEdit" />
                     	</c:if>
                     </span>
                     <span class="right">
@@ -676,7 +676,7 @@
                     	<c:if test="${project.dropYn ne 'Y' and (ct:isAdmin() or project.viewOnlyFlag eq 'N')}">
                     		<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 115px;" />
                     		<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('BIN')" class="btnColor red binBtn btnCheck" style="width: 100px;" />
-                    		<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BIN')" class="btnColor btnColor red idenEdit" />
+                    		<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BIN')" class="binBtn btnColor btnColor red idenEdit" />
                     	</c:if>
                     </span>
                     <span class="right">
@@ -906,7 +906,7 @@
 	                    	<input type="button" value="check License Text" class="downSet btnPackage" id="checkLicenseTextFile" onclick="binAndroid_fn.downloadFile()" style="display:none;float:right;">
 	                    	<input type="button" value="Check OSS Name" onclick="com_fn.CheckOssViewPage('ANDROID')" class="btnColor red binAndroidBtn btnCheck" style="width: 115px;" />
 	                    	<input type="button" value="Check License" onclick="com_fn.CheckOssLicenseViewPage('ANDROID')" class="btnColor red binAndroidBtn btnCheck" style="width: 100px;" />
-	                    	<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BINANDROID')" class="btnColor btnColor red idenEdit" />
+	                    	<input type="button" value="Bulk Edit" onclick="com_fn.bulkEdit('BINANDROID')" class="binAndroidBtn btnColor btnColor red idenEdit" />
                     	</c:if>
                     </span>
                     <span class="right">
