@@ -19,6 +19,7 @@
 	var distributionStatus = '${project.destributionStatus}';
 	var deleteFileList = new Array();
 	var isAndroid = '${project.androidFlag}'; 
+	var appendReadOnlyFlag = false;
 	
 	$(document).ready(function () {
 		'use strict';
@@ -101,6 +102,7 @@
 				$(".editYn").css("background-color", "#f3f6f8");
 				
 				if(CKEDITOR.instances.editor2) {
+					appendReadOnlyFlag = true;
 					CKEDITOR.instances.editor2.config.readOnly = true;
 				}
 			}
@@ -109,6 +111,7 @@
 				$(".editYn").attr("readonly", true);
 				$(".editYn").css("background-color", "#f3f6f8");
 				if(CKEDITOR.instances.editor2) {
+					appendReadOnlyFlag = true;
 					CKEDITOR.instances.editor2.config.readOnly = true;
 				}
 			}
@@ -116,6 +119,7 @@
 		
 		if("${ossNotice.editNoticeYn}" == "N"){
 			if(CKEDITOR.instances.editor2) {
+				appendReadOnlyFlag = true;
 				CKEDITOR.instances.editor2.config.readOnly = true;
 			}
 		}
@@ -1946,7 +1950,7 @@
 		appendEditVisible : function(target){
 			var checked = $(target).prop("checked");
 			
-			if(checked) {
+			if(checked || "CONF" == curIdenStatus) {
 				$("#editAppend").show();
 			} else {
 				$("#editAppend").hide();
@@ -2085,7 +2089,7 @@
 				if(editAppendedYn == "Y"){
 					$("#append").trigger("click").attr("checked", true);
 
-					if(CKEDITOR.instances.editor2) {
+					if(CKEDITOR.instances.editor2 && !appendReadOnlyFlag) {
 						CKEDITOR.instances.editor2.config.readOnly = false;
 					}
 				}
