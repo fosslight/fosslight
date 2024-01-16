@@ -38,6 +38,7 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.ShellCommander;
 import oss.fosslight.domain.CommentsHistory;
+import oss.fosslight.domain.History;
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
@@ -52,6 +53,7 @@ import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.ApiProjectService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
+import oss.fosslight.service.HistoryService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.ApiVulnerabilityService;
 import oss.fosslight.util.ExcelUtil;
@@ -75,6 +77,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	@Autowired CommentService commentService;
 	@Autowired ApiOssMapper apiOssMapper;
 	@Autowired ApiVulnerabilityService apiVulnerabilityService;
+	@Autowired HistoryService historyService;
 	
 	HashMap<String, HashMap<String, Object>> OSS_INFO_UPPER = new HashMap<>();
 	HashMap<String, HashMap<String, Object>> OSS_INFO_BY_ID = new HashMap<>();
@@ -151,9 +154,14 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return records == prjIdList.size() ? true : false;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet) {
+		return getSheetData(ufile, prjId, readType, sheet, false);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet, boolean exactMatchFlag) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		
 		String errMsg = "";
@@ -161,7 +169,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		List<String> errMsgList = new ArrayList<>();
 		
 		try {
-			if (!ExcelUtil.readReport(readType, true, sheet, ufile.getRegistSeq(), reportData, errMsgList)) {
+			if (!ExcelUtil.readReport(readType, true, sheet, ufile.getRegistSeq(), reportData, errMsgList, exactMatchFlag)) {
 				for (String s : errMsgList) { // error 처리
 					if (isEmpty(s)) {
 						continue;
@@ -3181,5 +3189,109 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 		
 		apiProjectMapper.deleteOssComponents(param);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, 
+			String comment, String tabGubn, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
+		Map<String, Object> rtnMap = new HashMap<>();
+		
+		String errorMsg = (String) result.get("errorMessage");
+		
+		if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
+			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+			return rtnMap;
+		}
+		
+		List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
+		ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>());
+		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
+		
+		if (ossComponents.isEmpty()) {
+			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, sheetNamesEmptyFlag ? getMessage("api.upload.file.sheet.no.match", new String[]{sheetName + "*"}) : getMessage("api.upload.file.sheet.no.match", new String[]{sheetName}));
+			return rtnMap;
+		}
+		
+		if (!isEmpty(errorMsg)) {
+			rtnMap.put("errorMessage", errorMsg);
+		}
+		
+		T2CoProjectValidator pv = new T2CoProjectValidator();
+		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+		pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+		pv.setAppendix("mainList", ossComponents); // sub grid
+		pv.setAppendix("subList", ossComponentsLicense);
+		T2CoValidationResult vr = pv.validate(new HashMap<>());
+		
+		if (!vr.isValid()) {
+			rtnMap.put("validError", "validError");
+			return rtnMap;
+		} else {
+			List<ProjectIdentification> ossComponentList = new ArrayList<>();
+			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+			
+			if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag)) || (loopFlag && sheetIdx > 0)) {
+				getIdentificationGridList(prjId, tabGubn.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
+			}
+			
+			ossComponentList.addAll(ossComponents);
+			ossComponentsLicenseList.addAll(ossComponentsLicense);
+			
+			Project project = new Project();
+			project.setPrjId(prjId);
+			
+			if (tabGubn.equals("DEP")) {
+				project.setDepCsvFileId(registFileId); // set file id
+				registDepOss(ossComponentList, ossComponentsLicenseList, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+			} else {
+				project.setSrcCsvFileId(registFileId); // set file id
+				projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
+			}
+			
+			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
+			try {
+				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+						CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP)) != null) {
+					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+							CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_DEP), true);
+					if (!isEmpty(changedLicenseName)) {
+						CommentsHistory commentHisBean = new CommentsHistory();
+						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+						commentHisBean.setReferenceId(prjId);
+						commentHisBean.setExpansion1(tabGubn);
+						commentHisBean.setContents(changedLicenseName);
+						commentHisBean.setLoginUserName(userId);
+						commentService.registComment(commentHisBean, false);
+					}
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			if (comment != null) {
+				CommentsHistory commentHisBean = new CommentsHistory();
+				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+				commentHisBean.setReferenceId(prjId);
+				commentHisBean.setExpansion1(tabGubn);
+				commentHisBean.setContents(comment);
+				commentHisBean.setLoginUserName(userId);
+				commentService.registComment(commentHisBean, false);
+			}
+			
+			try {
+				History h = new History();
+				h = projectService.work(project);
+				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+				project = (Project) h.gethData();
+				h.sethEtc(project.etcStr());
+				historyService.storeData(h);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+		} 
+		
+		return rtnMap;
 	}
 }

@@ -496,6 +496,10 @@ public class ExcelUtil extends CoTopComponent {
 		return value;
 	}
 
+	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, List<OssComponents> list, List<String> errMsgList) {
+		return readReport(readType, checkId, targetSheetNums, fileSeq, list, errMsgList, false);
+	}
+	
 	/**
 	 * 
 	 * @param readType Report종류(3rd, SRC, BAT ...)
@@ -507,7 +511,7 @@ public class ExcelUtil extends CoTopComponent {
 	 * @return
 	 */
 	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, 
-	        List<OssComponents> list,List<String> errMsgList) {
+	        List<OssComponents> list,List<String> errMsgList, boolean exactMatchFlag) {
 		
 		T2File fileInfo = fileService.selectFileInfo(fileSeq);
 		if (fileInfo == null) {
@@ -555,17 +559,22 @@ public class ExcelUtil extends CoTopComponent {
 
 				int idx = 0;
 				for (String sheetName : sheetNames){
-					if (sheetName.startsWith(readType)){
-						targetSheetNumsArrayList.add(Integer.toString(idx));
+					if (exactMatchFlag) {
+						if (sheetName.equalsIgnoreCase(readType)) {
+							targetSheetNumsArrayList.add(Integer.toString(idx));
+						}
+					} else {
+						if (sheetName.startsWith(readType)){
+							targetSheetNumsArrayList.add(Integer.toString(idx));
+						}
 					}
 					idx++;
 				}
-				if (targetSheetNumsArrayList.isEmpty()){
+				if (targetSheetNumsArrayList.isEmpty()) {
 					targetSheetNums = new String[] {"-1"};
-				}else{
+				} else {
 					targetSheetNums = targetSheetNumsArrayList.toArray(new String[0]);
 				}
-
 			}
 			
 			if (hasFileListSheet(targetSheetNums, wb)) {
