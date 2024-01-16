@@ -2,6 +2,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
     <script th:inline="javascript">
+        //<![CDATA[
+        /*global $ */
         let lastsel;
         let temp = {obligation: ''};
         let list = [];
@@ -76,6 +78,11 @@
                     allowClear: true,
                 });
 
+                $('.btnCancel').click(function(){
+                    $('.pop').hide();
+                    $('#blind_wrap').hide();
+                });
+
                 $("[name='commentInput']").summernote({
                     height: 100,
                     callbacks: {
@@ -94,21 +101,138 @@
                 });
 
                 //delete license
-                $('#delete').on('click', function () {
-                    var editorVal = $("#commentCont").summernote('code');
+                  $('#delete').on('click', function () {
 
+                    var editorVal = $("#commentCont").summernote('code');
                     if (editorVal == "") {
-                        alertify.alert(String([[#{msg.license.confirm.delete.required.comment}]]), function () {
+                        alertify.alert([[#{msg.oss.required.deletion}]], function () {
                         });
                         return false;
                     }
 
-                    alertify.confirm(String([[#{msg.license.confirm.delete}]]), function (e) {
+                    if(deactivateFlag == "Y"){
+                        alertify.alert([[#{msg.oss.required.deactivate.deletion}]], function(){});
+                        return false;
+                    }
+
+                    alertify.confirm([[#{msg.oss.warn.remove}]], function (e) {
                         if (e) {
+                            loading.show();
                             $('input[name=comment]').val(editorVal);
-                            deleteSubmit();
+
+                            if(validationDataSet()){
+                                $("#ossForm").ajaxForm({
+                                    url : "/oss/validation",
+                                    type : 'POST',
+                                    dataType:"json",
+                                    cache : false,
+                                    success : onDeleteValidSuccess,
+                                    error : onDeleteValidSuccess
+                                }).submit();
+                            } else {
+                                loading.hide();
+                            }
                         } else {
                             return false;
+                        }
+                    });
+                });
+            },
+            loadOssSelectList : function () {
+                //select oss 팝업 확인 버튼
+                var ossId = [[${ossId}]] || "";
+
+                $(".ossSelectPop > div.pbtn input:eq(1)").on('click', function(){
+                    var rowId = $('#_ossSelectList').jqGrid('getGridParam', 'selrow');
+                    if(rowId === null) {
+                        alert([[ #{msg.oss.required.select.grid} ]]);
+                    }else{
+                        var rowData = $('#_ossSelectList').jqGrid('getRowData',rowId);
+                        var newOssId = rowData.ossId;
+
+                        if(newOssId == ossId){
+                            alertify.alert([[ #{msg.oss.cannot.select} ]], function(){});
+                            return;
+                        }
+
+                        tempNewOssId = newOssId;
+
+                        console.log(oss_edit_data.detail.ossName)
+                        console.log(rowData.ossNameTemp)
+
+                        // 동일한 OSS의 다른 version으로이관하는 경우
+                        if(oss_edit_data.detail.ossName == rowData.ossNameTemp) {
+                            //1. 기존 OssId를 사용중인 프로젝트의 OssId , Version 교체
+                            //2. 기존 Oss 의 Name 과 Nickname을 현재 선택한 Oss의 Nickname 에 병합
+                            //3. 기존의 Oss 삭제
+
+                            var editorVal = $('#commentCont').summernote('code');
+                            var sendData = {
+                                ossId: ossId,
+                                newOssId: newOssId,
+                                comment: editorVal
+                            };
+
+                            $.ajax({
+                                url : "/oss/delAjax",
+                                type : 'POST',
+                                data : sendData,
+                                dataType:"json",
+                                cache : false,
+                                success : function(json){
+                                    var ossId = $('input[name=ossId]').val();
+                                    if(json.resCd == '10'){
+                                        alertify.alert( [[#{msg.common.success} ]], function(){
+                                            callDeleteTabInFrame("oss-edit");
+                                            callReloadTabInframe("/oss/list", "oss-list");
+
+                                            $('.ossSelectPop').hide();
+                                        });
+                                    }else{
+                                        alertify.error([[ #{msg.common.valid} ]], 0);
+                                    }
+                                },
+                                error : function(){
+                                    alertify.error([[ #{msg.common.valid2} ]], 0);
+                                }
+                            });
+                        } else {
+                            // 다른 OSS로 이관하는 경우
+                            mergeOssForDelete(newOssId);
+                        }
+                    }
+                });
+            },
+            ossMergeCheck: function () {
+                $(".mergeOssCheckPop > div.pbtn input:eq(1)").on('click', function(){
+                    var editorVal = $('#commentCont').summernote('code');
+                    var sendData = {
+                        //ossId:${empty ossId ? "''":ossId},
+                        newOssId:tempNewOssId,
+                        comment:editorVal
+                    };
+
+                    $.ajax({
+                        url : "/oss/delOssWithVersionMeregeAjax",
+                        type : 'POST',
+                        data : sendData,
+                        dataType:"json",
+                        cache : false,
+                        success : function(json){
+                            var ossId = $('input[name=ossId]').val();
+                            if(json.resCd == '10'){
+                                alertify.alert([[ #{msg.common.success} ]], function(){
+                                    deleteTabInFrame('<c:url value="/oss/edit/'+ossId+'"/>');
+                                    reloadTabInframe('<c:url value="/oss/list"/>');
+                                    $('.mergeOssCheckPop').hide();
+                                    $('#blind_wrap').hide();
+                                });
+                            }else{
+                                alertify.error([[ #{msg.common.valid} ]], 0);
+                            }
+                        },
+                        error : function(){
+                            alertify.error([[ #{msg.common.valid2} ]], 0);
                         }
                     });
                 });
@@ -244,6 +368,214 @@
                         setFristComb();
                     }
                 });
+
+                // 프로젝트 그리드
+                $("#_projectList").jqGrid({
+                    datatype: 'local',
+                    data: oss_edit_data.components,
+                    colNames:['ID','Project Name', 'Project Version', 'oldsystem'],
+                    colModel:[
+                        {name:'prjId',index:'prjId', width:70, sortable:false, align:"center", key:true},
+                        {name:'prjName',index:'prjName', width:380, sortable:false},
+                        {name:'prjVersion',index:'prjVersion', width:100, sortable:false, align:"center"},
+                        {name:'oldSystemFlag',index:'oldSystemFlag', hidden:true}
+                    ],
+                    rowNum:100,
+                    viewrecords: true,
+                    height: 'auto',
+                    ondblClickRow: function(rowid,iRow,iCol,e) {
+                        var rowData = $("#_projectList").jqGrid('getRowData',rowid);
+                        if("Y" != rowData.oldSystemFlag) {
+                            createTabInFrame(rowData['prjId']+'_Project','#/project/edit/'+rowData['prjId']);
+                        }
+                    },
+                    loadComplete: function(data) {
+                        if(data.records > 0) {
+                            var multRowIds = [];
+                            var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+                            for(var _idx=0;_idx<rowsCount;_idx++) {
+                                row = rows[_idx];
+                                className = row.className;
+                                if (className.indexOf('jqgrow') !== -1) {
+                                    rowid = row.id;
+                                    rowData = data.rows[rowIdx++];
+                                    if(rowData.oldSystemFlag == "Y") {
+                                        className = className + ' excludeRow';
+                                    }
+                                    row.className = className;
+                                } else if(className.indexOf('ui-subgrid') !== -1){
+                                    rowIdx++;
+                                }
+                            }
+                        }
+
+                        resizingJqGidSet();
+                    }
+                });
+
+                // 프로젝트 그리드
+                $("#_partnerList").jqGrid({
+                    datatype: 'local',
+                    data: oss_edit_data.componentsPartner,
+                    colNames:['ID','Partner Name', '3rd Party Software Name', '3rd Party Software Version'],
+                    colModel:[
+                        {name:'partnerId',index:'partnerId', width:70, sortable:false, align:"center", key:true},
+                        {name:'partnerName',index:'partnerName', width:300, sortable:false},
+                        {name:'softwareName',index:'softwareName', width:200, sortable:false, align:"center"},
+                        {name:'softwareVersion',index:'softwareVersion', width:200, sortable:false, align:"center"}
+                    ],
+                    rowNum:100,
+                    viewrecords: true,
+                    height: 'auto',
+                    ondblClickRow: function(rowid,iRow,iCol,e) {
+                        var rowData = $("#_partnerList").jqGrid('getRowData',rowid);
+                        var rowKey = rowData['partnerId'];
+
+                        createTabInFrame(rowKey+'_3rdParty', '#/partner/edit/'+rowKey);
+
+                    },
+                    loadComplete: function(data) {
+                        // 3rd party는 old system에는 없는 기능 이므로 old system으로 인한 exclude row는 표시 할 수 없음..
+                    }
+                });
+
+                // Vulnerability
+                let vulnInfoList = [[ ${vulnInfoList} ]];
+                if(vulnInfoList == null && vulnInfoList == '') {
+                    $("#_vulnInfoList").jqGrid({
+                        datatype: 'local',
+                        data: data.vulnInfoList,
+                        colNames:['CVE ID','CVSS Score', 'Description', 'Published Date'],
+                        colModel:[
+                            {name:'cveId',index:'cveId', width:100, align:"center", formatter: cveIdTag, unformat: unCveIdTag},
+                            {name:'cvssScore',index:'cvssScore', width:80, align:"center", formatter:'vuln',sorttype: 'number'},
+                            {name:'vulnSummary',index:'vulnSummary', width:500, align:"center"},
+                            {name:'modiDate',index:'modiDate', width:100, align:"center", formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}}
+                        ],
+                        rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
+                        sortname: 'cvssScore',
+                        viewrecords: true,
+                        loadonce:true,
+                        sortorder: "desc",
+                        height: 'auto',
+                        ondblClickRow: function(rowId) {
+                        }
+                    });
+                }
+
+                // comment history
+                $('.btnCommentHistory').on('click', function(e){
+                    e.preventDefault();
+                    openCommentHistory("/comment/popup/oss/" + oss_edit_data.ossId);
+                });
+
+
+            },
+            loadOssSelectList : function () {
+                let ossId = oss_edit_data.ossId;
+                if(ossId != null && ossId != '') {
+                    // oss 그리드
+                    $('#_ossSelectList').jqGrid({
+                        url:"/oss/ossPopupList/" + ossId,
+                        datatype: 'json',
+                        jsonReader:{
+                            repeatitems: false,
+                            id:'ossId',
+                            root:function(obj){return obj.rows;},
+                            page:function(obj){return obj.page;},
+                            total:function(obj){return obj.total;},
+                            records:function(obj){return obj.records;}
+                        },
+                        colNames:['ID','OSS Name(Nick Name)', 'Version', 'OSS Name Temp'],
+                        colModel:[
+                            {name:'ossId', index:'ossId', width:80, align:"center"},
+                            {name:'ossName',index:'ossName', width:470, align:"left"},
+                            {name:'ossVersion',index:'ossVersion', width:150, align:"center"},
+                            {name:'ossNameTemp',index:'ossNameTemp', align:"center", hidden:true}
+                        ],
+                        autoencode: true,
+                        rowNum: 5,
+                        rowList: [5, 10, 15],
+                        autowidth: true,
+                        pager: '#ossSelectListPager',
+                        gridview: true,
+                        sortname: 'ossId',
+                        viewrecords: true,
+                        sortorder: 'desc',
+                        loadonce:false,
+                        height: 'auto',
+                        caption : 'Please select the open source you want to set as nickname.',
+                        loadComplete: function(id){
+                            var ids = $('#_ossSelectList').jqGrid('getDataIDs');
+                            $.each(ids,function(idx,rowId){
+                                var rowData = $('#_ossSelectList').jqGrid("getRowData",rowId);
+                                if(rowData.ossId == ossId){
+                                    $('#_ossSelectList').jqGrid("setRowData",rowId, false, {'background-color' : '#a9a9a9'});
+                                }
+                            })
+                        },
+                        onSelectRow: function(id){
+                            var rowData = $('#_ossSelectList').jqGrid('getRowData',id);
+                            if(rowData.ossId == ossId){
+                                alertify.alert([[ #{msg.oss.cannot.select} ]], function () {});
+                            }
+                        }
+                    });
+                }
+            },
+            ossMergeCheck : function (newOssId) {
+                $('#_ossMergeCheckList').jqGrid({
+                    url: `/oss/ossMergeCheckList/${oss_edit_data.ossId}/${newOssId}`,
+                    datatype: 'json',
+                    jsonReader: {
+                        repeatitems: false,
+                        id: 'ossId',
+                        root: function (obj) {
+                            return obj.rows;
+                        }
+                    },
+                    colNames: ['ID', 'Merge', 'Version', 'License', 'License Type', 'Obligation', 'Copyright', 'Download Location', 'HomePage', 'delOssId'],
+                    colModel: [
+                        {name: 'ossId', index: 'ossId', width: 70, align: "center"},
+                        {name: 'mergeStr', index: 'mergeStr', width: 70, align: "center"},
+                        {name: 'ossVersion', index: 'ossVersion', width: 80, align: "left"},
+                        {name: 'licenseName', index: 'licenseName', width: 150, align: "left"},
+                        {name: 'licenseType', index: 'licenseType', width: 80, align: "left"},
+                        {name: 'obligation', index: 'obligation', width: 80, align: "left"},
+                        {name: 'copyright', index: 'copyright', width: 150, align: "left"},
+                        {name: 'downloadLocation', index: 'downloadLocation', width: 100, align: "left"},
+                        {name: 'homepage', index: 'homepage', width: 100, align: "left"},
+                        {name: 'delOssId', index: 'delOssId', hidden: true}
+                    ],
+                    autoencode: true,
+                    rowNum: 9999,
+                    autowidth: true,
+                    gridview: true,
+                    sortname: 'ossVersion',
+                    viewrecords: true,
+                    sortorder: 'desc',
+                    loadonce: true,
+                    height: 'auto',
+                    loadComplete: function (id) {
+                        $('#_ossMergeCheckList').jqGrid("setRowData", oss_edit_data.ossId, false, {'background-color': '#ada9a9'});
+                    },
+                    onSelectRow: function (id) {
+                        $("div.retxt._licenseChoice_" + rowid).remove();
+
+                    },
+                    ondblClickRow: function (rowid, iRow, iCol, e) {
+                        // 체크 박스 영역 제외
+                        var row = $('#_ossMergeCheckList').jqGrid('getRowData', rowid);
+
+                        // 자기자신이 아닌 경우만
+                        if ('Duplicated' == row['mergeStr'] && row['delOssId'] && row['delOssId'] != '${ossId}') {
+                            callCreateTabInFrame(row['delOssId'] + '_Opensource', "/oss/edit/" + row['delOssId']);
+                        } else if (row['ossId'] != '${ossId}') {
+                            callCreateTabInFrame(row['ossId'] + '_Opensource', "/oss/edit/" +  row['ossId']);
+                        }
+
+                    }
+                });
             }
         }
 
@@ -255,7 +587,7 @@
 
                     switch (licenseChoiceLength) {
                         case 0:
-                            alertify.alert(String([[ #{msg.oss.required.license}]]), function () {
+                            alertify.alert([[ #{msg.oss.required.license}]], function () {
                             });
                             return false;
                             break;
@@ -282,7 +614,7 @@
                             var errRow = $("#" + gridStr + " #" + dataId + " td[aria-describedby='" + gridStr + "_licenseNameEx']");
 
                             if (errRow) {
-                                errRow.append('<div class=\"' + gridStr + "_" + dataId + ' retxt"\">' + String([[ #{msg.oss.unknown.license}]]) + '</div>');
+                                errRow.append('<div class=\"' + gridStr + "_" + dataId + ' retxt"\">' + [[ #{msg.oss.unknown.license} ]] + '</div>');
                             }
 
                             $("div.retxt._licenseChoice_" + dataId).show();
@@ -292,7 +624,7 @@
                     });
 
                     if (!jsValidResult || !detectedLicenseValid) {
-                        alertify.error(String([[ #{msg.common.valid} ]]), 0);
+                        alertify.error([[ #{msg.common.valid} ]], 0);
                         //$("span.retxt").show();
 
                         return false;
@@ -304,20 +636,20 @@
                     if (editorVal == "") {
                         if (deactivateFlag == "N"
                             && localDeactivateFlag == "Y") { // deactivate Flag checked
-                            alertify.alert(String([[ #{msg.oss.required.deactivate}]]), function () {
+                            alertify.alert([[ #{msg.oss.required.deactivate} ]], function () {
                             });
                             return false;
                         }
 
                         if (deactivateFlag == "Y"
                             && localDeactivateFlag == "N") { // deactivate Flag unchecked
-                            alertify.alert(String([[ #{msg.oss.required.activate}]]), function () {
+                            alertify.alert([[ #{msg.oss.required.activate} ]], function () {
                             });
                             return false;
                         }
                     }
 
-                    alertify.confirm(String([[ #{msg.common.confirm.save}]]), function (e) {
+                    alertify.confirm([[ #{msg.common.confirm.save} ]], function (e) {
                         if (e) {
                             $('#_licenseChoice').jqGrid('saveRow', lastsel);
                             oss_edit_fn.validate();
@@ -350,7 +682,7 @@
                 loading.hide();
 
                 if (json.resCd == '10') {
-                    alertify.alert(String([[ #{msg.common.success}]]), function () {
+                    alertify.alert([[ #{msg.common.success}]], function () {
 
                         if(oss_edit_data.detail) {
                             if(oss_edit_data.isCopyData) {
@@ -365,7 +697,7 @@
                         callReloadTabInframe("/oss/list", "oss-list");
                     });
                 } else {
-                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                    alertify.error([[ #{msg.common.valid2} ]], 0);
                     renameFlag = 'N';
                     $('input[name=renameFlag]').val(renameFlag);
                 }
@@ -376,7 +708,7 @@
                 });
 
                 if (result.length > 0) {
-                    alertify.alert(String([[ #{msg.oss.required.auto}]]), function () {
+                    alertify.alert([[ #{msg.oss.required.auto} ]], function () {
                     });
                     return false;
                 }
@@ -401,7 +733,7 @@
                         const length = res.ossList.length;
 
                         if (length == 1) {
-                            alertify.alert(String([[ #{msg.oss.required.version} ]]), function(){});
+                            alertify.alert([[ #{msg.oss.required.version} ]], function(){});
 
                         } else if (length > 1) {
                             getAjaxJsonData({ossName : ossNameInputValue}, "/oss/checkExistsOssByname", "json", function (res) {
@@ -413,7 +745,7 @@
                                         _popup = window.open(`/oss/osssyncpopup?${_encUrl}`, `ossSyncViewPopup_${_encUrl}`, "width=1000, height=700, toolbar=no, location=no, left=100, top=100");
 
                                         if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
-                                            alertify.alert(String([[ #{msg.common.window.allowpopup} ]]), function(){});
+                                            alertify.alert([[ #{msg.common.window.allowpopup} ]], function(){});
                                         }
                                     } else {
                                         _popup.close();
@@ -464,19 +796,19 @@
                         oss_edit_cmt.deleteComment(commId);
                     })
                 }, function (xhr, ajaxOptions, thrownError) {
-                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                    alertify.error([[ #{msg.common.valid2}]], 0);
                 });
             },
             deleteComment: function (_commId) {
-                if (!confirm(String([[#{msg.oss.confirm.delete.comment}]]))) {
+                if (!confirm([[ #{msg.oss.confirm.delete.comment} ]])) {
                     return;
                 }
 
                 postAjaxData({'commId': _commId}, "/comment/deleteComment", "json", function (data) {
-                    alertify.error(String([[ #{msg.common.success}]]));
+                    alertify.error([[ #{msg.common.success} ]]);
                     oss_edit_cmt.getCommentList();
                 }, function () {
-                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                    alertify.error([[ #{msg.common.valid2} ]], 0);
                 });
 
             },
@@ -514,9 +846,9 @@
                 };
 
                 postAjaxData(param, "/comment/updateComment", "json", function () {
-                        alertify.success(String([[ #{msg.common.success}]]), 0);
+                        alertify.success([[ #{msg.common.success} ]], 0);
                     }, function () {
-                        alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                        alertify.error([[ #{msg.common.valid2} ]], 0);
                     }, function () {
                         oss_edit_cmt.getCommentList();
                 });
@@ -575,7 +907,7 @@
                             var value = $(this).val();
 
                             if (value != "") {
-                                $(this).parent().next("span.retxt:first").html(String([[ #{msg.oss.unknown.license}]])).show();
+                                $(this).parent().next("span.retxt:first").html([[ #{msg.oss.unknown.license} ]]).show();
                                 detectedLicenseValid = false;
                             }
                         }
@@ -620,7 +952,7 @@
                         let gridStr = "_licenseChoice";
                         $("div.retxt._licenseChoice_" + lastsel).remove();
                         if (_item == null) {
-                            $("#" + lastsel + "_licenseNameEx").after('<div class=\"' + gridStr + "_" + lastsel + ' retxt\">' + '<spring:message code="msg.oss.unknown.license" />' + '</div>');
+                            $("#" + lastsel + "_licenseNameEx").after('<div class=\"' + gridStr + "_" + lastsel + ' retxt\">' + [[ #{msg.oss.unknown.license} ]] + '</div>');
                             $("div.retxt._licenseChoice_" + lastsel).show();
                         } else {
                             let licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName;
@@ -641,8 +973,7 @@
                             list.forEach(function (row, index) {
                                 if (row.ossLicenseIdx == lastsel) {
                                     list.splice(index, 1, rowData);
-                                }
-                                ;
+                                };
                             });
 
                             $('#_licenseChoice').jqGrid('editRow', lastsel);
@@ -1017,7 +1348,7 @@
 
             switch (licenseChoiceLength) {
                 case 0:
-                    alertify.alert(String([[ #{msg.oss.required.license}]]), function () {
+                    alertify.alert([[ #{msg.oss.required.license}]], function () {
                     });
                     return false;
                     break;
@@ -1097,7 +1428,7 @@
 
         // OSS 삭제 체크 (기존에 CONF 상태로 등록된 OSS가 있는지 여부 검사)
         function checkExistOssConf() {
-            var ossId = $('input[name=ossId]').val();
+            var ossId = oss_edit_data.ossId;
 
             $.ajax({
                 url: "/oss/checkExistOssConf",
@@ -1109,18 +1440,35 @@
                     if (parseInt(data) > 0) {
                         loading.hide();
 
-                        $('.ossSelectPop').show();
-                        $('#blind_wrap').show();
+                        getAjaxData(null, "/oss/ossSelectPopup", "html", function (detailResult) {
+                            loading.hide();
+
+                            $("#ossSelectPopup").replaceWith(detailResult);
+                            $(".ossSelectPop").show();
+
+                            oss_edit_evt.loadOssSelectList();
+                            oss_edit_grid.loadOssSelectList();
+
+                            //라이센스 삭제용 검색
+                            $('#search').on('click', function(){
+                                var postData=$('#listSearch').serializeObject();
+                                $("#_ossSelectList").jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
+                            });
+
+                            $("#ossNameAllSearchFlag").on("change", function(e){
+                                $("[name='ossNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                            });
+                        })
                     } else if (parseInt(data) == 0) {
                         deleteOssByOne();
                     } else {
                         loading.hide();
-                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                        alertify.error([[#{msg.common.valid2}]]  , 0);
                     }
                 },
                 error: function () {
                     loading.hide();
-                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    alertify.error([[#{msg.common.valid2}]] , 0);
                 }
             });
         };
@@ -1129,11 +1477,11 @@
         function deleteOssByOne() {
             var ossId = $('input[name=ossId]').val();
             var ossName = $('input[name=ossName]').val();
-            var editorVal = CKEDITOR.instances['editor'].getData();
+            var editorVal = $('#commentCont').summernote('code');
             var sendData = {
                 ossId: ossId,
                 ossName: ossName,
-                newOssId: "N", // 단건일때 "N" 로 보냄
+                newOssId: "N", // 단건일때    "N" 로 보냄
                 comment: editorVal
             };
 
@@ -1147,16 +1495,16 @@
                     loading.hide();
                     if (json.resCd == '10') {
                         alertify.alert([[ #{msg.common.success} ]], function () {
-                            deleteTabInFrame('#<c:url value="/oss/edit/' + ossId + '"/>');
-                            reloadTabInframe('<c:url value="/oss/list"/>');
+                            callDeleteTabInFrame("oss-edit_" + oss_edit_data.ossId);
+                            callReloadTabInframe("/oss/list", "oss-list");
                         });
                     } else {
-                        alertify.error('<spring:message code="msg.common.valid" />', 0);
+                        alertify.error([[ #{msg.common.valid} ]], 0);
                     }
                 },
                 error: function () {
                     loading.hide();
-                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    alertify.error([[ #{msg.common.valid2} ]], 0);
                 }
             });
         };
@@ -1179,7 +1527,7 @@
             postAjaxJsonData(JSON.stringify(postData), "/oss/checkVdiff", 'json', function (json) {
                 rtnData = json.vFlag;
             }, function () {
-                alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                alertify.error([[ #{msg.common.valid2}]], 0);
             })
 
             rtnData['ossVersion'] = ossVersion;
@@ -1245,7 +1593,7 @@
                         $(this).parent().remove();
                     });
 
-                    var _alertMsg = String([[ #{msg.oss.nickname.exists} ]]);
+                    var _alertMsg = [[ #{msg.oss.nickname.exists} ]];
                     if (json.resultData.delNickArr) {
                         _alertMsg += '<br/><br/><b>Removed Nick Name List</b><span style="text-decoration:line-through;">';
                         for (var k in json.resultData.delNickArr) {
@@ -1259,7 +1607,7 @@
                 } else if (json.validMsg == "rename") {
                     if (typeof json.resultData !== 'undefined') {
                         var data = json.resultData;
-                        var _alertMsg = String([[ #{msg.oss.check.rename}]]);
+                        var _alertMsg = [[ #{msg.oss.check.rename}]];
                         for (var i in data) {
                             _alertMsg += '<br> - ' + data[i];
                         }
@@ -1273,10 +1621,10 @@
                     renameFlag = 'N';
                     $('input[name=renameFlag]').val(renameFlag);
                 } else if (json.validMsg == "notChange") {
-                    alertify.alert(String([[ #{msg.oss.name.nickname.sametime.notchange}]]), function () {
+                    alertify.alert([[ #{msg.oss.name.nickname.sametime.notchange}]], function () {
                     });
                 } else if (json.resultData) {
-                    var _alertMsg = String([[ #{msg.oss.nickname.exists}]]);
+                    var _alertMsg = [[ #{msg.oss.nickname.exists}]];
                     _alertMsg += '<br><br>' + 'When registering a new OSS or adding a version, it is not possible to delete the nickname of the existing OSS.';
                     alertify.alert(_alertMsg, function () {
                     });
@@ -1290,14 +1638,14 @@
                         $(this).parent().remove();
                     });
                 } else if (json.validMsg == "deactivate") {
-                    alertify.error(String([[ #{msg.oss.deactivated}]]), 0);
+                    alertify.error([[ #{msg.oss.deactivated}]], 0);
                 } else if (json.ossName == "Formatting error") {
-                    alertify.error(String([[ #{msg.common.valid}]]), 0);
+                    alertify.error([[ #{msg.common.valid}]], 0);
                     // 커스텀 에러 메세지
                     ossGridValidMsg(json, "_licenseChoice");
                 } else {
                     //alertify.error('<spring:message code="msg.common.valid"/>', 0);
-                    alertify.error(String([[ #{msg.oss.duplicated}]]), 0);
+                    alertify.error([[ #{msg.oss.duplicated}]], 0);
                     // 커스텀 에러 메세지
                     ossGridValidMsg(json, "_licenseChoice");
                 }
@@ -1313,7 +1661,7 @@
                             let vDiffDiv = document.createElement('div');
                             vDiffDiv.id = 'vDiffDiv';
                             let h1 = document.createElement('h1');
-                            h1.innerHTML = String([[ #{msg.oss.confirm.ossVersion}]]);
+                            h1.innerHTML = [[ #{msg.oss.confirm.ossVersion}]];
                             vDiffDiv.appendChild(h1);
                             vDiffDiv.appendChild(document.createElement('br'));
                             height += 30;
@@ -1421,7 +1769,7 @@
                             oss_edit_fn.onRegist();
                         }
                     } else {
-                        alertify.confirm(String([[ #{msg.oss.confirm.ossVersion}]]), function (e) {
+                        alertify.confirm([[ #{msg.oss.confirm.ossVersion}]], function (e) {
                             if (e) {
                                 oss_edit_fn.onRegist();
                             } else {
@@ -1430,7 +1778,7 @@
                         });
                     }
                 } else if (v_flag == "") {
-                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                    alertify.error([[ #{msg.common.valid2}]], 0);
                     return;
                 } else {
                     oss_edit_fn.onRegist();
@@ -1440,6 +1788,8 @@
 
         //유효성 체크 콜백함수
         function onDeleteValidSuccess(json, status) {
+            checkExistOssConf();
+
             if (json.isValid == 'false') {
                 loading.hide();
 
@@ -1458,7 +1808,7 @@
                     $('.smallDelete').on('click', function () {
                         $(this).parent().remove();
                     });
-                    var _alertMsg = '<spring:message code="msg.oss.nickname.exists"/>';
+                    var _alertMsg = [[#{msg.oss.nickname.exists} ]];
                     if (json.resultData.delNickArr) {
                         _alertMsg += '<br/><br/><b>Removed Nick Name List</b><span style="text-decoration:line-through;">';
                         for (var k in json.resultData.delNickArr) {
@@ -1469,7 +1819,7 @@
                     alertify.alert(_alertMsg, function () {
                     });
                 } else if (json.resultData) {
-                    alertify.alert('<spring:message code="msg.oss.nickname.exists"/>', function () {
+                    alertify.alert([[#{msg.oss.nickname.exists}]], function () {
                     });
                     for (var k in json.resultData) {
                         $(nickNameClone).appendTo('.multiTxtSet');
@@ -1480,7 +1830,7 @@
                     });
 
                 } else {
-                    alertify.error('<spring:message code="msg.common.valid"/>', 0);
+                    alertify.error([[#{msg.common.valid}]], 0);
                     // 커스텀 에러 메세지
                     ossGridValidMsg(json, "_licenseChoice");
                 }
@@ -1490,7 +1840,7 @@
 
                 if (v_flag == "") {
                     loading.hide();
-                    alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    alertify.error([[#{msg.common.valid2}]], 0);
                     return;
 
                 } else {
@@ -1532,24 +1882,23 @@
         function onPopupListSuccess(json, status) {
             $('#_ossSelectList').jqGrid('clearGridData');
             $('#_ossSelectList').jqGrid('setGridParam', {data: json}).trigger('reloadGrid');
-
         }
 
         //에러엘럿
         function onError(data, status) {
-            alertify.error(String([[ #{msg.common.valid2}]]), 0);
+            alertify.error([[ #{msg.common.valid2}]], 0);
             renameFlag = 'N';
             $('input[name=renameFlag]').val(renameFlag);
         };
 
         function deleteComment(obj) {
-            if (!confirm(String([[#{msg.oss.confirm.delete.comment}]]))) return;
+            if (!confirm([[#{msg.oss.confirm.delete.comment}]])) return;
             var commId = $(obj).next().val();
 
             getAjaxJsonData({'commId': commId}, "/oss/deleteComment", 'json', function () {
                 fn_commemt.getCommentList();
             }, function () {
-                alertify.error(String([[ #{msg.common.valid2}]]), 0);
+                alertify.error([[ #{msg.common.valid2}]], 0);
             });
         }
 
@@ -1568,11 +1917,10 @@
             });
 
             $('.modifyComment').off("click").on("click", function () {
-                var editorVal = CKEDITOR.instances.editor3.getData();
-                var register = '${sessUserInfo.userId}';
+                var editorVal = $('#commentCont').summernote('code');
                 var param = {
                     commId: modifyCommentId,
-                    referenceId: data.detail.ossId,
+                    referenceId: oss_edit_data.detail.ossId,
                     referenceDiv: '40',
                     contents: replaceWithLink(editorVal)
                 };
@@ -1583,18 +1931,18 @@
                     cache: false,
                     data: param,
                     success: function (json) {
-                        alertify.success(String([[ #{msg.common.success}]]));
+                        alertify.success([[ #{msg.common.success} ]]);
                         if (json.isValid) {
                             if (json.isValid == 'false') {
                                 createValidMsgComplex(json);
-                                alertify.error(String([[ #{msg.common.valid}]]), 0);
+                                alertify.error([[ #{msg.common.valid} ]], 0);
 
                             } else if (json.isValid == 'true') {
-                                alertify.alert([[ #{msg.common.success}]], function () {
+                                alertify.alert([[ #{msg.common.success} ]], function () {
                                 });
                             }
                         } else {
-                            alertify.alert([[ #{msg.common.success}]], function () {
+                            alertify.alert([[ #{msg.common.success} ]], function () {
                             });
                         }
                         $('.commModifyPop').hide();
@@ -1614,7 +1962,7 @@
 
                 switch (licenseChoiceLength) {
                     case 0:
-                        alertify.alert(String([[ #{msg.oss.required.license}]]), function () {
+                        alertify.alert([[ #{msg.oss.required.license}]], function () {
                         });
                         return false;
                         break;
@@ -1678,63 +2026,34 @@
         // 다른 OSS로 이관하는 경우
         function mergeOssForDelete(newOssId) {
 
+
+            console.log("mergeOssForDelete ::: " + newOssId)
             $('.ossSelectPop').hide();
+
+
             $("#_ossMergeCheckList").jqGrid('GridUnload');
-            $('.mergeOssCheckPop').show();
+            getAjaxData(null, "/oss/ossMergeCheckList/", "html", function (detailResult) {
+                loading.hide();
+
+                $("#ossMergeCheckPopup").replaceWith(detailResult);
+                $(".mergeOssCheckPop").show();
+
+                oss_edit_evt.ossMergeCheck();
+                oss_edit_grid.ossMergeCheck();
+
+                //라이센스 삭제용 검색
+                $('#search').on('click', function(){
+                    var postData=$('#listSearch').serializeObject();
+                    $("#_ossSelectList").jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
+                });
+
+                $("#ossNameAllSearchFlag").on("change", function(e){
+                    $("[name='ossNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                });
+            })
+
             //$("#div_mergeOssCheckPop_change").text(${ossId} + " => ");
-
-            $('#_ossMergeCheckList').jqGrid({
-                url: "/oss/ossMergeCheckList/${ossId}/" + newOssId,
-                datatype: 'json',
-                jsonReader: {
-                    repeatitems: false,
-                    id: 'ossId',
-                    root: function (obj) {
-                        return obj.rows;
-                    }
-                },
-                colNames: ['ID', 'Merge', 'Version', 'License', 'License Type', 'Obligation', 'Copyright', 'Download Location', 'HomePage', 'delOssId'],
-                colModel: [
-                    {name: 'ossId', index: 'ossId', width: 70, align: "center"},
-                    {name: 'mergeStr', index: 'mergeStr', width: 70, align: "center"},
-                    {name: 'ossVersion', index: 'ossVersion', width: 80, align: "left"},
-                    {name: 'licenseName', index: 'licenseName', width: 150, align: "left"},
-                    {name: 'licenseType', index: 'licenseType', width: 80, align: "left"},
-                    {name: 'obligation', index: 'obligation', width: 80, align: "left"},
-                    {name: 'copyright', index: 'copyright', width: 150, align: "left"},
-                    {name: 'downloadLocation', index: 'downloadLocation', width: 100, align: "left"},
-                    {name: 'homepage', index: 'homepage', width: 100, align: "left"},
-                    {name: 'delOssId', index: 'delOssId', hidden: true}
-                ],
-                autoencode: true,
-                rowNum: 9999,
-                autowidth: true,
-                gridview: true,
-                sortname: 'ossVersion',
-                viewrecords: true,
-                sortorder: 'desc',
-                loadonce: true,
-                height: 'auto',
-                loadComplete: function (id) {
-                    $('#_ossMergeCheckList').jqGrid("setRowData", '${ossId}', false, {'background-color': '#ada9a9'});
-                },
-                onSelectRow: function (id) {
-                    $("div.retxt._licenseChoice_" + rowid).remove();
-
-                },
-                ondblClickRow: function (rowid, iRow, iCol, e) {
-                    // 체크 박스 영역 제외
-                    var row = $('#_ossMergeCheckList').jqGrid('getRowData', rowid);
-
-                    // 자기자신이 아닌 경우만
-                    if ('Duplicated' == row['mergeStr'] && row['delOssId'] && row['delOssId'] != '${ossId}') {
-                        callCreateTabInFrame(row['delOssId'] + '_Opensource', "/oss/edit/" + row['delOssId']);
-                    } else if (row['ossId'] != '${ossId}') {
-                        callCreateTabInFrame(row['ossId'] + '_Opensource', "/oss/edit/" +  row['ossId']);
-                    }
-
-                }
-            });
+            oss_edit_grid.ossMergeCheck(newOssId);
         }
 
         function setFristComb() {
@@ -1749,7 +2068,6 @@
                     list.splice(index, 1);
                 };
             });
-
 
             // 해당 리스트 삭제
             $('#_licenseChoice').jqGrid('delRowData', rowId);
@@ -1784,6 +2102,6 @@
                 $("#disp_licenseText").hide();
             }
         }
-
+        //]]>
     </script>
 </th:block>

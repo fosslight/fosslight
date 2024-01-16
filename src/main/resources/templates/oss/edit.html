@@ -174,8 +174,8 @@
                                             <i class="far fa-file-code text-secondary fa-lg mx-1" title="Notice"></i>
                                         </span>
                                             <span th:if="${#strings.equals('11', detail?.obligationType)}">
-                                            <i class="far fa-file-code fa-1-5x mr-2" title="Notice"></i>
-                                            <i class="far fa-file-alt fa-1-5x mr-2" title="Source Code"></i>
+                                            <i class="far fa-file-code fa-1-5x mr-1" title="Notice"></i>
+                                            <i class="far fa-file-alt fa-1-5x mr-1" title="Source Code"></i>
                                         </span>
                                         </div>
                                     </div>
@@ -194,9 +194,24 @@
                                                   th:text="${summaryDescription}" th:disabled="${not @CommonFunction.isAdmin()}"/></textarea>
                                     </div>
                                     <div class="form-group">
-                                        <label th:text="#{msg.common.field.attribution}">Attribution 고지</label>
-                                        <textarea class="form-control" rows="5" th:text="${attribution}" th:disabled="${not @CommonFunction.isAdmin()}"/></textarea>
+                                        <label th:text="#{msg.common.field.attribution}"></label>
+                                        <textarea class="form-control" rows="5" name="attribution" th:text="${attribution}" th:disabled="${not @CommonFunction.isAdmin()}"/></textarea>
                                     </div>
+                                    <th:block th:if="${ossId}">
+                                        <div class="form-group">
+                                            <th:block th:if="${projectListFlag}">
+                                                <label th:text="|Project|"></label>
+                                                <input type="button" class="btn btn-dark-04 btn-xs mx-3 mb-1 px-3 py-0" id="listMore" onclick="showLicenseTextvalue(this)" value="List more">
+                                                <div class="jqGridSet mt-1">
+                                                    <table id="_projectList">
+                                                        <tr>
+                                                            <td></td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </th:block>
+                                        </div>
+                                    </th:block>
                                     <th:block th:if="${@CommonFunction.isAdmin()}">
                                         <div class="form-group">
                                             <label for="inputName">Comment</label>
@@ -239,6 +254,8 @@
                             </div>
                         </th:block>
                     </div>
+                    <div id="ossSelectPopup"></div>
+                    <div id="ossMergeCheckPopup"></div>
                 </form>
             </section>
             <!-- loading bar -->

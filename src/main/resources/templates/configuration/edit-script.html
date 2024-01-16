@@ -48,7 +48,8 @@
                     break;
                 }
                 if(userDivision.children().length - 1 == i ) {
-                    userDivision.append("<option value=[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}] ></option>");
+                    let optionVal = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+                    userDivision.append(`<option value="` + optionVal + `" ></option>`);
                     if([[${sessUserInfo.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
                         $('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
                         $('#userInfoArea select[name="division"] option:last').change();

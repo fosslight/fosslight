@@ -15,6 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,11 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.SearchType;
 import oss.fosslight.common.Url.CONFIGURATION;
-import oss.fosslight.domain.Configuration;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.PartnerMaster;
-import oss.fosslight.domain.Project;
+import oss.fosslight.domain.*;
 import oss.fosslight.service.ConfigurationService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.service.T2UserService;
@@ -46,6 +45,13 @@ public class ConfigurationController extends CoTopComponent {
 	
 	@GetMapping(value=CONFIGURATION.EDIT, produces = "text/html; charset=utf-8")
 	public String list(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		SecurityContext sec = SecurityContextHolder.getContext();
+		AbstractAuthenticationToken auth = (AbstractAuthenticationToken)sec.getAuthentication();
+
+		T2Users user = new T2Users();
+		user.setUserId(auth.getName());
+
+		model.addAttribute("sessUserInfo", userService.getUserAndAuthorities(user));
 		model.addAttribute("userInfo", userService.getLoginUserInfo());
 		return "configuration/edit";
 	}
@@ -91,7 +97,7 @@ public class ConfigurationController extends CoTopComponent {
 		}
         model.addAttribute("defaultSearchType", configuration.getDefaultSearchType());
 		
-		return CONFIGURATION.VIEW_SEARCH_CONDITION_JSP;
+		return "configuration/fragments/searchConditionArea";
 	}
 	
 	@PostMapping(value=CONFIGURATION.UPDATE_SEARCH_CONDITION_AJAX)

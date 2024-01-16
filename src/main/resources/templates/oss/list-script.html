@@ -439,7 +439,6 @@
                             $('[data-toggle="tooltip"]').tooltip({html: true});
                             oss_lst_data.existTooltip = true;
                         }
-                        resizingJqGidSet();
                     },
                     loadComplete: function (result) {
                         totalRow = result.records;
@@ -514,8 +513,6 @@
                         });
 
                         $('.listghead_0').hide(); // hide basic groupHeader
-
-                        resizingJqGidSet();
                     },
                     ondblClickRow: function (rowid, iRow, iCol, e) {
                         if (iCol != 0) {

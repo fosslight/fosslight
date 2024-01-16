@@ -1434,6 +1434,17 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(ossService.checkExistsOssByname(bean) > 0, "unconfirmed oss");
 	}
 
+
+	@GetMapping(value = OSS.SELECT_OSS_POPUP)
+	public String ossSelectPopup(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
+		return "oss/fragments/ossSelectPopup";
+	}
+
+	@GetMapping(value = OSS.MERGE_OSS_CHECK_POPUP)
+	public String mergeOssCheckPopup(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
+		return "oss/fragments/mergeOssCheckPopup";
+	}
+
 	@GetMapping(value = OSS.CHECK_OSS_LICENSE)
 	public String checkOssLicense(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 		model.addAttribute("projectInfo", bean);
