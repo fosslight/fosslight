@@ -307,8 +307,8 @@ public class OssController extends CoTopComponent{
 				componentsPartner = partnerMapper.selectOssRefPartnerList(ossMaster);
 			}
 			
-			model.addAttribute("components", components);
-			model.addAttribute("componentsPartner", componentsPartner);
+			if (components != null && !components.isEmpty()) model.addAttribute("components", components);
+			if (componentsPartner != null && !componentsPartner.isEmpty()) model.addAttribute("componentsPartner", componentsPartner);
 		}
 		
 		model.addAttribute("projectListFlag", projectListFlag);

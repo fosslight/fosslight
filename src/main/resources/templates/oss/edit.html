@@ -145,6 +145,24 @@
                                         <label th:text="#{msg.common.field.attribution}"></label>
                                         <textarea class="form-control" rows="5" th:text="${attribution}"/></textarea>
                                     </div>
+                                    <div class="form-group" th:if="${ossId != null && projectListFlag}">
+                                    	<label th:text="Project"></label><button type="button" class="btn btn-info btn-xs mx-3 mb-1 px-3 py-0" id="listMore" th:text="'List more'"></button>
+                                    	<div class="jqGridSet mt-1 mt5">
+                                    		<table id="_projectList"><tr><td></td></tr></table>
+                                    	</div>
+                                    </div>
+                                    <div class="form-group" th:if="${ossId != null && projectListFlag}">
+                                    	<label th:text="'3rd Party'"></label><button type="button" class="btn btn-info btn-xs mx-3 mb-1 px-3 py-0" id="listMore3rd" th:text="'List more'"></button>
+                                    	<div class="jqGridSet mt-1 mt5">
+                                    		<table id="_partnerList"><tr><td></td></tr></table>
+                                    	</div>
+                                    </div>
+                                    <div class="form-group" th:if="${ossId != null && vulnInfoList != null}">
+                                    	<label th:text="#{msg.common.field.vulnerability}"></label>
+                                    	<div class="jqGridSet mt-1 mt5">
+                                            <table id="_vulnInfoList"><tr><td></td></tr></table>
+                                        </div>
+                                    </div>
                                     <div class="form-group">
                                     	<label for="inputName" th:text="#{msg.common.field.comment}"></label>
                                     	<textarea class="form-control" id="commentCont" name='commentInput' rows="3" style="height: 800px"></textarea>

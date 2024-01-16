@@ -719,7 +719,7 @@
 			$('#_projectList').parent().parent().hide();
 		}
 
-		if(data.componentsPartner == null){
+		if (data.componentsPartner == null){
 			$('#_partnerList').parent().parent().hide();
 		}
 		
@@ -890,72 +890,76 @@
 		});
 		
 		// 프로젝트 그리드
-		$("#_projectList").jqGrid({
-			datatype: 'local',
-			data: data.components,
-			colNames:['ID','Project Name', 'Project Version', 'oldsystem'],
-			colModel:[
-				{name:'prjId',index:'prjId', width:70, sortable:false, align:"center", key:true},
-				{name:'prjName',index:'prjName', width:400, sortable:false},
-				{name:'prjVersion',index:'prjVersion', width:100, sortable:false, align:"center"},
-				{name:'oldSystemFlag',index:'oldSystemFlag', hidden:true}
-			],
-			rowNum:100,
-			viewrecords: true,
-			height: 'auto',
-			ondblClickRow: function(rowid,iRow,iCol,e) {
-				var rowData = $("#_projectList").jqGrid('getRowData',rowid);
-				if("Y" != rowData.oldSystemFlag) {
-					createTabInFrame(rowData['prjId']+'_Project','/project/edit/'+rowData['prjId']);
-				}
-			},
-			loadComplete: function(data) {
-				if(data.records > 0) {
-					var multRowIds = []; 
-					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
-					for(var _idx=0;_idx<rowsCount;_idx++) {
-						row = rows[_idx];
-						className = row.className;
-						if (className.indexOf('jqgrow') !== -1) {
-							rowid = row.id;
-							rowData = data.rows[rowIdx++];
-							if(rowData.oldSystemFlag == "Y") {
-								className = className + ' excludeRow';
+		if (data.components != null){
+			$("#_projectList").jqGrid({
+				datatype: 'local',
+				data: data.components,
+				colNames:['ID','Project Name', 'Project Version', 'oldsystem'],
+				colModel:[
+					{name:'prjId',index:'prjId', width:70, sortable:false, align:"center", key:true},
+					{name:'prjName',index:'prjName', width:400, sortable:false},
+					{name:'prjVersion',index:'prjVersion', width:100, sortable:false, align:"center"},
+					{name:'oldSystemFlag',index:'oldSystemFlag', hidden:true}
+				],
+				rowNum:100,
+				viewrecords: true,
+				height: 'auto',
+				ondblClickRow: function(rowid,iRow,iCol,e) {
+					var rowData = $("#_projectList").jqGrid('getRowData',rowid);
+					if("Y" != rowData.oldSystemFlag) {
+						createTabInFrame(rowData['prjId']+'_Project','/project/edit/'+rowData['prjId']);
+					}
+				},
+				loadComplete: function(data) {
+					if(data.records > 0) {
+						var multRowIds = []; 
+						var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+						for(var _idx=0;_idx<rowsCount;_idx++) {
+							row = rows[_idx];
+							className = row.className;
+							if (className.indexOf('jqgrow') !== -1) {
+								rowid = row.id;
+								rowData = data.rows[rowIdx++];
+								if(rowData.oldSystemFlag == "Y") {
+									className = className + ' excludeRow';
+								}
+								row.className = className;
+							} else if(className.indexOf('ui-subgrid') !== -1){
+								rowIdx++;
 							}
-							row.className = className;
-						} else if(className.indexOf('ui-subgrid') !== -1){
-							rowIdx++;
 						}
 					}
 				}
-			}
-		});
+			});
+		}
 		
-		// 프로젝트 그리드
-		$("#_partnerList").jqGrid({
-			datatype: 'local',
-			data: data.componentsPartner,
-			colNames:['ID','Partner Name', '3rd Party Software Name', '3rd Party Software Version'],
-			colModel:[
-				{name:'partnerId',index:'partnerId', width:70, sortable:false, align:"center", key:true},
-				{name:'partnerName',index:'partnerName', width:300, sortable:false},
-				{name:'softwareName',index:'softwareName', width:200, sortable:false, align:"center"},
-				{name:'softwareVersion',index:'softwareVersion', width:200, sortable:false, align:"center"}
-			],
-			rowNum:100,
-			viewrecords: true,
-			height: 'auto',
-			ondblClickRow: function(rowid,iRow,iCol,e) {
-				var rowData = $("#_partnerList").jqGrid('getRowData',rowid);
-				var rowKey = rowData['partnerId'];
-				
-				createTabInFrame(rowKey+'_3rdParty', '/partner/edit/'+rowKey);
-				
-			},
-			loadComplete: function(data) {
-				// 3rd party는 old system에는 없는 기능 이므로 old system으로 인한 exclude row는 표시 할 수 없음.. 
-			}
-		});
+		// partner 그리드
+		if (data.componentsPartner != null){
+			$("#_partnerList").jqGrid({
+				datatype: 'local',
+				data: data.componentsPartner,
+				colNames:['ID','Partner Name', '3rd Party Software Name', '3rd Party Software Version'],
+				colModel:[
+					{name:'partnerId',index:'partnerId', width:70, sortable:false, align:"center", key:true},
+					{name:'partnerName',index:'partnerName', width:300, sortable:false},
+					{name:'softwareName',index:'softwareName', width:200, sortable:false, align:"center"},
+					{name:'softwareVersion',index:'softwareVersion', width:200, sortable:false, align:"center"}
+				],
+				rowNum:100,
+				viewrecords: true,
+				height: 'auto',
+				ondblClickRow: function(rowid,iRow,iCol,e) {
+					var rowData = $("#_partnerList").jqGrid('getRowData',rowid);
+					var rowKey = rowData['partnerId'];
+					
+					createTabInFrame(rowKey+'_3rdParty', '/partner/edit/'+rowKey);
+					
+				},
+				loadComplete: function(data) {
+					// 3rd party는 old system에는 없는 기능 이므로 old system으로 인한 exclude row는 표시 할 수 없음.. 
+				}
+			});
+		}
 
 		// Vulnerability
 		if (data.vulnInfoList != null) {
@@ -965,22 +969,25 @@
 				colNames:['CVE ID','CVSS Score', 'Description', 'Published Date'],
 				colModel:[
 					{name:'cveId',index:'cveId', width:100, align:"center", formatter: cveIdTag, unformat: unCveIdTag},
-					{name:'cvssScore',index:'cvssScore', width:80, align:"center", formatter:'vuln',sorttype: 'number'},
+					{name:'cvssScore',index:'cvssScore', width:80, align:"center", formatter:fn.displayVulnerability, sorttype: 'number'},
 					{name:'vulnSummary',index:'vulnSummary', width:500, align:"center"},
 					{name:'modiDate',index:'modiDate', width:100, align:"center", formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}}
 				],
-				rowNum:[[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
+				rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
 				sortname: 'cvssScore',
 				viewrecords: true,
 				loadonce:true,
 				sortorder: "desc",
 				height: 'auto',
 				ondblClickRow: function(rowId) {
+				},
+				loadComplete: function() {
+					tableRefreshNew("_vulnInfoList");
 				}
 			});
 		}
 		
-		if ([[${ossId}]] != '') {
+		if ('' != [[${ossId}]]) {
 			// oss 그리드
 			$('#_ossSelectList').jqGrid({
 				url:"/oss/ossPopupList/" + [[${ossId}]],
@@ -2586,6 +2593,25 @@ var fn = {
 	},
 	removeTag : function(obj) {
 		$(obj).parent().parent().remove();
+	},
+	displayVulnerability : function (cellvalue, options, rowObject) {
+		var display = "";
+
+        if (parseInt(cellvalue) >= 9.0) {
+            display = "<span class=\"badge badge-dark\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">CRITICAL</span>";
+        } else if (parseInt(cellvalue) >= 7.0) {
+            display = "<span class=\"badge badge-danger\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">HIGH</span>";
+        } else if (parseInt(cellvalue) >= 4.0) {
+            display = "<span class=\"badge badge-orange\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">MEDIUM</span>";
+        } else if (parseInt(cellvalue) > 0) {
+            display = "<span class=\"badge badge-warning\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">LOW</span>";
+        } else if (parseInt(cellvalue) == 0 || cellvalue == undefined) {
+            display = "<span style=\"font-size:0;\"></span>";
+        } else {
+            display = cellvalue;
+        }
+		
+        return display;
 	}
 }
 </script>
