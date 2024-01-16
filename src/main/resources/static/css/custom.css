@@ -798,4 +798,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
   color: #e22563;
 }
 
-td .retxt, div .retxt {padding-top:2px; font-size:11px; color:red !important;}
+td .retxt, div .retxt {padding-top:2px; font-size:13px; color:red !important;}
+.urltxt {display:none; padding-top:2px; font-size:13px; color:blue !important;}
+div .retxtb {padding-top:2px; font-size:13px; color:blue !important;}
+div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}

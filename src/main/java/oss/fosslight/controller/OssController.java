@@ -115,7 +115,7 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return "oss/list :: content";
+		return "oss/list";
 	}
 	
 	@GetMapping(value={OSS.LIST_LINK}, produces = "text/html; charset=utf-8")
@@ -372,14 +372,8 @@ public class OssController extends CoTopComponent{
 		ossMaster.setOssLicenses((List<OssLicense>) map.get("rows"));
 		ossMaster.setOssId(null);
 		model.addAttribute("detail", ossMaster);
-		model.addAttribute("isCopyData", true);
-		//List<String> nickList = new ArrayList<>();
-		//model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
-		
-		//List<String> downloadLocationList = new ArrayList<>();
-		//model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
-		
-		return "oss/edit :: content";
+				
+		return "oss/edit";
 	}
 	
 	@PostMapping(value=OSS.SAVE_AJAX)

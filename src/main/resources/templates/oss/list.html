@@ -1,18 +1,18 @@
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
-
-<th:block th:fragment="content">
-    <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
-    <th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
-    <th:block th:replace="oss/list-script :: script"></th:block>
-    <body class="hold-transition sidebar-mini" style="height: 100%;">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="oss/list-script :: script"></th:block>
+<body class="hold-transition sidebar-mini" style="height: 100%;">
     <div class="wrapper">
         <div class="content-wrapper custom-layout">
             <section class="content-header"></section>
             <section class="content">
                 <div class="container-fluid">
                     <form id="ossSearch" name="ossSearch">
+                    	<input type="hidden" name="type" value="oss">
                     	<input type="hidden" name="parameter">
+                    	<input name="act" type="hidden" value="search"/> 
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="card card-dark card-outline collapsed-card search-form mb-3">
@@ -218,5 +218,5 @@
             </form>
         </div>
     </div>
-    </body>
-</th:block>
+</body>
+</html>

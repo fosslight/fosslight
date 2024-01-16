@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
-<style>
-.required .urltxt {display:none; padding-top:2px; font-size:11px; color:blue !important;}
-</style>
 <script th:inline="javascript">
 	var lastsel;	
 	var tempNewOssId;
@@ -93,6 +90,18 @@
 			}
 			
 			$('textarea[name=ossCopyright]').height(240);
+			
+			$("[name='commentInput']").summernote({
+                height: 150,
+                callbacks: {
+                    onInit: function() {
+                        var content = $(this).summernote('code');
+                        if (content === '<p><br></p>') {
+                            $(this).summernote('code', '');
+                        }
+                    }
+                }
+            });
 		},
 		syncData : function(syncData, copyFlag){
 			$.each(syncData, function(k, v){
@@ -126,30 +135,38 @@
 						break;
 					case 'downloadLocations':
 						v.forEach(function(downloadLocation, index, obj){
-							if(index == 0){
-								$('.multiDownloadLocationSet span:first').remove();
+							if (index == 0) {
+								$('.multiDownloadLocationSet').empty();
 							}
-							if(downloadLocation != '' && downloadLocation != null){
-								$(data.cloneDownloadLocation).appendTo('.multiDownloadLocationSet');
-								$('.multiDownloadLocationSet input[type=text]:last').val(downloadLocation);
-								$('.smallDelete').on('click', function(){
-									$(this).parent().remove();
-								});
+							if (downloadLocation != '' && downloadLocation != null) {
+								let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
+								downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
+								downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/>';
+								downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+								downloadLocationHtml 		+=		'</div>';
+								downloadLocationHtml 		+=		'<span class="retxt"></span>';
+								downloadLocationHtml 		+= 	'</div>';
+								
+								$(".multiDownloadLocationSet").append(downloadLocationHtml);
 							}
 						});
 						
 						break;
 					case 'detectedLicenses':
 						v.forEach(function(detectLicense, index, obj){
-							if(index == 0){
-								$('.multiDetectedLicenseSet span:first').remove();
+							if (index == 0){
+								$('.detectedLicensesDiv').empty();
 							}
-							if(detectLicense!=''){
-								$(data.cloneDetectLicense).appendTo('.multiDetectedLicenseSet');
-								$('.multiDetectedLicenseSet input[type=text]:last').val(detectLicense);
-								$('.smallDelete').on('click', function(){
-									$(this).parent().remove();
-								});
+							if (detectLicense!='') {
+								let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+								detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
+								detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'" readonly/>';
+								detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+								detectedLicenseHtml 		+=		'</div>';
+								detectedLicenseHtml 		+=		'<span class="retxt"></span>';
+								detectedLicenseHtml 		+= 	'</div>';
+								console.log(detectedLicenseHtml);
+								$(".detectedLicensesDiv").append(detectedLicenseHtml);
 							}					
 						});
 						
@@ -187,7 +204,7 @@
 						}
 						
 						if (v.toUpperCase().indexOf('V') > -1){
-							colOssType += '<span class="badge badge-tellow mr-1 text-sm">v-Diff</span>';
+							colOssType += '<span class="badge badge-yellow mr-1 text-sm">v-Diff</span>';
 						}
 						
 						if ('' != colOssType) {
@@ -224,41 +241,60 @@
 			
 			//닉네임 인풋 추가
 			$('#nickAdd').on('click', function(){
-				$('.multiTxtSet').prepend(data.clone).find("#newIcon:first").addClass("iconSet nick");
-				$('.multiTxtSet').find("input:first").css("padding-left", '40px');
-				$('.smallDelete').on('click', function(){
-					$(this).parent().parent().remove();
-				});
-				
+				var nickname = $("#input_ossNicknames").val();
+				if ('' != nickname) {
+					let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+					nickHtml 		+= 		'<div class="input-group card-tools">';
+					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'" readonly/>';
+					nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+					nickHtml 		+=		'</div>';
+					nickHtml 		+=		'<span class="retxt"></span>';
+					nickHtml 		+= 	'</div>';
+					
+					$('.multiTxtSet').append(nickHtml);
+				}
 			});
 
 			//Detect License Input 추가
 			$('#detectedLicenseAdd').on('click', function(){
-				$(data.cloneDetectLicense).appendTo('.multiDetectedLicenseSet');
-
-				setCustomAutoComplete("single");
-				
-				$('.smallDelete').on('click', function(){
-					$(this).parent().parent().remove();
-				});
+				var detectedLicense = $("#input_detectedLicense").val();
+				if ('' != detectedLicense) {
+					let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+					detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
+					detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectedLicense+'" readonly/>';
+					detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+					detectedLicenseHtml 		+=		'</div>';
+					detectedLicenseHtml 		+=		'<span class="retxt"></span>';
+					detectedLicenseHtml 		+= 	'</div>';
+					
+					$(".detectedLicensesDiv").append(detectedLicenseHtml);
+					setCustomAutoComplete("single");
+				}
 			});
 			
 			//Download Location Input 추가
 			$('#downloadLocationAdd').on('click', function(){
-				$(data.cloneDownloadLocation).appendTo('.multiDownloadLocationSet');
-				
-				$('.smallDelete').on('click', function(){
-					$(this).parent().parent().remove();
-				});
-				
-				if('' == [[${ossId}]]){
-					$(".multiDownloadLocationSet > div > span > input[name='downloadLocations']").each(function(idx, cur){
-						$(cur).attr("onblur", "fn.urlDuplication(this)");
-					});
+				var downloadLocation = $("#input_downloadLocations").val();
+				if ('' != downloadLocation) {
+					let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
+					downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
+					downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+					downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+					downloadLocationHtml 		+=		'</div>';
+					downloadLocationHtml 		+=		'<span class="urltxt"></span>';
+					downloadLocationHtml 		+= 	'</div>';
+					
+					$(".multiDownloadLocationSet").append(downloadLocationHtml);
+					$("#input_downloadLocations").val("");
+					if ([[${ossId}]] == null){
+						$(".multiDownloadLocationSet > div > div > input[name='downloadLocations']").each(function(idx, cur){
+							$(cur).trigger("blur");
+						});
+					}
 				}
 			});
 			
-			//라이센스 등록
+			//oss 등록
 			$("#save").on('click',function(){
 				fn.save();
 			});
@@ -419,8 +455,6 @@
 				});
 			});
 			
-			
-			
 			//프로젝트 리스트 더보기
 			$('#listMore').on('click',function(){
 				createTabInFrameWithCondition('Project List', '/project/list', 'OSSLISTMORE', $("input[name=ossId]").val());
@@ -431,9 +465,9 @@
 				createTabInFrameWithCondition('3rd Party List', '/partner/list', 'OSSLISTMORE', $("input[name=ossId]").val());
 			});
 			
-			if('${ossId}' == ''){ // OSS 신규등록 시 URL 링크 중복 체크
-				$(".multiDownloadLocationSet > div > span > input[name='downloadLocations']").each(function(idx, cur){
-					$(cur).attr("onblur", "fn.urlDuplication(this)");
+			if ([[${ossId}]] == null) { // OSS 신규등록 시 URL 링크 중복 체크
+				$(".multiDownloadLocationSet > div > div > input[name='downloadLocations']").each(function(idx, cur){
+					$(cur).trigger("blur");
 				});
 				
 				$('input[name=homepage]').blur(function(){
@@ -1592,12 +1626,12 @@
 	};
 	
 	// 그리드 체크 메세지( gridStr 그리드 문자열 )
-	function ossGridValidMsg(msgData,gridStr) {
+	function ossGridValidMsg(msgData,gridStr) {console.log(msgData);
 		$.each(msgData,function(key,value) {
-			if("isValid" != key) {
-				if(key.indexOf(".") > -1){
-					if(key.indexOf("ossNicknames") > -1){
-						var _nickIndex = key.substring(key.lastIndexOf(".") +1, key.length) -1;
+			if ("isValid" != key) {
+				if (key.indexOf(".") > -1){
+					if (key.indexOf("ossNicknames") > -1) {
+						var _nickIndex = key.substring(key.lastIndexOf(".") +1, key.length) -1;console.log(_nickIndex);
 						$('input[name=ossNicknames]:eq('+_nickIndex+')').parent().next("span.retxt").html(value).show();
 					} else {
 						var seqSuffix = key.split(".");
@@ -1613,15 +1647,18 @@
 					}
 					$("div.retxt").show();
 				} else {
-					if(key == 'ossNicknames'){
+					if (key == 'ossNicknames'){
 						$('input[name=ossNicknames]').parent().next("span.retxt").html(value).show();
-					}
-					if($('input[name='+key+']').length > 0) {
-						$('input[name='+key+']').next("span.retxt").html(value).show();
-					} else if($('textarea[name='+key+']').length > 0) {
-						$('textarea[name='+key+']').next("span.retxt").html(value).show();
-					} else if($('select[name='+k+']').length > 0) {
-						$('select[name='+key+']').parent().siblings("span.retxt").html(value).show();
+						$('input[name=ossNicknames]').addClass("is-invalid");
+					} else {
+						if($('input[name='+key+']').length > 0) {
+							$('input[name='+key+']').parent().next("div").find("span.retxt").html(value).show();
+							$('input[name='+key+']').addClass("is-invalid");
+						} else if($('textarea[name='+key+']').length > 0) {
+							$('textarea[name='+key+']').next("span.retxt").html(value).show();
+						} else if($('select[name='+k+']').length > 0) {
+							$('select[name='+key+']').parent().siblings("span.retxt").html(value).show();
+						}
 					}
 				}
 				// 라셀 초기화
@@ -1631,7 +1668,7 @@
 	};
 	
 	//유효성 체크 콜백함수
-	function onValidSuccess(json, status){
+	function onValidSuccess(json, status){console.log(json);
 		loading.hide();
 		
 		if(json.isValid == 'false') {
@@ -1663,14 +1700,14 @@
 				
 				alertify.alert(_alertMsg, function(){});
 			} else if(json.validMsg == "rename"){
-				if(typeof json.resultData !== 'undefined'){
+				if (typeof json.resultData !== 'undefined') {
 					var data = json.resultData;
 					var _alertMsg  = [[#{msg.oss.check.rename}]];
 					for(var i in data){
 						_alertMsg += '<br> - ' + data[i];
 					}
 					alertify.alert(_alertMsg, function(){});
-				}else{
+				} else {
 					alertify.alert('The OSS is the same, so it cannot be changed.', function(){});
 				}
 				
@@ -1697,7 +1734,7 @@
 				alertify.error([[#{msg.common.valid}]], 0);
 				// 커스텀 에러 메세지 
 				ossGridValidMsg(json, "_licenseChoice");
-			}else {
+			} else {
 				alertify.error([[#{msg.oss.duplicated}]], 0);
 				// 커스텀 에러 메세지 
 				ossGridValidMsg(json, "_licenseChoice");
@@ -1879,12 +1916,12 @@
 		} else if(json.isValid == 'true') {
 			var v_flag = checkVdiff('delete');
 
-			if(v_flag == ""){
+			if (v_flag == "") {
 				loading.hide();
 				alertify.error([[#{msg.common.valid2}]], 0);
 				return;
 				
-			}else{
+			} else {
 				checkExistOssConf();
 			}
 		}		
@@ -1894,7 +1931,7 @@
 	function onRegist(){
 		loading.show();
 		saveRow();
-		var editorVal = CKEDITOR.instances.editor.getData();
+		var editorVal = $('#commentCont').next().find(".note-editable").html();
 		$('input[name=comment]').val(replaceWithLink(editorVal));
 		$("#ossForm").ajaxForm({
 			url :'/oss/saveAjax',
@@ -2160,9 +2197,9 @@ function mergeOssForDelete(newOssId) {
 
 var fn_commemt = {
     getCommentList : function(){
-    	if(data.copyData){
+    	if (data.copyData) {
     		$('.commentList').remove();
-        }else{
+        } else {
         	$.ajax({
             	url : '/comment/getDivCommentList',
                 type : 'GET',
@@ -2280,7 +2317,7 @@ var fn = {
 	urlDuplication : function(target){
 		var value = $(target).val();
 
-		if(value.charAt(value.length-1) == "/"){
+		if (value.charAt(value.length-1) == "/"){
 			value = value.slice(0, -1); // 마지막 문자열 제거
 			$(target).val(value);
 		}
@@ -2293,7 +2330,7 @@ var fn = {
             dataType:"json",
             cache : false,
 	        success : function(json) {
-	        	if(json.externalData2){
+	        	if (json.externalData2) {
 	        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
 		        		var downloadLocation = json.externalData2.downloadLocation;
 		        		if (downloadLocation.indexOf("createTabInFrame") > -1) {
@@ -2303,7 +2340,7 @@ var fn = {
 		        		$(target).parent().next("span.urltxt").empty();
 		        		$(target).parent().next("span.urltxt").html(downloadLocation).show();
 		        	}
-	        	}else{
+	        	} else {
 		        	$(target).parent().next("span.urltxt").empty();
 	        	}
 	        },
@@ -2314,9 +2351,9 @@ var fn = {
 		$("[name='downloadLocations']").each(function(idx, cur){
 			var value = $(cur).val();
 
-			if (value.substr(-1) == "/"){
-				value = value.slice(0, -1);
-				$(cur).val(value);
+			if (value.charAt(value.length-1) == "/"){
+				value = value.slice(0, -1); // 마지막 문자열 제거
+				$(target).val(value);
 			}
 		});
 		
@@ -2345,8 +2382,8 @@ var fn = {
 						}						
 					});
 					
-	        	}else{
-	        		$(".multiDownloadLocationSet > .required > span.urltxt").empty();
+	        	} else {
+	        		$(".multiDownloadLocationSet > div > span.urltxt").empty();
 	        	}
 	        	
 	        	fn.homepageDuplication($('input[name=homepage]'));
@@ -2357,7 +2394,7 @@ var fn = {
 	homepageDuplication : function(target){
 		var value = $(target).val();
 
-		if(value.substr(-1) == "/"){
+		if (value.charAt(value.length-1) == "/"){
 			value = value.slice(0, -1); // 마지막 문자열 제거
 			$(target).val(value);
 		}
@@ -2370,18 +2407,18 @@ var fn = {
             dataType:"json",
             cache : false,
 	        success : function(json) {
-	        	if(json.externalData2){
+	        	if (json.externalData2) {
 	        		if (typeof json.externalData2.homepage !== 'undefined') {
 	        			var homepageHtml = json.externalData2.homepage;
 		        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
 		        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "fn.loadUrl");
 		        		}
 		        		
-		        		$(target).next("span.urltxt").empty();
-						$(target).next("span.urltxt").html(homepageHtml).show();
+		        		$(target).parent().next().children().empty();
+						$(target).parent().next().children().html(homepageHtml).show();
 	        		}
-	        	}else{
-					$(target).next("span.urltxt").empty();
+	        	} else {
+					$(target).parent().next().children().empty();
 	        	}
 	        },
             error : onError
@@ -2410,7 +2447,7 @@ var fn = {
 	replaceGetParamChar : function(_param) {
 		_param = _param.replace(/&/g,"%26");
 		_param = _param.replace(/\+/g,"%2B"); 
-		 return _param;
+		return _param;
 	},
 	save : function() {
 		if(fn.checkValid()){
@@ -2418,7 +2455,9 @@ var fn = {
 			$("span.retxt").hide();
 			// 그리드 에러 메세지 지우기
 			$("div.retxt").remove();
-
+			// remove input error class
+			$("input").removeClass("is-invalid");
+			
 			// 멀티 일경우 라이센스는 1건 이상이어야 한다.
 			var licenseDiv = "";
 			var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
@@ -2467,11 +2506,10 @@ var fn = {
 				return false;
 			}
 
-//			var editorVal = CKEDITOR.instances.editor.getData();
-			var editorVal = "";
+			var editorVal = $('#additionalInformation').next().find(".note-editable").html();
 			var localDeactivateFlag = $("[name='deactivateFlag']").val();
 
-			if(editorVal == "") {
+			if (editorVal == "") {
 				if(deactivateFlag == "N" 
 					&& localDeactivateFlag == "Y"){ // deactivate Flag checked
 					alertify.alert([[#{msg.oss.required.deactivate}]], function(){});
@@ -2545,6 +2583,9 @@ var fn = {
 				}
 			});
 		}
+	},
+	removeTag : function(obj) {
+		$(obj).parent().parent().remove();
 	}
 }
 </script>

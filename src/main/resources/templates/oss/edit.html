@@ -28,7 +28,7 @@
                         <div class="col-md-9">
                             <div class="card card-secondary submit-form">
                                 <div class="card-header">
-                                    <h3 class="card-title text-white">Form</h3>
+                                    <h3 class="card-title text-white"></h3>
                                     <div class="card-tools">
                                         <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button"><i class="fas fa-minus"></i></button>
                                     </div>
@@ -46,16 +46,16 @@
                                     <div class="row form-group">
                                     	<div class="col-12">
                                     		<label th:text="#{msg.common.field.nickname}"></label>
-                                      		<div class="input-group required">
-                                        		<input class="form-control" id="input_ossNicknames" onblur="oss_edit_fn.checkNickName(this)" type="text">
+                                      		<div class="input-group">
+                                        		<input class="form-control" id="input_ossNicknames" th:onblur="fn.checkNickName(this)" type="text">
                                            		<div class="input-group-append">
-                                            		<button class="btn btn-default" id="ossNicknames" name="addTagButton" type="button" th:text="Add"></button>
+                                            		<button class="btn btn-default" id="nickAdd" name="addTagButton" type="button" th:text="Add"></button>
                                           		</div>
                                       		</div>
                                     	</div>
-                                        <div class="col-12 required">
-                                        	<span class="retxt"></span>
-                                        </div>
+                                    	<div class="col-12">
+                                    		<div class="row multiTxtSet"></div>
+                                    	</div>
                                     </div>
                                     <div class="row form-group">
                                         <div class="col-1">
@@ -85,30 +85,19 @@
                                         </div>
                                         <div id="disp_licenseText" style="display: none;"></div>
                                     </div>
-                                    <div class="form-group tag-form" name="append-stag-form">
-                                        <label th:text="#{msg.common.field.detectedLicense}"></label>
-                                        <th:block th:if="${@CommonFunction.isAdmin()}">
-                                            <div class="input-group">
-                                                <input class="form-control autoComOssLicense" id="input_detectedLicense" name="detectedLicenses" type="text">
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-default" id="detectedLicense" name="addTagButton" type="button" th:text="Add"></button>
-                                                </div>
-                                            </div>
-                                        </th:block>
-                                    </div>
-                                    <div class="form-group row" id="appendArea_detectedLicense">
-                                        <th:block th:each="detectedLicense : ${detail?.detectedLicenses}"
-                                                  th:if="${!#strings.isEmpty(detectedLicense)}">
-                                            <div class="col-4 tag-container mb-1 pr-0">
-                                                <div class="external-event pl-3" name="appendArea_detectedLicense">
-                                                    <input name="detectedLicenses" th:value="${detectedLicense}" type="hidden"/>
-                                                    <th:block th:if="${@CommonFunction.isAdmin()}">
-                                                    <i class="fas fa-times text-blue-gray float-right mt-1" onclick="deleteTag(this)"></i>
-                                                    </th:block>
-                                                        [[${detectedLicense}]]
-                                                </div>
-                                            </div>
-                                        </th:block>
+                                    <div class="row form-group" name="append-stag-form">
+                                    	<div class="col-12">
+                                    		<label th:text="#{msg.common.field.detectedLicense}"></label>
+                                        	<div class="input-group">
+                                        		<input class="form-control autoComOssLicense" id="input_detectedLicense" type="text"/>
+                                           		<div class="input-group-append">
+                                            		<button class="btn btn-default" id="detectedLicenseAdd" name="addTagButton" type="button" th:text="Add"></button>
+                                            	</div>
+                                     		</div>
+                                    	</div>
+                                     	<div class="col-12">
+                                    		<div class="row detectedLicensesDiv"></div>
+                                    	</div>
                                     </div>
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.Copyright}"></label>
@@ -126,13 +115,27 @@
                                         </div>
                                         <div id="obDiv" class="col-1"></div>
                                     </div>
-                                    <div class="form-group">
-                                        <label th:text="#{msg.common.field.downloadLocation}"></label>
-                                        <input class="form-control" id="inputName" name="downloadLocations" type="text"/>
+                                    <div class="row form-group">
+                                    	<div class="col-12">
+                                    		<label th:text="#{msg.common.field.downloadLocation}"></label>
+                                        	<div class="input-group">
+                                        		<input class="form-control" id="input_downloadLocations" type="text"/>
+                                           		<div class="input-group-append">
+                                            		<button class="btn btn-default" id="downloadLocationAdd" type="button" th:text="Add"></button>
+                                            	</div>
+                                     		</div>
+                                    	</div>
+                                    	<div class="col-12 multiDownloadLocationSet">
+                                    	</div>
                                     </div>
-                                    <div class="form-group">
-                                        <label th:text="#{msg.common.field.homepage}"></label>
-                                        <input class="form-control" name="homepage" th:value="${detail?.homepage}" type="text"/>
+                                    <div class="row form-group">
+                                    	<div class="col-12">
+                                    		<label th:text="#{msg.common.field.homepage}"></label>
+                                        	<input class="form-control" name="homepage" th:value="${detail?.homepage}" placeholder="http://" type="text"/>
+                                    	</div>
+                                        <div class="col-12 required">
+                                        	<span class="urltxt"></span>
+                                    	</div>
                                     </div>
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.summaryDescription}"></label>
@@ -147,14 +150,12 @@
                                     	<textarea class="form-control" id="commentCont" name='commentInput' rows="3" style="height: 800px"></textarea>
                                   	</div>
                                 </div>
-                                <th:block th:if="${@CommonFunction.isAdmin()}">
-                                    <div class="card-footer clearfix">
-                                        <a th:if="${isCopyData == null}" class="btn btn-secondary float-left" href="javascript:void(0)" id="delete">Delete</a>
-                                        <a class="btn btn-teal-01 float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.save()">Save</a>
-                                        <a th:if="${isCopyData == null}" class="btn btn-default float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.copyOssPage()">copy</a>
-                                        <a class="btn btn-default float-right mx-1" href="javascript:void(0)" onclick="oss_edit_fn.syncOssPage()">Sync</a>
-                                    </div>
-                                </th:block>
+                                <div class="card-footer clearfix">
+                                	<button th:if="${ossId != null}" type="button" class="btn btn-secondary float-left" id="delete" th:text="Delete"></button>
+                                	<button type="button" class="btn btn-teal-01 float-right mx-1" id="save" th:text="Save"></button>
+                                   	<button th:if="${ossId != null}" type="button" class="btn btn-default float-right mx-1" id="copy" th:text="Copy"></button>
+                                   	<button th:if="${ossId != null}" type="button" class="btn btn-default float-right mx-1" id="sync" th:text="Sync"></button>
+                              	</div>
                             </div>
                         </div>
                         <th:block th:if="${@CommonFunction.isAdmin()}">
@@ -163,9 +164,7 @@
                                     <div class="card-header">
                                         <h3 class="card-title">Comment</h3>
                                         <div class="card-tools">
-                                            <button class="btn btn-tool text-white" data-card-widget="collapse"
-                                                    title="Collapse"
-                                                    type="button">
+                                            <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button">
                                                 <i class="fas fa-minus"></i>
                                             </button>
                                         </div>

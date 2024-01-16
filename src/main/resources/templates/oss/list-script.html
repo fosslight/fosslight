@@ -9,7 +9,7 @@
         let groupBuffer = '';
         let totalRow = 0;
         let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) }]];
-        linkFlag = [[ ${searchBean.linkFlag}]];
+        var linkFlag = [[ ${searchBean.linkFlag}]];
 
         $(window).load(function () {
             oss_lst_evt.init();
@@ -43,8 +43,8 @@
                 });
 
                 /* created date & modified date event */
-                const cStartDate = [[${searchBean.cStartDate}]];
-                const cEndDate = [[${searchBean.cEndDate}]];
+                let cStartDate = [[${searchBean.cStartDate}]];
+                let cEndDate = [[${searchBean.cEndDate}]];
 
                 $("#createdDate").daterangepicker({
                     autoUpdateInput: false
@@ -53,20 +53,20 @@
                     $("input[name='cEndDate']").val(picker.endDate.format('YYYYMMDD'));
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
-                    .on('cancel.daterangepicker', function (ev, picker) {
-                        $("#createdDate").val("");
-                        $("input[name='startDate']").val("");
-                        $("input[name='endDate']").val("");
-                    });
+               	.on('cancel.daterangepicker', function (ev, picker) {
+                	$("#createdDate").val("");
+                    $("input[name='startDate']").val("");
+                    $("input[name='endDate']").val("");
+               	});
 
-                if (cStartDate != null && cEndDate != null) {
+                if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
                     $('#createdDate').val(cStartDate.format('MM/DD/YYYY') + ' - ' + cEndDate.format('MM/DD/YYYY'));
                 } else {
                     $('#createdDate').attr('placeholder', 'Created Date');
                 }
 
-                const mStartDate = [[${searchBean.mStartDate}]];
-                const mEndDate = [[${searchBean.mEndDate}]];
+                let mStartDate = [[${searchBean.mStartDate}]];
+                let mEndDate = [[${searchBean.mEndDate}]];
 
                 $("#modifiedDate").daterangepicker({
                     autoUpdateInput: false
@@ -75,13 +75,13 @@
                     $("input[name='mEndDate']").val(picker.endDate.format('YYYYMMDD'));
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
-                    .on('cancel.daterangepicker', function (ev, picker) {
-                        $("#modifiedDate").val("");
-                        $("input[name='mStartDate']").val("");
-                        $("input[name='mEndDate']").val("");
-                    });
-
-                if (mStartDate != null && mEndDate != null) {
+                .on('cancel.daterangepicker', function (ev, picker) {
+                	$("#modifiedDate").val("");
+                    $("input[name='mStartDate']").val("");
+                    $("input[name='mEndDate']").val("");
+               	});
+                
+                if ((mStartDate != null && "" != mStartDate) && (mEndDate != null && "" != mEndDate)) {
                     $('#modifiedDate').val(mStartDate.format('MM/DD/YYYY') + ' - ' + mEndDate.format('MM/DD/YYYY'));
                 } else {
                     $('#modifiedDate').attr('placeholder', 'Modified Date');
@@ -89,7 +89,7 @@
 
                 initParam = serializeObjectHelper();
                 var defaultSearchFlag = [[${searchBean.defaultSearchFlag}]];
-                console.log(defaultSearchFlag)
+                
                 if (defaultSearchFlag != 'Y') {
                     // just make grid ui
                     initParam.ignoreSearchFlag = "Y";
