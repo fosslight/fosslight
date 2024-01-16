@@ -3722,8 +3722,8 @@
 		WHERE 
 			PRJ_ID = #{prjId} 
 			<choose>
-				<when test="@oss.fosslight.util.StringUtil@isNotEmpty(prjEmail)"> AND EMAIL = #{prjEmail}</when>
-				<otherwise> AND DIVISION = #{prjDivision} AND USER_ID = #{prjUserId}</otherwise>
+				<when test="@oss.fosslight.util.StringUtil@isNotEmpty(prjEmail)"> AND EMAIL = #{prjEmail} </when>
+				<otherwise> AND USER_ID = #{prjUserId} </otherwise>
 			</choose>
 	</update>
 	
