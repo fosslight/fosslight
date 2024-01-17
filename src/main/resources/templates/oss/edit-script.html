@@ -207,7 +207,7 @@
 							colOssType += '<span class="badge badge-purple mr-1 text-sm">Dual</span>';
 						}
 						
-						if (v.toUpperCase().indexOf('V') > -1){
+						if (v.toUpperCase().indexOf('V') > -1) {
 							colOssType += '<span class="badge badge-yellow mr-1 text-sm">v-Diff</span>';
 						}
 						
@@ -368,7 +368,7 @@
 			});
 			
 			//select oss 팝업 확인 버튼 
-			$("#wrapIframe > div > div.pop.ossSelectPop > div.pbtn input:eq(1)").on('click', function(){
+			$("#ossSelectSubimt").on('click', function(){
 				var rowId = $('#_ossSelectList').jqGrid('getGridParam', 'selrow');
 				if (rowId === null) {
 					alert([[#{msg.oss.required.select.grid}]]);
@@ -381,19 +381,20 @@
 	 				}
 	 				
 	 				tempNewOssId = newOssId;
-	 				
-	 				// 동일한 OSS의 다른 version으로이관하는 경우
+
+                    // 동일한 OSS의 다른 version으로이관하는 경우
 	 				if(data.detail.ossName == rowData.ossNameTemp) {
 		 				//1. 기존 OssId를 사용중인 프로젝트의 OssId , Version 교체
 		 				//2. 기존 Oss 의 Name 과 Nickname을 현재 선택한 Oss의 Nickname 에 병합
 		 				//3. 기존의 Oss 삭제
-	
+
 						var editorVal = ""; // summernote 데이터로 변경해야함
 	 					var sendData = {
 	 						ossId:[[${ossId}]],
 	 						newOssId:newOssId,
 	 						comment:editorVal
 	 					};
+
 		 				
 	 					$.ajax({
 	 						url :'/oss/delAjax',
@@ -426,8 +427,9 @@
 				}
 			});
 			
-			$("#wrapIframe > div > div.pop.mergeOssCheckPop > div.pbtn input:eq(1)").on('click', function(){
-				var editorVal = ""; // summernote 데이터로 변경해야함
+			$("#mergeOssSubimt").on('click', function(){
+
+                var editorVal = ""; // summernote 데이터로 변경해야함
 				var sendData = {
 					ossId : [[${ossId}]],
 					newOssId : tempNewOssId,
@@ -1031,6 +1033,8 @@
 							$('#_ossSelectList').jqGrid("setRowData",rowId, false, {'background-color' : '#a9a9a9'});
 						}
 					})
+
+                    $("#_ossSelectList").jqGrid("setGridWidth", $(window).innerWidth()*0.46, true);
 				},
 				onSelectRow: function(id){
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',id);
@@ -1573,7 +1577,7 @@
 	function deleteOssByOne(){
 		var ossId = $('input[name=ossId]').val();
 		var ossName = $('input[name=ossName]').val();
-		var editorVal = CKEDITOR.instances['editor'].getData();
+		var editorVal = $('#commentCont').next().find(".note-editable").html();
 		var sendData = {
 				ossId:ossId,
 				ossName:ossName,
@@ -2149,13 +2153,14 @@ function showLicenseText(_licenseName) {
 
 // 다른 OSS로 이관하는 경우
 function mergeOssForDelete(newOssId) {
+        var ossId = [[ ${ossId }]];
 
 		$('.ossSelectPop').hide();
 		$("#_ossMergeCheckList").jqGrid('GridUnload');
 		$('.mergeOssCheckPop').show();
 		
 		$('#_ossMergeCheckList').jqGrid({
-			url:'/oss/ossMergeCheckList/${ossId}/'+newOssId,
+			url:`/oss/ossMergeCheckList/${ossId}/${newOssId}`,
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -2186,6 +2191,7 @@ function mergeOssForDelete(newOssId) {
 			height: 'auto',
 			loadComplete: function(id){
 				$('#_ossMergeCheckList').jqGrid("setRowData",[[${ossId}]], false, {'background-color' : '#ada9a9'});
+                $("#_ossMergeCheckList").jqGrid("setGridWidth", $(window).innerWidth()*0.46, true);
 			},
 			onSelectRow: function(id){
 			},

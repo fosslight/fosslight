@@ -110,7 +110,7 @@ ul { list-style-type: none; }
 
 /*popup*/
 .custom-layout #promptPopup {width:470px; height:560px;}
-.custom-layout .ossSelectPop {
+.custom-layout .ossSelectPop, .custom-layout .mergeOssCheckPop {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -121,6 +121,7 @@ ul { list-style-type: none; }
     overflow-x: hidden;
     display: none;
     background-color: #f2f2f2;
+    font-size: .85rem;
 }
 a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:hover { background-color: #7e101b!important; }
 
