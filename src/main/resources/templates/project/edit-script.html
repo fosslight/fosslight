@@ -810,11 +810,12 @@
 				$('input[name=prjName]').val(prjName);
 				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
 
-				var editorVal = $('#additionalInformation').next().find(".note-editable").html();
+				var editorVal = $('#additionalInformation').summernote('code');
 				$('input[name=comment]').val(editorVal);
 
-				var userComment = $("#comment").next().find(".note-editable").html();
+				var userComment = $("#comment").summernote('code');
 				$('input[name=userComment]').val(userComment);
+				$("#comment").summernote('code', '');
 				
 				cleanErrMsg("_modelList");
 
@@ -848,15 +849,15 @@
 
 				var confirmStatusCopyFlag = true;
 				var confirmStatusCopyVal = "";
-				if($('input:radio[name="confirmStatusCopyRadio"]').is(':checked')){
+				if ($('input:radio[name="confirmStatusCopyRadio"]').is(':checked')) {
 					confirmStatusCopyVal = $('input:radio[name="confirmStatusCopyRadio"]:checked').val();
 					fn.disabledVerificationConfirm(false);
-				}else{
+				} else {
 					confirmStatusCopyFlag = false;
 				}
 				
-				if(data.copy){
-					if(confirmStatusCopyFlag){
+				if (data.copy) {
+					if (confirmStatusCopyFlag) {
 						URL = '/project/saveAjax?copy=true&confirmStatusCopy='+confirmStatusCopyVal;
 					} else {
 						URL = '/project/saveAjax?copy=true&confirmStatusCopy=false';
@@ -866,7 +867,7 @@
 				}
 				
 				//public 값 넣어주기
-				if($('#checkbox3').is(':checked')) {
+				if ($('#checkbox3').is(':checked')) {
 					$('#checkbox3').val('N');
 				} else {
 					$('#checkbox3').val('Y');

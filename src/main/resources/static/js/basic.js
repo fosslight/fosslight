@@ -696,7 +696,7 @@ var changeTab = function (pos) {
 
 // error msg
 function makeErrMsg(msg) {
-    return '<div class="retxt">' + msg + '</div>';
+    return '<div class="retxt text-danger text-sm">' + msg + '</div>';
 }
 
 function cleanErrMsg(gridStr, rowId) {
@@ -878,10 +878,13 @@ function createValidMsgComplex(msgData) {
 
                 if ($('input[name=' + key + ']').length > 0) {
                     $('input[name=' + key + ']').focus().next("span.retxt,div.retxt").html(value).show();
+                    $('input[name=' + key + ']').addClass("is-invalid");
                 } else if ($('textarea[name=' + key + ']').length > 0) {
                     $('textarea[name=' + key + ']').focus().next("span.retxt,div.retxt").html(value).show();
+                    $('textarea[name=' + key + ']').addClass("is-invalid");
                 } else if ($('select[name=' + key + ']').length > 0) {
                     $('select[name=' + key + ']').focus().parent().siblings("span.retxt,div.retxt").html(value).show();
+                    $('select[name=' + key + ']').addClass("is-invalid");
                 }
             }
         }
