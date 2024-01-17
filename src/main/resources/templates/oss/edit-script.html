@@ -479,12 +479,12 @@
 			
 			//프로젝트 리스트 더보기
 			$('#listMore').on('click',function(){
-				createTabInFrameWithCondition('Project List', '/project/list', 'OSSLISTMORE', $("input[name=ossId]").val());
+				createTabInFrame('Project List', '/project/list');
 			});
 
 			//프로젝트 리스트 더보기
 			$('#listMore3rd').on('click',function(){
-				createTabInFrameWithCondition('3rd Party List', '/partner/list', 'OSSLISTMORE', $("input[name=ossId]").val());
+				createTabInFrame('3rd Party List', '/partner/list');
 			});
 			
 			if ([[${ossId}]] == null) { // OSS 신규등록 시 URL 링크 중복 체크
@@ -993,19 +993,18 @@
 				colModel:[
 					{name:'cveId',index:'cveId', width:100, align:"center", formatter: cveIdTag, unformat: unCveIdTag},
 					{name:'cvssScore',index:'cvssScore', width:80, align:"center", formatter:fn.displayVulnerability, sorttype: 'number'},
-					{name:'vulnSummary',index:'vulnSummary', width:500, align:"center"},
+					{name:'vulnSummary',index:'vulnSummary', width:500, align:"left"},
 					{name:'modiDate',index:'modiDate', width:100, align:"center", formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}}
 				],
 				rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
 				sortname: 'cvssScore',
 				viewrecords: true,
-				loadonce:true,
+				loadonce: true,
 				sortorder: "desc",
 				height: 'auto',
 				ondblClickRow: function(rowId) {
 				},
 				loadComplete: function() {
-					tableRefreshNew("_vulnInfoList");
 				}
 			});
 		}
@@ -2565,13 +2564,13 @@
 		var display = "";
 
         if (parseInt(cellvalue) >= 9.0) {
-            display = "<span class=\"badge badge-dark\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">CRITICAL</span>";
+            display = "<span class=\"badge badge-dark\" style=\"cursor: pointer;\" title=\""+ cellvalue +"\" onclick=\"openNVD('" + rowObject.cveId + "')\">CRITICAL</span>";
         } else if (parseInt(cellvalue) >= 7.0) {
-            display = "<span class=\"badge badge-danger\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">HIGH</span>";
+            display = "<span class=\"badge badge-danger\" style=\"cursor: pointer;\" title=\""+ cellvalue +"\" onclick=\"openNVD('" + rowObject.cveId + "')\">HIGH</span>";
         } else if (parseInt(cellvalue) >= 4.0) {
-            display = "<span class=\"badge badge-orange\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">MEDIUM</span>";
+            display = "<span class=\"badge badge-orange\" style=\"cursor: pointer;\" title=\""+ cellvalue +"\" onclick=\"openNVD('" + rowObject.cveId + "')\">MEDIUM</span>";
         } else if (parseInt(cellvalue) > 0) {
-            display = "<span class=\"badge badge-warning\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">LOW</span>";
+            display = "<span class=\"badge badge-warning\" style=\"cursor: pointer;\" title=\""+ cellvalue +"\" onclick=\"openNVD('" + rowObject.cveId + "')\">LOW</span>";
         } else if (parseInt(cellvalue) == 0 || cellvalue == undefined) {
             display = "<span style=\"font-size:0;\"></span>";
         } else {
