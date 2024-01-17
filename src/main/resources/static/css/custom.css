@@ -776,7 +776,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 .taSet textarea {width:100%;vertical-align: top;}
 
 .required {position:relative;}
-.required .retxt {display:none;padding-top:2px;font-size:11px;color:red !important;}
+.required .retxt {display:none;padding-top:2px;font-size:13px;color:red !important;}
 
 /* commonIframe table custome */
 .custom-layout .tbws1 {border:.8px solid #ced4da;}
@@ -815,3 +815,4 @@ td .retxt, div .retxt {padding-top:2px; font-size:13px; color:red !important;}
 div .retxtb {padding-top:2px; font-size:13px; color:blue !important;}
 div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .urlLink {display:block;color:#0070c0 !important;text-decoration:underline !important;}
+.is-warning {border-color: #007bff !important;}

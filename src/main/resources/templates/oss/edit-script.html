@@ -28,6 +28,10 @@
 		typeCodes : [],
 		copyData : [[${copyData}]],
 		init : function(){
+			if (data.list == null) {
+				data.list = new Array();
+				data.list.rows = new Array();
+			}
 			commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
 			$('dl[name=commentClone]').remove();
 			data.clone = $('.multiTxtSet').clone().html();
@@ -56,31 +60,39 @@
 					if (ossNickList != null && ossNickList.length > 0) {
 						ossNickList.forEach(function(nickName, index, obj){
 							if (index == 0) {
-								$('.multiTxtSet span:first').remove();
+								$('.multiTxtSet').empty();
 							}
 							
 							if ('' != nickName) {
-								$(data.clone).appendTo('.multiTxtSet');
-								$('.multiTxtSet input[type=text]:last').val(nickName);
-								$('.smallDelete').on('click', function(){
-									$(this).parent().remove();
-								});
+								let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+								nickHtml 		+= 		'<div class="input-group card-tools">';
+								nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'"/>';
+								nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+								nickHtml 		+=		'</div>';
+								nickHtml 		+=		'<span class="retxt"></span>';
+								nickHtml 		+= 	'</div>';
+								
+								$('.multiTxtSet').append(nickHtml);
 							}					
 						});
 					}
 					
 					if (downloadLocationList != null && downloadLocationList.length > 0) {
 						downloadLocationList.forEach(function(downloadLocation, index, obj){
-							if(index == 0){
+							if (index == 0) {
 								$('.multiDownloadLocationSet span:first').remove();
 							}
 							
-							if(downloadLocation!='') {
-								$(data.cloneDownloadLocation).appendTo('.multiDownloadLocationSet');
-								$('.multiDownloadLocationSet input[type=text]:last').val(downloadLocation);
-								$('.smallDelete').on('click', function(){
-									$(this).parent().remove();
-								});
+							if ('' != downloadLocation) {
+								let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
+								downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
+								downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+								downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+								downloadLocationHtml 		+=		'</div>';
+								downloadLocationHtml 		+=		'<span class="urltxt"></span>';
+								downloadLocationHtml 		+= 	'</div>';
+								
+								$(".multiDownloadLocationSet").append(downloadLocationHtml);
 							}					
 						});
 					}
@@ -126,15 +138,19 @@
 				switch(k){
 					case 'ossNicknames':
 						v.forEach(function(nickName, index, obj){
-							if(index == 0){
-								$('.multiTxtSet span:first').remove();
+							if (index == 0) {
+								$('.multiTxtSet').empty();
 							}
-							if(nickName!=''){
-								$(data.clone).appendTo('.multiTxtSet');
-								$('.multiTxtSet input[type=text]:last').val(nickName);
-								$('.smallDelete').on('click', function(){
-									$(this).parent().remove();
-								});
+							if ('' != nickName) {
+								let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+								nickHtml 		+= 		'<div class="input-group card-tools">';
+								nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
+								nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+								nickHtml 		+=		'</div>';
+								nickHtml 		+=		'<span class="retxt"></span>';
+								nickHtml 		+= 	'</div>';
+								
+								$('.multiTxtSet').append(nickHtml);
 							}					
 						});
 						
@@ -166,7 +182,7 @@
 							if ('' != detectLicense) {
 								let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
 								detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
-								detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'" readonly/>';
+								detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'"/>';
 								detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 								detectedLicenseHtml 		+=		'</div>';
 								detectedLicenseHtml 		+=		'<span class="retxt"></span>';
@@ -182,7 +198,7 @@
 							syncData.ossLicenses.forEach(function(item){
 								$('input[name=licenseName]').val(item.licenseName);
 								$('#licenseName').val(item.licenseNameEx);
-								$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + item.licenseType + '</span>');
+								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + item.licenseType + '</span>');
 								$('#obDiv').html('');
 								$(item.obligation).appendTo('#obDiv');
 							});
@@ -190,7 +206,7 @@
 							var licenseType = autoLicense(data.list.rows);
 							var obligationHtml = autoObligation(data.list.rows);
 							if ('' != licenseType) {
-								$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + licenseType + '</span>');
+								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + licenseType + '</span>');
 							} else {
 								$('#ltDiv').html('');
 							}
@@ -251,7 +267,7 @@
 				if ('' != nickname) {
 					let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
 					nickHtml 		+= 		'<div class="input-group card-tools">';
-					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'" readonly/>';
+					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'"/>';
 					nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 					nickHtml 		+=		'</div>';
 					nickHtml 		+=		'<span class="retxt"></span>';
@@ -323,7 +339,7 @@
 			
 			//라이센스 삭제
 			$('#delete').on('click', function(){
-				var editorVal = $("#commentCont").next().find(".note-editable").html();
+				var editorVal = $("#commentCont").summernote('code');
 				
 				if ($("#commentCont").next().find(".note-editable").text() == "") {
 					alertify.alert([[#{msg.oss.required.deletion}]], function(){});
@@ -840,7 +856,7 @@
 					}
 					
 					if ('' != type) {
-						$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+						$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
 					} else {
 						$('#ltDiv').html(type);
 					}
@@ -872,7 +888,7 @@
 				}
 				
 				if ('' != type) {
-					$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+					$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
 				} else {
 					$('#ltDiv').html(type);
 				}
@@ -886,6 +902,7 @@
 				var ids = $("#_licenseChoice").jqGrid("getDataIDs");
 				var newId = ids.length ? Number(ids[ids.length-1])+1 : 1;
 				var row = {no	:newId, ossLicenseIdx	:newId};
+				
 				data.list.rows.push(row);
 				$("#_licenseChoice").jqGrid("addRowData", newId , row, "last");
 				$("#_licenseChoice").jqGrid("setSelection", newId);
@@ -1098,7 +1115,7 @@
 		}
 		
 		if ('' != type) {
-			$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+			$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
 		} else {
 			$('#ltDiv').html(type);
 		}
@@ -1375,7 +1392,7 @@
 		}
 		
 		if ('' != type) {
-			$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+			$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
 		} else {
 			$('#ltDiv').html(type);
 		}
@@ -1552,14 +1569,14 @@
 			cache : false,
 			data : {'ossId' : ossId},
 			success : function(data){
-				if(parseInt(data) > 0){
+				if (parseInt(data) > 0) {
 					loading.hide();
 					
 					$('.ossSelectPop').show();
 					$('#blind_wrap').show();
-				}else if(parseInt(data) == 0){
+				} else if (parseInt(data) == 0) {
 					deleteOssByOne();
-				}else{
+				} else {
 					loading.hide();
 					alertify.error([[#{msg.common.valid2}]], 0);
 				}
@@ -1575,7 +1592,7 @@
 	function deleteOssByOne(){
 		var ossId = $('input[name=ossId]').val();
 		var ossName = $('input[name=ossName]').val();
-		var editorVal = CKEDITOR.instances['editor'].getData();
+		var editorVal = $("#commentCont").summernote('code');
 		var sendData = {
 				ossId:ossId,
 				ossName:ossName,
@@ -1591,12 +1608,12 @@
             cache : false,
 	        success : function(json){
 	        	loading.hide();
-				if(json.resCd == '10'){
+				if (json.resCd == '10') {
 					alertify.alert([[#{msg.common.success}]],function(){
 						deleteTabInFrame('/oss/edit/'+ossId);
 						reloadTabInframe('/oss/list');
 					});
-				}else{
+				} else {
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
 	        },
@@ -1639,13 +1656,14 @@
 	};
 	
 	// 그리드 체크 메세지( gridStr 그리드 문자열 )
-	function ossGridValidMsg(msgData,gridStr) {console.log(msgData);
+	function ossGridValidMsg(msgData,gridStr) {
 		$.each(msgData,function(key,value) {
 			if ("isValid" != key) {
 				if (key.indexOf(".") > -1){
 					if (key.indexOf("ossNicknames") > -1) {
-						var _nickIndex = key.substring(key.lastIndexOf(".") +1, key.length) -1;console.log(_nickIndex);
+						var _nickIndex = key.substring(key.lastIndexOf(".") +1, key.length) -1;
 						$('input[name=ossNicknames]:eq('+_nickIndex+')').parent().next("span.retxt").html(value).show();
+						$('input[name=ossNicknames]:eq('+_nickIndex+')').addClass("is-invalid");
 					} else {
 						var seqSuffix = key.split(".");
 						var rowId = seqSuffix[1];
@@ -1681,7 +1699,7 @@
 	};
 	
 	//유효성 체크 콜백함수
-	function onValidSuccess(json, status){console.log(json);
+	function onValidSuccess(json, status){
 		loading.hide();
 		
 		if(json.isValid == 'false') {
@@ -1689,13 +1707,20 @@
 				// oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
 				
 				// nick name 필드 초기화
-				if($("div.multiTxtSet > div").length > 1) {
-					$("div.multiTxtSet > div:not(:nth-child(1))").remove();
+				if ($("div.multiTxtSet > div").length > 1) {
+					$("div.multiTxtSet").empty();
 				}
 				
-				for(var k in json.resultData.addNickArr) {
-					$(nickNameClone).appendTo('.multiTxtSet');
-					$('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
+				for (var k in json.resultData.addNickArr) {
+					let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+					nickHtml 		+= 		'<div class="input-group card-tools">';
+					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+json.resultData.addNickArr[k]+'"/>';
+					nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+					nickHtml 		+=		'</div>';
+					nickHtml 		+=		'<span class="retxt"></span>';
+					nickHtml 		+= 	'</div>';
+					
+					$('.multiTxtSet').append(nickHtml);
 				}
 				
 				$('.smallDelete').on('click', function(){
@@ -2285,6 +2310,7 @@
 		        		
 		        			$(target).parent().next("span.urltxt").empty();
 		        			$(target).parent().next("span.urltxt").html(downloadLocation).show();
+		        			$(target).addClass("is-warning");
 		        		}
 	        		} else {
 		        		$(target).parent().next("span.urltxt").empty();
@@ -2325,6 +2351,7 @@
 							
 								$(cur).parent().next("span.urltxt").empty();
 								$(cur).parent().next("span.urltxt").html(downloadLocation).show();
+								$(cur).addClass("is-warning");
 							}						
 						});
 					
@@ -2362,6 +2389,7 @@
 		        		
 		        			$(target).parent().next().children().empty();
 							$(target).parent().next().children().html(homepageHtml).show();
+							$(target).addClass("is-warning");
 	        			}
 	        		} else {
 						$(target).parent().next().children().empty();
