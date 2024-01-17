@@ -34,15 +34,20 @@
 							<input type="hidden" id="identificationStatusConfFlag" th:value="${project.identificationStatusConfFlag}" />
 							<input type="hidden" id="verificationStatusConfFlag" th:value="${project.verificationStatusConfFlag}" />
                             <div class="card-body">
-                                <div class="form-group">
-                                    <label for="inputName" th:text="#{msg.common.field.project.name}"></label><span class="text-orange">*</span>
-                                    <input type="text" id="prjName" name="prjName" class="form-control" th:value="${project.prjName}">
+                                <div class="row form-group">
+                                	<div class="col-12 required">
+                                		<label for="inputName" th:text="#{msg.common.field.project.name}"></label><span class="text-orange">*</span>
+                                    	<input type="text" id="prjName" name="prjName" class="form-control" th:value="${project.prjName}">
+                                    	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
+                                	</div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="inputName" th:text="#{msg.common.field.project.version}"></label>
-                                    <input type="text" id="inputName" name="prjVersion" class="form-control" th:value="${project.prjVersion}">
+                                <div class="row form-group">
+                                	<div class="col-12">
+                                		<label for="inputName" th:text="#{msg.common.field.project.version}"></label>
+                                    	<input type="text" id="inputName" name="prjVersion" class="form-control" th:value="${project.prjVersion}">
+                                	</div>
                                 </div>
-                                <div class="row">
+                                <div class="row" th:if="${project.viewOnlyFlag != 'Y'}">
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="inputName" th:text="#{msg.common.field.permission}"></label>
@@ -61,16 +66,20 @@
                                         </div>
                                     </div> 
                                 </div>
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="form-group">
-                                            <label for="inputName" th:text="#{msg.common.field.OS}"></label><span class="text-orange">*</span>
-                                            <select class="form-control select2" id="osType" name="osType" style="width: 100%;">
-                                            	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
-                                            		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.osType)}"></option>
-                                            	</th:block>
-                                            </select>
-                                        </div>
+                                <div class="row form-group">
+                                	<div class="col-12">
+                                		<label for="inputName" th:text="#{msg.common.field.OS}"></label><span class="text-orange">*</span>
+                                	</div>
+                                	<div class="col-10">
+                                    	<select class="form-control select2" id="osType" name="osType" style="width: 100%;">
+                                   			<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
+                                        		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.osType)}"></option>
+                                       		</th:block>
+                                    	</select>
+                                    </div>
+                                    <div class="col-2 required">
+                                    	<input type="text" id="osTypeEtc" name="osTypeEtc" class="form-control" disabled/>
+                                    	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -90,7 +99,7 @@
 														<label for="networkServerType_Y" th:text="Yes"></label>
 													</div>
 													<div class="icheck-primary d-inline" style="margin-left: 5px;">
-														<input type="radio" id="networkServerType_N" name="networkServerType" value="N" th:checked="${project.networkServerType != null && #strings.equals(project.networkServerType, 'N')} ? 'checked'"/>
+														<input type="radio" id="networkServerType_N" name="networkServerType" value="N" th:checked="${project.networkServerType == null || (project.networkServerType != null && #strings.equals(project.networkServerType, 'N'))} ? 'checked'"/>
 														<label for="networkServerType_N" th:text="No"></label>
 													</div>
                                                 </div>
@@ -99,13 +108,15 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label for="inputName" th:text="#{msg.common.field.priority}"></label>
-                                    <select class="form-control select2" style="width: 100%;" select id="priority" name="priority">
-                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
-                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.priority != null && #strings.equals(option.cdDtlNo, project.priority)}"></option>
-                                    	</th:block>
-                                    </select>
+                                <div class="row form-group">
+                                	<div class="col-12">
+                                		<label for="inputName" th:text="#{msg.common.field.priority}"></label><span class="text-orange">*</span>
+                                    	<select class="form-control select2" style="width: 100%;" id="priority" name="priority">
+                                        	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                            	<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.priority != null && #strings.equals(option.cdDtlNo, project.priority)}"></option>
+                                    		</th:block>
+                                    	</select>
+                                	</div>
                                 </div>
 
                                 <div class="form-group">
