@@ -15,6 +15,8 @@
 	var deactivateFlag = "N";
 	var renameFlag = "N";
 	var nickNameClone;
+	var commentsParam = {referenceId : [[${ossId}]], referenceDiv : 'oss'};
+	
 	//데이터 객체
 	var data = {
 		detail : [[${detail}]],
@@ -26,6 +28,10 @@
 		typeCodes : [],
 		copyData : [[${copyData}]],
 		init : function(){
+			if (data.list == null) {
+				data.list = new Array();
+				data.list.rows = new Array();
+			}
 			commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
 			$('dl[name=commentClone]').remove();
 			data.clone = $('.multiTxtSet').clone().html();
@@ -54,31 +60,39 @@
 					if (ossNickList != null && ossNickList.length > 0) {
 						ossNickList.forEach(function(nickName, index, obj){
 							if (index == 0) {
-								$('.multiTxtSet span:first').remove();
+								$('.multiTxtSet').empty();
 							}
 							
 							if ('' != nickName) {
-								$(data.clone).appendTo('.multiTxtSet');
-								$('.multiTxtSet input[type=text]:last').val(nickName);
-								$('.smallDelete').on('click', function(){
-									$(this).parent().remove();
-								});
+								let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+								nickHtml 		+= 		'<div class="input-group card-tools">';
+								nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'"/>';
+								nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+								nickHtml 		+=		'</div>';
+								nickHtml 		+=		'<span class="retxt"></span>';
+								nickHtml 		+= 	'</div>';
+								
+								$('.multiTxtSet').append(nickHtml);
 							}					
 						});
 					}
 					
 					if (downloadLocationList != null && downloadLocationList.length > 0) {
 						downloadLocationList.forEach(function(downloadLocation, index, obj){
-							if(index == 0){
+							if (index == 0) {
 								$('.multiDownloadLocationSet span:first').remove();
 							}
 							
-							if(downloadLocation!='') {
-								$(data.cloneDownloadLocation).appendTo('.multiDownloadLocationSet');
-								$('.multiDownloadLocationSet input[type=text]:last').val(downloadLocation);
-								$('.smallDelete').on('click', function(){
-									$(this).parent().remove();
-								});
+							if ('' != downloadLocation) {
+								let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
+								downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
+								downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+								downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+								downloadLocationHtml 		+=		'</div>';
+								downloadLocationHtml 		+=		'<span class="urltxt"></span>';
+								downloadLocationHtml 		+= 	'</div>';
+								
+								$(".multiDownloadLocationSet").append(downloadLocationHtml);
 							}					
 						});
 					}
@@ -124,15 +138,19 @@
 				switch(k){
 					case 'ossNicknames':
 						v.forEach(function(nickName, index, obj){
-							if(index == 0){
-								$('.multiTxtSet span:first').remove();
+							if (index == 0) {
+								$('.multiTxtSet').empty();
 							}
-							if(nickName!=''){
-								$(data.clone).appendTo('.multiTxtSet');
-								$('.multiTxtSet input[type=text]:last').val(nickName);
-								$('.smallDelete').on('click', function(){
-									$(this).parent().remove();
-								});
+							if ('' != nickName) {
+								let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+								nickHtml 		+= 		'<div class="input-group card-tools">';
+								nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
+								nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+								nickHtml 		+=		'</div>';
+								nickHtml 		+=		'<span class="retxt"></span>';
+								nickHtml 		+= 	'</div>';
+								
+								$('.multiTxtSet').append(nickHtml);
 							}					
 						});
 						
@@ -161,15 +179,15 @@
 							if (index == 0){
 								$('.detectedLicensesDiv').empty();
 							}
-							if (detectLicense!='') {
+							if ('' != detectLicense) {
 								let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
 								detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
-								detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'" readonly/>';
+								detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'"/>';
 								detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 								detectedLicenseHtml 		+=		'</div>';
 								detectedLicenseHtml 		+=		'<span class="retxt"></span>';
 								detectedLicenseHtml 		+= 	'</div>';
-								console.log(detectedLicenseHtml);
+								
 								$(".detectedLicensesDiv").append(detectedLicenseHtml);
 							}					
 						});
@@ -180,7 +198,7 @@
 							syncData.ossLicenses.forEach(function(item){
 								$('input[name=licenseName]').val(item.licenseName);
 								$('#licenseName').val(item.licenseNameEx);
-								$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + item.licenseType + '</span>');
+								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + item.licenseType + '</span>');
 								$('#obDiv').html('');
 								$(item.obligation).appendTo('#obDiv');
 							});
@@ -188,7 +206,7 @@
 							var licenseType = autoLicense(data.list.rows);
 							var obligationHtml = autoObligation(data.list.rows);
 							if ('' != licenseType) {
-								$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + licenseType + '</span>');
+								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + licenseType + '</span>');
 							} else {
 								$('#ltDiv').html('');
 							}
@@ -249,7 +267,7 @@
 				if ('' != nickname) {
 					let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
 					nickHtml 		+= 		'<div class="input-group card-tools">';
-					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'" readonly/>';
+					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'"/>';
 					nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 					nickHtml 		+=		'</div>';
 					nickHtml 		+=		'<span class="retxt"></span>';
@@ -321,7 +339,7 @@
 			
 			//라이센스 삭제
 			$('#delete').on('click', function(){
-				var editorVal = $("#commentCont").next().find(".note-editable").html();
+				var editorVal = $("#commentCont").summernote('code');
 				
 				if ($("#commentCont").next().find(".note-editable").text() == "") {
 					alertify.alert([[#{msg.oss.required.deletion}]], function(){});
@@ -463,12 +481,12 @@
 			
 			//프로젝트 리스트 더보기
 			$('#listMore').on('click',function(){
-				createTabInFrameWithCondition('Project List', '/project/list', 'OSSLISTMORE', $("input[name=ossId]").val());
+				createTabInFrame('Project List', '/project/list');
 			});
 
 			//프로젝트 리스트 더보기
 			$('#listMore3rd').on('click',function(){
-				createTabInFrameWithCondition('3rd Party List', '/partner/list', 'OSSLISTMORE', $("input[name=ossId]").val());
+				createTabInFrame('3rd Party List', '/partner/list');
 			});
 			
 			if ([[${ossId}]] == null) { // OSS 신규등록 시 URL 링크 중복 체크
@@ -699,7 +717,7 @@
 		data.init();
 		
 		if ($('input[name=ossId]').val()) {
-//			fn_commemt.getCommentList();
+			fn_comment.getCommentList(commentsParam);
 		}
 		
 		$("#btnShowLicenseText").click(function() {
@@ -840,7 +858,7 @@
 					}
 					
 					if ('' != type) {
-						$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+						$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
 					} else {
 						$('#ltDiv').html(type);
 					}
@@ -872,7 +890,7 @@
 				}
 				
 				if ('' != type) {
-					$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+					$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
 				} else {
 					$('#ltDiv').html(type);
 				}
@@ -886,6 +904,7 @@
 				var ids = $("#_licenseChoice").jqGrid("getDataIDs");
 				var newId = ids.length ? Number(ids[ids.length-1])+1 : 1;
 				var row = {no	:newId, ossLicenseIdx	:newId};
+				
 				data.list.rows.push(row);
 				$("#_licenseChoice").jqGrid("addRowData", newId , row, "last");
 				$("#_licenseChoice").jqGrid("setSelection", newId);
@@ -976,19 +995,18 @@
 				colModel:[
 					{name:'cveId',index:'cveId', width:100, align:"center", formatter: cveIdTag, unformat: unCveIdTag},
 					{name:'cvssScore',index:'cvssScore', width:80, align:"center", formatter:fn.displayVulnerability, sorttype: 'number'},
-					{name:'vulnSummary',index:'vulnSummary', width:500, align:"center"},
+					{name:'vulnSummary',index:'vulnSummary', width:500, align:"left"},
 					{name:'modiDate',index:'modiDate', width:100, align:"center", formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}}
 				],
 				rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
 				sortname: 'cvssScore',
 				viewrecords: true,
-				loadonce:true,
+				loadonce: true,
 				sortorder: "desc",
 				height: 'auto',
 				ondblClickRow: function(rowId) {
 				},
 				loadComplete: function() {
-					tableRefreshNew("_vulnInfoList");
 				}
 			});
 		}
@@ -1100,7 +1118,7 @@
 		}
 		
 		if ('' != type) {
-			$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+			$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
 		} else {
 			$('#ltDiv').html(type);
 		}
@@ -1377,7 +1395,7 @@
 		}
 		
 		if ('' != type) {
-			$('#ltDiv').html('<span style="cursor: none;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+			$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
 		} else {
 			$('#ltDiv').html(type);
 		}
@@ -1554,14 +1572,14 @@
 			cache : false,
 			data : {'ossId' : ossId},
 			success : function(data){
-				if(parseInt(data) > 0){
+				if (parseInt(data) > 0) {
 					loading.hide();
 					
 					$('.ossSelectPop').show();
 					$('#blind_wrap').show();
-				}else if(parseInt(data) == 0){
+				} else if (parseInt(data) == 0) {
 					deleteOssByOne();
-				}else{
+				} else {
 					loading.hide();
 					alertify.error([[#{msg.common.valid2}]], 0);
 				}
@@ -1577,7 +1595,11 @@
 	function deleteOssByOne(){
 		var ossId = $('input[name=ossId]').val();
 		var ossName = $('input[name=ossName]').val();
+<<<<<<< HEAD
 		var editorVal = $('#commentCont').next().find(".note-editable").html();
+=======
+		var editorVal = $("#commentCont").summernote('code');
+>>>>>>> f27378deb1c919088114727302d618c60f0e559f
 		var sendData = {
 				ossId:ossId,
 				ossName:ossName,
@@ -1593,12 +1615,12 @@
             cache : false,
 	        success : function(json){
 	        	loading.hide();
-				if(json.resCd == '10'){
+				if (json.resCd == '10') {
 					alertify.alert([[#{msg.common.success}]],function(){
 						deleteTabInFrame('/oss/edit/'+ossId);
 						reloadTabInframe('/oss/list');
 					});
-				}else{
+				} else {
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
 	        },
@@ -1641,13 +1663,14 @@
 	};
 	
 	// 그리드 체크 메세지( gridStr 그리드 문자열 )
-	function ossGridValidMsg(msgData,gridStr) {console.log(msgData);
+	function ossGridValidMsg(msgData,gridStr) {
 		$.each(msgData,function(key,value) {
 			if ("isValid" != key) {
 				if (key.indexOf(".") > -1){
 					if (key.indexOf("ossNicknames") > -1) {
-						var _nickIndex = key.substring(key.lastIndexOf(".") +1, key.length) -1;console.log(_nickIndex);
+						var _nickIndex = key.substring(key.lastIndexOf(".") +1, key.length) -1;
 						$('input[name=ossNicknames]:eq('+_nickIndex+')').parent().next("span.retxt").html(value).show();
+						$('input[name=ossNicknames]:eq('+_nickIndex+')').addClass("is-invalid");
 					} else {
 						var seqSuffix = key.split(".");
 						var rowId = seqSuffix[1];
@@ -1683,7 +1706,7 @@
 	};
 	
 	//유효성 체크 콜백함수
-	function onValidSuccess(json, status){console.log(json);
+	function onValidSuccess(json, status){
 		loading.hide();
 		
 		if(json.isValid == 'false') {
@@ -1691,13 +1714,20 @@
 				// oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
 				
 				// nick name 필드 초기화
-				if($("div.multiTxtSet > div").length > 1) {
-					$("div.multiTxtSet > div:not(:nth-child(1))").remove();
+				if ($("div.multiTxtSet > div").length > 1) {
+					$("div.multiTxtSet").empty();
 				}
 				
-				for(var k in json.resultData.addNickArr) {
-					$(nickNameClone).appendTo('.multiTxtSet');
-					$('.multiTxtSet input[type=text]:last').val(json.resultData.addNickArr[k]);
+				for (var k in json.resultData.addNickArr) {
+					let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+					nickHtml 		+= 		'<div class="input-group card-tools">';
+					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+json.resultData.addNickArr[k]+'"/>';
+					nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+					nickHtml 		+=		'</div>';
+					nickHtml 		+=		'<span class="retxt"></span>';
+					nickHtml 		+= 	'</div>';
+					
+					$('.multiTxtSet').append(nickHtml);
 				}
 				
 				$('.smallDelete').on('click', function(){
@@ -1977,9 +2007,9 @@
 			$('input[name=renameFlag]').val(renameFlag);
 		}
 	};
+	
 	// 색 설정
 	function makeBackGroundColor(){
-		
 		var colors = [];
 		var list = [];
 		if (data.copyData) {
@@ -2031,129 +2061,69 @@
 		$('input[name=renameFlag]').val(renameFlag);
     };
     
-	function deleteComment(obj){
-		if(!confirm([[#{msg.oss.confirm.delete.comment}]])) return;
-		var commId = $(obj).next().val();
-		$.ajax({
-			url : '/oss/deleteComment',
-			type : 'POST',
-			dataType : 'json',
-			cache : false,
-			data : {'commId' : commId},
-			success : function(){
-				fn_commemt.getCommentList();
-			},
-			error : function(){
-				alertify.error([[#{msg.common.valid2}]], 0);
+	function showLicenseText(_licenseName) {
+		if(!_licenseName) {
+			var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
+
+			switch (licenseChoiceLength) {
+				case 0:
+					alertify.alert([[#{msg.oss.required.license}]], function(){});
+					return false;
+					break;
+				case 1:
+					$("input[name=licenseDiv]").val("S");
+					break;
+				default:
+					$("input[name=licenseDiv]").val("M");
+					break;
 			}
-		});
-	}
-
-	function modifyComment(obj){
-		$('.commModifyPop').show();
-		$('#blind_wrap').show();
-		var commId = $(obj).next().next().val();
-		modifyCommentId = commId;
-//		var contents = $(obj).parent().parent().next().html();
-//		CKEDITOR.instances.editor3.setData(contents); // ckeditor > summernote 로 변경
-	
-		//코멘트 수정
-		$('.closeModComment').off("click").on("click", function(){
-		$('.commModifyPop').hide();
-		$('#blind_wrap').hide();	
-	});
-	
-	$('.modifyComment').off("click").on("click", function(){
-//      var editorVal = CKEDITOR.instances.editor3.getData(); // ckeditor > summernote 로 변경
-		var register = [[${@CommonFunction.loginUserName()}]];
-		var param = {commId : modifyCommentId, referenceId : data.detail.ossId, referenceDiv :'40', contents : replaceWithLink(editorVal)};
-		$.ajax({
-			url : '/oss/saveComment',
-			type : 'POST',
-			dataType : 'json',
-			cache : false,
-			data : param,
-			success : function(json){
-				alertify.success([[#{msg.common.success}]]);
-				if(json.isValid) {
-					if(json.isValid == 'false') {
-						createValidMsgComplex(json);
-						alertify.error([[#{msg.common.valid}]], 0);
-						
-					} else if(json.isValid == 'true') {
-						alertify.alert([[#{msg.common.success}]], function(){});
-					}	
-				} else {
-					alertify.alert([[#{msg.common.success}]], function(){});
-				}
-				$('.commModifyPop').hide();
-				$('#blind_wrap').hide();
-
-				fn_commemt.getCommentList();
-			},
-			error : function(){}
-		});
-	});
-}
-
-function showLicenseText(_licenseName) {
-	if(!_licenseName) {
-		var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
-
-		switch (licenseChoiceLength) {
-			case 0:
-				alertify.alert([[#{msg.oss.required.license}]], function(){});
-				return false;
-				break;
-			case 1:
-				$("input[name=licenseDiv]").val("S");
-				break;
-			default:
-				$("input[name=licenseDiv]").val("M");
-				break;
-		}
 		
-		var _selectedRow = $("#_licenseChoice").jqGrid('getGridParam', "selrow" );
-		if(_selectedRow) {
-			var licenseNameEx = $('#_licenseChoice').jqGrid('getRowData',_selectedRow,'licenseNameOrg');
-			licenseName = licenseNameEx['licenseNameEx'];
-		} else {
-			if($("#_licenseChoice").jqGrid("getDataIDs").length > 0) {
-				_selectedRow = $("#_licenseChoice").jqGrid("getDataIDs")[0];
-				licenseName = $('#_licenseChoice').jqGrid('getCell',_selectedRow,'licenseNameEx');
+			var _selectedRow = $("#_licenseChoice").jqGrid('getGridParam', "selrow" );
+			if(_selectedRow) {
+				var licenseNameEx = $('#_licenseChoice').jqGrid('getRowData',_selectedRow,'licenseNameOrg');
+				licenseName = licenseNameEx['licenseNameEx'];
+			} else {
+				if($("#_licenseChoice").jqGrid("getDataIDs").length > 0) {
+					_selectedRow = $("#_licenseChoice").jqGrid("getDataIDs")[0];
+					licenseName = $('#_licenseChoice').jqGrid('getCell',_selectedRow,'licenseNameEx');
+				}
 			}
+		} else {
+			licenseName = _licenseName;
 		}
-	} else {
-		licenseName = _licenseName;
-	}
 
-	if(licenseName && licenseName != "") {
-		$.ajax({
-			url : '/license/getLicenseText',
-			type : 'GET',
-			dataType : 'json',
-			cache : false,
-			data : {licenseName : licenseName},
-			success : function(data){
-				if("false" != data.isValid) {
-					$("#disp_licenseText").html(data.validMsg);
-					licenseName = "";
-				} else {
+		if(licenseName && licenseName != "") {
+			$.ajax({
+				url : '/license/getLicenseText',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {licenseName : licenseName},
+				success : function(data){
+					if("false" != data.isValid) {
+						$("#disp_licenseText").html(data.validMsg);
+						licenseName = "";
+					} else {
+						$("#disp_licenseText").html("");
+					}
+				},
+				error : function(){
 					$("#disp_licenseText").html("");
 				}
-			},
-			error : function(){
-				$("#disp_licenseText").html("");
-			}
-		});
-	} else {
-		$("#disp_licenseText").html("");
+			});
+		} else {
+			$("#disp_licenseText").html("");
+		}
 	}
-}
 
+<<<<<<< HEAD
 // 다른 OSS로 이관하는 경우
 function mergeOssForDelete(newOssId) {
         var ossId = [[ ${ossId }]];
+=======
+	// 다른 OSS로 이관하는 경우
+	function mergeOssForDelete(newOssId) {
+>>>>>>> f27378deb1c919088114727302d618c60f0e559f
 
 		$('.ossSelectPop').hide();
 		$("#_ossMergeCheckList").jqGrid('GridUnload');
@@ -2209,336 +2179,337 @@ function mergeOssForDelete(newOssId) {
 
 			}
 		});	
-}
+	}
 
 
-var fn_commemt = {
-    getCommentList : function(){
-    	if (data.copyData) {
-    		$('.commentList').remove();
-        } else {
-        	$.ajax({
-            	url : '/comment/getDivCommentList',
-                type : 'GET',
-                dataType : 'json',
-                cache : false,
-                data : {
-                    referenceId : $('input[name=ossId]').val(),
-                    referenceDiv : '40'
-                },
-                success : function(data){
-                	$('#commentListArea').children().remove();
-    				
-                	if(data.length != 0) {
-    					for(var i = 0; i < data.length; i++) {
-    						var commId = data[i].commId;
-    						$('#commentListArea').append(commentTemp.html());
-    						var temp = $('dl[name=commentClone]');
-    						
-    						if(data[i].status == "" || data[i].status == null || data[i].status == "undefined") {
-    							temp.find('.nameArea').text(data[i].creator);
-    						} else {
-    							temp.find('.nameArea').text(data[i].status).append("</br>"+data[i].creator);
-    						}
-    						
-    						temp.find('.dateArea').text(data[i].createdDate);
-    						temp.find('.commentContentsArea').html(replaceWithLink(data[i].contents));
-    						temp.find('input[name=commId]').val(commId);
-    						temp.removeAttr('name');
-    					}	
-    				} else {
-    					$('#commentListArea').append('<p class="noneTxt">No comments were registered.</p>');
-    				}
-                },
-                error : function(xhr, ajaxOptions, thrownError){
-                    alertify.error([[#{msg.common.valid2}]], 0);
-                }
-            });
-        }
-    },
-    deleteComment : function(_commId){
-        if(!confirm([[#{msg.oss.confirm.delete.comment}]])) return;
-        $.ajax({
-        	url : '/comment/deleteComment',
-            type : 'POST',
-            dataType : 'json',
-            cache : false,
-            data : {'commId' : _commId},
-            success : function(data){
-                alertify.success([[#{msg.common.success}]]);
-                fn_commemt.getCommentList();
-            },
-            error : function(){
-                alertify.error([[#{msg.common.valid2}]], 0);
-            }
-        });
-    },
-    editComment : function(_commId){
-        if(CKEDITOR.instances['comm_editor_'+_commId]) {
-            var _editor = CKEDITOR.instances['comm_editor_'+_commId];
-            _editor.destroy();
-        }
-        _editor = CKEDITOR.replace('comm_editor_'+_commId);
-
-        $("#spanBtnArea_"+_commId+" > .btnViewMode").hide();
-        $("#spanBtnArea_"+_commId+" > .btnEditMode").show();
-        
-        $("#spanBtnArea_"+_commId+" > .closeModComment").off("click").on("click", function(e){
-            fn_commemt.createNonToolbarEditor(_commId);
-            $("#spanBtnArea_"+_commId+" > .btnViewMode").show();
-            $("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
-        });
-        
-        $("#spanBtnArea_"+_commId+" > .modifyComment").off("click").on("click", function(e){
-            var _referenceId = $('input[name=ossId]').val();
-            var param = {commId : _commId, contents : replaceWithLink(_editor.getData()), referenceDiv: '40', referenceId: _referenceId};
-            $.ajax({
-            	url : '/comment/updateComment',
-                type : 'POST',
-                dataType : 'json',
-                cache : false,
-                data : param,
-                success : function(json){
-                    fn_commemt.createNonToolbarEditor(_commId);
-                    $("#spanBtnArea_"+_commId+" > .btnViewMode").show();
-                    $("#spanBtnArea_"+_commId+" > .btnEditMode").hide();
-                    alertify.success([[#{msg.common.success}]]);
-                },
-                error : function(){
-                    alertify.error([[#{msg.common.valid2}]], 0);
-                }
-            });
-            
-            return false;
-        });
-        
-    },
-    createNonToolbarEditor : function(_commId) {
-
-//         var _editor = CKEDITOR.instances['comm_editor_'+_commId];
-//         var editorVal = _editor.getData();
-//         if(_editor) {
-//             _editor.destroy();
-//         }
-//         if($('#comm_editor_'+_commId).html().length > 0) {
-//             CKEDITOR.replace('comm_editor_'+_commId, 
-//                     {
-//             	customConfig:'/js/customEditorConf_Comment.js'
-//                     });
-//         }
-//         CKEDITOR.instances['comm_editor_'+_commId].setData(replaceWithLink(editorVal));
-    }
-}
-
-var fn = {
-	urlDuplication : function(target){
-		var value = $(target).val();
-
-		if (value.charAt(value.length-1) == "/"){
-			value = value.slice(0, -1); // 마지막 문자열 제거
-			$(target).val(value);
+	var fn_comment = {
+    	getCommentList : function(param){
+    		if (data.copyData) {
+    			$('.commentList').remove();
+        	} else {
+        		$.ajax({
+            		url : '/comment/getCusCommentList',
+                	type : 'GET',
+                	dataType : 'html',
+                	cache : false,
+                	data : param,
+                	success : function(res){
+                		$("#commentListBody").empty();
+						$("#commentListBody").html(res);
+                	},
+                	error : function(xhr, ajaxOptions, thrownError){
+                   		alertify.error([[#{msg.common.valid2}]], 0);
+                	}
+            	});
+        	}
+    	},
+    	getMoreCommentsList : function() {
+			commentsParam["moreFlag"] = "Y";
+			fn_comment.getCommentList(commentsParam);
+		},
+		editComments : function(_commId, _referenceDiv, _referenceId) {
+			$.ajax({
+    			url : '/comment/getEditPopup',
+				type : 'POST',
+				data : {'commId' : _commId},
+				dataType : 'html',
+				cache : false,
+				success : function(res){
+					if(!alertify.editComments){
+						alertify.dialog('editComments', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+								
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+								
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+								
+									return setup;
+								},
+						    	hooks: {
+						    		onshow: function() {
+						        		this.elements.dialog.style.maxWidth = 'none';
+						          		this.elements.dialog.style.width = '750px';
+						        	}
+								}
+							};
+						}, false, 'alert');
+            		}
+				
+					alertify.editComments(res).set('title', 'Edit Comments');
+					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
+					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
+				}
+    		});
+		},
+		updateComments : function (_commId, _referenceDiv, _referenceId) {
+			if ("" == $("#commentEdit").next().find(".note-editable").text()) {
+				alertify.alert("Please enter a comment", function(){});
+				return false;
+			} else {
+				var param = {commId : _commId, contents : replaceWithLink($("#commentEdit").summernote('code')), referenceDiv: _referenceDiv, referenceId: _referenceId};
+					$.ajax({
+					url : '/comment/updateComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						alertify.success([[#{msg.common.success}]]);
+						fn.closeAlertifyView();
+						fn_comment.getCommentList(commentsParam);
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		deleteComments : function (_commId) {
+			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+				if (e) {
+					$.ajax({
+						url : '/comment/deleteComment',
+						type : 'POST',
+						dataType : 'json',
+						cache : false,
+						data : {'commId' : _commId},
+						success : function(data){
+							alertify.success([[#{msg.common.success}]]);
+							fn.closeAlertifyView();
+							fn_comment.getCommentList(commentsParam);
+						},
+						error : function(){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		},
+		closeAlertifyView : function () {
+			fn.closeAlertifyView();
 		}
-		
-    	$("input[name=validationType]").val('DOWNLOADLOCATION');
-    	$("[name='downloadLocation']").val(value);
-		$("#ossForm").ajaxForm({
-			url :'/oss/urlDuplicateValidation',
-            type : 'POST',
-            dataType:"json",
-            cache : false,
-	        success : function(json) {
-	        	if (json.externalData2) {
-	        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
-		        		var downloadLocation = json.externalData2.downloadLocation;
-		        		if (downloadLocation.indexOf("createTabInFrame") > -1) {
-		        			downloadLocation = downloadLocation.replaceAll("createTabInFrame", "fn.loadUrl");
-		        		}
-		        		
-		        		$(target).parent().next("span.urltxt").empty();
-		        		$(target).parent().next("span.urltxt").html(downloadLocation).show();
-		        	}
-	        	} else {
-		        	$(target).parent().next("span.urltxt").empty();
-	        	}
-	        },
-            error : onError
-	    }).submit();
-	},
-	urlDuplicationAll : function(){
-		$("[name='downloadLocations']").each(function(idx, cur){
-			var value = $(cur).val();
+	}
+
+	var fn = {
+		urlDuplication : function(target){
+			var value = $(target).val();
 
 			if (value.charAt(value.length-1) == "/"){
 				value = value.slice(0, -1); // 마지막 문자열 제거
 				$(target).val(value);
 			}
-		});
 		
-		$("input[name=validationType]").val('DOWNLOADLOCATIONS');
-		$("#ossForm").ajaxForm({
-			url :'/oss/urlDuplicateValidation',
-            type : 'POST',
-            dataType:"json",
-            cache : false,
-	        success : function(json) {
-	        	if(json.externalData2){
-	        		var diffMsg = json.externalData2.downloadLocations.split("||");
-					
-					$("[name='downloadLocations']").each(function(idx, cur){
-						var downloadLocation = $(cur).val();
-						var msg = diffMsg.filter(function(a){
-					        return a.indexOf(downloadLocation) > -1;
-					    })[0];
-						
-						if(msg){
-							msg = msg.split("@@")[1];
-							var downloadLocation = msg.replaceAll("createTabInFrame", "fn.loadUrl");
-							
-							$(cur).parent().next("span.urltxt").empty();
-							$(cur).parent().next("span.urltxt").html(downloadLocation).show();
-						}						
-					});
-					
-	        	} else {
-	        		$(".multiDownloadLocationSet > div > span.urltxt").empty();
-	        	}
-	        	
-	        	fn.homepageDuplication($('input[name=homepage]'));
-	        },
-            error : onError
-	    }).submit();
-	},
-	homepageDuplication : function(target){
-		var value = $(target).val();
-
-		if (value.charAt(value.length-1) == "/"){
-			value = value.slice(0, -1); // 마지막 문자열 제거
-			$(target).val(value);
-		}
-		
-		$("input[name=validationType]").val('HOMEPAGE');
-		
-		$("#ossForm").ajaxForm({
-			url :'/oss/urlDuplicateValidation',
-            type : 'POST',
-            dataType:"json",
-            cache : false,
-	        success : function(json) {
-	        	if (json.externalData2) {
-	        		if (typeof json.externalData2.homepage !== 'undefined') {
-	        			var homepageHtml = json.externalData2.homepage;
-		        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
-		        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "fn.loadUrl");
-		        		}
+    		$("input[name=validationType]").val('DOWNLOADLOCATION');
+    		$("[name='downloadLocation']").val(value);
+			$("#ossForm").ajaxForm({
+				url :'/oss/urlDuplicateValidation',
+            	type : 'POST',
+            	dataType:"json",
+           	 	cache : false,
+	        	success : function(json) {
+	        		if (json.externalData2) {
+	        			if (typeof json.externalData2.downloadLocation !== 'undefined') {
+		        			var downloadLocation = json.externalData2.downloadLocation;
+		        			if (downloadLocation.indexOf("createTabInFrame") > -1) {
+		        				downloadLocation = downloadLocation.replaceAll("createTabInFrame", "fn.loadUrl");
+		        			}
 		        		
-		        		$(target).parent().next().children().empty();
-						$(target).parent().next().children().html(homepageHtml).show();
+		        			$(target).parent().next("span.urltxt").empty();
+		        			$(target).parent().next("span.urltxt").html(downloadLocation).show();
+		        			$(target).addClass("is-warning");
+		        		}
+	        		} else {
+		        		$(target).parent().next("span.urltxt").empty();
 	        		}
-	        	} else {
-					$(target).parent().next().children().empty();
-	        	}
-	        },
-            error : onError
-	    }).submit();
-	},
-	checkValid : function(){
-		var result = gLicenseData.filter(function(a){
-			return a == "N";
-		});
-		
-		if(result.length > 0){
-			alertify.alert([[#{msg.oss.required.auto}]], function(){});
-			return false;
-		}
-		return true;
-	},
-	checkNickName : function(target){
-		var targetVal = $(target).val();
+	        	},
+            	error : onError
+	    	}).submit();
+		},
+		urlDuplicationAll : function(){
+			$("[name='downloadLocations']").each(function(idx, cur){
+				var value = $(cur).val();
 
-		if(targetVal.indexOf(",") > -1){
-			$(target).parent().next("span.retxt").html("Formatting error").show();
-		} else {
-			$(target).parent().next("span.retxt").hide();
-		}
-	},
-	replaceGetParamChar : function(_param) {
-		_param = _param.replace(/&/g,"%26");
-		_param = _param.replace(/\+/g,"%2B"); 
-		return _param;
-	},
-	save : function() {
-		if(fn.checkValid()){
-			// 폼 에러 메세지 숨기기
-			$("span.retxt").hide();
-			// 그리드 에러 메세지 지우기
-			$("div.retxt").remove();
-			// remove input error class
-			$("input").removeClass("is-invalid");
-			
-			// 멀티 일경우 라이센스는 1건 이상이어야 한다.
-			var licenseDiv = "";
-			var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
-
-			switch (licenseChoiceLength) {
-				case 0:
-					alertify.alert([[#{msg.oss.required.license}]], function(){});
-					return false;
-					break;
-				case 1:
-					$("input[name=licenseDiv]").val("S");
-					licenseDiv = "S";
-					break;
-				default:
-					$("input[name=licenseDiv]").val("M");
-					licenseDiv = "M";
-					break;
-			}
-
-			var rows = getOssGridRows('#_licenseChoice');
-			var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
-			var gridStr = "_licenseChoice";
-			var jsValidResult = true;
-		
-			dataIds.forEach(function(dataId){
-				var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
-				var licenseName = rowData.licenseNameEx;
-
-				if(checkLicenseSelected(licenseName) == null) {
-					var errRow = $("#"+gridStr+" #"+dataId+" td[aria-describedby='"+gridStr + "_licenseNameEx']");
-
-					if(errRow) {
-						errRow.append('<div class=\"'+gridStr+"_"+dataId+' retxt"\">'+ [[#{msg.oss.unknown.license}]] +'</div>');
-					}
-
-					$("div.retxt._licenseChoice_"+dataId).show();
-					
-					jsValidResult = false;
+				if (value.charAt(value.length-1) == "/"){
+					value = value.slice(0, -1); // 마지막 문자열 제거
+					$(target).val(value);
 				}
 			});
-			
-			if(!jsValidResult || !detectedLicenseValid) {
-				alertify.error([[#{msg.common.valid}]], 0);
-				$("span.retxt").show();
-				
+		
+			$("input[name=validationType]").val('DOWNLOADLOCATIONS');
+			$("#ossForm").ajaxForm({
+				url :'/oss/urlDuplicateValidation',
+            	type : 'POST',
+           		dataType:"json",
+            	cache : false,
+	        	success : function(json) {
+	        		if (json.externalData2){
+	        			var diffMsg = json.externalData2.downloadLocations.split("||");
+					
+						$("[name='downloadLocations']").each(function(idx, cur){
+							var downloadLocation = $(cur).val();
+							var msg = diffMsg.filter(function(a){
+					        	return a.indexOf(downloadLocation) > -1;
+					    	})[0];
+						
+							if(msg){
+								msg = msg.split("@@")[1];
+								var downloadLocation = msg.replaceAll("createTabInFrame", "fn.loadUrl");
+							
+								$(cur).parent().next("span.urltxt").empty();
+								$(cur).parent().next("span.urltxt").html(downloadLocation).show();
+								$(cur).addClass("is-warning");
+							}						
+						});
+					
+	        		} else {
+	        			$(".multiDownloadLocationSet > div > span.urltxt").empty();
+	        		}
+	        	
+	        		fn.homepageDuplication($('input[name=homepage]'));
+	        	},
+            	error : onError
+	    	}).submit();
+		},
+		homepageDuplication : function(target){
+			var value = $(target).val();
+
+			if (value.charAt(value.length-1) == "/"){
+				value = value.slice(0, -1); // 마지막 문자열 제거
+				$(target).val(value);
+			}
+		
+			$("input[name=validationType]").val('HOMEPAGE');
+		
+			$("#ossForm").ajaxForm({
+				url :'/oss/urlDuplicateValidation',
+            	type : 'POST',
+            	dataType:"json",
+            	cache : false,
+	        	success : function(json) {
+	        		if (json.externalData2) {
+	        			if (typeof json.externalData2.homepage !== 'undefined') {
+	        				var homepageHtml = json.externalData2.homepage;
+		        			if (homepageHtml.indexOf("createTabInFrame") > -1) {
+		        				homepageHtml = homepageHtml.replaceAll("createTabInFrame", "fn.loadUrl");
+		        			}
+		        		
+		        			$(target).parent().next().children().empty();
+							$(target).parent().next().children().html(homepageHtml).show();
+							$(target).addClass("is-warning");
+	        			}
+	        		} else {
+						$(target).parent().next().children().empty();
+	        		}
+	        	},
+            	error : onError
+	    	}).submit();
+		},
+		checkValid : function(){
+			var result = gLicenseData.filter(function(a){
+				return a == "N";
+			});
+		
+			if (result.length > 0){
+				alertify.alert([[#{msg.oss.required.auto}]], function(){});
 				return false;
 			}
+			return true;
+		},
+		checkNickName : function(target){
+			var targetVal = $(target).val();
 
-			var editorVal = $('#additionalInformation').next().find(".note-editable").html();
-			var localDeactivateFlag = $("[name='deactivateFlag']").val();
-
-			if (editorVal == "") {
-				if(deactivateFlag == "N" 
-					&& localDeactivateFlag == "Y"){ // deactivate Flag checked
-					alertify.alert([[#{msg.oss.required.deactivate}]], function(){});
-					return false;
-				}
-
-				if(deactivateFlag == "Y" 
-					&& localDeactivateFlag == "N"){ // deactivate Flag unchecked
-					alertify.alert([[#{msg.oss.required.activate}]], function(){});
-					return false;
-				}
+			if(targetVal.indexOf(",") > -1){
+				$(target).parent().next("span.retxt").html("Formatting error").show();
+			} else {
+				$(target).parent().next("span.retxt").hide();
 			}
+		},
+		replaceGetParamChar : function(_param) {
+			_param = _param.replace(/&/g,"%26");
+			_param = _param.replace(/\+/g,"%2B"); 
+			return _param;
+		},
+		save : function() {
+			if(fn.checkValid()){
+				// 폼 에러 메세지 숨기기
+				$("span.retxt").hide();
+				// 그리드 에러 메세지 지우기
+				$("div.retxt").remove();
+				// remove input error class
+				$("input").removeClass("is-invalid");
+			
+				// 멀티 일경우 라이센스는 1건 이상이어야 한다.
+				var licenseDiv = "";
+				var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
+
+				switch (licenseChoiceLength) {
+					case 0:
+						alertify.alert([[#{msg.oss.required.license}]], function(){});
+						return false;
+						break;
+					case 1:
+						$("input[name=licenseDiv]").val("S");
+						licenseDiv = "S";
+						break;
+					default:
+						$("input[name=licenseDiv]").val("M");
+						licenseDiv = "M";
+						break;
+				}
+
+				var rows = getOssGridRows('#_licenseChoice');
+				var dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
+				var gridStr = "_licenseChoice";
+				var jsValidResult = true;
+		
+				dataIds.forEach(function(dataId){
+					var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
+					var licenseName = rowData.licenseNameEx;
+
+					if (checkLicenseSelected(licenseName) == null) {
+						var errRow = $("#"+gridStr+" #"+dataId+" td[aria-describedby='"+gridStr + "_licenseNameEx']");
+
+						if (errRow) {
+							errRow.append('<div class=\"'+gridStr+"_"+dataId+' retxt"\">'+ [[#{msg.oss.unknown.license}]] +'</div>');
+						}
+
+						$("div.retxt._licenseChoice_"+dataId).show();
+					
+						jsValidResult = false;
+					}
+				});
+			
+				if (!jsValidResult || !detectedLicenseValid) {
+					alertify.error([[#{msg.common.valid}]], 0);
+					$("span.retxt").show();
+				
+					return false;
+				}
+
+				var editorVal = $('#commentCont').summernote('code');
+				var localDeactivateFlag = $("[name='deactivateFlag']").val();
+
+				if (editorVal == "") {
+					if (deactivateFlag == "N" 
+						&& localDeactivateFlag == "Y"){ // deactivate Flag checked
+						alertify.alert([[#{msg.oss.required.deactivate}]], function(){});
+						return false;
+					}
+
+					if (deactivateFlag == "Y" 
+						&& localDeactivateFlag == "N"){ // deactivate Flag unchecked
+						alertify.alert([[#{msg.oss.required.activate}]], function(){});
+						return false;
+					}
+				}
 			
 			alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
 				if (e) {
@@ -2608,13 +2579,13 @@ var fn = {
 		var display = "";
 
         if (parseInt(cellvalue) >= 9.0) {
-            display = "<span class=\"badge badge-dark\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">CRITICAL</span>";
+            display = "<span class=\"badge badge-dark\" style=\"cursor: pointer;\" title=\""+ cellvalue +"\" onclick=\"openNVD('" + rowObject.cveId + "')\">CRITICAL</span>";
         } else if (parseInt(cellvalue) >= 7.0) {
-            display = "<span class=\"badge badge-danger\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">HIGH</span>";
+            display = "<span class=\"badge badge-danger\" style=\"cursor: pointer;\" title=\""+ cellvalue +"\" onclick=\"openNVD('" + rowObject.cveId + "')\">HIGH</span>";
         } else if (parseInt(cellvalue) >= 4.0) {
-            display = "<span class=\"badge badge-orange\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">MEDIUM</span>";
+            display = "<span class=\"badge badge-orange\" style=\"cursor: pointer;\" title=\""+ cellvalue +"\" onclick=\"openNVD('" + rowObject.cveId + "')\">MEDIUM</span>";
         } else if (parseInt(cellvalue) > 0) {
-            display = "<span class=\"badge badge-warning\" style=\"cursor: pointer;\" onclick=\"openNVD('" + rowObject.cveId + "')\">LOW</span>";
+            display = "<span class=\"badge badge-warning\" style=\"cursor: pointer;\" title=\""+ cellvalue +"\" onclick=\"openNVD('" + rowObject.cveId + "')\">LOW</span>";
         } else if (parseInt(cellvalue) == 0 || cellvalue == undefined) {
             display = "<span style=\"font-size:0;\"></span>";
         } else {
@@ -2622,6 +2593,9 @@ var fn = {
         }
 		
         return display;
+	},
+	closeAlertifyView : function() {
+		$(".ajs-close").trigger("click");
 	}
 }
 </script>

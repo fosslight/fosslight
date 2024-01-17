@@ -14,16 +14,6 @@
 
             <!-- Main content -->
             <section class="content">
-            <form name="projectForm" id="projectForm" action="" method="post">
-            	<input type="hidden" name="prjId" style="display: none;"/>
-				<input type="hidden" name="prjModelJson" style="display: none;"/>
-				<input type="hidden" name="comment" />
-				<input type="hidden" name="userComment" />
-				<input type="hidden" name="commId" />
-				<input type="hidden" name="statusRequestYn" />
-				<input type="hidden" id="refPartnerId" name="refPartnerId" th:value="${project.refPartnerId}" />
-				<input type="hidden" id="identificationStatusConfFlag" th:value="${project.identificationStatusConfFlag}" />
-				<input type="hidden" id="verificationStatusConfFlag" th:value="${project.verificationStatusConfFlag}" />
                 <div class="row">
                     <div class="col-md-9">
                         <div class="card card-secondary submit-form">
@@ -33,6 +23,16 @@
                                     <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
                                 </div>
                             </div>
+                            <form name="projectForm" id="projectForm" action="" method="post">
+            				<input type="hidden" name="prjId" style="display: none;"/>
+							<input type="hidden" name="prjModelJson" style="display: none;"/>
+							<input type="hidden" name="comment" />
+							<input type="hidden" name="userComment" />
+							<input type="hidden" name="commId" />
+							<input type="hidden" name="statusRequestYn" />
+							<input type="hidden" id="refPartnerId" name="refPartnerId" th:value="${project.refPartnerId}" />
+							<input type="hidden" id="identificationStatusConfFlag" th:value="${project.identificationStatusConfFlag}" />
+							<input type="hidden" id="verificationStatusConfFlag" th:value="${project.verificationStatusConfFlag}" />
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="inputName" th:text="#{msg.common.field.project.name}"></label><span class="text-orange">*</span>
@@ -199,6 +199,7 @@
                                     <textarea id="comment" rows="3"></textarea>
                                 </div>
                             </div>
+                            </form>
                             <!-- /.card-body -->
                             <div class="card-footer clearfix">
                             	<th:block th:if="${project.prjId != null}">
@@ -237,10 +238,10 @@
                             <div class="card-header">
                                 <h3 class="card-title" th:text="Comment"></h3>
                                 <div class="card-tools">
-                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                                    <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
                                 </div>
                             </div>
-                            <div class="card-body pt-0">
+                            <div class="card-body pt-0" style="padding-bottom: 0;">
                                 <div clas="row">
                                     <div clas="col-md-12">
                                         <table class="table">
@@ -252,7 +253,6 @@
                         </div>
                     </div>
                 </div>
-                </form>
             </section>
         </div>
     </div>

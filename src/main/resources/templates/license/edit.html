@@ -1,10 +1,8 @@
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
-
-<th:block th:fragment="content">
-    <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
-    <th:block th:replace="license/edit-script :: contentScript"></th:block>
-    <body class="hold-transition sidebar-mini">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="license/edit-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
     <div class="wrapper">
         <div class="content-wrapper custom-layout" style="height: auto">
             <!-- Content Header (Page header) -->
@@ -22,16 +20,8 @@
                         <div class="col-md-9">
                             <div class="card card-secondary submit-form">
                                 <div class="card-header">
-                                    <th:block th:if="${@CommonFunction.isAdmin()}">
-                                        <h3 class="card-title text-white">Form</h3>
-                                    </th:block>
-                                    <th:block th:unless="${@CommonFunction.isAdmin()}">
-                                        <h3 class="card-title text-white">Detail</h3>
-                                    </th:block>
                                     <div class="card-tools">
-                                        <button class="btn btn-tool text-white" data-card-widget="collapse"
-                                                title="Collapse"
-                                                type="button">
+                                        <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button">
                                             <i class="fas fa-minus"></i>
                                         </button>
                                     </div>
@@ -39,21 +29,15 @@
                                 <div class="card-body">
                                     <div class="form-group">
                                         <label for="licenseNameInput" th:text="#{msg.common.field.licenseName}"></label>
-                                            <input class="form-control autoComLicenseLong" id="licenseNameInput"
-                                                   name="licenseName"
-                                                   th:value="${detail?.licenseName}" type="text" th:disabled ="${not @CommonFunction.isAdmin()}">
-                                            <span class="retxt text-danger text-sm"></span>
+                                        <input class="form-control autoComLicenseLong" id="licenseNameInput" name="licenseName" th:value="${detail?.licenseName}" type="text"/>
+                                        <span class="retxt text-danger text-sm"></span>
                                     </div>
                                     <div class="form-group">
-                                        <label for="licenseTypeSelect"
-                                               th:text="#{msg.common.field.licenseType}"></label>
-                                        <select class="select2" id="licenseTypeSelect" name="licenseType"
-                                                style="width: 100%;" th:disabled="${not @CommonFunction.isAdmin()}">
+                                        <label for="licenseTypeSelect" th:text="#{msg.common.field.licenseType}"></label>
+                                        <select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%;">
                                             <option value="" disabled selected> </option>
-                                            <th:block
-                                                    th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-                                                <option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}" th:text="${code.cdDtlNm}"
-                                                        th:value="${code.cdDtlNo}"></option>
+                                            <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                                                <option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
                                             </th:block>
                                         </select>
                                         <span class="retxt text-danger text-sm"></span>
@@ -223,4 +207,4 @@
         </div>
     </div>
     </body>
-</th:block>
+</html>
