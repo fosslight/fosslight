@@ -25,7 +25,7 @@ ul { list-style-type: none; }
 /* iframe mode nav link */
 .content-wrapper.iframe-mode .navbar-expand {border-bottom: none !important;}
 .content-wrapper.iframe-mode .nav-link.dropdown-toggle { border-radius: 15px;width: 4.5rem;height: 1.8rem;margin: .5rem 1rem;color: #fff;text-align: center;font-size: 1rem;align-items: center;display: flex;justify-content: center; }
-.content-wrapper.iframe-mode .navbar-nav .nav-link { color: #fff;margin-top: .3rem;padding: .7rem 1.7rem; }
+.content-wrapper.iframe-mode .navbar-nav .nav-link { color: #fff;margin-top: .3rem;padding: .7rem 1.7rem; background-color: #ffffff47; border-radius: .2rem .2rem 0 0; margin-right: 2px;}
 .content-wrapper.iframe-mode .navbar-nav .nav-link.active {color: #333;background-color: #fff;margin-top: .3rem;border: none;border-radius: .2rem .2rem 0 0;}
 .content-wrapper.iframe-mode .btn-iframe-close { color: #333;right: .5rem;top: .5rem;z-index: 10;background-color: #d8d8d8;border-radius: 15px;height: 15px;width: 15px;display: flex;align-items: center;justify-content: center; }
 .content-wrapper.iframe-mode .navbar-nav .fas {font-size: xx-small;}

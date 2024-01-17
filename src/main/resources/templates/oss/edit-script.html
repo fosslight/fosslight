@@ -1595,11 +1595,8 @@
 	function deleteOssByOne(){
 		var ossId = $('input[name=ossId]').val();
 		var ossName = $('input[name=ossName]').val();
-<<<<<<< HEAD
 		var editorVal = $('#commentCont').next().find(".note-editable").html();
-=======
-		var editorVal = $("#commentCont").summernote('code');
->>>>>>> f27378deb1c919088114727302d618c60f0e559f
+
 		var sendData = {
 				ossId:ossId,
 				ossName:ossName,
@@ -2116,19 +2113,14 @@
 		}
 	}
 
-<<<<<<< HEAD
-// 다른 OSS로 이관하는 경우
-function mergeOssForDelete(newOssId) {
-        var ossId = [[ ${ossId }]];
-=======
+
 	// 다른 OSS로 이관하는 경우
 	function mergeOssForDelete(newOssId) {
->>>>>>> f27378deb1c919088114727302d618c60f0e559f
-
 		$('.ossSelectPop').hide();
 		$("#_ossMergeCheckList").jqGrid('GridUnload');
 		$('.mergeOssCheckPop').show();
-		
+
+        var ossId = [[#{ossId}]];
 		$('#_ossMergeCheckList').jqGrid({
 			url:`/oss/ossMergeCheckList/${ossId}/${newOssId}`,
 			datatype: 'json',
