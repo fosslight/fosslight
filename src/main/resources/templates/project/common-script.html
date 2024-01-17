@@ -1251,7 +1251,7 @@ var com_fn = {
 		
 		return alertMsg; 
 	},
-	CheckOssViewPage : function(target){
+	checkOssViewPage : function(target){
 		var saveFlag = com_fn.saveFlagObject[target.toUpperCase()];
 		var referenceDiv;
 				
@@ -1330,7 +1330,7 @@ var com_fn = {
 		return returnFlag;
 	},
 	showLicenseInfo : function(obj){
-		var licenseName = $(obj).text();
+		var licenseName = $(obj).text().slice(0, -1);
 
 		$.ajax({
 			url : "/license/getLicenseId",
@@ -1392,7 +1392,7 @@ var com_fn = {
 			var _popup = null;
 			
             if(_popup == null || _popup.closed){
-            	_popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=430, toolbar=no, location=no, left=100, top=100, resizable=yes");
+            	_popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
             	$("#bulkEditForm > input[name=rowId]").val(rowCheckedArr);
 				$("#bulkEditForm > input[name=target]").val(targetGird);
@@ -1403,7 +1403,7 @@ var com_fn = {
                 }
             } else {
                 _popup.close();
-                _popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=430, toolbar=no, location=no, left=100, top=100, resizable=yes");
+                _popup = window.open("", "bulkEditViewProjectPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
                 $("#bulkEditForm > input[name=rowId]").val(rowCheckedArr);
 				$("#bulkEditForm > input[name=target]").val(targetGird);
@@ -1437,7 +1437,7 @@ var com_fn = {
                         }
                     }
                 }
-            }else{
+            } else {
                 com_fn.bulkEditSetCell(target, rowId, obj);
 
                 for (var i=0; i<param.length; i++){
@@ -1452,10 +1452,10 @@ var com_fn = {
             }
 
             $("#"+target).jqGrid('setGridParam', {data:param}).trigger('reloadGrid');
-    	}catch(e){
+    	} catch(e) {
     		alertify.error([[#{msg.common.valid2}]], 0);
     		editFlag = true;
-    	}finally{
+    	} finally {
         	if(!editFlag){
         		alertify.success([[#{msg.common.success}]]);
             }

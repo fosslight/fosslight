@@ -180,7 +180,9 @@
 			CASE WHEN CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
 		</if>
 	COMM_ID DESC
+	<if test="@oss.fosslight.util.StringUtil@equals(moreFlag, 'N')">
 	LIMIT 5
+	</if>
 	</select>
 	
 	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">

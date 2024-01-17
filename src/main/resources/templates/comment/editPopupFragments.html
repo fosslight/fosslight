@@ -17,5 +17,11 @@
           	<textarea class="form-control" id="commentEdit" rows="5">[[${comments.info.contents}]]</textarea>
         </div>
 	</div>
+	<div class="row custom-layout">
+		<div class="col-12">
+			<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn_comment.closeAlertifyView()|"></button>
+			<button type="button" id="updateComments" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn_comment.updateComments()|"></button>
+		</div>
+	</div>
 </body>
 </html>

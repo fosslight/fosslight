@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:if="${commentListCnt > 0}">
+	<tr th:each="comment, status : ${commentList}">
+		<td th:style="${status.index == 0} ? 'border-top: none;'">
+			<div class="row">
+				<div class="col-md-10">
+					<div class="post">
+						<div class="row">
+							<strong th:if="${comment.referenceDiv == '10'}" th:style="'color : #ffb526'">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]</strong>
+							<strong th:if="${comment.referenceDiv == '12'}" th:style="'color : #4cf58c'">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]</strong>
+							<strong th:if="${comment.referenceDiv == '19'}" th:style="'color : #059bf1'">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]</strong>
+							<strong th:if="${comment.referenceDiv == '60'}" th:style="'color : #02304b'">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]</strong>
+							<strong th:unless="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '60'}">
+								[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]
+							</strong>
+							<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block>
+						</div>
+						<div class="row">
+							<div class="user-block">
+								<span class="username"><a href="#" th:text="${comment.loginUserName}"></a></span>
+                    			<span class="description ml-0" th:text="${comment.createdDate}"></span>
+              				</div>
+						</div>
+             			<p th:utext="${comment.contents}"></p>
+          			</div>
+				</div>
+				<div class="col-md-2">
+					<div class="btn-group btn-group-sm" th:if="${comment.creator == comment.loginUserName}">
+               			<button class="btn btn btn-default" type="button" th:onclick="fn_comment.editComments([[${comment.commId}]], [[${comment.referenceDiv}]], [[${comment.referenceId}]])"><i class="fas fa-pencil-alt"></i></button>
+               			<button class="btn btn-lg-red" type="button" th:onclick="fn_comment.deleteComments([[${comment.commId}]])"><i class="fas fa-trash"></i></button>
+         			</div>
+				</div>
+			</div>
+      	</td>
+	</tr>
+	<th:block th:if="${commentListCnt > 5 and #strings.equals(commentsHistory.moreFlag, 'N')}">
+		<tr>
+			<td>
+				<div class="row">
+					<div class="col-md-12 text-center">
+						<button class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" type="button" th:onclick="fn_comment.getMoreCommentsList()" th:text="'More +'"></button>
+					</div>
+				</div>
+			</td>
+		</tr>
+	</th:block>
+</th:block>
+<th:block th:if="${commentListCnt == 0}">
+	<tr>
+		<td th:style="'border-top: none;'">
+			<div class="row">
+				<div class="col-md-12">
+					<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
+				</div>
+			</div>
+		</td>
+	</tr>
+</th:block>
+</html>

@@ -49,13 +49,12 @@ public class CommentController extends CoTopComponent {
     }
     
     @GetMapping(value={COMMENT.CUS_COMMENT_LIST})
-	public @ResponseBody ResponseEntity<Object> getCusCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model){
-		Map<String, Object> rtnMap = new HashMap<>();
-		rtnMap.put("commentList", commentService.getCommentListHis(commentsHistory));
-		rtnMap.put("commentListCnt", commentService.getCommentListHisCnt(commentsHistory));
-		rtnMap.put("moreYn", false);
-				
-		return makeJsonResponseHeader(rtnMap);
+	public String getCusCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model){
+    	model.addAttribute("commentList", commentService.getCommentListHis(commentsHistory));
+    	model.addAttribute("commentListCnt", commentService.getCommentListHisCnt(commentsHistory));
+		model.addAttribute("commentsHistory", commentsHistory);
+		
+		return "comment/commentList";
 	}
     
     @GetMapping(value = COMMENT.MORE_COMMENT_LIST, produces = "text/html; charset=utf-8")

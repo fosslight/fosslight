@@ -437,8 +437,7 @@ public class ProjectController extends CoTopComponent {
 		}
 	}
 	
-	@RequestMapping(value = { PROJECT.VIEW_ID }, method = { RequestMethod.GET,
-			RequestMethod.POST }, produces = "text/html; charset=utf-8")
+	@RequestMapping(value = { PROJECT.VIEW_ID }, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
 	public String view(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setPrjId(prjId);
@@ -4927,7 +4926,7 @@ public class ProjectController extends CoTopComponent {
 	
 	@PostMapping(value=PROJECT.SEC_BULK_EDIT_POPUP)
 	public String securityBulkEditPopup(HttpServletRequest req, HttpServletResponse res, Model model){
-		return "project/view/bulkEditView";
+		return "project/view/secBulkEditView";
 	}
 	
 	@GetMapping(value = PROJECT.SECURITY)

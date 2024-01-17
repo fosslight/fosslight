@@ -115,7 +115,7 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return "oss/list :: content";
+		return "oss/list";
 	}
 	
 	@GetMapping(value={OSS.LIST_LINK}, produces = "text/html; charset=utf-8")
@@ -262,16 +262,9 @@ public class OssController extends CoTopComponent{
 			List<String> downloadLocationList = new ArrayList<>();
 			downloadLocationList.add(avoidNull(bean.getDownloadLocation()));
 			model.addAttribute("downloadLocationList", toJson(downloadLocationList));
-		} else {
-			// 신규 등록시에도 ossNickList 은 필수(empty array를 설정)
-			List<String> nickList = new ArrayList<>();
-			model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
-			
-			List<String> downloadLocationList = new ArrayList<>();
-			model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
 		}
 		
-		return "/oss/edit :: content";
+		return "/oss/edit";
 	}
 
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")
@@ -314,8 +307,8 @@ public class OssController extends CoTopComponent{
 				componentsPartner = partnerMapper.selectOssRefPartnerList(ossMaster);
 			}
 			
-			model.addAttribute("components", components);
-			model.addAttribute("componentsPartner", componentsPartner);
+			if (components != null && !components.isEmpty()) model.addAttribute("components", components);
+			if (componentsPartner != null && !componentsPartner.isEmpty()) model.addAttribute("componentsPartner", componentsPartner);
 		}
 		
 		model.addAttribute("projectListFlag", projectListFlag);
@@ -334,7 +327,7 @@ public class OssController extends CoTopComponent{
 		
 		List<String> downloadLocationList = new ArrayList<>();
 		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
-		return "oss/edit :: content";
+		return "oss/edit";
 //		return CommonFunction.isAdmin() ? "oss/edit :: content" : "oss/view :: content";
 	}
 	
@@ -379,14 +372,8 @@ public class OssController extends CoTopComponent{
 		ossMaster.setOssLicenses((List<OssLicense>) map.get("rows"));
 		ossMaster.setOssId(null);
 		model.addAttribute("detail", ossMaster);
-		model.addAttribute("isCopyData", true);
-		//List<String> nickList = new ArrayList<>();
-		//model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
-		
-		//List<String> downloadLocationList = new ArrayList<>();
-		//model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
-		
-		return "oss/edit :: content";
+				
+		return "oss/edit";
 	}
 	
 	@PostMapping(value=OSS.SAVE_AJAX)
@@ -1449,7 +1436,7 @@ public class OssController extends CoTopComponent{
 	public String checkOssLicense(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 		model.addAttribute("projectInfo", bean);
 
-		return "oss/fragments/checkOssLicensePopup";
+		return "oss/checkOssLicensePopup";
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1530,7 +1517,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
 		
-		return "oss/fragments/checkOssNamePopup";
+		return "oss/checkOssNamePopup";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -2321,7 +2308,7 @@ public class OssController extends CoTopComponent{
 		model.addAttribute("rowId", rowId);
 		model.addAttribute("target", target);
 		
-		return OSS.OSS_BULK_EDIT_POPUP_JSP;
+		return "oss/ossBulkEditPopup";
 	}
 	
 	@PostMapping(value = OSS.CHECK_OSS_VERSION_DIFF)
