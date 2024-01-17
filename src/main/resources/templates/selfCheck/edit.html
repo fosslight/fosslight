@@ -9,8 +9,8 @@
             <section class="content-header">
                 <div class="container-fluid">
                 	<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
-                        <div class="card-body">
-                            <div class="card p-1 mb-1">
+                        <div class="card-body p-1">
+                            <div class="card">
                             	<div id="divViewMode"></div>
                             	<div id="divEditMode">
                             		<form name="projectForm" id="projectForm" method="post">
@@ -48,77 +48,78 @@
                                 </div>
                             </div>
         
-                            <div class="card p-3 my-2">
-                                <div class="row p-2">
-                                    <div class="col-12">
-                                        <div class="form-group">
-                                            <label for="exampleInputFile" th:text="#{msg.common.field.watcher}"></label>
-                                            <div class="row">
-                                                <div class="col-4">
-                                                    <select class="form-control select2" style="width: 100%;" th:id="prjDivision" th:name="prjDivision" th:onchange="|fn.selectDivision()|">
-                                            			<option th:value="''" th:text="'Select Division'"></option>
-                                            			<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                            				<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                            			</th:block>
-                                           	 		</select>
-                                                </div>
-                                                <div class="col-7">
-                                                    <select class="form-control select2" style="width: 100%;" th:id="prjUserId" th:name="prjUserId">
-														<option th:value="''" th:text="'Select User'"></option>
-													</select>
-                                                </div>
-                                                <div class="col-1">
-                                                    <button id="addWatcher" type="button" class="btn btn-default" th:text="Add"></button>
-                                                </div>
-                                            </div>
-                                            <div class="row my-1">
-                                                <div class="col-4">
-                                                    <input type="text" class="form-control" id="adId" name="adId" placeholder="Input AD ID" th:onKeypress="|fn.CheckChar()|"/>
-                                                </div>
-                                                <div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null 
-                                        												&& #lists.size(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))) > 0) ? true : false}">
-                                                    <th:block th:if="${useDomainFlag}">
-                                                    	<select class="form-control select2" id="domain" name="domain" style="width: 100%;">
-                                                        	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
-                                                        		<th:block th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
-                                        							<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                        						</th:block>
-                                        						<th:block th:if="${!#strings.contains(option.cdDtlNm, '직접입력')}">
-                                        							<option th:value="${option.cdDtlNo}" th:text="|@${option.cdDtlNm}|"></option>
-                                        						</th:block>
-                                                        	</th:block>
-                                                    	</select>
-                                                    	<input type="text" id="emailTemp" name="emailTemp" class="form-control" style="display:none;"
-                                            					th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
-                                                    </th:block>
-                                                    <th:block th:if="${!useDomainFlag}">
-                                                    	<input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">
-                                                    </th:block>
-                                                </div>
-                                                <div class="col-1">
-                                                    <button id="addEmail" type="button" class="btn btn btn-default" th:text="'Add'"></button>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-4">
-                                                    <select class="form-control select2" id="listKind" style="width: 100%;">
-                                                        <option th:value="''" th:text="'Select List'"></option>
-                                                        <option th:value="prj" th:text="'Project List'"></option>
-                                                        <option th:if="${partnerFlag}" th:value="par" th:text="'3rd Party List'"></option>
-                                                        <option th:if="${batFlag}" th:value="bat" th:text="'BAT List'" ></option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-7">
-                                                    <input type="text" class="form-control" id="listId" name="listId" placeholder="Input ID you want to copy">
-                                                </div>
-                                                <div class="col-1">
-                                                    <button id="addList" type="button" class="btn btn-default" th:text="Add"></button>
-                                                </div>
-                                            </div>
-                                            <div class="form-group mt-2">
-                                                <div id="multiDiv" class="external-events pl-3"></div>
-                                            </div>
+                            <div class="card mb-0">
+                                <div class="card-header" style="border-bottom: none">
+                                    <label class="mb-0" th:text="#{msg.common.field.watcher}"></label>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                                    </div>
+                                </div>
+                                <div class="card-body pt-0">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <select class="form-control select2" style="width: 100%;" th:id="prjDivision" th:name="prjDivision" th:onchange="|fn.selectDivision()|">
+                                                <option th:value="''" th:text="'Select Division'"></option>
+                                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+                                                    <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                                </th:block>
+                                            </select>
                                         </div>
+                                        <div class="col-7">
+                                            <select class="form-control select2" style="width: 100%;" th:id="prjUserId" th:name="prjUserId">
+                                                <option th:value="''" th:text="'Select User'"></option>
+                                            </select>
+                                        </div>
+                                        <div class="col-1">
+                                            <button id="addWatcher" type="button" class="btn btn-default" th:text="Add"></button>
+                                        </div>
+                                    </div>
+                                    <div class="row my-1">
+                                        <div class="col-4">
+                                            <input type="text" class="form-control" id="adId" name="adId" placeholder="Input AD ID" th:onKeypress="|fn.CheckChar()|"/>
+                                        </div>
+                                        <div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null
+                                        												&& #lists.size(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))) > 0) ? true : false}">
+                                            <th:block th:if="${useDomainFlag}">
+                                                <select class="form-control select2" id="domain" name="domain" style="width: 100%;">
+                                                    <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
+                                                        <th:block th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
+                                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                                        </th:block>
+                                                        <th:block th:if="${!#strings.contains(option.cdDtlNm, '직접입력')}">
+                                                            <option th:value="${option.cdDtlNo}" th:text="|@${option.cdDtlNm}|"></option>
+                                                        </th:block>
+                                                    </th:block>
+                                                </select>
+                                                <input type="text" id="emailTemp" name="emailTemp" class="form-control" style="display:none;"
+                                                       th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
+                                            </th:block>
+                                            <th:block th:if="${!useDomainFlag}">
+                                                <input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">
+                                            </th:block>
+                                        </div>
+                                        <div class="col-1">
+                                            <button id="addEmail" type="button" class="btn btn btn-default" th:text="'Add'"></button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <select class="form-control select2" id="listKind" style="width: 100%;">
+                                                <option th:value="''" th:text="'Select List'"></option>
+                                                <option th:value="prj" th:text="'Project List'"></option>
+                                                <option th:if="${partnerFlag}" th:value="par" th:text="'3rd Party List'"></option>
+                                                <option th:if="${batFlag}" th:value="bat" th:text="'BAT List'" ></option>
+                                            </select>
+                                        </div>
+                                        <div class="col-7">
+                                            <input type="text" class="form-control" id="listId" name="listId" placeholder="Input ID you want to copy">
+                                        </div>
+                                        <div class="col-1">
+                                            <button id="addList" type="button" class="btn btn-default" th:text="Add"></button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group mt-2">
+                                        <div id="multiDiv" class="external-events pl-3"></div>
                                     </div>
                                 </div>
                             </div>
