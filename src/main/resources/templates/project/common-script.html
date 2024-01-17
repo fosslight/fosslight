@@ -780,7 +780,7 @@ var com_fn = {
 		
 		// request review 또는 confirm 시에만 변경 여부를 확인한다.
 		// '/project/getCheckChangeData' 에서 androidModel의 경우는 check 하는 부분이 없어서 우회 시킴. 추후 해당 기능이 필요하게되면 다시 변경예정
-		if("REQ" != status && "CONF" != status || isAndroidModel) { 
+		if ("REQ" != status && "CONF" != status || isAndroidModel) { 
 			com_fn.exeProjectStatus(data, status);
 		} else {
 			var checkObligationFlag = false;
@@ -824,7 +824,7 @@ var com_fn = {
 	 		
 			// finalData
 			var finalData = { 
-				referenceId : '${project.prjId}',
+				referenceId : [[${project.prjId}]],
 				partyGrid : JSON.stringify(partyGrid),
 				depMainGrid : JSON.stringify(depMainGrid),
 				depSubGrid : "",

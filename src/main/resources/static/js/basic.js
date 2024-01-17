@@ -2650,7 +2650,7 @@ var existsTabName = function (tabNm) {
 var securityTableWidth = 0;
 var tableRefreshNew = function (id) {
     const tableRefreshList = ["_3rdAddList", "_list", "_list2", "_list-1", "_list-2", "_depProjectList1", "_depProjectList2", "_depAddList", "_srcProjectList1", "_srcProjectList2", "_srcAddList"
-        , "_binProjectList1", "_binProjectList2", "_binAddList", "_binaryFileList", "_binAndroidProjectList1", "_binAndroidProjectList2", "list", "totalList", "fixedList", "notFixedList"];
+        , "_binProjectList1", "_binProjectList2", "_binAddList", "_binaryFileList", "_binAndroidProjectList1", "_binAndroidProjectList2", "list", "totalList", "fixedList", "notFixedList", "_vulnInfoList"];
 
     if ("_srcProjectList1" == id || "_srcProjectList2" == id || "_srcAddList" == id || "_depProjectList1" == id || "_depProjectList2" == id || "_depAddList" == id
     		|| "_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id) {

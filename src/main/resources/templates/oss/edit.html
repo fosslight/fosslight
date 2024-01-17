@@ -11,19 +11,6 @@
             </section>
             <!-- Main content -->
             <section class="content">
-                <form id="ossForm" name="ossForm">
-                    <input type="hidden" name="ossLicensesJson"/>
-                    <input type="hidden" name="ossId"/>
-                    <input type="hidden" name="licenseType" id="licenseType"/>
-                    <input type="hidden" name="obligationType" id="obligationType"/>
-                    <input type="hidden" name="comment"/>
-                    <input type="hidden" name="ossType" th:value="${detail?.ossType}"/>
-                    <input type="hidden" name="validationType"/>
-                    <input type="hidden" name="downloadLocation"/>
-                    <input type="hidden" name="licenseId"/>
-                    <input type="hidden" name="deactivateFlag" value="N"/>
-                    <input type="hidden" name="renameFlag" value="N"/>
-                    <input type="hidden" name="ossCopyFlag" th:value="N" />
                     <div class="row">
                         <div class="col-md-9">
                             <div class="card card-secondary submit-form">
@@ -33,6 +20,19 @@
                                         <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button"><i class="fas fa-minus"></i></button>
                                     </div>
                                 </div>
+                                <form id="ossForm" name="ossForm">
+                    			<input type="hidden" name="ossLicensesJson"/>
+                    			<input type="hidden" name="ossId"/>
+                    			<input type="hidden" name="licenseType" id="licenseType"/>
+                    			<input type="hidden" name="obligationType" id="obligationType"/>
+                    			<input type="hidden" name="comment"/>
+                    			<input type="hidden" name="ossType" th:value="${detail?.ossType}"/>
+                    			<input type="hidden" name="validationType"/>
+                    			<input type="hidden" name="downloadLocation"/>
+                    			<input type="hidden" name="licenseId"/>
+                    			<input type="hidden" name="deactivateFlag" value="N"/>
+                    			<input type="hidden" name="renameFlag" value="N"/>
+                    			<input type="hidden" name="ossCopyFlag" th:value="N" />
                                 <div class="card-body">
                                     <div class="row form-group">
                                     	<div class="col-12">
@@ -168,6 +168,7 @@
                                     	<textarea class="form-control" id="commentCont" name='commentInput' rows="3" style="height: 800px"></textarea>
                                   	</div>
                                 </div>
+                                </form>
                                 <div class="card-footer clearfix">
                                 	<button th:if="${ossId != null}" type="button" class="btn btn-secondary float-left" id="delete" th:text="Delete"></button>
                                 	<button type="button" class="btn btn-teal-01 float-right mx-1" id="save" th:text="Save"></button>
@@ -176,29 +177,24 @@
                               	</div>
                             </div>
                         </div>
-                        <th:block th:if="${@CommonFunction.isAdmin()}">
-                            <div class="col-md-3">
-                                <div class="card card-lg-red">
-                                    <div class="card-header">
-                                        <h3 class="card-title">Comment</h3>
-                                        <div class="card-tools">
-                                            <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button">
-                                                <i class="fas fa-minus"></i>
-                                            </button>
-                                        </div>
+                        <div class="col-md-3 commentList" th:if="${ossId != null}">
+                        	<div class="card card-lg-red">
+                            	<div class="card-header">
+                                	<h3 class="card-title" th:text="Comment"></h3>
+                                    <div class="card-tools">
+                                    	<button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button"><i class="fas fa-minus"></i></button>
+                                  	</div>
+                              	</div>
+                                <div class="card-body pt-0" style="padding-bottom: 0;">
+                                    <div clas="col-md-12">
+                                        <table class="table">
+                                       		<tbody id="commentListBody"></tbody>
+                                        </table>
                                     </div>
-                                    <div class="card-body pt-0">
-                                        <div class="row" id="commentAreaFragment">
-                                            <div class="col-md-12 mt-3" >
-                                                <strong class="text-lg-gray">No comments were registered.</strong>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </th:block>
+                               	</div>
+                          	</div>
+                      	</div>
                     </div>
-                </form>
             </section>
             <!-- loading bar -->
             <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
