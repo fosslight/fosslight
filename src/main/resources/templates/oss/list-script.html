@@ -57,10 +57,13 @@
                 	$("#createdDate").val("");
                     $("input[name='startDate']").val("");
                     $("input[name='endDate']").val("");
+                    $('#createdDate').attr('placeholder', 'Created Date');
                	});
 
                 if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
-                    $('#createdDate').val(cStartDate.format('MM/DD/YYYY') + ' - ' + cEndDate.format('MM/DD/YYYY'));
+                	var cStartDateFormat = cStartDate.substr(4,2) + "/" + cStartDate.substr(6,2) + "/" + cStartDate.substr(0,4);
+                	var cEndDateFormat = cEndDate.substr(4,2) + "/" + cEndDate.substr(6,2) + "/" + cEndDate.substr(0,4);
+                    $('#createdDate').val(cStartDateFormat + ' - ' + cEndDateFormat);
                 } else {
                     $('#createdDate').attr('placeholder', 'Created Date');
                 }
@@ -79,10 +82,13 @@
                 	$("#modifiedDate").val("");
                     $("input[name='mStartDate']").val("");
                     $("input[name='mEndDate']").val("");
+                    $('#modifiedDate').attr('placeholder', 'Modified Date');
                	});
                 
                 if ((mStartDate != null && "" != mStartDate) && (mEndDate != null && "" != mEndDate)) {
-                    $('#modifiedDate').val(mStartDate.format('MM/DD/YYYY') + ' - ' + mEndDate.format('MM/DD/YYYY'));
+                	var mStartDateFormat = mStartDate.substr(4,2) + "/" + mStartDate.substr(6,2) + "/" + mStartDate.substr(0,4);
+                	var mEndDateFormat = mEndDate.substr(4,2) + "/" + mEndDate.substr(6,2) + "/" + mEndDate.substr(0,4);
+                    $('#modifiedDate').val(mStartDateFormat + ' - ' + mEndDateFormat);
                 } else {
                     $('#modifiedDate').attr('placeholder', 'Modified Date');
                 }

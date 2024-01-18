@@ -1146,7 +1146,7 @@
 					cache : false,
 					data : param,
 					success : function(json){
-						if(json.isValid == 'false'){
+						if (json.isValid == 'false'){
 							alertify.error([[#{msg.common.valid2}]], 0);
 						} else {
 							$('.ajs-close').trigger("click");
@@ -1197,13 +1197,13 @@
 				var btnHtm = '<br/><b>Send an email to</b><br/>';
 				btnHtm += '<input type="button" value="Watcher Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'W\')"/>&nbsp;&nbsp;&nbsp;';
 
-				if(userRole == "ROLE_ADMIN"){
+				if (userRole == "ROLE_ADMIN") {
 					btnHtm += '<input type="button" value="Creator Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'C\')"/>&nbsp;&nbsp;&nbsp;';
-				}else{
+				} else {
 					btnHtm += '<input type="button" value="Reviewer Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'R\')"/>&nbsp;&nbsp;&nbsp;';
 				}
 				
-				btnHtm +='<input type="button" value="All" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="fn.sendEditor(\'WR\')"/>&nbsp;&nbsp;&nbsp;';
+				btnHtm += '<input type="button" value="All" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="fn.sendEditor(\'WR\')"/>&nbsp;&nbsp;&nbsp;';
 
 				if(!alertify.myAlert){
 					//define a new dialog

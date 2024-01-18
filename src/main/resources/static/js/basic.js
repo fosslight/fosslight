@@ -884,7 +884,7 @@ function createValidMsgComplex(msgData) {
                     $('textarea[name=' + key + ']').addClass("is-invalid");
                 } else if ($('select[name=' + key + ']').length > 0) {
                     $('select[name=' + key + ']').focus().parent().siblings("span.retxt,div.retxt").html(value).show();
-                    $('select[name=' + key + ']').addClass("is-invalid");
+                    $('select[name=' + key + ']').next().children(0).children(0).addClass("custom-is-invalid");
                 }
             }
         }

@@ -10,18 +10,18 @@
                 <section class="content">
                 	<div class="container-fluid">
                     	<form id="licenseSearch" name="licenseSearch">
+                    	<input name="act" type="hidden" value="search"/>
                            	<div class="row">
                                	<div class="col-md-12">
                                    	<div class="card card-dark card-outline collapsed-card search-form mb-3">
                                        	<div class="card-header" style="border-bottom: none;">
                                            	<div class="row">
                                                	<div class="col-md-7 d-flex">
-														<div class="form-check width-8rem p-2 pl-3" style="font-size: .9rem; margin-left: 0.3rem">
-																<input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y'} ? 'checked'" type="checkbox" value="Y">
-																<label class="form-check-label text-blue-gray" for="licenseNameAllSearchFlag" style="font-weight: normal;" th:text="'Exact Match'"></label>
-																<input type="hidden" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" />
-														</div>
-
+													<div class="form-check width-8rem p-2 pl-3" style="font-size: .9rem; margin-left: 0.3rem">
+														<input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y'} ? 'checked'" type="checkbox" value="Y">
+														<label class="form-check-label text-blue-gray" for="licenseNameAllSearchFlag" style="font-weight: normal;" th:text="'Exact Match'"></label>
+														<input type="hidden" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" />
+													</div>
 													<div class="w-100">
 														<div class="input-group">
 															<input class="form-control autoComLicense" name="licenseName" placeholder="Licence Name" th:value="${searchBean.licenseName}" type="search">

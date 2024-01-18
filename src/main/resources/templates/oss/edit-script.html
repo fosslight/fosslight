@@ -63,17 +63,15 @@
 								$('.multiTxtSet').empty();
 							}
 							
-							if ('' != nickName) {
-								let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-								nickHtml 		+= 		'<div class="input-group card-tools">';
-								nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'"/>';
-								nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-								nickHtml 		+=		'</div>';
-								nickHtml 		+=		'<span class="retxt"></span>';
-								nickHtml 		+= 	'</div>';
-								
-								$('.multiTxtSet').append(nickHtml);
-							}					
+							let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+							nickHtml 		+= 		'<div class="input-group card-tools">';
+							nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'"/>';
+							nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+							nickHtml 		+=		'</div>';
+							nickHtml 		+=		'<span class="retxt"></span>';
+							nickHtml 		+= 	'</div>';
+							
+							$('.multiTxtSet').append(nickHtml);				
 						});
 					}
 					
@@ -83,17 +81,15 @@
 								$('.multiDownloadLocationSet span:first').remove();
 							}
 							
-							if ('' != downloadLocation) {
-								let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
-								downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
-								downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
-								downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-								downloadLocationHtml 		+=		'</div>';
-								downloadLocationHtml 		+=		'<span class="urltxt"></span>';
-								downloadLocationHtml 		+= 	'</div>';
-								
-								$(".multiDownloadLocationSet").append(downloadLocationHtml);
-							}					
+							let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
+							downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
+							downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+							downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+							downloadLocationHtml 		+=		'</div>';
+							downloadLocationHtml 		+=		'<span class="urltxt"></span>';
+							downloadLocationHtml 		+= 	'</div>';
+							
+							$(".multiDownloadLocationSet").append(downloadLocationHtml);
 						});
 					}
 
@@ -141,17 +137,15 @@
 							if (index == 0) {
 								$('.multiTxtSet').empty();
 							}
-							if ('' != nickName) {
-								let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-								nickHtml 		+= 		'<div class="input-group card-tools">';
-								nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
-								nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-								nickHtml 		+=		'</div>';
-								nickHtml 		+=		'<span class="retxt"></span>';
-								nickHtml 		+= 	'</div>';
-								
-								$('.multiTxtSet').append(nickHtml);
-							}					
+							let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+							nickHtml 		+= 		'<div class="input-group card-tools">';
+							nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
+							nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+							nickHtml 		+=		'</div>';
+							nickHtml 		+=		'<span class="retxt"></span>';
+							nickHtml 		+= 	'</div>';
+							
+							$('.multiTxtSet').append(nickHtml);				
 						});
 						
 						break;
@@ -160,17 +154,15 @@
 							if (index == 0) {
 								$('.multiDownloadLocationSet').empty();
 							}
-							if (downloadLocation != '' && downloadLocation != null) {
-								let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
-								downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
-								downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/>';
-								downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-								downloadLocationHtml 		+=		'</div>';
-								downloadLocationHtml 		+=		'<span class="retxt"></span>';
-								downloadLocationHtml 		+= 	'</div>';
-								
-								$(".multiDownloadLocationSet").append(downloadLocationHtml);
-							}
+							let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
+							downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
+							downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/>';
+							downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+							downloadLocationHtml 		+=		'</div>';
+							downloadLocationHtml 		+=		'<span class="retxt"></span>';
+							downloadLocationHtml 		+= 	'</div>';
+							
+							$(".multiDownloadLocationSet").append(downloadLocationHtml);
 						});
 						
 						break;
@@ -179,17 +171,15 @@
 							if (index == 0){
 								$('.detectedLicensesDiv').empty();
 							}
-							if ('' != detectLicense) {
-								let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-								detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
-								detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'"/>';
-								detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-								detectedLicenseHtml 		+=		'</div>';
-								detectedLicenseHtml 		+=		'<span class="retxt"></span>';
-								detectedLicenseHtml 		+= 	'</div>';
-								
-								$(".detectedLicensesDiv").append(detectedLicenseHtml);
-							}					
+							let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+							detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
+							detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'"/>';
+							detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+							detectedLicenseHtml 		+=		'</div>';
+							detectedLicenseHtml 		+=		'<span class="retxt"></span>';
+							detectedLicenseHtml 		+= 	'</div>';
+							
+							$(".detectedLicensesDiv").append(detectedLicenseHtml);			
 						});
 						
 						break;
@@ -263,56 +253,50 @@
 			
 			//닉네임 인풋 추가
 			$('#nickAdd').on('click', function(){
-				var nickname = $("#input_ossNicknames").val();
-				if ('' != nickname) {
-					let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-					nickHtml 		+= 		'<div class="input-group card-tools">';
-					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'"/>';
-					nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-					nickHtml 		+=		'</div>';
-					nickHtml 		+=		'<span class="retxt"></span>';
-					nickHtml 		+= 	'</div>';
-					
-					$('.multiTxtSet').append(nickHtml);
-				}
+				let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+				nickHtml 		+= 		'<div class="input-group card-tools">';
+				nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+$("#input_ossNicknames").val()+'"/>';
+				nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				nickHtml 		+=		'</div>';
+				nickHtml 		+=		'<span class="retxt"></span>';
+				nickHtml 		+= 	'</div>';
+				
+				$('.multiTxtSet').append(nickHtml);
 			});
 
 			//Detect License Input 추가
 			$('#detectedLicenseAdd').on('click', function(){
-				var detectedLicense = $("#input_detectedLicense").val();
-				if ('' != detectedLicense) {
-					let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-					detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
-					detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectedLicense+'" readonly/>';
-					detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-					detectedLicenseHtml 		+=		'</div>';
-					detectedLicenseHtml 		+=		'<span class="retxt"></span>';
-					detectedLicenseHtml 		+= 	'</div>';
-					
-					$(".detectedLicensesDiv").append(detectedLicenseHtml);
-					setCustomAutoComplete("single");
-				}
+				let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+				detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
+				detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+$("#input_detectedLicense").val()+'" readonly/>';
+				detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				detectedLicenseHtml 		+=		'</div>';
+				detectedLicenseHtml 		+=		'<span class="retxt"></span>';
+				detectedLicenseHtml 		+= 	'</div>';
+				
+				$(".detectedLicensesDiv").append(detectedLicenseHtml);
+				setCustomAutoComplete("single");
 			});
 			
 			//Download Location Input 추가
 			$('#downloadLocationAdd').on('click', function(){
 				var downloadLocation = $("#input_downloadLocations").val();
-				if ('' != downloadLocation) {
-					let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
-					downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
-					downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
-					downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-					downloadLocationHtml 		+=		'</div>';
-					downloadLocationHtml 		+=		'<span class="urltxt"></span>';
-					downloadLocationHtml 		+= 	'</div>';
-					
-					$(".multiDownloadLocationSet").append(downloadLocationHtml);
-					$("#input_downloadLocations").val("");
-					if ([[${ossId}]] == null){
-						$(".multiDownloadLocationSet > div > div > input[name='downloadLocations']").each(function(idx, cur){
-							$(cur).trigger("blur");
-						});
-					}
+				
+				let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
+				downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
+				downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+				downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				downloadLocationHtml 		+=		'</div>';
+				downloadLocationHtml 		+=		'<span class="urltxt"></span>';
+				downloadLocationHtml 		+= 	'</div>';
+				
+				$(".multiDownloadLocationSet").append(downloadLocationHtml);
+				$("#input_downloadLocations").val("");
+				
+				if ([[${ossId}]] == null && '' != downloadLocation){
+					$(".multiDownloadLocationSet > div > div > input[name='downloadLocations']").each(function(idx, cur){
+						$(cur).trigger("blur");
+					});
 				}
 			});
 			

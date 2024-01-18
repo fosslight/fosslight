@@ -2,6 +2,9 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
     <script th:inline="javascript">
+    	var userRole = [[${#authentication.authorities[0].authority}]];
+    	var commentsParam = {referenceDiv : 'license'};
+    
         $(window).load(function () {
             lic_edit_data.init();
         });
@@ -33,14 +36,33 @@
                     }
                 });
 
-                $("[name='addTagButton']").click(function (e) {
-                    const elId = this.id;
-                    appendSingleTag(e, elId);
+                $("#licenseNicknames").on('click', function(){
+                	let licenseNicknameHtml = '	<div class="col-2" style="margin-bottom: 0.5rem;">';
+            		licenseNicknameHtml += '		<div class="input-group card-tools">';
+            		licenseNicknameHtml += '			<input class="form-control" type="type" name="licenseNicknames" value="' + $("#input_licenseNicknames").val() + '" />';
+            		licenseNicknameHtml += '			<button type="button" class="btn btn-tool" onclick="fn.removeTag(this)"><i class="fas fa-times"></i></button>';
+            		licenseNicknameHtml += '			<span class="retxt"></span>';
+            		licenseNicknameHtml += '		</div>';
+            		licenseNicknameHtml += '	</div>';
+            		
+            		$(".multiTxtSet").append(licenseNicknameHtml);
+            		$("#input_licenseNicknames").val("");
                 });
 
+                $("#webpageAdd").on('click', function(){
+                	let webpageHtml = '		<div class="input-group card-tools" style="margin-bottom: 0.5rem;">';
+                	webpageHtml 	+= '		<input class="form-control" type="type" name="webpages" value="' + $("#input_webpages").val() + '" />';
+                	webpageHtml 	+= '		<button type="button" class="btn btn-tool" onclick="fn.removeTag(this)"><i class="fas fa-times"></i></button>';
+                	webpageHtml 	+= '		<span class="retxt"></span>';
+                	webpageHtml 	+= '	</div>';
+            		
+            		$(".multiWebPageSet").append(webpageHtml);
+            		$("#input_webpages").val("");
+                });
+                
                 //save license
                 $("#save").on('click',function(){
-                    alertify.confirm(String([[ #{msg.common.confirm.save} ]]), function (e) {
+                    alertify.confirm([[ #{msg.common.confirm.save} ]], function (e) {
                         if (e) {
                             lic_edit_fn.registSubmit();
                         } else {
@@ -51,14 +73,14 @@
 
                 //delete license
                 $('#delete').on('click', function(){
-                    var editorVal = CKEDITOR.instances.editor.getData();
+                    var editorVal = $("#commentInput").summernote('code');
 
-                    if(editorVal == "") {
-                        alertify.alert(String([[ #{msg.license.confirm.delete.required.comment} ]]), function(){});
+                    if ("" == editorVal) {
+                        alertify.alert([[ #{msg.license.confirm.delete.required.comment} ]], function(){});
                         return false;
                     }
 
-                    alertify.confirm(String([[ #{msg.license.confirm.delete} ]]), function (e) {
+                    alertify.confirm([[#{msg.license.confirm.delete}]], function (e) {
                         if (e) {
                             $('input[name=comment]').val(editorVal);
                             deleteSubmit();
@@ -68,14 +90,34 @@
                     });
                 });
 
-                if(lic_edit_data.detail) {
-                    lic_edit_cmt.getCommentList();
+              	//고지서 체크 안한상태에서 소스공개 체크 시 고지서 자동체크
+    			$('input[name=obligationDisclosingSrcYn]').on('click', function(){
+    				var checked1 = $(this).attr('checked');
+    				var checked2 = $('input[name=obligationNotificationYn]').attr('checked');
+    				if (checked1 && !checked2){
+    					$('input[name=obligationNotificationYn]').trigger('click');
+    				}
+    			});
+    			
+    			$('select[name=licenseType]').on('change', function(){
+    				// The others be set to usable.
+    				$(".oblicationChk").attr("disabled", false);
+    				
+    				// Extracted function for 'Needs Check' check box event. hk-cho
+    				setObligationCheckBox($(this).val());
+    			});
+                
+                if (lic_edit_data.detail != null) {
+                	commentsParam["referenceId"] = lic_edit_data.detail.licenseId;
+        			fn_comment.getCommentList(commentsParam);
                 }
             }
         }
 
         const lic_edit_fn = {
             registSubmit: function () {
+            	$("#licenseType option[value='']").removeAttr('disabled');
+            	
                 $("#licenseForm").ajaxForm({
                     url :"/license/validation",
                     type : 'POST',
@@ -88,7 +130,7 @@
             onValidSuccess: function (json, status) {
                 if (json.isValid == 'false') {
                     createValidMsgComplex(json);
-                    alertify.error(String([[ #{msg.common.valid} ]]), 0);
+                    alertify.error([[ #{msg.common.valid} ]], 0);
                 } else if (json.isValid == 'true') {
                     loading.show();
 
@@ -116,16 +158,12 @@
             },
             onRegistSuccess: function(json, status){
                 loading.hide();
-
-                if(json.resCd == '10') {
-                    alertify.alert(String([[ #{msg.common.success} ]]), function(){
-
-                        if(lic_edit_data.detail) {
-                            callDeleteTabInFrame("license-edit_" + json.licenseId);
-                        } else {
-                            callDeleteTabInFrame("license-edit");
-                        }
-                        callReloadTabInframe("/license/list", "license-list");
+                $('#commentInput').summernote('code', '');
+                
+                if (json.resCd == '10') {
+                	alertify.alert([[ #{msg.common.success} ]], function(){
+                    	deleteTabInFrame('/license/edit/' + json.licenseId);
+        				reloadTabInframe('/license/list');
                     });
                 } else {
                     alertify.error(String([[ #{msg.common.valid2} ]]), 0);
@@ -133,88 +171,170 @@
             }
         };
 
-        const lic_edit_cmt = {
-            getCommentList: function () {
-                const data = {
-                    referenceId: lic_edit_data.detail.licenseId,
-                    referenceDiv: 'license'
-                };
-
-                getAjaxJsonData(data, "/comment/getCommentList", 'html',
-                    function (res) {
-                        $('#commentAreaFragment').replaceWith(res);
-                        $("button[name='commentModifyBtn']").on("click", function (e){
-                            e.preventDefault();
-                            const commId = $(this).attr("data-commId");
-                            lic_edit_cmt.handleCommentPopupOpen(commId);
-                        });
-                        $("button[name='commentDeleteBtn']").on("click", function (e){
-                            e.preventDefault();
-                            const commId = $(this).attr("data-commId");
-                            lic_edit_cmt.deleteComment(commId);
-                        });
-                },
-                    function (xhr, ajaxOptions, thrownError) {
-                        alertify.error(String([[ #{msg.common.valid2} ]]), 0);
-                });
-            },
-            deleteComment: function (_commId) {
-                if (!confirm("Are you sure you want to delete this comment?")) {
-                    return;
-                }
-
-                postAjaxData({'commId': _commId}, "/comment/deleteComment", "json", function (res) {
-                    alertify.error(String([[ #{msg.common.success}]]));
-                    lic_edit_cmt.getCommentList();
-                }, function () {
-                    alertify.error(String([[ #{msg.common.valid2}]]), 0);
-                });
-            },
-            handleCommentPopupOpen: function (_commId) {
-                getAjaxJsonData({commId : _commId}, "/comment/getDivCommentByCommId", "html", function (res) {
-                    alertify.confirm(res, function (e) {
-                        if(e) {
-                            lic_edit_cmt.editComment();
-                        } else {
-                            return false;
-                        }
-                    }).set('resizable', true)
-                        .resizeTo('680px', '335px');
-
-                }, null, function (){
-                    $("#modifiedCommentEditor").summernote({
-                        height: 100,
-                        callbacks: {
-                            onInit: function() {
-                                const contents = $("#contents").val();
-                                $(this).summernote('code', contents);
-                            }
-                        }
-                    });
-                });
-            },
-            editComment: function () {
-                const commId = $("#modifiedCommentId").val();
-                const referenceId = $('input[name=licenseId]').val();
-                const contents = $('#modifiedCommentEditor').summernote('code');
-                const param = {
-                    'commId': commId,
-                    'contents': contents,
-                    'referenceDiv': '30',
-                    'referenceId': referenceId
-                };
-
-                postAjaxData(param,"/comment/updateComment", "json", function (json) {
-                    alertify.success(String([[ #{msg.common.success} ]]), 0);
-                }, function () {
-                    alertify.error(String([[ #{msg.common.valid2} ]]), 0);
-                }, function () {
-                    lic_edit_cmt.getCommentList();
-                });
-
-                return false;
-            }
+        var fn = {
+        	removeTag : function(obj) {
+        		$(obj).parent().parent().remove();
+        	},
+        	closeAlertifyView : function() {
+        		$(".ajs-close").trigger("click");
+        	}
         }
-
+        
+        var fn_comment = {
+            getCommentList : function(param){
+            	$.ajax({
+               		url : '/comment/getCusCommentList',
+                   	type : 'GET',
+                   	dataType : 'html',
+                   	cache : false,
+                   	data : param,
+                   	success : function(res){
+                   		$("#commentListBody").empty();
+    					$("#commentListBody").html(res);
+                   	},
+                   	error : function(xhr, ajaxOptions, thrownError){
+                   		alertify.error([[#{msg.common.valid2}]], 0);
+                   	}
+               	});
+            },
+            getMoreCommentsList : function() {
+        		commentsParam["moreFlag"] = "Y";
+        		fn_comment.getCommentList(commentsParam);
+        	},
+        	editComments : function(_commId, _referenceDiv, _referenceId) {
+        		$.ajax({
+            		url : '/comment/getEditPopup',
+        			type : 'POST',
+        			data : {'commId' : _commId},
+        			dataType : 'html',
+        			cache : false,
+        			success : function(res){
+        				if(!alertify.editComments){
+        					alertify.dialog('editComments', function() {
+        						return {
+        							setup: function() {
+        								var settings = alertify.confirm().settings;
+        							
+        								for (var prop in settings) {
+        									this.settings[prop] = settings[prop];
+        								}
+        								
+        								var setup = alertify.confirm().setup();
+        								setup.buttons = [];
+        								setup.focus.element = 1;
+        							
+        								return setup;
+        							},
+        					    	hooks: {
+        					    		onshow: function() {
+        					        		this.elements.dialog.style.maxWidth = 'none';
+        					          		this.elements.dialog.style.width = '750px';
+        					        	}
+        							}
+        						};
+        					}, false, 'alert');
+                   		}
+        				
+        				alertify.editComments(res).set('title', 'Edit Comments');
+        				$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
+        				$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
+        			}
+            	});
+        	},
+        	updateComments : function (_commId, _referenceDiv, _referenceId) {
+        		if ("" == $("#commentEdit").next().find(".note-editable").text()) {
+        			alertify.alert("Please enter a comment", function(){});
+        			return false;
+        		} else {
+        			var param = {commId : _commId, contents : replaceWithLink($("#commentEdit").summernote('code')), referenceDiv: _referenceDiv, referenceId: _referenceId};
+        			$.ajax({
+        				url : '/comment/updateComment',
+        				type : 'POST',
+        				dataType : 'json',
+        				cache : false,
+        				data : param,
+        				success : function(json){
+        					alertify.success([[#{msg.common.success}]]);
+        					fn.closeAlertifyView();
+        					fn_comment.getCommentList(commentsParam);
+        				},
+        				error : function(){
+        					alertify.error([[#{msg.common.valid2}]], 0);
+        				}
+        			});
+        		}
+        	},
+        	deleteComments : function (_commId) {
+        		alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+        			if (e) {
+        				$.ajax({
+        					url : '/comment/deleteComment',
+        					type : 'POST',
+        					dataType : 'json',
+        					cache : false,
+        					data : {'commId' : _commId},
+        					success : function(data){
+        						alertify.success([[#{msg.common.success}]]);
+        						fn.closeAlertifyView();
+        						fn_comment.getCommentList(commentsParam);
+        					},
+        					error : function(){
+        						alertify.error([[#{msg.common.valid2}]], 0);
+        					}
+        				});
+        			} else {
+        				return false;
+        			}
+        		});
+        	},
+        	closeAlertifyView : function () {
+        		fn.closeAlertifyView();
+        	}
+        }
+        
+        function deleteSubmit(){
+    		$("#licenseForm").ajaxForm({
+    			url :'/license/delAjax',
+                type : 'POST',
+                dataType:"json",
+                cache : false,
+    	        success:onDeleteSuccess,
+                error : onError
+    	    }).submit();
+    	}
+        
+        function onDeleteSuccess(json, status){
+    		var licenseId = $('input[name=licenseId]').val();
+    		
+    		if (json.isValid == 'false') {
+    			alertify.alert(json.validMsg, function(){});
+    		} else {
+    			alertify.alert([[#{msg.common.success}]] ,function(){
+    				if (licenseId) {
+    					deleteTabInFrame('/license/edit/'+licenseId);			
+    				} else {
+    					deleteTabInFrame('/license/edit');
+    				}
+    				reloadTabInframe('/license/list');
+    			});
+    		}
+    	}
+        
+        function onError(data, status){
+    		alertify.error([[#{msg.common.valid2}]], 0);
+        }
+        
+        function setObligationCheckBox(type){
+    		if (type == [[${@CoCodeManager.getCodes(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))[2]}]]) {
+    			$('input[name=obligationNotificationYn]').prop('checked', true);
+    			$('input[name=obligationDisclosingSrcYn]').prop('checked', true);
+    		} else if (type == [[${@CoCodeManager.getCodes(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))[1]}]]) {
+    			$('input[name=obligationNotificationYn]').prop('checked', true);
+    			$('input[name=obligationDisclosingSrcYn]').prop('checked', true);
+    		} else if (type == [[${@CoCodeManager.getCodes(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))[0]}]]) {
+    			$('input[name=obligationNotificationYn]').prop('checked', true);
+    			$('input[name=obligationDisclosingSrcYn]').prop('checked', false);
+    		}
+    	};
     </script>
 </th:block>

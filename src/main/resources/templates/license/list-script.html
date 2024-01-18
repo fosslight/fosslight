@@ -63,8 +63,8 @@
                 });
 
                 /* created date & modified date event */
-                const cStartDate = [[${searchBean.cStartDate}]];
-                const cEndDate = [[${searchBean.cEndDate}]];
+                let cStartDate = [[${searchBean.cStartDate}]];
+                let cEndDate = [[${searchBean.cEndDate}]];
 
                 $("#createdDate").daterangepicker({
                     autoUpdateInput: false
@@ -73,20 +73,23 @@
                     $("input[name='cEndDate']").val(picker.endDate.format('YYYYMMDD'));
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
-                    .on('cancel.daterangepicker', function (ev, picker) {
-                        $("#createdDate").val("");
-                        $("input[name='startDate']").val("");
-                        $("input[name='endDate']").val("");
-                    });
+                .on('cancel.daterangepicker', function (ev, picker) {
+               		$("#createdDate").val("");
+                  	$("input[name='startDate']").val("");
+                  	$("input[name='endDate']").val("");
+                  	$('#createdDate').attr('placeholder', 'Created Date');
+               	});
 
-                if (cStartDate != null && cEndDate != null) {
-                    $('#createdDate').val(cStartDate.format('MM/DD/YYYY') + ' - ' + cEndDate.format('MM/DD/YYYY'));
+                if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
+                	var cStartDateFormat = cStartDate.substr(4,2) + "/" + cStartDate.substr(6,2) + "/" + cStartDate.substr(0,4);
+                	var cEndDateFormat = cEndDate.substr(4,2) + "/" + cEndDate.substr(6,2) + "/" + cEndDate.substr(0,4);
+                    $('#createdDate').val(cStartDateFormat + ' - ' + cEndDateFormat);
                 } else {
                     $('#createdDate').attr('placeholder', 'Created Date');
                 }
 
-                const mStartDate = [[${searchBean.mStartDate}]];
-                const mEndDate = [[${searchBean.mEndDate}]];
+                let mStartDate = [[${searchBean.mStartDate}]];
+                let mEndDate = [[${searchBean.mEndDate}]];
 
                 $("#modifiedDate").daterangepicker({
                     autoUpdateInput: false
@@ -95,14 +98,17 @@
                     $("input[name='mEndDate']").val(picker.endDate.format('YYYYMMDD'));
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
-                    .on('cancel.daterangepicker', function (ev, picker) {
-                        $("#modifiedDate").val("");
-                        $("input[name='mStartDate']").val("");
-                        $("input[name='mEndDate']").val("");
-                    });
+             	.on('cancel.daterangepicker', function (ev, picker) {
+                  	$("#modifiedDate").val("");
+                 	$("input[name='mStartDate']").val("");
+                   	$("input[name='mEndDate']").val("");
+                   	$('#modifiedDate').attr('placeholder', 'Modified Date');
+               	});
 
-                if (mStartDate != null && mEndDate != null) {
-                    $('#modifiedDate').val(mStartDate.format('MM/DD/YYYY') + ' - ' + mEndDate.format('MM/DD/YYYY'));
+                if ((mStartDate != null && "" != mStartDate) && (mEndDate != null && "" != mEndDate)) {
+                	var mStartDateFormat = mStartDate.substr(4,2) + "/" + mStartDate.substr(6,2) + "/" + mStartDate.substr(0,4);
+                	var mEndDateFormat = mEndDate.substr(4,2) + "/" + mEndDate.substr(6,2) + "/" + mEndDate.substr(0,4);
+                    $('#modifiedDate').val(mStartDateFormat + ' - ' + mEndDateFormat);
                 } else {
                     $('#modifiedDate').attr('placeholder', 'Modified Date');
                 }

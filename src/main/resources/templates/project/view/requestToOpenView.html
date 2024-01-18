@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div class="requestToOpenPop" style="display: none;">
+		<div class="row">
+			<div class="col-12">
+				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+        			<div class="row" id="reqToOpenDiv"></div>
+					<div class="row" id="reqToOpenDiv2"></div>
+				</div>
+			</div>
+		</div>
+		<div class="row custom-layout">
+			<div class="col-12">
+				<button type="button" class="btn btn-yellow-03 btn-sm width-6rem mr-xm px-3 float-left" style="margin-left: 3px;" th:text="Ignore" th:onclick="|fn.commentsIgnore()|"></button>
+				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.closeAlertifyView()|"></button>
+				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn.rejectRegist()|"></button>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

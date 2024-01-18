@@ -82,32 +82,30 @@
                                     	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
                                     </div>
                                 </div>
-                                <div class="row">
+                                <div class="row form-group">
                                     <div class="col-12">
-                                        <div class="form-group">
-                                            <label for="inputName" th:text="#{msg.common.field.distributionType}"></label><span class="text-orange">*</span>
-                                            <select class="form-control select2" name="distributionType" style="width: 100%;">
-                                            	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
-                                            		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.distributionType)}"></option>
-                                            	</th:block>
-                                            </select>
-                                            <div class="row mt-2">
-                                                <p class="text-gray text-bold mx-3" th:text="'Network service only?'"></p>
-                                                <div class="form-group clearfix mb-0 ml-">
-                                                	<div class="icheck-primary d-inline">
-														<input type="radio" id="networkServerType_Y" name="networkServerType" value="Y" th:checked="${project.networkServerType != null && #strings.equals(project.networkServerType, 'Y')} ? 'checked'"/>
-														<label for="networkServerType_Y" th:text="Yes"></label>
-													</div>
-													<div class="icheck-primary d-inline" style="margin-left: 5px;">
-														<input type="radio" id="networkServerType_N" name="networkServerType" value="N" th:checked="${project.networkServerType == null || (project.networkServerType != null && #strings.equals(project.networkServerType, 'N'))} ? 'checked'"/>
-														<label for="networkServerType_N" th:text="No"></label>
-													</div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <label for="inputName" th:text="#{msg.common.field.distributionType}"></label><span class="text-orange">*</span>
+                                        <select class="form-control select2" name="distributionType" style="width: 100%;">
+                                        	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
+                                           		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.distributionType)}"></option>
+                                       		</th:block>
+                                      	</select>
+                                    	<div class="row mt-2">
+                                        	<p class="text-gray text-bold mx-3" th:text="'Network service only?'"></p>
+                                       		<div class="form-group clearfix mb-0 ml-">
+                                             	<div class="icheck-primary d-inline">
+													<input type="radio" id="networkServerType_Y" name="networkServerType" value="Y" th:checked="${project.networkServerType != null && #strings.equals(project.networkServerType, 'Y')} ? 'checked'"/>
+													<label for="networkServerType_Y" th:text="Yes"></label>
+												</div>
+												<div class="icheck-primary d-inline" style="margin-left: 5px;">
+													<input type="radio" id="networkServerType_N" name="networkServerType" value="N" th:checked="${project.networkServerType == null || (project.networkServerType != null && #strings.equals(project.networkServerType, 'N'))} ? 'checked'"/>
+													<label for="networkServerType_N" th:text="No"></label>
+												</div>
+                                         	</div>
+                                     	</div>
                                     </div>
+                                    <span class="col-12 retxt text-danger text-sm"></span>
                                 </div>
-
                                 <div class="row form-group">
                                 	<div class="col-12">
                                 		<label for="inputName" th:text="#{msg.common.field.priority}"></label><span class="text-orange">*</span>
@@ -268,38 +266,8 @@
         </div>
     </div>
     
-    <div class="requestToOpenPop" style="display: none;">
-		<div class="row">
-			<div class="col-12">
-				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
-        			<div class="row" id="reqToOpenDiv"></div>
-					<div class="row" id="reqToOpenDiv2"></div>
-				</div>
-			</div>
-		</div>
-		<div class="row custom-layout">
-			<div class="col-12">
-				<button type="button" class="btn btn-yellow-03 btn-sm width-6rem mr-xm px-3 float-left" style="margin-left: 3px;" th:text="Ignore" th:onclick="|fn.commentsIgnore()|"></button>
-				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.closeAlertifyView()|"></button>
-				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn.rejectRegist()|"></button>
-			</div>
-		</div>
-	</div>
+    <th:block th:replace="project/view/requestToOpenView"></th:block>
+    <th:block th:replace="project/view/copyConfirmView"></th:block>
 	
-	<div class="copyConfirmPopup" style="display: none;">
-		<div class="row">
-			<div class="col-12">
-				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
-        			<div class="row" id="copyConfirmDiv"></div>
-				</div>
-			</div>
-		</div>
-		<div class="row custom-layout">
-			<div class="col-12">
-				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.copyConfirmClose()|"></button>
-				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn.copyConfirmSave()|"></button>
-			</div>
-		</div>
-	</div>
 </body>
 </html>
