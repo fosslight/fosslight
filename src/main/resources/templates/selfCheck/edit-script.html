@@ -7,7 +7,7 @@
 /*jslint browser: true, nomen: true */
 var lastsel;
 var codeData;
-var userRole = "ROLE_ADMIN"; // '${sessUserInfo.authority}';
+var userRole = [[${#authentication.authorities[0].authority}]];
 var arr = new Array();
 var ossNames = [];
 var objs = [];
@@ -96,6 +96,9 @@ var fn_self ={
 		} else {
 			$("#divViewMode").hide();
 			$("#divEditMode").show();
+			
+			$("#commentTextArea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			$("#commentTextArea").summernote('code', $("#commentTextArea").val());
 		}
 	}
 }
@@ -272,7 +275,7 @@ var fn = {
 	},
 	// 저장
 	saveSubmit : function(){
-		var editorVal = CKEDITOR.instances.editor.getData();
+		var editorVal = $("#commentTextArea").summernote('code');
 		$('input[name=comment]').val(replaceWithLink(editorVal));
 		
 		$("#projectForm").ajaxForm({

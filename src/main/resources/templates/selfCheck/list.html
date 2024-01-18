@@ -8,6 +8,7 @@
             <section class="content-header">
                 <div class="container-fluid">
                 	<form id="projectSearch" name="projectSearch">
+                		<input name="act" type="hidden" value="search"/>
                     	<div class="row">
                         	<div class="col-md-12">
                             	<div class="card card-dark card-outline collapsed-card search-form mb-3">
@@ -18,7 +19,7 @@
                                                 <div class="row">
                                                 	<div class="col-12">
                                                 		<div class="input-group">
-                                                            <input type="search" name="prjId" class="form-control" placeholder="ID" th:value="${searchBean.prjId}"/>
+                                                            <input type="search" name="prjId" class="form-control" placeholder="ID" th:value="${searchBean?.prjId}"/>
                                                             <div class="input-group-append">
                                                                 <button id="search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                                                             </div>
@@ -37,13 +38,13 @@
                                 		<div class="row">
                                     		<div class="col-4">
                                         		<div class="form-group">
-                                            		<input type="text" class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}"/>
+                                            		<input type="text" class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}"/>
                                             	</div>
                                       		</div>
                                         	<div class="col-4">
                                         		<div class="form-group">
                                             		<div class="form-group">
-                                                		<input type="text" class="form-control autoComOss" name="ossName" placeholder="OSS Name" th:value="${searchBean.ossName}"/>
+                                                		<input type="text" class="form-control autoComOss" name="ossName" placeholder="OSS Name" th:value="${searchBean?.ossName}"/>
                                             		</div>
                                          		</div>
                                   	 		</div>
@@ -62,14 +63,14 @@
                                       		<div class="col-4">
                                           		<div class="form-group">
                                               		<div class="form-group">
-                                                   		<input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean.licenseName}"/>
+                                                   		<input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}"/>
                                                		</div>
                                            		</div>
                                        		</div>
                                        		<div class="col-4">
                                            		<div class="form-group">
                                               		<div class="form-group">
-                                                  		<input type="text" class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean.creator}"/>
+                                                  		<input type="text" class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean?.creator}"/>
                                                		</div>
                                           		</div>
                                       		</div>

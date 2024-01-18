@@ -12,7 +12,7 @@
 						<div class="col-md-1">
 							<span class="text-gray text-bold mr-3">|</span>
 						</div>
-						<div class="col-md-8">[[${project.prjName}]]</div>
+						<div class="col-md-8" th:text="${project.prjName}"></div>
 					</div>
 					<div class="row mt-2">
 						<div class="col-md-3">
@@ -22,7 +22,7 @@
 							<span class="text-gray text-bold mr-3">|</span>
 						</div>
 						<div class="col-md-8">
-							<span>[[${project.comment}]]</span>
+							<span id="comment" th:utext="${project.comment}"></span>
 						</div>
 					</div>
 				</div>
