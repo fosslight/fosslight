@@ -5,7 +5,7 @@
         //<![CDATA[
         /*global $ */
         /*jslint browser: true, nomen: true */
-        var userRole = 'ROLE_ADMIN';
+        var userRole = [[${#authentication.authorities[0].authority}]];
         var curIdenStatus = [[${project.verificationStatus}]];
         var projectStatus = [[${project.status}]];
         var modifyCommentId = '';
@@ -26,7 +26,7 @@
             datas.init();
             evt.init();
             packaging.init();
-
+            
 //		showHelpLink("Project_List_Packaging");
             $('.btnCommentHistory').on('click', function (e) {
                 e.preventDefault();
@@ -35,7 +35,6 @@
 
             // 버튼 컨트롤
             fn.btnCtl(userRole, curIdenStatus);
-            if (datas.ossList == null) datas.ossList = [];
 
             $("#list").jqGrid({
                 datatype: 'local',
@@ -155,6 +154,8 @@
             verify: [[${verify}]],
             ossList: [[${ossList}]],
             init: function () {
+            	if (datas.ossList == null) datas.ossList = new Array();
+            	
                 modifyCommentId = datas.verify.data.commentIdx;
                 commentIdx = datas.verify.data.commentIdx;
                 if (isAdmin) {
@@ -1066,16 +1067,7 @@
                     $("#editAppendedYn").val(checked ? "Y" : "N");
                     fn.appendEditVisible(this);
 
-                    if (CKEDITOR.instances.editor2) {
-                        var appendEditor = CKEDITOR.instances.editor2;
-                        appendEditor.on('beforePaste', function (event) {
-                            loading.show();
-                        });
-                        appendEditor.on('afterPaste', function (event) {
-                            loading.hide();
-                        });
-                        appendEditor.setReadOnly(!checked);
-                    }
+                    $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
                 });
 
                 $("[name='btnEditOssNotice']").change(function (e) {
@@ -1321,7 +1313,7 @@
                             break;
 
                     }
-                } else if ('${project.viewOnlyFlag}' == 'Y') {
+                } else if ('Y' == [[${project.viewOnlyFlag}]]) {
                     btn_confirm.hide();
                     btn_reject.hide();
                     btn_review.hide();
@@ -1428,42 +1420,28 @@
                     }
                 }
             },
-            // 180105 jy-seo
             openNoticeEditPop: function (data) {
                 var result = jQuery.parseJSON(data);
 
                 if (result.isValid == 'false') {
                     alertify.error([[#{msg.common.valid2}]], 0);
                 } else {
-                    var contents = '<textarea cols="80" id="editor3" name="editor3" rows="10"></textarea>';
-
-// 				alertify.confirm()
-// 						.set({'resizable': true, 'startMaximized':true})
-// 						.set('labels', {ok:'save'})
-// 						.set('onok', function(event){ fn.saveNoticeEditPop(); return false; })
-// 						.set('onshow', function(event){
-// 							CKEDITOR.replace( 'editor3', {
-// 						        fullPage: true,
-// 						        allowedContent: true,
-// 						        startupShowBorders: false,
-// 						        height: 620
-// 						    });
-// 							CKEDITOR.instances.editor3.setData(result.resultData);
-// 							CKEDITOR.instances.editor3.on('beforePaste', function(event) {
-// 							    loading.show();
-// 							});
-// 						    CKEDITOR.instances.editor3.on('afterPaste', function(event) {
-// 							    loading.hide();
-// 							});
-// 						})
-// 						.setContent(contents)
-// 						.show();
-
-// 				fn.defaultNotice(false);
+                	var contents = '<textarea cols="80" id="noticeEditPop" name="noticeEditPop" rows="10"></textarea>';
+        			alertify.confirm(contents)
+        					.set({'resizable': true, 'startMaximized':true}).resizeTo('650', '480')
+        					.set('labels', {ok:'save'})
+        					.set('onok', function(event){ 
+        						fn.saveNoticeEditPop(); 
+        						return false; 
+        					});
+        					
+        			$("#noticeEditPop").summernote({height: 250, minHeight: null, maxHeight: null, lang: "ko-KR"});
+					
+					fn.defaultNotice(false);
                 }
             },
             saveNoticeEditPop: function () {
-                $('#noticeHtml').val(""); //CKEDITOR.instances.editor3.getData());
+                $('#noticeHtml').val($("#noticeEditPop").summernote('code'));
 
                 $('#noticeForm').ajaxForm({
                     url: '/project/verification/saveNoticeAjax',
@@ -2207,10 +2185,7 @@
 
                     if (editAppendedYn == "Y") {
                         $("#append").trigger("click").attr("checked", true);
-
-// 					if(CKEDITOR.instances.editor2) {
-// 						CKEDITOR.instances.editor2.config.readOnly = false;
-// 					}
+                        $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
                     }
                 }, 1);
             },

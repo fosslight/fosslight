@@ -99,11 +99,11 @@
                                                                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                                                     <label class="btn btn-sm btn-onOff px-3">
                                                                         <input type="radio" name="publicYn" id="permissionRadio1" autocomplete="off" value="Y" th:text="Everyone"
-                                                                        		th:checked="${(detail != null && detail.publicYn ne 'N') || detail == null} ? 'checked'" th:disabled="${detail.status == 'CONF'} ? 'disabled'" />
+                                                                        		th:checked="${(detail != null && detail.publicYn != 'N') || detail == null} ? 'checked'" th:disabled="${detail.status == 'CONF'} ? 'disabled'" />
                                                                     </label>
                                                                     <label class="btn btn-sm btn-onOff active px-3">
                                                                         <input type="radio" name="publicYn" id="permissionRadio2" autocomplete="off" value="N" th:text="'Creator & Watcher'"
-                                                                        		th:checked="${detail != null && detail.publicYn eq 'N'} ? 'checked'" th:disabled="${detail.status == 'CONF'} ? 'disabled'" />
+                                                                        		th:checked="${detail != null && detail.publicYn == 'N'} ? 'checked'" th:disabled="${detail.status == 'CONF'} ? 'disabled'" />
                                                                     </label>
                                                                 </div>
                                                             </div>
