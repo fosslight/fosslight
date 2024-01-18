@@ -237,7 +237,7 @@ public class ApiSelfCheckController extends CoTopComponent {
         				
         				for (String sheetNm : sheetList) {
         					Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm, sheet, true);
-        					Map<String, Object> resultMap = getSheetDataResult(result, prjId, resetFlag, bean.getRegistFileId(), false, sheetLengthCheckFlag, sheetIdx);
+        					Map<String, Object> resultMap = getSheetDataResult(result, prjId, resetFlag, bean.getRegistFileId(), sheetLengthCheckFlag, sheetIdx);
         					sheetIdx++;
         					if (!resultMap.isEmpty()) {
         						rtnMap = resultMap;
@@ -272,7 +272,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 	}
 
     @SuppressWarnings("unchecked")
-	private Map<String, Object> getSheetDataResult(Map<String, Object> result, String prjId, String resetFlag, String registFileId, boolean sheetNameCheckFlag, boolean sheetLengthCheckFlag, int sheetIdx) {
+	private Map<String, Object> getSheetDataResult(Map<String, Object> result, String prjId, String resetFlag, String registFileId, boolean sheetLengthCheckFlag, int sheetIdx) {
     	Map<String, Object> rtnMap = new HashMap<>();
     	String errorMsg = "";
     	
@@ -292,8 +292,12 @@ public class ApiSelfCheckController extends CoTopComponent {
 		List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 
-		if (sheetNameCheckFlag && ossComponents.isEmpty()) {
-			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, getMessage("api.upload.file.sheet.no.match", new String[]{"Self-Check*"}));
+		if (ossComponents == null || ossComponents.isEmpty()) {
+			if (sheetLengthCheckFlag) {
+				rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+			} else {
+				rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, getMessage("api.upload.file.sheet.no.match", new String[]{"Self-Check*"}));
+			}
 			return rtnMap;
 		}
 
