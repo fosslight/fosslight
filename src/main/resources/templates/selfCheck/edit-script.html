@@ -24,7 +24,7 @@ var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMP
 $(document).ready(function() {
 	'use strict';
 
-	if ("" != [[${project.prjId}]]) {
+	if ([[${project.prjId}]] != null) {
 		fn_self.modeChange([[${project.prjId}]], 'v');
 		showHelpLink("Self-Check_Edit_Export", "helpLink_vulerabiityExport");
 	}
@@ -32,7 +32,7 @@ $(document).ready(function() {
 	data.init();
 	evt.init();
 	
-	if ("" != [[${project.prjId}]]) {
+	if ([[${project.prjId}]] != null) {
 		src_evt.init();
 		notice_evt.init();
 	}

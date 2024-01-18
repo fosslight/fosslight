@@ -125,6 +125,7 @@ public class SelfCheckController extends CoTopComponent {
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("project", new Project());
 
 		return "selfCheck/edit";
 	}
