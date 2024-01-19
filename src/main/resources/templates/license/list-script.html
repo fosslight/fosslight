@@ -115,9 +115,9 @@
 
                 initParam = fn.setGridParam();
                 var defaultSearchFlag = [[${searchBean.defaultSearchFlag}]];
-                if (defaultSearchFlag != 'Y') {
-                    // just make grid ui
-                    initParam.ignoreSearchFlag = "Y";
+
+                if (defaultSearchFlag != 'N') {
+                    initParam.ignoreSearchFlag = "N";
                 }
 
                 $('#search').on('click', function (e) {

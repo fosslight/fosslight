@@ -95,10 +95,9 @@
 
                 initParam = serializeObjectHelper();
                 var defaultSearchFlag = [[${searchBean.defaultSearchFlag}]];
-                
-                if (defaultSearchFlag != 'Y') {
-                    // just make grid ui
-                    initParam.ignoreSearchFlag = "Y";
+
+                if (defaultSearchFlag != 'N') {
+                    initParam.ignoreSearchFlag = "N";
                 }
 
                 var sentMailParam = $("input[name=ossName]").val();

@@ -592,7 +592,13 @@ var bin_fn = {
 			loadonce: false,
 			height: 'auto',
 			mtype: 'GET',
-			loadComplete: function(data){tableRefreshNew("_binAddList");}
+			loadComplete: function(data){
+                tableRefreshNew("_binAddList");
+                if(data.rows.length > 0) {
+                    $("#_binAddListContainer").show();
+                }
+
+            }
 		}
 	},	
 	// 닉네임 팝업 띄우기

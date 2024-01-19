@@ -59,6 +59,9 @@
                             <div class="float-right mr-3" style="margin-top: .35rem">
                                 <button type="button" class="btn btn-purple btn-xs px-3 btnCommentHistory" data-toggle="on" th:text="'Show Comment History'"></button>
                                 <button type="button" class="btn btn-default btn-xs px-3 commentBtn" data-toggle="off" th:text="'Comment Edit'"></button>
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -146,25 +149,25 @@
                                         </div>
                                         </form>
                                         <div class="3rdProjectSearch partyBtn">
-                                        	<div class="three1list card" style="display:none;">
-                                                <div class="card-header text-bold" th:text="'Search Results'"></div>
-                                                <div class="card-body">
+                                        	<div class="three1list card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm" th:text="'Search Results'"></div>
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_list"><tr><td></td></tr></table>
                                                         <div id="pager"></div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="three2list card" style="display:none;">
-                                                <div class="card-header text-bold">
+                                            <div class="three2list card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
                                                         <div class="col-10">
-                                                            <a class="btn btn-danger btn-sm float-right px-3" th:onclick="|party_evt.loadToList()|" th:text="load"></a>
+                                                            <a class="btn btn-danger btn-xs float-right px-3" th:onclick="|party_evt.loadToList()|" th:text="load" style="font-size: .8rem"></a>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="card-body">
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_list2"><tr><td></td></tr></table>
                                                         <div id="pager2"></div>
@@ -173,25 +176,25 @@
                                             </div>
                                         </div>
                                         <div class="3rdProjectSearch2 partyBtn">
-                                        	<div class="three3list card" style="display:none;">
-                                                <div class="card-header text-bold" th:text="'Search Results'"></div>
-                                                <div class="card-body">
+                                        	<div class="three3list card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_list-1"><tr><td></td></tr></table>
                                                         <div id="pager-1"></div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="three4list card" style="display:none;">
-                                                <div class="card-header text-bold">
+                                            <div class="three4list card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
                                                         <div class="col-10">
-                                                            <a class="btn btn-danger btn-sm float-right px-3" th:onclick="|party_evt.projectToAddList()|" th:text="load"></a>
+                                                            <a class="btn btn-danger btn-xs float-right px-3" th:onclick="|party_evt.projectToAddList()|" th:text="load" style="font-size: .8rem"></a>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="card-body">
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_list-2"><tr><td></td></tr></table>
                                                         <div id="pager2-2"></div>
@@ -200,10 +203,10 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="partyBtn">
-                                    	<div class="card">
-                                        	<div class="card-header text-bold" th:text="'Loaded List'"></div>
-                                            <div class="card-body">
+                                    <div class="partyBtn" id="_3rdAddListContainer" style="display: none">
+                                    	<div class="card card-secondary card-outline">
+                                            <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
+                                            <div class="card-body px-3 pt-3">
                                             	<div class="innerJqGridSet">
                                                 	<table id="_3rdAddList"><tr><td></td></tr></table>
                                                 </div>
@@ -307,17 +310,17 @@
                                         </div>
                                 	</form>
                                         <div class="depProjectSearch partyBtn">
-                                        	<div class="depProject1 card" style="display:none;">
-                                                <div class="card-header text-bold" th:text="'Search Results'"></div>
-                                                <div class="card-body">
+                                        	<div class="depProject1 card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_depProjectList1"><tr><td></td></tr></table>
                                                         <div id="depProjectPager1"></div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="depProject2 card" style="display:none;">
-                                                <div class="card-header text-bold">
+                                            <div class="depProject2 card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
                                                         <div class="col-10">
@@ -325,17 +328,17 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="card-body">
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_depProjectList2"><tr><td></td></tr></table>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="depBtn" id="content_dep_default">
-                                            <div class="card">
-                                                <div class="card-header text-bold" th:text="'Loaded List'"></div>
-                                                <div class="card-body">
+                                        <div class="depBtn" id="_depAddListContainer" style="display: none">
+                                            <div class="card card-secondary card-outline">
+                                                <div class="card-header text-sm py-2" th:text="|Loaded List|"></div>
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_depAddList"><tr><td></td></tr></table>
                                                     </div>
@@ -440,17 +443,17 @@
                                         </div>
                                 	</form>
                                 		<div class="srcProjectSearch srcBtn">
-                                        	<div class="srcProject1 card" style="display:none;">
-                                                <div class="card-header text-bold" th:text="'Search Results'"></div>
-                                                <div class="card-body">
+                                        	<div class="srcProject1 card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_srcProjectList1"><tr><td></td></tr></table>
                                                         <div id="srcProjectPager1"></div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="srcProject2 card" style="display:none;">
-                                                <div class="card-header text-bold">
+                                            <div class="srcProject2 card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
                                                         <div class="col-10">
@@ -458,17 +461,17 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="card-body">
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_srcProjectList2"><tr><td></td></tr></table>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="srcBtn" id="content_dep_default">
-                                            <div class="card">
-                                                <div class="card-header text-bold" th:text="'Loaded List'"></div>
-                                                <div class="card-body">
+                                        <div class="srcBtn" id="_srcAddListContainer" style="display: none">
+                                            <div class="card card-secondary card-outline">
+                                                <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_srcAddList"><tr><td></td></tr></table>
                                                     </div>
@@ -598,35 +601,35 @@
                                         </div>
                                   	</form>
                                   		<div class="binProjectSearch binBtn">
-                                        	<div class="binProject1 card" style="display:none;">
-                                                <div class="card-header text-bold" th:text="'Search Results'"></div>
-                                                <div class="card-body">
+                                        	<div class="binProject1 card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_binProjectList1"><tr><td></td></tr></table>
                                                         <div id="binProjectPager1"></div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="binProject2 card" style="display:none;">
-                                                <div class="card-header text-bold">
+                                            <div class="binProject2 card card-secondary card-outline" style="display:none;">
+                                                <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
                                                         <div class="col-10">
-                                                            <a class="btn btn-danger btn-sm float-right px-3" th:onclick="|bin_fn.showDialog()|" th:text="load"></a>
+                                                            <a class="btn btn-danger btn-xs float-right px-3" th:onclick="|bin_fn.showDialog()|" th:text="load" style="font-size: .8rem"></a>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="card-body">
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_binProjectList2"><tr><td></td></tr></table>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="binBtn" id="content_dep_default">
-                                            <div class="card">
-                                                <div class="card-header text-bold" th:text="'Loaded List'"></div>
-                                                <div class="card-body">
+                                        <div class="binBtn" id="_binAddListContainer" style="display: none">
+                                            <div class="card card-secondary card-outline">
+                                                <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
+                                                <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
                                                         <table id="_binAddList"><tr><td></td></tr></table>
                                                     </div>

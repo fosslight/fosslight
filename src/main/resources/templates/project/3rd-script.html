@@ -576,6 +576,8 @@ var party_evt = {
 				_mainLastsel = -1;
 				
 				if(data.rows.length > 0) {
+                    $("#_3rdAddListContainer").show();
+
 					var multRowIds = []; 
 					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
 					
@@ -598,7 +600,7 @@ var party_evt = {
 					}
 				}
 				
-				tableRefreshNew("_3rdAddList");
+				tableRefreshNew("#_3rdAddList");
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				//해당 3rd party tab을 연다

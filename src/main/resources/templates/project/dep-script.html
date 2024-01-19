@@ -524,6 +524,9 @@ var dep_fn = {
 			mtype: 'GET',
 			loadComplete: function(data){
 				tableRefreshNew("_depAddList");
+                if(data.rows.length > 0) {
+                    $("#_depAddListContainer").show();
+                }
 			}
 		}
 	},	
