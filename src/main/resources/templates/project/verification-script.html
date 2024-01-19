@@ -116,25 +116,18 @@
                 if (curIdenStatus && curIdenStatus != "PROG" && curIdenStatus != "NA") {
                     $(".editYn").attr("readonly", true);
                     $(".editYn").css("background-color", "#f3f6f8");
-
-// 				if(CKEDITOR.instances.editor2) {
-// 					CKEDITOR.instances.editor2.config.readOnly = true;
-// 				}
+                    $('#editor2').summernote('disable');
                 }
             } else {
                 if (curIdenStatus == "CONF") {
                     $(".editYn").attr("readonly", true);
                     $(".editYn").css("background-color", "#f3f6f8");
-// 				if(CKEDITOR.instances.editor2) {
-// 					CKEDITOR.instances.editor2.config.readOnly = true;
-// 				}
+                    $('#editor2').summernote('disable');
                 }
             }
 
             if ("N" == [[${ossNotice.editNoticeYn}]]) {
-// 			if(CKEDITOR.instances.editor2) {
-// 				CKEDITOR.instances.editor2.config.readOnly = true;
-// 			}
+            	$('#editor2').summernote('disable');
             }
 
             $("#docType > [value^='noticeDownload']").trigger("change");
@@ -900,7 +893,7 @@
                 });
                 // [Pakage Document Download START]
                 $('#packageDocDownload').click(function (e) {
-                    var type = $('#docType').val();
+                    var type = $('#docType option:selected').val();
 
                     if (type == 'noticeDownload') {
                         fn.downloadNotice();
@@ -1404,12 +1397,32 @@
                     noti.style.paddingBottom = "24px";
                     noti.appendChild(document.createTextNode(result.resultData));
 
-                    alertify.alert().set({
-                        'resizable': true,
-                        'startMaximized': true,
-                        'message': result.resultData
-                    }).show();
-                    alertify.alert().set({'resizable': false, 'startMaximized': false});
+                    if(!alertify.openPreviewPop){
+    					alertify.dialog('openPreviewPop', function() {
+    						return {
+    							setup: function() {
+    								var settings = alertify.alert().settings;
+    								
+    								for (var prop in settings) {
+    									this.settings[prop] = settings[prop];
+    								}
+    								
+    								var setup = alertify.alert().setup();
+									setup.focus.element = 1;
+									
+    								return setup;
+    							},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.content.style.top = "57px";
+							        }
+								}
+    						};
+    					}, false, 'alert');
+                	}
+    				
+    				alertify.openPreviewPop().set({'resizable': true, 'startMaximized':true, 'message':result.resultData}).show();
+    				alertify.openPreviewPop().set({'resizable': false, 'startMaximized':false});
 
                     var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
 
@@ -1789,10 +1802,8 @@
 
             downloadNotice: function () {
                 if ($("#append").prop("checked")) {
-// 				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
-                    $('#noticeForm input[name=appendedTEXT]').val("");
-                    $('#noticeForm input[name=appended]').val("");
+                	$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                 }
 
                 $("#editCompanyName").attr("disabled", false);
@@ -1825,10 +1836,8 @@
 
             downloadNoticeText: function () {
                 if ($("#append").prop("checked")) {
-// 				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
-                    $('#noticeForm input[name=appendedTEXT]').val("");
-                    $('#noticeForm input[name=appended]').val("");
+                	$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                 }
 
                 $("#editCompanyName").attr("disabled", false);
@@ -1862,10 +1871,8 @@
 
             downloadNoticeSimple: function () {
                 if ($("#append").prop("checked")) {
-// 				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
-                    $('#noticeForm input[name=appendedTEXT]').val("");
-                    $('#noticeForm input[name=appended]').val("");
+                	$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                 }
 
                 $("#editCompanyName").attr("disabled", false);
@@ -1896,13 +1903,10 @@
                     }
                 }).submit();
             },
-
             downloadNoticeTextSimple: function () {
                 if ($("#append").prop("checked")) {
-// 				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
-                    $('#noticeForm input[name=appendedTEXT]').val("");
-                    $('#noticeForm input[name=appended]').val("");
+ 					$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                 }
 
                 $("#editCompanyName").attr("disabled", false);
@@ -2078,21 +2082,10 @@
                     } else {
                         $("#editEmail").attr("disabled", checked);
                     }
-
+                    
                     if (type != "init" && $("#append").prop("checked")) {
-// 					if(CKEDITOR.instances.editor2) {
-// 						CKEDITOR.instances.editor2.setReadOnly(false);
-// 					}
+                    	$('#editor2').summernote('disable');
                     }
-
-                    $("#chkAllowDownloadNoticeText").attr("disabled", !checked);
-                    $("#chkAllowDownloadSimpleHTML").attr("disabled", !checked);
-                    $("#chkAllowDownloadSimpleText").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXSheet").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXRdf").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXTag").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXJson").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXYaml").attr("disabled", !checked);
                 } else {
                     $("#companyName").attr("disabled", !checked);
                     $("#ossDistributionSite").attr("disabled", !checked);
@@ -2105,20 +2098,18 @@
                     $("#editEmail").attr("disabled", !checked);
 
                     if (type != "init" && $("#append").prop("checked")) {
-// 					if(CKEDITOR.instances.editor2) {
-// 						CKEDITOR.instances.editor2.setReadOnly(true);
-// 					}
+                    	$('#editor2').summernote('enable');
                     }
-
-                    $("#chkAllowDownloadNoticeText").attr("disabled", !checked);
-                    $("#chkAllowDownloadSimpleHTML").attr("disabled", !checked);
-                    $("#chkAllowDownloadSimpleText").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXSheet").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXRdf").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXTag").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXJson").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXYaml").attr("disabled", !checked);
                 }
+                
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadNoticeText']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSimpleHTML']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSimpleText']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXSheet']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXRdf']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXTag']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXJson']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXYaml']").attr("disabled", !checked);
             },
             initNotice: function () {
                 window.setTimeout(function () {
@@ -2504,11 +2495,22 @@
                 var verifyPrjVersion = [[${project.prjVersion}]];
                 if ("" != verifyPrjVersion) verifyPrjName += "(" + verifyPrjVersion + ")";
                 var createdDate = [[${@CommonFunction.formatDateSimple(project.createdDate)}]];
-                var vCreated = [[${project.prjUserName}]] + " " + [[${project.prjDivisionName }]] + ' (' + createdDate + ')';
+                var prjUserName = [[${project.prjUserName}]];
+                var prjDivisionName = [[${project.prjDivisionName }]];
+                
+                var vCreated = "";
+                if ("" != prjUserName && prjUserName != null) {
+                	vCreated = prjUserName;
+                }
+                if ("" != prjDivisionName && prjDivisionName != null) {
+                	if ("" != vCreated) vCreated += " ";
+                	vCreated += prjDivisionName;
+                }
+                vCreated += ' (' + createdDate + ')';
 
                 var bTag = document.createElement("b");
                 bTag.innerText = verifyPrjName;
-
+                
                 $("#verifyPrjName").html(bTag);
                 $("#verifyCreator").text(vCreated);
 
