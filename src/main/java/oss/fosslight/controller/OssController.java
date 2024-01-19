@@ -264,7 +264,7 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("downloadLocationList", toJson(downloadLocationList));
 		}
 		
-		return "/oss/edit";
+		return "oss/edit";
 	}
 
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")

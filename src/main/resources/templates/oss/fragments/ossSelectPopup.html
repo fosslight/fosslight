@@ -1,0 +1,45 @@
+<div class="pop ossSelectPop" style="width: 650px;position: fixed !important;">
+  <h5 class="mt-3"><strong>Select OSS</strong></h5>
+  <hr class="my-2"/>
+  <div class="text-danger"><strong class="red">This OSS is already in use and can not be just deleted.</strong></div>
+  <div class="text-lg-gray">Please select another OSS to replace this OSS.<br>The name of this OSS will be a nickname of selected OSS.</div>
+  <div class="popdata">
+    <!-- 검색 박스 -->
+    <fieldset class="listSearch2 mt-2">
+      <form id="listSearch" name="listSearch">
+        <dl class="basicSearch">
+          <dd>
+            <div class="col-md-12 d-flex">
+              <div class="form-check width-8rem p-2 pl-3" style="font-size: .85rem; margin-left: 0.3rem">
+                <input class="form-check-input" id="ossNameAllSearchFlag" type="checkbox">
+                <label class="form-check-label text-blue-gray" for="ossNameAllSearchFlag" style="font-weight: normal;" th:text="'Exact Match'"></label>
+                <input name="ossNameAllSearchFlag" type="hidden"/>
+              </div>
+              <div class="w-100">
+                <div class="input-group">
+                  <input class="form-control autoCom ui-autocomplete-input" name="schOssName" placeholder="Oss Name" type="text">
+                  <div class="input-group-append">
+                    <button class="btn btn-default search" id="search" type="submit">
+                      <i class="fa fa-search"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </dd>
+        </dl>
+      </form>
+    </fieldset>
+    <!-- //검색 박스 -->
+    <!-- 검색 리스트 -->
+    <div class="my-2">
+        <table id="_ossSelectList"><tr><td></td></tr></table>
+        <div id="ossSelectListPager"></div>
+    </div>
+    <!-- //검색 리스트 -->
+  </div>
+  <div class="pbtn mt-1">
+    <input type="button" value="Cancel" class="btn btn-danger btnCancel btnColor width-6rem" />
+    <input type="button" value="OK" id="ossSelectSubmit" class="btn btn-light-gray btnColor red width-6rem" />
+  </div>
+</div>

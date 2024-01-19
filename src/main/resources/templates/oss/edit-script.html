@@ -16,6 +16,7 @@
 	var renameFlag = "N";
 	var nickNameClone;
 	var commentsParam = {referenceId : [[${ossId}]], referenceDiv : 'oss'};
+    var ossId = [[${ossId}]] || null;
 	
 	//데이터 객체
 	var data = {
@@ -370,7 +371,7 @@
 			});
 			
 			//select oss 팝업 확인 버튼 
-			$("#ossSelectSubimt").on('click', function(){
+			$("#ossSelectSubmit").on('click', function(){
 				var rowId = $('#_ossSelectList').jqGrid('getGridParam', 'selrow');
 				if (rowId === null) {
 					alert([[#{msg.oss.required.select.grid}]]);
@@ -412,7 +413,6 @@
 	 									deleteTabInFrame('/oss/edit/'+ossId);
 
 	 									$('.ossSelectPop').hide();
-	 									$('#blind_wrap').hide();
 	 								});
 	 							}else{
 	 								alertify.error([[#{msg.common.valid}]], 0);
@@ -429,7 +429,7 @@
 				}
 			});
 			
-			$("#mergeOssSubimt").on('click', function(){
+			$("#mergeOssSubmit").on('click', function(){
 
                 var editorVal = ""; // summernote 데이터로 변경해야함
 				var sendData = {
@@ -1031,12 +1031,12 @@
 					var ids = $('#_ossSelectList').jqGrid('getDataIDs');
 					$.each(ids,function(idx,rowId){
 						var rowData = $('#_ossSelectList').jqGrid("getRowData",rowId);
-						if(rowData.ossId == '${ossId}'){
+						if(rowData.ossId == [[${ossId}]]){
 							$('#_ossSelectList').jqGrid("setRowData",rowId, false, {'background-color' : '#a9a9a9'});
 						}
 					})
 
-                    $("#_ossSelectList").jqGrid("setGridWidth", $(window).innerWidth()*0.46, true);
+                    $("#_ossSelectList").jqGrid("setGridWidth", 580, true);
 				},
 				onSelectRow: function(id){
 	 				var rowData = $('#_ossSelectList').jqGrid('getRowData',id);
@@ -1558,9 +1558,7 @@
 			success : function(data){
 				if (parseInt(data) > 0) {
 					loading.hide();
-					
 					$('.ossSelectPop').show();
-					$('#blind_wrap').show();
 				} else if (parseInt(data) == 0) {
 					deleteOssByOne();
 				} else {
@@ -2103,10 +2101,9 @@
 		$('.ossSelectPop').hide();
 		$("#_ossMergeCheckList").jqGrid('GridUnload');
 		$('.mergeOssCheckPop').show();
-
-        var ossId = [[#{ossId}]];
+;
 		$('#_ossMergeCheckList').jqGrid({
-			url:`/oss/ossMergeCheckList/${ossId}/${newOssId}`,
+			url: `/oss/ossMergeCheckList/${ossId}/${newOssId}`,
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -2137,7 +2134,7 @@
 			height: 'auto',
 			loadComplete: function(id){
 				$('#_ossMergeCheckList').jqGrid("setRowData",[[${ossId}]], false, {'background-color' : '#ada9a9'});
-                $("#_ossMergeCheckList").jqGrid("setGridWidth", $(window).innerWidth()*0.46, true);
+                $("#_ossMergeCheckList").jqGrid("setGridWidth", 560, true);
 			},
 			onSelectRow: function(id){
 			},
