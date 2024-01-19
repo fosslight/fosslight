@@ -14,10 +14,10 @@
                             <span class="text-lg-gray text-smaller mx-1" th:id="verifyCreator"></span>
                         </div>
                         <div class="col-sm-4 float-right">
-                        	<div class="float-right" th:if="${not @CommonFunction.isAdmin() and (project.completeYn eq 'Y' or project.verificationStatus eq 'NA' or project.distributeDeployYn eq 'Y' or project.verificationStatus eq 'REV')}">
+                        	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.verificationStatus == 'NA' or project.distributeDeployYn == 'Y' or project.verificationStatus == 'REV')}">
                                	<button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" id="verReject" th:text="Reject"></button>
                         	</div>
-                            <div class="float-right" th:if="${project.completeYn ne 'Y' and project.dropYn ne 'Y' and project.verificationStatus ne 'NA' and project.distributeDeployYn ne 'Y'}">
+                            <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.verificationStatus != 'NA' and project.distributeDeployYn != 'Y'}">
                             	<button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" id="verConfirm" th:text="Confirm"></button>
                                 <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" id="verReject" th:text="Reject"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 review" id="verRequest" th:text="Request"></button>
@@ -152,12 +152,12 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="icheck-primary my-3">
-                                                <input type="radio" name="noticeOptions" id="optionDefault" checked="">
-                                                <label for="optionDefault" th:text="'Request to generate a default OSS Notice. (Select this in most cases.)'"></label>
+                                                <input type="radio" name="btnEditOssNotice" id="r1" value="N" th:checked="${ossNotice.editNoticeYn == 'N'} ? 'checked'" th:disabled="${project.verificationStatus == 'CONF'} ? 'disabled'">
+                                                <label for="r1" th:text="'Request to generate a default OSS Notice. (Select this in most cases.)'"></label>
                                             </div>
                                             <div class="icheck-primary my-3">
-                                                <input type="radio" name="noticeOptions" id="optionModified">
-                                                <label for="optionModified" th:text="'Request to generate a modified OSS Notice. (Select this only in exceptional cases.)'"></label>
+                                                <input type="radio" name="btnEditOssNotice" id="r2" value="Y" th:checked="${ossNotice.editNoticeYn == 'Y'} ? 'checked'" th:disabled="${project.verificationStatus == 'CONF'} ? 'disabled'">
+                                                <label for="r2" th:text="'Request to generate a modified OSS Notice. (Select this only in exceptional cases.)'"></label>
                                             </div>
                                         </div>
                                     </div>
@@ -166,14 +166,13 @@
                                             <div class="row">
                                                 <div class="col-md-2">
                                                     <div class="custom-control custom-checkbox">
-                                                        <input class="custom-control-input" type="checkbox" name="useModifiedInfo" id="useCompanyNameInfo">
-                                                        <label for="useCompanyNameInfo" class="custom-control-label" th:text="'Company Name'"></label>
+                                                        <input class="custom-control-input" type="checkbox" name="companyName" id="companyName" th:value="${ossNotice?.editCompanyYn}"/>
+                                                        <label for="companyName" class="custom-control-label" th:text="'Company Name'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <input type="text" class="form-control" id="inputCompanyNameInfo" disabled>
+                                                    <input type="text" class="form-control" id="editCompanyName" name="companyNameFull" th:value="${ossNotice?.companyNameFull}" disabled/>
                                                 </div>
-
                                                 <div class="col-md-4 text-lg-gray text-bold">
                                                     <p class="mb-0" style="font-size: .8rem;" th:text="'* Deselect if the company name must be removed.'"></p>
                                                 </div>
@@ -181,12 +180,12 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="custom-control custom-checkbox">
-                                                        <input class="custom-control-input" type="checkbox" name="useModifiedInfo" id="useDistributionSiteInfo">
-                                                        <label for="useDistributionSiteInfo" class="custom-control-label" th:text="'OSS Distribution Site'"></label>
+                                                        <input class="custom-control-input" type="checkbox" name="ossDistributionSite" id="ossDistributionSite" th:value="${ossNotice?.editDistributionSiteUrlYn}"/>
+                                                        <label for="ossDistributionSite" class="custom-control-label" th:text="'OSS Distribution Site'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <input type="text" class="form-control" id="inputDistributionSiteInfo" disabled>
+                                                    <input type="text" class="form-control" id="editOssDistributionSite" name="distributionSiteUrl" th:value="${ossNotice?.distributionSiteUrl}" disabled>
                                                 </div>
                                                 <div class="col-md-4 text-lg-gray text-bold">
                                                     <p class="mb-0" style="font-size: .8rem;" th:text="'* Deselect if both OSS Package and OSS Notice are not registered on the OSS Distribution site.'"></p>
@@ -195,14 +194,13 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="custom-control custom-checkbox">
-                                                        <input class="custom-control-input" type="checkbox" name="useModifiedInfo"
-                                                        id="useEmailInfo">
-                                                        <label for="useEmailInfo"
-                                                            class="custom-control-label" th:text="'Email (Written Offer)'"></label>
+                                                        <input class="custom-control-input" type="checkbox" name="email" id="email" th:value="${ossNotice?.editEmailYn}"/>
+                                                        <label for="email" class="custom-control-label" th:text="'Email (Written Offer)'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <input type="text" class="form-control" id="inputEmailInfo" disabled>
+                                                    <input type="text" class="form-control" id="editEmail" name="email" th:value="${ossNotice?.email}" disabled/>
+                                                    <span class="retxt"></span>
                                                 </div>
                                                 <div class="col-md-4 text-lg-gray text-bold">
                                                     <p class="mb-0" style="font-size: .8rem;" th:text="'* Deselect if the written offer is not required(OSS Package is delivered directly to the recipient).'"></p>
@@ -211,8 +209,8 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="custom-control custom-checkbox">
-                                                        <input class="custom-control-input" type="checkbox" name="useModifiedInfo" id="useOssVersionInfo">
-                                                        <label for="useOssVersionInfo" class="custom-control-label" th:text="'Hide OSS Version'"></label>
+                                                        <input class="custom-control-input" type="checkbox" name="hideOssVersion" id="hideOssVersion" th:value="${ossNotice?.hideOssVersionYn}"/>
+                                                        <label for="hideOssVersion" class="custom-control-label" th:text="'Hide OSS Version'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6 text-lg-gray text-bold">
@@ -222,12 +220,15 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="custom-control custom-checkbox">
-                                                        <input class="custom-control-input" type="checkbox" name="useModifiedInfo" id="useAppendInfo">
-                                                        <label for="useAppendInfo" class="custom-control-label" th:text="Append"></label>
+                                                        <input class="custom-control-input" type="checkbox" id="append" th:value="${ossNotice?.editAppendedYn}"/>
+                                                        <label for="append" class="custom-control-label" th:text="Append"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6 text-lg-gray text-bold">
                                                     <p style="font-size: .8rem;" th:text="'* Select if there is something to add to the OSS Notice.'"></p>
+                                                    <div id ="editAppend">
+                                                    	<textarea id="editor2" th:utext="${ossNotice.appended}"></textarea>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row mt-3">
@@ -235,17 +236,17 @@
                                                     <label th:text="'OSS Notice File Format'"></label>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <select class="select2" multiple="multiple" style="width: 100%;">
-                                                            <option value="chkAllowDownloadNoticeHTML">Notice HTML</option>
-                                                            <option value="chkAllowDownloadNoticeText">Notice Text</option>
-                                                            <option value="chkAllowDownloadSimpleHTML">Simple HTML</option>
-                                                            <option value="chkAllowDownloadSimpleText">Simple Text</option>
-                                                            <option value="chkAllowDownloadSPDXSheet">SPDX(SpreadSheet)</option>
-                                                            <option value="chkAllowDownloadSPDXRdf">SPDX(RDF)</option>
-                                                            <option value="chkAllowDownloadSPDXTag">SPDX(TAG)</option>
-                                                            <option value="chkAllowDownloadSPDXJson">SPDX(JSON)</option>
-                                                            <option value="chkAllowDownloadSPDXYaml">SPDX(YAML)</option>
-                                                        </select>
+                                                    <select class="select2" multiple="multiple" name="noticeFileFormat" style="width: 100%;">
+                                                    	<option value="chkAllowDownloadNoticeHTML" th:text="'Notice HTML'" th:selected="${project.allowDownloadNoticeHTMLYn == 'Y'}"></option>
+                                                        <option value="chkAllowDownloadNoticeText" th:text="'Notice Text'" th:selected="${project.allowDownloadNoticeTextYn == 'Y'}"></option>
+                                                        <option value="chkAllowDownloadSimpleHTML" th:text="'Simple HTML'" th:selected="${project.allowDownloadSimpleHTMLYn == 'Y'}"></option>
+                                                        <option value="chkAllowDownloadSimpleText" th:text="'Simple Text'" th:selected="${project.allowDownloadSimpleTextYn == 'Y'}"></option>
+                                                        <option value="chkAllowDownloadSPDXSheet" th:text="'SPDX(SpreadSheet)'" th:selected="${project.allowDownloadSPDXSheetYn == 'Y'}"></option>
+                                                        <option value="chkAllowDownloadSPDXRdf" th:text="'SPDX(RDF)'" th:selected="${project.allowDownloadSPDXRdfYn == 'Y'}"></option>
+                                                        <option value="chkAllowDownloadSPDXTag" th:text="'SPDX(TAG)'" th:selected="${project.allowDownloadSPDXTagYn == 'Y'}"></option>
+                                                        <option value="chkAllowDownloadSPDXJson" th:text="'SPDX(JSON)'" th:selected="${project.allowDownloadSPDXJsonYn == 'Y'}"></option>
+                                                        <option value="chkAllowDownloadSPDXYaml" th:text="'SPDX(YAML)'" th:selected="${project.allowDownloadSPDXYamlYn == 'Y'}"></option>
+                                                  	</select>
                                                 </div>
                                             </div>
                                             <div class="row mt-5">
