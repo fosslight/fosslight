@@ -677,7 +677,12 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	}
 	
 	@Override
-	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster){
+	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster) {
+		return getPartnerValidationList(partnerMaster, false);
+	}
+	
+	@Override
+	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster, boolean coReview){
 		ProjectIdentification prjBean = new ProjectIdentification();
 		
 		prjBean.setReferenceId(partnerMaster.getPartnerId());
@@ -705,7 +710,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			
 			if ((CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(partnerInfo.getStatus())
 					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(partnerInfo.getStatus()))
-					&& CommonFunction.isAdmin()) {
+					&& (CommonFunction.isAdmin() || coReview)) {
 				pv.setCheckForAdmin(true);
 			}
 

@@ -379,6 +379,11 @@ public class CommonFunction extends CoTopComponent {
     	if (auth != null && "ROLE_ADMIN".equalsIgnoreCase(result) && auth.isAuthenticated()) { 
         	return true;
         }
+		
+		if (auth == null) {
+			return true;
+		}
+		
     	return false;
     }
 	

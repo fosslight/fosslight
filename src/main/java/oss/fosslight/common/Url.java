@@ -353,11 +353,14 @@ public final class Url {
 		public static final String SAVE_SECURITY = PATH + "/saveSecurity";
 		public static final String CHECK_REQ_ENTRY_SECURITY = PATH + "/checkReqEntrySecurity";
 		public static final String SEC_BULK_EDIT_POPUP = PATH + "/secBulkEditPopup";
-		public static final String SEC_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/secBulkEditPopup";
+		public static final String SEC_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/secBulksaveOssNicknameEditPopup";
 		
 		public static final String CHECK_MERGE_AND_SAVE = PATH + "/checkMergeAndSave";
 		
 		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile/{code}";
+		public static final String AUTO_REVIEW = PATH + "/autoReview/{startNow}";
+		public static final String AUTO_REVIEW_STATUS = PATH + "/autoReviewStatus";
+		public static final String AUTO_REVIEW_STOP = PATH + "/autoReviewStop";
 	}
 	
 	public static final class VERIFICATION {
@@ -783,6 +786,7 @@ public final class Url {
 			
 			/** API DOWNLOAD LOCATION 조회 */
 			public static final String FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH	= "/downloadlocation_search";
+			public static final String FOSSLIGHT_API_AUTOANALYSIS_REGISTER				= "/autoAnalysis_register";
 			
 		/** LICENSE */
 			/** API License List 조회 */

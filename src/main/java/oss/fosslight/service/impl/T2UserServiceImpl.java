@@ -513,6 +513,31 @@ public class T2UserServiceImpl implements T2UserService {
             throw new CSigninFailedException();
         }
 	}
+
+	@Override
+	public T2Users changeSession(String userId) {
+		T2Users params = new T2Users();
+		params.setUserId(userId);
+		params = getUser(params);
+
+		if (params == null) {
+			throw new CUserNotFoundException();
+		}
+
+		return setSession(params);
+	}
+
+	private T2Users setSession(T2Users params) {
+		List<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
+		T2Users getUser = getUserAndAuthorities(params);
+		for (T2Authorities auth : getUser.getAuthoritiesList()) {
+			roles.add(new SimpleGrantedAuthority(auth.getAuthority()));
+		}
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(params.getUserId(), null, roles);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		return getUser;
+	}
 	
 	/**
 	 * @param T2Users

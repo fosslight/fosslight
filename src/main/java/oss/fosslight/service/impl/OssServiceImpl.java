@@ -28,6 +28,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -68,15 +69,12 @@ import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.repository.VulnerabilityMapper;
-import oss.fosslight.service.CommentService;
-import oss.fosslight.service.HistoryService;
-import oss.fosslight.service.OssService;
-import oss.fosslight.service.PartnerService;
-import oss.fosslight.service.ProjectService;
-import oss.fosslight.service.VerificationService;
+import oss.fosslight.service.*;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationConfig;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Service
 @Slf4j
@@ -87,6 +85,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Autowired ProjectService projectService;
 	@Autowired PartnerService partnerService;
 	@Autowired VerificationService verificationService;
+	@Autowired SelfCheckService selfCheckService;
+
+	@Autowired AutoFillOssInfoService autoFillOssInfoService;
 
 	// Mapper
 	@Autowired OssMapper ossMapper;
@@ -2190,6 +2191,121 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
+	public Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName) {
+		Map<String, Object> resMap = new HashMap<>();
+		Map<String, Object> map = null;
+		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
+
+		switch(targetName.toUpperCase()) {
+			case CoConstDef.CD_CHECK_OSS_SELF:
+				map = selfCheckService.getIdentificationGridList(paramBean);
+				break;
+			case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+				map = projectService.getIdentificationGridList(paramBean);
+				break;
+			case CoConstDef.CD_CHECK_OSS_PARTNER:
+				map = partnerService.getIdentificationGridList(paramBean);
+				break;
+		}
+
+		// 중간 저장을 기능 대응을 위해 save시 유효성 체크를 data load시로 일괄 변경
+		if (map != null) {
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+			List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
+			pv.setAppendix("mainList", mainData);
+			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+
+			T2CoValidationResult vr = pv.validate(new HashMap<>());
+
+			if (!vr.isValid()) {
+				Map<String, String> validMap = vr.getValidMessageMap();
+				result.addAll(checkOssNameData(mainData, validMap, null));
+				resMap.put("validMap", validMap);
+			}
+
+			if(!vr.isDiff()){
+				Map<String, String> diffMap = vr.getDiffMessageMap();
+				result.addAll(checkOssNameData(mainData, null, diffMap));
+				resMap.put("diffMap", diffMap);
+			}
+
+			result.addAll(checkOssNameData(mainData, null, null));
+		}
+
+		if(result.size() > 0) {
+			result = checkOssName(result);
+			List<ProjectIdentification> valid = new ArrayList<ProjectIdentification>();
+			List<ProjectIdentification> invalid = new ArrayList<ProjectIdentification>();
+			for(ProjectIdentification prj : result){
+				if(prj.getCheckOssList().equals("I")){
+					invalid.add(prj);
+				} else{
+					valid.add(prj);
+				}
+			}
+			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
+					.collect(Collectors.toList()));
+		}
+		return resMap;
+	}
+
+	@Override
+	public Map<String, Object> getCheckOssLicenseAjax(ProjectIdentification paramBean, String targetName) {
+		Map<String, Object> resMap = new HashMap<>();
+		Map<String, Object> map = null;
+		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
+
+		switch(targetName.toUpperCase()) {
+			case CoConstDef.CD_CHECK_OSS_SELF:
+				map = selfCheckService.getIdentificationGridList(paramBean);
+
+				break;
+			case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+				map = projectService.getIdentificationGridList(paramBean);
+
+				break;
+
+			case CoConstDef.CD_CHECK_OSS_PARTNER:
+				map = partnerService.getIdentificationGridList(paramBean);
+
+				break;
+		}
+
+		// intermediate storage function correspondence : validation check when loading data
+		if (map != null) {
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+			List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
+			pv.setAppendix("mainList", mainData);
+			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+
+			T2CoValidationResult vr = pv.validate(new HashMap<>());
+
+			if (!vr.isValid()) {
+				Map<String, String> validMap = vr.getValidMessageMap();
+				result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, validMap, null));
+				resMap.put("validMap", validMap);
+			}
+
+			if (!vr.isDiff()){
+				Map<String, String> diffMap = vr.getDiffMessageMap();
+				result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, null, diffMap));
+				resMap.put("diffMap", diffMap);
+			}
+		}
+
+		if (result.size() > 0) {
+			Map<String, Object> data = autoFillOssInfoService.checkOssLicense(result);
+			resMap.put("list", data.get("checkedData"));
+			resMap.put("error", data.get("error"));
+		}
+		return resMap;
+	}
+
+	@Override
 	public List<ProjectIdentification> checkOssName(List<ProjectIdentification> list){
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
@@ -2875,7 +2991,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 	
 	@Override
-	public Map<String, Object> startAnalysis(String prjId, String fileSeq){
+	public Map<String, Object> startAnalysis(String prjId, String fileSeq, boolean coReviewer){
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		T2File fileInfo = new T2File();
 		
@@ -2897,8 +3013,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			} else {
 				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName());
 			}
-			
-			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1));
+			String key = coReviewer ? "autoanalysisCoReviewer.ssh.command" : "autoanalysis.ssh.command";
+			String analysisCommand = MessageFormat.format(CommonFunction.getProperty(key), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1));
 			
 			ProcessBuilder builder = new ProcessBuilder( "/bin/bash", "-c", analysisCommand );
 			
@@ -3008,6 +3124,32 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return resultMap;
 	}
 
+	@Override
+	public OssAnalysis getNewestOssInfo2(OssAnalysis bean) {
+		OssAnalysis ossNewistData = ossMapper.getNewestOssInfo2(bean);
+
+		if (ossNewistData != null) {
+			if (!isEmpty(ossNewistData.getDownloadLocationGroup())) {
+				String url = "";
+
+				String[] downloadLocationList = ossNewistData.getDownloadLocationGroup().split(",");
+				// master table에 download location이 n건인 경우에 대해 중복제거를 추가함.
+				String duplicateRemoveUrl =  String.join(",", Arrays.asList(downloadLocationList)
+						.stream()
+						.filter(CommonFunction.distinctByKey(p -> p))
+						.collect(Collectors.toList()));
+
+				if (!isEmpty(duplicateRemoveUrl)) {
+					url = duplicateRemoveUrl;
+				}
+
+				ossNewistData.setDownloadLocation(url);
+			}
+		}
+
+		return ossNewistData;
+	}
+	
 	@Override
 	public OssAnalysis getNewestOssInfo(OssAnalysis bean) {		
 		OssAnalysis ossNewistData = ossMapper.getNewestOssInfo(bean);
@@ -3975,5 +4117,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		return vDiffFlag;
+	}
+	
+	@Override
+	public String getOssAnalysisStatus(String prjId) {
+		String status = ossMapper.getOssAnalysisStatus(prjId);
+		return status;
+	}
+
+	@Override
+	public void deleteOssAnalysis(String prjId) {
+		ossMapper.deleteOssAnalysis(prjId);
 	}
 }
