@@ -147,25 +147,25 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 		return ossAnalysis;
 	}
 
-	private OssAnalysis changeFormatAnalysisResult(String[] stringResult) {
+	private OssAnalysis changeFormatAnalysisResult(List<String> stringResult) {
 		//output_col_idx = {'id':0, 'result':1, 'oss_name':2, 'nickname':3, 'oss_version':4, 'license':5, 'concluded':6, 'main_l':7, 'scancode_l': 8,
 		// 'need_review_l':9, 'dn_loc':10, 'homepage':11, 'copyright':12, 'comment':13}
 		OssAnalysis ossAnalysis = new OssAnalysis();
-		ossAnalysis.setGridId(stringResult[0]);
-		ossAnalysis.setGroupId(stringResult[0]);
-		ossAnalysis.setResult(stringResult[1]);
-		ossAnalysis.setOssName(stringResult[2]);
-		ossAnalysis.setOssNickname(stringResult[3]);
-		ossAnalysis.setOssVersion(versionFormatter(stringResult[4]));
-		ossAnalysis.setLicenseName(stringResult[5]);
-		ossAnalysis.setConcludedLicense(stringResult[6]);
-		ossAnalysis.setAskalonoLicense(stringResult[7].replaceAll("\\(\\d+\\)", ""));
-		ossAnalysis.setScancodeLicense(stringResult[8].replaceAll("\\(\\d+\\)", ""));
-		ossAnalysis.setNeedReviewLicenseAskalono(stringResult[9]);
-		ossAnalysis.setDownloadLocation(stringResult[10]);
-		ossAnalysis.setHomepage(stringResult[11]);
-		ossAnalysis.setOssCopyright(stringResult[12]);
-		ossAnalysis.setComment(stringResult[13]);
+		ossAnalysis.setGridId(stringResult.get(0));
+		ossAnalysis.setGroupId(stringResult.get(0));
+		ossAnalysis.setResult(stringResult.get(1));
+		ossAnalysis.setOssName(stringResult.get(2));
+		ossAnalysis.setOssNickname(stringResult.get(3));
+		ossAnalysis.setOssVersion(versionFormatter(stringResult.get(4)));
+		ossAnalysis.setLicenseName(stringResult.get(5));
+		ossAnalysis.setConcludedLicense(stringResult.get(6));
+		ossAnalysis.setAskalonoLicense(stringResult.get(7).replaceAll("\\(\\d+\\)", ""));
+		ossAnalysis.setScancodeLicense(stringResult.get(8).replaceAll("\\(\\d+\\)", ""));
+		ossAnalysis.setNeedReviewLicenseAskalono(stringResult.get(9));
+		ossAnalysis.setDownloadLocation(stringResult.get(10));
+		ossAnalysis.setHomepage(stringResult.get(11));
+		ossAnalysis.setOssCopyright(stringResult.get(12));
+		ossAnalysis.setComment(stringResult.get(13));
 
 		return ossAnalysis;
 	}
@@ -282,7 +282,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 			return returnValue;
 	}
 	@Override
-	public Map<String, Object> registAnalysisOss(String[] stringResult, Map<String, String> userDataMap, String prjId, String _token) throws ExecutionException, InterruptedException {
+	public Map<String, Object> registAnalysisOss(List<String> stringResult, Map<String, String> userDataMap, String prjId, String _token) throws ExecutionException, InterruptedException {
 
 		Map<String, Object> resultMap = new HashMap<>();
 		Future<Map<String, Object>> future = executorService.submit(new Callable<Map<String, Object>>() {
@@ -298,7 +298,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 		return resultMap;
 	}
 
-	public Map<String, Object> singleRegistAnalysisOss(String[] stringResult, Map<String, String> userDataMap, String prjId, String _token) throws ExecutionException, InterruptedException {
+	public Map<String, Object> singleRegistAnalysisOss(List<String> stringResult, Map<String, String> userDataMap, String prjId, String _token) {
 		//log.info(userDataMap.get("oss_name_origin"));
 		Map<String, Object> returnValue = new HashMap<>();
 		Map<String, Object> condition = new HashMap<>();
@@ -306,8 +306,8 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 		OssAnalysis resultData = changeFormatAnalysisResult(stringResult);
 		OssAnalysis userData = changeFormatUserData(userDataMap);
 		userData.setPrjId(prjId);
-		userData.setGridId(stringResult[0]);
-		userData.setComponentId(stringResult[0]);
+		userData.setGridId(stringResult.get(0));
+		userData.setComponentId(stringResult.get(0));
 		boolean isNick = false;
 		boolean isName = false;
 		boolean needcheck = false;
