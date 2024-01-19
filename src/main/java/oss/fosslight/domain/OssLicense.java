@@ -23,7 +23,17 @@ public class OssLicense extends ComBean implements Serializable {
 	private String licenseType;				//라이센스 타입
 	private String obligation;				
 	private String obligationChecks;			//Obligation Check 상태(고지, 소스공개, 체크)
-	
+
+	public OssLicense() {
+		super();
+	}
+
+	public OssLicense(String licenseId, String licenseName) {
+		super();
+		this.licenseId = licenseId;
+		this.licenseName = licenseName;
+	}
+
 	public String getOssId() {
 		return ossId;
 	}

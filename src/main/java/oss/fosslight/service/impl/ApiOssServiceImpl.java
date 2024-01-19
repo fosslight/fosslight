@@ -5,24 +5,29 @@
 
 package oss.fosslight.service.impl;
 
-import java.util.ArrayList;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CommonFunction;
+import oss.fosslight.api.entity.ApiOssMaster;
+import oss.fosslight.repository.ApiOssMapper;
+import oss.fosslight.service.ApiOssService;
+import oss.fosslight.service.OssService;
+import oss.fosslight.util.StringUtil;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import oss.fosslight.common.CommonFunction;
-import oss.fosslight.repository.ApiOssMapper;
-import oss.fosslight.service.ApiOssService;
-import oss.fosslight.util.StringUtil;
-
 @Service
-public class ApiOssServiceImpl implements ApiOssService {
+@Slf4j
+public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
 	/** The api oss mapper. */
 	@Autowired ApiOssMapper apiOssMapper;
+
+	@Autowired OssService ossService;
 
 	@Override
 	public List<Map<String, Object>> getOssInfo(Map<String, Object> paramMap) {
@@ -60,5 +65,21 @@ public class ApiOssServiceImpl implements ApiOssService {
 		nickList = (nickList != null ? nickList : Collections.emptyList());
 		return nickList.toArray(new String[nickList.size()]);
 	}
-	
+
+	@Override
+	public Map<String, Object> saveOss(ApiOssMaster apiOssMaster) {
+		if (apiOssMaster.getOssName() == null) {
+			log.error("OssName Not Exist");
+			throw new RuntimeException("OssName Not Exist");
+		}
+		if (apiOssMaster.getDeclaredLicenses() == null) {
+			log.error("DeclaredLicenses Not Exist");
+			throw new RuntimeException("DeclaredLicenses Not Exist");
+		}
+		apiOssMaster.setValidOssLicenses();
+		apiOssMaster.checkDetectedLicenseManaged();
+		apiOssMaster.detectedLicenseNotIncludeDeclaredLicense();
+		Map<String, Object> saveOssResult = ossService.saveOss(apiOssMaster.toOssMaster());
+		return ossService.sendMailForSaveOss(saveOssResult);
+	}
 }

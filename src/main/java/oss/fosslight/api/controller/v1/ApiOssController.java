@@ -5,6 +5,8 @@
 
 package oss.fosslight.api.controller.v1;
 
+import static oss.fosslight.common.CommonFunction.isAdmin;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +25,8 @@ import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.API;
-import oss.fosslight.domain.OssMaster;
+import oss.fosslight.api.entity.ApiOssMaster;
 import oss.fosslight.service.ApiOssService;
-import oss.fosslight.service.OssService;
 import oss.fosslight.service.T2UserService;
 
 import io.swagger.annotations.Api;
@@ -46,8 +47,6 @@ public class ApiOssController extends CoTopComponent {
 	private final T2UserService userService;
 	
 	private final ApiOssService apiOssService;
-
-	private final OssService ossService;
 	
 	@ApiOperation(value = "Search OSS List", notes = "OSS 조회")
     @ApiImplicitParams({
@@ -143,13 +142,13 @@ public class ApiOssController extends CoTopComponent {
 	@PostMapping(value = {API.FOSSLIGHT_API_OSS_REGISTER})
 	public CommonResult registerOss(
 			@RequestHeader String _token,
-			@ApiParam(value = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
+			@ApiParam(value = "API OSS Master", required = true) @RequestBody(required = true) ApiOssMaster apiOssMaster) {
 
-		if (userService.isAdmin(_token)) {
+		userService.checkApiUserAuthAndSetSession(_token);
+		if (isAdmin()) {
 			Map<String, Object> resultMap = new HashMap<String, Object>();
 			try {
-				resultMap = ossService.saveOss(ossMaster);
-				resultMap = ossService.sendMailForSaveOss(resultMap);
+				resultMap = apiOssService.saveOss(apiOssMaster);
 				return responseService.getSingleResult(resultMap);
 			} catch (Exception e) {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
