@@ -198,72 +198,76 @@ public class ApiSelfCheckController extends CoTopComponent {
                 return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE,
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
             }
-//						UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
-            			List<String> sheetList = new ArrayList<>();
-            			boolean sheetNamesCheckFlag = false;
-            			
-            			List<Object> sheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
-            			for (Object obj : sheets) {
-            				Map<String, Object> sheetMap = (Map<String, Object>) obj;
-            				if (sheetMap.containsKey("name")) {
-            					sheetList.add((String) sheetMap.get("name"));
-            				}
-            			}
-            			
-            			if (!sheetList.isEmpty()) {
-            				for (String sheetName : sheetList) {
-            					if (sheetName.equalsIgnoreCase("all")) {
-            						sheetNamesCheckFlag = true;
-            						break;
-            					}
-            				}
-            			}
-            			
-            			if (!sheetNamesCheckFlag && (!isEmpty(sheetNames) && !sheetNames.equalsIgnoreCase("all"))) {
-            				if (sheetNames.contains(",")) {
-            					for (String sheetName : sheetNames.split(",")) {
-            						if (!isEmpty(sheetName.trim())) sheetList.add(sheetName.trim());
-            					}
-            				} else {
-            					sheetList.add(sheetNames);
-            				}
-            			}
-            			
-            			String[] sheet = sheetList.toArray(new String[sheetList.size()]);
-        				boolean sheetLengthCheckFlag = sheet.length > 1 ? true : false;
-        				
-        				Map<String, Object> rtnMap = null;
-        				int sheetIdx = 0;
-        				
-        				for (String sheetNm : sheetList) {
-        					Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm, sheet, true);
-        					Map<String, Object> resultMap = getSheetDataResult(result, prjId, resetFlag, bean.getRegistFileId(), sheetLengthCheckFlag, sheetIdx);
-        					sheetIdx++;
-        					if (!resultMap.isEmpty()) {
-        						rtnMap = resultMap;
-        						if (rtnMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
-        							rtnMap = null;
-        							continue;
-        						} else {
-        							break;
-        						}
-        					}
-        				}
-        				
-        				if (rtnMap == null) {
-        					deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
-							deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-							
-							return responseService.getSingleResult(rtnMap);
-        				} else {
-        					if (rtnMap.containsKey("validError")) {
-        						return responseService.getFailResult(CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE
-										, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
-							} else {
-								return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE,
-					                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
-							}
-        				}
+            
+            List<String> sheetList = new ArrayList<>();
+            boolean sheetNamesEmptyFlag = isEmpty(sheetNames) ? true : false;
+            
+			if (sheetNamesEmptyFlag) {
+				List<Object> sheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+				for (Object obj : sheets) {
+					Map<String, Object> sheetMap = (Map<String, Object>) obj;
+					if (sheetMap.containsKey("name")) {
+						sheetList.add((String) sheetMap.get("name"));
+					}
+				}
+			} else {
+				if (sheetNames.contains(",")) {
+					for (String sheetName : sheetNames.split(",")) {
+						if (!isEmpty(sheetName.trim())) sheetList.add(sheetName.trim());
+					}
+				} else {
+					sheetList.add(sheetNames);
+				}
+			}
+            
+			String[] sheet = sheetList.toArray(new String[sheetList.size()]);
+			Map<String, Object> rtnMap = null;
+			List<ProjectIdentification> ossComponentList = new ArrayList<>();
+			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+			
+			for (String sheetNm : sheetList) {
+				Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm, sheet, sheetNamesEmptyFlag);
+				Map<String, Object> resultMap = getSheetDataResult(result);
+								
+				if (!resultMap.isEmpty()) {
+					rtnMap = resultMap;
+					if (rtnMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
+						rtnMap = null;
+						continue;
+					} else if (rtnMap.containsKey("ossComponents")) {
+						ossComponentList.addAll((List<ProjectIdentification>) rtnMap.get("ossComponents"));
+						List<List<ProjectIdentification>> ossComponentsLicenses = (List<List<ProjectIdentification>>) rtnMap.get("ossComponentsLicense");
+						if (!ossComponentsLicenses.isEmpty()) {
+							ossComponentsLicenseList.addAll(ossComponentsLicenses);
+						}
+					} else {
+						break;
+					}
+				}
+			}
+			
+			if (rtnMap.containsKey("validError")) {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE
+						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
+			}
+			
+			if (!ossComponentList.isEmpty()) {
+				rtnMap = null;
+				
+				if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+					apiSelfCheckService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_SELF_COMPONENT_ID, ossComponentList, ossComponentsLicenseList);
+				}
+				
+				Project project = new Project();
+				project.setPrjId(prjId);
+				project.setSrcCsvFileId(bean.getRegistFileId()); // set file id
+				selfCheckService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
+				
+				deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
+				deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+			}
+			
+			return responseService.getSingleResult(rtnMap);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE,
@@ -272,7 +276,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 	}
 
     @SuppressWarnings("unchecked")
-	private Map<String, Object> getSheetDataResult(Map<String, Object> result, String prjId, String resetFlag, String registFileId, boolean sheetLengthCheckFlag, int sheetIdx) {
+	private Map<String, Object> getSheetDataResult(Map<String, Object> result) {
     	Map<String, Object> rtnMap = new HashMap<>();
     	String errorMsg = "";
     	
@@ -293,11 +297,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
 
 		if (ossComponents == null || ossComponents.isEmpty()) {
-			if (sheetLengthCheckFlag) {
-				rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
-			} else {
-				rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, getMessage("api.upload.file.sheet.no.match", new String[]{"Self-Check*"}));
-			}
+			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
 			return rtnMap;
 		}
 
@@ -310,29 +310,12 @@ public class ApiSelfCheckController extends CoTopComponent {
 
 		if (!vr.isValid()) {
 			rtnMap.put("validError", "validError");
-			return rtnMap;
 		} else {
-			List<ProjectIdentification> ossComponentList = new ArrayList<>();
-			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
-
-			if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag)) || (sheetLengthCheckFlag && sheetIdx > 0)) {
-				apiSelfCheckService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_SELF_COMPONENT_ID, ossComponentList, ossComponentsLicenseList);
-			}
-
-			ossComponentList.addAll(ossComponents);
-			ossComponentsLicenseList.addAll(ossComponentsLicense);
-
-			Project project = new Project();
-			project.setPrjId(prjId);
-			project.setSrcCsvFileId(registFileId); // set file id
-			selfCheckService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
-
-			// 정상처리된 경우 세션 삭제
-			deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
-			deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-
-			return rtnMap;
+			rtnMap.put("ossComponents", ossComponents);
+			rtnMap.put("ossComponentsLicense", ossComponentsLicense != null ? ossComponentsLicense : new ArrayList<ProjectIdentification>());
 		}
+		
+		return rtnMap;
 	}
 
     @ApiOperation(value = "SelfCheck Export", notes = "SelfCheck > Export")
