@@ -701,6 +701,8 @@ public class Project extends ComBean implements Serializable {
 	private String cdxJsonFileId;
 	private String cdxXmlFileId;
 	
+	private String[] noticeFileFormat;
+	
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -4382,5 +4384,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setChangeWatcherList(ArrayList<Map<String, String>> changeWatcherList) {
 		this.changeWatcherList = changeWatcherList;
+	}
+
+	public String[] getNoticeFileFormat() {
+		return noticeFileFormat;
+	}
+
+	public void setNoticeFileFormat(String[] noticeFileFormat) {
+		this.noticeFileFormat = noticeFileFormat;
 	}
 }

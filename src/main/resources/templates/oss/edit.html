@@ -178,7 +178,7 @@
                             </div>
                         </div>
                         <div class="col-md-3 commentList" th:if="${ossId != null}">
-							<div class="card card-lg-red" style="position:sticky;top:10px;">
+							<div class="card card-lg-red" style="position:sticky; top:10px;">
                             	<div class="card-header">
                                 	<h3 class="card-title" th:text="Comment"></h3>
                                     <div class="card-tools">
@@ -196,9 +196,9 @@
                       	</div>
                     </div>
             </section>
-            <!-- loading bar -->
+            <!-- loading bar 
             <th:block th:replace="oss/fragments/ossSelectPopup"></th:block>
-            <th:block th:replace="oss/fragments/mergeOssCheckPopup"></th:block>
+            <th:block th:replace="oss/fragments/mergeOssCheckPopup"></th:block> -->
             <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
             <!-- /. loading bar -->
         </div>

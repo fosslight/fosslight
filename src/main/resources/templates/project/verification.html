@@ -12,6 +12,10 @@
                         <div class="col-sm-8 text-left mt-2">
                             <span class="description-percentage text-dark-gray" id="verifyPrjName"></span>
                             <span class="text-lg-gray text-smaller mx-1" id="verifyCreator"></span>
+                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-primary center-atom" style="margin-left: 2.5rem; font-size: .85rem">
+                            	<input class="form-check-input text-orange" id="approve" name="approve" th:value="Y" type="checkbox">
+                               	<label class="form-check-label text-lg-gray" for="approve" th:text="'Approve without verification'"></label>
+                         	</span>
                         </div>
                         <div class="col-sm-4 float-right">
                         	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.verificationStatus == 'NA' or project.distributeDeployYn == 'Y' or project.verificationStatus == 'REV')}">
@@ -56,7 +60,7 @@
                                         <div class="col-sm-4">
                                             <div class="form-group clearfix">
                                                 <div class="icheck-primary d-inline">
-                                                    <input type="checkbox" id="autoVerify" name="autoVerify">
+                                                    <input type="checkbox" id="autoVerify" name="autoVerify" th:checked="true">
                                                     <label for="autoVerify" th:text="'Verify when file is uploaded'"></label>
                                                 </div>
                                             </div>
@@ -267,7 +271,7 @@
                                                     <label th:text="'OSS Notice File Format'"></label>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <select class="select2" multiple="multiple" name="noticeFileFormat" style="width: 100%;">
+                                                    <select class="select2" multiple="multiple" id="noticeFileFormat" name="noticeFileFormat" style="width: 100%;">
                                                     	<option value="chkAllowDownloadNoticeHTML" th:text="'Notice HTML'" th:selected="${project.allowDownloadNoticeHTMLYn == 'Y'}"></option>
                                                         <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
                                                         		value="chkAllowDownloadNoticeText" th:text="'Notice Text'" th:selected="${project.allowDownloadNoticeTextYn == 'Y'}"

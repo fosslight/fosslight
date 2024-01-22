@@ -2656,7 +2656,7 @@ var tableRefreshNew = function (id) {
         , "_binProjectList1", "_binProjectList2", "_binAddList", "_binaryFileList", "_binAndroidProjectList1", "_binAndroidProjectList2", "list", "totalList", "fixedList", "notFixedList", "_vulnInfoList"];
 
     if ("_srcProjectList1" == id || "_srcProjectList2" == id || "_srcAddList" == id || "_depProjectList1" == id || "_depProjectList2" == id || "_depAddList" == id
-    		|| "_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id) {
+    		|| "_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id || "_list-1" == id || "_list-2" == id) {
         window.setTimeout(function () {
             var width = $(".card-body").width() - 40;
             $('.ui-jqgrid-btable').each(function () {

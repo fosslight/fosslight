@@ -787,34 +787,34 @@ var fn = {
 		})
 	},
 	downloadExcel : function(){
-//		if(isMaximumRowCheck(totalRow)){
+		if(isMaximumRowCheck(totalRow)){
 			var data = fn.setGridParam();
 			
 			$.ajax({
-				   type: "POST",
-				   url: '/exceldownload/getExcelPost',
-				   data: JSON.stringify({"type":"project", "parameter":JSON.stringify(data)}),
-					dataType : 'json',
-					cache : false,
-					contentType : 'application/json',
-				   success: function (data) {
-					   loading.hide();
-					   
-					   if("false" == data.isValid) {
-						   if(data.validMsg == "overflow"){
-							   alertify.error(getMsgMaxRowCnt(), 0);
-						   }else{
-			            	   alertify.error([[#{msg.common.valid2}]], 0);
-						   }
-					   } else {
-					       window.location = '/exceldownload/getFile?id='+data.validMsg;
-					   }
-				   },
-					error: function(data){
-						alertify.error([[#{msg.common.valid2}]], 0);
+				type: "POST",
+				url: '/exceldownload/getExcelPost',
+				data: JSON.stringify({"type":"project", "parameter":JSON.stringify(data)}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					loading.hide();
+					
+					if ("false" == data.isValid) {
+						if (data.validMsg == "overflow"){
+							alertify.error(getMsgMaxRowCnt(), 0);
+						} else {
+			           		alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					} else {
+						window.location = '/exceldownload/getFile?id='+data.validMsg;
 					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
 			});
-//		}
+		}
 	},
 	downloadReport : function(obj, permission){
 		if(parseInt(permission) > 0){
