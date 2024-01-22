@@ -10,8 +10,12 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-8 text-left mt-2">
-                            <span class="description-percentage text-dark-gray" th:id="verifyPrjName"></span>
-                            <span class="text-lg-gray text-smaller mx-1" th:id="verifyCreator"></span>
+                            <span class="description-percentage text-dark-gray" id="verifyPrjName"></span>
+                            <span class="text-lg-gray text-smaller mx-1" id="verifyCreator"></span>
+                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-primary center-atom" style="margin-left: 2.5rem; font-size: .85rem">
+                            	<input class="form-check-input text-orange" id="approve" name="approve" th:value="Y" type="checkbox">
+                               	<label class="form-check-label text-lg-gray" for="approve" th:text="'Approve without verification'"></label>
+                         	</span>
                         </div>
                         <div class="col-sm-4 float-right">
                         	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.verificationStatus == 'NA' or project.distributeDeployYn == 'Y' or project.verificationStatus == 'REV')}">
@@ -56,7 +60,7 @@
                                         <div class="col-sm-4">
                                             <div class="form-group clearfix">
                                                 <div class="icheck-primary d-inline">
-                                                    <input type="checkbox" id="autoVerify" name="autoVerify">
+                                                    <input type="checkbox" id="autoVerify" name="autoVerify" th:checked="true">
                                                     <label for="autoVerify" th:text="'Verify when file is uploaded'"></label>
                                                 </div>
                                             </div>
@@ -139,7 +143,7 @@
                                                 </div>
                                                 <div class="row mt-3">
                                                     <div class="col-7 offset-md-2 text-lg-gray">
-                                                    	<p class="text-smaller" th:text="'* The maximum file size for uploading is 4GB.'"></p>
+                                                    	<p class="text-smaller" th:text="'* The maximum file size for uploading is 5GB.'"></p>
                                                     </div>
                                                 </div>
                                         	</div>
@@ -149,7 +153,7 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="menu-notice" role="tabpanel" aria-labelledby="cnotice-tab">
-                                    <div class="row">
+                                	<div class="row">
                                         <div class="col-md-6">
                                             <div class="icheck-primary my-3">
                                                 <input type="radio" name="btnEditOssNotice" id="r1" value="N" th:checked="${ossNotice.editNoticeYn == 'N'} ? 'checked'" th:disabled="${project.verificationStatus == 'CONF'} ? 'disabled'">
@@ -163,6 +167,37 @@
                                     </div>
                                     <div class="card card-widget bg-ivory mt-1">
                                         <div class="card-body">
+                                        	<form id="noticeForm">
+                                			<input type="hidden" id="editNoticeYn" name="editNoticeYn" th:value="${ossNotice.editNoticeYn}"/>
+											<input type="hidden" id="editCompanyYn" name="editCompanyYn" th:value="${ossNotice.editCompanyYn}"/>
+											<input type="hidden" id="editDistributionSiteUrlYn" name="editDistributionSiteUrlYn" th:value="${ossNotice.editDistributionSiteUrlYn}"/>
+											<input type="hidden" id="editEmailYn" name="editEmailYn" th:value="${ossNotice.editEmailYn}"/>
+											<input type="hidden" id="hideOssVersionYn" name="hideOssVersionYn" th:value="${ossNotice.hideOssVersionYn}"/>
+											<input type="hidden" id="editAppendedYn" name="editAppendedYn" th:value="${ossNotice.editAppendedYn}"/>
+											<input type="hidden" name="prjId" th:value="${project.prjId}"/>
+											<input type="hidden" id="useCustomNoticeYn" name="useCustomNoticeYn" th:value="${project.useCustomNoticeYn}"/>
+											<input type="hidden" id="noticeHtml" name="noticeHtml" value=""/>
+											<input type="hidden" name="noticeType" th:value="${project.noticeType}" />
+											<input type="hidden" name="packageJson"/>
+											<input type="hidden" name="packageFileId" id="packageFileId"/>
+											<input type="hidden" name="userComment" />
+											<input type="hidden" name="withoutVerifyYn" th:value="${project.withoutVerifyYn}"/>
+											<input type="hidden" name="ignoreBinaryDbFlag" value=""/>
+											<input type="hidden" id="appended" name="appended" value="" />
+											<input type="hidden" id="appendedTEXT" name="appendedTEXT" value="" />
+											<!-- 다운로드 허용 플래그 -->
+											<input type="hidden" id="allowDownloadNoticeHTMLYn" name="allowDownloadNoticeHTMLYn" th:value="${project.allowDownloadNoticeHTMLYn}" />
+											<input type="hidden" id="allowDownloadNoticeTextYn" name="allowDownloadNoticeTextYn" th:value="${project.allowDownloadNoticeTextYn}" />
+											<input type="hidden" id="allowDownloadSimpleHTMLYn" name="allowDownloadSimpleHTMLYn" th:value="${project.allowDownloadSimpleHTMLYn}" />
+											<input type="hidden" id="allowDownloadSimpleTextYn" name="allowDownloadSimpleTextYn" th:value="${project.allowDownloadSimpleTextYn}" />
+											<input type="hidden" id="allowDownloadSPDXSheetYn" name="allowDownloadSPDXSheetYn" th:value="${project.allowDownloadSPDXSheetYn}" />
+											<input type="hidden" id="allowDownloadSPDXRdfYn" name="allowDownloadSPDXRdfYn" th:value="${project.allowDownloadSPDXRdfYn}" />
+											<input type="hidden" id="allowDownloadSPDXTagYn" name="allowDownloadSPDXTagYn" th:value="${project.allowDownloadSPDXTagYn}" />
+											<input type="hidden" id="allowDownloadSPDXJsonYn" name="allowDownloadSPDXJsonYn" th:value="${project.allowDownloadSPDXJsonYn}" />
+											<input type="hidden" id="allowDownloadSPDXYamlYn" name="allowDownloadSPDXYamlYn" th:value="${project.allowDownloadSPDXYamlYn}" />
+											<input type="hidden" id="isSimpleNotice" name="isSimpleNotice">
+											<input type="hidden" name="previewOnly" id="previewOnly" th:value="N"/>
+											
                                             <div class="row">
                                                 <div class="col-md-2">
                                                     <div class="custom-control custom-checkbox">
@@ -194,7 +229,7 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="custom-control custom-checkbox">
-                                                        <input class="custom-control-input" type="checkbox" name="email" id="email" th:value="${ossNotice?.editEmailYn}"/>
+                                                        <input class="custom-control-input" type="checkbox" id="email" th:value="${ossNotice?.editEmailYn}"/>
                                                         <label for="email" class="custom-control-label" th:text="'Email (Written Offer)'"></label>
                                                     </div>
                                                 </div>
@@ -236,61 +271,123 @@
                                                     <label th:text="'OSS Notice File Format'"></label>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <select class="select2" multiple="multiple" name="noticeFileFormat" style="width: 100%;">
+                                                    <select class="select2" multiple="multiple" id="noticeFileFormat" name="noticeFileFormat" style="width: 100%;">
                                                     	<option value="chkAllowDownloadNoticeHTML" th:text="'Notice HTML'" th:selected="${project.allowDownloadNoticeHTMLYn == 'Y'}"></option>
-                                                        <option value="chkAllowDownloadNoticeText" th:text="'Notice Text'" th:selected="${project.allowDownloadNoticeTextYn == 'Y'}"></option>
-                                                        <option value="chkAllowDownloadSimpleHTML" th:text="'Simple HTML'" th:selected="${project.allowDownloadSimpleHTMLYn == 'Y'}"></option>
-                                                        <option value="chkAllowDownloadSimpleText" th:text="'Simple Text'" th:selected="${project.allowDownloadSimpleTextYn == 'Y'}"></option>
-                                                        <option value="chkAllowDownloadSPDXSheet" th:text="'SPDX(SpreadSheet)'" th:selected="${project.allowDownloadSPDXSheetYn == 'Y'}"></option>
-                                                        <option value="chkAllowDownloadSPDXRdf" th:text="'SPDX(RDF)'" th:selected="${project.allowDownloadSPDXRdfYn == 'Y'}"></option>
-                                                        <option value="chkAllowDownloadSPDXTag" th:text="'SPDX(TAG)'" th:selected="${project.allowDownloadSPDXTagYn == 'Y'}"></option>
-                                                        <option value="chkAllowDownloadSPDXJson" th:text="'SPDX(JSON)'" th:selected="${project.allowDownloadSPDXJsonYn == 'Y'}"></option>
-                                                        <option value="chkAllowDownloadSPDXYaml" th:text="'SPDX(YAML)'" th:selected="${project.allowDownloadSPDXYamlYn == 'Y'}"></option>
+                                                        <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
+                                                        		value="chkAllowDownloadNoticeText" th:text="'Notice Text'" th:selected="${project.allowDownloadNoticeTextYn == 'Y'}"
+                                                        		th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        <option value="chkAllowDownloadSimpleHTML" th:text="'Simple HTML'" th:selected="${project.allowDownloadSimpleHTMLYn == 'Y'}"
+                                                        		th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
+                                                        		value="chkAllowDownloadSimpleText" th:text="'Simple Text'" th:selected="${project.allowDownloadSimpleTextYn == 'Y'}"
+                                                        		th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) == 'Y'}">
+                                                        	<option value="chkAllowDownloadSPDXSheet" th:text="'SPDX(SpreadSheet)'" th:selected="${project.allowDownloadSPDXSheetYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        	<option value="chkAllowDownloadSPDXRdf" th:text="'SPDX(RDF)'" th:selected="${project.allowDownloadSPDXRdfYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        	<option value="chkAllowDownloadSPDXTag" th:text="'SPDX(TAG)'" th:selected="${project.allowDownloadSPDXTagYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        	<option value="chkAllowDownloadSPDXJson" th:text="'SPDX(JSON)'" th:selected="${project.allowDownloadSPDXJsonYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        	<option value="chkAllowDownloadSPDXYaml" th:text="'SPDX(YAML)'" th:selected="${project.allowDownloadSPDXYamlYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        </th:block>
                                                   	</select>
                                                 </div>
                                             </div>
-                                            <div class="row mt-5">
-                                                <div class="col-md-6">
+                                            <div class="row mt-3" th:if="${project.useCustomNoticeYn == 'Y'}">
+                                            	<div class="col-md-2"></div>
+                                            	<div class="col-md-6">
+                                            		<span class="useCustomNotice" th:utext="#{msg.project.verification.use.custom.notice}"></span>
+                                            	</div>
+                                            </div>
+                                            </form>
+                                      	</div>
+                                      	<div class="row" th:if="${project.verificationStatus != 'CONF' and project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}">
+                                      		<div class="col-md-12 mb-3">
+                                      			<div class="row float-right pr-4">
+                                      				<button type="button" id="save" class="btn btn-teal-01 btn-sm width-6rem px-3" th:text="Save"></button>
+                                      			</div>
+                                      		</div>
+                                      	</div>
+                                   	</div>
+                                   	<div class="card card-widget bg-ivory mt-1">
+                                      	<div class="card-body">
+                                            <div class="row" th:with="isAllowDownload=${project.allowDownloadBitFlag > 0}">
+                                                <div class="col-md-12" th:if="${@CommonFunction.isAdmin()}" th:with="isProgOrConfStat=${project.verificationStatus == 'REV' or project.verificationStatus == 'CONF'}">
                                                     <div class="row">
-                                                        <div class="col-md-2 mx-0">
-                                                            <button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="Preview"></button>
+                                                        <div class="col-md-1 mx-0">
+                                                            <button type="button" id="noticePreview" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="Preview"></button>
                                                         </div>
-                                                        <div class="col-md-4 mx-0">
-                                                            <select class="custom-select rounded-0" id="exampleSelectRounded0">
-                                                                <option value="noticeDownload" th:text="'Default (html)'"></option>
-                                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) eq 'Y'}" 
-                                                                		value="noticeTextDownload" th:text="'Default (text)'"></option>
+                                                        <div class="col-md-2 mx-0">
+                                                            <select class="custom-select rounded-0" id="docType" name="docType">
+                                                                <option th:value="noticeDownload" th:text="'Default (html)'"></option>
+                                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}" 
+                                                                		th:value="noticeTextDownload" th:text="'Default (text)'"></option>
                                                                 <option value="noticeSimpleDownload" th:text="'Simple (html)'"></option>
-                                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) eq 'Y'}" 
-                                                                		value="noticeTextSimpleDownload" th:text="'Simple (text)'"></option>
-                                                     		<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) eq 'Y'}">
-                                                               	<option value="spdxSpreadSheet" th:text="'SPDX (spreadsheet)'"></option>
-                                                                <option value="spdxRdf" th:text="'SPDX (RDF)'"></option>
-																<option value="spdxTag" th:text="'SPDX (TAG)'"></option>
-																<option value="spdxJson" th:text="'SPDX (JSON)'"></option>
-																<option value="spdxYaml" th:text="'SPDX (YAML)'"></option>
-                                                     		</th:block>
-                                                                
+                                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}" 
+                                                                		th:value="noticeTextSimpleDownload" th:text="'Simple (text)'"></option>
+                                                     			<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) == 'Y'}">
+                                                               		<option th:value="spdxSpreadSheet" th:text="'SPDX (spreadsheet)'"></option>
+                                                                	<option th:value="spdxRdf" th:text="'SPDX (RDF)'"></option>
+																	<option th:value="spdxTag" th:text="'SPDX (TAG)'"></option>
+																	<option th:value="spdxJson" th:text="'SPDX (JSON)'"></option>
+																	<option th:value="spdxYaml" th:text="'SPDX (YAML)'"></option>
+                                                     			</th:block>
                                                             </select>
                                                         </div>
-                                                        <div class="col-md-2">
+                                                        <div class="col-md-1">
+                                                        	<button type="button" id="packageDocDownload" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="download"></button>
+                                                        </div>
+                                                        <div class="col-md-2" th:if="${isProgOrConfStat}">
                                                             <div class="form-check float-right mt-1">
-                                                                <input type="checkbox" class="form-check-input" id="exampleCheck2">
-                                                                <label class="form-check-label" for="exampleCheck2" th:text="'use Editor'"></label>
+                                                                <input type="checkbox" class="form-check-input" id="chkUseCustomNotice">
+                                                                <label class="form-check-label" for="chkUseCustomNotice" th:text="'Use the html editor'"></label>
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-3">
-                                                            <button type="button" class="btn btn-block btn-default btn-xm" disabled th:text="Editor"></button>
+                                                        <div class="col-md-1" th:if="${isProgOrConfStat}">
+                                                            <button type="button" id="noticeEditor" class="btn btn-block btn-default btn-xm" th:text="Editor" th:disabled="${project.useCustomNoticeYn != 'Y'}"></button>
                                                         </div> 
                                                     </div>
+                                                </div>
+                                                <div class="row col-md-12" th:if="${@CommonFunction.isAdmin() == false and isAllowDownload and project.verificationStatus == 'CONF'}">
+                                                	<div class="col-md-2">
+                                                    	<label th:text="'Download'"></label>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadNoticeHTMLYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'Notice HTML'" th:onclick="|fn.downloadNotice()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadNoticeTextYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'Notice Text'" th:onclick="|fn.downloadNoticeText()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSimpleHTMLYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'Simple HTML'" th:onclick="|fn.downloadNoticeSimple()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSimpleTextYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'Simple Text'" th:onclick="|fn.downloadNoticeTextSimple()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXSheetYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(SpreadSheet)'" th:onclick="|fn.downloadSpdxSpreadSheetExcel()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXRdfYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(RDF)'" th:onclick="|fn.downloadSpdxRdf(()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXTagYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(TAG)'" th:onclick="|fn.downloadSpdxTag(()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXJsonYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(JSON)'" th:onclick="|fn.downloadSpdxJson(()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXYamlYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(YAML)'" th:onclick="|fn.downloadSpdxYaml(()|"></button>
+                                                	</div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                
                             </div>
-                            
                         </div>
                     </div>
                     <div name="gridArea" id="girdAreaPackaging">
@@ -301,10 +398,13 @@
                             <div class="col-md-5" th:text="'* Enter the path info of source code for each OSS and click the Verify button'"></div>
                             <div class="col-md-5 ">
                                 <div class="row float-right">
-                                    <button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:text="Verify"></button>
-                                    <button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:text="Save"></button>
-                                    <button type="button" class="btn btn-lg-gray btn-sm width-8rem mr-xm px-3" th:text="'Upload Path'"></button>
-                                    <button type="button"  class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Export"></button>
+                                	<th:block th:if="${project.dropYn != 'Y'}">
+                                		<button th:if="${(project.verificationStatus == null or project.verificationStatus == 'PROG' or (@CommonFunction.isAdmin() and project.verificationStatus == 'REV' )) and project.viewOnlyFlag == 'N'}"
+                                				type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" name="verify" th:text="Verify"></button>
+                                    	<button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" name="btnSavePath" th:text="Save"></button>
+                                	</th:block>
+                                    <button type="button" class="btn btn-lg-gray btn-sm width-8rem mr-xm px-3" name="upload_path" th:text="'Upload Path'"></button>
+                                    <button type="button"  class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" name="export_path" th:text="Export"></button>
                                 </div>
                             </div>
     
@@ -316,12 +416,15 @@
                                     <div id="pager"></div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row" id="verifyBtnSet">
                                 <div class="col-md-4 mt-1">
-                                    <button type="button"
-                                        class="btn btn-default btn-sm width-6rem" th:text="README"></button>
-                                    <button type="button" class="btn btn-secondary btn-sm width-6rem" th:text="'File List'"></button>
-                                    <button type="button" class="btn btn-default btn-sm width-6rem" th:text="'Banned List'"></button>
+                                	<input type="hidden" id="verifyFlag" th:value="${project.statusVerifyYn}"/>
+									<input type="hidden" id="readmeFile" th:value="${project.readmeFileName}" />
+									<input type="hidden" id="exceptFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_PROPRIETARY')}" />
+									<input type="hidden" id="verifyFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_FILE_LIST')}" />
+                                    <button type="button" class="btn btn-default btn-sm width-6rem" id="btnReadme" th:style="${project.readmeFileName != null} ? 'background-color: #007bff; color: #fff;'" th:text="README"></button>
+                                    <button type="button" class="btn btn-default btn-sm width-6rem" id="btnVerifyFileContent" th:style="${project.verifyFileContent != null} ? 'background-color: #007bff; color: #fff;'" th:text="'File List'"></button>
+                                    <button type="button" class="btn btn-default btn-sm width-6rem" id="btnProprietary" th:style="${project.exceptFileContent != null} ? 'background-color: #007bff; color: #fff;'" th:text="'Banned List'"></button>
                                 </div>
                             </div>
                         </div>

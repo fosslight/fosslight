@@ -154,27 +154,27 @@
 				</div>
 			</th:block>
 
-			<th:block th:if="${attributionList or ossAttributionList}">
-				<th:block th:if="${attributionList}">
+			<th:block th:if="${!#lists.isEmpty(attributionList) or !#lists.isEmpty(ossAttributionList)}">
+				<th:block th:if="${!#lists.isEmpty(attributionList)}">
 					<th:block th:each="attr : ${attributionList}">
 						<th:block th:if="${isSimpleNotice != 'Y'}">
-							<p class="bdTop"><b th:text="${attr.licenseName} Attribution"></b></p>
+							<p class="bdTop"><b th:text="${attr.licenseName} + ' Attribution'"></b></p>
 						</th:block>
 						<th:block th:if="${isSimpleNotice == 'N'}">
-							<p><b th:text="${attr.licenseName} Attribution"></b></p>
+							<p><b th:text="${attr.licenseName} + ' Attribution'"></b></p>
 						</th:block>
 						<p th:text="${attr.attribution}"></p>
 					</th:block>
 				</th:block>
 
-				<th:block th:if="${ossAttributionList}">
+				<th:block th:if="${!#lists.isEmpty(ossAttributionList)}">
 					<th:block th:each="value : ${ossAttributionList}">
-						<th:block th:with="s=${value.split('__')}, ossname=${s[0]}, attribution=${s[1]}">
+						<th:block th:with="ossname=${#strings.setSplit(value, '_')[0]}, attribution=${#strings.setSplit(value, '_')[1]}">
 							<th:block th:if="${isSimpleNotice != 'Y'}">
-								<p class="bdTop"><b th:text="${ossname} Attribution"></b></p>
+								<p class="bdTop"><b th:text="${ossname} + ' Attribution'"></b></p>
 							</th:block>
 							<th:block th:if="${isSimpleNotice == 'N'}">
-								<p><b th:text="${ossname} Attribution"></b></p>
+								<p><b th:text="${ossname} + ' Attribution'"></b></p>
 							</th:block>
 							<p th:text="${attribution}"></p>
 						</th:block>
@@ -192,7 +192,7 @@
 				</th:block>
 			</th:block>
 
-			<th:block th:if="${licenseListUrls}">
+			<th:block th:if="${!#lists.isEmpty(licenseListUrls)}">
 				<p class="bdTop license"><b>License URLs</b><br></p>
 				<ul class="bdTop2 license">
 					<th:block th:each="license : ${licenseListUrls}">
@@ -208,7 +208,6 @@
 			<th:block th:if="${editAppendedYn == 'Y'}">
 				<p class="bdTop" th:text="${appended}"></p>
 			</th:block>
-			<th:block th:if="${editAppendedYn == 'N'}"></th:block>
 		</div>
 	</body>
 </html>

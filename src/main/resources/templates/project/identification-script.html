@@ -16,7 +16,13 @@ $(document).ready(function () {
 		var tabId = $(this).attr("id");
 		tabId = tabId.replace("tabMenu", "");
 		$("[name=gridArea]").hide();
-		$("#gridArea"+tabId).show();
+		
+		var applicable = $("#applicable" + tabId).is(':checked');
+		if (!applicable) {
+			$("#gridArea"+tabId).show();
+		} else {
+			$("#gridArea"+tabId).hide();
+		}
 	});
 
     $('.btnCommentHistory').on('click', function (e) {

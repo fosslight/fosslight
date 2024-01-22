@@ -6,6 +6,7 @@ var ossNames = [];
 var objs = [];
 var licenseNames = [];
 var srcData;
+var _srcLoadListLength = 0;
 
 var src_evt = {
 	csvDelFileSeq : [],
@@ -511,10 +512,12 @@ var src_fn = {
 			height: 'auto',
 			mtype: 'GET',
 			loadComplete: function(data){
-				tableRefreshNew("_srcAddList");
-                if(data.rows.length > 0) {
+                if (data.rows.length > 0) {
+                	_srcLoadListLength = data.rows.length;
                     $("#_srcAddListContainer").show();
                 }
+                
+                tableRefreshNew("_srcAddList");
 			}
 		}
 	},	
@@ -877,13 +880,13 @@ var src_fn = {
 			});
 		}
     			
-		//launch it.
-		var btnHtm = '<br/><b></b><br/>';
-		btnHtm += '<input type="button" value="Reset & Load" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="src_fn.loadToList(\'resetLoad\')"/>&nbsp;&nbsp;&nbsp;';
-		btnHtm += '<input type="button" value="Load & Append" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="src_fn.loadToList(\'append\')"/>&nbsp;&nbsp;&nbsp;';
-		btnHtm +='<input type="button" value="Cancel" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>&nbsp;&nbsp;&nbsp;';
+    	var btnHtml = 	'<div class="custom-layout" style="text-align: center;">';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px;" class="btn btn-lg-gray" onclick="src_fn.loadToList(\'resetLoad\')">Reset & Load</button>';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-teal-01" onclick="src_fn.loadToList(\'append\')"/>Load & Append</button>';
+		btnHtml 	+=	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-yellow-04" onclick="$(\'.ajs-close\').trigger(\'click\')"/>Cancel</button>';
+		btnHtml 	+=	'</div>';
 		
-		alertify.commentDialog(btnHtm);
+		alertify.commentDialog(btnHtml);
     }
 }
 
@@ -1291,7 +1294,7 @@ var src_grid = {
 
 				result.forEach(function(cur,idx){
 					if(cur != ""){
-						var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+						var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
 
 						$('#'+rowid+'_licenseNameBtn').append(mult);
 					}

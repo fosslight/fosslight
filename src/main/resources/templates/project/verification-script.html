@@ -116,25 +116,18 @@
                 if (curIdenStatus && curIdenStatus != "PROG" && curIdenStatus != "NA") {
                     $(".editYn").attr("readonly", true);
                     $(".editYn").css("background-color", "#f3f6f8");
-
-// 				if(CKEDITOR.instances.editor2) {
-// 					CKEDITOR.instances.editor2.config.readOnly = true;
-// 				}
+                    $('#editor2').summernote('disable');
                 }
             } else {
                 if (curIdenStatus == "CONF") {
                     $(".editYn").attr("readonly", true);
                     $(".editYn").css("background-color", "#f3f6f8");
-// 				if(CKEDITOR.instances.editor2) {
-// 					CKEDITOR.instances.editor2.config.readOnly = true;
-// 				}
+                    $('#editor2').summernote('disable');
                 }
             }
 
             if ("N" == [[${ossNotice.editNoticeYn}]]) {
-// 			if(CKEDITOR.instances.editor2) {
-// 				CKEDITOR.instances.editor2.config.readOnly = true;
-// 			}
+            	$('#editor2').summernote('disable');
             }
 
             $("#docType > [value^='noticeDownload']").trigger("change");
@@ -487,7 +480,7 @@
                     }
 
                     var obj = {
-                        prjId: '${project.prjId}',
+                        prjId: [[${project.prjId}]],
                         gridFilePaths: filePaths,
                         gridComponentIds: componentIds,
                         fileSeqs: fileSeqs,
@@ -607,44 +600,88 @@
                     }
 
                     if ($("#append").prop("checked")) {
-// 					$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 					$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
+ 						$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 						$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                     }
 
-                    $("#editCompanyName").attr("disabled", false);
-                    $("#editOssDistributionSite").attr("disabled", false);
-                    $("#editEmail").attr("disabled", false);
-// 				$("#noticeForm input[name=userComment]").val(CKEDITOR.instances['editor'].getData());
+                    var innerHtml 	= 'Are you to enter a comment when confirm?';
+                    innerHtml 		+= '<textarea id="confirmEditor"></textarea>';
+                    
+                    if(!alertify.verConfirmDialog){
+						alertify.dialog('verConfirmDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									var buttons = setup.buttons;
+									var customButtons = [];
+									for (var i in buttons) {
+										if ('OK' == buttons[i].text) {
+											customButtons.push(buttons[i]);
+										}
+									}
+									setup.buttons = customButtons;
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
+								}
+							};
+						}, false, 'confirm');
+                	}
+                    
+                    alertify.verConfirmDialog(innerHtml, function () {
+                    	if ("" != $($("#confirmEditor").summernote('code')).text()){
+                    		$("#noticeForm input[name=userComment]").val($("#confirmEditor").summernote('code'));
+                    	} else {
+                    		$("#noticeForm input[name=userComment]").val("");
+                    	}
+                		
+                		$("#editCompanyName").attr("disabled", false);
+                        $("#editOssDistributionSite").attr("disabled", false);
+                        $("#editEmail").attr("disabled", false);
 
+                        $('#noticeForm').ajaxForm({
+                            url: '/project/verification/noticeAjax?confirm=conf',
+                            type: 'POST',
+                            dataType: "text",
+                            cache: false,
+                            success: function (data) {
+                                var result = jQuery.parseJSON(data);
 
-                    $('#noticeForm').ajaxForm({
-                        url: '/project/verification/noticeAjax?confirm=conf',
-                        type: 'POST',
-                        dataType: "text",
-                        cache: false,
-                        success: function (data) {
-                            var result = jQuery.parseJSON(data);
+                                if (result.isValid == 'false') {
+                                    alertify.error([[#{msg.common.valid2}]], 0);
+                                } else {
+                                    reloadTabInframe('/project/list');
+                                    loading.hide();
 
-                            if (result.isValid == 'false') {
-                                alertify.error([[#{msg.common.valid2}]], 0);
-                            } else {
-                                reloadTabInframe('/project/list');
+                                    var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+                                    fn.defaultNotice(checkedFlag);
+
+                                    alertify.alert([[#{msg.common.success}]], function () {
+                                        deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
+                                        activeTabInFrameList("PROJECT");
+                                    });
+                                }
+                            },
+                            error: function (data) {
                                 loading.hide();
-
-                                var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
-                                fn.defaultNotice(checkedFlag);
-
-                                alertify.alert([[#{msg.common.success}]], function () {
-                                    deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
-                                    activeTabInFrameList("PROJECT");
-                                });
+                                alertify.error([[#{msg.common.valid2}]], 0);
                             }
-                        },
-                        error: function (data) {
-                            loading.hide();
-                            alertify.error([[#{msg.common.valid2}]], 0);
-                        }
-                    }).submit();
+                        }).submit();
+                    });
+                    
+                    $("#confirmEditor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
                 });
 
                 // verReject 버튼
@@ -659,48 +696,55 @@
                         return false;
                     }
 
-                    var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to reject?';
-                    innerHtml += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
-                    innerHtml += '		<div id="editor3" style="width:470px; height:300px;"></div>';
-                    innerHtml += '	</div>';
-                    innerHtml += '</div>';
+                    var innerHtml 	= 'Are you sure you want to reject?';
+                    innerHtml 		+= '<textarea id="editor3"></textarea>';
+                    
+                    if(!alertify.verRejectDialog){
+						alertify.dialog('verRejectDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
+								}
+							};
+						}, false, 'confirm');
+                	}
+                    
+                    alertify.verRejectDialog(innerHtml, function () {
+ 						if ("" == $($("#editor3").summernote('code')).text()){
+ 							alertify.alert([[#{msg.project.required.comments}]], function(){});
 
-                    alertify.confirm().destroy(); // fullCustomize 와 중첩되는 영역을 초기화
-                    alertify.confirm(innerHtml, function () {
-// 					if(CKEDITOR.instances['editor3'].getData() == ""){
-// 						alertify.alert([[#{msg.project.required.comments}]], function(){});
+							return false;
+ 						} else {
+                        	var data = {
+                            	"prjId": [[${project.prjId}]]
+                            	, "verificationStatus": "PROG"
+                            	, "useCustomNoticeYn": "N"
+                            	, "userComment": $("#editor3").summernote('code')
+                            	, "referenceDiv": "12"
+                            	, "noticeFileFormat": $("#noticeFileFormat").val()
+                        	};
 
-// 						return false;
-// 					} else {
-                        var data = {
-                            "prjId": [[${project.prjId}]]
-                            , "verificationStatus": "PROG"
-                            , "useCustomNoticeYn": "N"
-                            , "userComment": "" // CKEDITOR.instances['editor3'].getData()
-                            , "referenceDiv": "12"
-                            , "allowDownloadNoticeHTMLYn": $("#allowDownloadNoticeHTMLYn").val()
-                            , "allowDownloadNoticeTextYn": $("#allowDownloadNoticeTextYn").val()
-                            , "allowDownloadSimpleHTMLYn": $("#allowDownloadSimpleHTMLYn").val()
-                            , "allowDownloadSimpleTextYn": $("#allowDownloadSimpleTextYn").val()
-                            , "allowDownloadSPDXSheetYn": $("#allowDownloadSPDXSheetYn").val()
-                            , "allowDownloadSPDXRdfYn": $("#allowDownloadSPDXRdfYn").val()
-                            , "allowDownloadSPDXTagYn": $("#allowDownloadSPDXTagYn").val()
-                            , "allowDownloadSPDXJsonYn": $("#allowDownloadSPDXJsonYn").val()
-                            , "allowDownloadSPDXYamlYn": $("#allowDownloadSPDXYamlYn").val()
-                        };
-
-                        fn.exeProjectStatus(data, "PROG");
-//					}
+                        	fn.exeProjectStatus(data, "PROG");
+						}
                     });
-
-// 				var _editor = CKEDITOR.instances.editor3;
-
-// 				if(_editor) {
-// 					_editor.destroy();
-// 				}
-
-//				CKEDITOR.replace('editor3', {});
-                })
+                    
+                    $("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                });
 
                 // verRequest 버튼
                 $('#verRequest').click(function (e) {
@@ -725,17 +769,9 @@
                         "prjId": [[${project.prjId}]]
                         , "verificationStatus": "REV"
                         , "useCustomNoticeYn": $('#useCustomNoticeYn').val()
-                        , "userComment": "" // CKEDITOR.instances['editor'].getData()
+                        , "userComment": [[${project.userComment}]]
                         , "referenceDiv": "12"
-                        , "allowDownloadNoticeHTMLYn": $("#allowDownloadNoticeHTMLYn").val()
-                        , "allowDownloadNoticeTextYn": $("#allowDownloadNoticeTextYn").val()
-                        , "allowDownloadSimpleHTMLYn": $("#allowDownloadSimpleHTMLYn").val()
-                        , "allowDownloadSimpleTextYn": $("#allowDownloadSimpleTextYn").val()
-                        , "allowDownloadSPDXSheetYn": $("#allowDownloadSPDXSheetYn").val()
-                        , "allowDownloadSPDXRdfYn": $("#allowDownloadSPDXRdfYn").val()
-                        , "allowDownloadSPDXTagYn": $("#allowDownloadSPDXTagYn").val()
-                        , "allowDownloadSPDXJsonYn": $("#allowDownloadSPDXJsonYn").val()
-                        , "allowDownloadSPDXYamlYn": $("#allowDownloadSPDXYamlYn").val()
+                        , "noticeFileFormat": $("#noticeFileFormat").val()
                     };
 
                     fn.exeProjectStatus(data, "REV");
@@ -900,7 +936,7 @@
                 });
                 // [Pakage Document Download START]
                 $('#packageDocDownload').click(function (e) {
-                    var type = $('#docType').val();
+                    var type = $('#docType option:selected').val();
 
                     if (type == 'noticeDownload') {
                         fn.downloadNotice();
@@ -1375,8 +1411,6 @@
                     cache: false,
                     contentType: 'application/json',
                     success: function (data) {
-                        resetEditor(CKEDITOR.instances.editor);
-
                         fn.btnCtl(userRole, status);
                         reloadTabInframe('/project/list');
 
@@ -1404,12 +1438,32 @@
                     noti.style.paddingBottom = "24px";
                     noti.appendChild(document.createTextNode(result.resultData));
 
-                    alertify.alert().set({
-                        'resizable': true,
-                        'startMaximized': true,
-                        'message': result.resultData
-                    }).show();
-                    alertify.alert().set({'resizable': false, 'startMaximized': false});
+                    if(!alertify.openPreviewPop){
+    					alertify.dialog('openPreviewPop', function() {
+    						return {
+    							setup: function() {
+    								var settings = alertify.alert().settings;
+    								
+    								for (var prop in settings) {
+    									this.settings[prop] = settings[prop];
+    								}
+    								
+    								var setup = alertify.alert().setup();
+									setup.focus.element = 1;
+									
+    								return setup;
+    							},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.content.style.top = "57px";
+							        }
+								}
+    						};
+    					}, false, 'alert');
+                	}
+    				
+    				alertify.openPreviewPop().set({'resizable': true, 'startMaximized':true, 'message':result.resultData}).show();
+    				alertify.openPreviewPop().set({'resizable': false, 'startMaximized':false});
 
                     var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
 
@@ -1789,10 +1843,8 @@
 
             downloadNotice: function () {
                 if ($("#append").prop("checked")) {
-// 				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
-                    $('#noticeForm input[name=appendedTEXT]').val("");
-                    $('#noticeForm input[name=appended]').val("");
+                	$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                 }
 
                 $("#editCompanyName").attr("disabled", false);
@@ -1825,10 +1877,8 @@
 
             downloadNoticeText: function () {
                 if ($("#append").prop("checked")) {
-// 				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
-                    $('#noticeForm input[name=appendedTEXT]').val("");
-                    $('#noticeForm input[name=appended]').val("");
+                	$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                 }
 
                 $("#editCompanyName").attr("disabled", false);
@@ -1862,10 +1912,8 @@
 
             downloadNoticeSimple: function () {
                 if ($("#append").prop("checked")) {
-// 				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
-                    $('#noticeForm input[name=appendedTEXT]').val("");
-                    $('#noticeForm input[name=appended]').val("");
+                	$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                 }
 
                 $("#editCompanyName").attr("disabled", false);
@@ -1896,13 +1944,10 @@
                     }
                 }).submit();
             },
-
             downloadNoticeTextSimple: function () {
                 if ($("#append").prop("checked")) {
-// 				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
-                    $('#noticeForm input[name=appendedTEXT]').val("");
-                    $('#noticeForm input[name=appended]').val("");
+ 					$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                 }
 
                 $("#editCompanyName").attr("disabled", false);
@@ -2078,21 +2123,10 @@
                     } else {
                         $("#editEmail").attr("disabled", checked);
                     }
-
+                    
                     if (type != "init" && $("#append").prop("checked")) {
-// 					if(CKEDITOR.instances.editor2) {
-// 						CKEDITOR.instances.editor2.setReadOnly(false);
-// 					}
+                    	$('#editor2').summernote('disable');
                     }
-
-                    $("#chkAllowDownloadNoticeText").attr("disabled", !checked);
-                    $("#chkAllowDownloadSimpleHTML").attr("disabled", !checked);
-                    $("#chkAllowDownloadSimpleText").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXSheet").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXRdf").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXTag").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXJson").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXYaml").attr("disabled", !checked);
                 } else {
                     $("#companyName").attr("disabled", !checked);
                     $("#ossDistributionSite").attr("disabled", !checked);
@@ -2105,20 +2139,18 @@
                     $("#editEmail").attr("disabled", !checked);
 
                     if (type != "init" && $("#append").prop("checked")) {
-// 					if(CKEDITOR.instances.editor2) {
-// 						CKEDITOR.instances.editor2.setReadOnly(true);
-// 					}
+                    	$('#editor2').summernote('enable');
                     }
-
-                    $("#chkAllowDownloadNoticeText").attr("disabled", !checked);
-                    $("#chkAllowDownloadSimpleHTML").attr("disabled", !checked);
-                    $("#chkAllowDownloadSimpleText").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXSheet").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXRdf").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXTag").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXJson").attr("disabled", !checked);
-                    $("#chkAllowDownloadSPDXYaml").attr("disabled", !checked);
                 }
+                
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadNoticeText']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSimpleHTML']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSimpleText']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXSheet']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXRdf']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXTag']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXJson']").attr("disabled", !checked);
+                $("select[name='noticeFileFormat'] option[value='chkAllowDownloadSPDXYaml']").attr("disabled", !checked);
             },
             initNotice: function () {
                 window.setTimeout(function () {
@@ -2504,11 +2536,22 @@
                 var verifyPrjVersion = [[${project.prjVersion}]];
                 if ("" != verifyPrjVersion) verifyPrjName += "(" + verifyPrjVersion + ")";
                 var createdDate = [[${@CommonFunction.formatDateSimple(project.createdDate)}]];
-                var vCreated = [[${project.prjUserName}]] + " " + [[${project.prjDivisionName }]] + ' (' + createdDate + ')';
+                var prjUserName = [[${project.prjUserName}]];
+                var prjDivisionName = [[${project.prjDivisionName }]];
+                
+                var vCreated = "";
+                if ("" != prjUserName && prjUserName != null) {
+                	vCreated = prjUserName;
+                }
+                if ("" != prjDivisionName && prjDivisionName != null) {
+                	if ("" != vCreated) vCreated += " ";
+                	vCreated += prjDivisionName;
+                }
+                vCreated += ' (' + createdDate + ')';
 
                 var bTag = document.createElement("b");
                 bTag.innerText = verifyPrjName;
-
+                
                 $("#verifyPrjName").html(bTag);
                 $("#verifyCreator").text(vCreated);
 

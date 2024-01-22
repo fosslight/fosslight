@@ -155,7 +155,7 @@ var com_evt = {
 				e.preventDefault();
 				
 				// 머지 체크
-				if("Y"!= $("#mergeYn").val()){
+				if("Y" != $("#mergeYn").val()) {
 					alertify.alert([[#{msg.project.required.merge}]], function(){
 						$("#tabMenuBom").trigger("click");
 					});
@@ -662,16 +662,32 @@ var com_fn = {
 
 		alertify.commentDialog(btnHtm);
 	},
-	checkAplicable :function(obj, target, flag){
+	checkAplicable : function(obj, target){
 		var aplicable = $(obj).val();
 
-		if($(obj).is(':checked')) {
+		if ($(obj).is(':checked')) {
 			$('.'+target).hide();
 		} else {
 			$('.'+target).show();
 			
-			if(target=="batBtn") {
+			if (target == "batBtn") {
 				bat_fn.changeSearch();
+			} else if ("partyBtn" == target){
+				if (_3rdLoadListLength == 0) {
+					$("#_3rdAddListContainer").hide();
+				}
+			} else if ("depBtn" == target){
+				if (_depLoadListLength == 0) {
+					$("#_depAddListContainer").hide();
+				}
+			} else if ("srcBtn" == target){
+				if (_srcLoadListLength == 0) {
+					$("#_srcAddListContainer").hide();
+				}
+			} else if ("binBtn" == target){
+				if (_binLoadListLength == 0) {
+					$("#_binAddListContainer").hide();
+				}
 			}
 		}
 	},

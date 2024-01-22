@@ -14,6 +14,7 @@ var partValidData;
 var partDiffData;
 var partInfoData;
 var partSubData;
+var _3rdLoadListLength = 0;
 
 var party_evt = {
 	init : function(){
@@ -261,6 +262,11 @@ var party_evt = {
 				var _tempRandId = "";
 				var newData = {};
 				
+				if (data.length > 0) {
+					$("#_3rdAddListContainer").show();
+					_exists3rdAddListLength = data.length;
+				}
+				
 				for(var i = 0; i < data.length; i++){
 					_tempRandId = $.jgrid.randId();
 					
@@ -480,9 +486,6 @@ var party_evt = {
 			gridview: true,
 			sortable: function(permutation){
 			},
-			rowNum: 20,
-			rowList: [20, 40, 60],
-			pager: '#pager',
 			sortname: 'prjId',
 			viewrecords: true,
 			sortorder: 'desc',
@@ -558,7 +561,7 @@ var party_evt = {
 				{name: 'partnerId', index: 'partnerId', width: 57, align: 'center', key:true},
 				{name: 'partnerName', index: 'partnerName', width: 327, align: 'left'},
 				{name: 'softwareName', index: 'softwareName', width: 262, align: 'left'},
-				{name: 'softwareVersion', index: 'softwareVersion', width: 120, align: 'left'},
+				{name: 'softwareVersion', index: 'softwareVersion', width: 120, align: 'center'},
 				{name: 'componentCount', index: 'componentCount', width: 110, align: 'center'},
 				{name: 'userRole', index: 'userRole', width: 110, align: 'center', hidden:true},
 				{name: 'delete', index: 'delete', width: 75, align: 'center', formatter: com_fn.displayDelete}
@@ -574,8 +577,9 @@ var party_evt = {
 			mtype: 'GET',
 			loadComplete: function(data){
 				_mainLastsel = -1;
-				
-				if(data.rows.length > 0) {
+				console.log(data);
+				if (data.rows.length > 0) {
+					_3rdLoadListLength = data.rows.length;
                     $("#_3rdAddListContainer").show();
 
 					var multRowIds = []; 
@@ -600,7 +604,7 @@ var party_evt = {
 					}
 				}
 				
-				tableRefreshNew("#_3rdAddList");
+				tableRefreshNew("_3rdAddList");
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				//해당 3rd party tab을 연다

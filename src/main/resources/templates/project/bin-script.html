@@ -6,6 +6,7 @@ var ossNames = [];
 var objs = [];
 var licenseNames = [];
 var binData;
+var _binLoadListLength = 0;
 
 // BIN 이벤트
 var bin_evt = {
@@ -593,11 +594,12 @@ var bin_fn = {
 			height: 'auto',
 			mtype: 'GET',
 			loadComplete: function(data){
-                tableRefreshNew("_binAddList");
-                if(data.rows.length > 0) {
+                if (data.rows.length > 0) {
+                	_binLoadListLength = data.rows.length;
                     $("#_binAddListContainer").show();
                 }
-
+                
+                tableRefreshNew("_binAddList");
             }
 		}
 	},	
@@ -967,13 +969,13 @@ var bin_fn = {
 			});
 		}
     			
-		//launch it.
-		var btnHtm = '<br/><b></b><br/>';
-		btnHtm += '<input type="button" value="Reset & Load" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="bin_fn.loadToList(\'resetLoad\')"/>&nbsp;&nbsp;&nbsp;';
-		btnHtm += '<input type="button" value="Load & Append" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="bin_fn.loadToList(\'append\')"/>&nbsp;&nbsp;&nbsp;';
-		btnHtm +='<input type="button" value="Cancel" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>&nbsp;&nbsp;&nbsp;';
+    	var btnHtml = 	'<div class="custom-layout" style="text-align: center;">';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px;" class="btn btn-lg-gray" onclick="bin_fn.loadToList(\'resetLoad\')">Reset & Load</button>';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-teal-01" onclick="bin_fn.loadToList(\'append\')"/>Load & Append</button>';
+		btnHtml 	+=	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-yellow-04" onclick="$(\'.ajs-close\').trigger(\'click\')"/>Cancel</button>';
+		btnHtml 	+=	'</div>';
 		
-		alertify.commentDialog(btnHtm);
+		alertify.commentDialog(btnHtml);
     }
 }
 

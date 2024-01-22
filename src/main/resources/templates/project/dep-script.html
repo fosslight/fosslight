@@ -6,6 +6,7 @@ var ossNames = [];
 var objs = [];
 var licenseNames = [];
 var depData;
+var _depLoadListLength = 0;
 
 // DEP 이벤트
 var dep_evt = {
@@ -20,7 +21,7 @@ var dep_evt = {
 		//Not aplicable
 		var aplicable = $('#applicableDep').is(':checked');
 		
-		if(aplicable){
+		if (aplicable) {
 			$('.depBtn').hide();
 		}
 
@@ -523,10 +524,12 @@ var dep_fn = {
 			height: 'auto',
 			mtype: 'GET',
 			loadComplete: function(data){
-				tableRefreshNew("_depAddList");
-                if(data.rows.length > 0) {
+                if (data.rows.length > 0) {
+                	_depLoadListLength = data.rows.length
                     $("#_depAddListContainer").show();
                 }
+                
+                tableRefreshNew("_depAddList");
 			}
 		}
 	},	
@@ -857,13 +860,13 @@ var dep_fn = {
 			});
 		}
     			
-		//launch it.
-		var btnHtm = '<br/><b></b><br/>';
-		btnHtm += '<input type="button" value="Reset & Load" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="dep_fn.loadToList(\'resetLoad\')"/>&nbsp;&nbsp;&nbsp;';
-		btnHtm += '<input type="button" value="Load & Append" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="dep_fn.loadToList(\'append\')"/>&nbsp;&nbsp;&nbsp;';
-		btnHtm +='<input type="button" value="Cancel" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>&nbsp;&nbsp;&nbsp;';
+		var btnHtml = 	'<div class="custom-layout" style="text-align: center;">';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px;" class="btn btn-lg-gray" onclick="dep_fn.loadToList(\'resetLoad\')">Reset & Load</button>';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-teal-01" onclick="dep_fn.loadToList(\'append\')"/>Load & Append</button>';
+		btnHtml 	+=	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-yellow-04" onclick="$(\'.ajs-close\').trigger(\'click\')"/>Cancel</button>';
+		btnHtml 	+=	'</div>';
 		
-		alertify.commentDialog(btnHtm);
+		alertify.commentDialog(btnHtml);
     },
     displayVulnerability : function(cellvalue, options, rowObject){
     	var display = "";
@@ -883,13 +886,13 @@ var dep_fn = {
 		}
 		
 		if(parseInt(cellvalue) >= 9.0 ) {
-			display="<span class=\"badge badge-dark\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">CRITICAL</span>";
+			display="<span class=\"badge badge-dark\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 		} else if(parseInt(cellvalue) >= 7.0 ) {
-			display="<span class=\"badge badge-danger\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">HIGH</span>";
+			display="<span class=\"badge badge-danger\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 		} else if(parseInt(cellvalue) >= 4.0) {
-			display="<span class=\"badge badge-orange\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">MEDIUM</span>";
+			display="<span class=\"badge badge-orange\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 		} else if(parseInt(cellvalue) > 0) {
-			display="<span class=\"badge badge-warning\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">LOW</span>";
+			display="<span class=\"badge badge-warning\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
 			display="<span style=\"font-size:0;\"></span>";
 		} else {
@@ -1285,7 +1288,7 @@ var dep_grid = {
 			    return false;
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {
-				if(iCol=="3") {
+				if (iCol=="3") {
 					fn_grid_com.showOssViewPage(depList, rowid, true, depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
 				}
 			},

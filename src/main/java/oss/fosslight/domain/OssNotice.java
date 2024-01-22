@@ -64,6 +64,7 @@ public class OssNotice extends ComBean implements Serializable {
 	private String editAppendedYn = "N";
 	private String isSimpleNotice;
 	private String previewOnly = "N";
+	private String[] noticeFileFormat;
 	
 	/** //OSS_NOTICE_NEW UI 변경 후 사용되는 properties */
 	
@@ -337,5 +338,11 @@ public class OssNotice extends ComBean implements Serializable {
 	}
 	public void setPreviewOnly(String previewOnly) {
 		this.previewOnly = previewOnly;
+	}
+	public String[] getNoticeFileFormat() {
+		return noticeFileFormat;
+	}
+	public void setNoticeFileFormat(String[] noticeFileFormat) {
+		this.noticeFileFormat = noticeFileFormat;
 	}
 }
