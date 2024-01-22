@@ -139,7 +139,7 @@
                                                 </div>
                                                 <div class="row mt-3">
                                                     <div class="col-7 offset-md-2 text-lg-gray">
-                                                    	<p class="text-smaller" th:text="'* The maximum file size for uploading is 4GB.'"></p>
+                                                    	<p class="text-smaller" th:text="'* The maximum file size for uploading is 5GB.'"></p>
                                                     </div>
                                                 </div>
                                         	</div>
@@ -225,7 +225,7 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="custom-control custom-checkbox">
-                                                        <input class="custom-control-input" type="checkbox" name="email" id="email" th:value="${ossNotice?.editEmailYn}"/>
+                                                        <input class="custom-control-input" type="checkbox" id="email" th:value="${ossNotice?.editEmailYn}"/>
                                                         <label for="email" class="custom-control-label" th:text="'Email (Written Offer)'"></label>
                                                     </div>
                                                 </div>
@@ -394,10 +394,13 @@
                             <div class="col-md-5" th:text="'* Enter the path info of source code for each OSS and click the Verify button'"></div>
                             <div class="col-md-5 ">
                                 <div class="row float-right">
-                                    <button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:text="Verify"></button>
-                                    <button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:text="Save"></button>
-                                    <button type="button" class="btn btn-lg-gray btn-sm width-8rem mr-xm px-3" th:text="'Upload Path'"></button>
-                                    <button type="button"  class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Export"></button>
+                                	<th:block th:if="${project.dropYn != 'Y'}">
+                                		<button th:if="${(project.verificationStatus == null or project.verificationStatus == 'PROG' or (@CommonFunction.isAdmin() and project.verificationStatus == 'REV' )) and project.viewOnlyFlag == 'N'}"
+                                				type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" name="verify" th:text="Verify"></button>
+                                    	<button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" name="btnSavePath" th:text="Save"></button>
+                                	</th:block>
+                                    <button type="button" class="btn btn-lg-gray btn-sm width-8rem mr-xm px-3" name="upload_path" th:text="'Upload Path'"></button>
+                                    <button type="button"  class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" name="export_path" th:text="Export"></button>
                                 </div>
                             </div>
     
@@ -409,12 +412,15 @@
                                     <div id="pager"></div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row" id="verifyBtnSet">
                                 <div class="col-md-4 mt-1">
-                                    <button type="button"
-                                        class="btn btn-default btn-sm width-6rem" th:text="README"></button>
-                                    <button type="button" class="btn btn-secondary btn-sm width-6rem" th:text="'File List'"></button>
-                                    <button type="button" class="btn btn-default btn-sm width-6rem" th:text="'Banned List'"></button>
+                                	<input type="hidden" id="verifyFlag" th:value="${project.statusVerifyYn}"/>
+									<input type="hidden" id="readmeFile" th:value="${project.readmeFileName}" />
+									<input type="hidden" id="exceptFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_PROPRIETARY')}" />
+									<input type="hidden" id="verifyFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_FILE_LIST')}" />
+                                    <button type="button" class="btn btn-default btn-sm width-6rem" id="btnReadme" th:style="${project.readmeFileName != null} ? 'background-color: #007bff; color: #fff;'" th:text="README"></button>
+                                    <button type="button" class="btn btn-default btn-sm width-6rem" id="btnVerifyFileContent" th:style="${project.verifyFileContent != null} ? 'background-color: #007bff; color: #fff;'" th:text="'File List'"></button>
+                                    <button type="button" class="btn btn-default btn-sm width-6rem" id="btnProprietary" th:style="${project.exceptFileContent != null} ? 'background-color: #007bff; color: #fff;'" th:text="'Banned List'"></button>
                                 </div>
                             </div>
                         </div>
