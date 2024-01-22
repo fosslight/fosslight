@@ -11,7 +11,11 @@
     <sql id="orderby">
     	ORDER BY T1.DEACTIVATE_FLAG ASC, 
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-    		CASE WHEN T1.OSS_NAME = #{ossName} THEN 1 ELSE 2 END ASC,
+			CASE
+    	    WHEN T1.OSS_NAME = #{ossName} THEN 1
+			WHEN T1.OSS_NAME LIKE CONCAT('%', #{ossName}, '%') THEN 2
+			ELSE 3
+			END ASC,
     	</if>
     	<choose>
     		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)"> OSS_ID desc</when>

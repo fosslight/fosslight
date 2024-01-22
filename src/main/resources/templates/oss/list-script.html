@@ -220,12 +220,21 @@
                         data: {context: "Do you want to delete the oss ?"}
                     };
                     postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
+                        let eFlag = false;
+                        document.addEventListener('keydown', function(event) {
+                            if (event.keyCode === 13) { eFlag = true; };
+                        }, true);
+
                         alertify.confirm(res, function (e) {
                             const comment = $("#promptPopupEditor").summernote('code');
                             if (e) {
-                                if ("" == comment) {
+                                if(eFlag) {
+                                    eFlag = false;
+                                    return false;
+                                } else if ("" == comment) {
                                     alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {
                                     });
+
                                     return false;
                                 } else {
                                     oss_lst_fn.multiDelAjax(deleteIds, comment);
@@ -552,6 +561,7 @@
 
         var fn = {
         	downloadExcel : function(){
+                console.log(totalRow);
         		if(isMaximumRowCheck(totalRow)){
         			var data = serializeObjectHelper();
         				
