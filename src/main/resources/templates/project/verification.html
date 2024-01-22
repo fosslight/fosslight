@@ -262,7 +262,7 @@
                                                 <div class="col-md-6 text-lg-gray text-bold">
                                                     <p style="font-size: .8rem;" th:text="'* Select if there is something to add to the OSS Notice.'"></p>
                                                     <div id ="editAppend">
-                                                    	<textarea id="editor2" th:utext="${ossNotice.appended}"></textarea>
+                                                    	<textarea id="editor2" row="3" th:utext="${ossNotice.appended}"></textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -342,7 +342,7 @@
                                                         </div>
                                                         <div class="col-md-2" th:if="${isProgOrConfStat}">
                                                             <div class="form-check float-right mt-1">
-                                                                <input type="checkbox" class="form-check-input" id="chkUseCustomNotice">
+                                                                <input type="checkbox" class="form-check-input" id="chkUseCustomNotice" th:checked="${project.useCustomNoticeYn == 'Y'} ? 'checked'">
                                                                 <label class="form-check-label" for="chkUseCustomNotice" th:text="'Use the html editor'"></label>
                                                             </div>
                                                         </div>

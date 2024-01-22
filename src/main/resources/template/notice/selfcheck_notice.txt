@@ -1,10 +1,5 @@
-[# th:block th:with="hash='#'"]
-    [# th:text="${hash}${hash}${hash} Open Source Software Notice ${hash}${hash}${hash}"][/]
-[/]
-
-[# th:if="${editCompanyYn eq 'Y'}"]
-    This product from [# th:text="${companyNameFull}"][/] contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
-[/]
+### Open Source Software Notice ###
+[# th:if="${editCompanyYn == 'Y'}"]This product from [(${companyNameFull})] contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.[/]
 [# th:if="${editCompanyYn ne 'Y'}"]
     This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
 [/]
