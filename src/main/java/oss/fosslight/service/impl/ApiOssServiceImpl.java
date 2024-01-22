@@ -16,7 +16,7 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.*;
-import oss.fosslight.lge.validation.custom.T2CoOssValidator;
+import oss.fosslight.validation.custom.T2CoOssValidator;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.service.*;
 import oss.fosslight.util.StringUtil;
@@ -33,7 +33,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 	@Autowired OssService ossService;
 	@Autowired HistoryService historyService;
 
-	@Autowired CoReviewerService coReviewerService;
+	//@Autowired CoReviewerService coReviewerService;
 	@Autowired T2UserService userService;
 
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -701,7 +701,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 			targetName = CoConstDef.CD_CHECK_OSS_PARTNER;
 		}
 
-		coReviewerService.checkOssName(prjId, targetName);
-		coReviewerService.checkLicense(prjId, targetName);
+		//coReviewerService.checkOssName(prjId, targetName);
+		//coReviewerService.checkLicense(prjId, targetName);
 	}
 }
