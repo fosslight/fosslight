@@ -325,9 +325,17 @@
                                                 </div>
                                                 <div class="col-md-6 text-lg-gray text-bold">
                                                     <p style="font-size: .8rem;" th:text="'* Select if there is something to add to the OSS Notice.'"></p>
+                                                    <div id ="editAppend">
+                                                    	<textarea id="editor2" row="3" th:utext="${ossNotice.appended}"></textarea>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="row mt-12">
+                                        </div>
+                                        </form>
+                                    </div>
+                                    <div class="card card-widget bg-ivory mt-1">
+                                    	<div class="card-body">
+                                    		<div class="row mt-12">
                                                 <div class="col-md-12">
                                                     <div class="row">
                                                         <div class="col-md-1 mx-0">
@@ -353,22 +361,19 @@
                                                         <div class="col-md-1 mx-0">
                                                             <button type="button" id="packageDocDownload" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="download"></button>
                                                         </div>
-                                                 	<th:block  th:with="fullCustomFlag=${project.useCustomNoticeYn eq 'Y' ? true : false}">
-                                                        <div class="col-md-2">
+                                                        <div class="col-md-2" th:if="${isProgOrConfStat}">
                                                             <div class="form-check float-right mt-1">
-                                                                <input type="checkbox" class="form-check-input" id="chkUseCustomNotice">
-                                                                <label class="form-check-label" for="chkUseCustomNotice"  th:text="'Use the html editor'"></label>
+                                                                <input type="checkbox" class="form-check-input" id="chkUseCustomNotice" th:checked="${project.useCustomNoticeYn == 'Y'} ? 'checked'">
+                                                                <label class="form-check-label" for="chkUseCustomNotice" th:text="'Use the html editor'"></label>
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-1">
-                                                            <button type="button" id="noticeEditor" class="btn btn-block btn-default btn-xm" th:text="Edit" ></button>
+                                                        <div class="col-md-1" th:if="${isProgOrConfStat}">
+                                                            <button type="button" id="noticeEditor" class="btn btn-block btn-default btn-xm" th:text="Edit" th:disabled="${project.useCustomNoticeYn != 'Y'} ? 'disabled'"></button>
                                                         </div>
-                                                 	</th:block>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        </form>
+                                    	</div>
                                     </div>
                                 </div>
                             </div>

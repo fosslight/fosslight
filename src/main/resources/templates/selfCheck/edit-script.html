@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<style>
+.note-editable { background-color: white; }
+</style>
 <th:block th:fragment="contentScript">
 <script th:inline="javascript">
 //<![CDATA[
@@ -28,6 +31,8 @@ $(document).ready(function() {
 		fn_self.modeChange([[${project.prjId}]], 'v');
 		showHelpLink("Self-Check_Edit_Export", "helpLink_vulerabiityExport");
 	}
+	
+	$("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 	
 	data.init();
 	evt.init();
@@ -543,8 +548,8 @@ var fn = {
 		}
 		
 		if($("#append").prop("checked")){
-			$('#noticeForm input[name=appendedTEXT]').val(""); // CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-			$('#noticeForm input[name=appended]').val(""); // CKEDITOR.instances.editor2.getData());
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
 		}
 		
 		$('#noticeForm').ajaxForm({
@@ -559,8 +564,8 @@ var fn = {
 	
 	downloadNotice : function(){
 		if($("#append").prop("checked")){
-			$('#noticeForm input[name=appendedTEXT]').val(""); // CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-			$('#noticeForm input[name=appended]').val(""); // CKEDITOR.instances.editor2.getData());
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
 		}
 		
 		$("#editCompanyName").attr("disabled", false);
@@ -593,8 +598,8 @@ var fn = {
 	
 	downloadNoticeText : function(){
 		if($("#append").prop("checked")){
-			$('#noticeForm input[name=appendedTEXT]').val(""); // CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-			$('#noticeForm input[name=appended]').val(""); // CKEDITOR.instances.editor2.getData());
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
 		}
 		
 		$("#editCompanyName").attr("disabled", false);
@@ -628,8 +633,8 @@ var fn = {
 	
 	downloadNoticeSimple : function(){
 		if($("#append").prop("checked")){
-			$('#noticeForm input[name=appendedTEXT]').val(""); // CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-			$('#noticeForm input[name=appended]').val(""); // CKEDITOR.instances.editor2.getData());
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
 		}
 		
 		$("#editCompanyName").attr("disabled", false);
@@ -663,8 +668,8 @@ var fn = {
 	
 	downloadNoticeTextSimple : function(){
 		if($("#append").prop("checked")){
-			$('#noticeForm input[name=appendedTEXT]').val(""); // CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-			$('#noticeForm input[name=appended]').val(""); // CKEDITOR.instances.editor2.getData());
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
 		}
 		
 		$("#editCompanyName").attr("disabled", false);
@@ -839,9 +844,7 @@ var fn = {
 			}
 			
 			if(type != "init" && $("#append").prop("checked")) {
-// 				if(CKEDITOR.instances.editor2) {
-// 					CKEDITOR.instances.editor2.setReadOnly(false);
-// 				}
+				$('#editor2').summernote('disable');
 			}
 		} else {
 			$("#companyName").attr("disabled",!checked);
@@ -855,9 +858,7 @@ var fn = {
 			$("#editEmail").attr("disabled", !checked);
 			
 			if(type != "init" && $("#append").prop("checked")){
-// 				if(CKEDITOR.instances.editor2) {
-// 					CKEDITOR.instances.editor2.setReadOnly(true);
-// 				}
+				$('#editor2').summernote('disable');
 			}
 		}
 	},
@@ -913,12 +914,9 @@ var fn = {
 				$("#hideOssVersion").trigger("click").attr("checked", true);
 			}
 			
-			if(editAppendedYn == "Y"){
+			if (editAppendedYn == "Y"){
 				$("#append").trigger("click").attr("checked", true);
-
-// 				if(CKEDITOR.instances.editor2) {
-// 					CKEDITOR.instances.editor2.config.readOnly = false;
-// 				}
+				$("#editor2").summernote({height: 250, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			}
 		}, 1);
 	},
@@ -2951,8 +2949,10 @@ var notice_evt = {
 			$("#editAppendedYn").val(checked ? "Y" : "N");
 			fn.appendEditVisible(this);
 			
-			if(CKEDITOR.instances.editor2) {
-				CKEDITOR.instances.editor2.setReadOnly(!checked);
+			if (checked) {
+				$('#editor2').summernote('enable');
+			} else {
+				$('#editor2').summernote('disable');
 			}
 		});
 		

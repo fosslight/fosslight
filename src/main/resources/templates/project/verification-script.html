@@ -35,7 +35,8 @@
 
             // 버튼 컨트롤
             fn.btnCtl(userRole, curIdenStatus);
-
+            $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+            
             $("#list").jqGrid({
                 datatype: 'local',
                 data: datas.ossList,
@@ -1102,8 +1103,6 @@
                     var checked = $(this).prop("checked");
                     $("#editAppendedYn").val(checked ? "Y" : "N");
                     fn.appendEditVisible(this);
-
-                    $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
                 });
 
                 $("[name='btnEditOssNotice']").change(function (e) {
@@ -1632,10 +1631,8 @@
                 }
 
                 if ($("#append").prop("checked")) {
-// 				$('#noticeForm input[name=appendedTEXT]').val(CKEDITOR.instances.editor2.getData().replace(/(<([^>]+)>)/ig, "").trim());
-// 				$('#noticeForm input[name=appended]').val(CKEDITOR.instances.editor2.getData());
-                    $('#noticeForm input[name=appendedTEXT]').val("");
-                    $('#noticeForm input[name=appended]').val("");
+ 					$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+ 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                 }
 
                 $('#noticeForm').ajaxForm({
@@ -2124,8 +2121,8 @@
                         $("#editEmail").attr("disabled", checked);
                     }
                     
-                    if (type != "init" && $("#append").prop("checked")) {
-                    	$('#editor2').summernote('disable');
+                    if (type != "init" && $("#append").prop("checked")) {console.log("disabled");
+//                    	$('#editor2').summernote('disable');
                     }
                 } else {
                     $("#companyName").attr("disabled", !checked);
@@ -2138,8 +2135,8 @@
                     $("#editOssDistributionSite").attr("disabled", !checked);
                     $("#editEmail").attr("disabled", !checked);
 
-                    if (type != "init" && $("#append").prop("checked")) {
-                    	$('#editor2').summernote('enable');
+                    if (type != "init" && $("#append").prop("checked")) {console.log("enable");
+//                    	$('#editor2').summernote('enable');
                     }
                 }
                 
@@ -2217,7 +2214,6 @@
 
                     if (editAppendedYn == "Y") {
                         $("#append").trigger("click").attr("checked", true);
-                        $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
                     }
                 }, 1);
             },
