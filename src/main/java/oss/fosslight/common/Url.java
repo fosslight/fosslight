@@ -353,7 +353,7 @@ public final class Url {
 		public static final String SAVE_SECURITY = PATH + "/saveSecurity";
 		public static final String CHECK_REQ_ENTRY_SECURITY = PATH + "/checkReqEntrySecurity";
 		public static final String SEC_BULK_EDIT_POPUP = PATH + "/secBulkEditPopup";
-		public static final String SEC_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/secBulksaveOssNicknameEditPopup";
+		public static final String SEC_BULK_EDIT_POPUP_JSP = TILES_ROOT + PATH + "/secBulkEditPopup";
 		
 		public static final String CHECK_MERGE_AND_SAVE = PATH + "/checkMergeAndSave";
 		
