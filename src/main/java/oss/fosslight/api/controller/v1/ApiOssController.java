@@ -113,53 +113,7 @@ public class ApiOssController extends CoTopComponent {
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}
     }
-	@ApiOperation(value = "Register Auto Analysis Result", notes = "자동 분석 결과 등록")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
-	})
-	@PostMapping(value = {API.FOSSLIGHT_API_AUTOANALYSIS_REGISTER})
-	public CommonResult registerAutoAnalysisInfo(
-			@RequestHeader String _token,
-			@RequestBody(required = true) Map<String, Object> data
 
-	){
-		try{
-			T2Users user = userService.checkApiUserAuthAndSetSession(_token);
-			if("ROLE_ADMIN".equals(user.getAuthority())) {
-				Type collectionType = new TypeToken<Map<String, String>>(){}.getType();
-
-				Map<String, Object> resultMap = new HashMap<>();
-				Boolean isFinish = (Boolean) data.get("isFinish");
-				String prjId = (String) data.get("prjId");
-
-
-				if(!isFinish) {
-					Map<String, String> userDataMap = (Map<String, String>) fromJson((String) data.get("userData"), collectionType);
-					List<String> stringResult = new ArrayList<>();
-					for(Object obj : (List<Object>) data.get("autoAnalysis")) {
-						stringResult.add(obj.toString());
-					}
-					resultMap = apiOssService.registAnalysisOss(stringResult, userDataMap, prjId, _token);
-				} else {
-					resultMap = apiOssService.finishOss(prjId);
-				}
-
-				if((boolean) resultMap.get("isValid")) {
-					return responseService.getSingleResult(resultMap);
-
-				} else {
-					return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
-							, (String) resultMap.get("errMsg"));
-				}
-			} else {
-				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE
-						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
-			}
-		} catch (Exception e){
-			return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE
-					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
-		}
-	}
 
 	@ApiOperation(value = "Search License Info", notes = "License Info 조회")
     @ApiImplicitParams({
