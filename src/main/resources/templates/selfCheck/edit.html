@@ -386,18 +386,21 @@
                             		<button type="button" id="delete" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Delete"></button>
                             	</div>
                                 <div class="row float-right">
-                                	<div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
-                                		<button type="button" id="Export" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:text="Export" th:onclick="|fn.exportList()|"></button>
-                                		<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;" th:onclick="|fn.selectDownloadFile()|">
-											<a id="report_sub" style="display: block;" th:text="'FOSSLight Report (Spreadsheet)'"></a>
-											<a id="YAML" style="display: block;" th:text="'FOSSLight Report (YAML)'"></a>
-											<a id="Spreadsheet_sub" style="display: block;" th:text="'SPDX (Spreadsheet)'"></a>
-											<a id="RDF_sub" style="display: block;" th:text="'SPDX (RDF)'"></a>
-											<a id="TAG_sub" style="display: block;" th:text="'SPDX (TAG)'"></a>
-											<a id="JSON_sub" style="display: block;" th:text="'SPDX (JSON)'"></a>
-											<a id="YAML_sub" style="display: block;" th:text="'SPDX (YAML)'"></a>
-										</div>
-                                	</div>
+                                    <div class="btn-group mr-xm">
+                                        <button type="button" class="btn btn-yellow-04 btn-sm px-3">Export</button>
+                                        <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                            <span class="sr-only">Toggle Dropdown</span>
+                                        </button>
+                                        <div class="dropdown-menu" role="menu"  th:onclick="|fn.selectDownloadFile()|">
+                                            <a class="dropdown-item" id="report_sub" th:text="'FOSSLight Report (Spreadsheet)'"></a>
+                                            <a class="dropdown-item" id="YAML" th:text="'FOSSLight Report (YAML)'"></a>
+                                            <a class="dropdown-item" id="Spreadsheet_sub" th:text="'SPDX (Spreadsheet)'"></a>
+                                            <a class="dropdown-item" id="RDF_sub" th:text="'SPDX (RDF)'"></a>
+                                            <a class="dropdown-item" id="TAG_sub" th:text="'SPDX (TAG)'"></a>
+                                            <a class="dropdown-item" id="JSON_sub" th:text="'SPDX (JSON)'"></a>
+                                            <a class="dropdown-item" id="YAML_sub" th:text="'SPDX (YAML)'"></a>
+                                        </div>
+                                    </div>
                                     <button type="button" class="btn btn-yellow-04 btn-sm width-7rem mr-xm px-3" th:onclick="fn.bulkEdit()" th:text="'Bulk Edit'"></button>
                                     <button type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3" th:onclick="src_fn.CheckOssViewPage()" th:text="'Check OSS Name'"></button>
                                     <button type="button" class="btn btn-yellow-04 btn-sm width-8rem mr-xm px-3" th:onclick="src_fn.CheckOssLicenseViewPage()" th:text="'Check License'"></button>

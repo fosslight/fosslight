@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="navFragment">
+	<script src="//cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
 	<!-- header -->
 	<!-- Navbar -->
 	<nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -14,31 +16,31 @@
 		<!-- Right navbar links -->
 		<ul class="navbar-nav ml-auto">
 			<!-- Navbar Search -->
-<!--			<li class="nav-item">-->
-<!--				<a class="nav-link" data-toggle="dropdown" href="#">-->
-<!--					<i class="fas fa-book"></i>-->
-<!--				</a>-->
-<!--			</li>-->
-<!--			<li class="nav-item">-->
-<!--				<a class="nav-link" data-toggle="dropdown" href="#">-->
-<!--					<i class="fas fa-bullhorn"></i>-->
-<!--				</a>-->
-<!--			</li>-->
-<!--			<li class="nav-item">-->
-<!--				<a class="nav-link" data-toggle="dropdown" href="#">-->
-<!--					<i class="fas fa-question"></i>-->
-<!--				</a>-->
-<!--			</li>-->
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="dropdown" href="#">
+					<i class="fas fa-book" data-toggle="tooltip" title="Manual"></i>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="dropdown" href="#">
+					<i class="fas fa-bullhorn" data-toggle="tooltip" title="Notice"></i>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="dropdown" href="#">
+					<i class="fas fa-question" data-toggle="tooltip" title="FAQ"></i>
+				</a>
+			</li>
 			<li class="nav-item">
 				<a class="nav-link" data-widget="fullscreen" href="#" role="button">
 					<i class="fas fa-expand-arrows-alt"></i>
 				</a>
 			</li>
-<!--			<li class="nav-item">-->
-<!--				<a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">-->
-<!--					<i class="fas fa-th-large"></i>-->
-<!--				</a>-->
-<!--			</li>-->
+			<li class="nav-item">
+				<a class="nav-link" data-widget="control-sidebar" data-slide="true" href="#" role="button">
+					<i class="fas fa-th-large"></i>
+				</a>
+			</li>
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="dropdown" href="#" id="languageToggle">
 					<i class="flag-icon flag-icon-us"></i>
@@ -55,6 +57,10 @@
 		</ul>
 	</nav>
 	<script>
+		$(document).ready(function(){
+			$('[data-toggle="tooltip"]').tooltip();
+		});
+
 		document.addEventListener('DOMContentLoaded', function () {
 			setLanguageFromUrl();
 		});

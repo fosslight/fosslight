@@ -428,18 +428,21 @@
                                    		<button type="button" th:if="${detail.partnerId != null}" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.shareUrl()|" th:text="'Share URL'"></button>
                                    		<button type="button" th:if="${detail.partnerId != null and @CommonFunction.isAdmin()}" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="fn.binaryDBSave([[${detail.partnerId}]])" th:text="'Save (Binary DB)'"></button>
                                     	<th:block th:if="${detail.partnerId != null}">
-                                    		<div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
-                                    			<button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.exportList(this)|" th:text="Export"></button>
-                								<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
-													<a th:onclick="|fn.selectDownloadFile('report_sub')|" style="display: block;" th:text="'FOSSLight Report (Spreadsheet)'"></a>
-													<a th:onclick="|fn.selectDownloadFile('YAML')|" style="display: block;" th:text="'FOSSLight Report (YAML)'"></a>
-													<a th:onclick="|fn.selectDownloadFile('Spreadsheet_sub')|" style="display: block;" th:text="'SPDX (Spreadsheet)'"></a>
-													<a th:onclick="|fn.selectDownloadFile('RDF_sub')|" style="display: block;" th:text="'SPDX (RDF)'"></a>
-													<a th:onclick="|fn.selectDownloadFile('TAG_sub')|" style="display: block;" th:text="'SPDX (TAG)'"></a>
-													<a th:onclick="|fn.selectDownloadFile('JSON_sub')|" style="display: block;" th:text="'SPDX (JSON)'"></a>
-													<a th:onclick="|fn.selectDownloadFile('YAML_sub')|" style="display: block;" th:text="'SPDX (YAML)'"></a>
-												</div>
-                    						</div>
+                                            <div class="btn-group mr-xm">
+                                                <button type="button" class="btn btn-yellow-04 btn-sm">Export</button>
+                                                <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                                    <span class="sr-only">Toggle Dropdown</span>
+                                                </button>
+                                                <div class="dropdown-menu" role="menu">
+                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('report_sub')|" th:text="'FOSSLight Report (Spreadsheet)'"></a>
+                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
+                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('Spreadsheet_sub')|" th:text="'SPDX (Spreadsheet)'"></a>
+                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('RDF_sub')|" th:text="'SPDX (RDF)'"></a>
+                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('TAG_sub')|" th:text="'SPDX (TAG)'"></a>
+                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('JSON_sub')|" th:text="'SPDX (JSON)'"></a>
+                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('YAML_sub')|" th:text="'SPDX (YAML)'"></a>
+                                                </div>
+                                            </div>
                                     	</th:block>
                                     	<th:block th:if="${detail.status != 'REQ' and detail.status != 'CONF' and  (detail.loginUserRole == 'ROLE_ADMIN' or (detail.loginUserRole == 'ROLE_ADMIN' and detail.status != 'REV')) and detail.viewOnlyFlag != 'Y'}">
                                     		<button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.CheckOssViewPage('PARTNER')|" th:text="'Check OSS Name'"></button>
