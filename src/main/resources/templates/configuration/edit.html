@@ -1,0 +1,336 @@
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var selectElArr = ["obligationType", "licenseType", "prjDivision", "distributionType", "priority", "networkServerType", "division"];
+        $.each(selectElArr, function (index, item) {
+            var selectEl = $('#searchConditionForm select[name="' + item + '"]');
+            if (selectEl.length > 0) {
+                $(selectEl).trigger('change');
+            }
+        });
+
+        $('#restrictionSelect').select2({
+            placeholder: "Restriction",
+            allowClear: true,
+        });
+
+        $('#licenseTypeSelect').select2({
+            placeholder: "License Type",
+            allowClear: true,
+        });
+
+        $('#obligationTypeSelect').select2({
+            placeholder: "Obligation Type",
+            allowClear: true,
+        });
+
+        $('#divisionSelect').select2({
+            placeholder: "Division",
+            allowClear: true,
+        });
+
+        $('#distributionTypeSelect').select2({
+            placeholder: "Distribution Type",
+            allowClear: true,
+        });
+
+        $('#networkServerTypeSelect').select2({
+            placeholder: "Network Service",
+            allowClear: true,
+        })
+
+        $('#prioritySelect').select2({
+            placeholder: "Priority",
+            allowClear: true,
+        })
+    });
+</script>
+<div style="padding-top: 10px;">
+    <fieldset class="listSearch">
+        <form id="searchConditionForm" name="searchConditionForm">
+            <input name="defaultSearchType" type="hidden" value="${defaultSearchType}"/>
+            <th:block th:if="${#strings.equals(defaultSearchType, 'LICENSE')}">
+                <div class="card card-dark card-outline search-form mb-3">
+                    <div class="card-header">
+                        <div class="card-title">Basic Search Area</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-2">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <input class="form-control" name="licenseName" placeholder="Licence Name"
+                                           th:value="${searchBean.licenseName}" type="text"/>
+                                </div>
+                                <div class="col-md-3 mt-1">
+                                    <input name="licenseNameAllSearchFlag" th:checked="${#strings.equals(searchBean.licenseNameAllSearchFlag, 'Y')}" type="checkbox"
+                                           value="Y"/><span>&nbsp;Exact Match</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-2">
+                            <textarea class="form-control" name="licenseText" placeholder="License Text" rows="1"
+                                      th:value="${searchBean.licenseText}"></textarea>
+                        </div>
+                        <div class="form-group mb-2">
+                            <select class="select2" id="licenseTypeSelect" name="licenseType"
+                                    style="width: 100%; color: gray;">
+                                <option value=""></option>
+                                <th:block
+                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'), searchBean.licenseType)}"></th:block>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <select class="select2" data-placeholder="Restriction" id="restrictionSelect"
+                                    multiple="multiple" name="restrictions" style="width: 100%;">
+                                <th:block
+                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"></th:block>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <textarea class="form-control" name="description" placeholder="User Guide" rows="3"
+                                      th:value="${searchBean.description}"></textarea>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="webpage" placeholder="Website" th:value="${searchBean.webpage}"
+                                   type="text">
+                        </div>
+                        <div class="form-group mb-2">
+                            <select class="select2" id="obligationTypeSelect" name="obligationType"
+                                    style="width: 100%;">
+                                <option value=""></option>
+                                <th:block
+                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'), searchBean.obligationType)}"></th:block>
+                                <option th:selected="${#strings.equals(searchBean.obligationType, 'NONE')}" value="NONE">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+            <th:block th:if="${#strings.equals(defaultSearchType, 'OSS')}">
+                <div class="card card-dark card-outline search-form mb-3">
+                    <div class="card-header">
+                        <div class="card-title">Basic Search Area</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-2">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <input class="form-control autoComOss" name="ossName" placeholder="Oss Name"
+                                           th:value="${searchBean.ossName}" type="text"/>
+                                </div>
+                                <div class="col-md-3 mt-1">
+                                    <input name="ossNameAllSearchFlag" th:checked="${#strings.equals(searchBean.ossNameAllSearchFlag, 'Y')}" type="checkbox"
+                                           value="Y"/><span>&nbsp;Exact Match</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-2">
+                            <textarea class="form-control" name="licenseText" placeholder="Copyright Text" rows="1"
+                                      th:value="${searchBean.copyright}"></textarea>
+                        </div>
+                        <div class="form-group mb-2">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <input class="form-control autoComLicense" name="ossName" placeholder="License Name"
+                                           th:value="${searchBean.ossName}" type="text"/>
+                                </div>
+                                <div class="col-md-3 mt-1">
+                                    <input name="licenseNameAllSearchFlag" th:checked="${#strings.equals(searchBean.licenseNameAllSearchFlag, 'Y')}" type="checkbox"
+                                           value="Y"/><span>&nbsp;Exact Match</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-2">
+                            <textarea class="form-control" name="summaryDescription" placeholder="Description" rows="1"
+                                      th:value="${searchBean.summaryDescription}"></textarea>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="homepage" placeholder="Website" th:value="${searchBean.homepage}"
+                                   type="text">
+                        </div>
+
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="cvssScore" placeholder="Vulnerability (>=)"
+                                   th:value="${searchBean.cvssScore}" type="text">
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+
+            <th:block th:if="${#strings.equals(defaultSearchType, 'PROJECT')}">
+                <div class="card card-dark card-outline search-form mb-3">
+                    <div class="card-header">
+                        <div class="card-title">Basic Search Area</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean.prjId}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
+                            <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean.schStartDate}" />
+                            <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean.schEndDate}" />
+                        </div>
+                        <div class="form-group mb-2">
+                            <select class="select2" name="prjDivision" id="divisionSelect"
+                                    style="width: 100%;">
+                                <option value=""></option>
+                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), searchBean.prjDivision)}"></th:block>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean.creator}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean.reviewer}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <select class="select2" name="distributionType" id="distributionTypeSelect"
+                                    style="width: 100%;">
+                                <option value=""></option>
+                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'), searchBean.distributionType)}"></th:block>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <select class="select2" name="networkServerType" id="networkServerTypeSelect"
+                                    style="width: 100%;">
+                                <option value=""></option>
+                                <option th:selected="${#strings.equals(searchBean.networkServerType, 'Y')}" th:text="|Yes|"></option>
+                                <option th:selected="${#strings.equals(searchBean.networkServerType, 'N')}" th:text="|No|"></option>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComProjectModel" name="modelName" placeholder="Model Name" th:value="${searchBean.modelName}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label class="text-lg-gray mr-3">Status</label>
+                            <th:block th:utext="${@CoCodeManager.genCheckbox(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), searchBean.statuses, '')}" ></th:block>
+                        </div>
+                        <div class="form-group mb-2">
+                            <select class="select2" name="priority" id="prioritySelect"
+                                    style="width: 100%;">
+                                <option value=""></option>
+                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'), searchBean.priority)}"></th:block>
+                            </select>
+                        </div>
+                        <th:block th:if="${@CommonFunction.isAdmin()}">
+                            <label class="text-lg-gray mr-3">View My Projects Only</label>
+                            <input type="checkbox" name="publicYn" value="N" th:checked="${#strings.equals(searchBean.publicYn, 'N')}"  />
+                        </th:block>
+                    </div>
+                </div>
+            </th:block>
+
+            <th:block th:if="${#strings.equals(defaultSearchType, 'THIRD_PARTY')}">
+                <dl class="basicSearch col3">
+                    <dt>Basic Search Area</dt>
+                    <dd>
+                        <label style="width:100px;">ID</label>
+                        <input name="partnerId" style="width:150px;" type="text" value="${searchBean.partnerId}"/>
+                    </dd>
+                    <dd class="centerAign">
+                        <label>3rd Party Name</label>
+                        <input class="autoComParty" name="partnerName" type="text" value="${searchBean.partnerName}"/>
+                    </dd>
+                    <dd class="lastAign"></dd>
+                    <dd>
+                        <label style="width:100px;">3rd Party<br/>Software Name</label>
+                        <input class="autoComSwNm" name="softwareName" style="width:150px;" type="text"
+                               value="${searchBean.softwareName}"/>
+                    </dd>
+                    <dd class="centerAign">
+                        <label>3rd Party<br/>Software Version</label>
+                        <input name="softwareVersion" type="text" value="${searchBean.softwareVersion}"/>
+                    </dd>
+                    <dd class="lastAign">
+                        <label>Division</label>
+                        <span class="selectSet">
+								<strong title="Division selected value"></strong>
+								<select name="division">
+									<option value=""></option>
+									${ct:genOptionSelected(ct:getConstDef("CD_USER_DIVISION"), searchBean.division)}
+								</select>
+							</span>
+                    </dd>
+                    <dd style="width:100%;">
+                        <label style="width:100px;">Status</label>
+                        <span class='checkSet'>
+							${ct:genCommonCheckbox(ct:getConstDef("CD_IDENTIFICATION_STATUS"), "status", searchBean.status, false)}
+	            			</span>
+                    </dd>
+                    <dd class="">
+                        <label style="width:100px;">Created Date</label>
+                        <input class="cal" id="createdDate1" maxlength="8" name="createdDate1" style="width:70px;"
+                               title="Search Start Date" type="text" value="${searchBean.createdDate1}"/> ~
+                        <input class="cal" id="createdDate2" maxlength="8" name="createdDate2" style="width:70px;"
+                               title="Search End Date" type="text" value="${searchBean.createdDate2}"/>
+                    </dd>
+                    <dd class="centerAign">
+                        <label>Creator</label>
+                        <input class="autoComCreatorDivision" name="creator" type="text" value="${searchBean.creator}"/>
+                    </dd>
+                    <dd class="lastAign">
+                        <label>Reviewer</label>
+                        <input class="autoComReviewer" name="reviewer" type="text" value="${searchBean.reviewer}"/>
+                    </dd>
+                    <dd class="lastAign">
+                        <label>Watcher</label>
+                        <input class="" name="watchers" type="text" value="${searchBean.watchers}"/>
+                    </dd>
+                    <th:block th:if="${@CommonFunction.isAdmin()}">
+                        <dd class="lastAign">
+                            <label style="width:150px;">View My 3rd Parties Only</label>
+                            <input ${searchBean.publicYn eq name="publicYn" type="checkbox" value="N" 'N' ?
+                            'checked="checked"' : '' } />
+                        </dd>
+                    </th:block>
+                    >
+                </dl>
+            </th:block>
+            <th:block th:if="${#strings.equals(defaultSearchType, 'SELF_CHECK')}">
+                <dl class="basicSearch col3">
+                    <dt>Basic Search Area</dt>
+                    <dd>
+                        <label>ID</label>
+                        <input name="prjId" type="text" value="${searchBean.prjId}"/>
+                    </dd>
+                    <dd class="centerAign">
+                        <label>Project Name</label>
+                        <input name="prjName" type="text" value="${searchBean.prjName}"/>
+                    </dd>
+                    <dd class="lastAign">
+                        <label>OSS Name</label>
+                        <input class="autoComOss" name="ossName" type="text" value="${searchBean.ossName}"/>
+                    </dd>
+                    <dd>
+                        <label>Created Date</label>
+                        <input autocomplete="off" class="cal" id="schStartDate" maxlength="8" name="schStartDate"
+                               title="Search Start Date" type="text" value="${searchBean.schStartDate}"/> ~
+                        <input autocomplete="off" class="cal" id="schEndDate" maxlength="8" name="schEndDate"
+                               title="Search End Date" type="text" value="${searchBean.schEndDate}"/>
+                    </dd>
+                    <dd class="centerAign">
+                        <label>License Name</label>
+                        <input class="autoComLicense" name="licenseName" type="text" value="${searchBean.licenseName}"/>
+                    </dd>
+                    <dd class="lastAign ">
+                        <label>Creator</label>
+                        <input class="autoComCreatorDivision" name="creator" type="text" value="${searchBean.creator}"/>
+                    </dd>
+                    <dd class="">
+                        <label class="vmiddle" style="width: 50%; text-align: left;">View My Project Only</label>
+<!--                        <input ${searchBean.publicYn eq id="checkbox3" name="publicYn" type="checkbox" value="N" 'N' ?-->
+<!--                        'checked="checked"' : '' }/>-->
+                    </dd>
+                </dl>
+            </th:block>
+        </form>
+    </fieldset>
+</div>
