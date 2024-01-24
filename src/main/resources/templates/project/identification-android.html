@@ -351,9 +351,9 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" 
-                                        		th:onclick="|binAndroid_fn.showDialog('NOTICE')|" th:text="'Supplement NOTICE.html'"></button>
-                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3"
+                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3"
+                                        		th:onclick="|binAndroid_fn.showD ialog('NOTICE')|" th:text="'Supplement NOTICE.html'"></button>
+                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3"
                                         		th:onclick="|fn_grid_com.checkLicenseTextValidation('${project.prjId}')|" th:text="'Check License Text'"></button>
                                         <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" id="checkLicenseTextFile"
                                         		th:onclick="|binAndroid_fn.downloadFile()|" th:text="'Check License Text'"></button>
@@ -367,7 +367,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
-                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3"
+                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3"
                                         		th:onclick="|binAndroid_fn.binaryDBSave('${project.prjId}')|" th:text="'Save (Binary DB)'"></button>
                                         <button type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|binAndroid_fn.downloadExcel()|" th:text="Export"></button>
                                         <button type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.downloadYaml('ANDROID')|" th:text="Yaml"></button>

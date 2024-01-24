@@ -232,11 +232,11 @@
                                 	</th:block>
                                 	<th:block th:unless="${@CommonFunction.isAdmin()}">
                                 		<th:block th:if="${project.completeYn == 'Y' and and project.viewOnlyFlag == 'N'}">
-                                			<a id="reqToOpen" class="btn btn-yellow-03 float-right" th:text="'Requested to Open'"></a>
+                                			<a id="reqToOpen" class="btn btn-danger float-right" th:text="'Requested to Open'"></a>
                                 		</th:block>
                                 	</th:block>
                                 </th:block>
-                                <a th:onclick="|fn.copy()|" class="btn btn-teal-01 float-right" style="margin-right: 5px;" th:text="Copy"></a>
+                                <a th:onclick="|fn.copy()|" th:if="${project.prjId != null}" class="btn btn-teal-01 float-right" style="margin-right: 5px;" th:text="Copy"></a>
                                 <a th:onclick="|fn.exeProjectComplete('Y')|" th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-teal-01 float-right" id="complete" style="margin-right: 5px;" th:text="Complete"></a>
                                 <a th:onclick="|fn.shareUrl()|" th:if="${project.prjId != null}" class="btn btn-teal-01 float-right" style="margin-right: 5px;" th:text="'Share URL'"></a>
                             </div>

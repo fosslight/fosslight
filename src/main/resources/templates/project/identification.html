@@ -59,7 +59,7 @@
                             <div class="float-right mr-3" style="margin-top: .35rem">
                                 <button type="button" class="btn btn-purple btn-xs px-3 btnCommentHistory" data-toggle="on" th:text="'Show Comment History'"></button>
                                 <button type="button" class="btn btn-default btn-xs px-3 commentBtn" data-toggle="off" th:text="'Comment Edit'"></button>
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <button type="button" class="btn btn-tool ml-3" data-card-widget="collapse" title="Collapse">
                                     <i class="fas fa-minus"></i>
                                 </button>
                             </div>
@@ -74,19 +74,19 @@
                                                 <div class="col-md-4 partyBtn" name="search-condition_party">
                                                     <div class="icheck-secondary d-inline partyBtn">
                                                         <input type="radio" id="radio_party_01" name="selectOption" th:onchange="|party_evt.changeSelectOption()|" th:value="1" th:checked="true">
-                                                        	<label for="radio_party_01" th:text="'3rd party Search'"></label>
+                                                        	<label for="radio_party_01" class="text-sm" th:text="'3rd party Search'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4 partyBtn" name="search-condition_party">
                                                     <div class="icheck-secondary d-inline partyBtn">
                                                         <input type="radio" id="radio_party_02" name="selectOption" th:onchange="|party_evt.changeSelectOption()|" th:value="2">
-                                                        <label for="radio_party_02" th:text="'Project Search'"></label>
+                                                        <label for="radio_party_02" class="text-sm" th:text="'Project Search'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="icheck-danger d-inline">
                                                         <input type="checkbox" id="applicableParty" value="N" th:onchange="|com_fn.checkAplicable(this, 'partyBtn')|">
-                                                        	<label for="applicableParty" th:text="'Not Applicable'"></label>
+                                                        	<label for="applicableParty" class="text-sm" th:text="'Not Applicable'"></label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -103,7 +103,7 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="form-group">
-                                                        <select class="custom-select" name="3rdSerarchSelect">
+                                                        <select class="custom-select custom-narrow-item" name="3rdSerarchSelect">
                                                             <option th:value="3rdPartyName" th:text="'3rd party Name'"></option>
                                                             <option th:value="sName" th:text="'Software Name'"></option>
                                                             <option th:value="3rdPartyId" th:text="'3rd party Id'"></option>
@@ -112,9 +112,9 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control autoComConfParty" name="3rdSearchText"/>
+                                                        <input type="text" class="form-control autoComConfParty custom-narrow-item" name="3rdSearchText"/>
                                                         <span class="input-group-append">
-                                                            <button type="button" class="btn btn-default btn-flat" id="3rdSearchBtn" th:text="Search"></button>
+                                                            <button type="button" class="btn btn-default btn-flat custom-narrow-item" id="3rdSearchBtn" th:text="Search"></button>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -130,7 +130,7 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="form-group">
-                                                        <select class="custom-select" name="3rdProjectSelect">
+                                                        <select class="custom-select custom-narrow-item" name="3rdProjectSelect">
                                                             <option th:value="pNm" th:text="'Project Name'"></option>
                                                             <option th:value="pVer" th:text="'Project Version'"></option>
                                                             <option th:value="pId" th:text="'Project Id'"></option>
@@ -139,9 +139,9 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control autoComProjectNmConf" name="prjSearchText">
+                                                        <input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjSearchText">
                                                         <span class="input-group-append">
-                                                            <button type="button" class="btn btn-default btn-flat" id="3rdProjectSearchBtn" th:text="Search"></button>
+                                                            <button type="button" class="btn btn-default btn-flat custom-narrow-item" id="3rdProjectSearchBtn" th:text="Search"></button>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -224,19 +224,19 @@
                                                 <div class="col-md-4 depBtn" name="search-condition_dep">
                                                     <div class="icheck-secondary d-inline">
                                                         <input type="radio" id="radio_dep_01" name="depSelectOption" checked th:onchange="|dep_fn.changeSelectOption()|" value="1">
-                                                        <label for="radio_dep_01" th:text="'Upload Analysis Result'"></label>
+                                                        <label for="radio_dep_01" class="text-sm" th:text="'Upload Analysis Result'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4 depBtn" name="search-condition_dep">
                                                     <div class="icheck-secondary d-inline">
                                                         <input type="radio" id="radio_dep_02" name="depSelectOption" th:onchange="|dep_fn.changeSelectOption()|" value="2">
-                                                        <label for="radio_dep_02" th:text="'Project Search'"></label>
+                                                        <label for="radio_dep_02" class="text-sm" th:text="'Project Search'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="icheck-danger d-inline">
                                                         <input type="checkbox" id="applicableDep" value="N" th:onchange="|com_fn.checkAplicable(this, 'depBtn')|">
-                                                        <label for="applicableDep" th:text="'Not Applicable'"></label>
+                                                        <label for="applicableDep" class="text-sm" th:text="'Not Applicable'"></label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -291,7 +291,7 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="form-group">
-                                                        <select class="custom-select" name="depProjectSelect">
+                                                        <select class="custom-select custom-narrow-item custom-narrow-item" name="depProjectSelect">
                                                             <option th:value="pNm" th:text="'Project Name'"></option>
                                                             <option th:value="pVer" th:text="'Project Version'"></option>
                                                             <option th:value="pId" th:text="'Project Id'"></option>
@@ -300,9 +300,9 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control autoComProjectNmConf" name="depPrjSearchText">
+                                                        <input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="depPrjSearchText">
                                                         <span class="input-group-append">
-                                                            <button type="button" class="btn btn-default btn-flat" id="depProjectSearchBtn" th:text="Search"></button>
+                                                            <button type="button" class="btn btn-default btn-flat custom-narrow-item" id="depProjectSearchBtn" th:text="Search"></button>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -357,19 +357,19 @@
                                                 <div class="col-md-4 srcBtn" name="search-condition_src">
                                                     <div class="icheck-secondary d-inline">
                                                         <input type="radio" id="srcR1" name="srcSelectOption" th:onchange="|src_fn.changeSelectOption()|" value="1" checked>
-                                                        <label for="srcR1" th:text="'Upload Analysis Result'"></label>
+                                                        <label for="srcR1" class="text-sm" th:text="'Upload Analysis Result'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4 srcBtn" name="search-condition_src">
                                                     <div class="icheck-secondary d-inline">
                                                         <input type="radio" id="srcR2" name="srcSelectOption" th:onchange="|src_fn.changeSelectOption()|" value="2">
-                                                        <label for="srcR2" th:text="'Project Search'"></label>
+                                                        <label for="srcR2" class="text-sm" th:text="'Project Search'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="icheck-danger d-inline">
                                                         <input type="checkbox" id="applicableSrc" value="N" th:onchange="|com_fn.checkAplicable(this, 'srcBtn')|">
-                                                        <label for="applicableSrc" th:text="'Not Applicable'"></label>
+                                                        <label for="applicableSrc" class="text-sm" th:text="'Not Applicable'"></label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -424,7 +424,7 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="form-group">
-                                                        <select class="custom-select" name="srcProjectSelect">
+                                                        <select class="custom-select custom-narrow-item " name="srcProjectSelect">
                                                             <option th:value="pNm" th:text="'Project Name'"></option>
                                                             <option th:value="pVer" th:text="'Project Version'"></option>
                                                             <option th:value="pId" th:text="'Project Id'"></option>
@@ -433,9 +433,9 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control autoComProjectNmConf" name="srcPrjSearchText">
+                                                        <input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="srcPrjSearchText">
                                                         <span class="input-group-append">
-                                                            <button type="button" class="btn btn-default btn-flat" id="srcProjectSearchBtn" th:text="Search"></button>
+                                                            <button type="button" class="btn btn-default btn-flat custom-narrow-item" id="srcProjectSearchBtn" th:text="Search"></button>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -490,19 +490,19 @@
                                                 <div class="col-md-4 binBtn" name="search-condition_bin">
                                                     <div class="icheck-secondary d-inline">
                                                         <input type="radio" id="binR1" value="1" name="binSelectOption" th:onchange="|bin_fn.changeSelectOption()|" checked>
-                                                        <label for="binR1" th:text="'Upload Analysis Result'"></label>
+                                                        <label for="binR1" class="text-sm" th:text="'Upload Analysis Result'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4 binBtn" name="search-condition_bin">
                                                     <div class="icheck-secondary d-inline">
                                                         <input type="radio" id="binR2" value="2" name="binSelectOption" th:onchange="|bin_fn.changeSelectOption()|">
-                                                        <label for="binR2" th:text="'Project Search'"></label>
+                                                        <label for="binR2" class="text-sm" th:text="'Project Search'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="icheck-danger d-inline">
                                                         <input type="checkbox" id="applicableBin" value="N" th:onchange="|com_fn.checkAplicable(this, 'binBtn')|">
-                                                        <label for="applicableBin" th:text="'Not Applicable'"></label>
+                                                        <label for="applicableBin" class="text-sm" th:text="'Not Applicable'"></label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -582,7 +582,7 @@
                                             <div class="row mt-3">
                                                 <div class="col-md-2">
                                                     <div class="form-group">
-                                                        <select class="custom-select" name="binProjectSelect">
+                                                        <select class="custom-select custom-narrow-item" name="binProjectSelect">
                                                             <option th:value="pNm" th:text="'Project Name'"></option>
                                                             <option th:value="pVer" th:text="'Project Version'"></option>
                                                             <option th:value="pId" th:text="'Project Id'"></option>
@@ -591,9 +591,9 @@
                                                 </div>
                                                 <div class="col-md-5">
                                                     <div class="input-group input-group-md">
-                                                        <input type="text" class="form-control autoComProjectNmConf" name="binPrjSearchText">
+                                                        <input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="binPrjSearchText">
                                                         <span class="input-group-append">
-                                                            <button type="button" class="btn btn-default btn-flat" id="binProjectSearchBtn" th:text="Search"></button>
+                                                            <button type="button" class="btn btn-default btn-flat custom-narrow-item" id="binProjectSearchBtn" th:text="Search"></button>
                                                         </span>
                                                     </div>
                                                 </div>
@@ -675,11 +675,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and @CommonFunction.isAdmin()}" 
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.checkOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.checkOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -710,11 +710,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Check Oss Name'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Check Oss Name'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'Check License'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'Check License'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('SRC')|" th:text="'Bulk Edit'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('SRC')|" th:text="'Bulk Edit'"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -745,11 +745,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -790,21 +790,24 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
-                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])" th:text="'Save (Binary DB)'"></button>
-                                        <div id="ExportContainer" class="inblock" style="vertical-align:top; position: relative;">
-                                        	<button type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|bom_fn.exportList(this)|" th:text="Export"></button>
-											<div id="ExportList" class="w200 tright" style="display: none; position: absolute; z-index: 1; right: 0;">
-												<a th:onclick="|bom_fn.selectDownloadFile('report_sub')|" style="display: block;" th:text="'FOSSLight Report (Spreadsheet)'"></a>
-												<a th:onclick="|bom_fn.selectDownloadFile('YAML')|" style="display: block;" th:text="'FOSSLight Report (YAML)'"></a>
-												<a th:onclick="|bom_fn.selectDownloadFile('Spreadsheet_sub')|" style="display: block;" th:text="'SPDX (Spreadsheet)'"></a>
-												<a th:onclick="|bom_fn.selectDownloadFile('RDF_sub')|" style="display: block;" th:text="'SPDX (RDF)'"></a>
-												<a th:onclick="|bom_fn.selectDownloadFile('TAG_sub')|" style="display: block;" th:text="'SPDX (TAG)'"></a>
-												<a th:onclick="|bom_fn.selectDownloadFile('JSON_sub')|" style="display: block;" th:text="'SPDX (JSON)'"></a>
-												<a th:onclick="|bom_fn.selectDownloadFile('YAML_sub')|" style="display: block;" th:text="'SPDX (YAML)'"></a>
-												<a th:onclick="|bom_fn.selectDownloadFile('cdxJSON')|" style="display: block;" th:text="'CycloneDX (JSON)'"></a>
-												<a th:onclick="|bom_fn.selectDownloadFile('cdxXML')|" style="display: block;" th:text="'CycloneDX (XML)'"></a>
-											</div>
-										</div>
+                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])" th:text="'Save (Binary DB)'"></button>
+                                        <div class="btn-group mr-xm">
+                                            <button type="button" class="btn btn-yellow-04 btn-sm">Export</button>
+                                            <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <div class="dropdown-menu" role="menu">
+                                                <a class="dropdown-item" th:onclick="|bom_fn.selectDownloadFile('report_sub')|" th:text="'FOSSLight Report (Spreadsheet)'"></a>
+                                                <a class="dropdown-item" th:onclick="|bom_fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
+                                                <a class="dropdown-item" th:onclick="|bom_fn.selectDownloadFile('Spreadsheet_sub')|" th:text="'SPDX (Spreadsheet)'"></a>
+                                                <a class="dropdown-item" th:onclick="|bom_fn.selectDownloadFile('RDF_sub')|" th:text="'SPDX (RDF)'"></a>
+                                                <a class="dropdown-item" th:onclick="|bom_fn.selectDownloadFile('TAG_sub')|" th:text="'SPDX (TAG)'"></a>
+                                                <a class="dropdown-item" th:onclick="|bom_fn.selectDownloadFile('JSON_sub')|" th:text="'SPDX (JSON)'"></a>
+                                                <a class="dropdown-item" th:onclick="|bom_fn.selectDownloadFile('YAML_sub')|" th:text="'SPDX (YAML)'"></a>
+                                                <a class="dropdown-item" th:onclick="|bom_fn.selectDownloadFile('cdxJSON')|" th:text="'CycloneDX (JSON)'"></a>
+                                                <a class="dropdown-item" th:onclick="|bom_fn.selectDownloadFile('cdxXML')|" th:text="'CycloneDX (XML)'"></a>
+                                            </div>
+                                        </div>
                                         <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="bomResetUp" th:text="Reset"></button>
                                         <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="bomSaveUp" th:text="Save"></button>
                                     </div>

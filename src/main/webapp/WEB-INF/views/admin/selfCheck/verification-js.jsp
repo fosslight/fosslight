@@ -12,7 +12,7 @@
 	var commentIdx= '';
 	var verified = '${project.statusVerifyYn}';
 	verified = (verified != "N" ? true : false);
-	var isAdmin = ${ct:isAdmin()};
+	var isAdmin = ${ct:               isAdmin()};
 	var $editor;
 	var gStatus = "";
 	var tempHandler = "";

@@ -12,7 +12,7 @@
                         <div class="col-sm-8 text-left mt-2">
                             <span class="description-percentage text-dark-gray" id="verifyPrjName"></span>
                             <span class="text-lg-gray text-smaller mx-1" id="verifyCreator"></span>
-                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-primary center-atom" style="margin-left: 2.5rem; font-size: .85rem">
+                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
                             	<input class="form-check-input text-orange" id="approve" name="approve" th:value="Y" type="checkbox">
                                	<label class="form-check-label text-lg-gray" for="approve" th:text="'Approve without verification'"></label>
                          	</span>
@@ -307,7 +307,7 @@
                                       	<div class="row" th:if="${project.verificationStatus != 'CONF' and project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}">
                                       		<div class="col-md-12 mb-3">
                                       			<div class="row float-right pr-4">
-                                      				<button type="button" id="save" class="btn btn-teal-01 btn-sm width-6rem px-3" th:text="Save"></button>
+                                      				<button type="button" id="save" class="btn btn-dagner btn-sm width-6rem px-3" th:text="Save"></button>
                                       			</div>
                                       		</div>
                                       	</div>
@@ -318,7 +318,7 @@
                                                 <div class="col-md-12" th:if="${@CommonFunction.isAdmin()}" th:with="isProgOrConfStat=${project.verificationStatus == 'REV' or project.verificationStatus == 'CONF'}">
                                                     <div class="row">
                                                         <div class="col-md-1 mx-0">
-                                                            <button type="button" id="noticePreview" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="Preview"></button>
+                                                            <button type="button" id="noticePreview" class="btn btn-block btn-danger btn-xm ml-0 mr-1" th:text="Preview"></button>
                                                         </div>
                                                         <div class="col-md-2 mx-0">
                                                             <select class="custom-select rounded-0" id="docType" name="docType">
