@@ -17,10 +17,16 @@
                 <div class="row">
                     <div class="col-md-9">
                         <div class="card card-secondary submit-form">
-                            <div class="card-header">
-                                <h3 class="card-title text-white">Form</h3>
-                                <div class="card-tools">
-                                    <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                            <div class="card-header p-2 pl-3">
+                                <h3 class="card-title text-white mt-1 ml-1">Form</h3>
+                                <div class="btn-group float-right" >
+                                    <button type="button" class="btn btn-danger px-3 btn-sm"><strong>Help</strong></button>
+                                    <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu" role="menu">
+                                        <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_BasicInfo_Main')|">How to use FossLight Hub</a>
+                                    </div>
                                 </div>
                             </div>
                             <form name="projectForm" id="projectForm" action="" method="post">
@@ -243,23 +249,24 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card card-lg-red" style="position:sticky;top:10px;">
-                            <div class="card-header">
-                                <h3 class="card-title" th:text="Comment"></h3>
-                                <div class="card-tools">
-                                    <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                            <div class="card card-lg-red" style="position:sticky;top:10px;">
+                                <div class="card-header">
+                                    <h3 class="card-title" th:text="Comment"></h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="card-body pt-0" style="padding-bottom: 0;">
-                                <div clas="row">
-                                    <div clas="col-md-12">
-                                        <table class="table">
-                                       		<tbody id="commentListBody"></tbody>
-                                        </table>
+                                <div class="card-body pt-0" style="padding-bottom: 0;">
+                                    <div clas="row">
+                                        <div clas="col-md-12">
+                                            <table class="table">
+                                                <tbody id="commentListBody"></tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+
                     </div>
                 </div>
             </section>

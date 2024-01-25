@@ -35,10 +35,19 @@
                                                   	</div>
                                               	</div>
                                             </div>
-                                            <div class="col-md-2 d-flex justify-content-start mx-2">
+                                            <div class="col-md-4 d-flex justify-content-start mx-2">
                                            		<div class="input-group-appen d-flex align-items-center">
                                                     <a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse" th:text="'+ Advanced Search'"></a>
 												</div>
+                                                <div class="btn-group ml-3 mt-1 pr-5">
+                                                    <button type="button" class="btn btn-danger px-3 btn-sm"><strong>Help</strong></button>
+                                                    <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                                        <span class="sr-only">Toggle Dropdown</span>
+                                                    </button>
+                                                    <div class="dropdown-menu" role="menu">
+                                                        <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('OSS_List_Main')|">How to use FossLight Hub</a>
+                                                    </div>
+                                                </div>
 											</div>
                                         </div>
                                     </div>
