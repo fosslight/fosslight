@@ -109,7 +109,7 @@ ul { list-style-type: none; }
 .custom-layout .bg-purple { background-color: #702f9f; }
 .custom-layout .bg-pink { background-color: #f70ce4; }
 
-.custom-layout #helpLinkBtn { position: fixed; top: 1.7rem; right: 1.5rem; }
+.custom-layout #helpLinkBtn { right: -16.5rem; }
 .custom-layout #helpLinkBtnDetail { position: fixed; top: 1.3rem; right: 20rem; }
 
 /*popup*/

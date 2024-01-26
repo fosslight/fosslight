@@ -29,6 +29,16 @@
                                 <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                             </div>
+                            <div class="float-right btn-group mr-1">
+                                <button type="button" class="btn btn-danger px-3 btn-sm"><strong>Help</strong></button>
+                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <div class="dropdown-menu" role="menu">
+                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Main')|">How to use FossLight Hub</a>
+                                    <a class="dropdown-item text-dark" href="#" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Identification', 'I')|">Role of Creator & Reviewer</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
