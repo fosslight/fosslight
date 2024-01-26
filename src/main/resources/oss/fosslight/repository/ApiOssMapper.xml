@@ -189,4 +189,18 @@
 		  FROM OSS_NICKNAME 
 	  GROUP BY OSS_NAME
 	</select>
+	
+	<select id = "getDownloadLocationListByOssName" parameterType="String" resultType="String">
+		SELECT DOWNLOAD_LOCATION
+		FROM OSS_DOWNLOADLOCATION
+		WHERE OSS_ID IN (SELECT OSS_ID FROM OSS_MASTER where OSS_NAME = #{ossName} AND USE_YN = 'Y' AND DEACTIVATE_FLAG = 'N')
+		UNION
+		SELECT DOWNLOAD_LOCATION from OSS_MASTER where oss_name = #{ossName} AND USE_YN = 'Y' AND DEACTIVATE_FLAG = 'N'
+	</select>
+
+	<select id = "getHomepageListByOssName" parameterType="String" resultType="String">
+		SELECT DISTINCT HOMEPAGE
+		FROM OSS_MASTER
+		WHERE OSS_NAME = #{ossName} AND USE_YN = 'Y' AND DEACTIVATE_FLAG = 'N'
+	</select>
 </mapper>

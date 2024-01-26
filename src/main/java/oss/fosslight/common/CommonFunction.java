@@ -54,6 +54,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.BeanMap;
@@ -372,6 +373,11 @@ public class CommonFunction extends CoTopComponent {
     	if (auth != null && "ROLE_ADMIN".equalsIgnoreCase(result) && auth.isAuthenticated()) { 
         	return true;
         }
+    	
+    	if (auth == null) {
+			return true;
+		}
+    	
     	return false;
     }
 	
@@ -1714,7 +1720,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 			
-			if (	!(!isEmpty(bean.getGroupingColumn()) && currentGroup.equals(bean.getGroupingColumn()))) {
+			if (!(!isEmpty(bean.getGroupingColumn()) && currentGroup.equals(bean.getGroupingColumn()))) {
 				// 0(1) : error level
 				if (errorMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
@@ -1783,10 +1789,26 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		
 		
 		// validation 위치별 재정렬
-		// treemap을 이용하여 오름차순으로 정렬한다.
-		TreeMap<String,ProjectIdentification> tm = new TreeMap<String,ProjectIdentification>(sortMap);
-		for (String key : tm.keySet()) {
-			sortList.add(tm.get(key));
+		if (!sortMap.isEmpty()) {
+			List<String> sortKeyList = sortMap.keySet().stream().collect(Collectors.toList());
+			if (sortKeyList.size() > 1) {
+				Collections.sort(sortKeyList, new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						if (new BigDecimal(o1.split("[_]")[0]).compareTo(new BigDecimal(o2.split("[_]")[0])) > 0) {
+							return 1;
+						} else if (new BigDecimal(o1.split("[_]")[0]).compareTo(new BigDecimal(o2.split("[_]")[0])) == 0) {
+							return 0;
+						} else {
+							return -1;
+						}
+					}
+				});
+			}
+					
+			for (String sortKey : sortKeyList) {
+				sortList.add(sortMap.get(sortKey));
+			}
 		}
 
 		// subGrid에서 오류가 있는 row
@@ -3768,19 +3790,21 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				OssAnalysis successOssInfo = ossService.getAutoAnalysisSuccessOssInfo(userData.getReferenceOssId());
 				
-				if (!isEmpty(successOssInfo.getDownloadLocationGroup())) {
-					successOssInfo.setDownloadLocation(successOssInfo.getDownloadLocationGroup());
+				if (successOssInfo != null) {
+					if (!isEmpty(successOssInfo.getDownloadLocationGroup())) {
+						successOssInfo.setDownloadLocation(successOssInfo.getDownloadLocationGroup());
+					}
+					
+					successOssInfo.setTitle("사용자 등록 정보");
+					successOssInfo.setGroupId(userData.getGroupId());
+					successOssInfo.setGridId(userData.getGridId());
+					successOssInfo.setResult("true");
+					successOssInfo.setCompleteYn(userData.getCompleteYn());
+					successOssInfo.setReferenceOssId(userData.getReferenceOssId());
+					changeAnalysisResultList.add(successOssInfo);
+					
+					continue;
 				}
-				
-				successOssInfo.setTitle("사용자 등록 정보");
-				successOssInfo.setGroupId(userData.getGroupId());
-				successOssInfo.setGridId(userData.getGridId());
-				successOssInfo.setResult("true");
-				successOssInfo.setCompleteYn(userData.getCompleteYn());
-				successOssInfo.setReferenceOssId(userData.getReferenceOssId());
-				changeAnalysisResultList.add(successOssInfo);
-				
-				continue;
 			}
 			
 			userData.setTitle("사용자 작성 정보");
@@ -3788,6 +3812,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			String ossName = userData.getOssName();
 			String ossNameTemp = "";
 			boolean ossNicknameFlag = false;
+			
+			String comment  = bean.getComment();
+			if (!isEmpty(comment)) userData.setComment(comment);
 			
 			if (bean.getResult().toUpperCase().equals("TRUE")) {
 				int ossNameCnt = errorMsg.entrySet()
@@ -3803,7 +3830,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						.size();
 				
 				String copyright = bean.getOssCopyright();
-				String comment  = bean.getComment();
 				
 				String askalonoLicense = bean.getAskalonoLicense().replaceAll("\\(\\d+\\)", "");
 				String scancodeLicense = bean.getScancodeLicense().replaceAll("\\(\\d+\\)", "");
@@ -3932,7 +3958,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 							
 							ossInfoByNick = new OssAnalysis(userData.getGridId(), ossInfoByNickList.get(0).getOssName(), bean.getOssVersion(), avoidNull(ossInfoByNickList.get(0).getOssNickname()).replaceAll("<br>", ",")
 									, license.substring(0, license.length()-1), ossInfoByNickList.get(0).getCopyright(), ossInfoByNickList.get(0).getDownloadLocation()
-									, ossInfoByNickList.get(0).getHomepage(), null, null, "", analysisTitle + " 최신 등록 정보"); // nick oss 최신정보
+									, ossInfoByNickList.get(0).getHomepage(), null, comment, "", analysisTitle + " 최신 등록 정보"); // nick oss 최신정보
 							ossInfoByNick.setGridId(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX + idx);
 							
 							ossAnalysisByNickList.add(ossInfoByNick);
@@ -4125,6 +4151,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						if (newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
 							newestOssInfo.setOssVersion(!isEmpty(bean.getOssVersion()) ? bean.getOssVersion() : userData.getOssVersion());
 							newestOssInfo.setGridId(""+gridSeq++);
+							newestOssInfo.setComment(comment);
 							
 							changeAnalysisResultList.add(newestOssInfo); // seq 2 : 최신등록 정보
 						}
@@ -4138,6 +4165,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 		}
+		
+		changeAnalysisResultList = changeAnalysisResultList.stream().filter(distinctByKey(e -> (e.getTitle() + "|" + e.getOssName() + "|" + e.getOssVersion()).toUpperCase())).collect(Collectors.toList());
 		
 		getAnalysisValidation(map, changeAnalysisResultList);
 		map.replace("rows", changeAnalysisResultList);
@@ -4243,6 +4272,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			if (!isEmpty(bean.getOssNickname())) { // nickname이 빈값이 있을 경우 담지 않음.
 				nicknameList.addAll(Arrays.asList(bean.getOssNickname().split(",")));
+				nicknameList = nicknameList.stream().filter(e -> !e.equalsIgnoreCase(bean.getOssName())).collect(Collectors.toList());
 			}
 			
 			nicknameList.addAll(Arrays.asList(newestNickName.split(",")));
@@ -5262,6 +5292,133 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			if (!btnShowMap.containsKey("reviewBtn")) btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
 			if (!btnShowMap.containsKey("confirmtBtn")) btnShowMap.put("confirmtBtn", CoConstDef.FLAG_NO);
 			if (!btnShowMap.containsKey("rejectBtn")) btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
+		}
+	}
+	
+	public static String getMessageForVulDOC(HttpServletRequest request, String gubn) {
+		String vulDocMsg = null;
+		if (gubn.equals("inst")) {
+			String installLink = "<a target='_blank' href='http://collab.lge.com/main/x/jhbZeg' style='color:blue;'>VulDOC Privacy and Credential Analyzer - Install</a>";
+			String webLink = "<a target='_blank' href='http://collab.lge.com/main/x/Sb2ig' style='color:blue;'>VulDOC Privacy and Credential Analyzer - Web</a>";
+			String isInfo = "<a target='_blank' href='http://collab.lge.com/main/x/NyM_cg' style='color:blue;'>";
+			
+			String lang = "";
+			Cookie[] cookies = request.getCookies();
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals("lang")) {
+					lang = cookie.getValue();
+					break;
+				}
+			}
+			if (lang.equals("en-US")) {
+				isInfo += "sensitive or credential information<a>";
+				vulDocMsg = getMessage("msg.project.packaging.vuldoc.instructions" , new String[]{installLink, webLink, isInfo});
+			} else {
+				isInfo += "중요 민감 정보</a>";
+				vulDocMsg = getMessage("msg.project.packaging.vuldoc.instructions" , new String[]{installLink, webLink, isInfo});
+			}
+		} else {
+			String vulDocInfoLink = "<a target='_blank' href='http://collab.lge.com/main/display/SWSEC/%5B6%5D+Getting+Help+and+Support' style='color:blue;'>CSG Task</a>";
+			vulDocMsg = getMessage("msg.project.packaging.vuldoc.info" , new String[]{vulDocInfoLink});
+		}
+		
+		return vulDocMsg;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void setDeduplicatedMessageInfo(Map<String, Object> result) {
+		Map<String, String> rtnMsgMapByValid = new HashMap<>();
+		Map<String, String> rtnMsgMapByValidAndDiff = new HashMap<>();
+		
+		if (result.containsKey("infoData")) {
+			Map<String, String> infoDataMap = (Map<String, String>) result.get("infoData");
+			if (result.containsKey("validData")) {
+				Map<String, String> validDataMap = (Map<String, String>) result.get("validData");
+				for (String key : infoDataMap.keySet()) {
+					if (!validDataMap.containsKey(key)) {
+						rtnMsgMapByValid.put(key, infoDataMap.get(key));
+					}
+				}
+			}
+			
+			if(result.containsKey("diffData")) {
+				Map<String, String> diffDataMap = (Map<String, String>) result.get("diffData");
+				if (!rtnMsgMapByValid.isEmpty()) {
+					for (String key : rtnMsgMapByValid.keySet()) {
+						if (!diffDataMap.containsKey(key)) {
+							rtnMsgMapByValidAndDiff.put(key, rtnMsgMapByValid.get(key));
+						}
+					}
+				} else {
+					for (String key : diffDataMap.keySet()) {
+						if (!diffDataMap.containsKey(key)) {
+							rtnMsgMapByValid.put(key, infoDataMap.get(key));
+						}
+					}
+				}
+			}
+		}
+		
+		if (!rtnMsgMapByValidAndDiff.isEmpty()) {
+			result.put("infoData", rtnMsgMapByValidAndDiff);
+		} else {
+			result.put("infoData", rtnMsgMapByValid);
+		}
+	}
+	
+	public static Object copyObject(Object obj, String gubn) {
+		if (gubn.equals("OM")) {
+			OssMaster bean = (OssMaster) obj;
+			
+			OssMaster copiedBean = new OssMaster();
+			copiedBean.setOssId(bean.getOssId());
+			copiedBean.setOssName(bean.getOssName());
+			copiedBean.setOssVersion(bean.getOssVersion());
+			copiedBean.setLicenseName(bean.getLicenseName());
+			copiedBean.setOssLicenses(bean.getOssLicenses());
+			copiedBean.setDetectedLicenses(bean.getDetectedLicenses());
+			copiedBean.setOssNickname(bean.getOssNickname());
+			copiedBean.setOssNicknames(bean.getOssNicknames());
+			copiedBean.setDownloadLocation(bean.getDownloadLocation());
+			copiedBean.setDownloadLocations(bean.getDownloadLocations());
+			copiedBean.setHomepage(bean.getHomepage());
+			
+			if (!isEmpty(bean.getLicenseDiv())) {
+				copiedBean.setMultiLicenseFlag(bean.getLicenseDiv());
+				copiedBean.setLicenseDiv(bean.getLicenseDiv());
+			}
+			
+			if (!isEmpty(bean.getLicenseType())) {
+				copiedBean.setLicenseType(bean.getLicenseType());
+			}
+			
+			if (!isEmpty(bean.getObligationType())) {
+				copiedBean.setObligation(bean.getObligationType());
+			}
+			
+			if (!isEmpty(bean.getModifiedDate())) {
+				copiedBean.setModifiedDate(bean.getModifiedDate());
+			}
+			
+			if (!isEmpty(bean.getModifier())) {
+				copiedBean.setModifier(bean.getModifier());
+			}
+			
+			if (!isEmpty(bean.getCreatedDate())) {
+				copiedBean.setCreatedDate(bean.getCreatedDate());
+			}
+			
+			if (!isEmpty(bean.getCreator())) {
+				copiedBean.setCreator(bean.getCreator());
+			}
+
+			copiedBean.setAttribution(bean.getAttribution());
+			copiedBean.setSummaryDescription(bean.getSummaryDescription());
+			copiedBean.setCopyright(bean.getCopyright());
+			
+			return copiedBean;
+		} else {
+			return obj;
 		}
 	}
 }

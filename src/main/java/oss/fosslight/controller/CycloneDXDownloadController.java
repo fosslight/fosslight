@@ -56,6 +56,7 @@ public class CycloneDXDownloadController extends CoTopComponent {
 	public @ResponseBody ResponseEntity<Object> getCycloneDXPost(@RequestBody HashMap<String, Object> map,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		String downloadId = null;
+		String rtnMsg = "";
 		
 		try {
 			String type = (String)map.get("type");
@@ -88,20 +89,13 @@ public class CycloneDXDownloadController extends CoTopComponent {
 					
 					try {
 						File cycloneDXJsonFile = new File(jsonFullPath);
-						
-						if (cycloneDXJsonFile.exists() && cycloneDXJsonFile.length() <= 0) {
-							CommentsHistory commHisBean = new CommentsHistory();
-							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-							commHisBean.setReferenceId(prjId);
-							commHisBean.setContents(getMessage("cyclonedx.json.failure"));
-							commHisBean.setStatus(null); // 일반적인 comment에는 status를 넣지 않음.
-							
-							commentService.registComment(commHisBean);
+						if (cycloneDXJsonFile.exists() && cycloneDXJsonFile.length() > 0) {
+							downloadId = fileId;
+						} else {
+							rtnMsg = getMessage("cyclonedx.json.failure");
 						}
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
-					} finally {
-						downloadId = fileId;
 					}
 				}
 			} else if ("cycloneDXXml".equals(type)) {
@@ -121,20 +115,13 @@ public class CycloneDXDownloadController extends CoTopComponent {
 					
 					try {
 						File cycloneDXXmlFile = new File(xmlFullPath);
-						
-						if (cycloneDXXmlFile.exists() && cycloneDXXmlFile.length() <= 0) {
-							CommentsHistory commHisBean = new CommentsHistory();
-							commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-							commHisBean.setReferenceId(prjId);
-							commHisBean.setContents(getMessage("cyclonedx.xml.failure"));
-							commHisBean.setStatus(null); // 일반적인 comment에는 status를 넣지 않음.
-							
-							commentService.registComment(commHisBean);
+						if (cycloneDXXmlFile.exists() && cycloneDXXmlFile.length() > 0) {
+							downloadId = fileId;
+						} else {
+							rtnMsg = getMessage("cyclonedx.xml.failure");
 						}
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
-					} finally {
-						downloadId = fileId;
 					}
 				}
 			} else {
@@ -148,7 +135,11 @@ public class CycloneDXDownloadController extends CoTopComponent {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
 
-		return makeJsonResponseHeader(downloadId);
+		if (downloadId != null) {
+			return makeJsonResponseHeader(downloadId);
+		} else {
+			return makeJsonResponseHeader(false, rtnMsg);
+		}
 	}
 	
 	@ResponseBody

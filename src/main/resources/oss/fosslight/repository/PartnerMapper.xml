@@ -1347,7 +1347,9 @@
 	</select>
 	
 	<select id="existsWatcherByUser" resultType="int" parameterType="oss.fosslight.domain.PartnerMaster">
-		SELECT COUNT(1) FROM PARTNER_WATCHER WHERE PARTNER_ID = #{partnerId} AND DIVISION = #{parDivision} AND (USER_ID = 'ALL' OR USER_ID = #{parUserId})
+		SELECT COUNT(1) FROM PARTNER_WATCHER 
+		WHERE (PARTNER_ID = #{partnerId} AND DIVISION = #{parDivision} AND (USER_ID = 'ALL' OR USER_ID = #{parUserId}))
+		OR (PARTNER_ID = #{partnerId} AND EMAIL = (SELECT EMAIL FROM T2_USERS WHERE USER_ID = #{parUserId} AND DIVISION = #{parDivision} LIMIT 1))
 	</select>
 	
 	<select id="existsWatcher" resultType="int" parameterType="oss.fosslight.domain.PartnerMaster">
@@ -2005,4 +2007,21 @@
 		WHERE T1.PARTNER_ID = #{partnerId}
 		  AND IFNULL(T2.EXCLUDE_YN, 'N') = 'N'
 	</select>
+	
+	<select id="existsWatcherByUserDivistion" resultType="int" parameterType="oss.fosslight.domain.PartnerMaster">
+		SELECT COUNT(1) FROM PARTNER_WATCHER WAT
+		INNER JOIN T2_USERS USR
+		ON WAT.USER_ID = USR.USER_ID
+		WHERE WAT.PARTNER_ID = #{partnerId}
+		AND WAT.USER_ID = #{parUserId} AND USR.DIVISION = #{parDivision}
+		AND WAT.DIVISION != USR.DIVISION
+	</select>
+	
+	<update id="updateWatcherDivision" parameterType="oss.fosslight.domain.Project">
+		UPDATE PARTNER_WATCHER 
+		SET DIVISION = #{parDivision}
+		WHERE PARTNER_ID = #{partnerId} 
+		AND USER_ID = #{parUserId} 
+		AND IFNULL(EMAIL,'') = ''
+	</update>
 </mapper>

@@ -1005,6 +1005,10 @@ var bom_data = {
 						gridDiffMsg(bomDiffMsgData, "bomList");
 					}
 
+					if (bomInfoMsgData) {
+						gridInfoMsg(bomInfoMsgData, "bomList");
+					}
+					
 					// totla record 표시
 					$("#bomList_toppager_right, #bomPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+bomMainData.length+'</div>');
 					
@@ -1044,7 +1048,7 @@ var bom_data = {
 				}
 				, onCellSelect: function(rowid,iCol,cellcontent,e) {
 					if(iCol == "0"){
-						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, null, com_fn.getLicenseName);
+						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
 					}
 				}
 				, ondblClickRow: function(rowid,iRow,iCol,e) {

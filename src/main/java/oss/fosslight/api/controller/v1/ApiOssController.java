@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 @Api(tags = {"1. OSS & License"})
 @RequiredArgsConstructor
 @RestController
+@Slf4j
 @RequestMapping(value = "/api/v1")
 public class ApiOssController extends CoTopComponent {
 	
@@ -107,7 +109,8 @@ public class ApiOssController extends CoTopComponent {
 					, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}
     }
-	
+
+
 	@ApiOperation(value = "Search License Info", notes = "License Info 조회")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")

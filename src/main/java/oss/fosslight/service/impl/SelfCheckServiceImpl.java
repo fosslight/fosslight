@@ -1821,8 +1821,12 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		Map<String, String> ossAttributionMap = new HashMap<>();
 		// 개행처리 및 velocity용 list 생성
 		List<OssComponents> noticeList = new ArrayList<>();
+		List<String> deduplicationList = new ArrayList<>();
 		
 		for (OssComponents bean : noticeInfo.values()) {
+			String key = (bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getLicenseName() + "_" + bean.getCopyrightText()).toUpperCase();
+			if (deduplicationList.contains(key)) continue;
+			
 			if (isTextNotice) {
 				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
@@ -1842,6 +1846,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 			
 			noticeList.add(bean);
+			deduplicationList.add(key);
 		}
 		
 		Collections.sort(noticeList, new Comparator<OssComponents>() {
@@ -2450,8 +2455,12 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		Map<String, String> ossAttributionMap = new HashMap<>();
 		// 개행처리 및 velocity용 list 생성
 		List<OssComponents> noticeList = new ArrayList<>();
+		List<String> deduplicationList = new ArrayList<>();
 		
 		for (OssComponents bean : noticeInfo.values()) {
+			String key = (bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getLicenseName() + "_" + bean.getCopyrightText()).toUpperCase();
+			if (deduplicationList.contains(key)) continue;
+			
 			if (isTextNotice) {
 				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
 				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
@@ -2471,6 +2480,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			}
 			
 			noticeList.add(bean);
+			deduplicationList.add(key);
 		}
 		
 		Collections.sort(noticeList, new Comparator<OssComponents>() {

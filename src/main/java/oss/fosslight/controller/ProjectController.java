@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
@@ -522,6 +522,8 @@ public class ProjectController extends CoTopComponent {
 		}
 		
 		if (result != null) {
+			CommonFunction.setDeduplicatedMessageInfo(result);
+			
 			if (CoConstDef.CD_DTL_COMPONENT_BAT.equals(code) && isEmpty(identification.getReferenceId())
 					&& !isEmpty(identification.getRefBatId())) {
 				code = CoConstDef.CD_DTL_COMPONENT_ID_BAT;
@@ -2960,7 +2962,9 @@ public class ProjectController extends CoTopComponent {
 	@PostMapping(value = PROJECT.IDENTIFICATION_GRID_POST)
 	public @ResponseBody ResponseEntity<Object> srcMainGridAjaxPost(@RequestBody ProjectIdentification identification,
 			HttpServletRequest req, HttpServletResponse res, Model model) {
-		return makeJsonResponseHeader(getOssComponentDataInfo(identification, identification.getReferenceDiv()));
+		Map<String, Object> result = getOssComponentDataInfo(identification, identification.getReferenceDiv());
+		if (result != null) CommonFunction.setDeduplicatedMessageInfo(result);
+		return makeJsonResponseHeader(result);
 	}
 	
 	/**
@@ -3000,6 +3004,7 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> result = getOssComponentDataInfo(identification, code);
 		
 		if (result != null) {
+			CommonFunction.setDeduplicatedMessageInfo(result);
 			// Project Identification에서 BAT Apply 인 경우 (BAT List 와
 			// Identification의 BAT 를 구분
 			if (CoConstDef.CD_DTL_COMPONENT_BAT.equals(code) && isEmpty(identification.getReferenceId())
@@ -4555,41 +4560,79 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		try {
+			Project beforePrjInfo = projectService.getProjectBasicInfo(beforePrjId);
+			String beforeReferenceDiv = "";
+			
 			ProjectIdentification beforeIdentification = new ProjectIdentification();
-			beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 			beforeIdentification.setReferenceId(beforePrjId);
-			beforeIdentification.setMerge("N");
+			
+			if(!beforePrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				beforeIdentification.setMerge("N");
+			} else {
+				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
+				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			}
+			
+			Project afterPrjInfo = projectService.getProjectBasicInfo(afterPrjId);
+			String afterReferenceDiv = "";
 			
 			ProjectIdentification AfterIdentification = new ProjectIdentification();
-			AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 			AfterIdentification.setReferenceId(afterPrjId);
-			AfterIdentification.setMerge("N");
+			
+			if(!afterPrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				AfterIdentification.setMerge("N");
+			} else {
+				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
+				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			}
 			
 			Map<String, Object> beforeBom = new HashMap<String, Object>();
 			Map<String, Object> afterBom = new HashMap<String, Object>();
+			List<ProjectIdentification> beforeBomList = null;
+			List<ProjectIdentification> afterBomList = null;
+			boolean beforeDataFlag = false;
+			boolean afterDataFlag = false;
 			
-			try {
-				beforeBom = getOssComponentDataInfo(beforeIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
+			beforeBom = getOssComponentDataInfo(beforeIdentification, beforeReferenceDiv);
+			if (beforeReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+				if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
+					beforeDataFlag = true;
+				} else {
+					beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
+				}
+			} else {
+				if (!beforeBom.containsKey("mainData") || (List<ProjectIdentification>) beforeBom.get("mainData") == null) {
+					beforeDataFlag = true;
+				} else {
+					beforeBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) beforeBom.get("mainData"));
+				}
 			}
+			if (beforeDataFlag || beforeBomList == null) return makeJsonResponseHeader(false, "1");
 			
-			try {
-				afterBom = getOssComponentDataInfo(AfterIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
+			afterBom = getOssComponentDataInfo(AfterIdentification, afterReferenceDiv);
+			if (afterReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+				if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
+					afterDataFlag = true;
+				} else {
+					afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
+				}
+			} else {
+				if (!afterBom.containsKey("mainData") || (List<ProjectIdentification>) afterBom.get("mainData") == null) {
+					afterDataFlag = true;
+				} else {
+					afterBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) afterBom.get("mainData"));
+				}
 			}
+			if (afterDataFlag || afterBomList == null) return makeJsonResponseHeader(false, "1");
 			
-			if ((List<ProjectIdentification>) beforeBom.get("rows") == null || (List<ProjectIdentification>) afterBom.get("rows") == null) {// before, after값 중 하나라도 null이 있으면 비교 불가함. 
-				throw new Exception();
-			}
-		
-			String flag = "list";
-			List<Map<String, String>> bomCompareList = projectService.getBomCompare((List<ProjectIdentification>) beforeBom.get("rows"), (List<ProjectIdentification>) afterBom.get("rows"), flag);
-			resultMap.put("contents", bomCompareList);
-				
+			resultMap.put("contents", projectService.getBomCompare(beforeBomList, afterBomList, "list"));
 			return makeJsonResponseHeader(true, "0" , resultMap);
 		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			return makeJsonResponseHeader(false, "1");
 		}
 	}

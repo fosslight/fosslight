@@ -70,4 +70,6 @@ public interface FileMapper {
 	public T2File getFileInfo2(T2File file);
 
 	public void insertCopyPhysicalFileInfo(T2File fileInfo);
+	
+	public T2File selectPackagingVulDOCFileInfo(String prjId);
 }

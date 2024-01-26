@@ -496,6 +496,10 @@ public class ExcelUtil extends CoTopComponent {
 		return value;
 	}
 
+	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, List<OssComponents> list, List<String> errMsgList) {
+		return readReport(readType, checkId, targetSheetNums, fileSeq, list, errMsgList, false);
+	}
+	
 	/**
 	 * 
 	 * @param readType Report종류(3rd, SRC, BAT ...)
@@ -507,7 +511,7 @@ public class ExcelUtil extends CoTopComponent {
 	 * @return
 	 */
 	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, 
-	        List<OssComponents> list,List<String> errMsgList) {
+	        List<OssComponents> list,List<String> errMsgList, boolean exactMatchFlag) {
 		
 		T2File fileInfo = fileService.selectFileInfo(fileSeq);
 		if (fileInfo == null) {
@@ -555,17 +559,22 @@ public class ExcelUtil extends CoTopComponent {
 
 				int idx = 0;
 				for (String sheetName : sheetNames){
-					if (sheetName.startsWith(readType)){
-						targetSheetNumsArrayList.add(Integer.toString(idx));
+					if (exactMatchFlag) {
+						if (sheetName.equalsIgnoreCase(readType)) {
+							targetSheetNumsArrayList.add(Integer.toString(idx));
+						}
+					} else {
+						if (sheetName.startsWith(readType)){
+							targetSheetNumsArrayList.add(Integer.toString(idx));
+						}
 					}
 					idx++;
 				}
-				if (targetSheetNumsArrayList.isEmpty()){
+				if (targetSheetNumsArrayList.isEmpty()) {
 					targetSheetNums = new String[] {"-1"};
-				}else{
+				} else {
 					targetSheetNums = targetSheetNumsArrayList.toArray(new String[0]);
 				}
-
 			}
 			
 			if (hasFileListSheet(targetSheetNums, wb)) {
@@ -1063,7 +1072,7 @@ public class ExcelUtil extends CoTopComponent {
     				if (ossNameCol < 0) {
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
     					bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
-    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)) : getCellData(row.getCell(licenseCol)) + ", " + getCellData(row.getCell(commentCol)));
+    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)).trim() : getCellData(row.getCell(licenseCol)).trim() + ", " + getCellData(row.getCell(commentCol)).trim());
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					if (bean.getCopyrightText() == ""){
     						bean.setCopyrightText(" ");
@@ -1141,9 +1150,9 @@ public class ExcelUtil extends CoTopComponent {
     						}
     					}
 
-    					bean.setComments(commentCol < 0 ? "" : comment);
+    					bean.setComments(commentCol < 0 ? "" : comment.trim());
     				} else {
-    					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)));
+    					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)).trim());
     				}
     
     				// oss Name을 입력하지 않거나, 이전 row와 oss name, oss version이 동일한 경우, 멀티라이선스로 판단

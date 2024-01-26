@@ -19,6 +19,7 @@
         var distributionStatus = [[${project.destributionStatus}]];
         var deleteFileList = new Array();
         var isAndroid = [[${project.androidFlag}]];
+        var appendReadOnlyFlag = false;
 
         $(document).ready(function () {
             'use strict';
@@ -1281,6 +1282,8 @@
 
                 btn_div.show();
                 if (role == "ROLE_ADMIN") { // 관리자 권한 일 경우
+                	$("#approve").attr("disabled", false);
+                	
                     switch (status) {
                         case "":
                             btn_confirm.hide();
@@ -1290,7 +1293,6 @@
                             btn_save.show();
                             btn_verify.show();
                             btn_savePath.show();
-                            $("#approve").attr("disabled", false);
 
                             break;
                         case "PROG":
@@ -1301,7 +1303,6 @@
                             btn_save.show();
                             btn_verify.show();
                             btn_savePath.show();
-                            $("#approve").attr("disabled", false);
 
                             break;
                         case "REQ":
@@ -1312,9 +1313,7 @@
                             btn_save.show();
                             btn_verify.show();
                             btn_savePath.show();
-
-                            $("#approve").attr("disabled", true);
-
+                            
                             break;
 
                         case "REV":
@@ -1325,9 +1324,7 @@
                             btn_save.show();
                             btn_verify.show();
                             btn_savePath.show();
-
-                            $("#approve").attr("disabled", true);
-
+                            
                             break;
 
                         case "CONF":
@@ -1343,8 +1340,7 @@
                             $('#chkUseCustomNotice').prop('disabled', true);
                             $('#noticeEditor').prop('disabled', true);
                             $('#noticeEditor').css('opacity', 0.5);
-
-                            $("#approve").attr("disabled", true);
+                            
                             break;
 
                     }
@@ -2089,7 +2085,7 @@
             appendEditVisible: function (target) {
                 var checked = $(target).prop("checked");
 
-                if (checked) {
+                if (checked || "CONF" == curIdenStatus) {
                     $("#editAppend").show();
                 } else {
                     $("#editAppend").hide();
@@ -2122,7 +2118,7 @@
                     }
                     
                     if (type != "init" && $("#append").prop("checked")) {console.log("disabled");
-//                    	$('#editor2').summernote('disable');
+                    	$('#editor2').summernote('disable');
                     }
                 } else {
                     $("#companyName").attr("disabled", !checked);
@@ -2135,8 +2131,8 @@
                     $("#editOssDistributionSite").attr("disabled", !checked);
                     $("#editEmail").attr("disabled", !checked);
 
-                    if (type != "init" && $("#append").prop("checked")) {console.log("enable");
-//                    	$('#editor2').summernote('enable');
+                    if (type != "init" && $("#append").prop("checked")) {
+                    	$('#editor2').summernote('enable');
                     }
                 }
                 
@@ -2214,6 +2210,10 @@
 
                     if (editAppendedYn == "Y") {
                         $("#append").trigger("click").attr("checked", true);
+                        
+                        if (!appendReadOnlyFlag) {
+                        	$('#editor2').summernote('enable');
+                        }
                     }
                 }, 1);
             },

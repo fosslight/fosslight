@@ -4,9 +4,8 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a class="brand-link">
-      <img th:src="@{/images/logo_s.png}" alt="FOSSLight hub Logo" class="brand-image img-circle elevation-3"
-           style="opacity: .8">
-      <span class="brand-text font-weight-light">FOSSLight Hub</span>
+      <img th:src="@{/images/logo_s.png}" alt="FOSSLight hub Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light" th:text="'FOSSLight'"></span>
     </a>
     <!-- Sidebar -->
     <div class="sidebar index">
@@ -17,7 +16,7 @@
             <div class="col-6">
               <span class="text-right">
                 <i class="fas fa-user-circle text-light mr-1 fa-xs"></i>
-                <a onclick="createTabNew('configuration_edit', '/configuration/edit')" style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" ></a>
+                <a th:onclick="|createTabNew('configuration_edit', '/configuration/edit')|" style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" ></a>
               </span>
             </div>
             <div class="col-1">
@@ -26,7 +25,7 @@
             <div class="col-4">
               <span class="text-left">
                 <i class="fas fa-sign-out-alt text-light mr-1 fa-xs"></i>
-                <a class="text-right" th:href="@{/session/logout}">Logout</a>
+                <a class="text-right" th:href="@{/session/logout}" th:text="Logout"></a>
               </span>
             </div>
           </div>
@@ -48,7 +47,7 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <li class="nav-item">
+          <li class="nav-item" th:if="${dashboardFlag}">
             <a th:href="@{/dashboard/list}" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               	<p th:text="Dashboard"></p>
@@ -66,19 +65,25 @@
               	<p th:text="'OSS List'"></p>
             </a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" th:if="${projectFlag}">
             <a th:href="@{/project/list}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
               	<p th:text="'Project List'"></p>
             </a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" th:if="${partnerFlag}">
             <a th:href="@{/partner/list}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
               	<p th:text="'3rd Party List'"></p>
             </a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" th:if="${batFlag}">
+            <a th:href="@{/bat/list}" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="'BAT List'"></p>
+            </a>
+          </li>
+          <li class="nav-item" th:if="${binarydbFlag}">
             <a th:href="@{/binary}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
               	<p th:text="'Binary DB'"></p>
@@ -99,7 +104,7 @@
           <li class="nav-item" th:if="${complianceStatusFlag and (projectFlag or partnerFlag)}">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
-              	<p th:text="Compliance Status"></p></p>
+              	<p th:text="'Compliance Status'"></p></p>
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item" th:if="${projectFlag}">
@@ -117,18 +122,24 @@
             </ul>
           </li>
           <li class="nav-item">
+            <a th:href="@{/external/external}" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+	          	<p th:text="'External Link'"></p>
+            </a>
+          </li>
+          <li class="nav-item" th:if="${@CommonFunction.isAdmin()}">
             <a th:href="@{/system/configuration}" class="nav-link">
               <i class="nav-icon fas fa-user-cog"></i>
 	          	<p th:text="Configuration"></p>
             </a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" th:if="${@CommonFunction.isAdmin()}">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-cog"></i>
               	<p th:text="System"><i class="fas fa-angle-left right"></i></p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
+              <li class="nav-item" th:if="${statisticsFlag}">
                 <a th:href="@{/statistics/view}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   	<p th:text="Statistics"></p>
@@ -176,7 +187,7 @@
                   	<p th:text="'Vulnerability Log'"></p>
                 </a>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" th:if="${binarydbFlag}">
                 <a th:href="@{/system/binaryDataHistory}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   	<p th:text="'BinaryDB Log'"></p>

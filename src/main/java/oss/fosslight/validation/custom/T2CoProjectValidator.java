@@ -128,7 +128,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 						
 						break;
 					case PROC_TYPE_IDENTIFICATION_BOM_MERGE:
-						validateProjectBomMerge(map, errMap, diffMap);
+						validateProjectBomMerge(map, errMap, diffMap, infoMap);
 						
 						break;
 					case PROC_TYPE_SELFCHECK :
@@ -717,7 +717,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 	
 	@SuppressWarnings("unchecked")
 	private void validateProjectBomMerge(Map<String, String> map, Map<String, String> errMap,
-			Map<String, String> diffMap) {
+			Map<String, String> diffMap, Map<String, String> infoMap) {
 		// ossComponetList==> grid 데이터(사용자 등록 데이터)
 		if (ossComponetList != null) {
 
@@ -1078,6 +1078,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 						String licenseText = CommonFunction.makeRecommendedLicenseString(checkOSSMaster, bean);
 						if(!isEmpty(licenseText)) {
 							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Recommended : " + licenseText );
+						}
+					}
+					
+					if (!diffMap.containsKey("COPYRIGHT_TEXT." + bean.getComponentId()) && !isEmpty(bean.getCopyrightText())) {
+						if (!checkOssData(ossInfoByName.get(checkKey), bean.getCopyrightText(), "COPYRIGHT")) {
+							infoMap.put("COPYRIGHT_TEXT." + bean.getComponentId(), "COPYRIGHT.DIFFERENT");
 						}
 					}
 				}

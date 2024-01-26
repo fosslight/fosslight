@@ -242,6 +242,8 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .btnSet.review span {background-position:left -62px;background-size:0 0px;padding:0 0 0 4px;}
 .btnSet.reject span {background-position:left -150px;}
 .btnSet.restart span {background-position:left -242px;}
+.btnSet.autoReview span {background-position:left -62px;background-size:0 0px;padding:0 0 0 4px;}
+.btnSet.autoReview.ing span {display:block;padding:0 0 0 18px;background: url("../images/img_timer.png") no-repeat; background-size: 16%; background-position: left;}
 /**/
 .smallDelete {display:inline-block;width:9px;height:9px;line-height:1000%;font-size:0 !important;overflow:hidden;cursor:pointer;border:0;background: url("../images/bg_btn.png") no-repeat left -90px;}
 .errorMsgDel {display:inline-block;width:25px;height:25px;line-height:1000%;font-size:0 !important;overflow:hidden;cursor:pointer;border:0;background: url("../images/bg_btn.png") no-repeat right -90px;position:absolute;top:5px;left:94%;}

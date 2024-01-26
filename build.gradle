@@ -5,6 +5,7 @@ plugins {
 	id 'war'
 	id 'eclipse' // optional (to generate Eclipse project files)
 	id 'idea' // optional (to generate IntelliJ IDEA project files)
+	id "com.google.cloud.tools.jib" version "3.3.1"
 }
 
 group = 'oss.fosslight'
