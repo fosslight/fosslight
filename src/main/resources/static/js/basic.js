@@ -2607,7 +2607,7 @@ function findAndReplace(match) {
 function popUpHelpGuide(id, _step) {
 	$.ajax({
 		type: 'GET',
-		url: CTX_PATH+"/system/processGuide/getProcessGuide",
+		url: "/system/processGuide/getProcessGuide",
 		data: {"id":id},
 		async:false,
 		success : function(data){
@@ -2625,7 +2625,7 @@ function popUpHelpGuide(id, _step) {
 function openHelpGuideLink(id) {
 	$.ajax({
 		type: 'GET',
-		url: CTX_PATH+"/system/processGuide/getProcessGuide",
+		url: "/system/processGuide/getProcessGuide",
 		data: {"id":id},
 		async:false,
 		success : function(data){
