@@ -517,6 +517,7 @@ var dep_fn = {
 			onSelectRow: function(id){},
 			autoencode: true,
 			gridview: true,
+			rowNum: 1000,
  			sortname: 'referenceId',
 			viewrecords: true,
  			sortorder: 'desc',
@@ -886,13 +887,13 @@ var dep_fn = {
 		}
 		
 		if(parseInt(cellvalue) >= 9.0 ) {
-			display="<span class=\"badge badge-dark\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+			display="<span class=\"badge badge-dark\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">CRITICAL</span>";
 		} else if(parseInt(cellvalue) >= 7.0 ) {
-			display="<span class=\"badge badge-danger\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+			display="<span class=\"badge badge-danger\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">HIGH</span>";
 		} else if(parseInt(cellvalue) >= 4.0) {
-			display="<span class=\"badge badge-orange\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+			display="<span class=\"badge badge-orange\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">MEDIUM</span>";
 		} else if(parseInt(cellvalue) > 0) {
-			display="<span class=\"badge badge-warning\" style=\"cursor: pointer;\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">"+cellvalue+"</span>";
+			display="<span class=\"badge badge-warning\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">LOW</span>";
 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
 			display="<span style=\"font-size:0;\"></span>";
 		} else {

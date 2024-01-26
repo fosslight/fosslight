@@ -1935,19 +1935,18 @@ var src_fn = {
 		var obligationType = rowObject["obligationType"];
 		var obligationGrayFlag = rowObject["obligationGrayFlag"];
 
-		if(obligationGrayFlag == "Y") {
+		if (obligationGrayFlag == "Y") {
 			var _obligationMsg = rowObject["obligationMsg"];
 			
 			if(!_obligationMsg || _obligationMsg == "") {
 				_obligationMsg = "unknown obligation";
 			}
-
-			display = "<span class=\"iconSet help\">Obligation is unclear</span>";
-
-		} else if(obligationType == 10){
-			display="<span class=\"iconSet ops\">Notice</span>";
-		} else if(obligationType == 11) {
-			display="<span class=\"iconSet ops\"></span><span class=\"iconSet man\">Notice & SourceCode</span>";
+			
+			display = "<i class=\"fas fa-question-circle\" style=\"font-size: 1.2rem; cursor: pointer;\" title=\"Obligation is unclear\"></i>";
+		} else if (obligationType == 10){
+			display = "<i class=\"far fa-file-code hover-icon fa-1-5x mr-1\" title=\"OSS Notice\"></i>";
+		} else if (obligationType == 11) {
+			display = "<i class=\"far fa-file-code hover-icon fa-1-5x mr-1\" title=\"OSS Notice\"></i><i class=\"far fa-file-pdf hover-icon fa-1-5x mr-1\" title=\"SourceCode\"></i>";
 		}
 		
 		return display;
@@ -2082,11 +2081,11 @@ var src_fn = {
 		var display = "";
 		var ossName = rowObject["ossName"];
 		var existsFlag = rowObject["ossNameExistsYn"];
-
-		if(ossName === undefined || ossName == "" || ossName == null) {
+		
+		if (ossName === undefined || ossName == "" || ossName == null) {
 		} else {
-			if(existsFlag && existsFlag == "Y") {
-					display = "<div class=\"tcenter\"><a class='btnIcon ossI' onclick=\"src_fn.showOssViewPage('srcList','"+options.rowId+"')\">Detail Info</a></div>";
+			if (existsFlag && existsFlag == "Y") {
+				display = "<i class=\"fas fa-info-circle\" style=\"font-size: 1.2rem; cursor: pointer; color: #31b404;\" title=\"Detail Info\" onclick=\"src_fn.showOssViewPage('srcList','"+options.rowId+"')\"></i>";
 			} else {
 				display = "";
 			}
@@ -2101,7 +2100,7 @@ var src_fn = {
 		if(licenseName === undefined || licenseName == "" || licenseName == null) {
 		} else {
 			if(existsFlag == "Y") {
-				display = "<div class=\"tcenter\"><a class='btnIcon licenseI' onclick=\"src_fn.showLicenseViewPage('srcList','"+options.rowId+"')\">Detail Info</a></div>";
+				display = "<i class=\"fas fa-info-circle\" style=\"font-size: 1.2rem; cursor: pointer; color: #ed7728;\" title=\"Detail Info\" onclick=\"src_fn.showLicenseViewPage('srcList','"+options.rowId+"')\"></i>";
 			} else {
 				display = "";
 			}
@@ -2112,17 +2111,16 @@ var src_fn = {
 	// vulnerability 
 	displayVulnerability : function(cellvalue, options, rowObject) {
 		var display = "";
-		var _score = rowObject.cvssScore;
 		
-		if(_score) {
-			if(parseInt(_score) >= 9.0 ) {
-				display = "<span class=\"badge badge-dark\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">"+_score+"</span>";
+		if(cellvalue) {
+			if(parseInt(cellvalue) >= 9.0 ) {
+				display = "<span class=\"badge badge-dark\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">CRITICAL</span>";
 			} else if(parseInt(_score) >= 7.0 ) {
-				display = "<span class=\"badge badge-danger\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">"+_score+"</span>";
+				display = "<span class=\"badge badge-danger\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">HIGH</span>";
 			} else if(parseInt(_score) >= 4.0) {
-				display = "<span class=\"badge badge-orange\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">"+_score+"</span>";
+				display = "<span class=\"badge badge-orange\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">MEDIUM</span>";
 			} else if(parseInt(_score) > 0) {
-				display = "<span class=\"badge badge-warning\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">"+_score+"</span>";
+				display = "<span class=\"badge badge-warning\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">LOW</span>";
 			} else {
 				display = "<span style=\"font-size:0;\"></span>";
 			}
@@ -2689,10 +2687,10 @@ var src_grid = {
 							$('#'+rowid+'_licenseNameBtn').append(mult);
 						}
 					});
-                                            var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name
-                                            var nextRow = rowid
-                                            $('#'+nextRow+"_"+nextCol).focus();
 					$('#'+rowid+'_licenseName').val("");
+                    var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name
+                    var nextRow = rowid
+                    $('#'+nextRow+"_"+nextCol).focus();
 				}
 			},
 			onPaging: function(action) {

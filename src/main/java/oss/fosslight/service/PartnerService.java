@@ -57,6 +57,8 @@ public interface PartnerService extends HistoryConfig{
 	
 	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster);
 	
+	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster, boolean coReview);
+	
 	public Map<String, Object> getFilterdList(Map<String, Object> paramMap);
 
 	public Map<String, Object> getIdentificationGridList(ProjectIdentification identification);

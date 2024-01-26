@@ -53,6 +53,7 @@ import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
@@ -83,6 +84,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired ProjectMapper projectMapper;
 	@Autowired T2UserMapper userMapper;
 	@Autowired PartnerMapper partnerMapper;
+	@Autowired CodeMapper codeMapper;
 	
 	@Override
 	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName, #project?.creator, #project?.identificationStatus}")
@@ -798,7 +800,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					cvssScoreMaxList.clear();
 					
 					String comments = "";
-					if (!isEmpty(loadToListComment)) comments = loadToListComment;
+					if (!isEmpty(loadToListComment)) {
+						comments = loadToListComment;
+						if (!isEmpty(project.getComments())) {
+							comments += " " + project.getComments();
+						}
+					}
 					if (!isEmpty(project.getComments())) comments += " " + project.getComments();
 					if (!isEmpty(comments)) project.setComments(comments);
 					
@@ -1611,7 +1618,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			} else if ("CONF".equals(result.getVerificationStatus()) 
 					&& CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(result.getDestributionStatus())
 					&& !CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(project.getDistributeTarget())) {
-				projectMapper.updateProjectDistributionStatus(project.getPrjId(), null);
+				String distributionType = codeMapper.getCodeDetail(CoConstDef.CD_DISTRIBUTION_TYPE, result.getDistributionType()).getCdDtlExp();
+				if ("T".equalsIgnoreCase(avoidNull(distributionType))
+						|| (CoConstDef.FLAG_NO.equalsIgnoreCase(avoidNull(distributionType)) && verificationService.checkNetworkServer(result.getPrjId()))) {
+					projectMapper.updateProjectDistributionStatus(project.getPrjId(), CoConstDef.CD_DTL_DISTRIBUTE_NA);
+				} else {
+					projectMapper.updateProjectDistributionStatus(project.getPrjId(), null);
+				}
 			}
 			
 			if (isNew) {
@@ -4874,6 +4887,44 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 	}
 	
+	@Override
+	public List<ProjectIdentification> setMergeGridDataByAndroid(List<ProjectIdentification> gridData) {
+		List<ProjectIdentification> resultGridData = null;
+		Map<String, ProjectIdentification> resultGridDataMap = new HashMap<>();
+		String groupKey = "";
+		
+		for (ProjectIdentification grid : gridData) {
+			groupKey = (grid.getOssName() + "_" + avoidNull(grid.getOssVersion())).toUpperCase();
+			
+			if (!resultGridDataMap.containsKey(groupKey)) {
+				resultGridDataMap.put(groupKey, grid);
+			} else {
+				ProjectIdentification bean = resultGridDataMap.get(groupKey);
+				for (String licenseName : grid.getLicenseName().split(",")) {
+					boolean equalFlag = false;
+					
+					for (String rtnLicenseName : bean.getLicenseName().split(",")) {
+						if (rtnLicenseName.trim().equals(licenseName.trim())) {
+							equalFlag = true;
+							break;
+						}
+					}
+					
+					if (!equalFlag) {
+						bean.setLicenseName((bean.getLicenseName() + "," + licenseName).trim());
+					}
+				}
+				resultGridDataMap.put(groupKey, bean);
+			}
+		}
+		
+		if (!resultGridDataMap.isEmpty()) {
+			resultGridData = new ArrayList<>(resultGridDataMap.values());
+		}
+		
+		return resultGridData;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public String checkValidData(Map<String, Object> map) {
@@ -5199,6 +5250,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 										.equalsIgnoreCase(afList.getOssName() + "||" + afList.getOssVersion() + "||" + getLicenseNameSort(afList.getLicenseName().trim()))
 										).collect(Collectors.toList()).size() == 0
 						).collect(Collectors.toList());
+		filteredBeforeBomList = filteredBeforeBomList.stream().filter(e -> !isEmpty(e.getOssName()) && !e.getOssName().equals("-")).collect(Collectors.toList());
 		
 		List<ProjectIdentification> filteredAfterBomList = afterBomList
 				.stream()
@@ -5210,6 +5262,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 										.equalsIgnoreCase(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim()))
 										).collect(Collectors.toList()).size() == 0
 						).collect(Collectors.toList());
+		filteredAfterBomList = filteredAfterBomList.stream().filter(e -> !isEmpty(e.getOssName()) && !e.getOssName().equals("-")).collect(Collectors.toList());
 		
 		// status > add
 		int addchk = 0;
@@ -5400,7 +5453,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 
 	private String getCompareKey(ProjectIdentification param) {
-		return param.getOssName().toLowerCase() + "|" + avoidNull(param.getOssVersion(), "") + "|" + param.getLicenseName();
+		return (param.getOssName() + "|" + avoidNull(param.getOssVersion(), "") + "|" + param.getLicenseName()).toLowerCase();
 	}
 	
 	private static String changeStyle(String flag, String text) {
@@ -5432,7 +5485,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	private String ossCheck(String flag, String ossNameVersion, String ossLicenseName, String ossNameVersion2, String ossLicenseName2) {
-		String splitOssNameVersion[] = ossNameVersion.split("/");
+String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		int count = splitOssNameVersion.length;
 		
@@ -5447,38 +5500,59 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			if (cnt > 0) {
 				return ossNameVersion;
-			}else {
+			} else {
 				return ossNameVersion + " / " + ossNameVersion2;
 			}
-		}else {
-			String licenseNmArr1[] = ossLicenseName.split("/");
-			
+		} else {
+			String licenseNmArr1[] = ossLicenseName.split(" / ");
 			int chk = 0;
-			for (int i=0; i<count; i++) {
-				if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
-					List<String> licenseNmChk1 = Arrays.asList(licenseNmArr1[i].split(","));
-					List<String> licenseNmChk2 = Arrays.asList(ossLicenseName2.split(","));
-					
-					Set<String> set = new LinkedHashSet<>(licenseNmChk1);
-					set.addAll(licenseNmChk2);
-					
-					List<String> mergeList = new ArrayList<>(set);
-					
-					if (mergeList.size() > 0) {
-						String str = "";
-						for (int j=0; j<mergeList.size(); j++) {
-							str += mergeList.get(j);
-							if (j < mergeList.size()-1) {
-								str += ", ";
+			boolean chkFlag = false;
+			
+			if (count == licenseNmArr1.length) {
+				chkFlag = true;
+				
+				for (int i=0; i<count; i++) {
+					if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
+						List<String> mergeList = new ArrayList<>();
+						List<String> licenseNmChk1 = Arrays.asList(licenseNmArr1[i].split(","));
+						List<String> licenseNmChk2 = Arrays.asList(ossLicenseName2.split(","));
+						
+						for (String chk1 : licenseNmChk1) {
+							boolean equalsFlag = false;
+							
+							for (String chk2 : licenseNmChk2) {
+								if (chk1.trim().equalsIgnoreCase(chk2.trim())) {
+									equalsFlag = true;
+									break;
+								}
+							}
+							
+							if (!equalsFlag) {
+								for (String chk2 : licenseNmChk2) {
+									mergeList.add(chk2.trim());
+								}
+								mergeList.add(chk1.trim());
 							}
 						}
-						licenseNmArr1[i] = str;
-						chk++;
+						
+						if (mergeList.size() > 0) {
+							mergeList = mergeList.stream().distinct().collect(Collectors.toList());
+							
+							String str = "";
+							for (int j=0; j<mergeList.size(); j++) {
+								str += mergeList.get(j);
+								if (j < mergeList.size()-1) {
+									str += ", ";
+								}
+							}
+							licenseNmArr1[i] = str;
+							chk++;
+						}
 					}
 				}
 			}
 			
-			if (chk > 0) {
+			if (chk > 0 || chkFlag) {
 				String strMerge = "";
 				for (int i=0; i<licenseNmArr1.length; i++) {
 					strMerge += licenseNmArr1[i];
@@ -5486,8 +5560,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						strMerge += " / ";
 					}
 				}
-				return strMerge;
-			}else {
+				
+				int cnt = 0;
+				for (int i=0; i<count; i++) {
+					if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
+						cnt++;
+					}
+				}
+				
+				if (cnt == 0) {
+					return strMerge + " / " + ossLicenseName2;
+				} else {
+					return strMerge;
+				}
+			} else {
 				return ossLicenseName + " / " + ossLicenseName2;
 			}
 		}
@@ -6458,11 +6544,26 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> resMap = new HashMap<>();
 		boolean emptyCheckFlag = false;
 		
-		List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
-		for (OssComponents oss : list) {
-			if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
-				emptyCheckFlag = true;
-				break;
+		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+			List<ProjectIdentification> list = projectMapper.checkSelectDownloadFileForBOM(project);
+			if (list != null) {
+				for (ProjectIdentification bean : list) {
+					if (!bean.getLicenseTypeIdx().equals("1")) continue;
+					if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) {
+						emptyCheckFlag = true;
+						break;
+					}
+				}
+			}
+		} else {
+			List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
+			if (list != null) {
+				for (OssComponents oss : list) {
+					if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
+						emptyCheckFlag = true;
+						break;
+					}
+				}
 			}
 		}
 		

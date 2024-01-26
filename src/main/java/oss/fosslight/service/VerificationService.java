@@ -91,4 +91,6 @@ public interface VerificationService {
 	void registOssNoticeConfirmStatus(OssNotice ossNotice);
 
 	String changePackageFileNameCombine(String prjId);
+	
+	void deleteFile(Map<Object, Object> map);
 }

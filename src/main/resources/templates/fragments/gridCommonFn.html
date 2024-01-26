@@ -104,10 +104,14 @@
                                             target.jqGrid('setCell', rowid, 'cveId', data.prjOssMaster.cveId);
                                             target.jqGrid('setCell', rowid, 'cvssScore', data.prjOssMaster.cvssScore);
                                             target.jqGrid('setCell', rowid, 'copyrightText', data.prjOssMaster.copyrightText);
+                                            target.jqGrid('setCell', rowid, 'ossName', ossName);
+                                            target.jqGrid('setCell', rowid, 'ossVersion', ossVersion);
                                             // 메인 그리드 로우 저장
                                             target.jqGrid('setCell', rowid, 'licenseName', data.prjOssMaster.licenseName);
 
                                             fn_grid_com.saveCellData(div, rowid, 'ossId', data.prjOssMaster.ossId, null, null);
+                                            fn_grid_com.saveCellData(div, rowid, 'ossName', ossName, null, null);
+                                            fn_grid_com.saveCellData(div, rowid, 'ossVersion', ossVersion, null, null);
                                             fn_grid_com.saveCellData(div, rowid, 'licenseDiv', data.prjOssMaster.licenseDiv, null, null);
                                             fn_grid_com.saveCellData(div, rowid, 'homepage', data.prjOssMaster.homepage, null, null);
                                             fn_grid_com.saveCellData(div, rowid, 'downloadLocation', data.prjOssMaster.downloadLocation, null, null);
@@ -279,13 +283,13 @@
                 var _url = '/vulnerability/vulnpopup?ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion + '&vulnType=';
 
                 if (parseInt(cellvalue) >= 9.0) {
-                    display = "<span class=\"badge badge-dark\" style=\"cursor: pointer;\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">CRITICAL</span>";
+                    display = "<span class=\"badge badge-dark\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">CRITICAL</span>";
                 } else if (parseInt(cellvalue) >= 7.0) {
-                    display = "<span class=\"badge badge-danger\" style=\"cursor: pointer;\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">HIGH</span>";
+                    display = "<span class=\"badge badge-danger\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">HIGH</span>";
                 } else if (parseInt(cellvalue) >= 4.0) {
-                    display = "<span class=\"badge badge-orange\" style=\"cursor: pointer;\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">MEDIUM</span>";
+                    display = "<span class=\"badge badge-orange\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">MEDIUM</span>";
                 } else if (parseInt(cellvalue) > 0) {
-                    display = "<span class=\"badge badge-warning\" style=\"cursor: pointer;\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">LOW</span>";
+                    display = "<span class=\"badge badge-warning\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">LOW</span>";
                 } else if (parseInt(cellvalue) == 0 || cellvalue == undefined) {
                     display = "<span style=\"font-size:0;\"></span>";
                 } else {
@@ -341,8 +345,13 @@
             },
             // 메인 그리드 체크박스 포메터
             cboxFormatter: function (cellvalue, options, rowObject) {
-                return '<input id=\"' + options.rowId + '_excludeYn\" type="checkbox"' + (cellvalue == 'Y' ? ' value ="Y" checked="checked"' : ' value ="N"') +
-                    'onclick="fn_grid_com.onCboxClick(\'' + options.rowId + '\',\'main\')/>';
+            	var cboxFormat = '<input id=\"' + options.rowId + '_excludeYn\" type="checkbox" value="' + cellvalue + '" onclick="fn_grid_com.onCboxClick(\'' + options.rowId + '\',\'main\')"';
+            	if ("Y" == cellvalue) {
+            		cboxFormat += ' checked>';
+            	} else {
+            		cboxFormat += '>';
+            	}
+            	return cboxFormat
             },
             cboxUnFormatter: function (cellvalue, options, rowObject) {
                 var cboxValue = $("#" + options.rowId + "_excludeYn").val();

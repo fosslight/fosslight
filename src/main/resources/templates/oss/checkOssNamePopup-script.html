@@ -419,6 +419,12 @@ var grid_fn = {
 						}
 					}
 					
+					if ("identification" == targetName && referenceDiv.startsWith("16")) {
+						$("#btnChangeOss").removeClass('red');
+						$("#btnChangeOss").addClass('gray disabled');
+						$("#btnChangeOss").attr('disabled', true);
+					}
+					
 					$('#loading_wrap_popup').hide();
 
 					if(ossValidMsg) {

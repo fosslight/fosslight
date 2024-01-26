@@ -52,6 +52,7 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelDownLoadUtil;
+import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
@@ -138,10 +139,10 @@ public class ApiSelfCheckController extends CoTopComponent {
             @RequestHeader String _token,
             @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
             @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
+            @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
 
         T2Users userInfo = userService.checkApiUserAuth(_token);
-        Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         try {
             Map<String, Object> paramMap = new HashMap<>();
@@ -197,68 +198,124 @@ public class ApiSelfCheckController extends CoTopComponent {
                 return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE,
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
             }
-//						UploadFile bean = apiFileService.uploadFile(ossReport); // file 등록 처리 이후 upload된 file정보를 return함.
-
-						String[] sheet = new String[1];
-						Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, "Self-Check", sheet);
-						String errorMsg = "";
-						if (result.containsKey("errorMsg")) {
-							errorMsg = (String) result.get("errorMsg");
+            
+            List<String> sheetList = new ArrayList<>();
+            boolean sheetNamesEmptyFlag = isEmpty(sheetNames) ? true : false;
+            
+			if (sheetNamesEmptyFlag) {
+				List<Object> sheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+				for (Object obj : sheets) {
+					Map<String, Object> sheetMap = (Map<String, Object>) obj;
+					if (sheetMap.containsKey("name")) {
+						sheetList.add((String) sheetMap.get("name"));
+					}
+				}
+			} else {
+				if (sheetNames.contains(",")) {
+					for (String sheetName : sheetNames.split(",")) {
+						if (!isEmpty(sheetName.trim())) sheetList.add(sheetName.trim());
+					}
+				} else {
+					sheetList.add(sheetNames);
+				}
+			}
+            
+			String[] sheet = sheetList.toArray(new String[sheetList.size()]);
+			Map<String, Object> rtnMap = null;
+			List<ProjectIdentification> ossComponentList = new ArrayList<>();
+			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
+			
+			for (String sheetNm : sheetList) {
+				Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm, sheet, sheetNamesEmptyFlag);
+				Map<String, Object> resultMap = getSheetDataResult(result);
+								
+				if (!resultMap.isEmpty()) {
+					rtnMap = resultMap;
+					if (rtnMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
+						rtnMap = null;
+						continue;
+					} else if (rtnMap.containsKey("ossComponents")) {
+						ossComponentList.addAll((List<ProjectIdentification>) rtnMap.get("ossComponents"));
+						List<List<ProjectIdentification>> ossComponentsLicenses = (List<List<ProjectIdentification>>) rtnMap.get("ossComponentsLicense");
+						if (!ossComponentsLicenses.isEmpty()) {
+							ossComponentsLicenseList.addAll(ossComponentsLicenses);
 						}
-
-						if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
-							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE,
-                                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
-						}
-
-						if (!isEmpty(errorMsg)) {
-							resultMap.put("errorMessage", errorMsg);
-						}
-
-						List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
-						List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
-
-						if (ossComponents.isEmpty()) {
-							return responseService.getFailResult(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, getMessage("api.upload.file.sheet.no.match", new String[]{"Self-Check*"}));
-						}
-
-						T2CoProjectValidator pv = new T2CoProjectValidator();
-						pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
-						pv.setValidLevel(pv.VALID_LEVEL_BASIC);
-						pv.setAppendix("mainList", ossComponents); // sub grid
-						pv.setAppendix("subList", ossComponentsLicense);
-						T2CoValidationResult vr = pv.validate(new HashMap<>());
-
-						if (!vr.isValid()) {
-							return responseService.getFailResult(getMessage("api.dataValidationError.code"), getMessage("api.dataValidationError.msg")); // data validation error
-						} else {
-							List<ProjectIdentification> ossComponentList = new ArrayList<>();
-							List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
-
-							if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-								apiSelfCheckService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_SELF_COMPONENT_ID, ossComponentList, ossComponentsLicenseList);
-							}
-
-							ossComponentList.addAll(ossComponents);
-							ossComponentsLicenseList.addAll(ossComponentsLicense);
-
-							Project project = new Project();
-							project.setPrjId(prjId);
-							project.setSrcCsvFileId(bean.getRegistFileId()); // set file id
-							selfCheckService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
-
-							// 정상처리된 경우 세션 삭제
-							deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
-							deleteSession(
-									CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-
-							return responseService.getSingleResult(resultMap);
-						}
+					} else {
+						break;
+					}
+				}
+			}
+			
+			if (rtnMap.containsKey("validError")) {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE
+						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
+			}
+			
+			if (!ossComponentList.isEmpty()) {
+				rtnMap = null;
+				
+				if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
+					apiSelfCheckService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_SELF_COMPONENT_ID, ossComponentList, ossComponentsLicenseList);
+				}
+				
+				Project project = new Project();
+				project.setPrjId(prjId);
+				project.setSrcCsvFileId(bean.getRegistFileId()); // set file id
+				selfCheckService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
+				
+				deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
+				deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+			}
+			
+			return responseService.getSingleResult(rtnMap);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE,
                     CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 		}
+	}
+
+    @SuppressWarnings("unchecked")
+	private Map<String, Object> getSheetDataResult(Map<String, Object> result) {
+    	Map<String, Object> rtnMap = new HashMap<>();
+    	String errorMsg = "";
+    	
+    	if (result.containsKey("errorMsg")) {
+			errorMsg = (String) result.get("errorMsg");
+		}
+
+		if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
+			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+			return rtnMap;
+		}
+
+		if (!isEmpty(errorMsg)) {
+			rtnMap.put("errorMessage", errorMsg);
+		}
+
+		List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
+		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
+
+		if (ossComponents == null || ossComponents.isEmpty()) {
+			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+			return rtnMap;
+		}
+
+		T2CoProjectValidator pv = new T2CoProjectValidator();
+		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+		pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+		pv.setAppendix("mainList", ossComponents); // sub grid
+		pv.setAppendix("subList", ossComponentsLicense);
+		T2CoValidationResult vr = pv.validate(new HashMap<>());
+
+		if (!vr.isValid()) {
+			rtnMap.put("validError", "validError");
+		} else {
+			rtnMap.put("ossComponents", ossComponents);
+			rtnMap.put("ossComponentsLicense", ossComponentsLicense != null ? ossComponentsLicense : new ArrayList<ProjectIdentification>());
+		}
+		
+		return rtnMap;
 	}
 
     @ApiOperation(value = "SelfCheck Export", notes = "SelfCheck > Export")

@@ -156,6 +156,8 @@ public interface ProjectService extends HistoryConfig{
 	
 	List<ProjectIdentification> setMergeGridData(List<ProjectIdentification> gridData);
 	
+	List<ProjectIdentification> setMergeGridDataByAndroid(List<ProjectIdentification> gridData);
+	
 	String checkValidData(Map<String, Object> map);
 	
 	String makeNoticeFileContents(Map<String, Object> paramMap);

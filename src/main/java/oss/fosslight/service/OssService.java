@@ -97,9 +97,11 @@ public interface OssService extends HistoryConfig{
 	
 	int getAnalysisListPage(int rows, String prjId);
 	
-	Map<String, Object> startAnalysis(String prjId, String fileId);
+	Map<String, Object> startAnalysis(String prjId, String fileId, boolean coReviewer);
 	
 	OssAnalysis getNewestOssInfo(OssAnalysis bean);
+	
+	OssAnalysis getNewestOssInfo2(OssAnalysis bean);
 	
 	Map<String, Object> updateAnalysisComplete(OssAnalysis bean) throws Exception;
 	
@@ -142,4 +144,12 @@ public interface OssService extends HistoryConfig{
 	int checkOssVersionDiff(String ossName);
 
 	boolean checkOssTypeForAnalysisResult(OssAnalysis ossAnalysis);
+	
+	Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName);
+
+	Map<String, Object> getCheckOssLicenseAjax(ProjectIdentification paramBean, String targetName);
+
+	String getOssAnalysisStatus(String prjId);
+
+	void deleteOssAnalysis(String prjId);
 }
