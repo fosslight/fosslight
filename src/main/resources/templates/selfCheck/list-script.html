@@ -114,16 +114,16 @@ var fn = {
 	displayVulnerability : function(cellvalue, options, rowObject){
 		var display = "";
 
-		if(parseInt(cellvalue) >= 9.0 ) {
-			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
-		} else if(parseInt(cellvalue) >= 7.0 ) {
-			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
-		} else if(parseInt(cellvalue) >= 4.0) {
-			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
-		} else if(parseInt(cellvalue) > 0) {
-			display="<span class=\"iconSet vulLow\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+		if (parseInt(cellvalue) >= 9.0 ) {
+			display = "<span class=\"badge badge-dark\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"openNVD('"+ rowObject.cveId +"')\">CRITICAL</span>";
+		} else if (parseInt(cellvalue) >= 7.0 ) {
+			display = "<span class=\"badge badge-danger\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"openNVD('"+ rowObject.cveId +"')\">HIGH</span>";
+		} else if (parseInt(cellvalue) >= 4.0) {
+			display = "<span class=\"badge badge-orange\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"openNVD('"+ rowObject.cveId +"')\">MEDIUM</span>";
+		} else if (parseInt(cellvalue) > 0) {
+			display = "<span class=\"badge badge-warning\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"openNVD('"+ rowObject.cveId +"')\">LOW</span>";
 		} else {
-			display="<span style=\"font-size:0;\"></span>";
+			display = "<span style=\"font-size:0;\"></span>";
 		}
 		
 		return display;

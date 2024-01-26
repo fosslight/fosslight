@@ -218,7 +218,7 @@
                             <!-- /.card-body -->
                             <div class="card-footer clearfix">
                             	<th:block th:if="${project.prjId != null}">
-                            		<a th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}" th:onclick="|fn.deletePrj()|" class="btn btn-secondary float-left" th:text="Delete"></a>
+                            		<a th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}" id="delete" class="btn btn-secondary float-left" th:text="Delete"></a>
                             		<a th:if="${project.viewOnlyFlag == 'N'}" id="drop" class="btn btn-secondary float-left" style="margin-left: 5px; display: none;" th:text="Drop"></a>
                             	</th:block>
                                 <th:block th:if="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
@@ -249,24 +249,23 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                            <div class="card card-lg-red" style="position:sticky;top:10px;">
-                                <div class="card-header">
-                                    <h3 class="card-title" th:text="Comment"></h3>
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
-                                    </div>
-                                </div>
-                                <div class="card-body pt-0" style="padding-bottom: 0;">
-                                    <div clas="row">
-                                        <div clas="col-md-12">
-                                            <table class="table">
-                                                <tbody id="commentListBody"></tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
+                     	<div class="card card-lg-red" style="position:sticky;top:10px;">
+                        	<div class="card-header">
+                            	<h3 class="card-title" th:text="Comment"></h3>
+                                <div class="card-tools">
+                                	<button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                               	</div>
+                           	</div>
+                            <div class="card-body pt-0" style="padding-bottom: 0;">
+                            	<div clas="row">
+                                	<div clas="col-md-12">
+                                    	<table class="table">
+                                        	<tbody id="commentListBody"></tbody>
+                                       	</table>
+                                   	</div>
+                               	</div>
+                          	</div>
+                   		</div>
                     </div>
                 </div>
             </section>

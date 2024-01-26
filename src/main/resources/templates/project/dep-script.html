@@ -886,18 +886,18 @@ var dep_fn = {
 			_url = '/vulnerability/vulnpopup?ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType=';
 		}
 		
-		if(parseInt(cellvalue) >= 9.0 ) {
-			display="<span class=\"badge badge-dark\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">CRITICAL</span>";
+		if (parseInt(cellvalue) >= 9.0 ) {
+			display = "<span class=\"badge badge-dark\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">CRITICAL</span>";
 		} else if(parseInt(cellvalue) >= 7.0 ) {
-			display="<span class=\"badge badge-danger\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">HIGH</span>";
+			display = "<span class=\"badge badge-danger\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">HIGH</span>";
 		} else if(parseInt(cellvalue) >= 4.0) {
-			display="<span class=\"badge badge-orange\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">MEDIUM</span>";
+			display = "<span class=\"badge badge-orange\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">MEDIUM</span>";
 		} else if(parseInt(cellvalue) > 0) {
-			display="<span class=\"badge badge-warning\" style=\"cursor: pointer;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">LOW</span>";
+			display = "<span class=\"badge badge-warning\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">LOW</span>";
 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
-			display="<span style=\"font-size:0;\"></span>";
+			display = "<span style=\"font-size:0;\"></span>";
 		} else {
-			display=cellvalue;
+			display = cellvalue;
 		}
 		
 		return display;

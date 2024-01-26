@@ -24,10 +24,10 @@
                         		<button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
                         	</div>
                             <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
-                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" th:style="${display.confirmtBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
-                                <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
-                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
-                                <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" th:style="${display.confirmtBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                                <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                             </div>
                             <div class="float-right btn-group mr-1">
                                 <button type="button" class="btn btn-danger px-3 btn-sm"><strong>Help</strong></button>
@@ -659,7 +659,7 @@
                         </div>
                     </div>
 
-                    <div class="row pl-2 partyBtn" name="gridArea" id="gridAreaParty" style="width: 100%; display: none;">
+                    <div class="row pl-2" name="gridArea" id="gridAreaParty" style="width: 100%; display: none;">
                         <!-- buttons -->
                         <div class="col-md-12 mb-3 pl-2">
                             <div class="row">
@@ -673,12 +673,12 @@
                             </div>
                         </div>
                         <!-- grids -->
-                        <div class="col-md-12 outerJqGridSet">
+                        <div class="col-md-12 outerJqGridSet partyBtn">
                             <table id="list3"><tr><td></td></tr></table>
                             <div id="pager3"></div>
                         </div>
                     </div>
-                    <div class="row pl-2 depBtn" name="gridArea" id="gridAreaDep" style="width: 100%; display: none;">
+                    <div class="row pl-2" name="gridArea" id="gridAreaDep" style="width: 100%; display: none;">
                         <!-- buttons -->
                         <div class="col-md-12 mb-3 pl-2">
                             <div class="row">
@@ -713,12 +713,12 @@
                             </div>
                         </div>
                         <!-- grids -->
-                        <div class="col-md-12 outerJqGridSet">
+                        <div class="col-md-12 outerJqGridSet depBtn">
                             <table id="depList"><tr><td></td></tr></table>
                             <div id="depPager"></div>
                         </div>
                     </div>
-                    <div class="row pl-2 srcBtn" name="gridArea" id="gridAreaSrc" style="width: 100%; display: none;">
+                    <div class="row pl-2" name="gridArea" id="gridAreaSrc" style="width: 100%; display: none;">
                         <!-- buttons -->
                         <div class="col-md-12 mb-3 pl-2">
                             <div class="row">
@@ -751,12 +751,12 @@
                             </div>
                         </div>
                         <!-- grids -->
-                        <div class="col-md-12 outerJqGridSet">
+                        <div class="col-md-12 outerJqGridSet srcBtn">
                             <table id="srcList"><tr><td></td></tr></table>
                             <div id="srcPager"></div>
                         </div>
                     </div>
-                    <div class="row pl-2 binBtn" name="gridArea" id="gridAreaBin" style="width: 100%;display: none;">
+                    <div class="row pl-2" name="gridArea" id="gridAreaBin" style="width: 100%;display: none;">
                         <!-- buttons -->
                         <div class="col-md-12 mb-3 pl-2">
                             <div class="row">
@@ -789,7 +789,7 @@
                             </div>
                         </div>
                         <!-- grids -->
-                        <div class="col-md-12 outerJqGridSet">
+                        <div class="col-md-12 outerJqGridSet binBtn">
                             <table id="binList"><tr><td></td></tr></table>
                             <div id="binPager"></div>
                         </div>

@@ -18,14 +18,15 @@ $(document).ready(function () {
 		$("[name=gridArea]").hide();
 		
 		var applicable = $("#applicable" + tabId).is(':checked');
-		if (!applicable) {
-			$("#gridArea"+tabId).show();
-		} else {
-			$("#gridArea"+tabId).hide();
+		$("#gridArea"+tabId).show();
+		
+		if (applicable) {
+			var btnClass = "." + tabId.toLowerCase() + "Btn";
+			$(btnClass).hide();
 		}
 	});
 
-    $('.btnCommentHistory').on('click', function (e) {
+	$('.btnCommentHistory').on('click', function (e) {
         e.preventDefault();
         openCommentHistory('/comment/popup/prj/' + [[${project.prjId}]]);
     });

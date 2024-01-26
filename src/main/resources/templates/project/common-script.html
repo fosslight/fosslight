@@ -18,7 +18,7 @@ var com_evt = {
 	init: function(){
 		com_fn.tabInit();
 
-		if(isAndroidModel) {
+		if (isAndroidModel) {
 			$("#mergeYn").val("Y");
 			
 			Bom_Save_Flg =true;
@@ -54,19 +54,65 @@ var com_evt = {
 					}
 				}
 				
-				if(com_fn.isAndroidOnly()) {
-//					var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData())};
-					
-	 				if($("#ignoreBinaryDbFlag")) {
-//						data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData()), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
-					}
-					
-					// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
-					if(!com_fn.validBomChangeStatus(true)) {
-						return false;
-					}
-					
-					com_fn.checkSave(data, "CONF");	
+				var innerHtml 	= 'Are you to enter a comment when confirm?<br><br>';
+                innerHtml 		+= '<textarea id="confirmEditor"></textarea>';
+                
+                if(!alertify.confirmDialog){
+					alertify.dialog('confirmDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								var buttons = setup.buttons;
+								var customButtons = [];
+								for (var i in buttons) {
+									if ('OK' == buttons[i].text) {
+										customButtons.push(buttons[i]);
+									}
+								}
+								setup.buttons = customButtons;
+								setup.focus.element = 1;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
+							}
+						};
+					}, false, 'confirm');
+            	}
+				
+                $("#confirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+				
+				if (com_fn.isAndroidOnly()) {
+					alertify.confirmDialog(innerHtml, function () {
+						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF"};
+						
+						if ("" != $($("#confirmEditor").summernote('code')).text()) {
+							data["userComment"] = replaceWithLink($("#confirmEditor").summernote('code'));
+						} else {
+							data["userComment"] = "";
+						}
+						
+		 				if ($("#ignoreBinaryDbFlag")) {
+		 					data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
+						}
+		 				
+		 				// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
+						if(!com_fn.validBomChangeStatus(true)) {
+							return false;
+						}
+						
+						com_fn.checkSave(data, "CONF");	
+					});
 				} else {		 		
 					// 머지 체크
 					if("Y"!= $("#mergeYn").val()){
@@ -76,7 +122,7 @@ var com_evt = {
 						return false;
 					}
 					
-					if(Bom_Save_Flg){
+					if (Bom_Save_Flg){
 						if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
 							alertify.alert([[#{msg.project.required.merge}]], function(){});
 
@@ -84,33 +130,39 @@ var com_evt = {
 						}
 
 						// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
-						if(!com_fn.validBomChangeStatus(false)) {
+						if (!com_fn.validBomChangeStatus(false)) {
 							return false;
 						}
 
-//						var data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData())};
-						var data = {"prjId" : [[${project.prjId}]]};
-						
-	 					if($("#ignoreBinaryDbFlag")) {
-//							data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData()), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
-						}
+						alertify.confirmDialog(innerHtml, function () {
+	                    	var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF"};
+	                    	if ("" != $($("#confirmEditor").summernote('code')).text()) {
+	                    		data["userComment"] = replaceWithLink($("#confirmEditor").summernote('code'));
+	                    	} else {
+	                    		data["userComment"] = "";
+	                    	}
+	                    	
+	                    	if ($("#ignoreBinaryDbFlag")) {
+	                    		data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
+	                    	}
+	                    
+	                    	loading.show();
+							$.ajax({
+								url :'/project/verification/reviewReportAjax?prjId='+[[${project.prjId}]],
+								type : 'POST',
+								cache : false,
+                            	async : false,
+								success: function(data){
+									loading.hide();
+								},
+								error : function(data){
+									loading.hide();
+									alertify.error([[#{msg.common.valid2}]], 0);
+								}
+							});
 
-						loading.show();
-						$.ajax({
-							url :'/project/verification/reviewReportAjax?prjId='+[[${project.prjId}]],
-							type : 'POST',
-							cache : false,
-                            async : false,
-							success: function(data){
-								loading.hide();
-							},
-							error : function(data){
-								loading.hide();
-								alertify.error([[#{msg.common.valid2}]], 0);
-							}
-						});
-
-	 					com_fn.checkSave(data, "CONF");	
+	 						com_fn.checkSave(data, "CONF");	
+	                    });
 					} else {
 						alertify.alert([[#{msg.project.check.save}]], function(){});
 					}				
@@ -125,7 +177,7 @@ var com_evt = {
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 
-				if(distributionStatus == "PROC"){
+				if (distributionStatus == "PROC"){
 					var comment = [[#{msg.project.distribution.loading}]];
 					
 					alertify.error(comment, 0);
@@ -133,32 +185,55 @@ var com_evt = {
 					return false;
 				}
 				
-				var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Are you sure you want to reject?';
-				innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
-				innerHtml    += '		<div id="editor2" style="width:470px; height:300px;">' +  + '</div>'; /* CKEDITOR.instances['editor'].getData() */
-				innerHtml    += '	</div>';
-				innerHtml    += '</div>';
+				var innerHtml 	= 'Are you sure you want to reject?<br><br>';
+               	innerHtml 		+= '<textarea id="bomRejectEditor"></textarea>';
 				
-				alertify.confirm(innerHtml, function () {
-					if(CKEDITOR.instances['editor2'].getData() == "") {
+               	if (!alertify.bomRejectDialog){
+					alertify.dialog('bomRejectDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								setup.focus.element = -1;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
+							}
+						};
+					}, false, 'confirm');
+            	}
+               	
+				alertify.bomRejectDialog(innerHtml, function () {
+					var comment = $($("#bomRejectEditor").summernote('code')).text();
+               		comment = comment.trim();
+					
+					if ("" == comment) {
 						alertify.alert([[#{msg.project.required.comments}]], function(){});
 
 						return false;
 					} else {
-						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : ""};/* replaceWithLink(CKEDITOR.instances['editor2'].getData()) */
-
+						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG"};
+						if ("" != $($("#bomRejectEditor").summernote('code')).text()) {
+							data["userComment"] = $("#bomRejectEditor").summernote('code');
+						} else {
+							data["userComment"] = "";
+						}
 						com_fn.checkSave(data, "PROG");
 					}
 				});
-
-// 				var _editor = CKEDITOR.instances.editor2;
 				
-// 				if(_editor) {
-// 					_editor.destroy();
-// 				}
-				
-// 				CKEDITOR.replace('editor2', {});
-			}else{
+				$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			} else {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}
 		});
@@ -177,8 +252,8 @@ var com_evt = {
 					return false;
 				}
 				
-				if(Bom_Save_Flg) {
-					if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
+				if (Bom_Save_Flg) {
+					if ($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
 						alertify.alert([[#{msg.project.required.merge}]], function(){
 							$("#tabMenuBom").trigger("click");
 						});
@@ -186,20 +261,65 @@ var com_evt = {
 						return false;
 					}
 					
-					alertify.confirm([[#{msg.common.confirm.continue}]], function(e){
-						if(e) {
-							if(userRole != "ROLE_ADMIN"){
-								if(!com_fn.validBomChangeStatus(isAndroidModel)) {
-									return false;
+					var innerHtml 	= 'Are you to enter a comment when request?<br><br>';
+                    innerHtml 		+= '<textarea id="requestEditor"></textarea>';
+                    
+                    if(!alertify.requestDialog){
+						alertify.dialog('requestDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									var buttons = setup.buttons;
+									var customButtons = [];
+									for (var i in buttons) {
+										if ('OK' == buttons[i].text) {
+											customButtons.push(buttons[i]);
+										}
+									}
+									setup.buttons = customButtons;
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
 								}
-							}
-							
-							var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REQ", "userComment" : ""}; /* replaceWithLink(CKEDITOR.instances['editor'].getData()) */
-
-							com_fn.checkSave(data, "REQ");
-						}
-					});
+							};
+						}, false, 'confirm');
+                	}
 					
+                    alertify.requestDialog(innerHtml, function () {
+                    	alertify.confirm([[#{msg.common.confirm.continue}]], function(e){
+    						if(e) {
+    							if (userRole != "ROLE_ADMIN"){
+    								if(!com_fn.validBomChangeStatus(isAndroidModel)) {
+    									return false;
+    								}
+    							}
+    							var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REQ"};
+    							var comment = $($("#requestEditor").summernote('code')).text();
+    							
+    							if ("" == comment) {
+    								data["userComment"] = "";
+    							} else {
+    								data["userComment"] = replaceWithLink($("#requestEditor").summernote('code'));
+    							}
+
+    							com_fn.checkSave(data, "REQ");
+    						}
+    					});
+                    });
+                    
+                    $("#requestEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 				} else {
 					alertify.alert([[#{msg.project.check.save}]], function(){});
 				}
@@ -221,13 +341,58 @@ var com_evt = {
 				}
 				
 				if(Bom_Save_Flg) {
-					var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REV", "userComment" : ""}; /* replaceWithLink(CKEDITOR.instances['editor'].getData()) */
-
-					com_fn.checkSave(data, "REV");
+					var innerHtml 	= 'Are you to enter a comment when review?<br><br>';
+                    innerHtml 		+= '<textarea id="reviewEditor"></textarea>';
+                    
+                    if(!alertify.reviewDialog){
+						alertify.dialog('reviewDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									var buttons = setup.buttons;
+									var customButtons = [];
+									for (var i in buttons) {
+										if ('OK' == buttons[i].text) {
+											customButtons.push(buttons[i]);
+										}
+									}
+									setup.buttons = customButtons;
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
+								}
+							};
+						}, false, 'confirm');
+                	}
+					
+                    alertify.reviewDialog(innerHtml, function () {
+                    	var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REV"};
+                    	if ("" != $($("#reviewEditor").summernote('code')).text()) {
+                    		data["userComment"] = replaceWithLink($("#reviewEditor").summernote('code'));
+                    	} else {
+                    		data["userComment"] = "";
+                    	}
+                    	
+                    	com_fn.checkSave(data, "REV");
+                    });
+                    
+                    $("#reviewEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 				} else {
 					alertify.alert([[#{msg.project.check.save}]], function(){});
 				}
-			}else {
+			} else {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}
 		});
@@ -237,7 +402,7 @@ var com_evt = {
 			var tabName = prjId+"_Project";
 			var existsTabFlag = existsTabName(tabName);
 
-			if(existsTabFlag) {
+			if (existsTabFlag) {
 				$("#tab--"+tabName).trigger("click");
 			} else {
 				createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
@@ -300,8 +465,6 @@ var com_fn = {
 	saveFlagObject : {},
 	// 탭 초기화
 	tabInit: function(){
-		var tabContent = $(".tabContent");
-		var tabMenuA = $(".tabMenu a");
 		var initDiv = [[${initDiv}]];
 		var vPrjName = [[${project.prjName}]];
 		var vPrjVersion = [[${project.prjVersion}]];
@@ -320,8 +483,23 @@ var com_fn = {
 
 		com_fn.btnCtl(userRole, curIdenStatus);
 		
-		$("#tabMenuParty").trigger("click");
-		$("#gridAreaParty").show();
+		var activateTab = "";
+		var activateGridArea = "";
+		switch (initDiv) {
+			case "0" : activateTab = "#tabMenuParty"; activateGridArea = "#gridAreaParty";
+				break;
+			case "1" : activateTab = "#tabMenuDep"; activateGridArea = "#gridAreaDep";
+				break;
+			case "2" : activateTab = "#tabMenuSrc"; activateGridArea = "#gridAreaSrc";
+				break;
+			case "3" : activateTab = "#tabMenuBin"; activateGridArea = "#gridAreaBin";
+				break;
+			default : activateTab = "#tabMenuBom"; activateGridArea = "#gridAreaBom";
+				break;
+		}
+		
+		$(activateTab).trigger("click");
+		$(activateGridArea).show();
 	},
 	fnTabChange: function(target){
 		var tabContent = $(".tabContent");
@@ -680,6 +858,16 @@ var com_fn = {
 		var aplicable = $(obj).val();
 
 		if ($(obj).is(':checked')) {
+			if ("partyBtn" == target){
+				$("#gridAreaParty").show();
+			} else if ("depBtn" == target){
+				$("#gridAreaDep").show();
+			} else if ("srcBtn" == target){
+				$("#gridAreaSrc").show();
+			} else if ("binBtn" == target){
+				$("#gridAreaBin").show();
+			}
+			
 			$('.'+target).hide();
 		} else {
 			$('.'+target).show();
@@ -831,7 +1019,7 @@ var com_fn = {
 		 		}
 			}
 			
-			if(checkObligationFlag) {
+			if (checkObligationFlag) {
 				loading.hide();
 				alertify.alert([[#{msg.warn.include.needcheck.license}]]);
 				
@@ -1082,9 +1270,9 @@ var com_fn = {
 							gridValidMsgNew(srcValidMsgData, "srcList");
 						}
 						
-						if(batValidMsgData) {
-							gridValidMsgNew(batValidMsgData, "batList");
-						}
+// 						if(batValidMsgData) {
+// 							gridValidMsgNew(batValidMsgData, "batList");
+// 						}
 						
 						if(binValidMsgData) {
 							gridValidMsgNew(binValidMsgData, "binList");
@@ -1110,7 +1298,6 @@ var com_fn = {
 						alertify.error([[#{msg.common.valid}]], 0);
 					}
 				} else {
-//					resetEditor(CKEDITOR.instances.editor);
 					var prjId = [[${project.prjId}]];
 					reloadTabInframe("/project/list");
 					
@@ -1121,11 +1308,13 @@ var com_fn = {
 						});
 					} else if(status == "PROG") { //reject한 경우는 새로고침 (save 버튼등이 문제)
 						alertify.alert([[#{msg.common.success}]], function() {
-							if(isAndroidModel) {
-								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/4');
-							} else {
-								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
-							}
+							com_fn.btnCtl(userRole, status);
+							curIdenStatus = status;
+// 							if(isAndroidModel) {
+// 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/4');
+// 							} else {
+// 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
+// 							}
 						});
 					} else if(userRole != "ROLE_ADMIN" && status == "REQ") { // 일반인이 request review한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
@@ -1133,11 +1322,13 @@ var com_fn = {
 						});	
 					} else if(userRole == "ROLE_ADMIN" && status == "REQ") { // admin이 request review한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
-							if(isAndroidModel) {
-								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/4");
-							} else {
-								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/5");
-							}
+							com_fn.btnCtl(userRole, status);
+							curIdenStatus = status;
+// 							if(isAndroidModel) {
+// 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/4");
+// 							} else {
+// 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/5");
+// 							}
 						});
 					} else if(status == "CONF") { // Admin이 confirm한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
@@ -1198,9 +1389,9 @@ var com_fn = {
 							gridDiffMsg(srcDiffMsgData, "srcList");
 						}
 						
-						if(batValidMsgData) {
-							gridValidMsgNew(batValidMsgData, "batList");
-						}
+// 						if(batValidMsgData) {
+// 							gridValidMsgNew(batValidMsgData, "batList");
+// 						}
 						
 						if(binValidMsgData) {
 							gridValidMsgNew(binValidMsgData, "binList");

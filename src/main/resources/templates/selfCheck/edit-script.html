@@ -133,7 +133,7 @@ var evt = {
 			fn_self.modeChange([[${project.prjId}]], 'v');
 		});
 		
-		$(".selfCheckDelete").click(function(){
+		$("#delete").click(function(){
 			alertify.confirm([[#{msg.selfcheck.confirm.remove.project}]], function (e) {
 				if (e) {
 					fn.deleteSubmit();
@@ -1696,28 +1696,7 @@ var src_fn = {
 		$.ajax({
 			type: "POST",
 			url: '/exceldownload/getExcelPost',
-			data: JSON.stringify({"type":"selfReport", "parameter":'${project.prjId}'}),
-			dataType : 'json',
-			cache : false,
-			contentType : 'application/json',
-			success: function (data) {
-				if("false" == data.isValid) {
-					alertify.error([[#{msg.common.valid2}]], 0);
-				} else {
-					window.location = '/exceldownload/getFile?id='+data.validMsg+'"/>';
-				}
-			},
-			error: function(data){
-				alertify.error([[#{msg.common.valid2}]], 0);
-			}
-		});
-	},
-	// 다운로드 엑셀
-	downloadExcelVuln : function(){
-		$.ajax({
-			type: "POST",
-			url: '/exceldownload/getExcelPost',
-			data: JSON.stringify({"type":"selfReportVuln", "parameter":[[${project.prjId}]]}),
+			data: JSON.stringify({"type":"selfReport", "parameter":[[${project.prjId}]]}),
 			dataType : 'json',
 			cache : false,
 			contentType : 'application/json',

@@ -1872,11 +1872,11 @@ var fn = {
 var list = {
 	load : function(){
 		var distributionFlag = [[${distributionFlag}]];
-		var authority = '*${sessUserInfo.authority}';
+		var authority = [[${#authentication.authorities[0].authority}]];
 		var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
 		var rowList = rowStr.split(",");
 		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
-		var authority = '*${sessUserInfo.authority}';
+		
 		var colNameArr = [ 'ID', 'Project Name', 'Status', 'Progress', 'Download', 'Security', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer'];
 		var colModelArr = [];
         var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
