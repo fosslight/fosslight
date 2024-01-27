@@ -57,6 +57,35 @@ export default function SelfCheckOSSModal({
   const loadAutocompleteLicenseRequest = useAPI('get', '/api/lite/licenses/candidates/all', {
     onSuccess: (res) => setAutocompleteLicense(res.data)
   });
+  const loadOSSLicenseRequest = useAPI('get', '/project/getOssIdLicenses', {
+    onSuccess: (res) => {
+      const { prjOssMaster: oss, prjLicense: licenseList } = res.data;
+
+      if (oss && licenseList && licenseList.length > 0) {
+        const {
+          copyrightText: copyright,
+          downloadLocation: downloadUrl,
+          homepage: homepageUrl
+        } = oss;
+        const license = licenseList[0];
+
+        const confirmMsg = [
+          'Do you want to fill the following fields automatically?\n',
+          `- License: ${license.licenseName}`,
+          '- Copyright',
+          '- Download URL',
+          '- Homepage URL'
+        ].join('\n');
+
+        if (confirm(confirmMsg)) {
+          setLicenses([{ licenseId: license.licenseId, licenseName: license.licenseName }]);
+          setValue('copyright', copyright);
+          setValue('downloadUrl', downloadUrl);
+          setValue('homepageUrl', homepageUrl);
+        }
+      }
+    }
+  });
 
   useEffect(() => {
     if (show) {
@@ -149,6 +178,10 @@ export default function SelfCheckOSSModal({
             <InputWithAutocomplete
               value={watch('ossVersion')}
               setValue={(value) => setValue('ossVersion', value)}
+              onBlur={() => {
+                const { ossName, ossVersion } = watch();
+                loadOSSLicenseRequest.execute({ params: { ossName, ossVersion } });
+              }}
               options={ossVersionOptions}
               placeholder="EX) 1.0.0"
             />
