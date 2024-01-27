@@ -5,12 +5,14 @@ export default function InputWithAutocomplete({
   value,
   setValue,
   pickValue,
+  onBlur,
   options,
   placeholder
 }: {
   value: string;
   setValue: (value: string) => void;
   pickValue?: (value: string) => void;
+  onBlur?: () => void;
   options: { value: string; label: string }[];
   placeholder: string;
 }) {
@@ -101,6 +103,7 @@ export default function InputWithAutocomplete({
           setActiveOptionIdx(0);
           setShowOptions(false);
           if (pickValue) pickValue(value);
+          if (onBlur) onBlur();
         }}
         placeholder={placeholder}
       />
