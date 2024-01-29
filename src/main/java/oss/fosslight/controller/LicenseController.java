@@ -139,11 +139,11 @@ public class LicenseController extends CoTopComponent{
 		
 		model.addAttribute("detail", licenseMaster);
 
-		if ("ROLE_ADMIN".equals(loginUserRole())) {
+
+		String role = loginUserRole();
+
+		if (!"ROLE_ADMIN".equals(loginUserRole())) {
 			model.addAttribute("isReadOnly", true);
-			//return LICENSE.EDIT_JSP;
-		} else {
-			// return LICENSE.LICENSE_VIEW_JSP;
 		}
 
 		return "license/edit";

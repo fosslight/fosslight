@@ -29,13 +29,13 @@
                                 <div class="card-body">
                                     <div class="form-group">
                                         <label for="licenseNameInput" th:text="#{msg.common.field.licenseName}"></label><span class="text-orange">*</span>
-                                        <input class="form-control autoComLicenseLong" id="licenseNameInput" name="licenseName" th:value="${detail?.licenseName}" type="text"/>
+                                        <input class="form-control autoComLicenseLong" id="licenseNameInput" name="licenseName" th:value="${detail?.licenseName}" type="text" th:disabled="${isReadOnly}"/>
                                         <span class="retxt text-danger text-sm"></span>
                                     </div>
                                     <div class="row form-group">
                                     	<div class="col-12">
                                     		<label for="licenseTypeSelect" th:text="#{msg.common.field.licenseType}"></label><span class="text-orange">*</span>
-                                        	<select class="select2" id="licenseType" name="licenseType" style="width: 100%;">
+                                        	<select class="select2" id="licenseType" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
                                             	<option value="" disabled selected> </option>
                                             	<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
                                                 	<option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
@@ -47,11 +47,11 @@
                                     <div class="row form-group">
                                     	<div class="col-12">
                                     		<label th:text="#{msg.common.field.restriction}"></label>
-                                        	<select class="select2" id="restrictionSelect" multiple="multiple" name="restriction" style="width: 100%;" th:disabled="${not @CommonFunction.isAdmin()}">
+                                        	<select class="select2" id="restrictionSelect" multiple="multiple" name="restriction" style="width: 100%;" th:disabled="${isReadOnly}">
                                             	<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
                                                     	th:text="${code.cdDtlNm}"
                                                     	th:value="${code.cdDtlNo}"
-                                                    	th:selected="${detail?.restrictionCdNoList != null and #arrays.contains(detail.restrictionCdNoList, code.cdDtlNo)}" th:disabled ="${not @CommonFunction.isAdmin()}">
+                                                    	th:selected="${detail?.restrictionCdNoList != null and #arrays.contains(detail.restrictionCdNoList, code.cdDtlNo)}" th:disabled ="${isReadOnly}">
                                             	</option>
                                         	</select>
                                     	</div>
@@ -66,13 +66,13 @@
                                                 <div class="icheck-primary d-inline mx-3">
                                                     <input id="obligationNotificationYn" class="oblicationChk"
                                                            name="obligationNotificationYn" th:checked="${#strings.equals(detail?.obligationNotificationYn, 'Y')}" type="checkbox"
-                                                           value="Y" th:disabled ="${not @CommonFunction.isAdmin()}">
+                                                           value="Y" th:disabled="${isReadOnly}">
                                                     <label class="text-lg-gray" for="obligationNotificationYn" th:text="Notice"></label>
                                                 </div>
                                                 <div class="icheck-primary d-inline  mx-3">
                                                     <input id="obligationDisclosingSrcYn" class="oblicationChk"
                                                            name="obligationDisclosingSrcYn" th:checked="${#strings.equals(detail?.obligationDisclosingSrcYn, 'Y')}" type="checkbox"
-                                                           value="Y" th:disabled ="${not @CommonFunction.isAdmin()}">
+                                                           value="Y" th:disabled="${isReadOnly}">
                                                     <label class="text-lg-gray" for="obligationDisclosingSrcYn" th:text="'Source Code'"></label>
                                                 </div>
                                             </div>
@@ -80,12 +80,12 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="shortIdentifierInput" th:text="#{msg.common.field.SPDX}"></label>
-                                        <input type="text" class="form-control" id="shortIdentifierInput" name="shortIdentifier" th:value="${detail?.shortIdentifier}" th:disabled ="${not @CommonFunction.isAdmin()}">
+                                        <input type="text" class="form-control" id="shortIdentifierInput" name="shortIdentifier" th:value="${detail?.shortIdentifier}" th:disabled ="${isReadOnly}">
                                         <span class="retxt text-danger text-sm"></span>
                                     </div>
                                    	<div class="form-group tag-form">
                                     	<label th:text="#{msg.common.field.nickname}"></label>
-                                        <div class="input-group" th:if="${@CommonFunction.isAdmin()}">
+                                        <div class="input-group" th:unless="${isReadOnly}">
                                            	<input type="text" class="form-control" id="input_licenseNicknames">
                                             <div class="input-group-append">
                                             	<button class="btn btn-default" id="licenseNicknames" name="addTagButton" type="button" th:text="Add"></button>
@@ -97,7 +97,7 @@
                                     		<div class="row multiTxtSet">
                                     			<div class="col-2" th:each="licenseNickname : ${detail?.licenseNicknames}" th:if="${!#strings.isEmpty(licenseNickname)}">
                                         			<div class="input-group card-tools">
-                                           				<input class="form-control" type="type" name="licenseNicknames" th:value="${licenseNickname}" />
+                                           				<input class="form-control" type="type" name="licenseNicknames" th:value="${licenseNickname}" th:disabled ="${isReadOnly}" />
                                             			<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-tool" th:onclick="|fn.removeTag(this)|"><i class="fas fa-times"></i></button>
                                         				<span class="retxt text-danger text-sm"></span>
                                         			</div>
@@ -107,8 +107,8 @@
                                     </div>
                                     <div class="form-group tag-form" name="append-stag-form">
                                         <label th:text="#{msg.common.field.licenseWebsite}"></label>
-                                        <div class="input-group">
-                                            <input class="form-control" id="input_webpages" type="text" placeholder="http://">
+                                        <div class="input-group" th:unless="${isReadOnly}">
+                                            <input class="form-control" id="input_webpages" type="text" placeholder="http://" >
                                             <div class="input-group-append">
                                             	<button class="btn btn-default" id="webpageAdd" type="button" th:text="Add"></button>
                                            	</div>
@@ -125,18 +125,18 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="licenseUserGuide" th:text="#{msg.common.field.userGuide}"></label>
-                                        <textarea class="form-control" id="licenseUserGuide" name="description" rows="4" th:text="${detail?.description}" th:disabled ="${not @CommonFunction.isAdmin()}"></textarea>
+                                        <textarea class="form-control" id="licenseUserGuide" name="description" rows="4" th:text="${detail?.description}" th:disabled ="${isReadOnly}"></textarea>
                                     </div>
                                     <div class="form-group">
                                         <label for="licenseTextInput" th:text="#{msg.common.field.licenseText}"></label><span class="text-orange">*</span>
-                                        <textarea class="form-control" id="licenseTextInput" name="licenseText" rows="4" th:text="${detail?.licenseText}" th:disabled ="${not @CommonFunction.isAdmin()}"></textarea>
+                                        <textarea class="form-control" id="licenseTextInput" name="licenseText" rows="4" th:text="${detail?.licenseText}" th:disabled ="${isReadOnly}"></textarea>
                                         <span class="retxt text-danger text-sm"></span>
                                     </div>
                                     <div class="form-group">
                                         <label for="attributionInput" th:text="#{msg.common.field.attribution}"></label>
                                         <textarea class="form-control" id="attributionInput" name="attribution" rows="4" th:text="${detail?.attribution}" th:disabled ="${not @CommonFunction.isAdmin()}"></textarea>
                                     </div>
-                                    <div class="form-group">
+                                    <div class="form-group" th:unless="${isReadOnly}">
                                     	<label for="commentInput" th:text="Comment"></label>
                                       	<textarea class="form-control" id="commentInput" name='commentInput' rows="3" style="height: 800px" th:disabled ="${not @CommonFunction.isAdmin()}"></textarea>
                                   	</div>
@@ -147,7 +147,7 @@
                               	</div>
                             </div>
                         </div>
-                        <div class="col-md-3" th:if="${licenseInfo != null && licenseInfo.licenseId != null}">
+                        <div class="col-md-3" th:unless="${isReadOnly}" th:if="${licenseInfo != null && licenseInfo.licenseId != null}">
                          	<div class="card card-lg-red" style="position:sticky; top:10px;">
                             	<div class="card-header">
                                 	<h3 class="card-title" th:text="Comment"></h3>

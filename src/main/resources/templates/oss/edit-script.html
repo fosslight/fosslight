@@ -17,7 +17,14 @@
 	var nickNameClone;
 	var commentsParam = {referenceId : [[${ossId}]], referenceDiv : 'oss'};
     var ossId = [[${ossId}]] || null;
-	
+    var isReadOnly = [[${isReadOnly}]] || null;
+
+    var downloadLocationList = [[${downloadLocationList}]];
+    var ossNickList = [[${ossNickList}]];
+
+    console.log(downloadLocationList);
+    console.log(ossNickList);
+
 	//데이터 객체
 	var data = {
 		detail : [[${detail}]],
@@ -57,16 +64,18 @@
 					var ossNickList = [];
 					var downloadLocationList = [];
 					ossNickList = [[${ossNickList}]];
+
+                    console.log(ossNickList);
 					downloadLocationList = [[${downloadLocationList}]];
 					if (ossNickList != null && ossNickList.length > 0) {
 						ossNickList.forEach(function(nickName, index, obj){
 							if (index == 0) {
 								$('.multiTxtSet').empty();
 							}
-							
+
 							let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
 							nickHtml 		+= 		'<div class="input-group card-tools">';
-							nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickname+'"/>';
+							nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
 							nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 							nickHtml 		+=		'</div>';
 							nickHtml 		+=		'<span class="retxt"></span>';
@@ -141,8 +150,12 @@
 							}
 							let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
 							nickHtml 		+= 		'<div class="input-group card-tools">';
-							nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
-							nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                            if(isReadOnly == 'true' || isReadOnly) {
+                                nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'" disabled/>';
+                            } else {
+                                nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
+                                nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                            }
 							nickHtml 		+=		'</div>';
 							nickHtml 		+=		'<span class="retxt"></span>';
 							nickHtml 		+= 	'</div>';
@@ -158,8 +171,12 @@
 							}
 							let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
 							downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
-							downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/>';
-							downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                            if(isReadOnly == 'true' || isReadOnly) {
+                                downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/ disabled>';
+                            } else {
+                                downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/>';
+                                downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                            }
 							downloadLocationHtml 		+=		'</div>';
 							downloadLocationHtml 		+=		'<span class="urltxt"></span>';
 							downloadLocationHtml 		+=		'<span class="retxt"></span>';
@@ -176,8 +193,12 @@
 							}
 							let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
 							detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
-							detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'"/>';
-							detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                            if(isReadOnly == 'true' || isReadOnly) {
+                                detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'"/ disabled>';
+                            } else {
+                                detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'"/>';
+                                detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                            }
 							detectedLicenseHtml 		+=		'</div>';
 							detectedLicenseHtml 		+=		'<span class="retxt"></span>';
 							detectedLicenseHtml 		+= 	'</div>';
@@ -191,7 +212,7 @@
 							syncData.ossLicenses.forEach(function(item){
 								$('input[name=licenseName]').val(item.licenseName);
 								$('#licenseName').val(item.licenseNameEx);
-								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + item.licenseType + '</span>');
+								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-light btn-sm">' + item.licenseType + '</span>');
 								$('#obDiv').html('');
 								$(item.obligation).appendTo('#obDiv');
 							});
@@ -199,7 +220,7 @@
 							var licenseType = autoLicense(data.list.rows);
 							var obligationHtml = autoObligation(data.list.rows);
 							if ('' != licenseType) {
-								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + licenseType + '</span>');
+								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-light btn-sm">' + licenseType + '</span>');
 							} else {
 								$('#ltDiv').html('');
 							}
@@ -225,8 +246,9 @@
 						if ('' != colOssType) {
 							$("#ossTypeDiv").html(colOssType);
 						}
-						
-						break;
+
+                        break;
+
 					case 'deactivateFlag':
 						if(v.toUpperCase() == "Y"){
 							$("#deactivateFlag").attr("checked", true);
@@ -845,7 +867,7 @@
 					}
 					
 					if ('' != type) {
-						$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+						$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-light btn-sm">' + type + '</span>');
 					} else {
 						$('#ltDiv').html(type);
 					}
@@ -877,7 +899,7 @@
 				}
 				
 				if ('' != type) {
-					$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+					$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-light btn-sm">' + type + '</span>');
 				} else {
 					$('#ltDiv').html(type);
 				}
@@ -886,20 +908,23 @@
 				$(obligationHtml).appendTo('#obDiv');
 			}
 		});
-		_licenseChoice.jqGrid('navGrid',"#_licenseChoicePager",{edit:false,add:true,del:false,search:false,refresh:false
-			, addfunc: function (rowid) {
-				var ids = $("#_licenseChoice").jqGrid("getDataIDs");
-				var newId = ids.length ? Number(ids[ids.length-1])+1 : 1;
-				var row = {no	:newId, ossLicenseIdx	:newId};
-				
-				data.list.rows.push(row);
-				$("#_licenseChoice").jqGrid("addRowData", newId , row, "last");
-				$("#_licenseChoice").jqGrid("setSelection", newId);
-				
-				// 첫 로우 ossLicenseComb 설정
-				setFristComb();
-			}
-		});
+
+        if(isReadOnly == null) {
+            _licenseChoice.jqGrid('navGrid',"#_licenseChoicePager",{edit:false,add:true,del:false,search:false,refresh:false
+                , addfunc: function (rowid) {
+                    var ids = $("#_licenseChoice").jqGrid("getDataIDs");
+                    var newId = ids.length ? Number(ids[ids.length-1])+1 : 1;
+                    var row = {no	:newId, ossLicenseIdx	:newId};
+
+                    data.list.rows.push(row);
+                    $("#_licenseChoice").jqGrid("addRowData", newId , row, "last");
+                    $("#_licenseChoice").jqGrid("setSelection", newId);
+
+                    // 첫 로우 ossLicenseComb 설정
+                    setFristComb();
+                }
+            });
+        }
 		
 		// 프로젝트 그리드
 		if (data.components != null){
@@ -1074,7 +1099,12 @@
 	
 	// 그리드 삭제 버튼 표출
 	function displayButtons(cellvalue, options, rowObject){
-		var deleted = "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"exeDelete("+options.rowId+")\" />";
+        if(isReadOnly == null) {
+            var deleted = "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"exeDelete("+options.rowId+")\" />";
+        } else {
+            var deleted = "";
+        }
+
 		return deleted;
 	}
 	
@@ -1105,7 +1135,7 @@
 		}
 		
 		if ('' != type) {
-			$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+			$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-light btn-sm">' + type + '</span>');
 		} else {
 			$('#ltDiv').html(type);
 		}
@@ -1221,11 +1251,11 @@
 						result = '<span></span>';
 						break;
 					case 2:
-						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i>';
+						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i> (Notice)';
 						$('input[name=obligationType]').val("10");
 						break;
 					case 3:
-						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i><i class="far fa-file-code fa-1-5x" title="Source Code"></i>';
+						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i> (Notice)  <i class="far fa-file-code fa-1-5x" title="Source Code"></i> (Source Code)';
 						$('input[name=obligationType]').val("11");
 						break;
 				}
@@ -1238,11 +1268,11 @@
 						result = '<span></span>';
 						break;
 					case 2:
-						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i>';
+						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i> (Notice)';
 						$('input[name=obligationType]').val("10");
 						break;
 					case 3:
-						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i><i class="far fa-file-code fa-1-5x" title="Source Code"></i>';
+						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i> (Notice)  <i class="far fa-file-code fa-1-5x" title="Source Code"></i> (Source Code)';
 						$('input[name=obligationType]').val("11");
 						break;
 				}
@@ -1382,7 +1412,7 @@
 		}
 		
 		if ('' != type) {
-			$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-info btn-sm">' + type + '</span>');
+			$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-light btn-sm">' + type + '</span>');
 		} else {
 			$('#ltDiv').html(type);
 		}
@@ -1723,8 +1753,11 @@
 				if ($("div.multiTxtSet > div").length > 1) {
 					$("div.multiTxtSet").empty();
 				}
-				
+
+
+
 				for (var k in json.resultData.addNickArr) {
+                    console.log(json.resultData.addNickArr[k])
 					let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
 					nickHtml 		+= 		'<div class="input-group card-tools">';
 					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+json.resultData.addNickArr[k]+'"/>';

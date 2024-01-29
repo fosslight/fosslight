@@ -327,6 +327,11 @@ public class OssController extends CoTopComponent{
 		
 		List<String> downloadLocationList = new ArrayList<>();
 		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
+
+		if(!CommonFunction.isAdmin()) {
+			model.addAttribute("isReadOnly", true);
+		}
+
 		return "oss/edit";
 //		return CommonFunction.isAdmin() ? "oss/edit :: content" : "oss/view :: content";
 	}
