@@ -2076,9 +2076,9 @@ var src_fn = {
 		var display = "";
 		var licenseName = rowObject["licenseName"];
 		var existsFlag = rowObject["licenseNameExistsYn"];
-		if(licenseName === undefined || licenseName == "" || licenseName == null) {
+		if (licenseName === undefined || licenseName == "" || licenseName == null) {
 		} else {
-			if(existsFlag == "Y") {
+			if (existsFlag == "Y") {
 				display = "<i class=\"fas fa-info-circle\" style=\"font-size: 1.2rem; cursor: pointer; color: #ed7728;\" title=\"Detail Info\" onclick=\"src_fn.showLicenseViewPage('srcList','"+options.rowId+"')\"></i>";
 			} else {
 				display = "";
@@ -2093,13 +2093,13 @@ var src_fn = {
 		
 		if(cellvalue) {
 			if(parseInt(cellvalue) >= 9.0 ) {
-				display = "<span class=\"badge badge-dark\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">CRITICAL</span>";
+				display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">CRITICAL</span>";
 			} else if(parseInt(_score) >= 7.0 ) {
-				display = "<span class=\"badge badge-danger\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">HIGH</span>";
+				display = "<span class=\"badge badge-danger pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">HIGH</span>";
 			} else if(parseInt(_score) >= 4.0) {
-				display = "<span class=\"badge badge-orange\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">MEDIUM</span>";
+				display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">MEDIUM</span>";
 			} else if(parseInt(_score) > 0) {
-				display = "<span class=\"badge badge-warning\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">LOW</span>";
+				display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">LOW</span>";
 			} else {
 				display = "<span style=\"font-size:0;\"></span>";
 			}

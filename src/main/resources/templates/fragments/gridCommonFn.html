@@ -283,13 +283,13 @@
                 var _url = '/vulnerability/vulnpopup?ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion + '&vulnType=';
 
                 if (parseInt(cellvalue) >= 9.0) {
-                    display = "<span class=\"badge badge-dark\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">CRITICAL</span>";
+                    display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">CRITICAL</span>";
                 } else if (parseInt(cellvalue) >= 7.0) {
-                    display = "<span class=\"badge badge-danger\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">HIGH</span>";
+                    display = "<span class=\"badge badge-danger pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">HIGH</span>";
                 } else if (parseInt(cellvalue) >= 4.0) {
-                    display = "<span class=\"badge badge-orange\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">MEDIUM</span>";
+                    display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">MEDIUM</span>";
                 } else if (parseInt(cellvalue) > 0) {
-                    display = "<span class=\"badge badge-warning\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">LOW</span>";
+                    display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">LOW</span>";
                 } else if (parseInt(cellvalue) == 0 || cellvalue == undefined) {
                     display = "<span style=\"font-size:0;\"></span>";
                 } else {

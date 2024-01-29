@@ -1565,8 +1565,8 @@ var fn = {
 			}
 		});
 	},
-	selectDivision : function() {
-		var division = $('#prjDivision').val();
+	selectDivision : function(obj) {
+		var division = $(obj).val();
 		$('#prjUserId').children().remove();
 		if(division == "") {
 			$('#prjUserId').val("").prev().text("select User").change();
@@ -1858,12 +1858,13 @@ var fn = {
 		changeWatcherArr = [];
 		$("#multiDiv").children().remove();
 		$("select[name=prjDivision]").val("").trigger('change');
+		$("select[name=prjUserId]").html("<option value=''>Select User</option>");
 		$("select[name=prjDomain]").val("").trigger('change');
 		$("select[name=listKind]").val("").trigger('change');
 		$("input[name=listId]").val("");
-		fn.closeAlertify();
 	},
 	closeAlertify : function() {
+		fn.resetChangeWatcherPop();
 		$(".ajs-close").trigger("click");
 	}
 };

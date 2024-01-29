@@ -642,6 +642,12 @@ public class PartnerController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@PostMapping(value=PARTNER.CHANGE_DIVISION_VIEW)
+	public String changeDivisionView(@PathVariable String code, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		model.addAttribute("code", code);
+		return "partner/view/changePartnerView";
+	}
+	
 	@PostMapping(value=PARTNER.CHANGE_DIVISION_AJAX)
 	public @ResponseBody ResponseEntity<Object> saveBasicInfoOnConfirmAjax(
 			@RequestBody HashMap<String, Object> map

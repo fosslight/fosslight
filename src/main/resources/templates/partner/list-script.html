@@ -13,7 +13,7 @@ var refreshParam = {};
 const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT'))}]];
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var changeWatcherArr = [];
-var role = 'ROLE_ADMIN';
+var role = [[${#authentication.authorities[0].authority}]];
 
 $(document).ready(function () {
 	'use strict';
@@ -130,14 +130,14 @@ var fn = {
 	displayVulnerability : function(cellvalue, options, rowObject){
 		var display = "";
 
-		if(parseInt(cellvalue) >= 9.0 ) {
-			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+		if (parseInt(cellvalue) >= 9.0 ) {
+			display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">CRITICAL</span>";
 		} else if(parseInt(cellvalue) >= 7.0 ) {
-			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+			display = "<span class=\"badge badge-danger pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">HIGH</span>";
 		} else if(parseInt(cellvalue) >= 4.0) {
-			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+			display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">MEDIUM</span>";
 		} else if(parseInt(cellvalue) > 0) {
-			display="<span class=\"iconSet vulLow\" onclick=\"openNVD('"+ rowObject.cveId +"')\">"+cellvalue+"</span>";
+			display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">LOW</span>";
 		} else {
 			display="<span style=\"font-size:0;\"></span>";
 		}
@@ -194,17 +194,12 @@ var fn = {
 	},
 	displayDeliveryForm: function (cellvalue, options, rowObject) {
 		var display = "";
-
 		switch (cellvalue) {
 			case [[${@CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_SRC')}]] :
-				display = "<span class=\"iconDeliveryForm source\">"
-					+ [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'), @CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_SRC'))}]];
-					+ "</span>";
+				display = "<span class=\"badge badge-orange pointer source\" title=\"" + [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'), @CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_SRC'))}]] + "\">S</span>";
 				break;
 			case [[${@CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_BIN')}]] :
-				display = "<span class=\"iconDeliveryForm binary\">"
-					+ [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'), @CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_BIN'))}]];
-					+ "</span>";
+				display = "<span class=\"badge badge-orange pointer binary\" title=\"" + [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'), @CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_BIN'))}]] + "\">B</span>";
 				break;
 		}
 		return display;
@@ -231,9 +226,46 @@ var fn = {
 	changeDivision : function(){
 		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
 
-		if(chk > 0){
-			$("#partnerChangeDivisionSelect").find("strong").text($("#partnerChangeDivisionSelect select[name='partnerDivision'] option:first").text());
-			$("#partnerChangeDivisionPop").show();
+		if (chk > 0) {
+			$.ajax({
+				url : '/partner/changePartnerView/division',
+				type : 'POST',
+				data : JSON.stringify({"partnerId" : ""}),
+				dataType : 'html',
+				cache : false,
+				contentType : 'application/json',
+				success: function(res){
+					if(!alertify.changeDivisionDialog){
+						alertify.dialog('changeDivisionDialog', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+								settings: {
+									oncontinue: null
+								},
+								callback: function(closeEvent) {
+									alertify.confirm().callback.call(this, closeEvent);
+								}
+							};
+						}, false, 'confirm');
+                	}
+					
+					alertify.changeDivisionDialog(res).set('title', 'Change Division').set('resizable', true).resizeTo('650', '306').show();
+				}
+			});
 		} else {
 			alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
 		}
@@ -286,19 +318,47 @@ var fn = {
 	changeDivisionCancel : function(){
 		$('#partnerChangeDivisionPop').hide();
 	},
-	change : function(obj) {
-		var changeListId = '#' + $(obj).siblings("div").attr("id");
-        if ($(changeListId).css('display')=='none') {
-            $(changeListId).show();
-        }else{
-            $(changeListId).hide();
-        }
-        $(changeListId).menu();
-	},
 	changeWatcher : function() {
 		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
-		if(chk > 0){
-			$("#changeWatcherPop").show();
+		if (parseInt(chk) > 0) {
+			$.ajax({
+				url : '/partner/changePartnerView/watcher',
+				type : 'POST',
+				data : JSON.stringify({"partnerId" : ""}),
+				dataType : 'html',
+				cache : false,
+				contentType : 'application/json',
+				success: function(res){
+					if(!alertify.changeWatcherDialog){
+						alertify.dialog('changeWatcherDialog', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.content.style.top = "60px";
+							        }
+								}
+							};
+						}, false, 'confirm');
+                	}
+					
+					alertify.changeWatcherDialog(res).set('title', 'Change Watcher').set('resizable', true).resizeTo('1000', '420');
+				}
+			});
 		} else {
 			alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
 		}
@@ -378,14 +438,16 @@ var fn = {
 			}
 		});
 	},
-	selectDivision : function() {
-		var division = $('#parDivision').val();
+	selectDivision : function(obj) {
+		var division = $(obj).val();
 		$('#parUserId').children().remove();
-		if(division == "") {
+		
+		if (division == "") {
 			$('#parUserId').val("").prev().text("select User").change();
 			return false;
 		}
 		$('#parUserId').attr('disabled', false);
+		
 		$.ajax({
 			url : '/partner/getUserList',
 			type : 'GET',
@@ -414,8 +476,8 @@ var fn = {
 		var $userSel	= $("#parUserId"),
 			userVal		= $userSel.val()||"",
 			userTxt		= $userSel.find("option[value='"+userVal+"']").text();
-
-		if(divVal == "" || userVal == "") {
+		
+		if (divVal == "" || userVal == "") {
 			return alertify.error([[#{msg.project.required.selectDivision}]], 0);
 		}
 		
@@ -443,7 +505,7 @@ var fn = {
 		if(isNew) {
 			var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
 			fn.addWatcherData(divVal, userVal, '');
-				fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+			fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
 		}
 	},
 	addWatcherData : function (uDiv, uId, uEmail) {
@@ -453,7 +515,7 @@ var fn = {
 		dataObj["parEmail"] = uEmail;
 		changeWatcherArr.push(dataObj);
 	},
-	removeWatcher : function (uDiv, uId) {
+	removeWatcher : function (uDiv, uId, obj) {
 		var uEmail = "";
 		if("Email" == uId) {
 			uEmail = uDiv;
@@ -462,24 +524,22 @@ var fn = {
 		}
 		
 		changeWatcherArr.forEach(function(cur, index){
-			var obj = cur;
-			if (uId === obj["parUserId"] && uDiv === obj["parDivision"] && uEmail === obj["parEmail"]) {
+			var object = cur;
+			if (uId === object["parUserId"] && uDiv === object["parDivision"] && uEmail === object["parEmail"]) {
+				$(obj).parent().remove();
 				changeWatcherArr.splice(index, 1);
 			}
 		});
 	},
 	addHtml : function(target, str, division, userId){
 		var rlt = division+((userId!="") ? "/"+userId : "");
-		var html  = '<span class="external-event mr-1" id="'+userId+'"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
-		html += '<strong>'+str+'</strong>';
-		if('${project.viewOnlyFlag}' != "Y") {
-			html += '<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\');" /></span>';
+		var html  = '<span class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		html += str;
+		if ("Y" != [[${searchBean.viewOnlyFlag}]]) {
+			html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 		}
+		html += '</div>';
 		target.append(html);
-
-		$('div.multiTxtSet2 .smallDelete').on('click', function(){
-			$(this).parent().remove();
-		});
 	},
 	addEmail : function() {
 		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
@@ -673,11 +733,14 @@ var fn = {
 		changeWatcherArr = [];
 		$("#multiDiv").children().remove();
 		$("select[name=parDivision]").val("").trigger('change');
+		$("select[name=parUserId]").html("<option value=''>Select User</option>");
 		$("select[name=parDomain]").val("").trigger('change');
 		$("select[name=listKind]").val("").trigger('change');
 		$("input[name=listId]").val("");
-		$('#changeWatcherPop').hide();
-		$("#ChangeList").hide();
+	},
+	closeAlertify : function() {
+		fn.resetChangeWatcherPop();
+		$(".ajs-close").trigger("click");
 	}
 }
 
@@ -721,6 +784,75 @@ var partnerList = {
 			var rowList = rowStr.split(",");
 			var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 			
+			var colModelArr = [];
+	        var colModelObj = {name: 'partnerId', index: 'partnerId', width: 30, align: 'center', key:true, sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'partnerName', index: 'partnerName', width: 100, align: 'left', sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'softwareName', index: 'softwareName', width: 100, align: 'left', sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'softwareVersion', index: 'softwareVersion', width: 40, align: 'left', sortable : true, hidden:true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'deliveryForm', index: 'deliveryForm', width: 50, align: 'center', formatter: fn.displayDeliveryForm, sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'description', index: 'description', width: 100, align: 'left', sortable : true, formatter:fn.displayComment, unformatter:fn.unformatter};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'division', index: 'division', width: 100, align: 'left', sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'creator', index: 'creator', width: 70, align: 'center', sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'reviewer', index: 'reviewer', width: 80, align: 'left', formatter: 'select', edittype:'text', formatter:fn.getUserName 
+					  , editoptions: {
+							dataInit:
+								function (e) {
+									$(e).autocomplete({
+										source: function(req, res){
+											res(
+												$.grep(Object.keys(userIdList)
+														.map(function(e) {
+															  return userIdList[e]
+														}), function(cur){
+												    return cur;
+												})
+											);
+										}
+										, minLength: 0
+										, open: function() { $(this).attr('state', 'open');}
+										, close: function () { $(this).attr('state', 'closed');}
+									}).focus(function() {
+										if ($(this).attr('state') != 'open') {
+											$(this).autocomplete("search");
+										}
+									}).blur(function(){
+										$(this).attr('state', 'closed');
+									}).on('autocompletechange', fn.reviewerChg);
+									
+									currentOssName = e.value;
+								}
+						}
+						, sortable : true
+					};
+	        if ("ROLE_ADMIN" == role) {
+	        	colModelObj["editable"] = true;
+	        } else {
+	        	colModelObj["editable"] = false;
+	        }
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'comment', index: 'comment', width: 100, align: 'left', formatter:fn.displayComment, sortable : true, hidden:true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'fileName', index: 'fileName', width: 70, align: 'left', hidden:true};
+	        colModelArr.push(colModelObj);
+	        
 		$('#list').jqGrid({
 			url: '/partner/listAjax',
 			datatype: 'json',
@@ -734,54 +866,7 @@ var partnerList = {
 			},
 		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description'
 			  	, 'CVE ID', 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
-            colModel: [
-				{name: 'partnerId', index: 'partnerId', width: 30, align: 'center', key:true, sortable : true},
-				{name: 'partnerName', index: 'partnerName', width: 100, align: 'left', sortable : true},
-				{name: 'softwareName', index: 'softwareName', width: 100, align: 'left', sortable : true},
-				{name: 'softwareVersion', index: 'softwareVersion', width: 40, align: 'left', sortable : true, hidden:true},
-				{name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true},
-				{name: 'deliveryForm', index: 'deliveryForm', width: 50, align: 'center', formatter: fn.displayDeliveryForm, sortable : true},
-				{name: 'description', index: 'description', width: 100, align: 'left', sortable : true, formatter:fn.displayComment, unformatter:fn.unformatter},
-				{name: 'cveId', index: 'cveId', hidden:true},
-				{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false},
-				{name: 'division', index: 'division', width: 100, align: 'left', sortable : true},
-				{name: 'creator', index: 'creator', width: 70, align: 'center', sortable : true},
-				{name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
-				{name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true},
-			  	{name: 'reviewer', index: 'reviewer', width: 80, align: 'left', formatter: 'select', editable:'${sessUserInfo.authority}'=="ROLE_ADMIN" ? true : false, edittype:'text', formatter:fn.getUserName
-				  , editoptions: {
-						dataInit:
-							function (e) {
-								$(e).autocomplete({
-									source: function(req, res){
-										res(
-											$.grep(Object.keys(userIdList)
-													.map(function(e) {
-														  return userIdList[e]
-													}), function(cur){
-											    return cur;
-											})
-										);
-									}
-									, minLength: 0
-									, open: function() { $(this).attr('state', 'open');}
-									, close: function () { $(this).attr('state', 'closed');}
-								}).focus(function() {
-									if ($(this).attr('state') != 'open') {
-										$(this).autocomplete("search");
-									}
-								}).blur(function(){
-									$(this).attr('state', 'closed');
-								}).on('autocompletechange', fn.reviewerChg);
-								
-								currentOssName = e.value;
-							}
-					}
-					, sortable : true
-				},
-				{name: 'comment', index: 'comment', width: 100, align: 'left', formatter:fn.displayComment, sortable : true, hidden:true},
-				{name: 'fileName', index: 'fileName', width: 70, align: 'left', hidden:true}
-			],
+            colModel: colModelArr,
 			onSelectRow: function(id){},
 			rowNum: rowNum,
 			rowList: rowList,
@@ -799,9 +884,7 @@ var partnerList = {
 			multiselect : true,
             multiselectWidth: 30,
 			onCellSelect: function(rowid,iCol,cellcontent,e) {
-				var role = "ROLE_ADMIN"; // '${sessUserInfo.authority}';
-
-				if(role=="ROLE_ADMIN"){
+				if (role == "ROLE_ADMIN"){
 					$("#list").jqGrid('saveRow',lastsel);
 					$("#list").jqGrid('editRow',rowid);
 					lastsel=rowid;
@@ -828,7 +911,7 @@ var partnerList = {
 					$("#list").jqGrid("setCell",rowid,"softwareName",swNmVer,"");
 				}
 
-				if(totalRow == 0){
+				if (totalRow == 0){
 					var startDate = $("#createdDate1").val()||0;
 					var endDate = $("#createdDate2").val()||0;
 					var diffNum = +startDate - +endDate;
@@ -865,8 +948,6 @@ var partnerList = {
 // 					});
 // 					gridTooltip.existTooltip = true;
 // 				}
-
-				tableRefreshNew("list");
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				createTabInFrame(rowid+'_3rdParty', '/partner/edit/'+rowid);
