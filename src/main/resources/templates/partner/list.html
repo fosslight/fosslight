@@ -12,13 +12,14 @@
             <section class="content">
                 <div class="container-fluid">
                 	<form id="3rdSearch" name="3rdSearch">
+                	<input name="act" type="hidden" value="search"/> 
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card card-dark card-outline collapsed-card search-form mb-3">
                                 <div class="card-header" style="border-bottom: none;">
                                     <div class="row">
-                                    	<div class="col-md-7">
-                                        	<div class="row">
+                                    	<div class="col-md-7 d-flex">
+                                        	<div class="row" style="width: 100%;">
                                         		<div class="col-12">
                                             		<div class="input-group">
                                                         <input type="search" name="partnerName" class="form-control autoComParty" placeholder="Partner Name" th:value="${searchBean.partnerName}">
@@ -29,17 +30,19 @@
                                             	</div>
 											</div>
                                    		</div>
-                                        <div class="col-md-5 d-flex justify-content-start pl-3" style="z-index: 1021">
+                                        <div class="col-md-4 d-flex justify-content-start">
                                        		<div class="input-group-appen d-flex align-items-center">
                                             	<a class="text-blue-gray" data-card-widget="collapse" title="Collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'"></a>
                                        		</div>
-                                            <div class="btn-group" id="helpLinkBtn">
-                                                <button type="button" class="btn btn-danger px-3 btn-sm"><strong>Help</strong></button>
+                                     	</div>
+                                     	<div class="col-md-1 d-flex justify-content-start">
+                                     		<div class="btn-group" id="helpLinkBtn">
+                                                <button type="button" class="btn btn-danger px-3 btn-sm"><strong th:text="Help"></strong></button>
                                                 <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
-                                                    <span class="sr-only">Toggle Dropdown</span>
+                                                    <span class="sr-only" th:text="'Toggle Dropdown'"></span>
                                                 </button>
                                                 <div class="dropdown-menu" role="menu">
-                                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Party_List_Main')|">How to use FossLight Hub</a>
+                                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Party_List_Main')|" th:text="'How to use FossLight Hub'"></a>
                                                 </div>
                                             </div>
                                      	</div>
@@ -79,7 +82,7 @@
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <select class="form-control select2" id="parDivision" name="parDivision" th:onchange="|fn.selectDivision()|" style="width: 100%;">
+                                                    <select class="form-control select2" name="division" style="width: 100%;">
                                                         <option th:value="''" th:text="'Division'"></option>
                                                         <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
                                                     		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
@@ -119,23 +122,26 @@
                                 </div>
                             </div>
                         </div>
+                        </form>
                     </div>
-					</form>
 					
                     <div class="row px-1">
                         <div class="col-md-6">
                             <div class="row float-left">
-                            	<div id="ChangeContainer" class="inblock" style="vertical-align:top; position: relative;">
-									<button type="button" class="btn btn-yellow-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.change(this)|" th:text="Change"></button>
-									<div id="ChangeList" class="w100 tright" style="display: none; position: absolute; z-index: 1; left: 0; text-align:left;">
-										<a th:onclick="|fn.changeDivision()|" style="display: block;" th:text="Division"></a>
-										<a th:onclick="|fn.changeWatcher()|" style="display: block;" th:text="Watcher"></a>
-									</div>
-								</div>
+                            	<div class="btn-group btn-group-sm width-10rem mr-xm" id="ChangeContainer">
+                            		<button type="button" class="btn btn-yellow-03 px-3 ml-2" th:text="Change"></button>
+                                    <button type="button" class="btn btn-yellow-03 dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                        <span class="sr-only" th:text="'Toggle Dropdown'"></span>
+                                    </button>
+                                    <div class="dropdown-menu" id="ChangeList" role="menu">
+                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeDivision()|" th:text="Division"></a>
+                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeWatcher()|" th:text="Watcher"></a>
+                                    </div>
+                            	</div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="row float-right">
+                            <div class="row float-right" style="margin-right: .1rem;">
                                 <button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|" th:text="Export"></button>
                                 <button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|" th:text="Add"></button>
                             </div>
@@ -143,7 +149,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-12 mt-3" style="overflow-x: scroll;">
+                        <div class="col-12 mt-3">
                             <div class="col-sm-12 jqGridSet">
                                 <table id="list"><tr><td></td></tr></table>
                                 <div id="pager"></div>

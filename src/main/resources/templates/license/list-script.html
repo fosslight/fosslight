@@ -136,6 +136,12 @@
         };
 
         var fn = {
+        	displayLicenseName : function(cellvalue, options, rowObject) {console.log(cellvalue);console.log(rowObject);
+        		var display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue;
+        		if ("" != rowObject.shortIdentifier) display += " (" + rowObject.shortIdentifier + ")";
+        		display += "</a>";
+        		return display;
+        	},
             downloadExcel: function () {
                 if (isMaximumRowCheck(totalRow)) {
                     var data = $('#licenseSearch').serializeObject();
@@ -236,7 +242,7 @@
                 var rowList = rowStr.split(",");
                 var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 
-                var colNameArr = ['ID', 'License Name', 'Identifier', 'License Type', 'Restriction', 'Obligation', 'Website', 'User Guide'];
+                var colNameArr = ['ID', 'License Name (Identifier)', 'Identifier', 'License Type', 'Restriction', 'Obligation', 'Website', 'User Guide'];
                 if ([[${@CommonFunction.isAdmin()}]]) {
                     colNameArr.push('Creator');
                     colNameArr.push('Created Date');
@@ -251,11 +257,11 @@
                     index: 'licenseName',
                     width: 200,
                     align: 'left',
-                    formatter: fn_grid_com.displayLicenseName,
+                    formatter: fn.displayLicenseName,
                     unformat: fn_grid_com.unformatter,
                 };
                 colModelArr.push(colModelObj);
-                colModelObj = {name: 'shortIdentifier', index: 'shortIdentifier', width: 100, align: 'left'};
+                colModelObj = {name: 'shortIdentifier', index: 'shortIdentifier', width: 100, align: 'left', hidden: true};
                 colModelArr.push(colModelObj);
                 colModelObj = {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'};
                 colModelArr.push(colModelObj);

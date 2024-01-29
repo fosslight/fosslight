@@ -41,11 +41,10 @@
 			isChangeModelInfo = false;
 		}
 
-		if(!isChangeModelInfo || "false" == isChangeModelInfo) {
+		if (!isChangeModelInfo || "false" == isChangeModelInfo) {
 			$("#tr_distribute > td > span.fileex_back").hide();
 			$("#allDelete").hide();
 			$("#unabledChangeModelTxt").show();
-			
 		}
 		
 		showHelpLink("Project_List_BasicInfo_Distribution_type", "helpLink_distributionType");
@@ -204,12 +203,52 @@
 			
 			// 삭제
 			$("#delete").click(function(){
-				if(data.detail.completeYn == 'Y' || data.detail.identificationStatus == "CONF") {
+				if (data.detail.completeYn == 'Y' || data.detail.identificationStatus == "CONF") {
 					alertify.alert([[#{msg.project.warn.edit.delete}]], function(){});
 
 					return;
 				} else {
+					var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
+	               	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';
 					
+	               	if(!alertify.deletePrjDialog){
+						alertify.dialog('deletePrjDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.focus.element = -1;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
+								}
+							};
+						}, false, 'confirm');
+                	}
+	               	
+	               	alertify.deletePrjDialog(innerHtml, function () {
+	               		var comment = $($("#prjDelEditor").summernote('code')).text();
+	               		comment = comment.trim();
+ 						if ("" == comment){
+ 							alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+							return false;
+ 						} else {
+							fn.deleteSubmit();
+						}
+                    });
+	               	
+	               	$("#prjDelEditor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 				}
 			});
 			// 직접입력

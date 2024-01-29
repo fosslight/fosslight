@@ -461,6 +461,9 @@ public final class Url {
 		
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
+		
+		public static final String CHANGE_DIVISION_VIEW = PATH + "/changePartnerView/{code}";
+		
 		public static final String CHANGE_DIVISION_AJAX = PATH + "/changeDivisionAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
 		

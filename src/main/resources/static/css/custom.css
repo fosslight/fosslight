@@ -109,7 +109,6 @@ ul { list-style-type: none; }
 .custom-layout .bg-purple { background-color: #702f9f; }
 .custom-layout .bg-pink { background-color: #f70ce4; }
 
-.custom-layout #helpLinkBtn { right: -16.5rem; }
 .custom-layout #helpLinkBtnDetail { position: fixed; top: 1.3rem; right: 20rem; }
 
 /*popup*/
@@ -270,7 +269,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .badge.badge-purple { background-color: #f5a9f2; color: #fff; }
 
 /* text color */
-.custom-layout .text-gray { color: #555555; }
+.custom-layout .text-gray { color: #555555;}
 
 /* level gradation */
 .custom-layout .level-1 { background-color: #e6f7ff; }
@@ -825,3 +824,6 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .custom-is-invalid {border-color: #dc3545 !important;}
 .useCustomNotice {color:#FF0000;}
 .note-editable {background-color: #fff;}
+.pointer {cursor: pointer; font-size: .75rem;}
+.source {background-color: #9a58b5 !important;}
+.binary {background-color: #c56272 !important;}
