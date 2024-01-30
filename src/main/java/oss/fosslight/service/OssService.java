@@ -97,7 +97,7 @@ public interface OssService extends HistoryConfig{
 	
 	int getAnalysisListPage(int rows, String prjId);
 	
-	Map<String, Object> startAnalysis(String prjId, String fileId, boolean coReviewer);
+	Map<String, Object> startAnalysis(String prjId, String fileId, String userName);
 	
 	OssAnalysis getNewestOssInfo(OssAnalysis bean);
 
