@@ -21,6 +21,7 @@
 	var verificationStatusConfFlag = [[${project.verificationStatusConfFlag}]];
 	var copyFlag = [[${project.copyFlag}]];
 	var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
+    var isReadOnly = [[${isReadOnly}]];
 	
 	$(document).ready(function() {
 		'use strict';
@@ -578,8 +579,8 @@
 			var rlt = division+((userId!="") ? "/"+userId : "");
 			var html  = '<div class="external-event" style="margin-right: 5px;"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 			html += str;
-			if([[${project.viewOnlyFlag}]] != "Y") {
-				html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
+			if([[${project.viewOnlyFlag}]] != "Y" && !isReadOnly) {
+				html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 			}
 			target.append(html);
 		},
@@ -2184,22 +2185,25 @@
 					}
 				}
 			});
-			$("#_modelList").jqGrid('navGrid',"#pagerModel",{edit:false,add:true,del:false,search:false,refresh:false
-				, addfunc: function (rowid) {
-					var _tempRandId = $.jgrid.randId();
-					var lastCategory = "";
-					var rows = fn.getModelGridRows('#_modelList');
-					
-					if(rows.length > 0){
-						lastCategory = rows[rows.length-1].category;
-					}else{
-						lastCategory = "";
-					}
 
-					$("#_modelList").jqGrid("addRowData", _tempRandId, {gridId: _tempRandId, category: lastCategory}, "last");
-                    $("#_modelList").jqGrid('editRow',_tempRandId,true,pickdates);
-				}
-			});
+            if(!isReadOnly) {
+                $("#_modelList").jqGrid('navGrid',"#pagerModel",{edit:false,add:true,del:false,search:false,refresh:false
+                    , addfunc: function (rowid) {
+                        var _tempRandId = $.jgrid.randId();
+                        var lastCategory = "";
+                        var rows = fn.getModelGridRows('#_modelList');
+
+                        if(rows.length > 0){
+                            lastCategory = rows[rows.length-1].category;
+                        }else{
+                            lastCategory = "";
+                        }
+
+                        $("#_modelList").jqGrid("addRowData", _tempRandId, {gridId: _tempRandId, category: lastCategory}, "last");
+                        $("#_modelList").jqGrid('editRow',_tempRandId,true,pickdates);
+                    }
+                });
+            }
 		},
 		changeTarget : function () {
 			$("#_modelList").jqGrid('clearGridData');

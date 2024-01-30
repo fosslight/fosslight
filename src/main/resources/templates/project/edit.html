@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="project/project-edit_script :: scriptFragment"></th:block>
 <th:block th:replace="project/edit-script :: contentScript"></th:block>
+<th:block th:replace="project/view-script :: viewScript"></th:block>
 <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
     <div class="wrapper">
@@ -18,7 +19,7 @@
                     <div class="col-md-9">
                         <div class="card card-secondary submit-form">
                             <div class="card-header p-2 pl-3">
-                                <h3 class="card-title text-white mt-1 ml-1">Form</h3>
+                                <h3 class="card-title text-white mt-1 ml-1">Basic Information</h3>
                                 <div class="btn-group float-right">
                                     <button type="button" class="btn btn-danger px-3 btn-sm"><strong>Help</strong></button>
                                     <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
@@ -41,17 +42,31 @@
 							<input type="hidden" id="verificationStatusConfFlag" th:value="${project.verificationStatusConfFlag}" />
                             <div class="card-body">
                                 <div class="row form-group">
-                                	<div class="col-12 required">
+                                	<div class="col-md-6 required">
                                 		<label for="inputName" th:text="#{msg.common.field.project.name}"></label><span class="text-orange">*</span>
-                                    	<input type="text" id="prjName" name="prjName" class="form-control" th:value="${project.prjName}">
+                                    	<input type="text" id="prjName" name="prjName" class="form-control" th:value="${project.prjName}" th:disabled="${isReadOnly}">
                                     	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
                                 	</div>
+                                    <div class="col-md-4">
+                                        <label for="inputName" th:text="#{msg.common.field.project.version}"></label>
+                                        <input type="text" id="inputName" name="prjVersion" class="form-control" th:value="${project.prjVersion}" th:disabled="${isReadOnly}">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="inputName" th:text="#{msg.common.field.priority}"></label><span class="text-orange">*</span>
+                                        <select class="form-control select2" style="width: 100%;" id="priority" name="priority" th:disabled="${isReadOnly}">
+                                            <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                                <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.priority != null && #strings.equals(option.cdDtlNo, project.priority)}"></option>
+                                            </th:block>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="row form-group">
-                                	<div class="col-12">
-                                		<label for="inputName" th:text="#{msg.common.field.project.version}"></label>
-                                    	<input type="text" id="inputName" name="prjVersion" class="form-control" th:value="${project.prjVersion}">
-                                	</div>
+                                <div class="row" th:if="${isReadOnly}">
+                                    <label for="inputName" th:text="#{msg.common.field.project.status}"></label>
+
+                                        <div>
+                                            <input type="button" id="identificationStatus" class="btn-primary"><input type="button" id="verificationStatus" class="w150 mr5"><input type="button" id="destributionStatus" class="w150 mr5"><span id="downloadBtn"></span>
+                                        </div>
+
                                 </div>
                                 <div class="row" th:if="${project.viewOnlyFlag != 'Y'}">
                                     <div class="col-md-12">
@@ -61,10 +76,10 @@
                                                 <div class="col-sm-12">
                                                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                                         <label class="btn btn-sm btn-onOff px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio1" value="Y" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="" th:text="Everyone">
+                                                            <input type="radio" name="publicYn" id="permissionRadio1" value="Y" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="" th:text="Everyone" th:disabled="${isReadOnly}">
                                                         </label>
                                                         <label class="btn btn-sm btn-onOff active px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Watcher'">
+                                                            <input type="radio" name="publicYn" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Watcher'" th:disabled="${isReadOnly}">
                                                         </label>
                                                     </div>
                                                 </div>
@@ -72,153 +87,144 @@
                                         </div>
                                     </div> 
                                 </div>
-                                <div class="row form-group">
-                                	<div class="col-12">
-                                		<label for="inputName" th:text="#{msg.common.field.OS}"></label><span class="text-orange">*</span>
-                                	</div>
-                                	<div class="col-10">
-                                    	<select class="form-control select2" id="osType" name="osType" style="width: 100%;">
+                                <div class="row">
+                                	<div class="col-md-6 mb-0">
+                                        <label for="inputName" th:text="#{msg.common.field.OS}"></label><span class="text-orange">*</span>
+                                    	<select class="form-control select2" id="osType" name="osType" style="width: 100%;" th:disabled="${isReadOnly}">
                                    			<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
                                         		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.osType)}"></option>
                                        		</th:block>
                                     	</select>
                                     </div>
-                                    <div class="col-2 required">
-                                    	<input type="text" id="osTypeEtc" name="osTypeEtc" class="form-control" disabled/>
-                                    	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
+                                    <div class="col-md-6 mb-0">
+                                        <div class="form-group mb-0">
+                                            <label for="inputName" th:text="#{msg.common.field.distributionType}"></label><span class="text-orange">*</span>
+                                            <select class="form-control select2" name="distributionType" style="width: 100%;" th:disabled="${isReadOnly}">
+                                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
+                                                    <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.distributionType)}"></option>
+                                                </th:block>
+                                            </select>
+                                            <div class="row mt-2">
+                                                <p class="text-primary text-sm mx-3" th:text="'Network service only?'"></p>
+                                                <div class="form-group clearfix mb-0 ml-">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="radio" id="networkServerType_Y" name="networkServerType" value="Y" th:checked="${project.networkServerType != null && #strings.equals(project.networkServerType, 'Y')} ? 'checked'" th:disabled="${isReadOnly}"/>
+                                                        <label for="networkServerType_Y" th:text="Yes"></label>
+                                                    </div>
+                                                    <div class="icheck-primary d-inline" style="margin-left: 5px;">
+                                                        <input type="radio" id="networkServerType_N" name="networkServerType" value="N" th:checked="${project.networkServerType == null || (project.networkServerType != null && #strings.equals(project.networkServerType, 'N'))} ? 'checked'" th:disabled="${isReadOnly}"/>
+                                                        <label for="networkServerType_N" th:text="No"></label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span class="retxt text-danger text-sm"></span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row form-group">
-                                    <div class="col-12">
-                                        <label for="inputName" th:text="#{msg.common.field.distributionType}"></label><span class="text-orange">*</span>
-                                        <select class="form-control select2" name="distributionType" style="width: 100%;">
-                                        	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
-                                           		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.distributionType)}"></option>
-                                       		</th:block>
-                                      	</select>
-                                    	<div class="row mt-2">
-                                        	<p class="text-gray text-bold mx-3" th:text="'Network service only?'"></p>
-                                       		<div class="form-group clearfix mb-0 ml-">
-                                             	<div class="icheck-primary d-inline">
-													<input type="radio" id="networkServerType_Y" name="networkServerType" value="Y" th:checked="${project.networkServerType != null && #strings.equals(project.networkServerType, 'Y')} ? 'checked'"/>
-													<label for="networkServerType_Y" th:text="Yes"></label>
-												</div>
-												<div class="icheck-primary d-inline" style="margin-left: 5px;">
-													<input type="radio" id="networkServerType_N" name="networkServerType" value="N" th:checked="${project.networkServerType == null || (project.networkServerType != null && #strings.equals(project.networkServerType, 'N'))} ? 'checked'"/>
-													<label for="networkServerType_N" th:text="No"></label>
-												</div>
-                                         	</div>
-                                     	</div>
-                                    </div>
-                                    <span class="col-12 retxt text-danger text-sm"></span>
-                                </div>
-                                <div class="row form-group">
-                                	<div class="col-12">
-                                		<label for="inputName" th:text="#{msg.common.field.priority}"></label><span class="text-orange">*</span>
-                                    	<select class="form-control select2" style="width: 100%;" id="priority" name="priority">
-                                        	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
-                                            	<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.priority != null && #strings.equals(option.cdDtlNo, project.priority)}"></option>
-                                    		</th:block>
-                                    	</select>
-                                	</div>
+<!--                                    <div class="col-2 required">-->
+<!--                                    	<input type="text" id="osTypeEtc" name="osTypeEtc" class="form-control" disabled/>-->
+<!--                                    	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>-->
+<!--                                    </div>-->
                                 </div>
 
                                 <div class="form-group">
                                     <label for="inputName" th:text="'Model Information'"></label>
-                                    <div class="row">
-                                        <div class="col-10 mb-2 d-flex">
+                                    <div class="row" th:unless="${isReadOnly}">
+                                        <div class="col-md-10 mb-2 d-flex">
                                        		<div class="float-left" id="modelFile" style="max-width: 100%;"></div>
                                         </div>
-                                        <div class="col-2">
+                                        <div class="col-md-2">
                                         	<button type="button" class="btn btn-default btn-sm float-right px-5" th:text="Download" th:onclick="|fn.downloadModelList()|"><i class="fa fa-download"></i></button>
                                         </div>
                                     </div>
-                                    <div class="jq-container">
+                                    <div class="jqGridSet">
                                         <table id="_modelList"><tr><td></td></tr></table>
                                         <div id="pagerModel"></div>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label for="additionalInformation" th:text="#{msg.common.field.additionalInformation}"></label>
-                                    <textarea class="form-control" id="additionalInformation" name="additionalInformation" rows="3"></textarea>
+                                    <textarea th:if="${isReadOnly}" class="form-control" rows="3" th:text="${detail?.comment}" disabled></textarea>
+                                    <textarea th:unless="${isReadOnly}" class="form-control" id="additionalInformation" name="additionalInformation" rows="3"></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="exampleInputFile" th:text="#{msg.common.field.watcher}"></label>
-                                    <div class="row">
-                                        <div class="col-4">
-                                            <select class="form-control select2" style="width: 100%;" th:id="prjDivision" th:name="prjDivision" th:onchange="|fn.selectDivision()|">
-                                            	<option th:value="''" th:text="'Select Division'"></option>
-                                            	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                            		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                            	</th:block>
-                                            </select>
+                                    <th:block th:unless="${isReadOnly}">
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <select class="form-control select2" style="width: 100%;" th:id="prjDivision" th:name="prjDivision" th:onchange="|fn.selectDivision()|">
+                                                    <option th:value="''" th:text="'Select Division'"></option>
+                                                    <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+                                                        <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                                    </th:block>
+                                                </select>
+                                            </div>
+                                            <div class="col-7">
+                                                <select class="form-control select2" style="width: 100%;" th:id="prjUserId" th:name="prjUserId">
+                                                    <option th:value="''" th:text="'Select User'"></option>
+                                                </select>
+                                            </div>
+                                            <div class="col-1">
+                                                <button id="addWatcher" type="button" class="btn btn-default" th:text="Add"></button>
+                                            </div>
                                         </div>
-                                        <div class="col-7">
-											<select class="form-control select2" style="width: 100%;" th:id="prjUserId" th:name="prjUserId">
-												<option th:value="''" th:text="'Select User'"></option>
-											</select>
-                                        </div>
-                                        <div class="col-1">
-                                            <button id="addWatcher" type="button" class="btn btn-default" th:text="Add"></button>
-                                        </div>
-                                    </div>
-                                    <div class="row my-1">
-                                        <div class="col-4">
-                                        	<input class="form-control" type="text" id="adId" name="adId" placeholder="Input email" th:onKeypress="|fn.CheckChar()|">
-                                        </div>
-                                        <div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null 
+                                        <div class="row my-1">
+                                            <div class="col-4">
+                                                <input class="form-control" type="text" id="adId" name="adId" placeholder="Input email" th:onKeypress="|fn.CheckChar()|">
+                                            </div>
+                                            <div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null
                                         												&& #lists.size(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))) > 0) ? true : false}">
-                                        	<th:block th:if="${useDomainFlag}">
-                                        		<select class="form-control select2" style="width: 100%;">
-                                        			<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
-                                        				<th:block th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
-                                        					<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                        				</th:block>
-                                        				<th:block th:if="${!#strings.contains(option.cdDtlNm, '직접입력')}">
-                                        					<option th:value="${option.cdDtlNo}" th:text="|@${option.cdDtlNm}|"></option>
-                                        				</th:block>
-                                        			</th:block>
-                                            	</select>
-                                            	<input type="text" id="emailTemp" class="w220" style="display:none;"
-                                            			th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
-                                        	</th:block>
-                                        	<th:block th:if="${!useDomainFlag}">
-                                        		<input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">
-                                        	</th:block>
+                                                <th:block th:if="${useDomainFlag}">
+                                                    <select class="form-control select2" style="width: 100%;">
+                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
+                                                            <th:block th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
+                                                                <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                                            </th:block>
+                                                            <th:block th:if="${!#strings.contains(option.cdDtlNm, '직접입력')}">
+                                                                <option th:value="${option.cdDtlNo}" th:text="|@${option.cdDtlNm}|"></option>
+                                                            </th:block>
+                                                        </th:block>
+                                                    </select>
+                                                    <input type="text" id="emailTemp" class="w220" style="display:none;"
+                                                           th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
+                                                </th:block>
+                                                <th:block th:if="${!useDomainFlag}">
+                                                    <input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">
+                                                </th:block>
+                                            </div>
+                                            <div class="col-1">
+                                                <button id="addEmail" type="button" class="btn btn btn-default" th:text="Add"></button>
+                                            </div>
                                         </div>
-                                        <div class="col-1">
-                                            <button id="addEmail" type="button" class="btn btn btn-default" th:text="Add"></button>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <select id="listKind" class="form-control select2" style="width: 100%;">
+                                                    <option th:value="''" th:text="'Select List'"></option>
+                                                    <option th:if="${partnerFlag}" th:text="'3rd Party List'" th:value="par"></option>
+                                                    <option th:if="${batFlag}" th:text="'BAT List'" th:value="bat"></option>
+                                                </select>
+                                            </div>
+                                            <div class="col-7">
+                                                <input class="form-control" type="text" id="listId" name="listId" placeholder="Input ID you want to copy"/>
+                                            </div>
+                                            <div class="col-1">
+                                                <button id="addList" type="button" class="btn btn-default" th:text="Add"></button>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-4">
-                                            <select id="listKind" class="form-control select2" style="width: 100%;">
-                                            	<option th:value="''" th:text="'Select List'"></option>
-                                                <option th:if="${partnerFlag}" th:text="'3rd Party List'" th:value="par"></option>
-                                                <option th:if="${batFlag}" th:text="'BAT List'" th:value="bat"></option>
-                                            </select>
-                                        </div>
-                                        <div class="col-7">
-                                            <input class="form-control" type="text" id="listId" name="listId" placeholder="Input ID you want to copy"/>
-                                        </div>
-                                        <div class="col-1">
-                                            <button id="addList" type="button" class="btn btn-default" th:text="Add"></button>
-                                        </div>
-                                    </div>
+                                    </th:block>
                                     <div class="form-group mt-2">
                                         <div id="multiDiv" class="external-events"></div>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" th:unless="${isReadOnly}">
                                     <label for="comment" th:text="Comment"></label>
                                     <textarea id="comment" rows="3"></textarea>
                                 </div>
                             </div>
                             </form>
                             <!-- /.card-body -->
-                            <div class="card-footer clearfix">
+                            <div class="card-footer clearfix" th:unless="${isReadOnly}">
                             	<th:block th:if="${project.prjId != null}">
-                            		<a th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}" id="delete" class="btn btn-secondary float-left" th:text="Delete"></a>
+                            		<a th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}" th:onclick="|fn.deletePrj()|" class="btn btn-secondary float-left" th:text="Delete"></a>
                             		<a th:if="${project.viewOnlyFlag == 'N'}" id="drop" class="btn btn-secondary float-left" style="margin-left: 5px; display: none;" th:text="Drop"></a>
                             	</th:block>
                                 <th:block th:if="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
@@ -237,7 +243,7 @@
                                 		</th:block>
                                 	</th:block>
                                 	<th:block th:unless="${@CommonFunction.isAdmin()}">
-                                		<th:block th:if="${project.completeYn == 'Y' and and project.viewOnlyFlag == 'N'}">
+                                		<th:block th:if="${project.completeYn == 'Y' and project.viewOnlyFlag == 'N'}">
                                 			<a id="reqToOpen" class="btn btn-danger float-right" th:text="'Requested to Open'"></a>
                                 		</th:block>
                                 	</th:block>
@@ -248,24 +254,25 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                     	<div class="card card-lg-red" style="position:sticky;top:10px;">
-                        	<div class="card-header">
-                            	<h3 class="card-title" th:text="Comment"></h3>
-                                <div class="card-tools">
-                                	<button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
-                               	</div>
-                           	</div>
-                            <div class="card-body pt-0" style="padding-bottom: 0;">
-                            	<div clas="row">
-                                	<div clas="col-md-12">
-                                    	<table class="table">
-                                        	<tbody id="commentListBody"></tbody>
-                                       	</table>
-                                   	</div>
-                               	</div>
-                          	</div>
-                   		</div>
+                    <div class="col-md-3" th:unless="${isReadOnly}">
+                            <div class="card card-lg-red" style="position:sticky;top:10px;">
+                                <div class="card-header">
+                                    <h3 class="card-title" th:text="Comment"></h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                                    </div>
+                                </div>
+                                <div class="card-body pt-0" style="padding-bottom: 0;">
+                                    <div clas="row">
+                                        <div clas="col-md-12">
+                                            <table class="table">
+                                                <tbody id="commentListBody"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                     </div>
                 </div>
             </section>

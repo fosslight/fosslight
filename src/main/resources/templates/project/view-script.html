@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="bomScript">
+    <script th:inline="javascript">
+        var lastsel;
+        var codeData;
+        var userRole = '${sessUserInfo.authority}';
+        var arr = new Array();
+        var isChangeModelInfo = true;
+        var isCheckT = false;
+        var modelData;
+        var gDateKeyup = false;
+        var distributionStatus = [[${project.destributionStatus}]];
+        var etcDomain = [[${@CommonFunction.getCoConstDefVal('CD_DTL_ECT_DOMAIN')}]];
+        var osTypeEtc = [[${@CommonFunction.getCoConstDefVal('CD_OS_TYPE_ETC')}]];
+        var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+        var permission = [[${projectPermission}]];
+        var isReadOnly = [[${isReadOnly}]];
+        var detail = [[${detail}]];
+
+        $(document).ready(function() {
+            if(isReadOnly) {
+                fn.displayProjectStatus(detail);
+            }
+        });
+
+        var fn = {
+            displayProjectStatus : function(projectInfo){
+                var identificationStatus = projectInfo.identificationStatus;
+                var verificaitonStatus = projectInfo.verificationStatus;
+                var distributionStatus = projectInfo.destributionStatus;
+                var dropYn = projectInfo.dropYn;
+
+                var identVal = "";
+                if(identificationStatus){
+                    if(identificationStatus==[[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS')}]]) {
+                        identVal = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS'))}]];
+                        $("#identificationStatus").val("Identification : "+identVal).css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
+                    } else if(identificationStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REQUEST')}"){
+                        identVal = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}]];
+                        $("#identificationStatus").val("Identification : "+identVal).css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
+                    } else if(identificationStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REVIEW')}") {
+                        identVal = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REVIEW'))}]];
+                        $("#identificationStatus").val("Identification : "+identVal).css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
+                    } else if(identificationStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}") {
+                        identVal = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_CONFIRM'))}]];
+                        $("#identificationStatus").val("Identification : "+identVal).css('background-color','rgb(56, 79, 123)').css('color','rgb(255, 255, 255)');
+                    }
+                } else {
+                    $("#identificationStatus").val("Identification").addClass("btnPG wauto");
+                }
+
+                var verifyVal = "";
+                if(verificaitonStatus){
+                    if(identificationStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}") {
+                        if((identificationStatus != "${ct:getConstDef('CD_DTL_PROJECT_STATUS_COMPLETE')}"
+                                || identificationStatus != "${ct:getConstDef('CD_DTL_PROJECT_STATUS_DROP')}" )
+                            && projectInfo.statusRequestYn == "N"
+                            && verificaitonStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_PROGRESS')}") {
+                            verifyVal = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS'))}]];
+                            $("#verificationStatus").val("Verification : "+verifyVal).css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
+                        } else if(verificaitonStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REQUEST')}") {
+                            verifyVal = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}]];
+                            $("#verificationStatus").val("Verification : "+verifyVal).css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
+                        } else if(verificaitonStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_REVIEW')}") {
+                            verifyVal = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REVIEW'))}]];
+                            $("#verificationStatus").val("Verification : "+verifyVal).css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
+                        } else if(verificaitonStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}") {
+                            verifyVal = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_CONFIRM'))}]];
+                            $("#verificationStatus").val("Verification : "+verifyVal).css('background-color','rgb(56, 79, 123)').css('color','rgb(255, 255, 255)');
+                        }
+                    }
+                } else {
+                    $("#verificationStatus").val("Verification").addClass("btnPG wauto");
+                }
+
+                var distributeVal = "";
+                if(distributionStatus){
+                    if(identificationStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}" && verificaitonStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}") {
+                        if(distributionStatus=="${ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_PROGRESS')}"
+                            && projectInfo.distributeTarget != "NA") {
+                            distributeVal = "${ct:getCodeString(ct:getConstDef('CD_DISTRIBUTE_STATUS'), ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_PROGRESS'))}";
+                            $("#destributionStatus").val("Distribution : "+distributeVal).css('background-color','rgb(157, 165, 184)').css('color','rgb(255, 255, 255)');
+                        } else if(distributionStatus=="${ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_RESERVE')}") {
+                            distributeVal = "${ct:getCodeString(ct:getConstDef('CD_DISTRIBUTE_STATUS'), ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_RESERVE'))}";
+                            $("#destributionStatus").val("Distribution : "+distributeVal).css('background-color','rgb(109, 126, 156)').css('color','rgb(255, 255, 255)');
+                        } else if(distributionStatus=="${ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED')}") {
+                            distributeVal = "${ct:getCodeString(ct:getConstDef('CD_DISTRIBUTE_STATUS'), ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED'))}";
+                            $("#destributionStatus").val("Distribution : "+distributeVal).css('background-color','rgb(56, 79, 123)').css('color','rgb(255, 255, 255)');
+                        } else if(distributionStatus=="${ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_FAILED')}") {
+                            distributeVal = "${ct:getCodeString(ct:getConstDef('CD_DISTRIBUTE_STATUS'), ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_FAILED'))}";
+                            $("#destributionStatus").val("Distribution : " + distributeVal).addClass("btnPG wauto");
+                        }
+                    }
+                } else {
+                    $("#destributionStatus").val("Distribution").addClass("btnPG wauto");
+                }
+
+                // NA 처리
+                if(verificaitonStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_NA')}") {
+                    verifyVal = "${ct:getCodeString(ct:getConstDef('CD_IDENTIFICATION_STATUS'), ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_NA'))}";
+                    $("#verificationStatus").val("Verification : "+verifyVal);
+                }
+
+                if(distributionStatus=="${ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_NA')}") {
+                    distributeVal = "${ct:getCodeString(ct:getConstDef('CD_DISTRIBUTE_STATUS'), ct:getConstDef('CD_DTL_DISTRIBUTE_STATUS_NA'))}";
+                    $("#destributionStatus").val("Distribution : "+distributeVal);
+                }
+
+                // Drop	Project check
+                if(identificationStatus!="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}"
+                    && dropYn == "Y") {
+                    $("#identificationStatus").val("Identification : Drop");
+                    $("#verificationStatus").val("Verification : N/A");
+                    $("#destributionStatus").val("Distribution : N/A");
+                }
+
+                if(identificationStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}"
+                    && verificaitonStatus!="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}"
+                    && dropYn == "Y") {
+                    $("#verificationStatus").val("Verification : Drop");
+                    $("#destributionStatus").val("Distribution : N/A");
+                }
+
+                if(identificationStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}"
+                    && verificaitonStatus=="${ct:getConstDef('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}"
+                    && dropYn == "Y") {
+                    $("#destributionStatus").val("Distribution : Drop");
+                }
+            }
+    </script>
+</th:block>

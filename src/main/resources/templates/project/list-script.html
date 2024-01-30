@@ -1660,8 +1660,8 @@ var fn = {
 		var rlt = division+((userId!="") ? "/"+userId : "");
 		var html  = '<div class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 		html += str;
-		if("Y" != [[${searchBean.viewOnlyFlag}]]) {
-			html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
+		if("Y" != [[${searchBean.viewOnlyFlag}]] && !isReadOnly) {
+			html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 		}
 		html += '</div>';
 		target.append(html);

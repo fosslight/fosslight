@@ -415,6 +415,7 @@ public class ProjectController extends CoTopComponent {
 			if (permissionCheckList.contains(loginUserName())) {
 				permissionFlag = true;
 			}
+			model.addAttribute("isReadOnly", true);
 		}
 		
 		if (project.getPublicYn().equals(CoConstDef.FLAG_NO)

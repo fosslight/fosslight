@@ -27,22 +27,63 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <div class="form-group">
-                                        <label for="licenseNameInput" th:text="#{msg.common.field.licenseName}"></label><span class="text-orange">*</span>
-                                        <input class="form-control autoComLicenseLong" id="licenseNameInput" name="licenseName" th:value="${detail?.licenseName}" type="text" th:disabled="${isReadOnly}"/>
-                                        <span class="retxt text-danger text-sm"></span>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="licenseNameInput" th:text="#{msg.common.field.licenseName}"></label><span class="text-orange">*</span>
+                                                <input class="form-control autoComLicenseLong" id="licenseNameInput" name="licenseName" th:value="${detail?.licenseName}" type="text" th:disabled="${isReadOnly}"/>
+                                                <span class="retxt text-danger text-sm"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="shortIdentifierInput" th:text="#{msg.common.field.SPDX}"></label>
+                                                <input type="text" class="form-control" id="shortIdentifierInput" name="shortIdentifier" th:value="${detail?.shortIdentifier}" th:disabled ="${isReadOnly}">
+                                                <span class="retxt text-danger text-sm"></span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="row form-group">
-                                    	<div class="col-12">
-                                    		<label for="licenseTypeSelect" th:text="#{msg.common.field.licenseType}"></label><span class="text-orange">*</span>
-                                        	<select class="select2" id="licenseType" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
-                                            	<option value="" disabled selected> </option>
-                                            	<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-                                                	<option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
-                                            	</th:block>
-                                       		</select>
-                                    	</div>
-                                        <span class="col-12 retxt text-danger text-sm"></span>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="row form-group">
+                                                <div class="col-12">
+                                                    <label for="licenseTypeSelect" th:text="#{msg.common.field.licenseType}"></label><span class="text-orange">*</span>
+                                                    <select class="select2" id="licenseType" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
+                                                        <option value="" disabled selected> </option>
+                                                        <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                                                            <option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+                                                        </th:block>
+                                                    </select>
+                                                </div>
+                                                <span class="col-12 retxt text-danger text-sm"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group clearfix">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <label th:text="#{msg.common.field.obligation}"></label>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12 ml-3 mt-2">
+                                                            <div class="icheck-primary d-inline mx-3">
+                                                                <input id="obligationNotificationYn" class="oblicationChk"
+                                                                       name="obligationNotificationYn" th:checked="${#strings.equals(detail?.obligationNotificationYn, 'Y')}" type="checkbox"
+                                                                       value="Y" th:disabled="${isReadOnly}">
+                                                                <label class="text-lg-gray" for="obligationNotificationYn" th:text="Notice"></label>
+                                                            </div>
+                                                            <div class="icheck-primary d-inline  mx-3">
+                                                                <input id="obligationDisclosingSrcYn" class="oblicationChk"
+                                                                       name="obligationDisclosingSrcYn" th:checked="${#strings.equals(detail?.obligationDisclosingSrcYn, 'Y')}" type="checkbox"
+                                                                       value="Y" th:disabled="${isReadOnly}">
+                                                                <label class="text-lg-gray" for="obligationDisclosingSrcYn" th:text="'Source Code'"></label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="row form-group">
                                     	<div class="col-12">
@@ -57,48 +98,26 @@
                                     	</div>
                                         <span class="col-12 retxt text-danger text-sm"></span>
                                     </div>
-                                    <div class="form-group clearfix">
-                                        <div class="row">
-                                            <div class="col-2">
-                                                <label th:text="#{msg.common.field.obligation}"></label>
-                                            </div>
-                                            <div class="col-10">
-                                                <div class="icheck-primary d-inline mx-3">
-                                                    <input id="obligationNotificationYn" class="oblicationChk"
-                                                           name="obligationNotificationYn" th:checked="${#strings.equals(detail?.obligationNotificationYn, 'Y')}" type="checkbox"
-                                                           value="Y" th:disabled="${isReadOnly}">
-                                                    <label class="text-lg-gray" for="obligationNotificationYn" th:text="Notice"></label>
-                                                </div>
-                                                <div class="icheck-primary d-inline  mx-3">
-                                                    <input id="obligationDisclosingSrcYn" class="oblicationChk"
-                                                           name="obligationDisclosingSrcYn" th:checked="${#strings.equals(detail?.obligationDisclosingSrcYn, 'Y')}" type="checkbox"
-                                                           value="Y" th:disabled="${isReadOnly}">
-                                                    <label class="text-lg-gray" for="obligationDisclosingSrcYn" th:text="'Source Code'"></label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group tag-form">
+                                                <label th:text="#{msg.common.field.nickname}"></label>
+                                                <div class="input-group" th:unless="${isReadOnly}">
+                                                    <input type="text" class="form-control" id="input_licenseNicknames">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default" id="licenseNicknames" name="addTagButton" type="button" th:text="Add"></button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label for="shortIdentifierInput" th:text="#{msg.common.field.SPDX}"></label>
-                                        <input type="text" class="form-control" id="shortIdentifierInput" name="shortIdentifier" th:value="${detail?.shortIdentifier}" th:disabled ="${isReadOnly}">
-                                        <span class="retxt text-danger text-sm"></span>
-                                    </div>
-                                   	<div class="form-group tag-form">
-                                    	<label th:text="#{msg.common.field.nickname}"></label>
-                                        <div class="input-group" th:unless="${isReadOnly}">
-                                           	<input type="text" class="form-control" id="input_licenseNicknames">
-                                            <div class="input-group-append">
-                                            	<button class="btn btn-default" id="licenseNicknames" name="addTagButton" type="button" th:text="Add"></button>
-                                           	</div>
-                                       	</div>
-                                   	</div>
                                     <div class="row form-group">
-                                    	<div class="col-12">
+                                    	<div class="col-md-12">
                                     		<div class="row multiTxtSet">
-                                    			<div class="col-2" th:each="licenseNickname : ${detail?.licenseNicknames}" th:if="${!#strings.isEmpty(licenseNickname)}">
-                                        			<div class="input-group card-tools">
+                                    			<div class="col-md-2" th:each="licenseNickname : ${detail?.licenseNicknames}" th:if="${!#strings.isEmpty(licenseNickname)}">
+                                        			<div class="form-group mb-0">
                                            				<input class="form-control" type="type" name="licenseNicknames" th:value="${licenseNickname}" th:disabled ="${isReadOnly}" />
-                                            			<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-tool" th:onclick="|fn.removeTag(this)|"><i class="fas fa-times"></i></button>
+                                            			<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-tool xbox" th:onclick="|fn.removeTag(this)|"><i class="fas fa-times"></i></button>
                                         				<span class="retxt text-danger text-sm"></span>
                                         			</div>
                                       			</div>
@@ -134,14 +153,14 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="attributionInput" th:text="#{msg.common.field.attribution}"></label>
-                                        <textarea class="form-control" id="attributionInput" name="attribution" rows="4" th:text="${detail?.attribution}" th:disabled ="${not @CommonFunction.isAdmin()}"></textarea>
+                                        <textarea class="form-control" id="attributionInput" name="attribution" rows="4" th:text="${detail?.attribution}" th:disabled ="${isReadOnly}"></textarea>
                                     </div>
                                     <div class="form-group" th:unless="${isReadOnly}">
                                     	<label for="commentInput" th:text="Comment"></label>
                                       	<textarea class="form-control" id="commentInput" name='commentInput' rows="3" style="height: 800px" th:disabled ="${not @CommonFunction.isAdmin()}"></textarea>
                                   	</div>
                                 </div>
-                                <div class="card-footer clearfix">
+                                <div class="card-footer clearfix" th:unless="${isReadOnly}">
                                 	<a class="btn btn-secondary float-left" href="javascript:void(0)" id="delete" th:text="Delete"></a>
                                     <a class="btn btn-teal-01 float-right" href="javascript:void(0)" id="save" th:text="Save"></a>
                               	</div>

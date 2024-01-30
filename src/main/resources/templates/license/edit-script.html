@@ -37,10 +37,10 @@
                 });
 
                 $("#licenseNicknames").on('click', function(){
-                	let licenseNicknameHtml = '	<div class="col-2" style="margin-bottom: 0.5rem;">';
-            		licenseNicknameHtml += '		<div class="input-group card-tools">';
+                	let licenseNicknameHtml = '	<div class="col-md-2" style="margin-bottom: 0.5rem;">';
+            		licenseNicknameHtml += '		<div class="form-group mb-0" >';
             		licenseNicknameHtml += '			<input class="form-control" type="type" name="licenseNicknames" value="' + $("#input_licenseNicknames").val() + '" />';
-            		licenseNicknameHtml += '			<button type="button" class="btn btn-tool" onclick="fn.removeTag(this)"><i class="fas fa-times"></i></button>';
+            		licenseNicknameHtml += '			<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this)"><i class="fas fa-times"></i></button>';
             		licenseNicknameHtml += '			<span class="retxt"></span>';
             		licenseNicknameHtml += '		</div>';
             		licenseNicknameHtml += '	</div>';
@@ -50,9 +50,9 @@
                 });
 
                 $("#webpageAdd").on('click', function(){
-                	let webpageHtml = '		<div class="input-group card-tools" style="margin-bottom: 0.5rem;">';
+                	let webpageHtml = '		<div class="form-group" style="margin-bottom: 0.5rem;">';
                 	webpageHtml 	+= '		<input class="form-control" type="type" name="webpages" value="' + $("#input_webpages").val() + '" />';
-                	webpageHtml 	+= '		<button type="button" class="btn btn-tool" onclick="fn.removeTag(this)"><i class="fas fa-times"></i></button>';
+                	webpageHtml 	+= '		<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this)"><i class="fas fa-times"></i></button>';
                 	webpageHtml 	+= '		<span class="retxt"></span>';
                 	webpageHtml 	+= '	</div>';
             		

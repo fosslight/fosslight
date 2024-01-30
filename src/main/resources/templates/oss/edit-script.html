@@ -7,7 +7,6 @@
 	var temp={
 		obligation:''
 	};
-	
 	var licenseTags=[];
 	var commentTemp = '';
 	var gLicenseData = new Array();
@@ -18,13 +17,8 @@
 	var commentsParam = {referenceId : [[${ossId}]], referenceDiv : 'oss'};
     var ossId = [[${ossId}]] || null;
     var isReadOnly = [[${isReadOnly}]] || null;
-
     var downloadLocationList = [[${downloadLocationList}]];
     var ossNickList = [[${ossNickList}]];
-
-    console.log(downloadLocationList);
-    console.log(ossNickList);
-
 	//데이터 객체
 	var data = {
 		detail : [[${detail}]],
@@ -74,9 +68,9 @@
 							}
 
 							let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-							nickHtml 		+= 		'<div class="input-group card-tools">';
+							nickHtml 		+= 		'<div class="form-group">';
 							nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
-							nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+							nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 							nickHtml 		+=		'</div>';
 							nickHtml 		+=		'<span class="retxt"></span>';
 							nickHtml 		+= 	'</div>';
@@ -91,10 +85,10 @@
 								$('.multiDownloadLocationSet span:first').remove();
 							}
 							
-							let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
-							downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
+							let downloadLocationHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
+							downloadLocationHtml 		+= 		'<div class="form-group">';
 							downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
-							downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+							downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 							downloadLocationHtml 		+=		'</div>';
 							downloadLocationHtml 		+=		'<span class="urltxt"></span>';
 							downloadLocationHtml 		+=		'<span class="retxt"></span>';
@@ -169,13 +163,13 @@
 							if (index == 0) {
 								$('.multiDownloadLocationSet').empty();
 							}
-							let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
-							downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
+							let downloadLocationHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
+							downloadLocationHtml 		+= 		'<div class="form-group mb-0">';
                             if(isReadOnly == 'true' || isReadOnly) {
                                 downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/ disabled>';
                             } else {
                                 downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/>';
-                                downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                                downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool mbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
                             }
 							downloadLocationHtml 		+=		'</div>';
 							downloadLocationHtml 		+=		'<span class="urltxt"></span>';
@@ -191,13 +185,13 @@
 							if (index == 0){
 								$('.detectedLicensesDiv').empty();
 							}
-							let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-							detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
+							let detectedLicenseHtml 	= 	'<div class="col-md-3" style="margin-top: 5px;">';
+							detectedLicenseHtml 		+= 		'<div class="form-group mb-0">';
                             if(isReadOnly == 'true' || isReadOnly) {
                                 detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'"/ disabled>';
                             } else {
                                 detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+detectLicense+'"/>';
-                                detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                                detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
                             }
 							detectedLicenseHtml 		+=		'</div>';
 							detectedLicenseHtml 		+=		'<span class="retxt"></span>';
@@ -279,9 +273,9 @@
 			//닉네임 인풋 추가
 			$('#nickAdd').on('click', function(){
 				let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-				nickHtml 		+= 		'<div class="input-group card-tools">';
+				nickHtml 		+= 		'<div class="form-group">';
 				nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+$("#input_ossNicknames").val()+'"/>';
-				nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 				nickHtml 		+=		'</div>';
 				nickHtml 		+=		'<span class="retxt"></span>';
 				nickHtml 		+= 	'</div>';
@@ -291,10 +285,15 @@
 
 			//Detect License Input 추가
 			$('#detectedLicenseAdd').on('click', function(){
-				let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-				detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
-				detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+$("#input_detectedLicense").val()+'" readonly/>';
-				detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				let detectedLicenseHtml 	= 	'<div class="col-md-3" style="margin-top: 5px;">';
+				detectedLicenseHtml 		+= 		'<div class="form-group mb-0">';
+
+                if(isReadOnly == 'true' || isReadOnly) {
+                    detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+$("#input_detectedLicense").val()+'" disabled/>';
+                } else {
+                    detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+$("#input_detectedLicense").val()+'"/>';
+                    detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                }
 				detectedLicenseHtml 		+=		'</div>';
 				detectedLicenseHtml 		+=		'<span class="retxt"></span>';
 				detectedLicenseHtml 		+= 	'</div>';
@@ -307,10 +306,14 @@
 			$('#downloadLocationAdd').on('click', function(){
 				var downloadLocation = $("#input_downloadLocations").val();
 				
-				let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
-				downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
-				downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
-				downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				let downloadLocationHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
+				downloadLocationHtml 		+= 		'<div class="form-group mb-0">';
+                if(isReadOnly == 'true' || isReadOnly) {
+                    downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);" disabled>';
+                } else {
+                    downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+                    downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                }
 				downloadLocationHtml 		+=		'</div>';
 				downloadLocationHtml 		+=		'<span class="urltxt"></span>';
 				downloadLocationHtml 		+=		'<span class="retxt"></span>';
@@ -549,7 +552,7 @@
 										if(data.isValid == 'true') {
 											var _popup = null;
 											var _encUrl = "ossName="+fn.replaceGetParamChar(encodeURIComponent(ossName))+"&ossVersion="+fn.replaceGetParamChar(ossVersion)+"&ossId="+ossId;
-											
+
 											if(_popup == null || _popup.closed){
 												_popup = window.open("/oss/osssyncpopup?"+_encUrl, "ossSyncViewPopup_"+ossName, "width=1000, height=700, toolbar=no, location=no, left=100, top=100");
 
@@ -574,9 +577,9 @@
 					});
 				}
 			});
-		}			
+		}
 	};
-	
+
 	//커스터마이징 자동완성 셀렉트
 	function setCustomAutoComplete(div){
 		var selected = false;
@@ -591,7 +594,7 @@
 						var licenseName = ui.item.shortIdentifier.length > 0 ? ui.item.shortIdentifier : ui.item.licenseName;
 						$('#licenseName').val(licenseName);
 						showLicenseText(licenseName);
-						
+
 						return false;
 					}
 				},
@@ -796,40 +799,52 @@
 		}
 		
 		// 라이센스 그리드
+        var colModelArr = [];
+        var colModelObj = {name:'no', index: 'ossLicenseIdx', width:30, hidden:true};
+        colModelArr.push(colModelObj);
+        colModelObj = {name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true};
+        colModelArr.push(colModelObj);
+        if(isReadOnly == 'true' || isReadOnly) {
+            colModelObj = {name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false};
+            colModelArr.push(colModelObj);
+            colModelObj = {name:'licenseNameEx',index:'licenseNameEx', width:150};
+            colModelArr.push(colModelObj);
+            colModelObj = {name:'ossCopyright',index:'ossCopyright', width:250};
+            colModelArr.push(colModelObj);
+        } else {
+            colModelObj = {name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:changeLicenseType}]}};
+            colModelArr.push(colModelObj);
+            colModelObj = {name:'licenseNameEx',index:'licenseNameEx', width:150, editable:true, editoptions: {
+                    dataInit: function (elem) {
+                        $(elem).focus(function () {
+                            setCustomAutoComplete('multi');
+                        })
+                    }
+                }
+            };
+            colModelArr.push(colModelObj);
+            colModelObj = {name:'ossCopyright',index:'ossCopyright', width:250, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}};
+            colModelArr.push(colModelObj);
+        }
+        colModelObj = {name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons};
+        colModelArr.push(colModelObj);
+        colModelObj = {name:'licenseName',index:'licenseName', width:50, hidden:true};
+        colModelArr.push(colModelObj);
+        colModelObj = {name:'licenseId',index:'licenseId', width:50, hidden:true};
+        colModelArr.push(colModelObj);
+        colModelObj = {name:'licenseNameEx',index:'licenseNameOrg', width:50,hidden:true};
+        colModelArr.push(colModelObj);
+        colModelObj = {name:'licenseType',index:'licenseType', width:50,hidden:true};
+        colModelArr.push(colModelObj);
+        colModelObj = {name:'obligationChecks',index:'obligationChecks', width:50,hidden:true};
+        colModelArr.push(colModelObj);
+
 		var _licenseChoice = $('#_licenseChoice');
 		_licenseChoice.jqGrid({
 			datatype: 'local',
 			data:list,
 			colNames:['','','','License', 'Copyright', '','','','','license Type', 'obligationChecks'],
-			colModel:[
-				{name:'no', index: 'ossLicenseIdx', width:30, hidden:true},
-				{name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true},
-				{name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:changeLicenseType}]}},
-				{name:'licenseNameEx',index:'licenseNameEx', width:150, editable:true, editoptions: {
-                        dataInit: function (elem) {
-                            $(elem).focus(function () {
-                                setCustomAutoComplete('multi');
-                            })
-                        }
-                    }
-                },
-				{name:'ossCopyright',index:'ossCopyright', width:250, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}},
-				{name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons},
-				{name:'licenseName',index:'licenseName', width:50, hidden:true},
-				{name:'licenseId',index:'licenseId', width:50, hidden:true},
-				{name:'licenseNameEx',index:'licenseNameOrg', width:50,hidden:true},
-				{name:'licenseType',index:'licenseType', width:50,hidden:true},
-				{name:'obligationChecks',index:'obligationChecks', width:50,hidden:true}
-			],
-			autoencode: true,
-			editurl:'clientArray',
-			pager: '#_licenseChoicePager',
-			autowidth: true,
-			height: 'auto',
-			gridview: true,
-			rownumbers: true,
-			viewrecords: true,
-			loadonce:true,
+			colModel: colModelArr,
 			onSelectRow: function(rowid){
 				// 로울 클릭시 그리드 에러 메세지 삭제 
 				$("div.retxt._licenseChoice_"+rowid).remove();
@@ -1251,11 +1266,11 @@
 						result = '<span></span>';
 						break;
 					case 2:
-						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i> (Notice)';
+						result = '<i class="far fa-file-alt fa-1-5x mr-1" title="Notice"></i>';
 						$('input[name=obligationType]').val("10");
 						break;
 					case 3:
-						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i> (Notice)  <i class="far fa-file-code fa-1-5x" title="Source Code"></i> (Source Code)';
+						result = '<i class="far fa-file-alt fa-1-5x mr-1" title="Notice"></i><i class="far fa-file-code fa-1-5x ml-3 mr-1" title="Source Code"></i>';
 						$('input[name=obligationType]').val("11");
 						break;
 				}
@@ -1268,11 +1283,11 @@
 						result = '<span></span>';
 						break;
 					case 2:
-						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i> (Notice)';
+						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i>';
 						$('input[name=obligationType]').val("10");
 						break;
 					case 3:
-						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i> (Notice)  <i class="far fa-file-code fa-1-5x" title="Source Code"></i> (Source Code)';
+						result = '<i class="far fa-file-alt fa-1-5x mr-2" title="Notice"></i><i class="far fa-file-code fa-1-5x" title="Source Code"></i>';
 						$('input[name=obligationType]').val("11");
 						break;
 				}
@@ -1759,9 +1774,9 @@
 				for (var k in json.resultData.addNickArr) {
                     console.log(json.resultData.addNickArr[k])
 					let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-					nickHtml 		+= 		'<div class="input-group card-tools">';
+					nickHtml 		+= 		'<div class="form-group">';
 					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+json.resultData.addNickArr[k]+'"/>';
-					nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+					nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 					nickHtml 		+=		'</div>';
 					nickHtml 		+=		'<span class="retxt"></span>';
 					nickHtml 		+= 	'</div>';

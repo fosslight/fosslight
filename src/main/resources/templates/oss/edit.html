@@ -35,42 +35,39 @@
                     			<input type="hidden" name="ossCopyFlag" th:value="N" />
                                 <div class="card-body">
                                     <div class="row form-group">
-                                    	<div class="col-12">
+                                    	<div class="col-md-6 required">
                                     		<label th:text="#{msg.common.field.OSS.name}"></label><span class="text-orange">*</span>
                                         	<input class="form-control autoComOss" name="ossName" th:value="${detail?.ossName}" type="text" th:disabled="${isReadOnly}"/>
-                                    	</div>
-                                    	<div class="col-12 required">
-                                    		<span class="retxt text-danger text-sm"></span>
-                                    	</div>
-                                    </div>
-                                    <div class="row form-group">
-                                    	<div class="col-12">
-                                    		<label th:text="#{msg.common.field.nickname}"></label>
-                                      		<div class="input-group" th:unless="${isReadOnly}">
-                                        		<input class="form-control" id="input_ossNicknames" th:onblur="fn.checkNickName(this)" type="text">
-                                           		<div class="input-group-append">
-                                            		<button class="btn btn-default" id="nickAdd" name="addTagButton" type="button" th:text="Add"></button>
-                                          		</div>
-                                      		</div>
-                                    	</div>
-                                    	<div class="col-12">
-                                    		<div class="row multiTxtSet"></div>
-                                    	</div>
-                                    </div>
+											<span class="retxt text-danger text-sm"></span>
+										</div>
+										<div class="col-md-6 required">
+											<label for="ossVersion" th:text="#{msg.common.field.OSS.version}"></label><span class="text-orange">*</span>
+											<input class="form-control" id="ossVersion" name="ossVersion" th:value="${detail?.ossVersion}" type="text" th:disabled="${isReadOnly}"/>
+											<span class="retxt text-danger text-sm"></span>
+										</div>
+									</div>
+									<div class="row form-group">
+										<div class="col-md-6 required">
+											<label th:text="#{msg.common.field.nickname}"></label>
+											<div class="input-group" th:unless="${isReadOnly}">
+												<input class="form-control" id="input_ossNicknames" th:onblur="|fn.checkNickName(this)|" type="text">
+												<div class="input-group-append">
+													<button class="btn btn-default" id="nickAdd" name="addTagButton" type="button" th:text="Add"></button>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-12">
+											<div class="row multiTxtSet"></div>
+										</div>
+									</div>
                                     <div class="row form-group">
                                         <div class="col-md-2">
                                             <label th:text="#{msg.common.field.OSS.type}"></label>
                                         </div>
                                         <div class="col-10" id="ossTypeDiv"></div>
-                                    </div>
-                                    <div class="row form-group">
-                                    	<div class="col-12">
-                                    		<label for="ossVersion" th:text="#{msg.common.field.OSS.version}"></label><span class="text-orange">*</span>
-                                        	<input class="form-control" id="ossVersion" name="ossVersion" th:value="${detail?.ossVersion}" type="text" th:disabled="${isReadOnly}"/>
-                                    	</div>
-                                    	<div class="col-12 required">
-                                    		<span class="retxt text-danger text-sm"></span>
-                                    	</div>
+										<div class="col-12 required">
+											<span class="retxt text-danger text-sm"></span>
+										</div>
                                     </div>
                                     <div class="form-group required">
                                         <label th:text="#{msg.common.field.declaredLicense}"></label><span class="text-orange">*</span>
@@ -85,8 +82,26 @@
                                         </div>
                                         <div id="disp_licenseText" style="display: none;"></div>
                                     </div>
+									<div class="row">
+										<div class="col-md-6">
+											<div class="form-group row">
+												<div class="col-md-4">
+													<label th:text="#{msg.common.field.licenseType}"></label>
+												</div>
+												<div id="ltDiv" class="col-md-1"></div>
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group row">
+												<div class="col-md-4">
+													<label th:text="#{msg.common.field.obligation}"></label>
+												</div>
+												<div id="obDiv"></div>
+											</div>
+										</div>
+									</div>
                                     <div class="row form-group" name="append-stag-form">
-                                    	<div class="col-12">
+                                    	<div class="col-md-6">
                                     		<label th:text="#{msg.common.field.detectedLicense}"></label>
                                         	<div class="input-group" th:unless="${isReadOnly}">
                                         		<input class="form-control autoComOssLicense" id="input_detectedLicense" type="text"/>
@@ -95,28 +110,13 @@
                                             	</div>
                                      		</div>
                                     	</div>
-                                     	<div class="col-12">
+                                     	<div class="col-md-12">
                                     		<div class="row detectedLicensesDiv"></div>
                                     	</div>
                                     </div>
-                                    <div class="form-group">
-                                        <label th:text="#{msg.common.field.Copyright}"></label>
-                                        <textarea class="form-control" name="copyright" rows="5" th:text="${detail?.copyright}" th:disabled="${isReadOnly}"/></textarea>
-                                    </div>
-                                    <div class="form-group row">
-                                    	<div class="col-md-2">
-                                    		<label th:text="#{msg.common.field.licenseType}"></label>
-                                    	</div>
-                                    	<div id="ltDiv" class="col-1"></div>
-                                    </div>
-                                    <div class="form-group row">
-                                        <div class="col-md-2">
-                                            <label th:text="#{msg.common.field.obligation}"></label>
-                                        </div>
-                                        <div id="obDiv" class="col-1"></div>
-                                    </div>
+
                                     <div class="row form-group">
-                                    	<div class="col-12">
+                                    	<div class="col-md-6">
                                     		<label th:text="#{msg.common.field.downloadLocation}"></label>
                                         	<div class="input-group" th:unless="${isReadOnly}">
                                         		<input class="form-control" id="input_downloadLocations" type="text"/>
@@ -125,19 +125,24 @@
                                             	</div>
                                      		</div>
                                     	</div>
-                                    	<div class="col-12 multiDownloadLocationSet">
-                                    	</div>
+										<div class="col-md-12">
+											<div class="row multiDownloadLocationSet"></div>
+										</div>
                                     </div>
                                     <div class="row form-group">
-                                    	<div class="col-12">
+                                    	<div class="col-md-6">
                                     		<label th:text="#{msg.common.field.homepage}"></label>
                                         	<input class="form-control" name="homepage" th:value="${detail?.homepage}" placeholder="http://" type="text" th:disabled="${isReadOnly}"/>
                                     	</div>
-                                        <div class="col-12 required">
+                                        <div class="col-md-12 required">
                                         	<span class="urltxt"></span>
                                         	<span class="retxt"></span>
                                     	</div>
                                     </div>
+									<div class="form-group">
+										<label th:text="#{msg.common.field.Copyright}"></label>
+										<textarea class="form-control" name="copyright" rows="5" th:text="${detail?.copyright}" th:disabled="${isReadOnly}"/></textarea>
+									</div>
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.summaryDescription}"></label>
                                         <textarea class="form-control" rows="5" th:text="${summaryDescription}" th:disabled="${isReadOnly}"/></textarea>
@@ -170,7 +175,7 @@
                                   	</div>
                                 </div>
                                 </form>
-                                <div class="card-footer clearfix">
+                                <div class="card-footer clearfix" th:unless="${isReadOnly}">
                                 	<button th:if="${ossId != null}" type="button" class="btn btn-secondary float-left" id="delete" th:text="Delete"></button>
                                 	<button type="button" class="btn btn-teal-01 float-right mx-1" id="save" th:text="Save"></button>
                                    	<button th:if="${ossId != null}" type="button" class="btn btn-default float-right mx-1" id="copy" th:text="Copy"></button>

@@ -14,6 +14,7 @@ const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConst
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var changeWatcherArr = [];
 var role = [[${#authentication.authorities[0].authority}]];
+var isReadOnly = [[${isReadOnly}]];
 
 $(document).ready(function () {
 	'use strict';
@@ -535,8 +536,8 @@ var fn = {
 		var rlt = division+((userId!="") ? "/"+userId : "");
 		var html  = '<span class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 		html += str;
-		if ("Y" != [[${searchBean.viewOnlyFlag}]]) {
-			html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
+		if ("Y" != [[${searchBean.viewOnlyFlag}]] && !isReadOnly) {
+			html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 		}
 		html += '</div>';
 		target.append(html);
