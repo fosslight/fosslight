@@ -1288,15 +1288,16 @@ var fn = {
 		});
 	},
 	disabledBtn : function () {
-		var tabContentButtons = $(".tabContent input[type=button]");
+		var tabContentButtons = $(".tabButtonArea input[type=button]");
 		var watcherButtons = $(".tbws1.w1025.mt10 input[type=button]");
 		tabContentButtons.push(watcherButtons);
-		
+
 		$.each(tabContentButtons, function(index, obj){
-			var value = $(obj).attr("value");
-			if("Export" != value){
-				$(obj).hide();
-			}
+            // var value = $(obj).attr("value");
+		    // if("Export" != value){
+			// 	$(obj).hide();
+			// }
+            $(obj).hide();
 		});
 	},
 	showUnconfirmedLicense: function() {
@@ -1331,7 +1332,13 @@ var data = {
 			$('input[name=prjId]').val(data.detail.prjId);
 			$('input[name=prjName]').val(data.detail.prjName);
 			$('input[name=prjVersion]').val(data.detail.prjVersion);
-			
+
+            console.log("::::: " + data.detail.watcherList.length);
+
+            if(data.detail.watcherList.length > 0) {
+                $(".tbws1.w1025.mt10").removeClass("collapsed-card")
+            }
+
 			data.detail.watcherList.forEach(function(watcher, index, obj){
 				var deptUseYn = watcher.deptUseYn || "Y";
 				var userUseYn = watcher.userUseYn || "Y";
@@ -2563,6 +2570,7 @@ var src_grid = {
 			cellsubmit : 'clientArray',
 			ignoreCase: true,
 			multiselect: true,
+            multiselectWidth: 30,
 		    onSortCol: function (index, columnIndex, sortOrder) {
 		    	isSort = true;
 		    },

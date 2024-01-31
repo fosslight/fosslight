@@ -37,7 +37,7 @@
                                     		</div>
                                			</div>
                                 	</form>
-                                	<div class="row">
+                                	<div class="row w1025">
                                 		<div class="col-12" style="padding:0 1.75rem 1rem 1rem;">
                                 			<div class="row float-right">
                                 				<button th:if="${project.prjId != null}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="cancel" th:text="Cancel"></button>
@@ -48,7 +48,7 @@
                                 </div>
                             </div>
         
-                            <div class="card mb-0 collapsed-card">
+                            <div class="card mb-0 collapsed-card tbws1 w1025 mt10">
                                 <div class="card-header border-0">
                                     <label class="mb-0" th:text="#{msg.common.field.watcher}"></label>
                                     <div class="card-tools">
@@ -71,7 +71,7 @@
                                             </select>
                                         </div>
                                         <div class="col-1">
-                                            <button id="addWatcher" type="button" class="btn btn-default" th:text="Add"></button>
+                                            <input id="addWatcher" type="button" class="btn btn-default" th:value="|Add|"></input>
                                         </div>
                                     </div>
                                     <div class="row my-1">
@@ -99,7 +99,7 @@
                                             </th:block>
                                         </div>
                                         <div class="col-1">
-                                            <button id="addEmail" type="button" class="btn btn btn-default" th:text="'Add'"></button>
+                                            <input id="addEmail" type="button" class="btn btn btn-default" th:value="|Add|"></input>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -115,7 +115,7 @@
                                             <input type="text" class="form-control" id="listId" name="listId" placeholder="Input ID you want to copy">
                                         </div>
                                         <div class="col-1">
-                                            <button id="addList" type="button" class="btn btn-default" th:text="Add"></button>
+                                            <input id="addList" type="button" class="btn btn-default" th:value="|Add|"></input>
                                         </div>
                                     </div>
                                     <div class="form-group submit-form mt-2">
@@ -205,7 +205,7 @@
                                                             <div class="input-group input-group-md">
                                                                 <input type="text" class="form-control" id="sendWgetUrl" name="sendWgetUrl">
                                                                 <span class="input-group-append">
-                                                                    <button type="button" class="btn btn-primary btn-flat" th:onclick="|src_fn.uploadOSSByUrl()|" th:text="send"></button>
+                                                                    <input type="button" class="btn btn-primary btn-flat" th:onclick="|src_fn.uploadOSSByUrl()|" value="send"></input>
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -333,84 +333,74 @@
                                         </div>
                                         </form>
                                     </div>
-                                    <div class="card card-widget bg-ivory mt-1">
-                                    	<div class="card-body">
-                                    		<div class="row mt-12">
-                                                <div class="col-md-12">
-                                                    <div class="row">
-                                                        <div class="col-md-1 mx-0">
-                                                            <button type="button" id="noticePreview" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="Preview"></button>
-                                                        </div>
-                                                        <div class="col-md-2 mx-0">
-                                                            <select class="custom-select rounded-0" id="docType" name="docType">
-                                                                <option th:value="noticeDownload" th:text="'Default (html)'"></option>
-                                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}" 
-                                                                		value="noticeTextDownload" th:text="'Default (text)'"></option>
-                                                                <option value="noticeSimpleDownload" th:text="'Simple (html)'"></option>
-                                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}" 
-                                                                		value="noticeTextSimpleDownload" th:text="'Simple (text)'"></option>
-                                                            <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) == 'Y'}">
-                                                               	<option value="spdxSpreadSheet" th:text="'SPDX (spreadsheet)'"></option>
-                                                                <option value="spdxRdf" th:text="'SPDX (RDF)'"></option>
-																<option value="spdxTag" th:text="'SPDX (TAG)'"></option>
-																<option value="spdxJson" th:text="'SPDX (JSON)'"></option>
-																<option value="spdxYaml" th:text="'SPDX (YAML)'"></option>
-                                                     		</th:block>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-1 mx-0">
-                                                            <button type="button" id="packageDocDownload" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="download"></button>
-                                                        </div>
-                                                        <div class="col-md-2" th:if="${isProgOrConfStat}">
-                                                            <div class="form-check float-right mt-1">
-                                                                <input type="checkbox" class="form-check-input" id="chkUseCustomNotice" th:checked="${project.useCustomNoticeYn == 'Y'} ? 'checked'">
-                                                                <label class="form-check-label" for="chkUseCustomNotice" th:text="'Use the html editor'"></label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-1" th:if="${isProgOrConfStat}">
-                                                            <button type="button" id="noticeEditor" class="btn btn-block btn-default btn-xm" th:text="Edit" th:disabled="${project.useCustomNoticeYn != 'Y'} ? 'disabled'"></button>
-                                                        </div>
-                                                    </div>
-                                                </div>
+
+                                    <div class="row tabButtonArea">
+                                        <div class="col-md-5">
+                                            <input class="btn btn-light-gray btn-xm width-8rem" type="button" id="noticePreview" value="Preview" />
+                                            <select class="custom-select rounded-0 mx-2" id="docType" name="docType" style="width: 300px">
+                                                <option th:value="noticeDownload" th:text="'Default (html)'"></option>
+                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
+                                                        value="noticeTextDownload" th:text="'Default (text)'"></option>
+                                                <option value="noticeSimpleDownload" th:text="'Simple (html)'"></option>
+                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
+                                                        value="noticeTextSimpleDownload" th:text="'Simple (text)'"></option>
+                                            <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) == 'Y'}">
+                                                <option value="spdxSpreadSheet" th:text="'SPDX (spreadsheet)'"></option>
+                                                <option value="spdxRdf" th:text="'SPDX (RDF)'"></option>
+                                                <option value="spdxTag" th:text="'SPDX (TAG)'"></option>
+                                                <option value="spdxJson" th:text="'SPDX (JSON)'"></option>
+                                                <option value="spdxYaml" th:text="'SPDX (YAML)'"></option>
+                                            </th:block>
+                                            </select>
+                                            <input class="btn btn-light-gray btn-xm width-8rem" type="button" id="packageDocDownload" value="download" />
+                                        </div>
+                                        <div class="col-md-2" th:if="${isProgOrConfStat}">
+                                            <div class="form-check float-right mt-1">
+                                                <input type="checkbox" class="form-check-input" id="chkUseCustomNotice" th:checked="${project.useCustomNoticeYn == 'Y'} ? 'checked'">
+                                                <label class="form-check-label" for="chkUseCustomNotice" th:text="'Use the html editor'"></label>
                                             </div>
-                                    	</div>
+                                        </div>
+                                        <div class="col-md-1" th:if="${isProgOrConfStat}">
+                                            <input class="btn btn-block btn-default btn-xm" type="button" id="noticeEditor" value="Edit" th:disabled="${project.useCustomNoticeYn != 'Y'} ? 'disabled'"></input>
+                                        </div>
+                                    </div>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div name="gridArea" id="gridAreaOssList">
-                        <div class="row my-3">
+                <div class="container-fluid">
+                    <div class="tabButtonArea" name="gridArea" id="gridAreaOssList">
+                        <div class="row mt-3">
                             <div class="col-md-12">
-                            	<div class="row float-left">
-                            		<button type="button" id="delete" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 selfCheckDelete" value="Delete" th:text="Delete"></button>
-                            	</div>
+                                <div class="row float-left">
+                                    <input type="button" id="delete" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 selfCheckDelete" value="Delete"></input>
+                                </div>
                                 <div class="row float-right">
                                     <div class="btn-group mr-xm">
                                         <button type="button" class="btn btn-yellow-04 btn-sm px-3">Export</button>
-                                        <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                        <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon mr-xm" data-toggle="dropdown">
                                             <span class="sr-only">Toggle Dropdown</span>
                                         </button>
                                         <div class="dropdown-menu" role="menu"  th:onclick="|fn.selectDownloadFile()|">
-                                            <a class="dropdown-item" id="report_sub" style="curosr: pointer;" th:text="'FOSSLight Report (Spreadsheet)'"></a>
-                                            <a class="dropdown-item" id="YAML" style="curosr: pointer;" th:text="'FOSSLight Report (YAML)'"></a>
-                                            <a class="dropdown-item" id="Spreadsheet_sub" style="curosr: pointer;" th:text="'SPDX (Spreadsheet)'"></a>
-                                            <a class="dropdown-item" id="RDF_sub" style="curosr: pointer;" th:text="'SPDX (RDF)'"></a>
-                                            <a class="dropdown-item" id="TAG_sub" style="curosr: pointer;" th:text="'SPDX (TAG)'"></a>
-                                            <a class="dropdown-item" id="JSON_sub" style="curosr: pointer;" th:text="'SPDX (JSON)'"></a>
-                                            <a class="dropdown-item" id="YAML_sub" style="curosr: pointer;" th:text="'SPDX (YAML)'"></a>
+                                            <a class="dropdown-item" id="report_sub" style="cursor: pointer;" th:text="'FOSSLight Report (Spreadsheet)'"></a>
+                                            <a class="dropdown-item" id="YAML" style="cursor: pointer;" th:text="'FOSSLight Report (YAML)'"></a>
+                                            <a class="dropdown-item" id="Spreadsheet_sub" style="cursor: pointer;" th:text="'SPDX (Spreadsheet)'"></a>
+                                            <a class="dropdown-item" id="RDF_sub" style="cursor: pointer;" th:text="'SPDX (RDF)'"></a>
+                                            <a class="dropdown-item" id="TAG_sub" style="cursor: pointer;" th:text="'SPDX (TAG)'"></a>
+                                            <a class="dropdown-item" id="JSON_sub" style="cursor: pointer;" th:text="'SPDX (JSON)'"></a>
+                                            <a class="dropdown-item" id="YAML_sub" style="cursor: pointer;" th:text="'SPDX (YAML)'"></a>
                                         </div>
+                                        <input type="button" class="btn btn-yellow-04 btn-sm width-7rem mr-xm px-3" th:onclick="fn.bulkEdit()" value="Bulk Edit"></input>
+                                        <input type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3" th:onclick="src_fn.CheckOssViewPage()" value="Check OSS Name"></input>
+                                        <input type="button" class="btn btn-yellow-04 btn-sm width-8rem mr-xm px-3" th:onclick="src_fn.CheckOssLicenseViewPage()" value="Check License"></input>
+                                        <input type="button" id="srcResetUp" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" value="Reset"></input>
+                                        <input type="button" id="srcSaveUp" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" value="Save"></input>
                                     </div>
-                                    <button type="button" class="btn btn-yellow-04 btn-sm width-7rem mr-xm px-3" th:onclick="fn.bulkEdit()" th:text="'Bulk Edit'"></button>
-                                    <button type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3" th:onclick="src_fn.CheckOssViewPage()" th:text="'Check OSS Name'"></button>
-                                    <button type="button" class="btn btn-yellow-04 btn-sm width-8rem mr-xm px-3" th:onclick="src_fn.CheckOssLicenseViewPage()" th:text="'Check License'"></button>
-                                    <button type="button" id="srcResetUp" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Reset"></button>
-                                    <button type="button" id="srcSaveUp" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:text="Save"></button>
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <div class="row">
+                            <div class="row mt-2">
                                 <div class="col-sm-12 outerJqGridSet">
                                     <table id="srcList"><tr><td></td></tr></table>
                                     <div id="srcPager"></div>
