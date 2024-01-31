@@ -60,13 +60,20 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="row" th:if="${isReadOnly}">
-                                    <label for="inputName" th:text="#{msg.common.field.project.status}"></label>
-
-                                        <div>
-                                            <input type="button" id="identificationStatus" class="btn-primary"><input type="button" id="verificationStatus" class="w150 mr5"><input type="button" id="destributionStatus" class="w150 mr5"><span id="downloadBtn"></span>
+                                <div class="row form-group" th:if="${isReadOnly}">
+                                    <div class="col-md-12">
+                                        <label th:text="#{msg.common.field.project.status}"></label>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="btn-group ml-2">
+                                                    <button type="button" id="identificationStatus" class="btn text-sm btn-default width-14rem"></button>
+                                                    <button type="button" id="verificationStatus" class="btn text-sm btn-default width-14rem"></button>
+<!--                                                    <button type="button" id="destributionStatus" class="btn text-sm btn-default width-14rem"></button>-->
+                                                    <span id="downloadBtn"></span>
+                                                </div>
+                                            </div>
                                         </div>
-
+                                    </div>
                                 </div>
                                 <div class="row" th:if="${project.viewOnlyFlag != 'Y'}">
                                     <div class="col-md-12">
@@ -106,7 +113,7 @@
                                             </select>
                                             <div class="row mt-2">
                                                 <p class="text-primary text-sm mx-3" th:text="'Network service only?'"></p>
-                                                <div class="form-group clearfix mb-0 ml-">
+                                                <div class="form-group clearfix">
                                                     <div class="icheck-primary d-inline">
                                                         <input type="radio" id="networkServerType_Y" name="networkServerType" value="Y" th:checked="${project.networkServerType != null && #strings.equals(project.networkServerType, 'Y')} ? 'checked'" th:disabled="${isReadOnly}"/>
                                                         <label for="networkServerType_Y" th:text="Yes"></label>
@@ -279,9 +286,7 @@
             <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
         </div>
     </div>
-    
     <th:block th:replace="project/view/requestToOpenView"></th:block>
     <th:block th:replace="project/view/copyConfirmView"></th:block>
-	
 </body>
 </html>

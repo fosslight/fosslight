@@ -35,19 +35,32 @@
                     			<input type="hidden" name="ossCopyFlag" th:value="N" />
                                 <div class="card-body">
                                     <div class="row form-group">
-                                    	<div class="col-md-6 required">
-                                    		<label th:text="#{msg.common.field.OSS.name}"></label><span class="text-orange">*</span>
-                                        	<input class="form-control autoComOss" name="ossName" th:value="${detail?.ossName}" type="text" th:disabled="${isReadOnly}"/>
-											<span class="retxt text-danger text-sm"></span>
+                                    	<div class="col-md-6">
+											<div class="row form-group">
+												<div class="col-md-12 required">
+													<label th:text="#{msg.common.field.OSS.name}"></label><span class="text-orange">*</span>
+													<input class="form-control autoComOss" name="ossName" th:value="${detail?.ossName}" type="text" th:disabled="${isReadOnly}"/>
+												</div>
+												<div class="col-md-12 required">
+													<span class="retxt text-danger text-sm"></span>
+												</div>
+											</div>
 										</div>
-										<div class="col-md-6 required">
-											<label for="ossVersion" th:text="#{msg.common.field.OSS.version}"></label><span class="text-orange">*</span>
-											<input class="form-control" id="ossVersion" name="ossVersion" th:value="${detail?.ossVersion}" type="text" th:disabled="${isReadOnly}"/>
-											<span class="retxt text-danger text-sm"></span>
+										<div class="col-md-6">
+											<div class="row form-group">
+												<div class="col-md-12">
+													<label for="ossVersion" th:text="#{msg.common.field.OSS.version}"></label><span class="text-orange">*</span>
+													<input class="form-control" id="ossVersion" name="ossVersion" th:value="${detail?.ossVersion}" type="text" th:disabled="${isReadOnly}"/>
+												</div>
+												<div class="col-12 required">
+													<span class="retxt text-danger text-sm"></span>
+												</div>
+											</div>
 										</div>
 									</div>
+
 									<div class="row form-group">
-										<div class="col-md-6 required">
+										<div class="col-md-6">
 											<label th:text="#{msg.common.field.nickname}"></label>
 											<div class="input-group" th:unless="${isReadOnly}">
 												<input class="form-control" id="input_ossNicknames" th:onblur="|fn.checkNickName(this)|" type="text">
@@ -60,6 +73,7 @@
 											<div class="row multiTxtSet"></div>
 										</div>
 									</div>
+
                                     <div class="row form-group">
                                         <div class="col-md-2">
                                             <label th:text="#{msg.common.field.OSS.type}"></label>
