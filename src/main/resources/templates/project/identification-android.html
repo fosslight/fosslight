@@ -13,8 +13,8 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-8 text-left mt-2">
-                            <span class="description-percentage text-dark-gray" id="vPrjName"></span>
-                            <span class="text-lg-gray text-smaller mx-1" id="vCreated"></span>
+                            <span class="description-percentage text-lg text-blue-gray" id="vPrjName"></span>
+                            <span class="text-dark-gray mx-1" id="vCreated"></span>
                         </div>
                         <div class="col-sm-4 float-right">
                         	<div class="float-right" th:if="${not @CommonFunction.isAdmin() and (project.completeYn eq 'Y' or project.distributeDeployYn eq 'Y' or project.identificationStatus eq 'REV')}">

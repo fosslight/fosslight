@@ -16,10 +16,22 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-8 text-left mt-2">
-                            <span class="description-percentage text-dark-gray" id="vPrjName"></span>
-                            <span class="text-lg-gray text-smaller mx-1" id="vCreated"></span>
+                            <span class="description-percentage text-lg text-blue-gray" id="vPrjName"></span>
+                            <span class="text-dark-gray mx-1" id="vCreated"></span>
+                            <span class="ml-2">
+                                <span class="badge badge-info text-md px-2 py-1" id="editTab" title="Go to Basic information tab">B</span>
+                                <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
+                                    <span class="badge badge-success text-md px-2 py-1" id="packagingTab" title="Go to Packaging tab">P</span>
+                                </th:block>
+<!--                                <th:block th:if="${distributionFlag and project.destributionStatus != 'NA' and (project.destributionStatus != null || project.verificationStatus == 'CONF')}">-->
+<!--                                    <span class="badge badge-danger text-md px-2 py-1" id="distributionTab" title="Go to Distribution tab">D</span>-->
+<!--                                </th:block>-->
+                                <th:block th:if="${project.secCode != null}">
+                                   <span class="badge badge-carrot text-md px-2 py-1" id="securityTab" title="Go to Security tab">S</span>
+                                </th:block>
+                            </span>
                         </div>
-                        <div class="col-sm-4 float-right">
+                        <div class="col-sm-4 float-right mt-1">
                         	<div class="float-right" th:if="${@CommonFunction.isAdmin() == false and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
                         		<button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
                         	</div>
@@ -30,8 +42,8 @@
                                 <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                             </div>
                             <div class="float-right btn-group mr-1">
-                                <button type="button" class="btn btn-danger px-3 btn-sm"><strong>Help</strong></button>
-                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong>Help</strong></button>
+                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
                                     <span class="sr-only">Toggle Dropdown</span>
                                 </button>
                                 <div class="dropdown-menu" role="menu">
@@ -159,7 +171,7 @@
                                         </div>
                                         </form>
                                         <div class="3rdProjectSearch">
-                                        	<div class="three1list card card-secondary card-outline" style="display:none;">
+                                        	<div class="three1list card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm" th:text="'Search Results'"></div>
                                                 <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
@@ -168,7 +180,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="three2list card card-secondary card-outline" style="display:none;">
+                                            <div class="three2list card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
@@ -186,7 +198,7 @@
                                             </div>
                                         </div>
                                         <div class="3rdProjectSearch2 partyBtn">
-                                        	<div class="three3list card card-secondary card-outline" style="display:none;">
+                                        	<div class="three3list card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
                                                 <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
@@ -195,7 +207,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="three4list card card-secondary card-outline" style="display:none;">
+                                            <div class="three4list card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
@@ -214,7 +226,7 @@
                                         </div>
                                     </div>
                                     <div class="mt-4 partyBtn" id="_3rdAddListContainer" style="display: none;">
-                                    	<div class="card card-secondary card-outline">
+                                    	<div class="card card-light-gray-02 card-outline">
                                             <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
                                             <div class="card-body px-3 pt-3">
                                             	<div class="innerJqGridSet">
@@ -320,7 +332,7 @@
                                         </div>
                                 	</form>
                                         <div class="depProjectSearch depBtn">
-                                        	<div class="depProject1 card card-secondary card-outline" style="display:none;">
+                                        	<div class="depProject1 card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
                                                 <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
@@ -329,7 +341,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="depProject2 card card-secondary card-outline" style="display:none;">
+                                            <div class="depProject2 card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
@@ -346,7 +358,7 @@
                                             </div>
                                         </div>
                                         <div class="mt-4 depBtn" id="_depAddListContainer" style="display: none">
-                                            <div class="card card-secondary card-outline">
+                                            <div class="card card-light-gray-02 card-outline">
                                                 <div class="card-header text-sm py-2" th:text="|Loaded List|"></div>
                                                 <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
@@ -453,7 +465,7 @@
                                         </div>
                                 	</form>
                                 		<div class="srcProjectSearch srcBtn">
-                                        	<div class="srcProject1 card card-secondary card-outline" style="display:none;">
+                                        	<div class="srcProject1 card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
                                                 <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
@@ -462,7 +474,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="srcProject2 card card-secondary card-outline" style="display:none;">
+                                            <div class="srcProject2 card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
@@ -479,7 +491,7 @@
                                             </div>
                                         </div>
                                         <div class="mt-4 srcBtn" id="_srcAddListContainer" style="display: none">
-                                            <div class="card card-secondary card-outline">
+                                            <div class="card card-light-gray-02 card-outline">
                                                 <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
                                                 <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
@@ -611,7 +623,7 @@
                                         </div>
                                   	</form>
                                   		<div class="binProjectSearch binBtn">
-                                        	<div class="binProject1 card card-secondary card-outline" style="display:none;">
+                                        	<div class="binProject1 card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
                                                 <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">
@@ -620,7 +632,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="binProject2 card card-secondary card-outline" style="display:none;">
+                                            <div class="binProject2 card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2">
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
@@ -637,7 +649,7 @@
                                             </div>
                                         </div>
                                         <div class="mt-4 binBtn" id="_binAddListContainer" style="display: none">
-                                            <div class="card card-secondary card-outline">
+                                            <div class="card card-light-gray-02 card-outline">
                                                 <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
                                                 <div class="card-body px-3 pt-3">
                                                     <div class="innerJqGridSet">

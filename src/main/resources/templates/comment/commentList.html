@@ -7,14 +7,21 @@
 				<div class="col-md-10">
 					<div class="post">
 						<div class="row">
-							<strong th:if="${comment.referenceDiv == '10'}" th:style="'color : #ffb526'">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]</strong>
-							<strong th:if="${comment.referenceDiv == '12'}" th:style="'color : #4cf58c'">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]</strong>
-							<strong th:if="${comment.referenceDiv == '19'}" th:style="'color : #059bf1'">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]</strong>
-							<strong th:if="${comment.referenceDiv == '60'}" th:style="'color : #02304b'">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]</strong>
-							<strong th:unless="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '60'}">
-								[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]
-							</strong>
-							<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block>
+							<th:block th:if="${comment.referenceDiv == '10'}">
+								<span class="badge badge-orange">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+							</th:block>
+							<th:block th:if="${comment.referenceDiv == '12'}">
+								<span class="badge badge-success">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+							</th:block>
+							<th:block th:if="${comment.referenceDiv == '19'}">
+								<span class="badge badge-primary">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+							</th:block>
+							<th:block th:if="${comment.referenceDiv == '60'}">
+								<span class="badge badge-dark">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+							</th:block>
+							<th:block th:unless="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '60'}">
+								<span class="badge badge-ivory">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+							</th:block>
 						</div>
 						<div class="row">
 							<div class="user-block">
