@@ -692,7 +692,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    padding: 0px 0px 0px 20px !important;
+    padding: 3px 3px 3px 10px !important;
     background-color: white;
 }
 .ui-jqgrid .ui-jqgrid-view input,
@@ -739,7 +739,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 .ui-jqgrid .ui-jqgrid-view input {
     border: .8px solid #ced4da;
     border-radius: 4px;
-    padding: 2px;
+    padding: 4px;
     font-size: .7rem;
     height: auto;
     margin: 0 5px;
@@ -747,6 +747,9 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 
 .ui-jqgrid .ui-jqgrid-view textarea {
     width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    box-shadow: inset 0 0 0 transparent;
 }
 
 .ui-corner-all,

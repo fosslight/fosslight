@@ -211,8 +211,13 @@
                 return display;
             },
             ossNameLinkFormat: function (cellvalue, options, rowObject) {
-                const display = "<a href=\"javascript:void(0);\" class='urlLink'>" + cellvalue + "</a>";
-                return display;
+                var link = $('<a>').prop({
+                    class : 'urlLink',
+                    href : 'javascript:',
+                    innerHTML : cellvalue
+                })
+                link.attr('onclick', 'openDetailPage(' + rowObject.ossId + ')');
+                return link.prop('outerHTML');
             },
             obligationTypeFormat: function (cellvalue, options, rowObject) {
                 var display = "";
@@ -329,9 +334,15 @@
 
                 return display;
             },
-            displayProjectName: function (cellvalue, options, rowObject) {
-                const display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue + "</a>";
-                return display;
+            displayProjectName: function (cellvalue, options, rowObject) { 
+                var link = $('<a>').prop({
+                    class : 'urlLink',
+                    href : 'javascript:',
+                    text : cellvalue
+                })
+
+                link.attr('onclick', 'openDetailPage(' + rowObject.prjId + ')');
+                return link.prop('outerHTML');
             },
             // comment 포메터
             displayComment: function (cellvalue, options, rowObject) {

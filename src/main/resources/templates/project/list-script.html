@@ -1882,7 +1882,7 @@ var list = {
 		var colModelArr = [];
         var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjName', index: 'prjName', width: 140, align: 'left', formatter: fn_grid_com.displayLicenseName, unformat: fn_grid_com.unformatter, cellattr: fn.toolTipDoubleclick};
+		colModelObj = {name: 'prjName', index: 'prjName', width: 140, align: 'left', formatter: fn_grid_com.displayProjectName, unformat: fn_grid_com.unformatter, cellattr: fn.toolTipDoubleclick};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true};
 		colModelArr.push(colModelObj);
@@ -2006,29 +2006,31 @@ var list = {
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				var rowData = $("#list").jqGrid('getRowData',rowid);
 				var isAdmin = [[${@CommonFunction.isAdmin()}]];
-				
+
 				if('true' == isAdmin && iCol == 5 || 'false' == isAdmin && iCol == 4) {
 					fn.mvIdentification(rowid, "5", rowData['permission']);
 				} else if('true' == isAdmin && iCol == 6 || 'false' == isAdmin && iCol == 5) {
 					if(rowData.verificationStatus == ''|| rowData.verificationStatus == 'N/A') {
-						
+
 					} else {
 						fn.mvVerification(rowData['prjId'], rowData['permission']);
 					}
 				} else if('true' == isAdmin && iCol == 7 || 'false' == isAdmin && iCol == 6) {
 					if(rowData.destributionStatus == '' || rowData.destributionStatus == 'N/A') {
-						
-					} else {						
+
+					} else {
 						fn.mvDistribution(rowData['prjId'], rowData['permission']);
 					}
-				} else if(iCol != 0 && iCol != 5 && iCol != 14) {
-					createTabInFrame(rowData['prjId']+'_Project', '/project/edit/'+rowData['prjId']);
 				}
 			},
 			postData: refreshParam
 		});
 	}
 };
+
+function openDetailPage(pjtId) {
+    callCreateTabInFrame(pjtId + '_Project', '/project/edit/' + pjtId, 'project-edit_' + pjtId, true);
+}
 
 //]]>
 </script>

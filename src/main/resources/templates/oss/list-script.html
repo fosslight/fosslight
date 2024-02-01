@@ -525,24 +525,38 @@
 
                         $('.listghead_0').hide(); // hide basic groupHeader
                     },
-                    ondblClickRow: function (rowid, iRow, iCol, e) {
-                        if (iCol != 0) {
-                            var rowData = $("#list").jqGrid('getRowData', rowid);
-
-                            if ("Y" != linkFlag) {
-                                callCreateTabInFrame(rowData['ossId'] + '_Opensource', '/oss/edit/' + rowData['ossId'], 'oss-edit_' + rowData['ossId'], true);
-                            } else {
-                                const openNewWindow = window.open("about:blank");
-
-                                if (isAdmin) {
-                                    openNewWindow.location.href = "/oss/edit/" + rowData['ossId'];
-                                } else {
-                                    openNewWindow.location.href = "/oss/view/" + rowData['ossId'];
-                                }
-                            }
-                        }
-                    },
+                    // ondblClickRow: function (rowid, iRow, iCol, e) {
+                    //     if (iCol != 0) {
+                    //         var rowData = $("#list").jqGrid('getRowData', rowid);
+                    //
+                    //         if ("Y" != linkFlag) {
+                    //             callCreateTabInFrame(rowData['ossId'] + '_Opensource', '/oss/edit/' + rowData['ossId'], 'oss-edit_' + rowData['ossId'], true);
+                    //         } else {
+                    //             const openNewWindow = window.open("about:blank");
+                    //
+                    //             if (isAdmin) {
+                    //                 openNewWindow.location.href = "/oss/edit/" + rowData['ossId'];
+                    //             } else {
+                    //                 openNewWindow.location.href = "/oss/view/" + rowData['ossId'];
+                    //             }
+                    //         }
+                    //     }
+                    // },
                 });
+            }
+        }
+
+        function openDetailPage(ossId) {
+            if ("Y" != linkFlag) {
+                callCreateTabInFrame(ossId + '_Opensource', '/oss/edit/' + ossId, 'oss-edit_' + ossId, true);
+            } else {
+                const openNewWindow = window.open("about:blank");
+
+                if (isAdmin) {
+                    openNewWindow.location.href = "/oss/edit/" + ossId;
+                } else {
+                    openNewWindow.location.href = "/oss/view/" + ossId;
+                }
             }
         }
 

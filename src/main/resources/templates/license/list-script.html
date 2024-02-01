@@ -136,11 +136,16 @@
         };
 
         var fn = {
-        	displayLicenseName : function(cellvalue, options, rowObject) {console.log(cellvalue);console.log(rowObject);
-        		var display = "<a class='urlLink' href=\"javascript:;\">" + cellvalue;
-        		if ("" != rowObject.shortIdentifier) display += " (" + rowObject.shortIdentifier + ")";
-        		display += "</a>";
-        		return display;
+        	displayLicenseName : function(cellvalue, options, rowObject) {
+                if("" != rowObject.shortIdentifier) { text += " (" + rowObject.shortIdentifier + ")"; }
+                var link = $('<a>').prop({
+                    class : 'urlLink',
+                    href : 'javascript:',
+                    text : cellvalue
+                })
+
+                link.attr('onclick', 'openDetailPage(' + rowObject.licenseId + ')');
+                return link.prop('outerHTML');
         	},
             downloadExcel: function () {
                 if (isMaximumRowCheck(totalRow)) {
@@ -417,16 +422,20 @@
                     onSelectRow: function (id) {
                         $('#' + id + 'description').width(130).height(140);
                     },
-                    ondblClickRow: function (rowid, iRow, iCol, e) {
-                        var rowData = $("#list").jqGrid('getRowData', rowid);
-                        callCreateTabInFrame(rowData['licenseId'] + '_License', '/license/edit/' + rowData['licenseId'], 'license-edit_' + rowData['licenseId'], true);
-                    }
+                    // ondblClickRow: function (rowid, iRow, iCol, e) {
+                    //     var rowData = $("#list").jqGrid('getRowData', rowid);
+                    //     callCreateTabInFrame(rowData['licenseId'] + '_License', '/license/edit/' + rowData['licenseId'], 'license-edit_' + rowData['licenseId'], true);
+                    // }
                 });
             }
         };
 
         function displayUrl(cellvalue) {
             return "<a href=\"" + cellvalue + "\" class=\"urlLink\" target=\"_blank\">" + cellvalue + "</a>";
+        }
+
+        function openDetailPage(licenseId) {
+            callCreateTabInFrame(licenseId + '_License', '/license/edit/' + licenseId, 'license-edit_' + licenseId, true);
         }
     </script>
 </th:block>

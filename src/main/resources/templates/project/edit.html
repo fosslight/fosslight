@@ -232,10 +232,10 @@
                             <div class="card-footer clearfix" th:unless="${isReadOnly}">
                             	<th:block th:if="${project.prjId != null}">
                             		<a th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}" th:onclick="|fn.deletePrj()|" class="btn btn-secondary float-left" th:text="Delete"></a>
-                            		<a th:if="${project.viewOnlyFlag == 'N'}" id="drop" class="btn btn-secondary float-left" style="margin-left: 5px; display: none;" th:text="Drop"></a>
+                            		<a th:if="${project.viewOnlyFlag == 'N'}" id="drop" class="btn btn-dark-02 float-left" style="margin-left: 5px; display: none;" th:text="|Drop|"></a>
                             	</th:block>
                                 <th:block th:if="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
-                                	<a th:onclick="|fn.save()|" class="btn btn-teal-01 float-right" th:text="Save"></a>
+                                	<a th:onclick="|fn.save()|" class="btn btn-teal-01 float-right" th:text="|Save|"></a>
                                 </th:block>
                                 <th:block th:unless="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
                                 	<th:block th:if="${project.dropYn == 'Y' and project.statusRequestYn == 'N'}">
@@ -255,9 +255,9 @@
                                 		</th:block>
                                 	</th:block>
                                 </th:block>
-                                <a th:onclick="|fn.copy()|" th:if="${project.prjId != null}" class="btn btn-teal-01 float-right" style="margin-right: 5px;" th:text="Copy"></a>
-                                <a th:onclick="|fn.exeProjectComplete('Y')|" th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-teal-01 float-right" id="complete" style="margin-right: 5px;" th:text="Complete"></a>
-                                <a th:onclick="|fn.shareUrl()|" th:if="${project.prjId != null}" class="btn btn-teal-01 float-right" style="margin-right: 5px;" th:text="'Share URL'"></a>
+                                <a th:onclick="|fn.copy()|" th:if="${project.prjId != null}" class="btn btn-teal-02 float-right" style="margin-right: 5px;" th:text="|Copy|"></a>
+                                <a th:onclick="|fn.exeProjectComplete('Y')|" th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-teal-02 float-right" id="complete" style="margin-right: 5px;" th:text="|Complete|"></a>
+                                <a th:onclick="|fn.shareUrl()|" th:if="${project.prjId != null}" class="btn btn-teal-02 float-right" style="margin-right: 5px;" th:text="|Share URL|"></a>
                             </div>
                         </div>
                     </div>
