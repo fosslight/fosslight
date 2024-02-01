@@ -232,6 +232,7 @@ input.btnCLightAnalysis {height:20px;padding-bottom:1px;line-height:auto;}
 .btnColor.sky, .btnCLight.sky, .btnCLight2.sky {border-color:#62a6d1;background:#69bcf6; vertical-align:middle !important;}
 /**/
 .btnColor.search {width:76px;height:26px;padding-bottom:2px;border-color:#c84801;background:#ff5a00;}
+.btnColor.clear_search_form {width:76px;height:26px;padding-bottom:2px}
 .btnColor.commentBtn {width:auto;padding:0 22px 2px 10px;height:18px;line-height:16px;font-size:11px !important;font-family:Tahoma;color:#fff;border:1px solid #afa897;background:#cbc7bd url("../images/bg_btn.png") no-repeat right top;}
 .btnColor.commentBtn.open {background-position:right -30px;}
 .btnCLight.download {padding:0 14px;width:auto;height:18px;line-height:18px;font-size:11px !important;font-weight:normal;color:#666;border-color:#c6c6c6;background:#f1f1f1;}
@@ -461,6 +462,7 @@ body,html {/*overflow:hidden !important;letter-spacing:0.06em;*/background:#fff;
 .hiddenSearch dd.lastAign .selectSet {width:170px;}
 .hiddenSearch dd input.cal {width:92px;}
 .listSearch .search {position:absolute;top:13px;right:20px;}
+.listSearch .clear_search_form {position:absolute;top:45px;right:20px;}
 .listSearch2 {position:relative;padding:10px 20px 8px;width:598px;border:1px solid #ff651c;border-radius:5px;box-shadow:0 0 5px rgba(0,0,0,.3);background:#fff;}
 .listSearch2 dl {padding:0 90px 0 0;}
 .listSearch2 dl dd {float:left;padding:3px 0;}
