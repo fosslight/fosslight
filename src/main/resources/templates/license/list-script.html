@@ -140,7 +140,6 @@
 
         var fn = {
         	displayLicenseName : function(cellvalue, options, rowObject) {
-
                 var link = $('<a>').prop({
                     class : 'urlLink',
                     href : 'javascript:',
@@ -360,14 +359,14 @@
                             });
                             data.existTooltip = true;
 
-                            $('.urlLink').click(function(event) {
-                                event.preventDefault();
-                                var href = $(this).attr('href');
-                                if (!/^https?:\/\//i.test(href)) {
-                                    href = 'http://' + href;
-                                }
-                                window.open(href, '_blank');
-                            });
+                            // $('.urlLink').click(function(event) {
+                            //     event.preventDefault();
+                            //     var href = $(this).attr('href');
+                            //     if (!/^https?:\/\//i.test(href)) {
+                            //         href = 'http://' + href;
+                            //     }
+                            //     window.open(href, '_blank');
+                            // });
 // 					$.ajax({
 // 						type: 'GET',
 // 						url: '/system/processGuide/getProcessGuide',

@@ -80,10 +80,13 @@
                 var srcObligation = rowObject["obligationDisclosingSrcYn"];
                 var noticeObligation = rowObject["obligationNotificationYn"];
 
+                console.log(srcObligation);
+                console.log(noticeObligation);
+
                 if (srcObligation == 'Y') {
                     display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i><i class=\"far fa-file-code fa-1-3x mr-2\" title=\"Source Code\"></i>";
                 } else if (noticeObligation == 'Y') {
-                    display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
+                    display += "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
                 }
 
                 return display;

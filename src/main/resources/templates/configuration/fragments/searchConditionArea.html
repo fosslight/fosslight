@@ -24,7 +24,7 @@
             allowClear: true,
         });
 
-        $('#divisionSelect').select2({
+        $('#prjDivisionSelect').select2({
             placeholder: "Division",
             allowClear: true,
         });
@@ -41,6 +41,11 @@
 
         $('#prioritySelect').select2({
             placeholder: "Priority",
+            allowClear: true,
+        })
+
+        $('#divisionSelect').select2({
+            placeholder: "Division",
             allowClear: true,
         })
     });
@@ -105,6 +110,9 @@
                             </select>
                         </div>
                     </div>
+                    <div class="card-footer">
+                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                    </div>
                 </div>
             </th:block>
             <th:block th:if="${#strings.equals(defaultSearchType, 'OSS')}">
@@ -155,6 +163,9 @@
                                    th:value="${searchBean.cvssScore}" type="text">
                         </div>
                     </div>
+                    <div class="card-footer">
+                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                    </div>
                 </div>
             </th:block>
 
@@ -176,7 +187,7 @@
                             <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean.schEndDate}" />
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" name="prjDivision" id="divisionSelect"
+                            <select class="select2" name="prjDivision" id="prjDivisionSelect"
                                     style="width: 100%;">
                                 <option value=""></option>
                                 <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), searchBean.prjDivision)}"></th:block>
@@ -214,8 +225,7 @@
                             <th:block th:utext="${@CoCodeManager.genCheckbox(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), searchBean.statuses, '')}" ></th:block>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" name="priority" id="prioritySelect"
-                                    style="width: 100%;">
+                            <select class="select2" name="priority" id="prioritySelect" style="width: 100%;">
                                 <option value=""></option>
                                 <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'), searchBean.priority)}"></th:block>
                             </select>
@@ -225,46 +235,55 @@
                             <input type="checkbox" name="publicYn" value="N" th:checked="${#strings.equals(searchBean.publicYn, 'N')}"  />
                         </th:block>
                     </div>
+                    <div class="card-footer">
+                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                    </div>
                 </div>
             </th:block>
 
             <th:block th:if="${#strings.equals(defaultSearchType, 'THIRD_PARTY')}">
+                <div class="card card-dark card-outline search-form mb-3">
+                    <div class="card-header">
+                        <div class="card-title">Basic Search Area</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="partnerId" placeholder="ID" th:value="${searchBean.partnerId}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="partnerName" placeholder="3rd Party Name" th:value="${searchBean.partnerName}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="partnerName" placeholder="3rd Party Software Name" th:value="${searchBean.softwareName}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="partnerName" placeholder="3rd Party Software Version" th:value="${searchBean.softwareVersion}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <select class="select2" name="division" id="divisionSelect" style="width: 100%;">
+                                <option value=""></option>
+                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), searchBean.division)}"></th:block>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label class="text-lg-gray mr-3">Status</label>
+<!--                            <th:block th:utext="${@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS')}"></th:block>-->
+
+                            <th:block        th:utext="${searchBean.status}"></th:block>
+<!--                             <th:block        th:utext="${@CoCodeManager.genCommonCheckbox('206', 'status', searchBean.status, false)}"></th:block>-->
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                    </div>
+                </div>
+
+
                 <dl class="basicSearch col3">
                     <dt>Basic Search Area</dt>
-                    <dd>
-                        <label style="width:100px;">ID</label>
-                        <input name="partnerId" style="width:150px;" type="text" value="${searchBean.partnerId}"/>
+
                     </dd>
-                    <dd class="centerAign">
-                        <label>3rd Party Name</label>
-                        <input class="autoComParty" name="partnerName" type="text" value="${searchBean.partnerName}"/>
-                    </dd>
-                    <dd class="lastAign"></dd>
-                    <dd>
-                        <label style="width:100px;">3rd Party<br/>Software Name</label>
-                        <input class="autoComSwNm" name="softwareName" style="width:150px;" type="text"
-                               value="${searchBean.softwareName}"/>
-                    </dd>
-                    <dd class="centerAign">
-                        <label>3rd Party<br/>Software Version</label>
-                        <input name="softwareVersion" type="text" value="${searchBean.softwareVersion}"/>
-                    </dd>
-                    <dd class="lastAign">
-                        <label>Division</label>
-                        <span class="selectSet">
-								<strong title="Division selected value"></strong>
-								<select name="division">
-									<option value=""></option>
-									${ct:genOptionSelected(ct:getConstDef("CD_USER_DIVISION"), searchBean.division)}
-								</select>
-							</span>
-                    </dd>
-                    <dd style="width:100%;">
-                        <label style="width:100px;">Status</label>
-                        <span class='checkSet'>
-							${ct:genCommonCheckbox(ct:getConstDef("CD_IDENTIFICATION_STATUS"), "status", searchBean.status, false)}
-	            			</span>
-                    </dd>
+
                     <dd class="">
                         <label style="width:100px;">Created Date</label>
                         <input class="cal" id="createdDate1" maxlength="8" name="createdDate1" style="width:70px;"
@@ -291,7 +310,7 @@
                             'checked="checked"' : '' } />
                         </dd>
                     </th:block>
-                    >
+
                 </dl>
             </th:block>
             <th:block th:if="${#strings.equals(defaultSearchType, 'SELF_CHECK')}">
