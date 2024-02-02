@@ -59,7 +59,6 @@
 					var downloadLocationList = [];
 					ossNickList = [[${ossNickList}]];
 
-                    console.log(ossNickList);
 					downloadLocationList = [[${downloadLocationList}]];
 					if (ossNickList != null && ossNickList.length > 0) {
 						ossNickList.forEach(function(nickName, index, obj){
@@ -87,7 +86,7 @@
 							
 							let downloadLocationHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
 							downloadLocationHtml 		+= 		'<div class="form-group mb-0">';
-							downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+							downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
 							downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 							downloadLocationHtml 		+=		'</div>';
 							downloadLocationHtml 		+=		'<span class="urltxt"></span>';
@@ -166,9 +165,9 @@
 							let downloadLocationHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
 							downloadLocationHtml 		+= 		'<div class="form-group mb-0">';
                             if(isReadOnly == 'true' || isReadOnly) {
-                                downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/ disabled>';
+                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/ disabled>';
                             } else {
-                                downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/>';
+                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/>';
                                 downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
                             }
 							downloadLocationHtml 		+=		'</div>';
@@ -309,9 +308,9 @@
 				let downloadLocationHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
 				downloadLocationHtml 		+= 		'<div class="form-group mb-0">';
                 if(isReadOnly == 'true' || isReadOnly) {
-                    downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);" disabled>';
+                    downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);" disabled>';
                 } else {
-                    downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+                    downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
                     downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
                 }
 				downloadLocationHtml 		+=		'</div>';
@@ -933,9 +932,7 @@
 			}
 		});
 
-        console.log(":::: " + isReadOnly);
         if(isReadOnly == null) {
-            console.log("::::2 " + isReadOnly);
             _licenseChoice.jqGrid('navGrid',"#_licenseChoicePager",{edit:false,add:true,del:false,search:false,refresh:false
                 , addfunc: function (rowid) {
                     var ids = $("#_licenseChoice").jqGrid("getDataIDs");
@@ -1425,7 +1422,6 @@
 	}
 	
 	function changeLicenseType() {
-
 		$('#_licenseChoice').jqGrid('saveRow',lastsel);
 		//var list = data.list.rows;
 		var list = $('#_licenseChoice').jqGrid('getRowData');
@@ -1447,7 +1443,6 @@
 		$(obligationHtml).appendTo('#obDiv');
 		$('#_licenseChoice').jqGrid('editRow',lastsel);
 	}
-	
 	
 	//라이센스 묶음 처리
 	function createMultiLicenseText(){
@@ -1780,10 +1775,7 @@
 					$("div.multiTxtSet").empty();
 				}
 
-
-
 				for (var k in json.resultData.addNickArr) {
-                    console.log(json.resultData.addNickArr[k])
 					let nickHtml 	= 	'<div class="col-md-2" style="margin-top: 5px;">';
 					nickHtml 		+= 		'<div class="form-group mb-0">';
 					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+json.resultData.addNickArr[k]+'"/>';

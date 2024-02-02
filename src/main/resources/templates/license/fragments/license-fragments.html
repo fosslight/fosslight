@@ -83,24 +83,22 @@
                 var noticeObligation = rowObject["obligationNotificationYn"];
 
                 if (srcObligation == 'Y') {
-                    display += "<span class=\"iconSet ops\" title=\"Notice\"></span>";
-                    display += "<span class=\"iconSet man\" title=\"Source Code\"></span>";
+                    display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i><i class=\"far fa-file-code fa-1-3x mr-2\" title=\"Source Code\"></i>";
                 } else if (noticeObligation == 'Y') {
-                    display = "<span class=\"iconSet ops\" title=\"Notice\"></span>";
+                    display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
                 }
 
                 return display;
             },
 
             displayLicenseType: function (cellvalue, options, rowObject) {
-                var typeCd = [[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}]];
+                var typeCd = JSON.parse([[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}]]);
                 var licenseType = rowObject["licenseType"];
                 var display = "";
 
                 for (var i = 0; i < typeCd.length; i++) {
                     if (licenseType == typeCd[i].cdDtlNo) {
                         display = typeCd[i].cdDtlNm;
-
                         break;
                     }
                 }
@@ -224,7 +222,6 @@
                                 var rowLicenseText = $('#list').jqGrid('getCell', id, 'licenseText');
 
                                 if (rowLicenseUserGuide) {
-                                    console.log("r show")
                                     $("#licenseUserGuideInfo").html(rowLicenseUserGuide.replace(/\n/g, '<br>'));
                                     $("#informationArea").show();
                                     $("#userGuideGroup").show();
@@ -233,7 +230,6 @@
                                 }
 
                                 if (rowLicenseRestriction) {
-                                    console.log("r show")
                                     $("#licenseRestrictionInfo").html($(rowLicenseRestriction).attr("title").replace(/\n/g, '<br>'));
                                     $("#informationArea").show();
                                     $("#restrictionsGroup").show();
@@ -242,7 +238,6 @@
                                 }
 
                                 if (rowLicenseText) {
-                                    console.log("t show")
                                     $("#licenseTextInfo").html(rowLicenseText.replace(/\n/g, '<br>'));
                                     $("#informationArea").show();
                                     $("#licenseTextGroup").show();
@@ -283,7 +278,6 @@
 
                                         if (className.indexOf('jqgrow') !== -1) {
                                             rowid = row.id;
-                                            console.log("dur;")
                                             $('#list').jqGrid("setSelection", rowid);
 
                                             break;

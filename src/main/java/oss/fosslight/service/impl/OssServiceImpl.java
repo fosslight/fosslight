@@ -186,7 +186,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					if (!isEmpty(bean.getOssNickname())) {
 						bean.setOssName("<span class=\"badge badge-warning\">Nick</span>&nbsp;" + bean.getOssName());
 					} else {
-						bean.setOssName("<span class=\"badge badge-warning\">Nick</span>&nbsp;" + bean.getOssName());
+						//bean.setOssName("<span class=\"badge badge-warning\">Nick</span>&nbsp;" + bean.getOssName());
+						bean.setOssName(bean.getOssName());
 					}
 				}
 			}
