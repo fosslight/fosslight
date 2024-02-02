@@ -136,6 +136,7 @@ ul { list-style-type: none; }
     font-size: .85rem;
 }
 a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:hover { background-color: #7e101b!important; }
+.card-lg-red table a {color: #212529;}
 
 .content-wrapper.custom-layout { font-size: 1rem;}
 .custom-layout hr { margin-top: 0; margin-bottom: 0;}

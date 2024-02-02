@@ -129,15 +129,18 @@
                 $(".cal").on("keyup", function (e) {
                     calValidation(this, e);
                 });
+
                 $("#licenseNameAllSearchFlag").on("change", function (e) {
                     $("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
                 });
+
+
             }
         };
 
         var fn = {
         	displayLicenseName : function(cellvalue, options, rowObject) {
-                if("" != rowObject.shortIdentifier) { text += " (" + rowObject.shortIdentifier + ")"; }
+
                 var link = $('<a>').prop({
                     class : 'urlLink',
                     href : 'javascript:',
@@ -356,6 +359,15 @@
                                 }
                             });
                             data.existTooltip = true;
+
+                            $('.urlLink').click(function(event) {
+                                event.preventDefault();
+                                var href = $(this).attr('href');
+                                if (!/^https?:\/\//i.test(href)) {
+                                    href = 'http://' + href;
+                                }
+                                window.open(href, '_blank');
+                            });
 // 					$.ajax({
 // 						type: 'GET',
 // 						url: '/system/processGuide/getProcessGuide',

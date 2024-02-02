@@ -172,7 +172,7 @@ var fn_grid_com = {
         options.gid +
         "','" +
         options.rowId +
-        "')\">R</span>";
+        "')\" style=\"cursor: pointer\">R</span>";
     }
 
     return display;
