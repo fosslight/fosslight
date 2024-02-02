@@ -13,20 +13,11 @@
         var detail = [[${detail}]];
 
         $(document).ready(function() {
-
-            console.log(detail);
             if(isReadOnly) {
                 var identificationStatus = detail.identificationStatus;
                 var verificaitonStatus = detail.verificationStatus;
                 var distributionStatus = detail.destributionStatus;
                 var dropYn = detail.dropYn;
-
-
-                console.log("===================================");
-                console.log(identificationStatus);
-                console.log(verificaitonStatus);
-                console.log(distributionStatus);
-                console.log("===================================");
 
                 var identVal = "";
                 if (identificationStatus) {
