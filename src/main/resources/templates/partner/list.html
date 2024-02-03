@@ -82,8 +82,7 @@
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <select class="form-control select2" name="division" style="width: 100%;">
-                                                        <option th:value="''" th:text="'Division'"></option>
+                                                    <select class="form-control select2" id="division" name="division" style="width: 100%;">
                                                         <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
                                                     		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
                                                     	</th:block>
@@ -92,10 +91,9 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <select class="select2" multiple="multiple" data-placeholder="Status" style="width: 100%;">
-                                                    	<option th:value="''" th:text="'Status'"></option>
+                                                    <select class="form-control select2" multiple="multiple" id="status" name="status" data-placeholder="Status" style="width: 100%;">
                                                         <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}">
-                                                    		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                                    		<option th:if="${option.cdDtlNo != 'NA'}" th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
                                                     	</th:block>
                                                     </select>
                                                 </div>
@@ -143,7 +141,7 @@
                         <div class="col-md-6">
                             <div class="row float-right" style="margin-right: .1rem;">
                                 <button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|" th:text="Export"></button>
-                                <button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|" th:text="Add"></button>
+                                <button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3 btnAdd" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|" th:text="Add"></button>
                             </div>
                         </div>
                     </div>

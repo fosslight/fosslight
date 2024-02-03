@@ -17,10 +17,10 @@
                             <span class="text-dark-gray mx-1" id="vCreated"></span>
                         </div>
                         <div class="col-sm-4 float-right">
-                        	<div class="float-right" th:if="${not @CommonFunction.isAdmin() and (project.completeYn eq 'Y' or project.distributeDeployYn eq 'Y' or project.identificationStatus eq 'REV')}">
+                        	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
                         		<button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
                         	</div>
-                            <div class="float-right" th:if="${project.completeYn ne 'Y' and project.dropYn ne 'Y' and project.distributeDeployYn ne 'Y'}">
+                            <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y'}">
                                 <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" id="bomConfirm" th:text="Confirm"></button>
                                 <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" id="bomRequest" th:text="Request"></button>
@@ -178,6 +178,10 @@
                                         <input type="hidden" name="prjName"/>
 										<input type="hidden" name="prjVersion"/>
 										<input type="hidden" name="prjId"/>
+										<input type="hidden" id="srcAndroidCsvFileId" th:value="${project.srcAndroidCsvFileId}"/>
+										<input type="hidden" id="srcAndroidNoticeFileId" th:value="${project.srcAndroidNoticeFileId}"/>
+										<input type="hidden" id="srcAndroidNoticeXmlId" th:value="${project.srcAndroidNoticeXmlId}"/>
+										<input type="hidden" id="srcAndroidResultFileId" th:value="${project.srcAndroidResultFileId}"/>
                                         <div name="content_android" id="binAndroidProjectSearch" style="display: none;">
                                             <div class="row mt-3">
                                                 <div class="col-md-2">

@@ -20,7 +20,6 @@ $(document).ready(function () {
 	fn.getUserIdList("Y", "REVIEWER"); // 근무자
 	fn.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
 	$('.btnReject').hide();
-	showHelpLink("Project_List_Main");
 });
 
 //데이터 객체
@@ -632,28 +631,31 @@ var fn = {
 	// Grid download cell display
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
-        if(rowObject.identificationStatus == "Confirm"){
+        if (rowObject.identificationStatus == "Confirm"){
         	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-5x mr-1\" title=\"FOSSLight Report\"></i></span>';
             if(rowObject.reviewReportFileId != ""){
             	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-5x mr-1\" title=\"FOSSLight Review Report\"></i></span>';
             }
+        } else {
+        	display += '<span style=\"cursor:pointer; pointer-events: none;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-5x mr-1\" title=\"FOSSLight Report\"></i></span>';
         }
 		
-		if(rowObject.verificationStatus == "Confirm"){
-			if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
+		if (rowObject.verificationStatus == "Confirm"){
+			if (rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
+				display += "<span style=\"cursor:pointer; pointer-events: none;\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\"><i class=\"far fa-file-code hover-icon fa-1-5x mr-1\" title=\"OSS Notice\"></i></span>";
 			} else {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-5x mr-1\" title=\"OSS Notice\"></i></span>';
+				display += '<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-5x mr-1\" title=\"OSS Notice\"></i></span>';
 			}
 			
-			if(rowObject.packageFileId!=""){
+			if (rowObject.packageFileId!="") {
 				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File1\"></i></span>';
 			}
 			
-			if(rowObject.packageFileId2!=""){
+			if (rowObject.packageFileId2!="") {
 				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File2\"></i></span>';
 			}
 			
-			if(rowObject.packageFileId3!=""){
+			if (rowObject.packageFileId3!="") {
 				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File3\"></i></span>';
 			}
 		}
@@ -736,11 +738,11 @@ var fn = {
 	},
 	// Grid identification display event
 	mvIdentification : function(prjId, initDiv, permission){
-//		if(parseInt(permission) > 0){
+		if(parseInt(permission) > 0){
 			createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/'+initDiv);
-//		} else {
-//			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
-//		}
+		} else {
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+		}
 	},
 	// Grid veritification display event
 	mvVerification : function(prjId, permission){
@@ -1397,7 +1399,10 @@ var fn = {
     	return 'title="' + "Double click" + '"';
     }, 
     mvSecurityTab : function(prjId){
-		createTabInFrame(prjId+'_Security', '/project/security/'+prjId+'');
+		createTabInFrame(prjId+'_Security', '/project/security/'+prjId);
+	},
+	mvEditTab : function(prjId){
+		createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
 	},
 	change : function(obj) {
 		var changeListId = '#' + $(obj).siblings("div").attr("id");

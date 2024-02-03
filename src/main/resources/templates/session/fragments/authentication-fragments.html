@@ -26,7 +26,7 @@
                             <p><a class="text-right" href="javascript:void(0);"
                                   onclick="resetPw_fn.renderPage(); return false;">ResetPassword</a></p>
                         </span>
-                    <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG'))}">
+                    <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG')) != 'Y'}">
                         <span class="float-right mx-1 pt-3 pb-0" style="color: #ced4da">|</span>
                         <span class="float-right pt-3 pb-0">
                              <p><a class="text-right" href="javascript:void(0);"
@@ -97,8 +97,7 @@
                 <label class="top-text" for="s3">Division</label>
                 <select class="custom-select form-control-border" name="division" id="s3">
                     <option value="" hidden></option>
-                    <th:block
-                            th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}"></th:block>
+                    <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}"></th:block>
                 </select>
                 <div class="retxt text-danger text-sm division"></div>
             </div>

@@ -17,11 +17,11 @@
                                	<label class="form-check-label text-lg-gray" for="approve" th:text="'Approve without verification'"></label>
                          	</span>
                         </div>
-                        <div class="col-sm-4 float-right">
-                        	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.verificationStatus == 'NA' or project.distributeDeployYn == 'Y' or project.verificationStatus == 'REV')}">
+                        <div class="col-sm-4 float-right projdecBtn">
+                        	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.verificationStatus == 'NA' or project.verificationStatus == 'REV')}">
                                	<button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" id="verReject" th:text="Reject"></button>
                         	</div>
-                            <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.verificationStatus != 'NA' and project.distributeDeployYn != 'Y'}">
+                            <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.verificationStatus != 'NA'}">
                             	<button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" id="verConfirm" th:text="Confirm"></button>
                                 <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" id="verReject" th:text="Reject"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 review" id="verRequest" th:text="Request"></button>
@@ -34,7 +34,6 @@
                                 </button>
                                 <div class="dropdown-menu" role="menu">
                                     <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Packaging')|">How to use FossLight Hub</a>
-                                    <a class="dropdown-item text-dark" href="#" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Package', 'P')|">Role of Creator & Reviewer</a>
                                 </div>
                             </div>
                         </div>
@@ -108,7 +107,7 @@
                                                         				<div th:class="col-md-10" th:classappend="verifyFile_+${i}" th:id="registFileDiv_+${i}" style="display:none;">
                                                                         	<div th:id="registFile_+${i}"></div>
                                                                     	</div>
-                                                        				<div class="ajax-file-upload-container binary" style="margin-top:0px;">
+                                                        				<div class="ajax-file-upload-container" style="margin-top:0px;">
                                                         					<ul th:class="uploadList_+${i}">
                                                         						<li th:if="${file.delYn eq 'N'}">
                                                                         			<a class="ajax-file-upload-filename" th:text="${file.origNm}" th:href="@{'/download/' + ${file.fileSeq} + '/' + ${file.logiNm}}"></a>
@@ -123,7 +122,7 @@
                                                         				<div th:class="col-md-10" th:classappend="verifyFile_+${i}" th:id="registFileDiv_+${i}" style="display: flex;">
                                                                         	<div th:id="registFile_+${i}"></div>
                                                                     	</div>
-                                                                    	<div class="ajax-file-upload-container binary" style="margin-top:0px; display:none;">
+                                                                    	<div class="ajax-file-upload-container" style="margin-top:0px; display:none;">
                                                         					<ul th:class="uploadList_+${i}"></ul>
                                                         				</div>
                                                         			</th:block>

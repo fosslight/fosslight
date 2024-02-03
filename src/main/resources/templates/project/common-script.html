@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <th:block th:fragment="commonScript">
 <script th:inline="javascript">
-var userRole = 'ROLE_ADMIN';
+var userRole = [[${#authentication.authorities[0].authority}]];
 var curIdenStatus = [[${project.identificationStatus}]];
 var projectStatus = [[${project.status}]];
 var distributionStatus = [[${project.destributionStatus}]];
@@ -55,10 +55,10 @@ var com_evt = {
 				}
 				
 				var innerHtml 	= 'Are you to enter a comment when confirm?<br><br>';
-                innerHtml 		+= '<textarea id="confirmEditor"></textarea>';
+                innerHtml 		+= '<textarea id="bomConfirmEditor"></textarea>';
                 
-                if(!alertify.confirmDialog){
-					alertify.dialog('confirmDialog', function() {
+                if(!alertify.bomConfirmDialog){
+					alertify.dialog('bomConfirmDialog', function() {
 						return {
 							setup: function() {
 								var settings = alertify.confirm().settings;
@@ -90,10 +90,8 @@ var com_evt = {
 					}, false, 'confirm');
             	}
 				
-                $("#confirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
-				
-				if (com_fn.isAndroidOnly()) {
-					alertify.confirmDialog(innerHtml, function () {
+                if (com_fn.isAndroidOnly()) {
+					alertify.bomConfirmDialog(innerHtml, function () {
 						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF"};
 						
 						if ("" != $($("#confirmEditor").summernote('code')).text()) {
@@ -134,7 +132,7 @@ var com_evt = {
 							return false;
 						}
 
-						alertify.confirmDialog(innerHtml, function () {
+						alertify.bomConfirmDialog(innerHtml, function () {
 	                    	var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF"};
 	                    	if ("" != $($("#confirmEditor").summernote('code')).text()) {
 	                    		data["userComment"] = replaceWithLink($("#confirmEditor").summernote('code'));
@@ -167,7 +165,9 @@ var com_evt = {
 						alertify.alert([[#{msg.project.check.save}]], function(){});
 					}				
 				}
-			}else {
+                
+                $("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			} else {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}	
 		});
@@ -485,6 +485,9 @@ var com_fn = {
 		
 		var activateTab = "";
 		var activateGridArea = "";
+		
+		$("[name=gridArea]").hide();
+		
 		switch (initDiv) {
 			case "0" : activateTab = "#tabMenuParty"; activateGridArea = "#gridAreaParty";
 				break;
@@ -1310,11 +1313,11 @@ var com_fn = {
 						alertify.alert([[#{msg.common.success}]], function() {
 							com_fn.btnCtl(userRole, status);
 							curIdenStatus = status;
-// 							if(isAndroidModel) {
-// 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/4');
-// 							} else {
-// 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
-// 							}
+ 							if(isAndroidModel) {
+ 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/4');
+ 							} else {
+ 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
+ 							}
 						});
 					} else if(userRole != "ROLE_ADMIN" && status == "REQ") { // 일반인이 request review한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
@@ -1324,13 +1327,13 @@ var com_fn = {
 						alertify.alert([[#{msg.common.success}]], function() {
 							com_fn.btnCtl(userRole, status);
 							curIdenStatus = status;
-// 							if(isAndroidModel) {
-// 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/4");
-// 							} else {
-// 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/5");
-// 							}
+ 							if (isAndroidModel) {
+ 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/4");
+							} else {
+ 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/5");
+ 							}
 						});
-					} else if(status == "CONF") { // Admin이 confirm한 경우
+					} else if (status == "CONF") { // Admin이 confirm한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
 							deleteTabInFrame('/project/identification/'+prjId);	
 						});

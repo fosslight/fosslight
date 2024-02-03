@@ -1396,7 +1396,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("ossInfo", bean);
 		
-		return OSS.OSS_POPUP_JSP;
+		return "oss/view/viewPopup";
 	}
 	
 	@GetMapping(value=OSS.OSS_DETAIL_VIEW_AJAX, produces = "text/html; charset=utf-8")
@@ -1407,7 +1407,7 @@ public class OssController extends CoTopComponent{
 			OssMaster _bean = ossList.get(0);
 			_bean.setOssName(StringUtil.replaceHtmlEscape(_bean.getOssName()));
 			
-			model.addAttribute("ossInfo", ossList.get(0));
+			model.addAttribute("ossInfo", _bean);
 			
 			CommentsHistory commentsHistory = new CommentsHistory();
 			commentsHistory.setReferenceId(bean.getOssId());
@@ -1417,7 +1417,7 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("ossInfo", new OssMaster());
 		}
 		
-		return OSS.OSS_DETAILS_VIEW_AJAX_JSP;
+		return "oss/view/ossDetailView";
 	}
 	
 	@GetMapping(value = OSS.CHECK_EXISTS_OSS_BY_NAME)
@@ -1701,7 +1701,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
 		
-		return OSS.OSS_AUTO_ANALYSIS_JSP;
+		return "oss/ossAutoAnalysispopup";
 	}
 	
 	@GetMapping(value=OSS.AUTO_ANALYSIS_LIST)
@@ -1831,7 +1831,7 @@ public class OssController extends CoTopComponent{
 	public String analysisResultDetail(HttpServletRequest req, HttpServletResponse res, @PathVariable String groupId, Model model){
 		model.addAttribute("groupId", groupId);
 		
-		return OSS.ANALYSIS_RESULT_DETAIL_JSP;
+		return "oss/ossAnalysisResultDetailpopup";
 	}
 	
 	@SuppressWarnings("unchecked")

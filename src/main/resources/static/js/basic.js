@@ -2714,7 +2714,7 @@ var tableRefreshNew = function (id) {
                 var id = $(this).attr('id');
                 if ("list" == id) {
                     $(this).jqGrid('setGridWidth', 0, true);
-                    $(this).jqGrid('setGridWidth', width, true);
+                    $(this).jqGrid('setGridWidth', width-20, true);
                 }
             });
         }, 300);
@@ -3067,7 +3067,7 @@ function resizingOuterJqGidSet() {
         $(".outerJqGridSet table").jqGrid("setGridWidth", 0, true);
         $(".outerJqGridSet table").jqGrid(
             "setGridWidth",
-            $(window).innerWidth() - 50,
+            $(window).innerWidth() - 40,
             true
         );
     }
@@ -3185,7 +3185,6 @@ function getCookie(cookieName) {
             end = cookieData.length;
         }
         cookieValue = cookieData.substring(start, end);
-        console.log(cookieValue);
     }
 
     return unescape(cookieValue);

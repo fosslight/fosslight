@@ -27,11 +27,9 @@
 		'use strict';
 		data.init();
 		evt.init();
+		$('.select2').select2();
 		
-		if('Y' == [[${project.viewOnlyFlag}]]) {
-            
-        }
-		if([[${project.prjId}]] != "" && [[${project.copyFlag}]] != 'Y'){
+		if ("" != [[${project.prjId}]] && 'Y' != [[${project.copyFlag}]]) {
 			$("input[name=creatorNm]").val([[${project.prjUserName}]]);
 		}
 		
@@ -145,40 +143,80 @@
 			});
 			
 			$('#drop').on('click', function(){
-				var comment = "";
-				if(comment == ""){
-					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
-				}else{
-					if(distributionStatus == "PROC"){
-						var comment = [[#{msg.project.distribution.loading}]];
-						
-						alertify.error(comment, 0);
-
-						return false;
-					} else if(distributionStatus == "RSV"){
-						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
-
-						alertify.confirm(dropMessage, function (e) {
-							if (e) {
-								fn.cancelDistributeReserve();
-							} else {
-								return false;
+				var innerHtml 	= 'Are you to enter a comment when drop?<br><br>';
+                innerHtml 		+= '<textarea id="dropEditor"></textarea>';
+				
+                if(!alertify.dropDialog){
+					alertify.dialog('dropDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								var buttons = setup.buttons;
+								var customButtons = [];
+								for (var i in buttons) {
+									if ('OK' == buttons[i].text) {
+										customButtons.push(buttons[i]);
+									}
+								}
+								setup.buttons = customButtons;
+								setup.focus.element = 1;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
 							}
-						});
-					} else if(distributionStatus == "DONE"){
-						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
+						};
+					}, false, 'confirm');
+            	}
+				
+                $("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+				
+                alertify.confirmDialog(innerHtml, function () {
+                	var comment = $($("#dropEditor").summernote('code')).text();
+    				if ("" == comment) {
+    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
+    				} else {
+    					if (distributionStatus == "PROC") {
+    						var comment = [[#{msg.project.distribution.loading}]];
+    						
+    						alertify.error(comment, 0);
 
-						alertify.confirm(dropMessage, function (e) {
-							if (e) {
-								fn.deleteWithOSDD();
-							} else {
-								return false;
-							}
-						});
-					} else {
-						fn.exeProjectDrop();
-					}
-				}
+    						return false;
+    					} else if (distributionStatus == "RSV") {
+    						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
+
+    						alertify.confirm(dropMessage, function (e) {
+    							if (e) {
+    								fn.cancelDistributeReserve();
+    							} else {
+    								return false;
+    							}
+    						});
+    					} else if (distributionStatus == "DONE") {
+    						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
+
+    						alertify.confirm(dropMessage, function (e) {
+    							if (e) {
+    								fn.deleteWithOSDD();
+    							} else {
+    								return false;
+    							}
+    						});
+    					} else {
+    						fn.exeProjectDrop(true);
+    					}
+    				}
+                });
 			});
 			
 			$("#popCopyConfirmSave").click(function(){
@@ -257,10 +295,12 @@
 				$("#osType option:selected").each(function () {
 					$("#osTypeEtc").val('');
 					
-					if($(this).val()== osTypeEtc){
-						$("#osTypeEtc").attr("disabled",false);
-					}else{
-						$("#osTypeEtc").attr("disabled",true);
+					if ($(this).val()== osTypeEtc){
+						$("#osTypeEtc").attr("disabled", false);
+						$("#osTypeEtc").show();
+					} else{
+						$("#osTypeEtc").attr("disabled", true);
+						$("#osTypeEtc").hide();
 					}
 				});
 
@@ -775,8 +815,13 @@
 				});
 			},
 			// 컴플리트 처리
-			exeProjectDrop : function(){
-				var data = {"prjId" : $('input[name=prjId]').val() , "dropYn" : "Y", "userComment":""};
+			exeProjectDrop : function(commentFlag){
+				var data = {"prjId" : $('input[name=prjId]').val() , "dropYn" : "Y"};
+				if (commentFlag) {
+					data["userComment"] = $("#dropEditor").summernote('code');
+				} else {
+					data["userComment"] = "";
+				}
 				
 				$.ajax({
 					url : '/project/updateProjectStatus',
@@ -805,7 +850,7 @@
 							alertify.alert(data.resMsg, function(){
 								this.close();
 								
-								fn.exeProjectDrop();
+								fn.exeProjectDrop(false);
 							});
 						} else {
 							alertify.error(data.resMsg, 0);
@@ -832,7 +877,7 @@
 							alertify.alert(data.resMsg, function(){
 								this.close();
 								
-								fn.exeProjectDrop();
+								fn.exeProjectDrop(false);
 							});
 						} else {
 							alertify.error(data.resMsg, 0);
@@ -1059,7 +1104,7 @@
 				var prjId = $('input[name=prjId]').val();
 				
 				if(json.resCd=='10') {
-					reloadTabInframe('<c:url value="/project/list"/>');
+					reloadTabInframe('/project/list');
 					
 					if(data.copy) {
 						alertify.alert([[#{msg.common.success}]], function(){
@@ -1118,6 +1163,12 @@
 						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
+			},
+			selectCreatorDivision : function(obj) {
+				var cDivision = $(obj).val();
+				if ("" != cDivision) {
+					$("input[name='division']").val(cDivision);
+				}
 			},
 			makeModelList : function(data){
 				modelData = data.currentModelList;

@@ -42,12 +42,12 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="btn-group float-right mt-1">
-                                                    <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong>Help</strong></button>
+                                                    <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong th:text="Help"></strong></button>
                                                     <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
-                                                        <span class="sr-only">Toggle Dropdown</span>
+                                                        <span class="sr-only"></span>
                                                     </button>
                                                     <div class="dropdown-menu" role="menu">
-                                                        <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('OSS_List_Main')|">How to use FossLight Hub</a>
+                                                        <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('OSS_List_Main')|" th:text="'How to use FossLight Hub'"></a>
                                                     </div>
                                                 </div>
 											</div>

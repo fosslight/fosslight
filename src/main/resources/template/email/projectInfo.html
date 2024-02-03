@@ -226,7 +226,7 @@
 									</table>
 								</th:block>
 								<br />
-								<div th:if="${comment and comment != '' and mailType != '51' and mailType != '50' and mailType != '40' and mailType != '41' and mailType != '68' and mailType != '38' and mailType != '33' and mailType != '46' and mailType != '100' }">
+								<div th:if="${comment != '' and mailType != '51' and mailType != '50' and mailType != '40' and mailType != '41' and mailType != '68' and mailType != '38' and mailType != '33' and mailType != '46' and mailType != '100' }">
 									<h2 th:style="'margin:0;padding:25px 10px 0;font-size:16px;'" th:utext="'Comment'"></h2>
 									<div th:style="'padding:10px;font-size:12px;'" th:utext="${comment}"></div>
 								</div>

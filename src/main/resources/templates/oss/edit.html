@@ -36,9 +36,10 @@
                                 <div class="card-body">
                                     <div class="row form-group">
                                     	<div class="col-md-6">
-											<div class="row form-group">
+											<div class="row">
 												<div class="col-md-12 required">
 													<label th:text="#{msg.common.field.OSS.name}"></label><span class="text-orange">*</span>
+													<i class="fas fa-info-circle ml-1 ossI" title="detail Info" style="color: #007bff; cursor: pointer;" th:onclick="|fn.showOssViewPage(this)|"></i>
 													<input class="form-control autoComOss" name="ossName" th:value="${detail?.ossName}" type="text" th:disabled="${isReadOnly}"/>
 												</div>
 												<div class="col-md-12 required">
@@ -47,7 +48,7 @@
 											</div>
 										</div>
 										<div class="col-md-6">
-											<div class="row form-group">
+											<div class="row">
 												<div class="col-md-12">
 													<label for="ossVersion" th:text="#{msg.common.field.OSS.version}"></label><span class="text-orange">*</span>
 													<input class="form-control" id="ossVersion" name="ossVersion" th:value="${detail?.ossVersion}" type="text" th:disabled="${isReadOnly}"/>
