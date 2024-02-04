@@ -24,10 +24,10 @@
 						<tr>
 							<td width="1" th:style="'background:#ddd'"></td>
 							<td th:style="'padding:40px;'">
-								<div th:if="${contentsTitle}" th:style="'padding-bottom:10px;font-size:16px;font-weight:bold;'" th:text="${contentsTitle}"></div>
-								<div th:if="${contentsSubTitle}" th:style="'font-size:12px;'" th:text="${contentsSubTitle}"></div>
+								<div th:if="${contentsTitle != null && contentsTitle != ''}" th:style="'padding-bottom:10px;font-size:16px;font-weight:bold;'" th:text="${contentsTitle}"></div>
+								<div th:if="${contentsSubTitle != null && contentsSubTitle != ''}" th:style="'font-size:12px;'" th:text="${contentsSubTitle}"></div>
 								<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:text="'« User Information »'"></h2>
-								<div th:if="${changed_user_info}">
+								<div th:if="${changed_user_info != null}">
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">
 										<tr>
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'ID'"></th>
@@ -42,7 +42,7 @@
 									</table>
 								</div>
 								<br />
-								<div th:if="${retiree_user_info}">
+								<div th:if="${retiree_user_info != null}">
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">
 										<tr>
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'ID'"></th>
@@ -60,7 +60,7 @@
 								</div>
 								<br />
 								<div th:style="'margin:20px 0;border:1px dashed #666;'"></div>
-								<div th:if="${domain}">
+								<div th:if="${domain != null && domain != ''}">
 									<div th:assign="shortDomain=${domain.replaceAll('(http|https)://', '')}" th:style="'font-size:12px;'" th:text="'* This mail was sent by ' + ${shortDomain}"></div>
 								</div>
 							</td>

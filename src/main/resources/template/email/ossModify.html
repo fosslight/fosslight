@@ -29,7 +29,7 @@
                         <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle}"
                              th:utext="${contentsTitle}"></div>
                         <p style="font-size:12px;" th:if="${contentsSubTitle}" th:utext="${contentsSubTitle}"></p>
-                        <div th:if="${comment}">
+                        <div th:if="${comment != null && comment != ''}">
                             <h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
                             <div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
                         </div>

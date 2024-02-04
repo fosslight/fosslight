@@ -376,8 +376,13 @@ public class OssController extends CoTopComponent{
 		
 		ossMaster.setOssLicenses((List<OssLicense>) map.get("rows"));
 		ossMaster.setOssId(null);
-		model.addAttribute("detail", ossMaster);
-				
+		model.addAttribute("copyData", ossMaster);
+		List<String> nickList = new ArrayList<>();
+		model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
+		
+		List<String> downloadLocationList = new ArrayList<>();
+		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
+		
 		return "oss/edit";
 	}
 	

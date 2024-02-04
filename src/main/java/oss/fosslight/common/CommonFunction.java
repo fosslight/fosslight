@@ -550,11 +550,17 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		
 		// 연삭식 적용 및 Short Identifier 로 변경
 		if (!licenseNameList.isEmpty()) {
+			int liListSize = licenseNameList.size();
+			int liIdx = 0;
+			
 			for (List<String> combList : licenseNameList) {
 				if (!isEmpty(rtnVal)) {
 					rtnVal += " OR ";
 				}
 				String andStr = "";
+				int combListSize = combList.size();
+				int idx = 0;
+				
 				for (String s : combList) {
 					if (!isEmpty(andStr)) {
 						if (msgType) { 
@@ -572,7 +578,35 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					}
 					
 					if (htmlLinkType && licenseMaster != null) {
-						andStr += "<a href='javascript:void(0);' class='urlLink'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + s + "</a>" ;
+						if (liListSize == 1) {
+							if (combListSize > 1) {
+								if (idx == 0) {
+									andStr += "<a href='javascript:void(0);' class='urlLink mr-1'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + s + "</a>" ;
+								} else {
+									andStr += "<a href='javascript:void(0);' class='urlLink ml-1'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + s + "</a>" ;
+								}
+							} else {
+								andStr += "<a href='javascript:void(0);' class='urlLink'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + s + "</a>" ;
+							}
+						} else {
+							if (combListSize > 1) {
+								if (liIdx != liListSize -1) {
+									if (idx == 0) {
+										andStr += "<a href='javascript:void(0);' class='urlLink mr-1'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + s + "</a>" ;
+									} else {
+										andStr += "<a href='javascript:void(0);' class='urlLink ml-1'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + s + "</a>" ;
+									}
+								} else {
+									andStr += "<a href='javascript:void(0);' class='urlLink ml-1'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + s + "</a>" ;
+								}
+							} else {
+								if (liIdx != liListSize -1) {
+									andStr += "<a href='javascript:void(0);' class='urlLink mr-1'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + s + "</a>" ;
+								} else {
+									andStr += "<a href='javascript:void(0);' class='urlLink ml-1'  onclick='showLicenseText(" + licenseMaster.getLicenseId() + ");' >" + s + "</a>" ;
+								}
+							}
+						}
 					} else {
 						if (spdxConvert) {
 							// identifier가 없는 경우 라이선스 이름을 spdx 연동 용으로 변경한다.
@@ -580,9 +614,11 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						}
 						andStr += s;
 					}
+					idx++;
 				}
 				
 				rtnVal += licenseNameList.size() > 1 ? ( combList.size() != 1 && !msgType ? ("(" + andStr + ")") :  andStr ) : andStr;
+				liIdx++;
 			}
 		}
 		
@@ -5269,17 +5305,17 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				case "" : btnShowMap.put("requestBtn", CoConstDef.FLAG_YES); break;
 				case "PROG": btnShowMap.put("requestBtn", CoConstDef.FLAG_YES); break;
 				case "REQ": btnShowMap.put("reviewBtn", CoConstDef.FLAG_YES); break;
-				case "REV": btnShowMap.put("confirmtBtn", CoConstDef.FLAG_YES); break;
+				case "REV": btnShowMap.put("confirmBtn", CoConstDef.FLAG_YES); break;
 				case "CONF": btnShowMap.put("rejectBtn", CoConstDef.FLAG_YES); break;
 			}
 			if (!btnShowMap.containsKey("requestBtn")) btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
 			if (!btnShowMap.containsKey("reviewBtn")) btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("confirmtBtn")) btnShowMap.put("confirmtBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("confirmBtn")) btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
 			if (!btnShowMap.containsKey("rejectBtn")) btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
 		} else if (viewOnlyFlag.equals("Y")) {
 			btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
 			btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
-			btnShowMap.put("confirmtBtn", CoConstDef.FLAG_NO);
+			btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
 			btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
 		} else {
 			switch (identificationStatus) {
@@ -5290,7 +5326,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 			if (!btnShowMap.containsKey("requestBtn")) btnShowMap.put("requestBtn", CoConstDef.FLAG_NO);
 			if (!btnShowMap.containsKey("reviewBtn")) btnShowMap.put("reviewBtn", CoConstDef.FLAG_NO);
-			if (!btnShowMap.containsKey("confirmtBtn")) btnShowMap.put("confirmtBtn", CoConstDef.FLAG_NO);
+			if (!btnShowMap.containsKey("confirmBtn")) btnShowMap.put("confirmBtn", CoConstDef.FLAG_NO);
 			if (!btnShowMap.containsKey("rejectBtn")) btnShowMap.put("rejectBtn", CoConstDef.FLAG_NO);
 		}
 	}

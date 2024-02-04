@@ -113,13 +113,6 @@ $(document).ready(function () {
 	$(".select2").select2();
 });
 
-// close exportlist
-$(document).click(function(e){
-	if(!$("#ExportContainer").has(e.target).length) {
-		$("#ExportList").hide();
-	}
-});
-
 var commentTemp = '';
 var modifyCommentId = [[${detail.comment}]];
 var commentIdx= [[${detail.comment}]];
@@ -175,7 +168,7 @@ var evt = {
 			if(isNew) {
 				var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
 				fn.addWatcher(divVal, userVal, '');
-				fn.addHtml($("#nameSpace"), watcherStr, divVal, userVal);
+				fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
 			}
 		});
 		
@@ -477,10 +470,10 @@ var evt = {
 					if("true" == data.isValid) {
 						var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
 						fn.addWatcher(data.division, data.userId, '');
-						fn.addHtml($("#nameSpace"), watcherStr, data.division, data.userId);
+						fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
 					} else {
 						fn.addWatcher('', '', _email);
-						fn.addHtml($("#nameSpace"), _email, _email, "Email");
+						fn.addHtml($("#multiDiv"), _email, _email, "Email");
 					}
 				},
 				error: function(data){
@@ -531,7 +524,7 @@ var evt = {
 			var listKind = $("#listKind").val()
 			  , listId = $("#listId").val();
 				
-			if(fn.chkListValidation(listKind, listId)){
+			if (fn.chkListValidation(listKind, listId)){
 				var obj = {};
 				
 				obj["listKind"] = listKind;
@@ -738,7 +731,7 @@ var fn = {
 			 		
 					$('#ossComponentsStr').val(JSON.stringify(mainData));
 					$('#userComment').val(""); // replaceWithLink(CKEDITOR.instances['editor'].getData())
-					$('#description').val(replaceWithLink($("#descriptionTextarea").code()));
+					$('#description').val(replaceWithLink($("#descriptionTextarea").summernote('code')));
 					
 					var prjId = [[${detail.partnerId}]];
 					var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
@@ -1088,25 +1081,47 @@ var fn = {
 	},
 	delete : function(){
 		if (fn.checkStatus()){
-			var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">'+[[#{msg.partner.delete.warning}]];
-			innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
-			innerHtml    += '		<div id="editor2" style="width:470px; height:300px;">' + '' + /* + CKEDITOR.instances['editor'].getData() + */ '</div>';
-			innerHtml    += '	</div>';
-			innerHtml    += '</div>';
-			
-			alertify.confirm(innerHtml, function () {
-//				if(CKEDITOR.instances['editor2'].getData() == "") {
-//					alertify.alert([[#{msg.project.required.comments}]], function(){});
+			var innerHtml 	= [[#{msg.partner.delete.warning}]];
+           	innerHtml 		+= '<textarea id="parDelEditor"></textarea>';
+           	
+           	if(!alertify.deleteParDialog){
+				alertify.dialog('deleteParDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = -1;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+        	}
+           	
+			alertify.deleteParDialog(innerHtml, function () {
+				if("" == $("#parDelEditor").summernote('code')) {
+					alertify.alert([[#{msg.project.required.comments}]], function(){});
 
-//					return false;
-//				} else {
+					return false;
+				} else {
 					var partnerId = $('input[name=partnerId]').val();
 					$.ajax({
 						url : '/partner/delAjax',
 						type : 'POST',
 						dataType : 'json',
 						cache : false,
-						data : {'partnerId' : partnerId, userComment : "" /* replaceWithLink(CKEDITOR.instances['editor2'].getData())*/ },
+						data : {'partnerId' : partnerId, userComment : replaceWithLink($("#parDelEditor").summernote('code')) },
 						success: function(data){
 							if(partnerId) {
 								deleteTabInFrame('/partner/edit/'+partnerId);			
@@ -1120,17 +1135,11 @@ var fn = {
 							alertify.error([[#{msg.common.valid2}]], 0);
 						}
 					});
-//				}
+				}
 			});
 
-// 			var _editor = CKEDITOR.instances.editor2;
-			
-// 			if(_editor) {
-// 				_editor.destroy();
-// 			}
-			
-// 			CKEDITOR.replace('editor2', {});
-		}else{
+			$("#parDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+		} else {
 			alertify.alert([[#{msg.partner.warning}]], function(){});
 		}
 	},
@@ -1555,26 +1564,11 @@ var fn = {
 			}
 		}
 		
-		var html  = '<div class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		var html  = '<div class="external-event mr-1"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 		html += str;
-		if ("Y" != [[${detail.viewOnlyFlag}]] && !isReadOnly) html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\');"></i>';
-		if ("Email" == userId) {
-			html += '<input class="watcherTags" type="hidden" name="watchers" value="'+userId+'/Email" />';
-			if ("Y" != [[${detail.viewOnlyFlag}]] && !isReadOnly) html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\');"></i>';
-		} 
+		html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 		
 		target.append(html);
-		
-// 		var rlt = division+((userId!="") ? "/"+userId : "");
-// 		var html  = '<span><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
-// 		html += '<strong>'+str+'</strong>';
-// 		html +='<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher(\''+division+'\',\''+userId+'\');" /></span>';
-
-// 		target.append(html);
-		
-// 		$('div.multiTxtSet2 .smallDelete').on('click', function(){
-// 			$(this).parent().remove();
-// 		});
 	},
 	addWatcher : function(uDiv, uId, uEmail) {
 		var partnerId = [[${detail.partnerId}]];
@@ -1600,7 +1594,7 @@ var fn = {
 			error : fn.onError
 		});
 	},
-	removeWatcher : function(uDiv, uId) {
+	removeWatcher : function(uDiv, uId, obj) {
 		var uEmail = "";
 
 		if("Email" == uId) {
@@ -1626,6 +1620,7 @@ var fn = {
 			contentType : 'application/json',
 			success: function(resultData){
 				if(resultData.isValid == "true") {
+					$(obj).parent().remove();
 					alertify.success([[#{msg.common.success}]]);
 				}
 			},
@@ -1681,7 +1676,7 @@ var fn = {
 						
 						if(isNew){
 							if(email != "") {
-								fn.addHtml($("#nameSpace"), email, email, "Email");
+								fn.addHtml($("#multiDiv"), email, email, "Email");
 							} else {
 								var str = "";
 								
@@ -1689,8 +1684,8 @@ var fn = {
 									str = divisionName;
 								} else {
 									str = '<b';
-
-									if(divisionEmptyCd != divVal) {
+									
+									if (divisionEmptyCd != division) {
 										if(deptUseYn == "N"){
 											str += ' class="deleteUser"';
 										}
@@ -1705,7 +1700,7 @@ var fn = {
 									str += '>'+userName+'</b>';
 								}
 								
-								fn.addHtml($("#nameSpace"), str, division, userId);
+								fn.addHtml($("#multiDiv"), str, division, userId);
 							}
 						}
 					}
@@ -1925,7 +1920,7 @@ var fn = {
 				_popupCheckOssName.close();
 			}
 			
-			_popupCheckOssName = window.open("/oss/checkOssName?prjId=${detail.partnerId}&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+			_popupCheckOssName = window.open("/oss/checkOssName?prjId="+[[${detail.partnerId}]]+"&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 			if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
 				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
@@ -1994,12 +1989,18 @@ var fn = {
 		if(langSelect){
 			copyUrl += "?lang=" + langSelect;
 		}
+		$("#copyUrl").show();
 		$("#copyUrl").val(copyUrl);
 		
 		//launch it.
-		var btnHtm = '<b>Share Link</b><br>';
-		btnHtm += '<input type="text" value="'+copyUrl+'" style="width:460px;" disabled/><br><br>';
-		btnHtm += '<input type="button" value="Copy" class="btnCancel btnColor red right" style="height:30px;width:100px;"onclick="fn.copyUrl(this)"/>';
+		var btnHtml 	= 	'<div class="row form-group">';
+		btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
+		btnHtml 		+= 	'		<input type="text" class="form-control" value="'+copyUrl+'" disabled/>';
+		btnHtml 		+= 	'	</div>';
+		btnHtml 		+= 	'</div>';
+		btnHtml 		+= 	'<div class="row float-right custom-layout">';
+		btnHtml 		+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" onclick="fn.copyUrl(this)">Copy</button>';
+		btnHtml 		+= 	'</div>';
 
 		if(!alertify.myAlert){
 			//define a new dialog
@@ -2015,17 +2016,23 @@ var fn = {
 				},
 				prepare:function(){
 					this.setContent(this.message);
+				},
+				hooks: {
+			    	onshow: function() {
+			          	this.elements.content.style.height = '200px';
+			        }
 				}
 			}});
 		}
 		
-		alertify.myAlert(btnHtm);
+		alertify.myAlert(btnHtml);
 	},
 	copyUrl : function(target){
 		var copyUrl = document.getElementById( 'copyUrl' );
 		copyUrl.select();
         document.execCommand( 'Copy' );
         
+        $("#copyUrl").hide();
 		$('.ajs-close').trigger("click");
 		alertify.success([[#{msg.common.success}]]);
 	},
@@ -2072,7 +2079,7 @@ var fn = {
             var _popup = null;
 
             if(_popup == null || _popup.closed){
-                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
+                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
                 $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
 				$("#partnerBulkEditForm > input[name=target]").val(targetGird);
@@ -2083,7 +2090,7 @@ var fn = {
                 }
             } else {
                 _popup.close();
-                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=380, toolbar=no, location=no, left=100, top=100, resizable=yes");
+                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
                 $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
 				$("#partnerBulkEditForm > input[name=target]").val(targetGird);
@@ -2376,16 +2383,19 @@ var datas = {
 				var deptUseYn = watcher.deptUseYn || "Y";
 				var userUseYn = watcher.userUseYn || "Y";
 				
-				if(watcher!=""){
-					if(watcher.parEmail){ 
+				if ("" != watcher){
+					if (watcher.parEmail){ 
 						fn.addHtml($("#multiDiv"), watcher.parEmail, watcher.parEmail, "Email");
 					} else {
-						var str = "";
+						str = '';
 						
 						if(watcher.parUserName == undefined){
 							str = watcher.parDivisionName;
 						} else {
-							str = watcher.parUserName;
+							if (divisionEmptyCd != watcher.prjDivision) {
+								str += watcher.parDivisionName +'/';
+							}
+							str += watcher.parUserName;
 						}
 						
 						fn.addHtml($("#multiDiv"), str, watcher.parDivision, watcher.parUserId);

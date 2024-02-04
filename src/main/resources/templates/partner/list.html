@@ -116,6 +116,45 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <th:block sec:authorize="hasRole('ROLE_ADMIN')">
+                                        	<a class="small-box-footer mb-2" href="#" id="moreInfoBtn" th:text="More"><i class="fas fa-arrow-circle-down"></i></a>
+                                            <div class="more-search" id="moreSearchContent" style="display: none">
+                                            	<div class="row">
+                                        			<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<input type="text" name="ossName" class="form-control autoComOss" placeholder="Oss Name" th:value="${searchBean?.ossName}" />
+                                                		</div>
+                                            		</div>
+                                            		<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<input type="text" name="ossVersion" class="form-control autoComOss" placeholder="Oss Version" th:value="${searchBean?.ossVersion}" />
+                                                		</div>
+                                            		</div>
+                                            		<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
+                                                		</div>
+                                          			</div>
+                                        		</div>
+                                        		<div class="row">
+                                        			<div class="col-4">
+                                                		<div class="form-group">
+                                                			<textarea class="form-control" name="binaryName" placeholder="Binary Name" rows="3" th:utext="${searchBean?.binaryName}"></textarea>
+                                                		</div>
+                                            		</div>
+                                            		<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<textarea class="form-control" name="userComment" placeholder="Comment" rows="3" th:utext="${searchBean?.comment}"></textarea>
+                                                		</div>
+                                            		</div>
+                                            		<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<textarea class="form-control" name="description" placeholder="Description" rows="3" th:utext="${searchBean?.description}"></textarea>
+                                                		</div>
+                                          			</div>
+                                        		</div>
+                                            </div>
+                                        </th:block>
                                    	</div>
                                 </div>
                             </div>

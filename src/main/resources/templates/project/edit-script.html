@@ -287,7 +287,7 @@
 						}
                     });
 	               	
-	               	$("#prjDelEditor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	               	$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 				}
 			});
 			// 직접입력
@@ -1935,21 +1935,13 @@
 							if(watcher.prjUserName == undefined){
 								str = watcher.prjDivisionName;
 							} else {
-								str = '<b';
+								str = '';
 								
-								if(divisionEmptyCd != watcher.prjDivision) {
-									if(deptUseYn == "N"){
-										str += ' class="deleteUser"';
-									}
-									
-									str += '>'+watcher.prjDivisionName+'</b>/<b';
+								if (divisionEmptyCd != watcher.prjDivision) {
+									str += watcher.prjDivisionName;
 								}
 								
-								if(userUseYn == "N"){
-									str += ' class="deleteUser"';
-								}
-								
-								str += '>'+watcher.prjUserName+'</b>';
+								str += watcher.prjUserName;
 							}
 							
 							fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);

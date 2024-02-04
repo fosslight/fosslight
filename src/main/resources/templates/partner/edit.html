@@ -92,7 +92,6 @@
                                                     <div class="col-md-12 mb-0">
                                                         <label for="inputName" th:text="#{msg.common.field.permission}"></label>
                                                         <div class="form-group mb-0">
-                                                            <button type="button" class="btn btn-sm clear1 text-gray text-bold" th:text="view"></button>
                                                             <div class="col-sm-12">
                                                                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                                                     <label class="btn btn-sm btn-onOff px-3">
@@ -123,7 +122,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6 px-5">
+                                        <div class="col-md-7 px-5">
                                             <div class="row form-group">
                                             	<div class="col-3">
                                             		<label for="inputName" th:text="#{msg.common.field.Agreement}"></label>
@@ -213,11 +212,9 @@
                                             </div>
                                             <div class="form-group" th:if="${detail.viewOnlyFlag ne 'Y' and !#lists.isEmpty(prjList)}">
                                             	<label for="inputName" th:text="#{msg.common.field.project}"></label>
-                                            	<div class="row">
-                                            		<div class="col-10 mb-2 d-flex">
-                                            			<table id="_projectList"><tr><td></td></tr></table>
-                                            		</div>
-                                            	</div>
+                                            	<div class="jqGridSet">
+                                        			<table id="_projectList"><tr><td></td></tr></table>
+                                    			</div>
                                             </div>
                                             <div class="form-group">
                                                 <label for="Watcher" th:text="Watcher"></label>
@@ -284,8 +281,7 @@
                                         				</div>
                                     				</div>
                                     				<div class="form-group mt-2">
-                                        				<div id="multiDiv" class="external-events pl-3 multiTxtSet2">
-                                        				</div>
+                                        				<div id="multiDiv" class="external-events ml-1 row"></div>
                                     				</div>
                                                 
                                             </div>
@@ -436,6 +432,7 @@
                             	</div>
                             	<div class="col-md-8">
                             		<div class="row float-right">
+                            			<input id="copyUrl" type="text" style="width:1px; height:1px; margin:0; padding:0; border: 0; display: none;">
                                    		<button type="button" th:if="${detail.partnerId != null}" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.shareUrl()|" th:text="'Share URL'"></button>
                                    		<button type="button" sec:authorize="hasRole('ROLE_ADMIN')" th:if="${detail.partnerId != null}" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="fn.binaryDBSave([[${detail.partnerId}]])" th:text="'Save (Binary DB)'"></button>
                                     	<th:block th:if="${detail.partnerId != null}">
@@ -445,13 +442,13 @@
                                                     <span class="sr-only" th:text="'Toggle Dropdown'"></span>
                                                 </button>
                                                 <div class="dropdown-menu" role="menu">
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('report_sub')|" th:text="'FOSSLight Report (Spreadsheet)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('Spreadsheet_sub')|" th:text="'SPDX (Spreadsheet)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('RDF_sub')|" th:text="'SPDX (RDF)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('TAG_sub')|" th:text="'SPDX (TAG)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('JSON_sub')|" th:text="'SPDX (JSON)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('YAML_sub')|" th:text="'SPDX (YAML)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('report_sub')|" th:text="'FOSSLight Report (Spreadsheet)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('Spreadsheet_sub')|" th:text="'SPDX (Spreadsheet)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('RDF_sub')|" th:text="'SPDX (RDF)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('TAG_sub')|" th:text="'SPDX (TAG)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('JSON_sub')|" th:text="'SPDX (JSON)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('YAML_sub')|" th:text="'SPDX (YAML)'"></a>
                                                 </div>
                                             </div>
                                     	</th:block>
@@ -478,5 +475,8 @@
         </div>
     </div>
 </body>
-
+<form id="partnerBulkEditForm" method="POST" th:action="@{/oss/ossBulkEditPopup}" target="bulkEditViewPartnerPopup">
+	<input type="hidden" name="rowId" value=""/>
+	<input type="hidden" name="target" value=""/>
+</form>
 </html>
