@@ -33,6 +33,7 @@ $(document).ready(function() {
 		showHelpLink("Self-Check_Edit_Export", "helpLink_vulerabiityExport");
 	}
 	
+	$("#editor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 	$("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 	
 	data.init();
@@ -61,13 +62,6 @@ $(document).ready(function() {
 		$("[name=gridArea]").hide();
 		$("#gridArea"+tabId).show();
 	});
-});
-
-// close exportlist
-$(document).click(function(e){
-    if(!$("#ExportContainer").has(e.target).length) {
-        $("#ExportList").hide();
-    }
 });
 
 var fn_self ={
@@ -174,7 +168,8 @@ var evt = {
 			var $userSel	= $("#prjUserId"),
 				userVal		= $userSel.val()||"",
 				userTxt		= $userSel.find("option[value='"+userVal+"']").text();
-
+				userTxt 	= userTxt.split("(")[0];
+			
 			// 선택한 item이 없을 경우.
 			if(divVal == "" || userVal == "") {
 				return alertify.error([[#{msg.project.required.selectDivision}]], 0);
@@ -202,8 +197,13 @@ var evt = {
 				}
 			});
 			
-			if(isNew) {
-				var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
+			if (isNew) {
+				var watcherStr = "";
+				if (divisionEmptyCd != divVal) {
+					watcherStr = "<b>" + divTxt + "</b>/<b>" + userTxt + "</b>";
+				} else {
+					watcherStr = "<b>" + userTxt + "</b>"
+				}
 				fn.addWatcher(divVal, userVal, '');
 				fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
 			}
@@ -257,7 +257,7 @@ var evt = {
 			var listKind = $("#listKind").val(),
 				listId = $("#listId").val();
 				
-			if(fn.chkListValidation(listKind, listId)) {
+			if (fn.chkListValidation(listKind, listId)) {
 				var obj = {};
 				obj["listKind"] = listKind;
 				obj["listId"] = listId;
@@ -281,7 +281,7 @@ var fn = {
 	},
 	// 저장
 	saveSubmit : function(){
-		var editorVal = $("#commentTextArea").summernote('code');
+		var editorVal = $("#editor").summernote('code');
 		$('input[name=comment]').val(replaceWithLink(editorVal));
 		
 		$("#projectForm").ajaxForm({
@@ -939,7 +939,7 @@ var fn = {
             var _popup = null;
             
             if(_popup == null || _popup.closed){
-                _popup = window.open("", "bulkEditViewSelfPopup", "width=850, height=415, toolbar=no, location=no, left=100, top=100, resizable=yes");
+                _popup = window.open("", "bulkEditViewSelfPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
                 $("#selfBulkEditForm > input[name=rowId]").val(rowCheckedArr);
 				$("#selfBulkEditForm > input[name=target]").val(targetGird);
@@ -950,7 +950,7 @@ var fn = {
                 }
             } else {
                 _popup.close();
-                _popup = window.open("", "bulkEditViewSelfPopup", "width=850, height=415, toolbar=no, location=no, left=100, top=100, resizable=yes");
+                _popup = window.open("", "bulkEditViewSelfPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
 
                 $("#selfBulkEditForm > input[name=rowId]").val(rowCheckedArr);
 				$("#selfBulkEditForm > input[name=target]").val(targetGird);
@@ -1120,13 +1120,9 @@ var fn = {
 		var html  = '<span class="external-event mr-1" id="'+userId+'"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
         html += str;
 		if([[${project.viewOnlyFlag}]] != "Y" && !isReadOnly) {
-			html += '<i value="Delete" class="fas fa-times float-right mt-1 ml-3 smallDelete" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\');" /></i>';
+			html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);" /></i>';
 		}
 		target.append(html);
-
-		$('div.multiTxtSet2 .smallDelete').on('click', function(){
-			$(this).parent().remove();
-		});
 	},
 	addWatcher : function(uDiv, uId, uEmail) {
 		if($('input[name=prjId]').val() == "") {
@@ -1168,7 +1164,7 @@ var fn = {
 			error : fn.onError
 		});
 	},
-	removeWatcher : function(uDiv, uId) {
+	removeWatcher : function(uDiv, uId, obj) {
 		var uEmail = "";
 		if("Email" == uId) {
 			uEmail = uDiv;
@@ -1190,7 +1186,8 @@ var fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function(resultData){
-				if(resultData.isValid == "true") {
+				if (resultData.isValid == "true") {
+					$(obj).parent().remove();
 					alertify.success([[#{msg.common.success}]]);
 				}
 			},
@@ -1275,12 +1272,13 @@ var fn = {
 						}
 					}
 					
-					if(prjId) {
+					if (prjId) {
 						alertify.success([[#{msg.common.success}]]);
+						$("input[name='listId']").val("");
 					}
 				}
 				
-				if(!copyWatcher.length) {
+				if (!copyWatcher.length) {
 					alertify.warning([[#{msg.project.required.id}]]);
 				}
 			},
@@ -1341,27 +1339,19 @@ var data = {
 				var deptUseYn = watcher.deptUseYn || "Y";
 				var userUseYn = watcher.userUseYn || "Y";
 				
-				if(watcher!=""){
-					if(watcher.prjEmail){ 
+				if (watcher != "") {
+					if (watcher.prjEmail) { 
 						fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
 					} else {
 						var str = "";
 						
-						if(watcher.prjUserName == undefined){
+						if (watcher.prjUserName == undefined){
 							str = watcher.prjDivisionName;
 						} else {
 							str = '<b';
 							
-							if(divisionEmptyCd != watcher.prjDivision) {
-								if(deptUseYn == "N"){
-									str += ' class="deleteUser"';
-								}
-								
+							if (divisionEmptyCd != watcher.prjDivision) {
 								str += '>'+watcher.prjDivisionName+'</b>/<b';
-							}
-							
-							if(userUseYn == "N"){
-								str += ' class="deleteUser"';
 							}
 							
 							str += '>'+watcher.prjUserName+'</b>';
@@ -2129,7 +2119,7 @@ var src_fn = {
 				_popupCheckOssName.close();
 			}
 			
-			_popupCheckOssName = window.open('/oss/checkOssName?prjId='+[[${project.prjId}]]+'&referenceDiv=10&targetName=self"/>', 'Check OSS Name', 'width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
+			_popupCheckOssName = window.open('/oss/checkOssName?prjId='+[[${project.prjId}]]+'&referenceDiv=10&targetName=self', 'Check OSS Name', 'width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
 
 			if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
 				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
@@ -2148,7 +2138,7 @@ var src_fn = {
 				_popupCheckOssLicense.close();
 			}
 			
-			_popupCheckOssLicense = window.open('/oss/checkOssLicense?prjId='+[[${project.prjId}]]+'&referenceDiv=10&targetName=self"/>', 'Check License', 'width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
+			_popupCheckOssLicense = window.open('/oss/checkOssLicense?prjId='+[[${project.prjId}]]+'&referenceDiv=10&targetName=self', 'Check License', 'width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
 
 			if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
 				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
@@ -2694,6 +2684,8 @@ var src_grid = {
 				if(srcDiffMsgData) {
 					gridDiffMsg(srcDiffMsgData, "srcList", "SELF");
 				}
+				
+				resizingOuterJqGidSet();
 			}
 		});
 		
