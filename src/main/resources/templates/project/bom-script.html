@@ -798,7 +798,7 @@ var bom_fn = {
 	displayVulnerability : function(cellvalue, options, rowObject){
 		var display = "";
 		var _url = "";
-		var prjId = '${project.prjId}';
+		var prjId = [[${project.prjId}]];
 		var ossName = "";
 		if (typeof rowObject.refOssName !== "undefined") {
 			ossName = rowObject.refOssName.replace(' ','_');

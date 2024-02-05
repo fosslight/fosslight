@@ -19,15 +19,15 @@
                             <span class="description-percentage text-lg text-dark-gray" id="vPrjName"></span>
                             <span class="text-dark-gray mx-1" id="vCreated"></span>
                             <span class="ml-2">
-                                <span class="badge badge-info text-md px-2 py-1" id="editTab" title="Go to Basic information tab">B</span>
+                                <span class="badge badge-info text-md px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">B</span>
                                 <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
-                                    <span class="badge badge-success text-md px-2 py-1" id="packagingTab" title="Go to Packaging tab">P</span>
+                                    <span class="badge badge-success text-md px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">P</span>
                                 </th:block>
 <!--                                <th:block th:if="${distributionFlag and project.destributionStatus != 'NA' and (project.destributionStatus != null || project.verificationStatus == 'CONF')}">-->
 <!--                                    <span class="badge badge-danger text-md px-2 py-1" id="distributionTab" title="Go to Distribution tab">D</span>-->
 <!--                                </th:block>-->
                                 <th:block th:if="${project.secCode != null}">
-                                   <span class="badge badge-carrot text-md px-2 py-1" id="securityTab" title="Go to Security tab">S</span>
+                                   <span class="badge badge-carrot text-md px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">S</span>
                                 </th:block>
                             </span>
                             <span sec:authorize="hasRole('ROLE_ADMIN')" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
@@ -207,7 +207,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="3rdProjectSearch2 partyBtn">
+                                        <div class="3rdProjectSearch2">
                                         	<div class="three3list card card-light-gray-02 card-outline" style="display:none;">
                                                 <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
                                                 <div class="card-body px-3 pt-3">
@@ -235,7 +235,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mt-4 partyBtn" id="_3rdAddListContainer" style="display: none;">
+                                    <div class="mt-4" id="_3rdAddListContainer" style="display: none;">
                                     	<div class="card card-light-gray-02 card-outline">
                                             <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
                                             <div class="card-body px-3 pt-3">
@@ -367,7 +367,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="mt-4 depBtn" id="_depAddListContainer" style="display: none">
+                                        <div class="mt-4" id="_depAddListContainer" style="display: none">
                                             <div class="card card-light-gray-02 card-outline">
                                                 <div class="card-header text-sm py-2" th:text="|Loaded List|"></div>
                                                 <div class="card-body px-3 pt-3">
@@ -500,7 +500,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="mt-4 srcBtn" id="_srcAddListContainer" style="display: none">
+                                        <div class="mt-4" id="_srcAddListContainer" style="display: none">
                                             <div class="card card-light-gray-02 card-outline">
                                                 <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
                                                 <div class="card-body px-3 pt-3">
@@ -658,7 +658,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="mt-4 binBtn" id="_binAddListContainer" style="display: none">
+                                        <div class="mt-4" id="_binAddListContainer" style="display: none">
                                             <div class="card card-light-gray-02 card-outline">
                                                 <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
                                                 <div class="card-body px-3 pt-3">

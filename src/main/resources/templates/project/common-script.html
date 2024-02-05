@@ -863,12 +863,16 @@ var com_fn = {
 		if ($(obj).is(':checked')) {
 			if ("partyBtn" == target){
 				$("#gridAreaParty").show();
+				$("#_3rdAddListContainer").hide();
 			} else if ("depBtn" == target){
 				$("#gridAreaDep").show();
+				$("#_depAddListContainer").hide();
 			} else if ("srcBtn" == target){
 				$("#gridAreaSrc").show();
+				$("#_srcAddListContainer").hide();
 			} else if ("binBtn" == target){
 				$("#gridAreaBin").show();
+				$("#_binAddListContainer").hide();
 			}
 			
 			$('.'+target).hide();
@@ -878,19 +882,27 @@ var com_fn = {
 			if (target == "batBtn") {
 				bat_fn.changeSearch();
 			} else if ("partyBtn" == target){
-				if (_3rdLoadListLength == 0) {
+				if (_3rdLoadListLength > 0) {
+					$("#_3rdAddListContainer").show();
+				} else {
 					$("#_3rdAddListContainer").hide();
 				}
 			} else if ("depBtn" == target){
-				if (_depLoadListLength == 0) {
+				if (_depLoadListLength > 0) {
+					$("#_depAddListContainer").show();
+				} else {
 					$("#_depAddListContainer").hide();
 				}
 			} else if ("srcBtn" == target){
-				if (_srcLoadListLength == 0) {
+				if (_srcLoadListLength > 0) {
+					$("#_srcAddListContainer").show();
+				} else {
 					$("#_srcAddListContainer").hide();
 				}
 			} else if ("binBtn" == target){
-				if (_binLoadListLength == 0) {
+				if (_binLoadListLength > 0) {
+					$("#_binAddListContainer").show();
+				} else {
 					$("#_binAddListContainer").hide();
 				}
 			}
