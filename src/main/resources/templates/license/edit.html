@@ -68,13 +68,13 @@
                                                         <div class="col-md-12 ml-3 mt-2">
                                                             <div class="icheck-primary d-inline mx-3">
                                                                 <input id="obligationNotificationYn" class="oblicationChk"
-                                                                       name="obligationNotificationYn" th:checked="${#strings.equals(detail?.obligationNotificationYn, 'Y')}" type="checkbox"
+                                                                       name="obligationNotificationYn" th:checked="${detail?.obligationNotificationYn == 'Y'}" type="checkbox"
                                                                        value="Y" th:disabled="${isReadOnly}">
                                                                 <label class="text-lg-gray" for="obligationNotificationYn" th:text="Notice"></label>
                                                             </div>
                                                             <div class="icheck-primary d-inline  mx-3">
                                                                 <input id="obligationDisclosingSrcYn" class="oblicationChk"
-                                                                       name="obligationDisclosingSrcYn" th:checked="${#strings.equals(detail?.obligationDisclosingSrcYn, 'Y')}" type="checkbox"
+                                                                       name="obligationDisclosingSrcYn" th:checked="${detail?.obligationDisclosingSrcYn == 'Y'}" type="checkbox"
                                                                        value="Y" th:disabled="${isReadOnly}">
                                                                 <label class="text-lg-gray" for="obligationDisclosingSrcYn" th:text="'Source Code'"></label>
                                                             </div>

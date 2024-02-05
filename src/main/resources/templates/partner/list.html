@@ -82,8 +82,7 @@
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <select class="form-control select2" name="division" style="width: 100%;">
-                                                        <option th:value="''" th:text="'Division'"></option>
+                                                    <select class="form-control select2" id="division" name="division" style="width: 100%;">
                                                         <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
                                                     		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
                                                     	</th:block>
@@ -92,10 +91,9 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <select class="select2" multiple="multiple" data-placeholder="Status" style="width: 100%;">
-                                                    	<option th:value="''" th:text="'Status'"></option>
+                                                    <select class="form-control select2" multiple="multiple" id="status" name="status" data-placeholder="Status" style="width: 100%;">
                                                         <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}">
-                                                    		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                                    		<option th:if="${option.cdDtlNo != 'NA'}" th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
                                                     	</th:block>
                                                     </select>
                                                 </div>
@@ -118,6 +116,45 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <th:block sec:authorize="hasRole('ROLE_ADMIN')">
+                                        	<a class="small-box-footer mb-2" href="#" id="moreInfoBtn" th:text="More"><i class="fas fa-arrow-circle-down"></i></a>
+                                            <div class="more-search" id="moreSearchContent" style="display: none">
+                                            	<div class="row">
+                                        			<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<input type="text" name="ossName" class="form-control autoComOss" placeholder="Oss Name" th:value="${searchBean?.ossName}" />
+                                                		</div>
+                                            		</div>
+                                            		<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<input type="text" name="ossVersion" class="form-control autoComOss" placeholder="Oss Version" th:value="${searchBean?.ossVersion}" />
+                                                		</div>
+                                            		</div>
+                                            		<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
+                                                		</div>
+                                          			</div>
+                                        		</div>
+                                        		<div class="row">
+                                        			<div class="col-4">
+                                                		<div class="form-group">
+                                                			<textarea class="form-control" name="binaryName" placeholder="Binary Name" rows="3" th:utext="${searchBean?.binaryName}"></textarea>
+                                                		</div>
+                                            		</div>
+                                            		<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<textarea class="form-control" name="userComment" placeholder="Comment" rows="3" th:utext="${searchBean?.comment}"></textarea>
+                                                		</div>
+                                            		</div>
+                                            		<div class="col-4">
+                                                		<div class="form-group">
+                                                    		<textarea class="form-control" name="description" placeholder="Description" rows="3" th:utext="${searchBean?.description}"></textarea>
+                                                		</div>
+                                          			</div>
+                                        		</div>
+                                            </div>
+                                        </th:block>
                                    	</div>
                                 </div>
                             </div>
@@ -142,8 +179,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="row float-right" style="margin-right: .1rem;">
-                                <button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|" th:text="Export"></button>
-                                <button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|" th:text="Add"></button>
+                                <button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                                <button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3 btnAdd" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|" th:text="Add"></button>
                             </div>
                         </div>
                     </div>

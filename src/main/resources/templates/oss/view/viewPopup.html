@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+<th:block th:replace="oss/view/viewPopup-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <div class="custom-layout" style="height: auto">
+			<section class="content">
+				<div class="container-fluid">
+					<div class="row mt-3">
+						<div class="col-12">
+							<div class="card-body" style="background-color: #f5f4f3;">
+								<div class="jqGridSet" id="_ossListDiv" style="overflow-y :auto">
+									<table id="_ossList"><tr><td></td></tr></table>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row mt-3">
+						<div class="col-12" id="ossDetailInfo">
+					</div>
+				</div>
+			</section>
+		</div>
+    </div>
+</body>
+</html>

@@ -73,9 +73,9 @@
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
                 .on('cancel.daterangepicker', function (ev, picker) {
-               		$("#createdDate").val("");
-                  	$("input[name='startDate']").val("");
-                  	$("input[name='endDate']").val("");
+                	$(this).val("");
+                  	$("input[name='cStartDate']").val("");
+                  	$("input[name='cEndDate']").val("");
                   	$('#createdDate').attr('placeholder', 'Created Date');
                	});
 
@@ -98,7 +98,7 @@
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
              	.on('cancel.daterangepicker', function (ev, picker) {
-                  	$("#modifiedDate").val("");
+             		$(this).val("");
                  	$("input[name='mStartDate']").val("");
                    	$("input[name='mEndDate']").val("");
                    	$('#modifiedDate').attr('placeholder', 'Modified Date');

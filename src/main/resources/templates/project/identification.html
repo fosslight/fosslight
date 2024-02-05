@@ -30,25 +30,32 @@
                                    <span class="badge badge-carrot text-md px-2 py-1" id="securityTab" title="Go to Security tab">S</span>
                                 </th:block>
                             </span>
+                            <span sec:authorize="hasRole('ROLE_ADMIN')" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
+                            	<th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
+                            	<span class="ml-5 projdecBtn">
+                            		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
+                               		<label class="form-check-label text-lg-gray" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
+                               	</span>
+                            	</th:block>
+                         	</span>
                         </div>
                         <div class="col-sm-4 float-right mt-1">
                         	<div class="float-right" th:if="${@CommonFunction.isAdmin() == false and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
                         		<button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
                         	</div>
                             <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
-                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" th:style="${display.confirmtBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
                                 <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                             </div>
                             <div class="float-right btn-group mr-1">
-                                <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong>Help</strong></button>
+                                <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong th:text="Help"></strong></button>
                                 <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
-                                    <span class="sr-only">Toggle Dropdown</span>
+                                    <span class="sr-only"></span>
                                 </button>
                                 <div class="dropdown-menu" role="menu">
-                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Main')|">How to use FossLight Hub</a>
-                                    <a class="dropdown-item text-dark" href="#" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Identification', 'I')|">Role of Creator & Reviewer</a>
+                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Main')|" th:text="'How to use FossLight Hub'"></a>
                                 </div>
                             </div>
                         </div>
@@ -75,6 +82,9 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="tabMenuBom" data-toggle="pill" href="#menu-bom" role="tab" aria-controls="menu-bom" aria-selected="false" th:text="BOM"></a>
+                                </li>
+                                <li th:if="${batFlag}" class="nav-item">
+                                    <a class="nav-link" id="tabMenuBat" data-toggle="pill" href="#menu-bat" role="tab" aria-controls="menu-bat" aria-selected="false" th:text="BAT"></a>
                                 </li>
                             </ul>
                         </div>
@@ -768,7 +778,7 @@
                             <div id="srcPager"></div>
                         </div>
                     </div>
-                    <div class="row pl-2" name="gridArea" id="gridAreaBin" style="width: 100%;display: none;">
+                    <div class="row pl-2" name="gridArea" id="gridAreaBin" style="width: 100%; display: none;">
                         <!-- buttons -->
                         <div class="col-md-12 mb-3 pl-2">
                             <div class="row">
@@ -814,16 +824,16 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${autoAnalysisFlag and project.dropYn != 'Y'}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Auto Analysis'" th:onclick="|bom_fn.analysisValidation()|"></button>
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenAnalysis" th:text="'Auto Analysis'" th:onclick="|bom_fn.analysisValidation()|"></button>
                                         <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${autoAnalysisFlag and project.dropYn != 'Y'}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenAnalysisResult" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
                                         <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${project.dropYn != 'Y'}"
                                         		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
-                                        <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])" th:text="'Save (Binary DB)'"></button>
+                                        <button sec:authorize="hasRole('ROLE_ADMIN')" type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])" th:text="'Save (Binary DB)'"></button>
                                         <div class="btn-group mr-xm">
                                             <button type="button" class="btn btn-yellow-04 btn-sm">Export</button>
                                             <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">

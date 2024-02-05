@@ -133,7 +133,7 @@ public class PartnerController extends CoTopComponent{
 				}
 			}
 		} else {
-			if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
+			if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF")) || getSessionObject(SESSION_KEY_SEARCH) == null) {
 				deleteSession(SESSION_KEY_SEARCH);
 				
 				searchBean = searchService.getPartnerSearchFilter(loginUserName());
@@ -1147,6 +1147,12 @@ public class PartnerController extends CoTopComponent{
 			resultList.add("CSV_FILE");
 
 			return toJson(resultList);
+		} else if (fileExtension.equalsIgnoreCase("pdf")) {
+			resultList.add(list);
+			resultList.add("SRC");
+			resultList.add("PDF_FILE");
+
+			return toJson(resultList);
 		} else {
 			// sheet name
 			List<Object> sheetNameList = null;
@@ -1159,7 +1165,7 @@ public class PartnerController extends CoTopComponent{
 						sheetNameList = ExcelUtil.getSheetNames(list, RESOURCE_PUBLIC_UPLOAD_EXCEL_PATH_PREFIX);
 					}
 				}
-			
+				
 				for (Object sheet : sheetNameList) {
 					String sheetName = sheet.toString();
 					if (sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {

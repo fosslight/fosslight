@@ -3,14 +3,16 @@
 <th:block th:fragment="contentScript">
 <script th:inline="javascript">
 var partnerFlag = [[${partnerFlag}]];
+var batFlag = [[${batFlag}]];
 
-$(document).ready(function () {
+$(document).ready(function () {console.log("test");
 	com_evt.init();
 	if (partnerFlag) party_evt.init();
 	dep_evt.init();
 	src_evt.init();
 	bin_evt.init();
 	bom_evt.init();
+	if (batFlag) bat_evt.init();
 	
 	$("[id^=tabMenu]").on("click", function() {
 		var tabId = $(this).attr("id");

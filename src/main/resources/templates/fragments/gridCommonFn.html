@@ -210,15 +210,6 @@
 
                 return display;
             },
-            ossNameLinkFormat: function (cellvalue, options, rowObject) {
-                var link = $('<a>').prop({
-                    class : 'urlLink',
-                    href : 'javascript:',
-                    innerHTML : cellvalue
-                })
-                link.attr('onclick', 'openDetailPage(' + rowObject.ossId + ')');
-                return link.prop('outerHTML');
-            },
             obligationTypeFormat: function (cellvalue, options, rowObject) {
                 var display = "";
                 switch (cellvalue) {
@@ -335,14 +326,8 @@
                 return display;
             },
             displayProjectName: function (cellvalue, options, rowObject) {
-                var link = $('<a>').prop({
-                    class : 'urlLink',
-                    href : 'javascript:',
-                    text : cellvalue
-                })
-
-                link.attr('onclick', 'openDetailPage(' + rowObject.prjId + ')');
-                return link.prop('outerHTML');
+            	var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+rowObject["prjId"]+"')\">" + cellvalue + "</span>";
+                return display;
             },
             // comment 포메터
             displayComment: function (cellvalue, options, rowObject) {
@@ -1422,6 +1407,94 @@
         }
 
         var src_fn_com = {
+        		autoReviewStop : function(prjId) {
+           	        $.ajax({
+           	            url : [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReviewStop',
+           	            type : 'POST',
+           	            data : JSON.stringify({"prjId" : prjId}),
+           	            dataType : 'json',
+           	            cache : false,
+           	            async : false,
+           	            contentType : 'application/json',
+           	            success : function(data){
+           	                console.log("stop review");
+           	            },
+           	            error : function(){
+           	                console.log("Fail stop review");
+           	            }
+           	        });
+           	    },
+            	autoReviewStatus : function(prjId){
+            		$.ajax({
+            	    	url : [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReviewStatus',
+            	      	type : 'POST',
+            	      	data : JSON.stringify({"prjId" :prjId}),
+            	      	dataType : 'json',
+            	     	cache : false,
+            	     	async : false,
+            	      	contentType : 'application/json',
+            	      	success : function(data){
+            	      		var btn_review = $(".btnSet.autoReview");
+            	           	if("false" == data.isValid && "running" == data.validMsg) {
+            	              	btn_review.addClass("ing");
+            	           	} else {
+            	              	if (btn_review.hasClass("ing") == true) {
+            	               		btn_review.removeClass("ing");
+            	           		}
+            	         	}
+            	      	},
+            	    	error : function(){
+            	         	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            	           	returnFlag = false;
+            	    	}
+            	  	});
+          		},
+            	checkAutoReview : function(prjId) {
+            		var returnFlag = false;
+
+            		$.ajax({
+            	      	url : [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReviewStatus',
+            	      	type : 'POST',
+            	     	data : JSON.stringify({"prjId" : prjId}),
+            	      	dataType : 'json',
+            	       	cache : false,
+            	       	async : false,
+            	      	contentType : 'application/json',
+            	       	success : function(data){
+            	       		if ("false" == data.isValid && "running" == data.validMsg) {
+            	               	alertify.alert("Auto review is running now.<br>It has not been completed yet.", function (e) {});
+            	           	} else if("true" == data.isValid) {
+            	              	alertify.success('<spring:message code="msg.common.start.autoreview" />');
+            	              	src_fn_com.autoReviewStart(prjId, true);
+            	           	}
+            	       	},
+            	      	error : function(){
+            	          	alertify.error('<spring:message code="msg.common.valid2" />', 0);
+            	     	}
+            	   	});
+            	  	return returnFlag;
+            	},
+            	autoReviewStart : function(prjId, startNow){
+            	  	var url;
+            		if (startNow == true) {
+            	    	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/true';
+            	 	} else {
+            	      	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/false';
+            	  	}
+            	  	$.ajax({
+            	      	type : 'POST',
+            	      	url : url,
+            	      	data : JSON.stringify({"prjId" : prjId}),
+            	       	dataType : 'json',
+            	       	cache : false,
+            	       	async : false,
+            	     	contentType : 'application/json',
+            	       	success: function(data){
+            	      	},
+            	      	error: function(){
+            	     	}
+            	  	});
+            	},
             // License 상세 페이지 이동
             showLicenseRestrictionViewPage: function (gridNm, rowid) {
                 var target = $("#" + gridNm);

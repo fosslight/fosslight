@@ -128,7 +128,7 @@ public class SessionController extends CoTopComponent{
 	        } else {
 	        	loginSuccess = userService.checkSystemUser(userId, rawPassword);
 	        }
-
+			
 	        if (loginSuccess) {
 //	            List<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
 //	            T2Users user = new T2Users();

@@ -9,25 +9,23 @@
             <section class="content-header">
                 <div class="container-fluid">
                 	<div class="row">
-                        <div class="col-sm-8 text-left mt-2"></div>
-                        <div class="col-sm-4 float-right" th:if="${!#strings.equals(detail.viewOnlyFlag, 'Y') and !#strings.equals(detail.loginUserRole, 'ROLE_VIEWER')}">
+                        <div class="col-sm-6 text-left mt-2">
+                        	<div th:if="${detail.loginUserRole == 'ROLE_ADMIN' and detail.status == 'REV' and binaryFile != null}" class="form-check width-8rem pl-3" style="font-size: .85rem; margin-left: 0.3rem; width: 100%;">
+                               	<input class="form-check-input" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" value="N" type="checkbox">
+                                <label class="form-check-label text-blue-gray" for="ignoreBinaryDbFlag" style="font-weight: normal;" th:text="'Do not register in binary DB'"></label>
+                          	</div>
+                        </div>
+                        <div class="col-sm-6 float-right" th:if="${detail.viewOnlyFlag != 'Y' and detail.loginUserRole != 'ROLE_VIEWER'}">
                         	<div class="float-right">
-                        		<button type="button" th:if="${#strings.equals(detail.status, 'CONF')}" class="btn btn-dark-03 btn-sm width-8rem mr-xm px-3" id="createProject" th:text="'Create Project for OSS Notice'"></button>
-                        		<button type="button" th:if="${not @CommonFunction.isAdmin() and (#strings.equals(project.completeYn, 'Y') or #strings.equals(project.distributeDeployYn, 'Y') or #strings.equals(project.identificationStatus, 'REV'))}"
-                        				class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.reject()|" th:text="Reject"></button>
-                        		<button type="button" th:if="${#strings.equals(detail.loginUserRole, 'ROLE_ADMIN') and #strings.equals(detail.status, 'REV')}" 
-                        				class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" th:onclick="|fn.confirm()|" th:text="Confirm"></button>
-                                <button type="button" th:if="${#strings.equals(detail.loginUserRole, 'ROLE_ADMIN') and (#strings.equals(detail.status, 'REV' or #strings.equals(detail.status, 'CONF'))}" 
-                                		class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" th:onclick="|fn.reject()|" th:text="Reject"></button>
-                                <button type="button" th:if="${#strings.equals(detail.loginUserRole, 'ROLE_ADMIN') and #strings.equals(detail.status, 'PROG')}" 
-                                		class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:onclick="|fn.requestReview()|" th:text="Request"></button>
-                                <button type="button" th:if="${#strings.equals(detail.loginUserRole, 'ROLE_ADMIN') and #strings.equals(detail.status, 'REQ')}" 
-                                		class="btn btn-dark-04 btn-sm width-8rem px-3 restart" th:onclick="|fn.reviewStart()|" th:text="'Review Start'"></button>
+                        		<button th:if="${detail.status == 'CONF'}" type="button" class="btn btn-dark-03 btn-sm width-8rem mr-xm px-3" id="createProject" th:text="'Create Project for OSS Notice'"></button>
+                        		<button type="button" th:if="${detail.status == 'REV'}" class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" th:onclick="|fn.confirm()|" th:text="Confirm"></button>
+                        		<button type="button" th:if="${detail.status == 'REV' or detail.status == 'CONF'}" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" th:onclick="|fn.reject()|" th:text="Reject"></button>
+                                <button type="button" th:if="${detail.status == 'REQ'}" class="btn btn-dark-04 btn-sm width-8rem px-3 restart" th:onclick="|fn.reviewStart()|" th:text="'Review Start'"></button>
+                                <button type="button" th:if="${detail.status =='PROG'}" class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:onclick="|fn.requestReview()|" th:text="Request"></button>
                         	</div>
-                        	<div class="float-right" th:if="${!#strings.equals(detail.loginUserRole, 'ROLE_ADMIN')}">
-                            	<button type="button" th:if="${#strings.equals(detail.status, 'REQ') or #strings.equals(detail.status, 'CONF')}" 
-                            			class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" th:onclick="|fn.reject()|" th:text="Reject"></button>
-                            	<button type="button" th:if="${#strings.equals(detail.status, 'PROG')}" class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:onclick="|fn.requestReview()|" th:text="Request"></button>
+                        	<div class="float-right" th:if="${detail.loginUserRole != 'ROLE_ADMIN'}">
+                            	<button type="button" th:if="${detail.status == 'REQ' or detail.status == 'CONF'}" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" th:onclick="|fn.reject()|" th:text="Reject"></button>
+                            	<button type="button" th:if="${detail.status == 'PROG'}" class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:onclick="|fn.requestReview()|" th:text="Request"></button>
                             </div>
                         </div>
                 	</div>
@@ -76,7 +74,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="softwareVersion" th:text="#{msg.common.field.3rdParty.softwareVersion}"></label>
-                                                <input type="text" id="softwareVersion" name="softwareVersion" class="form-control" th:value="${detail != null ? detail.softwareVersion : ''}" th:disabled="${detail.status == 'CONF'} ? 'disabled'"/>
+                                                <input type="text" id="softwareVersion" name="softwareVersion" class="form-control" th:value="${detail?.softwareVersion}" th:disabled="${detail.status == 'CONF'} ? 'disabled'"/>
                                             </div>
                                             <div class="form-group">
                                                 <label for="inputName" th:text="#{msg.common.field.deliveryForm}">
@@ -94,7 +92,6 @@
                                                     <div class="col-md-12 mb-0">
                                                         <label for="inputName" th:text="#{msg.common.field.permission}"></label>
                                                         <div class="form-group mb-0">
-                                                            <button type="button" class="btn btn-sm clear1 text-gray text-bold" th:text="view"></button>
                                                             <div class="col-sm-12">
                                                                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                                                     <label class="btn btn-sm btn-onOff px-3">
@@ -125,17 +122,18 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-6 px-5">
-                                            <div class="form-group">
-                                                <label for="inputName" th:text="#{msg.common.field.Agreement}"></label>
-                                                <div class="row">
-                                                    <div class="col-10 mb-2 d-flex" th:if="${confirmationFile == null}">
-                                                        <div class="float-left" id="confirmationFile" th:style="${isCommited} ? 'max-width: 100%; display:none;' : 'max-width: 100%;'"></div>
-                                                        <input type="hidden" id="confirmationFileId" name="confirmationFileId"/>
+                                        <div class="col-md-7 px-5">
+                                            <div class="row form-group">
+                                            	<div class="col-3">
+                                            		<label for="inputName" th:text="#{msg.common.field.Agreement}"></label>
+                                            	</div>
+                                                <div class="col-9">
+                                                    <div class="col-12 mb-2 d-flex confirmationUploader" th:style="${confirmationFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
+                                                        <div class="float-left" id="confirmationFile" style="max-width: 100%;"></div>
                                                     </div>
-                                                    <div class="col-10 mb-2 d-flex" th:if="${confirmationFile != null}">
-                                                    	<ul class="confirmationFileArea">
-                                                        	<li>
+                                                    <div class="col-12 mb-2 d-flex">
+                                                    	<ul class="pl-0 confirmationUpload">
+                                                        	<li th:if="${confirmationFile != null}">
                                                             	<a class="ajax-file-upload-filename" th:text="${confirmationFile.origNm}" th:href="@{'/download/' + ${confirmationFile.fileSeq} + '/' + ${confirmationFile.logiNm}}"></a>
                                                                 <span th:if="${detail.viewOnlyFlag != 'N'}" class="badge bg-danger" style="cursor:pointer;" th:onclick="|fn.deleteConfirmationFile(this)|" th:text="X"></span>
                                                                 <input type="hidden" id="confirmationFileId" name="confirmationFileId" th:value="${confirmationFile.fileSeq}"/>
@@ -145,16 +143,17 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="form-group">
-                                                <label for="inputName" th:text="#{msg.common.field.OSSChecklist} + '(Open Source List)'"></label>
-                                                <div class="row">
-                                                    <div class="col-10 mb-2 d-flex" th:if="${ossFile == null}">
-                                                        <div class="float-left" id="ossFile" th:style="${isCommited} ? 'max-width: 100%; display:none;' : 'max-width: 100%;'"></div>
-                                                        <input type="hidden" id="ossFileId" name="ossFileId"/>
+                                            <div class="row form-group">
+                                            	<div class="col-3">
+                                            		<label for="inputName" th:text="#{msg.common.field.OSSChecklist} + '(Open Source List)'"></label>
+                                            	</div>
+                                                <div class="col-9">
+                                                    <div class="col-12 mb-2 d-flex ossUploader" th:style="${ossFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
+                                                        <div class="float-left" id="ossFile" style="max-width: 100%;"></div>
                                                     </div>
-                                                    <div class="col-10 mb-2 d-flex" th:if="${ossFile != null}">
-                                                    	<ul class="ossFileArea">
-                                                        	<li>
+                                                    <div class="col-12 mb-2 d-flex">
+                                                    	<ul class="pl-0 ossUpload">
+                                                        	<li th:if="${ossFile != null}">
                                                             	<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}" th:href="@{'/download/' + ${ossFile.fileSeq} + '/' + ${ossFile.logiNm}}"></a>
                                                                 <span th:if="${detail.viewOnlyFlag != 'N'}" class="badge bg-danger" style="cursor:pointer;" th:onclick="|fn.deleteOssFile(this)|" th:text="X"></span>
                                                                 <input type="hidden" id="ossFileId" name="ossFileId" th:value="${ossFile.fileSeq}"/>
@@ -164,49 +163,58 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="form-group">
-                                                <label for="inputName" th:text="'fosslight_binary.txt'"></label>
-                                                <div class="row">
-                                                    <div class="col-10 mb-2 d-flex" th:if="${binaryFile == null}">
-                                                        <div class="float-left" id="partnerBinaryFile" th:style="${isCommited} ? 'max-width: 100%; display:none;' : 'max-width: 100%;'"></div>
-                                                        <input type="hidden" id="binaryFileId" name="binaryFileId"/>
+                                            <div class="row form-group">
+                                            	<div class="col-3">
+                                            		<label for="inputName" th:text="'fosslight_binary.txt'"></label>
+                                            	</div>
+                                                <div class="col-9">
+                                                    <div class="col-12 mb-2 d-flex binaryUploader" th:style="${binaryFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
+                                                        <div class="float-left" id="partnerBinaryFile" style="max-width: 100%;"></div>
                                                     </div>
-                                                    <div class="col-10 mb-2 d-flex" th:if="${binaryFile != null}">
-                                                    	<ul class="binaryFileArea">
-                                                        	<li>
+                                                    <div class="col-12 mb-2 d-flex">
+                                                    	<ul class="pl-0 binaryUpload">
+                                                        	<li th:if="${binaryFile != null}">
                                                             	<a class="ajax-file-upload-filename" th:text="${binaryFile.origNm}" th:href="@{'/download/' + ${binaryFile.fileSeq} + '/' + ${binaryFile.logiNm}}"></a>
                                                                 <span class="badge bg-danger" th:style="cursor:pointer; ${isCommited} ? 'display:none'" th:onclick="|fn.deleteBinaryFile(this)|" th:text="X"></span>
-                                                                <input type="hidden" id="binaryFileId" name="binaryFileId" value="${binaryFile.fileId}"/>
+                                                                <input type="hidden" id="binaryFileId" name="binaryFileId" th:value="${binaryFile.fileSeq}"/>
                                                                 <br>[[${binaryFile.createdDate}]]
                                                         	</li>
                                                    		</ul>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="form-group">
-                                                <label for="inputName" th:text="#{msg.common.field.relatedDocuments}"></label>
-                                                <div class="row">
-                                                    <div class="col-10 mb-2 d-flex">
-                                                        <div class="float-left" id="documentsFile" th:style="${isCommited} ? 'max-width: 100%; display:none;' : 'max-width: 100%;'"></div>
-                                                        <ul class="documentsFileArea" th:each="documentsFile : ${detail.documentsFile}">
-                                                        	<li>
-                                                            	<a class="ajax-file-upload-filename" th:text="${documentsFile.origNm}" th:href="@{'/download/' + ${documentsFile.fileSeq} + '/' + ${documentsFile.logiNm}}"></a>
-                                                                <span class="badge bg-danger" th:style="${isCommited} ? 'cursor:pointer; display:none;' : 'cursor:pointer;'" th:onclick="|fn.deleteDocumentsFile(this)|" th:text="X"></span>
-                                                                <input type="hidden" th:value="${documentsFile.fileSeq}"/>
-                                                                <br>[[${documentsFile.createdDate}]]
-                                                        	</li>
-                                                        </ul>
+                                            <div class="row form-group">
+                                            	<div class="col-3">
+                                            		<label for="inputName" th:text="#{msg.common.field.relatedDocuments}"></label><br/>
+                                            		<span class="text-lg-red text-smaller" th:style="${isCommited} ? 'display: none;'" th:text="'The maximum number of files that can be uploaded is 5.'"></span>
+                                            	</div>
+                                                <div class="col-9 documentsUploader">
+                                                    <div class="col-12 mb-2 d-flex documentsUploader" th:style="${isCntOver} or ${isCommited} ? 'display : none;' : 'display : flex;'">
+                                                        <div class="float-left" id="documentsFile" style="max-width: 100%;"></div>
                                                     </div>
-                                                    <input type="hidden" id="documentsFileId" name="documentsFileId" th:value="${detail.documentsFileId}" />
                                                 </div>
+                                                <div class="col-3 documentsUploader"></div>
+                                                <div class="col-9 mb-2 d-flex">
+                                                    <ul class="pl-0 documentsFileArea">
+                                                    	<th:block th:each="documentsFile : ${detail.documentsFile}">
+                                                    		<th:block th:if="${documentsFile.delYn == 'N'}">
+                                                    			<li>
+                                                        			<a class="ajax-file-upload-filename" th:text="${documentsFile.origNm}" th:href="@{'/download/' + ${documentsFile.fileSeq} + '/' + ${documentsFile.logiNm}}"></a>
+                                                            		<span class="badge bg-danger" th:style="${isCommited} ? 'cursor:pointer; display:none;' : 'cursor:pointer;'" th:onclick="|fn.deleteDocumentsFile(this)|" th:text="X"></span>
+                                                            		<input type="hidden" th:value="${documentsFile.fileSeq}"/>
+                                                            		<br>[[${documentsFile.createdDate}]]
+                                                       			</li>
+                                                    		</th:block>
+                                                    	</th:block>
+                                                   	</ul>
+                                           		</div>
+                                           		<input type="hidden" id="documentsFileId" name="documentsFileId" th:value="${detail.documentsFileId}" />
                                             </div>
                                             <div class="form-group" th:if="${detail.viewOnlyFlag ne 'Y' and !#lists.isEmpty(prjList)}">
                                             	<label for="inputName" th:text="#{msg.common.field.project}"></label>
-                                            	<div class="row">
-                                            		<div class="col-10 mb-2 d-flex">
-                                            			<table id="_projectList"><tr><td></td></tr></table>
-                                            		</div>
-                                            	</div>
+                                            	<div class="jqGridSet">
+                                        			<table id="_projectList"><tr><td></td></tr></table>
+                                    			</div>
                                             </div>
                                             <div class="form-group">
                                                 <label for="Watcher" th:text="Watcher"></label>
@@ -273,8 +281,7 @@
                                         				</div>
                                     				</div>
                                     				<div class="form-group mt-2">
-                                        				<div id="multiDiv" class="external-events pl-3 multiTxtSet2">
-                                        				</div>
+                                        				<div id="multiDiv" class="external-events ml-1 row"></div>
                                     				</div>
                                                 
                                             </div>
@@ -419,34 +426,35 @@
                             				<button id="partyDelete" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.delete()|" th:text="Delete"></button>
                             				<button id="partyBulkEdit" type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.bulkEdit()|" th:text="'Bulk Edit'"></button>
                           				</th:block>
-                            			<button th:if="${detail.partnerId != null and @CommonFunction.isAdmin()}" type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" 
-                            					th:onclick="fn_grid_com.ossBulkReg([[${detail.partnerId}]],'20')" th:text="'OSS bulk registration'"></button>
+                            			<button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${detail.partnerId != null}" type="button" class="btn btn-danger btn-sm width-9rem mr-xm px-3" 
+                            					th:onclick="fn_grid_com.ossBulkReg([[${detail.partnerId}]], '20')" th:text="'OSS bulk registration'"></button>
                             		</div>
                             	</div>
                             	<div class="col-md-8">
                             		<div class="row float-right">
+                            			<input id="copyUrl" type="text" style="width:1px; height:1px; margin:0; padding:0; border: 0; display: none;">
                                    		<button type="button" th:if="${detail.partnerId != null}" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.shareUrl()|" th:text="'Share URL'"></button>
-                                   		<button type="button" th:if="${detail.partnerId != null and @CommonFunction.isAdmin()}" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="fn.binaryDBSave([[${detail.partnerId}]])" th:text="'Save (Binary DB)'"></button>
+                                   		<button type="button" sec:authorize="hasRole('ROLE_ADMIN')" th:if="${detail.partnerId != null}" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="fn.binaryDBSave([[${detail.partnerId}]])" th:text="'Save (Binary DB)'"></button>
                                     	<th:block th:if="${detail.partnerId != null}">
                                             <div class="btn-group mr-xm">
-                                                <button type="button" class="btn btn-yellow-04 btn-sm">Export</button>
+                                                <button type="button" class="btn btn-yellow-04 btn-sm" th:text="Export" th:onclick="|fn.exportList(this)|"></button>
                                                 <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
-                                                    <span class="sr-only">Toggle Dropdown</span>
+                                                    <span class="sr-only" th:text="'Toggle Dropdown'"></span>
                                                 </button>
                                                 <div class="dropdown-menu" role="menu">
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('report_sub')|" th:text="'FOSSLight Report (Spreadsheet)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('Spreadsheet_sub')|" th:text="'SPDX (Spreadsheet)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('RDF_sub')|" th:text="'SPDX (RDF)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('TAG_sub')|" th:text="'SPDX (TAG)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('JSON_sub')|" th:text="'SPDX (JSON)'"></a>
-                                                    <a class="dropdown-item" th:onclick="|fn.selectDownloadFile('YAML_sub')|" th:text="'SPDX (YAML)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('report_sub')|" th:text="'FOSSLight Report (Spreadsheet)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('Spreadsheet_sub')|" th:text="'SPDX (Spreadsheet)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('RDF_sub')|" th:text="'SPDX (RDF)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('TAG_sub')|" th:text="'SPDX (TAG)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('JSON_sub')|" th:text="'SPDX (JSON)'"></a>
+                                                    <a class="dropdown-item pointer" th:onclick="|fn.selectDownloadFile('YAML_sub')|" th:text="'SPDX (YAML)'"></a>
                                                 </div>
                                             </div>
                                     	</th:block>
-                                    	<th:block th:if="${detail.status != 'REQ' and detail.status != 'CONF' and  (detail.loginUserRole == 'ROLE_ADMIN' or (detail.loginUserRole == 'ROLE_ADMIN' and detail.status != 'REV')) and detail.viewOnlyFlag != 'Y'}">
-                                    		<button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.CheckOssViewPage('PARTNER')|" th:text="'Check OSS Name'"></button>
-                                    		<button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.CheckOssLicenseViewPage('PARTNER')|" th:text="'Check License'"></button>
+                                    	<th:block th:if="${detail.status != 'REQ' and detail.status != 'CONF' and (detail.loginUserRole == 'ROLE_ADMIN' or (detail.loginUserRole != 'ROLE_ADMIN' and detail.status != 'REV')) and detail.viewOnlyFlag != 'Y'}">
+                                    		<button type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3" th:onclick="|fn.CheckOssViewPage('PARTNER')|" th:text="'Check OSS Name'"></button>
+                                    		<button type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3" th:onclick="|fn.CheckOssLicenseViewPage('PARTNER')|" th:text="'Check License'"></button>
                                     		<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.reset()|" th:text="Reset"></button>
                                     		<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" th:onclick="|fn.save()|" th:text="Save"></button>
                                     	</th:block>
@@ -459,7 +467,7 @@
                             <div id="pager"></div>
                         </div>
                     </div>
-                    <div class="row pl-2" name="gridArea" id="girdAreaBat" style="width: 100%;display: none;">
+                    <div class="row pl-2" name="gridArea" id="gridAreaBat" style="width: 100%;display: none;">
                        
                     </div>
                 </div>
@@ -467,5 +475,8 @@
         </div>
     </div>
 </body>
-
+<form id="partnerBulkEditForm" method="POST" th:action="@{/oss/ossBulkEditPopup}" target="bulkEditViewPartnerPopup">
+	<input type="hidden" name="rowId" value=""/>
+	<input type="hidden" name="target" value=""/>
+</form>
 </html>

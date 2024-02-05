@@ -23,12 +23,17 @@ $(document).ready(function () {
 	ajax.getUserIdList("Y", "REVIEWER"); // 근무자
 	ajax.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
 	
-	if(role == "ROLE_VIEWER"){
+	if ("ROLE_VIEWER" == role){
 		$(".btnAdd").hide();
 	}
 	
 	showHelpLink("3rd-Party_List_Main");
 	$(".select2").select2();
+	
+	$('#division').select2({
+        placeholder: "Division",
+        allowClear: true,
+    });
 });
 
 var gridTooltip = {
@@ -57,7 +62,7 @@ var evt = {
 		$('#search').on('click',function(e){
 			e.preventDefault();
 			var postData = fn.setGridParam();
-			
+			console.log(postData);
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 		});
 		
@@ -209,16 +214,16 @@ var fn = {
 		var paramData=$('#3rdSearch').serializeObject();
 		
 		//public 값 넣어주기
-		if($('#checkbox3').is(':checked')){
+		if ($('#checkbox3').is(':checked')){
 			paramData.publicYn = 'N';
 		}else{
 			paramData.publicYn = 'Y';
 		}
 		
-		if(paramData.status) {
+		if (paramData.status) {
 			paramData.status = JSON.stringify(paramData.status);
 			paramData.status = paramData.status.replace(/\"|\[|\]/gi, "");
-		}else{
+		} else {
 			paramData.status = "";
 		}
 		
@@ -254,17 +259,18 @@ var fn = {
 									
 									return setup;
 								},
-								settings: {
-									oncontinue: null
-								},
-								callback: function(closeEvent) {
-									alertify.confirm().callback.call(this, closeEvent);
+								hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							          	this.elements.content.style.height = '215px';
+							        }
 								}
 							};
 						}, false, 'confirm');
                 	}
 					
-					alertify.changeDivisionDialog(res).set('title', 'Change Division').set('resizable', true).resizeTo('650', '306').show();
+					alertify.changeDivisionDialog(res).set('title', 'Change Division');
 				}
 			});
 		} else {

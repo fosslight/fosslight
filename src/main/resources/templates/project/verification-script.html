@@ -28,7 +28,6 @@
             evt.init();
             packaging.init();
             
-//		showHelpLink("Project_List_Packaging");
             $('.btnCommentHistory').on('click', function (e) {
                 e.preventDefault();
                 openCommentHistory('/comment/popup/prj/' + [[${project.prjId}]]);
@@ -208,7 +207,7 @@
         var evt = {
             uploadStatus: false,
             init: function () {
-                $('#wgetUrl').hide();
+            	$('#wgetUrl').hide();
                 $('.OKcolse').click(function () {
                     $('#blind_wrap').hide();
                     $('.warningPop').hide();
@@ -1279,7 +1278,7 @@
                 var btn_verify = $("[name='verify']");
                 var btn_savePath = $("[name='btnSavePath']");
 
-
+                status = status||"";
                 btn_div.show();
                 if (role == "ROLE_ADMIN") { // 관리자 권한 일 경우
                 	$("#approve").attr("disabled", false);

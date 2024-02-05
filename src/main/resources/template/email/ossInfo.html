@@ -26,7 +26,7 @@
 							<td style="padding:40px;">
 								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle}" th:utext="${contentsTitle}"></div>
 								<p style="font-size:12px;" th:if="${contentsSubTitle}" th:utext="${contentsSubTitle}"></p>
-								<th:block th:if="${comment and comment != '' and (mailType == '19' or mailType == '10' or mailType == '13')}">
+								<th:block th:if="${comment != null and comment != '' and (mailType == '19' or mailType == '10' or mailType == '13')}">
 									<h2 style="margin:0; padding:25px 10px 0; font-size:16px;">Comment</h2>
 									<div style="padding:10px; font-size:12px;" th:utext="${comment}"></div>
 								</th:block>

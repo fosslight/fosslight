@@ -54,9 +54,9 @@
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
                	.on('cancel.daterangepicker', function (ev, picker) {
-                	$("#createdDate").val("");
-                    $("input[name='startDate']").val("");
-                    $("input[name='endDate']").val("");
+               	 	$(this).val("");
+                    $("input[name='cStartDate']").val("");
+                    $("input[name='cEndDate']").val("");
                     $('#createdDate').attr('placeholder', 'Created Date');
                	});
 
@@ -79,7 +79,7 @@
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
                 .on('cancel.daterangepicker', function (ev, picker) {
-                	$("#modifiedDate").val("");
+                	$(this).val("");
                     $("input[name='mStartDate']").val("");
                     $("input[name='mEndDate']").val("");
                     $('#modifiedDate').attr('placeholder', 'Modified Date');
@@ -297,6 +297,21 @@
                         $("#cvssScoreInput").val('');
                     }
                 }
+            },
+            ossNameLinkFormat: function (cellvalue, options, rowObject) {
+            	var display = "";
+            	var url = "/oss/edit/" + rowObject['ossId'];
+            	
+            	if (cellvalue.indexOf("<span class") > -1) {
+            		display = "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
+            	} else {
+            		display = "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink\" style=\"margin-left: 1.8rem; cursor: pointer;\">" + cellvalue + "</a>";
+            	}
+            	 
+                return display;
+            },
+            mvEdit : function (url, ossId) {
+            	createTabInFrame(ossId+'_Opensource', url);
             }
         }
 
@@ -359,7 +374,7 @@
                             index: 'ossName',
                             width: 200,
                             align: 'left',
-                            formatter: fn_grid_com.ossNameLinkFormat
+                            formatter: oss_lst_fn.ossNameLinkFormat
                         }
                         , {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
                         , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}

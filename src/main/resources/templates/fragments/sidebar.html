@@ -121,7 +121,7 @@
               </li>
             </ul>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" th:if="${externalLinkFlag and @CoCodeManager.getCodeValues(@CommonFunction.getCoConstDefVal('CD_EXTERNAL_LINK')) != null}">
             <a th:href="@{/external/external}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
 	          	<p th:text="'External Link'"></p>

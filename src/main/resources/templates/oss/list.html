@@ -42,12 +42,12 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="btn-group float-right mt-1">
-                                                    <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong>Help</strong></button>
+                                                    <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong th:text="Help"></strong></button>
                                                     <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
-                                                        <span class="sr-only">Toggle Dropdown</span>
+                                                        <span class="sr-only"></span>
                                                     </button>
                                                     <div class="dropdown-menu" role="menu">
-                                                        <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('OSS_List_Main')|">How to use FossLight Hub</a>
+                                                        <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('OSS_List_Main')|" th:text="'How to use FossLight Hub'"></a>
                                                     </div>
                                                 </div>
 											</div>
@@ -208,7 +208,7 @@
                             <div class="col-md-6">
                                 <div class="row float-right">
                                     <button class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" type="button" th:onclick="|createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')|" th:text="'Bulk Registration'"></button>
-                                    <button class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" type="button" th:onclick="|fn.downloadExcel()|" th:text="Export"><i class="far fa-file-excel mr-2"></i></button>
+                                    <button class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" type="button" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
                                     <button class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3" type="button" th:onclick="|createTabInFrame('New_OpenSource', '/oss/edit')|" th:text="Add"></button>
                                 </div>
                             </div>

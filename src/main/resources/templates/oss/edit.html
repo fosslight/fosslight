@@ -36,9 +36,10 @@
                                 <div class="card-body">
                                     <div class="row form-group">
                                     	<div class="col-md-6">
-											<div class="row form-group">
+											<div class="row">
 												<div class="col-md-12 required">
 													<label th:text="#{msg.common.field.OSS.name}"></label><span class="text-orange">*</span>
+													<i class="fas fa-info-circle ml-1 ossI" title="detail Info" style="color: #007bff; cursor: pointer;" th:onclick="|fn.showOssViewPage(this)|"></i>
 													<input class="form-control autoComOss" name="ossName" th:value="${detail?.ossName}" type="text" th:disabled="${isReadOnly}"/>
 												</div>
 												<div class="col-md-12 required">
@@ -47,7 +48,7 @@
 											</div>
 										</div>
 										<div class="col-md-6">
-											<div class="row form-group">
+											<div class="row">
 												<div class="col-md-12">
 													<label for="ossVersion" th:text="#{msg.common.field.OSS.version}"></label><span class="text-orange">*</span>
 													<input class="form-control" id="ossVersion" name="ossVersion" th:value="${detail?.ossVersion}" type="text" th:disabled="${isReadOnly}"/>
@@ -165,13 +166,13 @@
                                         <label th:text="#{msg.common.field.attribution}"></label>
                                         <textarea class="form-control" rows="5" th:text="${attribution}"  th:disabled="${isReadOnly}"/></textarea>
                                     </div>
-                                    <div class="form-group" th:if="${ossId != null && projectListFlag}">
+                                    <div class="form-group" th:if="${ossId != null and (projectListFlag != null and projectListFlag)}">
                                     	<label th:text="Project"></label><button type="button" class="btn btn-info btn-xs mx-3 mb-1 px-3 py-0" id="listMore" th:text="'List more'"></button>
                                     	<div class="jqGridSet mt-1 mt5">
                                     		<table id="_projectList" style="border-collapse: initial;"><tr><td></td></tr></table>
                                     	</div>
                                     </div>
-                                    <div class="form-group" th:if="${ossId != null && projectListFlag}">
+                                    <div class="form-group" th:if="${ossId != null and (projectListFlag != null and projectListFlag)}">
                                     	<label th:text="'3rd Party'"></label><button type="button" class="btn btn-info btn-xs mx-3 mb-1 px-3 py-0" id="listMore3rd" th:text="'List more'"></button>
                                     	<div class="jqGridSet mt-1 mt5">
                                     		<table id="_partnerList" style="border-collapse: initial;"><tr><td></td></tr></table>
@@ -208,7 +209,17 @@
                                 <div class="card-body pt-0" style="padding-bottom: 0;">
                                     <div clas="col-md-12">
                                         <table class="table">
-                                       		<tbody id="commentListBody"></tbody>
+                                       		<tbody id="commentListBody">
+                                       			<tr>
+													<td th:style="'border-top: none;'">
+													<div class="row">
+														<div class="col-md-12">
+															<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
+														</div>
+													</div>
+													</td>
+												</tr>
+                                       		</tbody>
                                         </table>
                                     </div>
                                	</div>

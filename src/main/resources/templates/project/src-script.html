@@ -374,7 +374,7 @@ var src_fn = {
 	changeSelectOption : function(){
 		var value = $('input[name=srcSelectOption]:checked').val();
 		
-		if(value == 1){autoComProjectNmConf
+		if (value == 1) {
 			$('#srcUploadSearch').show();
 			$('#srcProjectSearch').hide();
 			$('.srcProjectSearch').hide();
@@ -1303,8 +1303,8 @@ var src_grid = {
 				});
 				
 				$('#'+rowid+'_licenseName').val("");
-                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name
-                var nextRow = rowid
+                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name;
+                var nextRow = rowid;
                 $('#'+nextRow+"_"+nextCol).focus();
 			},
 			onPaging: function(action) {
