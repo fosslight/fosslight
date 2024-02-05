@@ -5908,27 +5908,35 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			T2File fileInfo2 = fileService.selectFileInfoById(fileInfo.getFileId());
 			switch (project.getReferenceDiv()) {
 			case CoConstDef.CD_DTL_COMPONENT_ID_DEP: 
-				if (fileInfo2 == null && prjInfo.getDepCsvFileId().equals(fileInfo.getFileId())) {
-					project.setDepCsvFileFlag(CoConstDef.FLAG_YES);
-					fileDeleteCheckFlag = true;
+				if (fileInfo2 == null && prjInfo.getDepCsvFileId() != null) {
+					if (prjInfo.getDepCsvFileId().equals(fileInfo.getFileId())) {
+						project.setDepCsvFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
 				}
 				break;
 			case CoConstDef.CD_DTL_COMPONENT_ID_SRC: 
-				if (fileInfo2 == null && prjInfo.getSrcCsvFileId().equals(fileInfo.getFileId())) {
-					project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
-					fileDeleteCheckFlag = true;
+				if (fileInfo2 == null && prjInfo.getSrcCsvFileId() != null) {
+					if (prjInfo.getSrcCsvFileId().equals(fileInfo.getFileId())) {
+						project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
 				}
 				break;
 			case CoConstDef.CD_DTL_COMPONENT_ID_BIN: 
-				if (fileInfo2 == null && prjInfo.getBinCsvFileId().equals(fileInfo.getFileId())) {
-					project.setBinCsvFileFlag(CoConstDef.FLAG_YES);
-					fileDeleteCheckFlag = true;
+				if (fileInfo2 == null && prjInfo.getBinCsvFileId() != null) {
+					if (prjInfo.getBinCsvFileId().equals(fileInfo.getFileId())) {
+						project.setBinCsvFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
 				}
 				break;
 			case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID: 
-				if (fileInfo2 == null && prjInfo.getSrcAndroidCsvFileId().equals(fileInfo.getFileId())) {
-					project.setSrcAndroidCsvFileFlag(CoConstDef.FLAG_YES);
-					fileDeleteCheckFlag = true;
+				if (fileInfo2 == null && prjInfo.getSrcAndroidCsvFileId() != null) {
+					if (prjInfo.getSrcAndroidCsvFileId().equals(fileInfo.getFileId())) {
+						project.setSrcAndroidCsvFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
 				}
 				break;
 			default :
