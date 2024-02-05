@@ -327,8 +327,8 @@
                                 <input name="createdDate2" id="createdDate2" type="hidden" th:value="${searchBean.createdDate2}" />
                             </div>
                             <script>
-                                var startDate = String([[${searchBean?.createdDate1}]]);
-                                var endDate = String([[${searchBean?.createdDate2}]]);
+                                var startDate = String([[${searchBean.createdDate1}]]);
+                                var endDate = String([[${searchBean.createdDate2}]]);
 
                                 if (startDate && startDate != 'null' && endDate && endDate != 'null') {
                                     var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
@@ -394,8 +394,8 @@
                                 <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean.schEndDate}" />
                             </div>
                             <script>
-                                var startDate = String([[${searchBean?.createdDate1}]]);
-                                var endDate = String([[${searchBean?.createdDate2}]]);
+                                var startDate = String([[${searchBean?.schStartDate}]]);
+                                var endDate = String([[${searchBean?.schEndDate}]]);
 
                                 if (startDate && startDate != 'null' && endDate && endDate != 'null') {
                                     var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
