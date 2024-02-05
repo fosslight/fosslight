@@ -50,7 +50,7 @@ var evt = {
 	init : function(){
 		setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
 		
-		$('select[name=networkServerType]').select2({placeholder: "Restriction", allowClear: true});
+		$('select[name=networkServerType]').select2({placeholder: "Network Service", allowClear: true});
 		if ([[${searchBean != null}]] && [[${searchBean.networkServerType}]] != null) $('select[name=networkServerType]').val([[${searchBean.networkServerType}]]).prop("selected", true);
 		
 		$('select[name=prjDivision]').select2({placeholder: "Select Division", allowClear: true});
@@ -879,16 +879,16 @@ var fn = {
 		}
 	},
 	setGridParam : function(){
-		var paramData=$('#projectSearch').serializeObject();
+		var paramData = $('#projectSearch').serializeObject();
 		
 		//public 값 넣어주기
-		if($('#checkbox3').is(':checked')) {
+		if ($('#checkbox3').is(':checked')) {
 			paramData.publicYn = 'N';
 		} else {
 			paramData.publicYn = 'Y';
 		}
 		
-		if(paramData.statuses != null) {
+		if (paramData.statuses != null) {
 			paramData.statuses = JSON.stringify(paramData.statuses);
 			paramData.statuses = paramData.statuses.replace(/\"|\[|\]/gi, "");
 		} else {

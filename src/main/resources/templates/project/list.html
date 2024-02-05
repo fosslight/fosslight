@@ -22,7 +22,7 @@
                                         	<div class="row" style="width: 100%;">
                                         		<div class="col-12">
                                         			<div class="input-group">
-                                                		<input type="search"  class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}">
+                                                		<input type="search"  class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}">
                                                 		<div class="input-group-append">
                                                     		<button id="search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                                                 		</div>
@@ -52,7 +52,7 @@
 										<div class="row">
                                             <div class="col-4">
                                                 <div class="form-group mb-2">
-                                                    <input type="text" name="prjId" class="form-control" placeholder="ID" th:value="${searchBean.prjId}">
+                                                    <input type="text" name="prjId" class="form-control" placeholder="ID" th:value="${searchBean?.prjId}">
                                                 </div>
                                             </div>
                                             <div class="col-4">
@@ -64,8 +64,8 @@
                                                             </span>
                                                         </div>
                                                         <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
-                                                        <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean.schStartDate}" />
-														<input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean.schEndDate}" />
+                                                        <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean?.schStartDate}" />
+														<input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean?.schEndDate}" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -84,17 +84,26 @@
                                             <div class="col-4">
                                                 <div class="form-group mb-2">
                                                 	<div class="input-group">
-                                                    	<input type="text" class="form-control autoComCreatorDivision" placeholder="Creator" name="creator" th:value="${searchBean.creator}" />
+                                                    	<input type="text" class="form-control autoComCreatorDivision" placeholder="Creator" name="creator" th:value="${searchBean?.creator}" />
                                                 	</div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group mb-2">
                                                 	<div class="input-group">
-                                                    	<input type="text" class="form-control autoComReviewer" placeholder="Reviewer" name="reviewer" th:value="${searchBean.creator}" />
+                                                    	<input type="text" class="form-control autoComReviewer" placeholder="Reviewer" name="reviewer" th:value="${searchBean?.creator}" />
                                                 	</div>
                                                 </div>
                                             </div>
+                                            <div class="col-4">
+                                                <div class="form-group mb-2">
+                                                	<div class="input-group">
+                                                    	<input type="text" class="form-control" placeholder="Watcher" name="watchers" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" />
+                                                	</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
                                                     <select class="select2" name="networkServerType" style="width: 100%;">
@@ -102,15 +111,6 @@
                                                         <option th:value="Y" th:text="Yes"></option>
                                                         <option th:value="N" th:text="No"></option>
                                                     </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-4">
-                                                <div class="form-group mb-2">
-                                                	<div class="input-group">
-                                                    	<input type="text" class="form-control" placeholder="Model Name" name="modelName" th:value="${searchBean.modelName}"/>
-                                                	</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
@@ -133,63 +133,72 @@
                                                     </select>
                                                 </div>
                                             </div>
-
                                         </div>
-<!--                                    <th:block th:if="${@CommonFunction.isAdmin()}">-->
-<!--                                        <a class="small-box-footer mb-2" href="#" id="moreInfoBtn">More <i-->
-<!--                                                class="fas fa-arrow-circle-down"></i></a>-->
-<!--                                        <div class="more-search" id="moreSearchContent" style="display: none">-->
-<!--                                            <div class="row">-->
-<!--                                                <div class="col-md-4">-->
-<!--                                                    <div class="form-group mb-2">-->
-<!--                                                        <input type="search" name="ossName" class="form-control" th:placeholder="|OSS Name|" th:value="${searchBean?.ossName}">-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                                <div class="col-md-4">-->
-<!--                                                    <div class="form-group mb-2">-->
-<!--                                                        <input type="search" name="ossVersion" class="form-control" th:placeholder="|OSS Version|" th:value="${searchBean?.ossVersion}">-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                                <div class="col-md-4">-->
-<!--                                                    <div class="form-group mb-2">-->
-<!--                                                        <input type="search" name="licenseName" class="form-control" th:placeholder="|License Name|" th:value="${searchBean?.licenseName}">-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
-<!--                                            <div class="row">-->
-<!--                                                <div class="col-md-4">-->
-<!--                                                    <div class="form-group mb-2">-->
-<!--                                                        <textarea class="form-control" name="comment"-->
-<!--                                                                  th:placeholder="|Additional Information|"-->
-<!--                                                                  rows="3"-->
-<!--                                                                  th:text="${searchBean?.comment}"></textarea>-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                                <div class="col-md-4">-->
-<!--                                                    <div class="form-group mb-2">-->
-<!--                                                        <textarea class="form-control" name="userComment"-->
-<!--                                                                  th:placeholder="|Comment|"-->
-<!--                                                                  rows="3"-->
-<!--                                                                  th:text="${searchBean?.userComment}"></textarea>-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                            </div>-->
-<!--                                            <div class="row">-->
-<!--                                                <div class="col-md-4">-->
-<!--                                                    <div class="form-group mb-2">-->
-<!--                                                        <input type="search" name="schBinaryName" class="form-control" th:placeholder="|Binary Name|" th:value="${searchBean?.schBinaryName}">-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                                <th:block th:if="${partnerFlag}">-->
-<!--                                                <div class="col-md-4">-->
-<!--                                                    <div class="form-group mb-2">-->
-<!--                                                        <input type="search" name="refPartnerId" class="form-control" th:placeholder="|3rd party|" th:value="${option?.refPartnerId}">-->
-<!--                                                    </div>-->
-<!--                                                </div>-->
-<!--                                                </th:block>-->
-<!--                                            </div>-->
-<!--                                        </div>-->
-<!--                                    </th:block>-->
+                                        <div class="row">
+                                        	<div class="col-4">
+                                                <div class="form-group mb-2">
+                                                	<div class="input-group">
+                                                    	<input type="text" class="form-control" placeholder="Model Name" name="modelName" th:value="${searchBean?.modelName}"/>
+                                                	</div>
+                                                </div>
+                                            </div>
+                                            <div sec:authorize="!hasRole('ROLE_ADMIN')" class="col-4 d-flex justify-content-start mx-2">
+                                            	<div class="form-group mb-2 d-flex align-items-center">
+                                                    <div class="form-check mb-1" style="font-size: .85rem">
+                                                        <input class="form-check-input text-orange" type="checkbox" id="checkbox3" name="publicYn" th:checked="${searchBean.publicYn == 'N'}">
+                                                        <label class="form-check-label text-lg-gray" for="checkbox3" th:text="'View My Projects Only'"></label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                   <th:block sec:authorize="hasRole('ROLE_ADMIN')">
+                                       <a class="small-box-footer mb-2" href="#" id="moreInfoBtn">More <i class="fas fa-arrow-circle-down"></i></a>
+                                       <div class="more-search" id="moreSearchContent" style="display: none">
+                                           <div class="row">
+                                               <div class="col-md-4">
+                                                   <div class="form-group mb-2">
+                                                       <input type="search" name="ossName" class="form-control autoComOss" th:placeholder="|OSS Name|" th:value="${searchBean?.ossName}">
+                                                   </div>
+                                               </div>
+                                               <div class="col-md-4">
+                                                   <div class="form-group mb-2">
+                                                       <input type="search" name="ossVersion" class="form-control autoComOssVersion" th:placeholder="|OSS Version|" th:value="${searchBean?.ossVersion}">
+                                                   </div>
+                                               </div>
+                                               <div class="col-md-4">
+                                                   <div class="form-group mb-2">
+                                                       <input type="search" name="licenseName" class="form-control autoComLicense" th:placeholder="|License Name|" th:value="${searchBean?.licenseName}">
+                                                   </div>
+                                               </div>
+                                           </div>
+                                           <div class="row">
+                                               <div class="col-md-4">
+                                                   <div class="form-group mb-2">
+                                                       <textarea class="form-control" name="comment" th:placeholder="|Additional Information|" rows="3" th:utext="${searchBean?.comment}"></textarea>
+                                                   </div>
+                                               </div>
+                                               <div class="col-md-4">
+                                                   <div class="form-group mb-2">
+                                                       <textarea class="form-control" name="userComment" th:placeholder="|Comment|" rows="3" th:utext="${searchBean?.userComment}"></textarea>
+                                                   </div>
+                                               </div>
+                                           </div>
+                                           <div class="row">
+                                               <div class="col-md-4">
+                                                   <div class="form-group mb-2">
+                                                       <input type="search" name="schBinaryName" class="form-control" th:placeholder="|Binary Name|" th:value="${searchBean?.schBinaryName}">
+                                                   </div>
+                                               </div>
+                                               <th:block th:if="${partnerFlag}">
+                                               <div class="col-md-4">
+                                                   <div class="form-group mb-2">
+                                                       <input type="search" name="refPartnerId" class="form-control" th:placeholder="|3rd party|" th:value="${searchBean?.refPartnerId}">
+                                                   </div>
+                                               </div>
+                                               </th:block>
+                                           </div>
+                                       </div>
+                                   </th:block>
                                 </div>
                             </div>
                         </div>
