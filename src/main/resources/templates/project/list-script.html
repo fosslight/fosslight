@@ -631,31 +631,28 @@ var fn = {
 	// Grid download cell display
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
-        if (rowObject.identificationStatus == "Confirm"){
+        if ("Confirm" == rowObject.identificationStatus){
         	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-5x mr-1\" title=\"FOSSLight Report\"></i></span>';
-            if(rowObject.reviewReportFileId != ""){
+            if ("" != rowObject.reviewReportFileId){
             	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-5x mr-1\" title=\"FOSSLight Review Report\"></i></span>';
             }
-        } else {
-        	display += '<span style=\"cursor:pointer; pointer-events: none;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-5x mr-1\" title=\"FOSSLight Report\"></i></span>';
         }
 		
-		if (rowObject.verificationStatus == "Confirm"){
-			if (rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
-				display += "<span style=\"cursor:pointer; pointer-events: none;\" onclick=\"fn.downloadNotice(this,"+rowObject.permission+")\"><i class=\"far fa-file-code hover-icon fa-1-5x mr-1\" title=\"OSS Notice\"></i></span>";
+		if ("Confirm" == rowObject.verificationStatus) {
+			if ("99" == rowObject.noticeType || "" == rowObject.noticeFileId) {
 			} else {
 				display += '<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-5x mr-1\" title=\"OSS Notice\"></i></span>';
 			}
 			
-			if (rowObject.packageFileId!="") {
+			if ("" != rowObject.packageFileId) {
 				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File1\"></i></span>';
 			}
 			
-			if (rowObject.packageFileId2!="") {
+			if ("" != rowObject.packageFileId2) {
 				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File2\"></i></span>';
 			}
 			
-			if (rowObject.packageFileId3!="") {
+			if ("" != rowObject.packageFileId3) {
 				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File3\"></i></span>';
 			}
 		}
