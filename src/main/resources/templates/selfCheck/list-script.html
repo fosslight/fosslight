@@ -61,11 +61,19 @@ var evt = {
 			}
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 		});
+
+        var startDate = String([[${searchBean?.schStartDate}]]);
+        var endDate = String([[${searchBean?.schEndDate}]]);
+
+        if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+            var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+        }
 		
 		$("#schDateRange").daterangepicker({
             autoUpdateInput: false
-        })
-		.on('apply.daterangepicker', function(ev, picker) {
+        }).on('apply.daterangepicker', function(ev, picker) {
 		    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
 		    $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
 		    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));

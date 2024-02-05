@@ -124,6 +124,12 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			if (!isEmpty(item.getRestriction())){
 				item.setRestriction(CommonFunction.setLicenseRestrictionList(item.getRestriction()));
 			}
+
+			if(!isEmpty(item.getWebpage())) {
+				if (!item.getWebpage().contains("http://") && !item.getWebpage().contains("https://")) {
+					item.setWebpage("http://" + item.getWebpage());
+				}
+			}
 		}
 		
 		map.put("page", licenseMaster.getCurPage());

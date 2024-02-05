@@ -48,6 +48,16 @@
             placeholder: "Division",
             allowClear: true,
         })
+
+        $("#prjStatusSelect").select2({
+            placeholder: "Status",
+            allowClear: true,
+        })
+
+        $("#statusSelect").select2({
+            placeholder: "Status",
+            allowClear: true,
+        })
     });
 </script>
 <div style="padding-top: 10px;">
@@ -182,9 +192,38 @@
                             <input class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
-                            <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean.schStartDate}" />
-                            <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean.schEndDate}" />
+                            <div class="input-group" style="width: 100%;">
+                                <div class="input-group-prepend">
+                                                            <span class="input-group-text">
+                                                                <i class="far fa-calendar-alt"></i>
+                                                            </span>
+                                </div>
+                                <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
+                                <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean.schStartDate}" />
+                                <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean.schEndDate}" />
+                            </div>
+                            <script>
+                                var startDate = String([[${searchBean.schStartDate}]]);
+                                var endDate = String([[${searchBean.schEndDate}]]);
+
+                                if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+                                    var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                    var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                    $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+                                }
+
+                                $("#createdDate").daterangepicker({
+                                    autoUpdateInput: false
+                                }).on('apply.daterangepicker', function(ev, picker) {
+                                    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                                    $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                                }).on('cancel.daterangepicker', function(ev, picker) {
+                                    $("#createdDate").val("");
+                                    $("input[name='schStartDate']").val("");
+                                    $("input[name='schEndDate']").val("");
+                                });
+                            </script>
                         </div>
                         <div class="form-group mb-2">
                             <select class="select2" name="prjDivision" id="prjDivisionSelect"
@@ -221,8 +260,12 @@
                             <input class="form-control autoComProjectModel" name="modelName" placeholder="Model Name" th:value="${searchBean.modelName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <label class="text-lg-gray mr-3">Status</label>
-                            <th:block th:utext="${@CoCodeManager.genCheckbox(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), searchBean.statuses, '')}" ></th:block>
+                            <select class="form-control select2" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
+                                <option th:value="''"></option>
+                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}">
+                                    <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                </th:block>
+                            </select>
                         </div>
                         <div class="form-group mb-2">
                             <select class="select2" name="priority" id="prioritySelect" style="width: 100%;">
@@ -230,7 +273,7 @@
                                 <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'), searchBean.priority)}"></th:block>
                             </select>
                         </div>
-                        <th:block th:if="${@CommonFunction.isAdmin()}">
+                        <th:block th:if="${not @CommonFunction.isAdmin()}">
                             <label class="text-lg-gray mr-3">View My Projects Only</label>
                             <input type="checkbox" name="publicYn" value="N" th:checked="${#strings.equals(searchBean.publicYn, 'N')}"  />
                         </th:block>
@@ -266,89 +309,130 @@
                             </select>
                         </div>
                         <div class="form-group mb-2">
-                            <label class="text-lg-gray mr-3">Status</label>
-<!--                            <th:block th:utext="${@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS')}"></th:block>-->
+                            <select class="form-control select2" multiple="multiple" id="statusSelect" name="status" data-placeholder="Status" style="width: 100%;">
+                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}">
+                                    <option th:if="${option.cdDtlNo != 'NA'}" th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div class="form-group mb-2">
+                            <div class="input-group" style="width: 100%;">
+                                <div class="input-group-prepend">
+                                                            <span class="input-group-text">
+                                                                <i class="far fa-calendar-alt"></i>
+                                                            </span>
+                                </div>
+                                <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
+                                <input name="createdDate1" id="createdDate1" type="hidden" th:value="${searchBean.createdDate1}" />
+                                <input name="createdDate2" id="createdDate2" type="hidden" th:value="${searchBean.createdDate2}" />
+                            </div>
+                            <script>
+                                var startDate = String([[${searchBean?.createdDate1}]]);
+                                var endDate = String([[${searchBean?.createdDate2}]]);
 
-                            <th:block        th:utext="${searchBean.status}"></th:block>
-<!--                             <th:block        th:utext="${@CoCodeManager.genCommonCheckbox('206', 'status', searchBean.status, false)}"></th:block>-->
+                                if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+                                    var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                    var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                    $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+                                }
+
+                                $("#createdDate").daterangepicker({
+                                    autoUpdateInput: false
+                                }).on('apply.daterangepicker', function(ev, picker) {
+                                    $("input[name='createdDate1']").val(picker.startDate.format('YYYYMMDD'));
+                                    $("input[name='createdDate2']").val(picker.endDate.format('YYYYMMDD'));
+                                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                                }).on('cancel.daterangepicker', function(ev, picker) {
+                                    $("#createdDate").val("");
+                                    $("input[name='createdDate1']").val("");
+                                    $("input[name='createdDate2']").val("");
+                                });
+                            </script>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean.creator}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean.reviewer}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComCreatorDivision" name="watchers" placeholder="Watcher" th:value="${searchBean.watchers}" type="text"/>
                         </div>
                     </div>
                     <div class="card-footer">
                         <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
                     </div>
                 </div>
-
-
-                <dl class="basicSearch col3">
-                    <dt>Basic Search Area</dt>
-
-                    </dd>
-
-                    <dd class="">
-                        <label style="width:100px;">Created Date</label>
-                        <input class="cal" id="createdDate1" maxlength="8" name="createdDate1" style="width:70px;"
-                               title="Search Start Date" type="text" value="${searchBean.createdDate1}"/> ~
-                        <input class="cal" id="createdDate2" maxlength="8" name="createdDate2" style="width:70px;"
-                               title="Search End Date" type="text" value="${searchBean.createdDate2}"/>
-                    </dd>
-                    <dd class="centerAign">
-                        <label>Creator</label>
-                        <input class="autoComCreatorDivision" name="creator" type="text" value="${searchBean.creator}"/>
-                    </dd>
-                    <dd class="lastAign">
-                        <label>Reviewer</label>
-                        <input class="autoComReviewer" name="reviewer" type="text" value="${searchBean.reviewer}"/>
-                    </dd>
-                    <dd class="lastAign">
-                        <label>Watcher</label>
-                        <input class="" name="watchers" type="text" value="${searchBean.watchers}"/>
-                    </dd>
-                    <th:block th:if="${@CommonFunction.isAdmin()}">
-                        <dd class="lastAign">
-                            <label style="width:150px;">View My 3rd Parties Only</label>
-                            <input ${searchBean.publicYn eq name="publicYn" type="checkbox" value="N" 'N' ?
-                            'checked="checked"' : '' } />
-                        </dd>
-                    </th:block>
-
-                </dl>
             </th:block>
             <th:block th:if="${#strings.equals(defaultSearchType, 'SELF_CHECK')}">
-                <dl class="basicSearch col3">
-                    <dt>Basic Search Area</dt>
-                    <dd>
-                        <label>ID</label>
-                        <input name="prjId" type="text" value="${searchBean.prjId}"/>
-                    </dd>
-                    <dd class="centerAign">
-                        <label>Project Name</label>
-                        <input name="prjName" type="text" value="${searchBean.prjName}"/>
-                    </dd>
-                    <dd class="lastAign">
-                        <label>OSS Name</label>
-                        <input class="autoComOss" name="ossName" type="text" value="${searchBean.ossName}"/>
-                    </dd>
-                    <dd>
-                        <label>Created Date</label>
-                        <input autocomplete="off" class="cal" id="schStartDate" maxlength="8" name="schStartDate"
-                               title="Search Start Date" type="text" value="${searchBean.schStartDate}"/> ~
-                        <input autocomplete="off" class="cal" id="schEndDate" maxlength="8" name="schEndDate"
-                               title="Search End Date" type="text" value="${searchBean.schEndDate}"/>
-                    </dd>
-                    <dd class="centerAign">
-                        <label>License Name</label>
-                        <input class="autoComLicense" name="licenseName" type="text" value="${searchBean.licenseName}"/>
-                    </dd>
-                    <dd class="lastAign ">
-                        <label>Creator</label>
-                        <input class="autoComCreatorDivision" name="creator" type="text" value="${searchBean.creator}"/>
-                    </dd>
-                    <dd class="">
-                        <label class="vmiddle" style="width: 50%; text-align: left;">View My Project Only</label>
-                        <input ${searchBean.publicYn eq id="checkbox3" name="publicYn" type="checkbox" value="N" 'N' ?
-                        'checked="checked"' : '' }/>
-                    </dd>
-                </dl>
+                <div class="card card-dark card-outline search-form mb-3">
+                    <div class="card-header">
+                        <div class="card-title">Basic Search Area</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean.prjId}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComOss" name="ossNamec" placeholder="OSS Name" th:value="${searchBean.ossName}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComOss" name="ossNamec" placeholder="OSS Name" th:value="${searchBean.ossName}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <div class="input-group" style="width: 100%;">
+                                <div class="input-group-prepend">
+                                                                <span class="input-group-text">
+                                                                    <i class="far fa-calendar-alt"></i>
+                                                                </span>
+                                </div>
+                                <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
+                                <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean.schStartDate}" />
+                                <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean.schEndDate}" />
+                            </div>
+                            <script>
+                                var startDate = String([[${searchBean?.createdDate1}]]);
+                                var endDate = String([[${searchBean?.createdDate2}]]);
+
+                                if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+                                    var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                    var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                    $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+                                }
+
+                                $("#createdDate").daterangepicker({
+                                    autoUpdateInput: false
+                                }).on('apply.daterangepicker', function(ev, picker) {
+                                    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                                    $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                                }).on('cancel.daterangepicker', function(ev, picker) {
+                                    $("#createdDate").val("");
+                                    $("input[name='schStartDate']").val("");
+                                    $("input[name='schEndDate']").val("");
+                                });
+                            </script>
+                            </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComLicense" name="licenseName" placeholder="License Name" th:value="${searchBean.licenseName}" type="text"/>
+                        </div>
+                        <div class="form-group mb-2">
+                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean.creator}" type="text"/>
+                        </div>
+                        <th:block th:if="${not @CommonFunction.isAdmin()}">
+                            <div class="form-group mb-2">
+                                <label class="text-lg-gray mr-3">View My Projects Only</label>
+                                <input type="checkbox" name="publicYn" id="checkbox3" value="N" th:checked="${#strings.equals(searchBean.publicYn, 'N')}"  />
+                            </div>
+                        </th:block>
+                    </div>
+                    <div class="card-footer">
+                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                    </div>
+                </div>
             </th:block>
         </form>
     </fieldset>

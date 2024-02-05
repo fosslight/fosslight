@@ -72,6 +72,15 @@ var evt = {
 			
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 		});
+
+        var startDate = String([[${searchBean?.schStartDate}]]);
+        var endDate = String([[${searchBean?.schEndDate}]]);
+
+        if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+            var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+        }
 		
 		$("#createdDate").daterangepicker({
 			autoUpdateInput: false

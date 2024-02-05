@@ -64,7 +64,9 @@
                                                                 <i class="far fa-calendar-alt"></i>
                                                             </span>
                                                         </div>
-                                                        <input type="text" class="form-control" placeholder="Date range" id="createdDate">
+                                                        <input type="text" class="form-control" placeholder="Date range" id="schDateRange">
+                                                        <input name="createdDate1" id="createdDate1" type="hidden" th:value="${searchBean?.createdDate1}" />
+                                                        <input name="createdDate2" id="createdDate2" type="hidden" th:value="${searchBean?.createdDate2}" />
                                                     </div>
                                                 </div>
                                             </div>
