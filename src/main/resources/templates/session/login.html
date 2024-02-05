@@ -40,6 +40,12 @@
                 $("#authenticationAreaFragment .replaceable-content").replaceWith(res);
                 login_fn.setSaveIdChecked();
             });
+
+            $(document).keypress(function(event) {
+                if (event.key === "Enter") {
+                    login_fn.excSubmit();
+                }
+            });
         },
         excSubmit: function () {
             formAjaxData("#loginForm", "/session/login-proc",
@@ -54,16 +60,16 @@
         },
         setSaveIdChecked() {
             const userInputId = getCookie("userInputId");
-            $("input[name=userId]").val(userInputId);
+            $("input[name=userId]").val("");
 
-            if ($("input[name=un]").val() != "") {
-                $("#saveID").attr("checked", true);
+            if (userInputId) {
+                $("#saveID").prop("checked", true);
+                $("input[name=userId]").val(userInputId);
             }
         },
         handleSaveIdCheckboxChange(checkbox) {
             if (checkbox.checked) {
                 const _userInputId = $("input[name='userId']").val();
-
                 setCookie("userInputId", _userInputId, 7);
             } else {
                 deleteCookie("userInputId");
