@@ -444,7 +444,7 @@ var src_fn = {
 				{name: 'ossName', index: 'ossName', width: 300, align: 'left', template: searchStringOptions},
 				{name: 'ossVersion', index: 'ossVersion', width: 150, align: 'center', template: searchStringOptions},
 				{name: 'licenseName', index: 'licenseName', width: 218, align: 'left', formatter: fn_grid_com.displayLicense, template: searchStringOptions},
-				{name: 'cvssScore', index: 'cvssScore', width: 98, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions, sortable : true, sorttype:'float'},
+				{name: 'cvssScore', index: 'cvssScore', width: 98, align: 'center', formatter:fn.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions, sortable : true, sorttype:'float'},
 				{name: 'excludeYn', index: 'excludeYn', width: 40, align: 'center', hidden:true}
 			],
 			onSelectRow: function(id){},
@@ -492,7 +492,7 @@ var src_fn = {
 			colNames: ['prjId', 'ID','project Name', 'project Version', 'Component Count', 'referenceDiv'],
 			colModel: [
 				{name: 'prjId', index: 'prjId', width: 110, align: 'center', formatter: function(){
-					return '${project.prjId}';
+					return [[${project.prjId}]];
 				}, hidden:true},
 				{name: 'referenceId', index: 'referenceId', width: 68, align: 'center', key:true},
 				{name: 'prjName', index: 'prjName', width: 390, align: 'left'},
@@ -613,6 +613,7 @@ var src_fn = {
 		
 		src_fn.getSrcGridData(param, type);
 		$('.srcProject2').hide();
+		$("#_srcAddListContainer").show();
 	},
 	exportList : function(obj) {
     	var exportListId = '#' + $(obj).siblings("div").attr("id");

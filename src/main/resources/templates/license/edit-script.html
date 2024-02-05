@@ -7,8 +7,10 @@
     
         $(window).load(function () {
             lic_edit_data.init();
+            
+            showHelpLink("License_Edit_Info", "heplLink_licenseEditInfo");
         });
-
+        
         const lic_edit_data = {
             detail : [[${ detail }]],
             init: function () {

@@ -766,7 +766,8 @@ var fn = {
 		})
 	},
 	downloadExcel : function(){
-		if(isMaximumRowCheck(totalRow)){
+		loading.show();
+		if (isMaximumRowCheck(totalRow)) {
 			var data = fn.setGridParam();
 			
 			$.ajax({

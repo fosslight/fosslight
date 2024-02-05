@@ -239,6 +239,8 @@ var party_evt = {
 				}
 				
 				$('.three2list').hide();
+				$("#_3rdAddListContainer").show();
+				
 			},
 			error : function(){
 				alertify.error([[#{msg.common.valid2}]], 0);
@@ -692,7 +694,7 @@ var party_evt = {
     },
     removeList : function(removeRow, refPartnerId){
     	$('#_3rdAddList').jqGrid('delRowData', removeRow); // Loaded List - delete row
-    	var mainData = $('#list3').jqGrid(('getGridParam','data'));
+    	var mainData = $('#list3').jqGrid('getGridParam', 'data');
     	
     	mainData
 	    	.filter(function(a){ 
@@ -709,6 +711,7 @@ var party_evt = {
         });
 
         partMainData = gridData;
+        
         $("#list3").jqGrid('GridUnload');
         part_grid.load();
     }

@@ -3,7 +3,7 @@
 <th:block th:fragment="loadingWrapFragment">
     <div class="loading" id="loading_wrap" style="display:none;">
         <div class="loadingBlind"></div>
-        <img alt="loading" src="/images/loading.gif"/>
+        <img alt="loading" th:src="@{/images/loading.gif}"/>
     </div>
 </th:block>
 <th:block th:fragment="promptPopupFragment">
