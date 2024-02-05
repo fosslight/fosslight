@@ -686,26 +686,6 @@ var fn = {
         }
         
         return display;
-		
-		
-// 		var display = "";
-// 		var _url = '/vulnerability/vulnpopup?ossName='+rowObject.ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType=';
-		
-// 		if(parseInt(cellvalue) >= 9.0 ) {
-// 			display="<span class=\"iconSet vulCritical\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
-// 		} else if(parseInt(cellvalue) >= 7.0 ) {
-// 			display="<span class=\"iconSet vulHigh\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
-// 		} else if(parseInt(cellvalue) >= 4.0) {
-// 			display="<span class=\"iconSet vulMiddle\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
-// 		} else if(parseInt(cellvalue) > 0) {
-// 			display="<span class=\"iconSet vulLow\" onclick=\"openNVD2('"+rowObject.ossName+"','"+_url+"')\">"+cellvalue+"</span>";
-// 		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
-// 			display="<span style=\"font-size:0;\"></span>";
-// 		} else {
-// 			display=cellvalue;
-// 		}
-		
-// 		return display;
 	},
 	displaySecurityTab : function(cellvalue, options, rowObject){
 		var display = "";
@@ -735,7 +715,7 @@ var fn = {
 	},
 	// Grid identification display event
 	mvIdentification : function(prjId, initDiv, permission){
-		if(parseInt(permission) > 0){
+		if (parseInt(permission) > 0){
 			createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/'+initDiv);
 		} else {
 			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
@@ -743,11 +723,11 @@ var fn = {
 	},
 	// Grid veritification display event
 	mvVerification : function(prjId, permission){
-//		if(parseInt(permission) > 0){
+		if (parseInt(permission) > 0){
 			createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
-//		} else {
-//			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
-//		}
+		} else {
+			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+		}
 	},
 	// Grid distribution display event
 	mvDistribution : function(prjId, permission){
@@ -923,7 +903,7 @@ var fn = {
 			var prjId = $("#list").getGridParam("selrow");
 			var rowData = $("#list").getRowData(prjId);
 
-//			if(parseInt(rowData["statusPermission"]) > 0) {
+			if (parseInt(rowData["statusPermission"]) > 0) {
 				var rtnParameter = {};
 				
 				$.ajax({
@@ -974,9 +954,9 @@ var fn = {
 						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				});
-//			} else {
-//				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
-//			}
+			} else {
+				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+			}
 		}
 	},
 	copy : function(){
@@ -984,11 +964,11 @@ var fn = {
 			var prjId = $("#list").getGridParam("selrow");
 			var rowData = $("#list").getRowData(prjId);
 
-//			if(parseInt(rowData["permission"]) > 0) {
+			if (parseInt(rowData["permission"]) > 0) {
 				createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
-//			} else {
-//				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
-//			}
+			} else {
+				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+			}
 		}
 	},
 	showChangeStatus : function(){
@@ -1482,11 +1462,11 @@ var fn = {
 		
 		for (var i in prjIds) {
 			var gridData = $('#list').jqGrid('getRowData',prjIds[i]);
-//			if ("1" == gridData.statusPermission) {
+			if ("1" == gridData.statusPermission) {
 				permissionPrjIds.push(prjIds[i]);
-//			} else {
-//				notPermissionPrjIds.push(prjIds[i]);
-//			}
+			} else {
+				notPermissionPrjIds.push(prjIds[i]);
+			}
 		}
 		
 		if (notPermissionPrjIds.length > 0) {
@@ -1500,10 +1480,10 @@ var fn = {
 			}
 		}
 		
-//		if (permissionPrjIds.length == 0) {
-//			alertify.alert(msg, function(){});
-//			return false;
-//		}
+		if (permissionPrjIds.length == 0) {
+			alertify.alert(msg, function(){});
+			return false;
+		}
 		
 		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
@@ -1887,7 +1867,8 @@ var list = {
 		var rowList = rowStr.split(",");
 		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 		
-		var colNameArr = [ 'ID', 'Project Name', 'Status', 'Progress', 'Download', 'Security', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer'];
+		var colNameArr = [ 'ID', 'Project Name', 'Status', 'Progress', 'Download', 'Security', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer', 
+							'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'];
 		var colModelArr = [];
         var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
 		colModelArr.push(colModelObj);
@@ -1945,6 +1926,18 @@ var list = {
 		} else {
 			colModelObj["editable"] = false;
 		}
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'comment', index: 'comment', width: 70, align: 'left', formatter:fn.displayComment, unformatter:fn.unformatter, sortable : true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'distributionTypeOfCodeDtlExp', index: 'distributionTypeOfCodeDtlExp', width: 50, hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'statusRequestYn', index: 'statusRequestYn', width: 50, hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'priority', index: 'priority', width: 50,hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'permission', index: 'permission', width: 50, hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50,hidden:true};
 		colModelArr.push(colModelObj);
 		
 		$("#list").jqGrid({
