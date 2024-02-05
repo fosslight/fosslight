@@ -10,26 +10,34 @@
                         <th:block th:each="comment, status : ${commentList}">
                             <tr>
                                 <td>
-                                    <div class="row">
-                                        <th:block th:if="${not #strings.isEmpty(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment?.referenceDiv))}">
-                                            <th:block th:if="${comment.referenceDiv == '10'}">
-                                                <span class="badge badge-orange">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
-                                            </th:block>
-                                            <th:block th:if="${comment.referenceDiv == '12'}">
-                                                <span class="badge badge-success">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
-                                            </th:block>
-                                            <th:block th:if="${comment.referenceDiv == '19'}">
-                                                <span class="badge badge-primary">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
-                                            </th:block>
-                                            <th:block th:if="${comment.referenceDiv == '60'}">
-                                                <span class="badge badge-dark">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
-                                            </th:block>
-                                            <th:block th:unless="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '60'}">
-                                                <span class="badge badge-ivory">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
-                                            </th:block>
-                                        </th:block>
-                                    </div>
                                     <div class="post">
+                                        <div class="row mb-1">
+                                            <th:block th:if="${not #strings.isEmpty(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment?.referenceDiv))}">
+                                                <th:block th:if="${comment.referenceDiv == '10'}">
+                                                    <span class="badge badge-orange">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+                                                </th:block>
+                                                <th:block th:if="${comment.referenceDiv == '12'}">
+                                                    <span class="badge badge-success">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+                                                </th:block>
+                                                <th:block th:if="${comment.referenceDiv == '19'}">
+                                                    <span class="badge badge-primary">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+                                                </th:block>
+                                                <th:block th:if="${comment.referenceDiv == '60'}">
+                                                    <span class="badge badge-dark">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+                                                </th:block>
+                                                <th:block th:unless="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '60'}">
+                                                    <span class="badge badge-ivory">[[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv)}]]<th:block th:if="${comment.expansion1 != null}">([[${comment.expansion1}]])</th:block></span>
+                                                </th:block>
+                                            </th:block>
+                                            <th:block th:if="${not #strings.isEmpty(comment.expansion1)}">
+                                                <span class="mx-1 text-lg-gray text-bold">></span>
+                                                <span class="text-lg-gray text-sm text-bold">[[${comment.expansion1}]]</span>
+                                            </th:block>
+                                            <th:block th:if="${not #strings.isEmpty(comment.status)}">
+                                                <span class="mx-1 text-lg-gray text-bold">></span>
+                                                <span class="text-lg-gray text-sm text-bold">[[${comment.status}]]</span>
+                                            </th:block>
+                                        </div>
                                         <div class="user-block">
                                             <span class="username">
                                               <a href="#" th:text="${comment.creator}"></a>
