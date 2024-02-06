@@ -72,7 +72,7 @@
                                 <td class="text-right py-0 align-middle">
                                 <td class="text-right py-0 align-middle">
                                     <div class="btn-group btn-group-sm" th:if="${comment.creator == comment.loginUserName}">
-                                        <button class="btn btn btn-default" type="button" th:data-commId="${comment.commId}" name="commentModifyBtn">
+                                        <button class="btn btn btn-default" type="button" th:data-commId="${comment.commId}" th:data-referenceDiv="${comment.referenceDiv}" name="commentModifyBtn">
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
                                         <button class="btn btn-lg-red" th:data-commId="${comment.commId}" name="commentDeleteBtn" type="button">
@@ -245,7 +245,8 @@
                         $("button[name='commentModifyBtn']").on("click", function (e){
                             e.preventDefault();
                             const commId = $(this).attr("data-commId");
-                            fn_comment.handleCommentPopupOpen(commId);
+                            const referenceDiv = $(this).attr("data-referenceDiv");
+                            fn_comment.handleCommentPopupOpen(commId, referenceDiv);
                         });
                         $("button[name='commentDeleteBtn']").on("click", function (e){
                             e.preventDefault();
@@ -285,8 +286,8 @@
                     }
                 });
             },
-            handleCommentPopupOpen: function (_commId)  {
-                getAjaxJsonData({commId : _commId}, "/comment/getDivCommentByCommId", "html", function (res) {
+            handleCommentPopupOpen: function (_commId, _referenceDiv)  {
+                getAjaxJsonData({commId : _commId, referenceDiv: _referenceDiv}, "/comment/getDivCommentByCommId", "html", function (res) {
                     alertify.confirm(res, function (e) {
                         if(e) {
                             fn_comment.editComment();
@@ -310,11 +311,12 @@
             editComment: function () {
                 const commId = $("#modifiedCommentId").val();
                 const referenceId = $('input[name=ossId]').val();
+                const referenceDiv = $("#referenceDiv").val();
                 const contents = $('#modifiedCommentEditor').summernote('code');
                 const param = {
                     'commId': commId,
                     'contents': contents,
-                    'referenceDiv': '40',
+                    'referenceDiv': referenceDiv,
                     'referenceId': referenceId
                 };
 
@@ -336,6 +338,7 @@
             <div class="col-12">
                 <input type="hidden" id="modifiedCommentId" th:value="${commId}">
                 <input type="hidden" id="contents" th:value="${contents}">
+                <input type="hidden" id="referenceDiv" th:value="${referenceDiv}">
                 <textarea class="form-control" id="modifiedCommentEditor" name="commentInput" rows="3" style="height: 800px"></textarea>
             </div>
         </div>

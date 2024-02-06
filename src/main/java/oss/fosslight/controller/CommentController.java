@@ -118,9 +118,10 @@ public class CommentController extends CoTopComponent {
     }
 
     @GetMapping(value = COMMENT.DIV_COMMENT_BY_ID)
-    public String getDivCommentByCommId(@RequestParam String commId, Model model) {
+    public String getDivCommentByCommId(@RequestParam String commId, @RequestParam String referenceDiv, Model model) {
         String contents = commentService.getContents(commId);
         model.addAttribute("commId", commId);
+        model.addAttribute("referenceDiv", referenceDiv);
         model.addAttribute("contents", contents);
 
         return "fragments/comment-fragments :: commentPopupFragment";
