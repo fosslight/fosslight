@@ -379,7 +379,9 @@
                                 </div>
                                 <div class="row float-right">
                                     <div class="btn-group mr-xm">
-                                        <button type="button" class="btn btn-yellow-04 btn-sm px-3">Export</button>
+                                    	<input type="button" class="btn btn-yellow-04 btn-sm width-7rem mr-xm px-3" th:onclick="|fn.shareUrl()|" value="Share URL"></input>
+                                    	<input type="hidden" id="copyUrl"/>
+                                        <button type="button" class="btn btn-yellow-04 btn-sm px-3" th:text="Export"></button>
                                         <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon mr-xm" data-toggle="dropdown">
                                             <span class="sr-only">Toggle Dropdown</span>
                                         </button>

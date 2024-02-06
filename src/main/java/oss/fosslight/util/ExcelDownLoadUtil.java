@@ -5189,8 +5189,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		bom.setComponents(componentList);
-		bom.setDependencies(dependencyList);
-		bom.setVulnerabilities(vulnerablityList);
+		if (!dependencyList.isEmpty()) bom.setDependencies(dependencyList);
+		if (!vulnerablityList.isEmpty()) bom.setVulnerabilities(vulnerablityList);
 	
 		return bom;
 	}
