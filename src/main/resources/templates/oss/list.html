@@ -141,10 +141,11 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <div class="form-group mb-2">
                                                             <select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
                                                                 <option value=""></option>
-                                                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></th:block>
+                                                                <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                                                                    <option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+                                                                </th:block>
                                                             </select>
                                                         </div>
                                                     </div>

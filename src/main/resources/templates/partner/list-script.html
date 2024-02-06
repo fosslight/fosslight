@@ -28,12 +28,6 @@ $(document).ready(function () {
 	}
 	
 	showHelpLink("3rd-Party_List_Main");
-	$(".select2").select2();
-	
-	$('#division').select2({
-        placeholder: "Division",
-        allowClear: true,
-    });
 
     var startDate = String([[${searchBean?.createdDate1}]]);
     var endDate = String([[${searchBean?.createdDate2}]]);
@@ -76,10 +70,9 @@ var gridTooltip = {
 //event
 var evt = {
 	init : function(){
+        $('#division').select2({placeholder: "Division", allowClear: true});
+        $('.select2').select2({placeholder: "Status", allowClear: true});
 
-		$('select[name=division]').val('${searchBean.division}').trigger('change');
-		$('select[name=status]').val('${searchBean.status}').trigger('change');
-		
 		refreshParam = fn.setGridParam();
 		
 		$('#search').on('click',function(e){

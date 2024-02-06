@@ -47,7 +47,7 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <li class="nav-item" th:if="${dashboardFlag}">
+          <li th:if="${dashboardFlag}" class="nav-item">
             <a th:href="@{/dashboard/list}" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               	<p th:text="Dashboard"></p>
@@ -71,19 +71,19 @@
               	<p th:text="'Project List'"></p>
             </a>
           </li>
-          <li class="nav-item" th:if="${partnerFlag}">
+          <li th:if="${partnerFlag}" class="nav-item">
             <a th:href="@{/partner/list}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
               	<p th:text="'3rd Party List'"></p>
             </a>
           </li>
-          <li class="nav-item" th:if="${batFlag}">
+          <li th:if="${batFlag}" class="nav-item">
             <a th:href="@{/bat/list}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
               	<p th:text="'BAT List'"></p>
             </a>
           </li>
-          <li class="nav-item" th:if="${binarydbFlag}">
+          <li th:if="${binarydbFlag}" class="nav-item">
             <a th:href="@{/binary}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
               	<p th:text="'Binary DB'"></p>

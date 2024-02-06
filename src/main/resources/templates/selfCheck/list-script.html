@@ -68,7 +68,7 @@ var evt = {
         if (startDate && startDate != 'null' && endDate && endDate != 'null') {
             var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
             var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
-            $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+            $("#schDateRange").val(formattedStartDate + ' - ' + formattedEndDate);
         }
 		
 		$("#schDateRange").daterangepicker({

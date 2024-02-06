@@ -53,19 +53,23 @@
                                            	<div class="row">
                                                	<div class="col-md-3">
                                                    	<div class="form-group mb-2">
-                                                       	<select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
-                                                           	<option value=""></option>
-                                                           	<th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}"></th:block>
-                                                       	</select>
+														<select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
+															<option value=""></option>
+															<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+																<option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+															</th:block>
+														</select>
                                                    	</div>
                                                	</div>
                                                	<div class="col-md-3">
                                                    	<div class="form-group mb-2">
-                                                     	<select class="select2" id="obligationTypeSelect" name="obligationType" style="width: 100%;">
-                                                           	<option value=""></option>
-                                                           	<th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}"></th:block>
-                                                           	<option th:value="NONE" th:text="None"></option>
-                                                       	</select>
+
+														<select class="select2" id="obligationTypeSelect" name="obligationType" style="width: 100%; color: gray;">
+															<option value=""></option>
+															<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}">
+																<option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.obligationType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+															</th:block>
+														</select>
                                                    	</div>
                                                	</div>
                                                	<div class="col-md-4">
@@ -77,8 +81,12 @@
 											<div class="row">
 												<div class="col-md-10">
 													<div class="form-group mb-2">
-														<select class="select2" data-placeholder="Restriction" id="restrictionSelect" multiple="multiple" name="restrictions" style="width: 100%;">
-															<th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"></th:block>
+														<select class="select2" id="restrictionSelect" multiple="multiple"  name="restrictions" style="width: 100%;">
+															<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+																	th:text="${code.cdDtlNm}"
+																	th:value="${code.cdDtlNo}"
+																	th:selected="${searchBean?.restrictions != null and #arrays.contains(searchBean.restrictions, code.cdDtlNo)}">
+															</option>
 														</select>
 													</div>
 												</div>
@@ -86,12 +94,12 @@
                                            	<div class="row">
                                                	<div class="col-md-5">
                                                    	<div class="form-group mb-2">
-                                                   		<textarea class="form-control" name="licenseText" placeholder="License Text" rows="3" th:value="${searchBean.licenseText}"></textarea>
+                                                   		<textarea class="form-control" name="licenseText" placeholder="License Text" rows="3" th:text="${searchBean.licenseText}"></textarea>
                                                    	</div>
                                                	</div>
                                                	<div class="col-md-5">
                                                    	<div class="form-group mb-2">
-                                                   		<textarea class="form-control" name="description" placeholder="User Guide" rows="3" th:value="${searchBean.description}"></textarea>
+                                                   		<textarea class="form-control" name="description" placeholder="User Guide" rows="3" th:text="${searchBean.description}"></textarea>
                                                    	</div>
                                                	</div>
                                            	</div>

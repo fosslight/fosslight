@@ -84,26 +84,28 @@
                         </div>
                         <div class="form-group mb-2">
                             <textarea class="form-control" name="licenseText" placeholder="License Text" rows="1"
-                                      th:value="${searchBean.licenseText}"></textarea>
+                                      th:text="${searchBean.licenseText}"></textarea>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" id="licenseTypeSelect" name="licenseType"
-                                    style="width: 100%; color: gray;">
-                                <option value=""></option>
-                                <th:block
-                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'), searchBean.licenseType)}"></th:block>
+                            <select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
+                                <option value="" disabled selected> </option>
+                                <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                                    <option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+                                </th:block>
                             </select>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" data-placeholder="Restriction" id="restrictionSelect"
-                                    multiple="multiple" name="restrictions" style="width: 100%;">
-                                <th:block
-                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"></th:block>
+                            <select class="select2" id="restrictionSelect" multiple="multiple" name="restrictions" style="width: 100%;">
+                                <option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+                                        th:text="${code.cdDtlNm}"
+                                        th:value="${code.cdDtlNo}"
+                                        th:selected="${searchBean?.restrictions != null and #arrays.contains(searchBean.restrictions, code.cdDtlNo)}">
+                                </option>
                             </select>
                         </div>
                         <div class="form-group mb-2">
                             <textarea class="form-control" name="description" placeholder="User Guide" rows="3"
-                                      th:value="${searchBean.description}"></textarea>
+                                      th:text="${searchBean.description}"></textarea>
                         </div>
                         <div class="form-group mb-2">
                             <input class="form-control" name="webpage" placeholder="Website" th:value="${searchBean.webpage}"
@@ -144,14 +146,14 @@
                             </div>
                         </div>
                         <div class="form-group mb-2">
-                            <textarea class="form-control" name="licenseText" placeholder="Copyright Text" rows="1"
-                                      th:value="${searchBean.copyright}"></textarea>
+                            <textarea class="form-control" name="copyright" placeholder="Copyright Text" rows="1"
+                                      th:text="${searchBean.copyright}"></textarea>
                         </div>
                         <div class="form-group mb-2">
                             <div class="row">
                                 <div class="col-md-9">
-                                    <input class="form-control autoComLicense" name="ossName" placeholder="License Name"
-                                           th:value="${searchBean.ossName}" type="text"/>
+                                    <input class="form-control autoComLicense" name="licenseName" placeholder="License Name"
+                                           th:value="${searchBean.licenseName}" type="text"/>
                                 </div>
                                 <div class="col-md-3 mt-1">
                                     <input name="licenseNameAllSearchFlag" th:checked="${#strings.equals(searchBean.licenseNameAllSearchFlag, 'Y')}" type="checkbox"
@@ -161,7 +163,7 @@
                         </div>
                         <div class="form-group mb-2">
                             <textarea class="form-control" name="summaryDescription" placeholder="Description" rows="1"
-                                      th:value="${searchBean.summaryDescription}"></textarea>
+                                      th:text="${searchBean.summaryDescription}"></textarea>
                         </div>
                         <div class="form-group mb-2">
                             <input class="form-control" name="homepage" placeholder="Website" th:value="${searchBean.homepage}"
@@ -239,7 +241,7 @@
                             <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean.reviewer}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}" type="text"/>
+                            <input class="form-control autoComProjectNm" name="watchers" placeholder="Watchers"  th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <select class="select2" name="distributionType" id="distributionTypeSelect"
@@ -252,25 +254,30 @@
                             <select class="select2" name="networkServerType" id="networkServerTypeSelect"
                                     style="width: 100%;">
                                 <option value=""></option>
-                                <option th:selected="${#strings.equals(searchBean.networkServerType, 'Y')}" th:text="|Yes|"></option>
-                                <option th:selected="${#strings.equals(searchBean.networkServerType, 'N')}" th:text="|No|"></option>
+                                <option value="Y" th:selected="${#strings.equals(searchBean.networkServerType, 'Y')}" th:text="|Yes|"></option>
+                                <option value="N" th:selected="${#strings.equals(searchBean.networkServerType, 'N')}" th:text="|No|"></option>
                             </select>
                         </div>
                         <div class="form-group mb-2">
                             <input class="form-control autoComProjectModel" name="modelName" placeholder="Model Name" th:value="${searchBean.modelName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="form-control select2" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
-                                <option th:value="''"></option>
-                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}">
-                                    <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                </th:block>
-                            </select>
+                            <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
+                                <select class="form-control select2" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
+                                    <option th:value="''"></option>
+                                    <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}"
+                                            th:text="${option.cdDtlNm}"
+                                            th:value="${option.cdDtlNo}"
+                                        th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
+                                    </option>
+                                </select>
+                            </th:block>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" name="priority" id="prioritySelect" style="width: 100%;">
-                                <option value=""></option>
-                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'), searchBean.priority)}"></th:block>
+                            <select class="form-control select2" style="width: 100%;" name="priority" id="prioritySelect">
+                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                    <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean.priority != null && #strings.equals(option.cdDtlNo, searchBean.priority)}"></option>
+                                </th:block>
                             </select>
                         </div>
                         <th:block th:if="${not @CommonFunction.isAdmin()}">
@@ -297,10 +304,10 @@
                             <input class="form-control" name="partnerName" placeholder="3rd Party Name" th:value="${searchBean.partnerName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="partnerName" placeholder="3rd Party Software Name" th:value="${searchBean.softwareName}" type="text"/>
+                            <input class="form-control" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean.softwareName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="partnerName" placeholder="3rd Party Software Version" th:value="${searchBean.softwareVersion}" type="text"/>
+                            <input class="form-control" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean.softwareVersion}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <select class="select2" name="division" id="divisionSelect" style="width: 100%;">
@@ -309,11 +316,16 @@
                             </select>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="form-control select2" multiple="multiple" id="statusSelect" name="status" data-placeholder="Status" style="width: 100%;">
-                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}">
-                                    <option th:if="${option.cdDtlNo != 'NA'}" th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                </th:block>
-                            </select>
+                            <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
+                                <select class="form-control select2" multiple="multiple" id="statusSelect" name="status" style="width: 100%;">
+                                    <option th:value="''"></option>
+                                    <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}"
+                                            th:text="${option.cdDtlNm}"
+                                            th:value="${option.cdDtlNo}"
+                                            th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
+                                    </option>
+                                </select>
+                            </th:block>
                         </div>
                         <div class="form-group mb-2">
                             <div class="input-group" style="width: 100%;">
@@ -356,7 +368,7 @@
                             <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean.reviewer}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComCreatorDivision" name="watchers" placeholder="Watcher" th:value="${searchBean.watchers}" type="text"/>
+                            <input class="form-control" name="watchers" placeholder="Watcher" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
                         </div>
                     </div>
                     <div class="card-footer">
@@ -377,17 +389,14 @@
                             <input class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComOss" name="ossNamec" placeholder="OSS Name" th:value="${searchBean.ossName}" type="text"/>
-                        </div>
-                        <div class="form-group mb-2">
-                            <input class="form-control autoComOss" name="ossNamec" placeholder="OSS Name" th:value="${searchBean.ossName}" type="text"/>
+                            <input class="form-control autoComOss" name="ossName" placeholder="OSS Name" th:value="${searchBean.ossName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <div class="input-group" style="width: 100%;">
                                 <div class="input-group-prepend">
-                                                                <span class="input-group-text">
-                                                                    <i class="far fa-calendar-alt"></i>
-                                                                </span>
+                                    <span class="input-group-text">
+                                        <i class="far fa-calendar-alt"></i>
+                                    </span>
                                 </div>
                                 <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
                                 <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean.schStartDate}" />

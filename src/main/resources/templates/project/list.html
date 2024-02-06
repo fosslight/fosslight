@@ -71,10 +71,11 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="form-control select2" id="division" name="division" style="width: 100%">
+                                                    <select class="form-control select2" id="division" name="prjDivision" style="width: 100%">
                                                     	<option th:value="''"></option>
                                                     	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                                    		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                                    		<option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}"
+                                                                    th:selected="${#strings.equals(option.cdDtlNo, searchBean?.prjDivision)}"></option>
                                                     	</th:block>
                                                     </select>
                                                 </div>
@@ -91,7 +92,7 @@
                                             <div class="col-4">
                                                 <div class="form-group mb-2">
                                                 	<div class="input-group">
-                                                    	<input type="text" class="form-control autoComReviewer" placeholder="Reviewer" name="reviewer" th:value="${searchBean?.creator}" />
+                                                    	<input type="text" class="form-control autoComReviewer" placeholder="Reviewer" name="reviewer" th:value="${searchBean?.reviewer}" />
                                                 	</div>
                                                 </div>
                                             </div>
@@ -106,30 +107,34 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="select2" name="networkServerType" style="width: 100%;">
-                                                    	<option th:value="''"></option>
-                                                        <option th:value="Y" th:text="Yes"></option>
-                                                        <option th:value="N" th:text="No"></option>
+                                                    <select class="select2" name="networkServerType" id="networkServerTypeSelect"
+                                                            style="width: 100%;">
+                                                        <option value=""></option>
+                                                        <option value="Y" th:selected="${#strings.equals(searchBean.networkServerType, 'Y')}" th:text="|Yes|"></option>
+                                                        <option value="N" th:selected="${#strings.equals(searchBean.networkServerType, 'N')}" th:text="|No|"></option>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="form-control select2" id="statuses" name="statuses" style="width: 100%;">
-                                                    	<option th:value="''"></option>
-                                                    	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}">
-                                                    		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                                    	</th:block>
-                                                    </select>
+                                                    <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
+                                                        <select class="form-control select2" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
+                                                            <option th:value="''"></option>
+                                                            <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}"
+                                                                    th:text="${option.cdDtlNm}"
+                                                                    th:value="${option.cdDtlNo}"
+                                                                    th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
+                                                            </option>
+                                                        </select>
+                                                    </th:block>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="form-control select2" name="priority" style="width: 100%;">
-                                                    	<option th:value="''"></option>
-                                                    	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
-                                                    		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                                    	</th:block>
+                                                    <select class="form-control select2" style="width: 100%;" id="priority" name="priority">
+                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean.priority != null && #strings.equals(option.cdDtlNo, searchBean.priority)}"></option>
+                                                        </th:block>
                                                     </select>
                                                 </div>
                                             </div>

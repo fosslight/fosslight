@@ -117,9 +117,19 @@
             // multiple checkbox values to comma separate
             var chkElArr = ["restrictions", "statuses", "status"];
             $.each(chkElArr, function(index, item){
-                var selectEl = $('#searchConditionForm input[name="'+item+'"]');
-                if(selectEl.length > 0) {
-                    fn.appendFormCheckboxValuesEl(item);
+
+                var selectedValues  = "";
+
+                $('#searchConditionForm select[name="'+item+'"]').find(':selected').each(function() {
+                    if (selectedValues.length === 0) {
+                        selectedValues += $(this).val();
+                    } else {
+                        selectedValues += "," + $(this).val();
+                    }
+                });
+
+                if(selectedValues.length > 0) {
+                    fn.appendFormCheckboxValuesEl(item, selectedValues);
                 }
             });
 
@@ -132,9 +142,9 @@
                 error : fn.onError
             }).submit();
         },
-        appendFormCheckboxValuesEl(target) {
-            $('#searchConditionForm input[name="chk_'+target+'"]').remove();
-            var addEl = '<input type="hidden" name="chk_'+target+'" value="'+ $('input[name="'+target+'"]:checked').map(function () {return this.value;}).get().join(",") +'" />';
+        appendFormCheckboxValuesEl(item, selectedValues) {
+            $('#searchConditionForm input[name="chk_'+item+'"]').remove();
+            var addEl = '<input type="hidden" name="chk_'+item+'" value="'+ selectedValues +'" />';
             $("#searchConditionForm").append(addEl);
         },
         updateSubmit : function(){

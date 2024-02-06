@@ -72,32 +72,39 @@
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" id="autocomplete-license-name" class="form-control" placeholder="3rd Party Software Name" th:value="${searchBean.softwareName}"/>
+                                                    <input type="text" class="form-control" placeholder="3rd Party Software Name" th:value="${searchBean.softwareName}"/>
                                                 </div>
                                             </div>
                                      	</div>
                                      	<div class="row">
                                      		<div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" id="autocomplete-license-name" class="form-control" placeholder="3rd Party Software Version" th:value="${searchBean.softwareVersion}"/>
+                                                    <input type="text" class="form-control" placeholder="3rd Party Software Version" th:value="${searchBean.softwareVersion}"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <select class="form-control select2" id="division" name="division" style="width: 100%;">
+                                                    <select class="form-control select2" name="division" id="division" style="width: 100%;">
+                                                        <option value=""></option>
                                                         <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                                    		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                                    	</th:block>
+                                                            <option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}"
+                                                                    th:selected="${#strings.equals(option.cdDtlNo, searchBean?.division)}"></option>
+                                                        </th:block>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <select class="form-control select2" multiple="multiple" id="status" name="status" data-placeholder="Status" style="width: 100%;">
-                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}">
-                                                    		<option th:if="${option.cdDtlNo != 'NA'}" th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
-                                                    	</th:block>
-                                                    </select>
+                                                    <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
+                                                        <select class="form-control select2" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
+                                                            <option th:value="''"></option>
+                                                            <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}"
+                                                                    th:text="${option.cdDtlNm}"
+                                                                    th:value="${option.cdDtlNo}"
+                                                                    th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
+                                                            </option>
+                                                        </select>
+                                                    </th:block>
                                                 </div>
                                             </div>
                                      	</div>
@@ -114,7 +121,7 @@
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="watchers" class="form-control" placeholder="Watcher" th:value="''" />
+                                                    <input type="text" name="watchers" class="form-control" placeholder="Watcher" th:value="${searchBean.watchers[0]}" />
                                                 </div>
                                             </div>
                                         </div>

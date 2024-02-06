@@ -48,36 +48,40 @@
                                 <input type="button" class="btn btn-info float-right right" id="change" value="change" onclick="fn.changePassword()"/>
                             </div>
                         </div>
-                        <div class="card card-outline card-dark submit-form">
-                            <div class="card-header">
-                                <div class="card-title">Setting</div>
-                            </div>
-                            <div class="card-body">
-                                <div class="row form-group mb-3">
-                                    <div class="col-12">
-                                        <select class="select2" name="defaultLocale" style="width: 100%;">
-                                            <option value="" disabled selected> </option>
-                                            <th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DEFAULT_LOCALE'))}">
-                                                <option th:value="${code[3]}"  th:selected="${code[3] eq sessUserInfo.defaultLocale}" th:utext="${code[1]}"></option>
+                        <form name="ConfigurationForm" id="ConfigurationForm">
+                            <div class="card card-outline card-dark submit-form">
+                                <div class="card-header">
+                                    <div class="card-title">Setting</div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row form-group mb-3">
+                                        <div class="col-12">
+                                            <select class="select2" name="defaultLocale" style="width: 100%;">
+                                                <option value="" disabled selected> </option>
+                                                <th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DEFAULT_LOCALE'))}">
+                                                    <option th:value="${code[3]}"  th:selected="${code[3] eq sessUserInfo.defaultLocale}" th:utext="${code[1]}"></option>
+                                                </th:block>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-12">
+                                            <th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DEFAULT_TAB'))}">
+                                                <div class="icheck-warning mb-3">
+                                                    <input type="checkbox" name="defaultTab" th:id="|defaultTab${code[0]}|" th:value="${code[0]}"/>
+                                                    <label th:for="|defaultTab${code[0]}|" th:utext="${code[1]}" style="font-weight: normal"></label>
+                                                </div>
                                             </th:block>
-                                        </select>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="row form-group">
-                                    <div class="col-12">
-                                        <th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DEFAULT_TAB'))}">
-                                            <div class="icheck-warning mb-3">
-                                                <input type="checkbox" name="defaultTab" th:id="|defaultTab${code[0]}|" th:value="${code[0]}"/>
-                                                <label th:for="|defaultTab${code[0]}|" th:utext="${code[1]}" style="font-weight: normal"></label>
-                                            </div>
-                                        </th:block>
-                                    </div>
+                                <div class="card-footer">
+                                    <input id="save" type="button" value="Save" class="btn btn-dark-04 float-right right" />
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <input id="save" type="button" value="Save" class="btn btn-dark-04 float-right right" />
-                            </div>
-                        </div>
+
+                        </form>
+
                     </div>
                     <div class="col-md-6">
                         <div class="card card-outline card-dark submit-form">
