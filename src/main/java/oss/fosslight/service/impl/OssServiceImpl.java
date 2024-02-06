@@ -3015,8 +3015,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName);
 			}
 
-			String key = userName != null ? "autoanalysisCoReviewer.ssh.command" : "autoanalysis.ssh.command";
-			String analysisCommand = MessageFormat.format(CommonFunction.getProperty(key), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1));
+			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1), (userName == null ? 0 : 1));
 			
 			ProcessBuilder builder = new ProcessBuilder( "/bin/bash", "-c", analysisCommand );
 			
