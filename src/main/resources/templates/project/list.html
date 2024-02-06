@@ -115,7 +115,7 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="form-control select2" id="statuses" name="statuses" style="width: 100%;">
+                                                    <select class="form-control select2" multiple="multiple" id="statuses" name="statuses" data-placeholder="Status" style="width: 100%;">
                                                     	<option th:value="''"></option>
                                                     	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}">
                                                     		<option th:value="${option.cdDtlNo}" th:selected="${option.cdDtlNo == searchBean?.statuses}" th:text="${option.cdDtlNm}"></option>
