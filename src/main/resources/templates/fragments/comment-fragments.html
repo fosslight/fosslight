@@ -71,7 +71,7 @@
                                 </td>
                                 <td class="text-right py-0 align-middle">
                                 <td class="text-right py-0 align-middle">
-                                    <div class="btn-group btn-group-sm">
+                                    <div class="btn-group btn-group-sm" th:if="${comment.creator == comment.loginUserName}">
                                         <button class="btn btn btn-default" type="button" th:data-commId="${comment.commId}" name="commentModifyBtn">
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
