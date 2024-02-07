@@ -276,6 +276,9 @@
             // vulnerability 포메터
             displayVulnerability: function (cellvalue, options, rowObject) {
                 var display = "";
+                var ossName = rowObject.ossName;
+                var ossVersion = rowObject.ossVersion;
+                
                 var _url = '/vulnerability/vulnpopup?ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion + '&vulnType=';
 
                 if (parseInt(cellvalue) >= 9.0) {

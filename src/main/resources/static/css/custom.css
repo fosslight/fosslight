@@ -843,3 +843,4 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .pointer {cursor: pointer; font-size: .75rem;}
 .source {background-color: #9a58b5 !important;}
 .binary {background-color: #c56272 !important;}
+.select2-selection__rendered {color: #212529 !important;}

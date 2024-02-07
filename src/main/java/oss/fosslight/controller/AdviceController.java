@@ -9,7 +9,10 @@ import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,9 +20,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.config.AppConstBean;
 import oss.fosslight.domain.T2Users;
+import oss.fosslight.service.T2UserService;
 
 @ControllerAdvice
 public class AdviceController extends CoTopComponent{
+	@Autowired T2UserService userService;
 	
 	@ModelAttribute("req")
 	public HttpServletRequest getRequest(HttpServletRequest req){
@@ -37,23 +42,18 @@ public class AdviceController extends CoTopComponent{
 		return "";
 	}
 	
-	@SuppressWarnings("unchecked")
 	@ModelAttribute("sessUserInfo")
 	public T2Users getSessUserInfo(){
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		HashMap<String, Object> sessDetailInfo = null;
+		SecurityContext sec = SecurityContextHolder.getContext();
+		AbstractAuthenticationToken auth = (AbstractAuthenticationToken)sec.getAuthentication();
+
 		T2Users sessUserInfo = null;
-		
-		if (auth != null) {			
-			try{
-				sessDetailInfo = (HashMap<String, Object>) auth.getDetails();
-			}catch(Exception e){
-			}
-			
-			if (sessDetailInfo != null){
-				sessUserInfo = (T2Users)sessDetailInfo.get("sessUserInfo");
-			}
+		if (!auth.getName().equals("anonymousUser")) {
+			T2Users user = new T2Users();
+			user.setUserId(auth.getName());
+			sessUserInfo = userService.getUserAndAuthorities(user);
 		}
+		
 		return sessUserInfo;
 	}
 	

@@ -34,6 +34,14 @@ public class CoCodeDtl {
 		this.cdDtlExp = cdDtlExp;
 	}
 
+	public String getUseYn() {
+		return useYn;
+	}
+	
+	public void setUseYn(String useYn) {
+		this.useYn = useYn;
+	}
+	
 	/** The cd sub no. */
     String cdSubNo;
     

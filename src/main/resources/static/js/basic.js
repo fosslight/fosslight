@@ -110,26 +110,6 @@ $(document).ready(function () {
         return false;
     });
 
-    function initTab() {
-        var query = window.location.search;
-        var param = new URLSearchParams(query);
-        var id = param.get("id");
-        var prjFlag = param.get("project");
-        if (id != null && prjFlag != null) {
-            createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
-        } else {
-            var _defaultTabStr = $("#defaultTabAnchorArr").val() || "";
-
-            $.each(_defaultTabStr.split(","), function (idx, val) {
-                var _gnbHref = $("#header > div > div.gnb a[href$='" + val + "']");
-
-                if (_gnbHref && _gnbHref.length == 1) {
-                    $("#header > div > div.gnb a[href$='" + val + "']").trigger("click");
-                }
-            });
-        }
-    }
-
     function tabExitHide() {
         var $tabs = $('#nav-tabs').tabs();
         var tab_length = $tabs.find('.nav-tab-menu li span').length;
@@ -210,11 +190,9 @@ $(document).ready(function () {
 
             return false;
         });
-
-        initTab();
     });
 
-    /* Delete tab function */
+	/* Delete tab function */
     $(document).on('click', '.ui-icon-close', function (event) {
         viewRefresh();
 
@@ -337,6 +315,32 @@ $(document).ready(function () {
     autoComplete.load();
     autoComplete.init();
 });
+
+window.onload = function() {
+	initTab();
+}
+
+function initTab() {
+	var query = window.location.search;
+   	var param = new URLSearchParams(query);
+   	var id = param.get("id");
+   	var prjFlag = param.get("project");
+   	if (id != null && prjFlag != null) {
+    	createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
+   	} else {
+    	var _defaultTabStr = $("#defaultTabAnchorArr").val() || "";
+		var _sidebar = $("#sidebar").find(".nav-link");
+		
+		$.each(_sidebar, function(idx, val){
+			var _href = $(this).attr("href");
+			if ("#" != _href && !_href.startsWith("/system")) {
+				if (_defaultTabStr.indexOf(_href) != -1) {
+					$(this).trigger("click");
+				}
+			}
+		});
+	}
+}
 
 var loading = {
     show: function () {
