@@ -307,6 +307,7 @@
                                 <a th:onclick="|fn.copy()|" id="copy" class="btn btn-teal-02 float-right" style="margin-right: 5px; display: none;" th:text="|Copy|"></a>
                                 <a th:onclick="|fn.exeProjectComplete('Y')|" th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-teal-02 float-right" id="complete" style="margin-right: 5px; display: none;" th:text="|Complete|"></a>
                                 <a th:onclick="|fn.shareUrl()|" th:if="${project.prjId != null}" class="btn btn-teal-02 float-right" style="margin-right: 5px;" th:text="|Share URL|"></a>
+                                <input type="hidden" id="copyUrl"/>
                             </div>
                         </div>
                     </div>

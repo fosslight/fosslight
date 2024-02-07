@@ -56,11 +56,8 @@ var evt = {
 		$('select[name=prjDivision]').select2({placeholder: "Select Division", allowClear: true});
 		if ([[${searchBean != null}]] && [[${searchBean.prjDivision}]] != null) $('select[name=prjDivision]').val([[${searchBean.prjDivision}]]).prop("selected", true);
 		
-		$('select[name=priority]').select2({placeholder: "Priority", allowClear: true});
-		if ([[${searchBean != null}]] && [[${searchBean.priority}]] != null) $('select[name=priority]').val([[${searchBean.priority}]]).prop("selected", true);
-
-        $("#prjStatusSelect").select2({placeholder: "Status", allowClear: true,})
-
+		$('#priority').select2({placeholder: "Priority", allowClear: true});
+		$("#prjStatusSelect").select2({placeholder: "Status", allowClear: true,})
 		$('#division').select2({placeholder: "Division", allowClear: true});
 		$('#statuses').select2({placeholder: "Status", allowClear: true});
 		

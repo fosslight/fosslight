@@ -2996,7 +2996,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 	
 	@Override
-	public Map<String, Object> startAnalysis(String prjId, String fileSeq, boolean coReviewer){
+	public Map<String, Object> startAnalysis(String prjId, String fileSeq, String userName){
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		T2File fileInfo = new T2File();
 		
@@ -3013,13 +3013,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			fileInfo = fileMapper.selectFileInfo(fileSeq);
 			
 			String EMAIL_VAL = ""; // reviewer와 loginUser의 email
+			String loginUserName = userName != null ? userName : loginUserName();
 			if (prjId.toUpperCase().indexOf("3RD") > -1){
-				EMAIL_VAL = partnerMapper.getReviewerEmail(prjId, loginUserName());
+				EMAIL_VAL = partnerMapper.getReviewerEmail(prjId, loginUserName);
 			} else {
-				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName());
+				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName);
 			}
-			String key = coReviewer ? "autoanalysisCoReviewer.ssh.command" : "autoanalysis.ssh.command";
-			String analysisCommand = MessageFormat.format(CommonFunction.getProperty(key), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1));
+			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1), (userName == null ? 0 : 1));
 			
 			ProcessBuilder builder = new ProcessBuilder( "/bin/bash", "-c", analysisCommand );
 			

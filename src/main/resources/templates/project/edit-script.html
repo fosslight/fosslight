@@ -4,7 +4,7 @@
 <script th:inline="javascript">
 	var lastsel;
 	var codeData;
-	var userRole = [[${#authentication.authorities[0].authority}]];
+	var userRole = [[${sessUserInfo.authority}]];
 	var arr = new Array();
 	var isChangeModelInfo = true;
 	var isCheckT = false;
@@ -1592,22 +1592,24 @@
 				var protocol = window.location.protocol;
 				var host =  window.location.host;
 				copyUrl = protocol + "//" + host + "/project/view/" + [[${project.prjId}]];
-
-				var langSelect = $('.userLang > select option:selected', window.parent.document)[0];
-				langSelect = $(langSelect).val();
-				if(langSelect){
-					copyUrl += "?lang=" + langSelect;
-				}
+				
+				var locale = [[${#locale}]];
+				if (locale) copyUrl += "?lang=" + locale;
 				$("#copyUrl").val(copyUrl);
 				
 				//launch it.
-				var btnHtm = '<b>Share Link</b><br>';
-				btnHtm += '<input type="text" value="'+copyUrl+'" style="width:460px;" disabled/><br><br>';
-				btnHtm += '<input type="button" value="Copy" class="btnCancel btnColor red right" style="height:30px;width:100px;"onclick="fn.copyUrl(this)"/>';
+				var btnHtml 	= 	'<div class="row form-group">';
+				btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
+				btnHtml 		+= 	'		<input type="text" class="form-control" value="'+copyUrl+'" disabled/>';
+				btnHtml 		+= 	'	</div>';
+				btnHtml 		+= 	'</div>';
+				btnHtml 		+= 	'<div class="row float-right custom-layout">';
+				btnHtml 		+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" onclick="fn.copyUrl(this)">Copy</button>';
+				btnHtml 		+= 	'</div>';
 
-				if(!alertify.myAlert){
+				if (!alertify.prjShareUrl){
 					//define a new dialog
-					alertify.dialog('myAlert',function factory(){
+					alertify.dialog('prjShareUrl',function factory(){
 						return{
 							main:function(message){
 							this.message = message;
@@ -1623,15 +1625,20 @@
 					}});
 				}
 				
-				alertify.myAlert(btnHtm);
+				alertify.prjShareUrl(btnHtml);
 			},
 			copyUrl : function(target){
-				var copyUrl = document.getElementById( 'copyUrl' );
-				copyUrl.select();
-				document.execCommand( 'Copy' );
+				$('#copyUrl').attr('type', 'text');
+				$('#copyUrl').select();
+		        var copyFlag = document.execCommand('copy');
+		        $('#copyUrl').attr('type', 'hidden');
 		        
-				$('.ajs-close').trigger("click");
-				alertify.success([[#{msg.common.success}]]);
+		        if (copyFlag) {
+		        	$('.ajs-close').trigger("click");
+					alertify.success([[#{msg.common.success}]]);
+		        } else {
+		        	alertify.error([[#{msg.common.valid}]]);
+		        }
 			},
 			disabledCompleteRow : function(disabledBoolean){
 				var diabledNameList = ['prjName', 'osType', 'osTypeEtc', 'distributionType', 'networkServerType', 'distributeTarget', 'noticeType', 'noticeTypeEtc', 'priority', 'creatorNm', 'reviewer'];
