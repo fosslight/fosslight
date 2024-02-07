@@ -316,32 +316,6 @@ $(document).ready(function () {
     autoComplete.init();
 });
 
-window.onload = function() {
-	initTab();
-}
-
-function initTab() {
-	var query = window.location.search;
-   	var param = new URLSearchParams(query);
-   	var id = param.get("id");
-   	var prjFlag = param.get("project");
-   	if (id != null && prjFlag != null) {
-    	createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
-   	} else {
-    	var _defaultTabStr = $("#defaultTabAnchorArr").val() || "";
-		var _sidebar = $("#sidebar").find(".nav-link");
-		
-		$.each(_sidebar, function(idx, val){
-			var _href = $(this).attr("href");
-			if ("#" != _href && !_href.startsWith("/system")) {
-				if (_defaultTabStr.indexOf(_href) != -1) {
-					$(this).trigger("click");
-				}
-			}
-		});
-	}
-}
-
 var loading = {
     show: function () {
         if ($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide) {
@@ -3004,7 +2978,6 @@ function callCreateTabInFrame(title, link, uniqueName, autoOpen) {
         action: 'create_new'
     };
 
-    console.log(JSON.stringify(data));
     parent.postMessage(JSON.stringify(data), "*");
 
 }

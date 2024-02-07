@@ -48,10 +48,10 @@ public class AppConstBean {
 	public static final String SECURITY_ROLE_PREFIX = "";
 	public static final String SECURITY_ROLE_DEFAULT = "ROLE_USER"; // 사용자 추가시 T2_AUTHORITIES에 기본으로 들어가는 역할
 //	
-//	public static final String SECURITY_LOGIN_PAGE = "/session/login";
+	public static final String SECURITY_LOGIN_PAGE = "/session/login";
 //	public static final String SECURITY_LOGIN_PROCESSING_URL = "/session/login-proc";
-//	public static final String SECURITY_LOGOUT_URL = "/session/logout-proc";
-//	public static final String SECURITY_LOGOUT_SUCCESS_URL = "/";
+	public static final String SECURITY_LOGOUT_URL = "/session/logout-proc";
+	public static final String SECURITY_LOGOUT_SUCCESS_URL = "/";
 //	
 //	public static final String SECURITY_USERNAME_PARAMETER = "un";
 //	public static final String SECURITY_PASSWORD_PARAMETER = "up";

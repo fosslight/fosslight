@@ -5,6 +5,12 @@
 
 package oss.fosslight.config;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -15,13 +21,17 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 
 import lombok.RequiredArgsConstructor;
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.util.CookieUtil;
 
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_VALIDATION_PROPERTIES)})
 @EnableWebSecurity
@@ -30,7 +40,7 @@ import oss.fosslight.common.CoConstDef;
 public class SecurityConfig {    
     /** The jwt token provider. */
     private final JwtTokenProvider jwtTokenProvider;
-    
+    private final CookieUtil cookieUtil;
     /** The unauthorized handler. */
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     
@@ -48,12 +58,27 @@ public class SecurityConfig {
 						.antMatchers(CoConstDef.PERMIT_UTL_PATTERNS).permitAll()
 						.anyRequest().authenticated())
 				.formLogin(FormLoginConfigurer::disable)
-				.addFilterBefore(new JwtAuthenticationFilter(this.jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+				.logout().logoutUrl(AppConstBean.SECURITY_LOGOUT_URL).logoutSuccessHandler(logoutSuccessHandler()).and()
+				.addFilterBefore(new JwtAuthenticationFilter(this.jwtTokenProvider, this.cookieUtil), UsernamePasswordAuthenticationFilter.class)
 				.build();
 	}
     
 	@Bean
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+	
+	public LogoutSuccessHandler logoutSuccessHandler() {
+		LogoutSuccessHandler successHandler = new CustomLogoutSuccessHandler();
+        return successHandler;
+    }
+	
+	public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler implements LogoutSuccessHandler {
+	    @Override
+		public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response,
+				Authentication authentication) throws IOException, ServletException {
+	    	cookieUtil.deleteCookie(request, response, "X-FOSS-AUTH-TOKEN");
+			response.sendRedirect(request.getContextPath() + AppConstBean.SECURITY_LOGOUT_SUCCESS_URL);
+		}
 	}
 }
