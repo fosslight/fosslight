@@ -13,7 +13,7 @@ public class ResponseUtil {
 
 	public static void DefaultAlertAndGo(HttpServletResponse response, String msg, String url) throws IOException {
 		response.setContentType("text/html; charset=UTF-8");
-		response.getWriter().printf("<script>alert('%s');location.href='%s';</script>", msg, url);
+		response.getWriter().printf("<script>alert('%s');window.parent.location.href='%s';</script>", msg, url);
 	}
 
 	public static void DefaultalertAndBack(HttpServletResponse response, String msg) throws IOException {

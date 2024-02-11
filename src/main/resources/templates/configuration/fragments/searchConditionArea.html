@@ -56,7 +56,7 @@
         $("#statusSelect").select2({
             placeholder: "Status",
             allowClear: true,
-        })
+        });
     });
 </script>
 <div style="padding-top: 10px;">
@@ -70,27 +70,25 @@
                         <div class="card-title">Basic Search Area</div>
                     </div>
                     <div class="card-body">
-                        <div class="form-group mb-2">
-                            <div class="row">
-                                <div class="col-md-9">
-                                    <input class="form-control" name="licenseName" placeholder="Licence Name"
-                                           th:value="${searchBean.licenseName}" type="text"/>
+                        <div class="row form-group mb-2">
+                        	<div class="col-md-9">
+                            	<input class="form-control" name="licenseName" placeholder="Licence Name" th:value="${searchBean?.licenseName}" type="text"/>
+                          	</div>
+                            <div class="col-md-3">
+                              	<div class="icheck-warning">
+                               		<input type="checkbox" id="licenseNameAllSearchFlag" name="licenseNameAllSearchFlag" th:checked="${searchBean?.licenseNameAllSearchFlag == 'Y'}" value="Y"/>
+                                	<label for="licenseNameAllSearchFlag" th:text="|Exact Match|" style="font-weight: normal"></label>
                                 </div>
-                                <div class="col-md-3 mt-1">
-                                    <input name="licenseNameAllSearchFlag" th:checked="${#strings.equals(searchBean.licenseNameAllSearchFlag, 'Y')}" type="checkbox"
-                                           value="Y"/><span>&nbsp;Exact Match</span>
-                                </div>
-                            </div>
+                        	</div>
                         </div>
                         <div class="form-group mb-2">
-                            <textarea class="form-control" name="licenseText" placeholder="License Text" rows="1"
-                                      th:text="${searchBean.licenseText}"></textarea>
+                            <textarea class="form-control" name="licenseText" placeholder="License Text" rows="1" th:text="${searchBean?.licenseText}"></textarea>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
+                            <select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%;">
                                 <option value="" disabled selected> </option>
                                 <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-                                    <option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+                                    <option th:selected="${code.cdDtlNo == searchBean?.licenseType}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
                                 </th:block>
                             </select>
                         </div>
@@ -99,31 +97,28 @@
                                 <option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
                                         th:text="${code.cdDtlNm}"
                                         th:value="${code.cdDtlNo}"
-                                        th:selected="${searchBean?.restrictions != null and #arrays.contains(searchBean.restrictions, code.cdDtlNo)}">
+                                        th:selected="${searchBean?.restrictions != null and #arrays.contains(searchBean?.restrictions, code.cdDtlNo)}">
                                 </option>
                             </select>
                         </div>
                         <div class="form-group mb-2">
-                            <textarea class="form-control" name="description" placeholder="User Guide" rows="3"
-                                      th:text="${searchBean.description}"></textarea>
+                            <textarea class="form-control" name="description" placeholder="User Guide" rows="3" th:text="${searchBean?.description}"></textarea>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="webpage" placeholder="Website" th:value="${searchBean.webpage}"
-                                   type="text">
+                            <input class="form-control" name="webpage" placeholder="Website" th:value="${searchBean?.webpage}" type="text">
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" id="obligationTypeSelect" name="obligationType"
-                                    style="width: 100%;">
+                            <select class="select2" id="obligationTypeSelect" name="obligationType" style="width: 100%;">
                                 <option value=""></option>
-                                <th:block
-                                        th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'), searchBean.obligationType)}"></th:block>
-                                <option th:selected="${#strings.equals(searchBean.obligationType, 'NONE')}" value="NONE">
-                                </option>
+                                <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}">
+                                	<option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}" th:selected="${code.cdDtlNo == searchBean?.obligationType}"></option>
+                                </th:block>
+                                <option th:selected="${searchBean?.obligationType == 'NONE'}" th:value="NONE" th:text="NONE"></option>
                             </select>
                         </div>
                     </div>
                     <div class="card-footer">
-                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                        <input id="saveSearchCondition" type="button" value="Save" th:onclick="|fn.updateSearchCondition()|" class="btn btn-dark-04 float-right right" />
                     </div>
                 </div>
             </th:block>
@@ -136,47 +131,50 @@
                         <div class="form-group mb-2">
                             <div class="row">
                                 <div class="col-md-9">
-                                    <input class="form-control autoComOss" name="ossName" placeholder="Oss Name"
-                                           th:value="${searchBean.ossName}" type="text"/>
+                                    <input class="form-control autoComOss" name="ossName" placeholder="Oss Name" th:value="${searchBean.ossName}" type="text"/>
                                 </div>
-                                <div class="col-md-3 mt-1">
-                                    <input name="ossNameAllSearchFlag" th:checked="${#strings.equals(searchBean.ossNameAllSearchFlag, 'Y')}" type="checkbox"
-                                           value="Y"/><span>&nbsp;Exact Match</span>
+                                <div class="col-md-3">
+                                	<div class="icheck-warning">
+                               			<input type="checkbox" id="ossNameAllSearchFlag" name="ossNameAllSearchFlag" th:checked="${searchBean?.ossNameAllSearchFlag == 'Y'}" value="Y"/>
+                                		<label for="ossNameAllSearchFlag" th:text="|Exact Match|" style="font-weight: normal"></label>
+                                	</div>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group mb-2">
-                            <textarea class="form-control" name="copyright" placeholder="Copyright Text" rows="1"
-                                      th:text="${searchBean.copyright}"></textarea>
+                            <textarea class="form-control" name="copyright" placeholder="Copyright Text" rows="1" th:utext="${searchBean.copyright}"></textarea>
                         </div>
                         <div class="form-group mb-2">
                             <div class="row">
                                 <div class="col-md-9">
-                                    <input class="form-control autoComLicense" name="licenseName" placeholder="License Name"
-                                           th:value="${searchBean.licenseName}" type="text"/>
+                                    <input class="form-control autoComLicense" name="licenseName" placeholder="License Name" th:value="${searchBean.licenseName}" type="text"/>
                                 </div>
-                                <div class="col-md-3 mt-1">
-                                    <input name="licenseNameAllSearchFlag" th:checked="${#strings.equals(searchBean.licenseNameAllSearchFlag, 'Y')}" type="checkbox"
-                                           value="Y"/><span>&nbsp;Exact Match</span>
+                                <div class="col-md-3">
+                                	<div class="icheck-warning">
+                               			<input type="checkbox" id="licenseNameAllSearchFlag" name="licenseNameAllSearchFlag" th:checked="${searchBean?.licenseNameAllSearchFlag == 'Y'}" value="Y"/>
+                                		<label for="licenseNameAllSearchFlag" th:text="|Exact Match|" style="font-weight: normal"></label>
+                                	</div>
                                 </div>
                             </div>
                         </div>
                         <div class="form-group mb-2">
-                            <textarea class="form-control" name="summaryDescription" placeholder="Description" rows="1"
-                                      th:text="${searchBean.summaryDescription}"></textarea>
+                            <textarea class="form-control" name="summaryDescription" placeholder="Description" rows="1" th:utext="${searchBean.summaryDescription}"></textarea>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="homepage" placeholder="Website" th:value="${searchBean.homepage}"
-                                   type="text">
+                            <input class="form-control" name="homepage" placeholder="Website" th:value="${searchBean.homepage}" type="text">
                         </div>
-
                         <div class="form-group mb-2">
-                            <input class="form-control" name="cvssScore" placeholder="Vulnerability (>=)"
-                                   th:value="${searchBean.cvssScore}" type="text">
+                            <input class="form-control" name="cvssScore" placeholder="Vulnerability (>=)" th:value="${searchBean.cvssScore}" type="text">
+                        </div>
+                        <div class="form-group mb-2">
+                            <div class="icheck-warning">
+                           		<input type="checkbox" id="deactivateFlag" name="deactivateFlag" th:checked="${searchBean?.deactivateFlag == 'Y'}" value="Y"/>
+                           		<label for="deactivateFlag" th:text="|Deactivate|" style="font-weight: normal"></label>
+                          	</div>
                         </div>
                     </div>
                     <div class="card-footer">
-                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                        <input id="saveSearchCondition" type="button" value="Save" th:onclick="|fn.updateSearchCondition()|" class="btn btn-dark-04 float-right right" />
                     </div>
                 </div>
             </th:block>
@@ -188,21 +186,21 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group mb-2">
-                            <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean.prjId}" type="text"/>
+                            <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean?.prjId}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}" type="text"/>
+                            <input class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <div class="input-group" style="width: 100%;">
                                 <div class="input-group-prepend">
-                                                            <span class="input-group-text">
-                                                                <i class="far fa-calendar-alt"></i>
-                                                            </span>
+                                 	<span class="input-group-text">
+                                    	<i class="far fa-calendar-alt"></i>
+                                  	</span>
                                 </div>
                                 <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
-                                <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean.schStartDate}" />
-                                <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean.schEndDate}" />
+                                <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean?.schStartDate}" />
+                                <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean?.schEndDate}" />
                             </div>
                             <script>
                                 var startDate = String([[${searchBean.schStartDate}]]);
@@ -228,38 +226,35 @@
                             </script>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" name="prjDivision" id="prjDivisionSelect"
-                                    style="width: 100%;">
+                            <select class="select2" name="prjDivision" id="prjDivisionSelect" style="width: 100%;">
                                 <option value=""></option>
-                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), searchBean.prjDivision)}"></th:block>
+                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), searchBean?.prjDivision)}"></th:block>
                             </select>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean.creator}" type="text"/>
+                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean.reviewer}" type="text"/>
+                            <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComProjectNm" name="watchers" placeholder="Watchers"  th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
+                            <input class="form-control autoComProjectNm" name="watchers" placeholder="Watchers"  th:value="${searchBean?.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" name="distributionType" id="distributionTypeSelect"
-                                    style="width: 100%;">
+                            <select class="select2" name="distributionType" id="distributionTypeSelect" style="width: 100%;">
                                 <option value=""></option>
-                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'), searchBean.distributionType)}"></th:block>
+                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'), searchBean?.distributionType)}"></th:block>
                             </select>
                         </div>
                         <div class="form-group mb-2">
-                            <select class="select2" name="networkServerType" id="networkServerTypeSelect"
-                                    style="width: 100%;">
+                            <select class="select2" name="networkServerType" id="networkServerTypeSelect" style="width: 100%;">
                                 <option value=""></option>
-                                <option value="Y" th:selected="${#strings.equals(searchBean.networkServerType, 'Y')}" th:text="|Yes|"></option>
-                                <option value="N" th:selected="${#strings.equals(searchBean.networkServerType, 'N')}" th:text="|No|"></option>
+                                <option value="Y" th:selected="${searchBean?.networkServerType == 'Y'}" th:text="|Yes|"></option>
+                                <option value="N" th:selected="${searchBean?.networkServerType == 'N'}" th:text="|No|"></option>
                             </select>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComProjectModel" name="modelName" placeholder="Model Name" th:value="${searchBean.modelName}" type="text"/>
+                            <input class="form-control autoComProjectModel" name="modelName" placeholder="Model Name" th:value="${searchBean?.modelName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
@@ -276,17 +271,22 @@
                         <div class="form-group mb-2">
                             <select class="form-control select2" style="width: 100%;" name="priority" id="prioritySelect">
                                 <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
-                                    <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean.priority != null && #strings.equals(option.cdDtlNo, searchBean.priority)}"></option>
+                                	<option th:value="''"></option>
+                                    <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.priority != null && option.cdDtlNo == searchBean.priority}"></option>
                                 </th:block>
                             </select>
                         </div>
-                        <th:block th:if="${not @CommonFunction.isAdmin()}">
-                            <label class="text-lg-gray mr-3">View My Projects Only</label>
-                            <input type="checkbox" name="publicYn" value="N" th:checked="${#strings.equals(searchBean.publicYn, 'N')}"  />
+                        <th:block sec:authorize="!hasRole('ROLE_ADMIN')">
+                        <div class="form-group mb-2">
+                            <div class="icheck-warning">
+                           		<input type="checkbox" id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" value="N"/>
+                           		<label for="publicYn" th:text="|View My Projects Only|" style="font-weight: normal"></label>
+                          	</div>
+                        </div>
                         </th:block>
                     </div>
                     <div class="card-footer">
-                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                        <input id="saveSearchCondition" type="button" value="Save" th:onclick="|fn.updateSearchCondition()|" class="btn btn-dark-04 float-right right" />
                     </div>
                 </div>
             </th:block>
@@ -298,45 +298,45 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group mb-2">
-                            <input class="form-control" name="partnerId" placeholder="ID" th:value="${searchBean.partnerId}" type="text"/>
+                            <input class="form-control" name="partnerId" placeholder="ID" th:value="${searchBean?.partnerId}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="partnerName" placeholder="3rd Party Name" th:value="${searchBean.partnerName}" type="text"/>
+                            <input class="form-control" name="partnerName" placeholder="3rd Party Name" th:value="${searchBean?.partnerName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean.softwareName}" type="text"/>
+                            <input class="form-control" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean.softwareVersion}" type="text"/>
+                            <input class="form-control" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <select class="select2" name="division" id="divisionSelect" style="width: 100%;">
                                 <option value=""></option>
-                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), searchBean.division)}"></th:block>
+                                <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), searchBean?.division)}"></th:block>
                             </select>
                         </div>
                         <div class="form-group mb-2">
                             <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
                                 <select class="form-control select2" multiple="multiple" id="statusSelect" name="status" style="width: 100%;">
                                     <option th:value="''"></option>
-                                    <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}"
-                                            th:text="${option.cdDtlNm}"
-                                            th:value="${option.cdDtlNo}"
-                                            th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
-                                    </option>
+                                    <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}">
+                                    	<option th:if="${option.useYn != 'N' and option.cdDtlNo != 'NA'}"
+                                    			th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}"
+                                    			th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}"></option>
+                                    </th:block>
                                 </select>
                             </th:block>
                         </div>
                         <div class="form-group mb-2">
                             <div class="input-group" style="width: 100%;">
                                 <div class="input-group-prepend">
-                                                            <span class="input-group-text">
-                                                                <i class="far fa-calendar-alt"></i>
-                                                            </span>
+                                 	<span class="input-group-text">
+                                 		<i class="far fa-calendar-alt"></i>
+                                   	</span>
                                 </div>
                                 <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
-                                <input name="createdDate1" id="createdDate1" type="hidden" th:value="${searchBean.createdDate1}" />
-                                <input name="createdDate2" id="createdDate2" type="hidden" th:value="${searchBean.createdDate2}" />
+                                <input name="createdDate1" id="createdDate1" type="hidden" th:value="${searchBean?.createdDate1}" />
+                                <input name="createdDate2" id="createdDate2" type="hidden" th:value="${searchBean?.createdDate2}" />
                             </div>
                             <script>
                                 var startDate = String([[${searchBean.createdDate1}]]);
@@ -355,24 +355,32 @@
                                     $("input[name='createdDate2']").val(picker.endDate.format('YYYYMMDD'));
                                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                                 }).on('cancel.daterangepicker', function(ev, picker) {
-                                    $("#createdDate").val("");
+                                    $(this).val("");
                                     $("input[name='createdDate1']").val("");
                                     $("input[name='createdDate2']").val("");
                                 });
                             </script>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean.creator}" type="text"/>
+                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean.reviewer}" type="text"/>
+                            <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="watchers" placeholder="Watcher" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
+                            <input class="form-control" name="watchers" placeholder="Watcher" th:value="${searchBean?.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
                         </div>
+                        <th:block sec:authorize="!hasRole('ROLE_ADMIN')">
+                        <div class="form-group mb-2">
+                            <div class="icheck-warning">
+                           		<input type="checkbox" id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" value="N"/>
+                           		<label for="publicYn" th:text="|View My 3rd Parties Only|" style="font-weight: normal"></label>
+                          	</div>
+                        </div>
+                        </th:block>
                     </div>
                     <div class="card-footer">
-                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                        <input id="saveSearchCondition" type="button" value="Save" th:onclick="|fn.updateSearchCondition()|" class="btn btn-dark-04 float-right right" />
                     </div>
                 </div>
             </th:block>
@@ -383,13 +391,13 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group mb-2">
-                            <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean.prjId}" type="text"/>
+                            <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean?.prjId}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean.prjName}" type="text"/>
+                            <input class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComOss" name="ossName" placeholder="OSS Name" th:value="${searchBean.ossName}" type="text"/>
+                            <input class="form-control autoComOss" name="ossName" placeholder="OSS Name" th:value="${searchBean?.ossName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <div class="input-group" style="width: 100%;">
@@ -399,8 +407,8 @@
                                     </span>
                                 </div>
                                 <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
-                                <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean.schStartDate}" />
-                                <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean.schEndDate}" />
+                                <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean?.schStartDate}" />
+                                <input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean?.schEndDate}" />
                             </div>
                             <script>
                                 var startDate = String([[${searchBean?.schStartDate}]]);
@@ -419,27 +427,27 @@
                                     $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
                                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                                 }).on('cancel.daterangepicker', function(ev, picker) {
-                                    $("#createdDate").val("");
+                                    $(this).val("");
                                     $("input[name='schStartDate']").val("");
                                     $("input[name='schEndDate']").val("");
                                 });
                             </script>
                             </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComLicense" name="licenseName" placeholder="License Name" th:value="${searchBean.licenseName}" type="text"/>
+                            <input class="form-control autoComLicense" name="licenseName" placeholder="License Name" th:value="${searchBean?.licenseName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean.creator}" type="text"/>
+                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
                         </div>
-                        <th:block th:if="${not @CommonFunction.isAdmin()}">
-                            <div class="form-group mb-2">
-                                <label class="text-lg-gray mr-3">View My Projects Only</label>
-                                <input type="checkbox" name="publicYn" id="checkbox3" value="N" th:checked="${#strings.equals(searchBean.publicYn, 'N')}"  />
-                            </div>
-                        </th:block>
+                        <div class="form-group mb-2">
+                            <div class="icheck-warning">
+                           		<input type="checkbox" id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" value="N"/>
+                           		<label for="publicYn" th:text="|View My Project Only|" style="font-weight: normal"></label>
+                          	</div>
+                        </div>
                     </div>
                     <div class="card-footer">
-                        <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btn btn-dark-04 float-right right" />
+                        <input id="saveSearchCondition" type="button" value="Save" th:onclick="|fn.updateSearchCondition()|" class="btn btn-dark-04 float-right right" />
                     </div>
                 </div>
             </th:block>

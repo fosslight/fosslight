@@ -56,7 +56,7 @@ public class SessionController extends CoTopComponent{
 	@Autowired private CookieUtil cookieUtil;
     
 	@GetMapping(value = SESSION.LOGIN, produces = "text/html; charset=utf-8")
-	public String user(HttpServletRequest req, HttpServletResponse res) throws IOException {
+	public String login(HttpServletRequest req, HttpServletResponse res) throws IOException {
 //		if (isLogin()) {
 //			res.sendRedirect(req.getContextPath() + "/index");
 //		}
@@ -168,21 +168,6 @@ public class SessionController extends CoTopComponent{
 
 	}
 
-
-	/**
-	 * Logout.
-	 *
-	 * @param req the req
-	 * @param res the res
-	 * @param model the model
-	 * @return the string
-	 */
-	@GetMapping("/session/logout")
-	public String logout(HttpServletRequest req, HttpServletResponse res, Model model) {
-		cookieUtil.deleteCookie(req, res, "X-AUTH-TOKEN-ADM");
-		return "redirect:/session/login";
-	}
-	
 	@GetMapping(value = SESSION.LOGIN_EXPIRED, produces = "text/html; charset=utf-8")
 	public void loginExpired(HttpServletRequest req, HttpServletResponse res) throws IOException {
 		res.sendRedirect(req.getContextPath() + "/index");

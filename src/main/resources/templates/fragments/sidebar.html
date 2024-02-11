@@ -18,6 +18,7 @@
                 <i class="fas fa-user-circle text-light mr-1 fa-xs"></i>
                 <a th:onclick="|createTabNew('configuration_edit', '/configuration/edit')|" style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" ></a>
               </span>
+              <input type="hidden" id="defaultTabAnchorArr" th:value="${sessUserInfo.defaultTabAnchor}" />
             </div>
             <div class="col-1">
               <span class="text-center"><a href="#">|</a></span>
@@ -25,7 +26,7 @@
             <div class="col-4">
               <span class="text-left">
                 <i class="fas fa-sign-out-alt text-light mr-1 fa-xs"></i>
-                <a class="text-right" th:href="@{/session/logout}" th:text="Logout"></a>
+                <a class="text-right" th:href="@{/session/logout-proc}" th:text="Logout"></a>
               </span>
             </div>
           </div>
@@ -46,7 +47,7 @@
 
       <!-- Sidebar Menu -->
       <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <ul id="sidebar" class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li th:if="${dashboardFlag}" class="nav-item">
             <a th:href="@{/dashboard/list}" class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -206,5 +207,41 @@
       All rights reserved.
     </div>
   </aside>
+  	<script th:inline="javascript">
+  	var _initTabs = new Array();
+  	window.onload = function() {
+  		try {
+  			initTab();
+  		} finally {
+  			$.each(_initTabs, function (i, cur) {
+  				setTimeout(function () {
+					$(cur).trigger("click");
+	  			}, (i) * 800);
+  			});
+  		}
+  	}
+
+  	function initTab() {
+  		var query = window.location.search;
+  	   	var param = new URLSearchParams(query);
+  	   	var id = param.get("id");
+  	   	var prjFlag = param.get("project");
+  	   	if (id != null && prjFlag != null) {
+  	    	createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
+  	   	} else {
+  	    	var _defaultTabStr = $("#defaultTabAnchorArr").val() || "";
+  			var _sidebar = $("#sidebar").find(".nav-link");
+  			
+  			$.each(_sidebar, function(idx, val){
+  				var _href = $(this).attr("href");
+  				if ("#" != _href && !_href.startsWith("/system")) {
+  					if (_defaultTabStr.indexOf(_href) != -1) {
+  						_initTabs.push($(this));
+  					}
+  				}
+  			});
+  		}
+  	}
+  	</script>
 </th:block>
 </html>

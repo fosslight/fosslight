@@ -14,6 +14,7 @@
         evt.init();
 
         $(".select2").select2();
+        $('select[name=defaultSearch]').select2({placeholder: "Division selected value", allowClear: true});
     });
 
     let commentTemp = '';
@@ -121,7 +122,7 @@
         },
         updateSearchCondition: function(){
             // multiple checkbox values to comma separate
-            var chkElArr = ["restrictions", "statuses", "status"];
+            var chkElArr = ["restrictions", "statuses", "status", "priority"];
             $.each(chkElArr, function(index, item){
 
                 var selectedValues  = "";

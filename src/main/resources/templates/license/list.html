@@ -94,12 +94,12 @@
                                            	<div class="row">
                                                	<div class="col-md-5">
                                                    	<div class="form-group mb-2">
-                                                   		<textarea class="form-control" name="licenseText" placeholder="License Text" rows="3" th:text="${searchBean.licenseText}"></textarea>
+                                                   		<textarea class="form-control" name="licenseText" placeholder="License Text" rows="3" th:text="${searchBean?.licenseText}"></textarea>
                                                    	</div>
                                                	</div>
                                                	<div class="col-md-5">
                                                    	<div class="form-group mb-2">
-                                                   		<textarea class="form-control" name="description" placeholder="User Guide" rows="3" th:text="${searchBean.description}"></textarea>
+                                                   		<textarea class="form-control" name="description" placeholder="User Guide" rows="3" th:text="${searchBean?.description}"></textarea>
                                                    	</div>
                                                	</div>
                                            	</div>
@@ -112,7 +112,6 @@
 																<select class="select2" id="creatorSelect" name="creator" style="width: 100%;">
 																	<option value=""></option>
 																	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
-																	<option th:value="NONE" th:text="None"></option>
 																</select>
 															</div>
 														</div>

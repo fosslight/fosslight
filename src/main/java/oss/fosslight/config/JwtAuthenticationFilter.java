@@ -15,14 +15,18 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.SESSION;
+import oss.fosslight.util.CookieUtil;
 import oss.fosslight.util.ResponseUtil;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
+	 
 	private final JwtTokenProvider jwtTokenProvider;
+	
+	private final CookieUtil cookieUtil;
 
-	public JwtAuthenticationFilter(JwtTokenProvider provider) {
+	public JwtAuthenticationFilter(JwtTokenProvider provider, CookieUtil cookie) {
 		jwtTokenProvider = provider;
+		cookieUtil = cookie;
 	}
 	
 	@Override
@@ -42,6 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);	
 		} else {
+			cookieUtil.deleteCookie(req, res, "X-FOSS-AUTH-TOKEN");
 			if(isAjaxRequest(req)) {
 				ResponseUtil.DefaultAlertAndGo(res, "로그인 세션이 만료되었습니다. 로그인 화면으로 이동합니다.", SESSION.LOGIN);
 			} else {

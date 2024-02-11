@@ -59,17 +59,17 @@
                                             <select class="select2" name="defaultLocale" style="width: 100%;">
                                                 <option value="" disabled selected> </option>
                                                 <th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DEFAULT_LOCALE'))}">
-                                                    <option th:value="${code[3]}"  th:selected="${code[3] eq sessUserInfo.defaultLocale}" th:utext="${code[1]}"></option>
+                                                    <option th:value="${code[3]}"  th:selected="${code[3] == sessUserInfo.defaultLocale}" th:utext="${code[1]}"></option>
                                                 </th:block>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="row form-group">
                                         <div class="col-12">
-                                            <th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DEFAULT_TAB'))}">
-                                                <div class="icheck-warning mb-3">
-                                                    <input type="checkbox" name="defaultTab" th:id="|defaultTab${code[0]}|" th:value="${code[0]}"/>
-                                                    <label th:for="|defaultTab${code[0]}|" th:utext="${code[1]}" style="font-weight: normal"></label>
+                                            <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DEFAULT_TAB'))}">
+                                                <div class="icheck-warning mb-3" th:if="${code.useYn != 'N'}">
+                                                    <input type="checkbox" name="defaultTab" th:id="|defaultTab${code.cdDtlNo}|" th:value="${code.cdDtlNo}"/>
+                                                    <label th:for="|defaultTab${code.cdDtlNo}|" th:utext="${code.cdDtlNm}" style="font-weight: normal"></label>
                                                 </div>
                                             </th:block>
                                         </div>
@@ -88,8 +88,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="col-12">
-                                    <label th:text="|Division selected value|"></label>
-                                    <select class="select2" id="defaultSearch" name="defaultSearch" onchange="fn.loadSearchCondition();" style="width: 100%">
+                                    <select class="select2" id="defaultSearch" name="defaultSearch" th:onchange="|fn.loadSearchCondition()|" style="width: 100%">
                                         <option value=""></option>
                                         <option value="LICENSE">License List</option>
                                         <option value="OSS">OSS List</option>
