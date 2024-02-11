@@ -25,8 +25,8 @@
                                 </div>
                                 <div class="row form-group">
                                     <div class="col-12">
-                                        <select class="select2" name="division" style="width: 100%;">
-                                            <option value="" disabled selected> </option>
+                                        <label th:text="|Division|"></label>
+                                        <select class="select2" id="division" name="division" style="width: 100%;">
                                             <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), userInfo.division)}"></th:block>
                                         </select>
                                     </div>
@@ -79,9 +79,7 @@
                                     <input id="save" type="button" value="Save" class="btn btn-dark-04 float-right right" />
                                 </div>
                             </div>
-
                         </form>
-
                     </div>
                     <div class="col-md-6">
                         <div class="card card-outline card-dark submit-form">

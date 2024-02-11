@@ -63,6 +63,12 @@
 
     let evt = {
         init : function(){
+            /* set select2 */
+            $("#division, #defaultSearch").select2({
+                placeholder: "",
+                allowClear: true,
+            });
+
             $("#save").on('click',function(){
                 //var radioVal = $('input[name="defaultTab"]:checked').val();
                 if($('input:checkbox[name="defaultTab"]:checked').length == 0){
