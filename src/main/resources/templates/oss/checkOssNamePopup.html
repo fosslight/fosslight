@@ -14,9 +14,24 @@
 		</div>
 		<div class="row pl-2 float-left custom-layout" style="margin-top: 10px;">
         	<button type="button" id="btnChangeOss" class="btn btn-teal-01 btn-sm width-9rem px-3" th:text="'Change OSS Name'"></button>
-        	<button sec:authorize="hasRole('ROLE_ADMIN')" type="button" id="btnAddNickname" class="btn btn-teal-01 btn-sm width-9rem px-3" style="margin-left: .2rem;" th:text="'Add Nickname - OSS name(now)'"></button>
-        	<button sec:authorize="hasRole('ROLE_ADMIN')" type="button" id="btnChangeOss" class="btn btn-teal-01 btn-sm width-9rem px-3" style="margin-left: .2rem;" th:text="'Add URL, Nickname based on URL'"></button>
+        	<button th:if="${sessUserInfo.authority == 'ROLE_ADMIN'}" type="button" id="btnAddNickname" class="btn btn-teal-01 btn-sm width-9rem px-3" style="margin-left: .2rem;" th:text="'Add Nickname - OSS name(now)'"></button>
+        	<button th:if="${sessUserInfo.authority == 'ROLE_ADMIN'}" type="button" id="btnChangeOss" class="btn btn-teal-01 btn-sm width-9rem px-3" style="margin-left: .2rem;" th:text="'Add URL, Nickname based on URL'"></button>
     	</div>
+	</div>
+	<div class="pop sheetSelectPop" style="width:400px; display:none;">
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+					<table class="table table-hover text-nowrap" style="margin-top: 1rem;">
+						<tbody id="sheetBody" class="sheetNameArea"></tbody>
+					</table>
+				</div>
+				<div class="float-right custom-layout">
+					<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|grid_fn.closeAlertify()|"></button>
+					<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 sheetApply" th:text="OK" th:onclick=|grid_fn.selectChangedOssName()|></button>
+				</div>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

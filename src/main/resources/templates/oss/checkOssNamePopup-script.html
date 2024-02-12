@@ -14,7 +14,7 @@ var commentId = "";
 var referenceId = [[${projectInfo.prjId}]];
 var referenceDiv = [[${projectInfo.referenceDiv}]];
 var targetName = [[${projectInfo.targetName}]];
-var userRole = [[${#authentication.authorities[0].authority}]];
+var userRole = [[${sessUserInfo.authority}]];
 
 var evt_fn = {
 	init : function(){
@@ -35,7 +35,7 @@ var evt_fn = {
 
 var Ctrl_fn = {
 	loadGridData : function(){
-		$('#loading_wrap_popup').show();
+		loading.show();
 		
 		var params = {};
 		params["referenceId"] = referenceId;
@@ -64,7 +64,7 @@ var Ctrl_fn = {
 		});	
 	},
 	addURLNicknameProc : function(){
-		$('#loading_wrap_popup').show();
+		loading.show();
 		var target = $("#ossList");
 		var result = [];
 		var failFlag = false;
@@ -113,32 +113,32 @@ var Ctrl_fn = {
 								if(!failFlag){
 									alertify.success([[#{msg.oss.change.success}]]);
 								}
-								$('#loading_wrap_popup').hide();
+								loading.hide();
 							}
 						},
 						error: function () {
-							$('#loading_wrap_popup').hide();
+							loading.hide();
 						}
 					});
 				}
 			},0);
 		} else if (idArry.length > 0){
 			alertify.error([[#{msg.oss.warn.unregistered}]]);
-			$('#loading_wrap_popup').hide();
+			loading.hide();
 		} else {
 			alertify.alert([[#{msg.oss.required.change}]], function(){});
-			$('#loading_wrap_popup').hide();
+			loading.hide();
 		}
 	},
 	changeProc : function(){
-		$('#loading_wrap_popup').show();
+		loading.show();
 		
 		var target = $("#ossList");
 		var result = [];
 		var failFlag = false;
 		var idArry = grid_fn.getCheckedRow("CHANGE");
 			
-		if(idArry.length > 0){
+		if (idArry.length > 0){
 			window.setTimeout(function(){
 				for(var i = 0 ; i < idArry.length ; i++){
 					var rowId = idArry[i];
@@ -187,14 +187,14 @@ var Ctrl_fn = {
 								commentId = resultData.commentId;
 							}
 							
-							if(result.length == idArry.length){
-								if(!failFlag){
+							if (result.length == idArry.length){
+								if (!failFlag){
 									var successMsg = [[#{msg.project.check.oss.name.success}]];
-
-									if("self" == targetName) {
-										opener.location.href = `/selfCheck/edit/\${rowdata["referenceId"]}`;
+									
+									if ("self" == targetName) {
+										opener.location.href = '/selfCheck/edit/' + rowdata["referenceId"];
 									} else if ("partner" == targetName) {
-										opener.location.href = `/partner/edit/\${rowdata["referenceId"]}`;
+										opener.location.href = '/partner/edit/' + rowdata["referenceId"];
 									} else {
 										var identificationTabOrder;
 
@@ -221,7 +221,7 @@ var Ctrl_fn = {
 									alertify.success(successMsg, 5); // 5sec동안 message 출력
 								}
 								
-								$('#loading_wrap_popup').hide();
+								loading.hide();
 							}
 						},
 						error: function(resultData){}
@@ -230,11 +230,11 @@ var Ctrl_fn = {
 			}, 0);
 		} else {
 			alertify.alert([[#{msg.oss.required.change}]], function(){});
-			$('#loading_wrap_popup').hide();
+			loading.hide();
 		}
 	},
 	addProc : function(){
-		$('#loading_wrap_popup').show();
+		loading.show();
 		
 		var target = $("#ossList");
 		var result = [];
@@ -287,7 +287,7 @@ var Ctrl_fn = {
 									opener.location.reload();
 								}
 								
-								$('#loading_wrap_popup').hide();
+								loading.hide();
 							}
 						},
 						error: function(resultData){}
@@ -296,10 +296,10 @@ var Ctrl_fn = {
 			}, 0);
 		} else if(idArry.length > 0){
 			alertify.error([[#{msg.oss.warn.unregistered}]]);
-			$('#loading_wrap_popup').hide();
+			loading.hide();
 		} else {
 			alertify.alert([[#{msg.oss.required.change}]], function(){});
-			$('#loading_wrap_popup').hide();
+			loading.hide();
 		}
 	},
 	showOssViewPage : function(ossName){
@@ -425,7 +425,7 @@ var grid_fn = {
 						$("#btnChangeOss").attr('disabled', true);
 					}
 					
-					$('#loading_wrap_popup').hide();
+					loading.hide();
 
 					if(ossValidMsg) {
 						gridValidMsgNew(ossValidMsg, "ossList", "SELF");
@@ -439,13 +439,13 @@ var grid_fn = {
 				onSelectRow: function(rowid){},
 				gridComplete:function (){},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
-					if(iCol=="5"){
+					if (iCol=="5") {
 						var popupVisible = $(".sheetSelectPop").is(':visible');
-						if(cellcontent.indexOf("<br>") > -1 && !popupVisible){
+						if (cellcontent.indexOf("<br>") > -1 && !popupVisible){
 							var checkNameArr = cellcontent.split("<br>");
 							for(var i=0; i < checkNameArr.length; i++){
-								$('.sheetSelectPop .sheetNameArea').append('<li><input type="checkbox" name="checkNameSelect" id="checkName'+i+'" value="'+rowid+'" class="sheetNum">'
-										+'<label for="checkName'+i+'">'+checkNameArr[i]+'</label></li>');
+								$('#sheetBody').append('<tr><td class="text-center"><input type="checkbox" name="checkNameSelect" id="checkName'+i+'" value="'+rowid+'" class="form-check-input">'
+										+'<label for="checkName'+i+'" class="form-check-label text-blue-gray"></label></td><td class="text-left">'+checkNameArr[i]+'</td></tr>');
 							}
 
 							$('input:checkbox[name=checkNameSelect]').click(function(){
@@ -455,8 +455,36 @@ var grid_fn = {
 								}
 							});
 							
-							$(".pop").css("left", "40%");
-							$(".sheetSelectPop").show();
+							const sheetHtml = $(".sheetSelectPop").html();
+							$("#sheetBody").empty();
+							
+							if (!alertify.checkOssNameSelectSheet){
+								alertify.dialog('checkOssNameSelectSheet', function() {
+									return {
+										setup: function() {
+											var settings = alertify.confirm().settings;
+											
+											for (var prop in settings) {
+												this.settings[prop] = settings[prop];
+											}
+											
+											var setup = alertify.confirm().setup();
+											setup.buttons = [];
+											setup.focus.element = 1;
+											
+											return setup;
+										},
+									    hooks: {
+									    	onshow: function() {
+									        	this.elements.dialog.style.maxWidth = 'none';
+									          	this.elements.dialog.style.width = '400px';
+									        }
+										}
+									};
+								}, false, 'alert');
+		                	}
+							
+							alertify.checkOssNameSelectSheet(sheetHtml).set('title', 'Select, To Be Changed OSS Name');
 						}
 					}
 				}
@@ -470,16 +498,16 @@ var grid_fn = {
 			var addFlag = rowObject.addFlag || rowObject[7];
 			var urlFlag = rowObject.urlFlag || rowObject[12];
 			
-			if(changeFlag =="Y"){
+			if (changeFlag == "Y"){
 				display += "<a class='btnPG wAnd onAnd'>Changed</a>";
 			}
 
-			if('${sessUserInfo.authority}' == 'ROLE_ADMIN'){
-				if(addFlag =="Y" ){
+			if ('ROLE_ADMIN' == [[${sessUserInfo.authority}]]){
+				if ("Y" == addFlag) {
 					display += "<a class='btnPG wAnd onAnd'>Added N</a>";
 				}
 
-				if(urlFlag == "Y"){
+				if ("Y" == urlFlag) {
 					display += "<a class='btnPG wAnd onAnd'>Added U</a>";
 				}
 			}
@@ -545,10 +573,10 @@ var grid_fn = {
 		selectChangedOssName : function(){
 			var param = $("#ossList").jqGrid('getGridParam', 'data');
 			var rowId = $('input:checkbox[name=checkNameSelect]:checked').val();
-			var checkedValue = $('input:checkbox[name=checkNameSelect]:checked').next().text();
+			var checkedValue = $('input:checkbox[name=checkNameSelect]:checked').parent().next().text();
 
 			for (var i=0; i<param.length; i++){
-				if(param[i]["componentId"] == rowId){
+				if (param[i]["componentId"] == rowId){
 					param[i]["checkName"] = checkedValue;
 				}
 			}
@@ -560,13 +588,15 @@ var grid_fn = {
 
 			$('#'+rowId).removeClass('excludeRow');
 
-			$('.sheetNameArea').empty();
-			$('.sheetSelectPop').hide();
+			grid_fn.closeAlertify();
 		},
 		closePop : function(){
 			$('input:checkbox[name=ossNameSelect]').prop('checked', false);
 			$('.sheetNameArea').empty();
 			$('.sheetSelectPop').hide();
+		},
+		closeAlertify : function() {
+			$(".ajs-close").trigger("click");
 		}
 };
 </script>

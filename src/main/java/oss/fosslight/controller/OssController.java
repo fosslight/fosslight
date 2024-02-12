@@ -76,7 +76,7 @@ public class OssController extends CoTopComponent{
 	public String list(HttpServletRequest req, HttpServletResponse res, Model model){
 		OssMaster searchBean = null;
 		
-		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
+		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF")) || getSessionObject(SESSION_KEY_SEARCH) == null) {
 			deleteSession(SESSION_KEY_SEARCH);
 			searchBean = searchService.getOssSearchFilter(loginUserName());
 			if (searchBean == null) {
@@ -328,12 +328,11 @@ public class OssController extends CoTopComponent{
 		List<String> downloadLocationList = new ArrayList<>();
 		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 
-		if(!CommonFunction.isAdmin()) {
+		if (!CommonFunction.isAdmin()) {
 			model.addAttribute("isReadOnly", true);
 		}
 
 		return "oss/edit";
-//		return CommonFunction.isAdmin() ? "oss/edit :: content" : "oss/view :: content";
 	}
 	
 	@GetMapping(value={OSS.POPUPLIST_ID}, produces = "text/html; charset=utf-8")
@@ -1540,7 +1539,7 @@ public class OssController extends CoTopComponent{
 			@PathVariable String targetName) {
 		Map<String, Object> resMap = new HashMap<>();
 		resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
-/*		Map<String, Object> map = null;
+		Map<String, Object> map = null;
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		
 		switch(targetName.toUpperCase()) {
@@ -1598,7 +1597,7 @@ public class OssController extends CoTopComponent{
 			}
 			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
 					.collect(Collectors.toList()));
-		} */
+		}
 		
 		return makeJsonResponseHeader(resMap);
 	}

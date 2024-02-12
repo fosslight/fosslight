@@ -10,7 +10,7 @@
 /*jslint browser: true, nomen: true */
 var lastsel;
 var codeData;
-var userRole = [[${#authentication.authorities[0].authority}]];
+var userRole = [[${sessUserInfo.authority}]];
 var arr = new Array();
 var ossNames = [];
 var objs = [];
@@ -23,7 +23,7 @@ var etcDomain = [[${@CommonFunction.getCoConstDefVal('CD_DTL_ECT_DOMAIN')}]];
 var divisionUseFlag = true;
 var projectPermission = [[${projectPermission}]];
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
-var isReadOnly = [[${isReadOnly}]];
+var viewFlag = [[${viewFlag}]];
 
 $(document).ready(function() {
 	'use strict';
@@ -85,6 +85,7 @@ var fn_self ={
 						});
 					}
 					$("#divEditMode").hide();
+					if (viewFlag != null) $("#editBtn").hide();
 				},
 				error : function(request,status,error){
 					alertify.error([[#{msg.common.valid2}]], 0);
@@ -1134,7 +1135,7 @@ var fn = {
 		var rlt = division+((userId!="") ? "/"+userId : "");
 		var html  = '<span class="external-event mr-1" id="'+userId+'"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
         html += str;
-		if([[${project.viewOnlyFlag}]] != "Y" && !isReadOnly) {
+		if ([[${project.viewOnlyFlag}]] != "Y") {
 			html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);" /></i>';
 		}
 		target.append(html);
@@ -1346,36 +1347,38 @@ var data = {
 			$('input[name=prjName]').val(data.detail.prjName);
 			$('input[name=prjVersion]').val(data.detail.prjVersion);
 
-            if(data.detail.watcherList.length > 0) {
+            if (viewFlag == null && data.detail.watcherList.length > 0) {
                 $(".tbws1.w1025.mt10").removeClass("collapsed-card")
             }
 
-			data.detail.watcherList.forEach(function(watcher, index, obj){
-				var deptUseYn = watcher.deptUseYn || "Y";
-				var userUseYn = watcher.userUseYn || "Y";
-				
-				if (watcher != "") {
-					if (watcher.prjEmail) { 
-						fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
-					} else {
-						var str = "";
-						
-						if (watcher.prjUserName == undefined){
-							str = watcher.prjDivisionName;
-						} else {
-							str = '<b';
-							
-							if (divisionEmptyCd != watcher.prjDivision) {
-								str += '>'+watcher.prjDivisionName+'</b>/<b';
-							}
-							
-							str += '>'+watcher.prjUserName+'</b>';
-						}
-						
-						fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
-					}
-				}
-			});
+            if (viewFlag == null) {
+            	data.detail.watcherList.forEach(function(watcher, index, obj){
+    				var deptUseYn = watcher.deptUseYn || "Y";
+    				var userUseYn = watcher.userUseYn || "Y";
+    				
+    				if (watcher != "") {
+    					if (watcher.prjEmail) { 
+    						fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
+    					} else {
+    						var str = "";
+    						
+    						if (watcher.prjUserName == undefined){
+    							str = watcher.prjDivisionName;
+    						} else {
+    							str = '<b';
+    							
+    							if (divisionEmptyCd != watcher.prjDivision) {
+    								str += '>'+watcher.prjDivisionName+'</b>/<b';
+    							}
+    							
+    							str += '>'+watcher.prjUserName+'</b>';
+    						}
+    						
+    						fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
+    					}
+    				}
+    			});
+            }
 		}
 	}
 }
@@ -2105,11 +2108,11 @@ var src_fn = {
 		if(cellvalue) {
 			if(parseInt(cellvalue) >= 9.0 ) {
 				display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">CRITICAL</span>";
-			} else if(parseInt(_score) >= 7.0 ) {
+			} else if(parseInt(cellvalue) >= 7.0 ) {
 				display = "<span class=\"badge badge-danger pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">HIGH</span>";
-			} else if(parseInt(_score) >= 4.0) {
+			} else if(parseInt(cellvalue) >= 4.0) {
 				display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">MEDIUM</span>";
-			} else if(parseInt(_score) > 0) {
+			} else if(parseInt(cellvalue) > 0) {
 				display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">LOW</span>";
 			} else {
 				display = "<span style=\"font-size:0;\"></span>";
@@ -2229,6 +2232,8 @@ var src_fn = {
 //SRC 그리드
 var src_grid = {
 	load: function() {
+		loading.show();
+		
 		var currentOssName = "";
 		var ondblClickRowBln = false;
 		var srcList = $("#srcList");
@@ -2690,6 +2695,8 @@ var src_grid = {
 				fn_grid_com.totalGridSaveMode('srcList');
 			},
 			gridComplete : function() {
+				loading.hide();
+				
 				cleanErrMsg("srcList");
 				
 				if(srcValidMsgData) {
@@ -2704,12 +2711,14 @@ var src_grid = {
 			}
 		});
 		
-		srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
-		srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
-												  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);}
-												  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
-												  , cloneToTop:true
-		});
+		if (viewFlag == null) {
+			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+			srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
+													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);}
+													  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
+													  , cloneToTop:true
+			});
+		}
 		
 		$('#srcList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
 	}

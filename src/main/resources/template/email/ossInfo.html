@@ -113,7 +113,7 @@
 										<td style="padding:5px;" th:utext="${oss_basic_info.createdDate} + ' / ' + ${oss_basic_info.creator}"></td>
 									</tr>
 								</table>
-								<div th:if="${comment != null and not #strings.isEmpty(comment) and mailType != '19' and mailType != '10' and mailType != '13'">
+								<div th:if="${comment != null and not #strings.isEmpty(comment) and mailType != '19' and mailType != '10' and mailType != '13'}">
 									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
 									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
 								</div>

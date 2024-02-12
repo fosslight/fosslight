@@ -18,7 +18,7 @@ var targetName = [[${projectInfo.targetName}]];
 var evt_fn = {
 	init : function(){
 		$("#btnChangeOss").on("click", function(){
-			Ctrl_fn.changeProc();				
+			Ctrl_fn.changeProc();
 		});
 	}
 };
@@ -181,9 +181,9 @@ var Ctrl_fn = {
 									var successMsg = [[#{msg.project.check.license.success}]];
 
 									if ("self" == targetName) {
-										opener.location.href = `/selfCheck/edit/\${rowdata["referenceId"]}`;
+										opener.location.href = '/selfCheck/edit/' + rowdata["referenceId"];
 									} else if ("partner" == targetName) {
-										opener.location.href = `/partner/edit/\${rowdata["referenceId"]}`;
+										opener.location.href = '/partner/edit/' + rowdata["referenceId"];
 									} else {
 										/**
 										 * identifcaiton tab order you're working on

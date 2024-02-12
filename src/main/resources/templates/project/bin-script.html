@@ -7,6 +7,7 @@ var objs = [];
 var licenseNames = [];
 var binData;
 var _binLoadListLength = 0;
+var _binUploadFile;
 
 // BIN 이벤트
 var bin_evt = {
@@ -174,7 +175,7 @@ var bin_evt = {
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 						
-						bin_fn.makeFileTag(result[0][0]);	
+						_binUploadFile = result[0][0];	
 					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
 						bin_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
 
@@ -894,7 +895,8 @@ var bin_fn = {
 							binInfoMsgData = data.externalData3;
 						}
 						
-						bin_fn.makeOssList(data.resultData);
+						bin_fn.makeOssList(_binUploadFile);
+						_binUploadFile = undefined
 						
 						if(data.validMsg) {
 							alertify.alert(data.validMsg, function(){});

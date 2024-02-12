@@ -6,7 +6,7 @@
 /*global $ */
 /*jslint browser: true, nomen: true */
 //	var subGridUrl = true;
-var userRole = [[${#authentication.authorities[0].authority}]];
+var userRole = [[${sessUserInfo.authority}]];
 var ossNames = [];
 var objs = [];
 var licenseNames = [];
@@ -21,7 +21,7 @@ var sampleFile = [[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstD
 var _popupCheckOssName = null;
 var _popupCheckOssLicense = null;
 var saveFlag = false;
-var documentsFileCnt = [[${detail.documentsFileCnt}]];
+var documentsFileCnt = 0;
 
 $(document).ready(function () {
 	'use strict';
@@ -29,6 +29,7 @@ $(document).ready(function () {
 	evt.tabInit();
 	datas.init();
 
+	if (partnerData.documentsFileCnt != null) documentsFileCnt = partnerData.documentsFileCnt;
 	if (parseInt(documentsFileCnt) >= 5) {
 		$(".documentsUploader").attr("style", "display: none !important");
 	}
@@ -66,8 +67,8 @@ $(document).ready(function () {
 		}
 	});
 	
-	if("" != [[${detail.partnerId}]]){
-		$("input[name=creatorNm]").val([[${detail.creatorName}]]);
+	if (partnerData.partnerId != null) {
+		$("input[name=creatorNm]").val(partnerData.creatorName||"");
 	}
 	
 	$("#_projectList").jqGrid({
@@ -179,7 +180,7 @@ var evt = {
 		//코멘트 임시저장
 		$('.saveEditorDraft').click(function(){
 			var editorVal = ""; //replaceWithLink(CKEDITOR.instances.editor.getData());
-			var register = [[${#authentication.name}]];
+			var register = [[${sessUserInfo.userId}]];
 			var param = { referenceId : $('input[name=partnerId]').val(), referenceDiv :'21', contents : editorVal };
 			
 			$.ajax({
@@ -256,7 +257,7 @@ var evt = {
 			onSuccess:function(files,data,xhr,pd){
 				// 161102 jy-seo 파일 업로드 에러처리
 				var result = jQuery.parseJSON(data);
-				
+				console.log(result);
 				if (result == null) {
 					alertify.error([[#{msg.common.valid}]], 0);
 				} else {
@@ -275,10 +276,10 @@ var evt = {
 						var result_ = result[0][0];
 						
 						if (result && result_.uploadSucc) {
-							if (result[1] && result[1].length != 0) {
+							if (result[1] && result[1].length != 0) {console.log(result[1]);
 								for(var i = 0; i < result[1].length; i++){
 									var num = i+1;
-									var checkedTxt = "";
+									var checkedTxt = "";console.log(result[1][i]);
 									var sheetName = result[1][i].name.toUpperCase().trim();
 
 									if (sheetName == "OSS LIST" || sheetName == "OPEN SOURCE SOFTWARE LIST") {
@@ -445,7 +446,7 @@ var evt = {
 			var adId = $("#adId").val();
 			var domain = $("#emailTemp").val();
 
-			if(adId == "") {
+			if ("" == adId) {
 				$("#adId").focus();
 				// return alertify.error('Please enter watcher AD ID', 0);
 				return alertify.error([[#{enter.watcher.error}]], 0);
@@ -487,7 +488,10 @@ var evt = {
 		
 		$('.btnCommentHistory').on('click', function(e){
 			e.preventDefault();
-			openCommentHistory('/comment/popup/3rd/'+[[${detail.partnerId}]]);
+			if (partnerData.partnerId != null) {
+				openCommentHistory('/comment/popup/3rd/' + partnerData.partnerId);
+			}
+			
 		});
 		
 		$('#partnerForm').ajaxForm({
@@ -501,9 +505,9 @@ var evt = {
 			}
 		});
 		
-		if("" != [[${detail.partnerId}]]){
+		if (partnerData != null && partnerData.partnerId != null){
 			$("[name='publicYn']").on('change',function(e){
-				var param = {partnerId : [[${detail.partnerId}]], publicYn : ($("[name='publicYn']:checked").val())};
+				var param = {partnerId : partnerData.partnerId, publicYn : ($("[name='publicYn']:checked").val())};
 				
 				$.ajax({
 					url : '/partner/updatePublicYn',
@@ -551,20 +555,22 @@ var evt = {
 		});
 
 		$("#createProject").on("click", function(){
-			var partnerId = [[${detail.partnerId}]];
-			var partnerName = [[${detail.partnerName}]];
-			var softwareName = [[${detail.softwareName}]];
-			if(softwareName.indexOf("/") > -1){
-				softwareName = softwareName.replace("/", "[]");
+			if (partnerData != null) {console.log(partnerData);
+				var partnerId = partnerData.partnerId||"";
+				var partnerName = partnerData.partnerName||"";
+				var softwareName = partnerData.softwareName||"";
+				if (softwareName.indexOf("/") > -1){
+					softwareName = softwareName.replace("/", "[]");
+				}
+				createTabInFrameWithCondition("New_Project", '/project/edit', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
 			}
-			createTabInFrameWithCondition("New_Project", '/project/edit', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
 		});
 	},
 	tabInit: function(){
 		var tabContent = $(".tabContent");
 		var tabMenuA = $(".tabMenu a");
 
-		if("" == [[${detail.partnerId}]]){
+		if (partnerData != null && partnerData.partnerId == null) {
 			tabMenuA.eq("1").hide();
 		}
 		
@@ -632,44 +638,46 @@ var fn = {
 	},
 	// party 그리드 데이터
 	getPartyGridData : function(){
-		$.ajax({
-			url : '/project/identificationGrid/'+[[${detail.partnerId}]]+'/20',
-			type : 'GET',
-			dataType : 'json',
-			cache : false,
-			data : {referenceId : [[${detail.partnerId}]]},
-			contentType : 'application/json',
-			success : function(data){
-				partyMainData = data.mainData;
-				partyValidMsgData_e = []; //초기화
-				partyDiffMsgData_e = []; //초기화
-				
-				if(data.validData) {
-					partyValidMsgData_e = data.validData;
-				}
-				if(data.diffData) {
-					partyDiffMsgData_e = data.diffData;
-				}
+		if (partnerData.partnerId != null) {
+			$.ajax({
+				url : '/project/identificationGrid/'+partnerData.partnerId+'/20',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {referenceId : partnerData.partnerId},
+				contentType : 'application/json',
+				success : function(data){
+					partyMainData = data.mainData;
+					partyValidMsgData_e = []; //초기화
+					partyDiffMsgData_e = []; //초기화
+					
+					if(data.validData) {
+						partyValidMsgData_e = data.validData;
+					}
+					if(data.diffData) {
+						partyDiffMsgData_e = data.diffData;
+					}
 
-				// 리로드 대신 그리드 삭제 후 다시 그리기
-				$("#list").jqGrid('GridUnload');
-				
-				grid.init();
-
-				// totla record 표시
-				$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
-				
-				fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, null, com_fn.getLicenseName);
-			},
-			error : function(){
-				alertify.error([[#{msg.common.valid2}]], 0);
-			}
-		});
+					// 리로드 대신 그리드 삭제 후 다시 그리기
+					$("#list").jqGrid('GridUnload');
+					
+					grid.init();
+					
+					// totla record 표시
+					$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
+					
+					fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, null, com_fn.getLicenseName);
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
 	},
 	changeDivision : function() {
 		var divisionCd = $("#division option:selected").val();
-		if("" != divisionCd) {
-			var postData = { "partnerId" : [[${detail.partnerId}]], "division" : divisionCd};
+		if ("" != divisionCd) {
+			var postData = { "partnerId" : partnerData.partnerId||"", "division" : divisionCd};
 			$.ajax({
 				url : '/partner/changeDivisionAjax',
 				type : 'POST',
@@ -733,7 +741,7 @@ var fn = {
 					$('#userComment').val(""); // replaceWithLink(CKEDITOR.instances['editor'].getData())
 					$('#description').val(replaceWithLink($("#descriptionTextarea").summernote('code')));
 					
-					var prjId = [[${detail.partnerId}]];
+					var prjId = partnerData.partnerId||"";
 					var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
 					
 					$.ajax({
@@ -838,8 +846,8 @@ var fn = {
 			alertify.error([[#{msg.common.valid}]], 0);
 		} else {
 			if("10" == data.resCd){
-				if(isStatusChangeFlag) {
-					var param = {status : 'REQ', partnerId : [[${detail.partnerId}]], userComment : "" /* replaceWithLink(CKEDITOR.instances['editor'].getData())*/};
+				if (isStatusChangeFlag) {
+					var param = {status : 'REQ', partnerId : partnerData.partnerId||"", userComment : ""};
 					checkObligationFlag = false;
 					var _list = $("#list");
 					var mainData = _list.jqGrid('getGridParam','data');
@@ -850,7 +858,7 @@ var fn = {
 						}
 					});
 					
-					if(checkObligationFlag) {
+					if (checkObligationFlag) {
 						alert([[#{msg.warn.include.needcheck.license}]]);
 						return false;
 					}
@@ -863,7 +871,7 @@ var fn = {
 						dataType : 'json',
 						cache : false,
 						success : function(data){
-							if(data.isValid == "false") {
+							if (data.isValid == "false") {
 								gridCleanErrMsg("list");
 								partyValidMsgData_e = data.externalData;
 								partyDiffMsgData_e = data.externalData2;
@@ -879,8 +887,8 @@ var fn = {
 								alertify.error([[#{msg.common.valid}]], 0);
 							} else {
 								reloadTabInframe('/partner/list');
-								if([[${detail.partnerId}]] != ''){
-									reloadTabInframe('/partner/edit/'+[[${detail.partnerId}]]);
+								if (partnerData.partnerId != null) {
+									reloadTabInframe('/partner/edit/'+partnerData.partnerId);
 								}
 							}
 						},
@@ -952,7 +960,7 @@ var fn = {
 		var btnHtm = '<br/><b>Send an email to</b><br/>';
 		btnHtm += '<input type="button" value="Watcher Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'W\')"/>&nbsp;&nbsp;&nbsp;';
 
-		if(userRole == "ROLE_ADMIN") {
+		if (userRole == "ROLE_ADMIN") {
 			btnHtm += '<input type="button" value="Creator Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'C\')"/>&nbsp;&nbsp;&nbsp;';
 		} else {
 			btnHtm += '<input type="button" value="Reviewer Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'R\')"/>&nbsp;&nbsp;&nbsp;';
@@ -1008,7 +1016,7 @@ var fn = {
 		
 		$('.modifyComment').click(function(){
 			var editorVal = ""; // replaceWithLink(CKEDITOR.instances.editor3.getData());
-			var register = "oscAdmin"; // '${sessUserInfo.userId}';
+			var register = [[${sessUserInfo.userId}]];
 			var param = {commId : modifyCommentId, referenceId : $('input[name=partnerId]').val(), referenceDiv :'20', contents : editorVal};
 
 			$.ajax({
@@ -1031,7 +1039,7 @@ var fn = {
 						//코멘트 임시저장
 						$('.modifyComment').click(function(){
 							var editorVal = ""; // replaceWithLink(CKEDITOR.instances.editor3.getData());
-							var register = "oscAdmin"; // '${sessUserInfo.userId}';
+							var register = [[${sessUserInfo.userId}]];
 							var param = {commId : commentIdx, referenceId : $('input[name=partnerId]').val(), referenceDiv :'13', contents : editorVal};
 
 							$.ajax({
@@ -1256,7 +1264,7 @@ var fn = {
            	}
            	
            	alertify.partnerRejectDialog(innerHtml, function () {
-				var comment = $($("#partnerRejectEditor").summernote('code')).text();
+				var comment = $("#partnerRejectEditor").summernote('code');
            		comment = comment.trim();
 
            		if ("" == comment) {
@@ -1264,7 +1272,7 @@ var fn = {
 
 					return false;
 				} else {
-					var param = {status : 'PROG', partnerId : [[${detail.partnerId}]], userComment : replaceWithLink($("#partnerRejectEditor").summernote('code'))};
+					var param = {status : 'PROG', partnerId : partnerData.partnerId||"", userComment : replaceWithLink($("#partnerRejectEditor").summernote('code'))};
 
 					$.ajax({
 						url : '/partner/changeStatus',
@@ -1275,8 +1283,8 @@ var fn = {
 						success : function(data){
 							reloadTabInframe('/partner/list');
 							
-							if ("" != [[${detail.partnerId}]]) {
-								reloadTabInframe('/partner/edit/'+[[${detail.partnerId}]]);
+							if (partnerData.partnerId != null) {
+								reloadTabInframe('/partner/edit/'+partnerData.partnerId);
 							}
 						},
 						error : function(){
@@ -1294,7 +1302,7 @@ var fn = {
 	//reviewStart
 	reviewStart : function(){
 		if (fn.checkStatus()){
-			var param = {status : 'REV', partnerId : [[${detail.partnerId}]]};
+			var param = {status : 'REV', partnerId : partnerData.partnerId||""};
 			$.ajax({
 				url : '/partner/changeStatus',
 				type : 'POST',
@@ -1303,16 +1311,15 @@ var fn = {
 				cache : false,
 				success : function(data){
 					reloadTabInframe('/partner/list');
-					
-					if([[${detail.partnerId}]] != ''){
-						reloadTabInframe('/partner/edit/'+[[${detail.partnerId}]]);	
+					if (partnerData.partnerId != null) {
+						reloadTabInframe('/partner/edit/'+partnerData.partnerId);
 					}
 				},
 				error : function(){
 					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
-		}else{
+		} else {
 			alertify.alert([[#{msg.partner.warning}]], function(){});
 		}
 	},
@@ -1351,7 +1358,7 @@ var fn = {
 							}
 							
 							var setup = alertify.confirm().setup();
-							setup.focus.element = -1;
+							setup.focus.element = 1;
 							
 							return setup;
 						},
@@ -1366,20 +1373,23 @@ var fn = {
            	}
 			
            	alertify.partnerConfirmDialog(innerHtml, function () {
-           		var param = {status : 'CONF', partnerId : [[${detail.partnerId}]], binaryFileId : [[${detail.binaryFileId}]], "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
-           		if ("" != $($("#partnerConfirmEditor").summernote('code')).text()) {
+           		var ignoreBinaryDbFlag = $("#ignoreBinaryDbFlag").val();
+           		if (typeof ignoreBinaryDbFlag === 'undefined') ignoreBinaryDbFlag = "";
+           		
+           		var param = {status : 'CONF', partnerId : partnerData.partnerId||"", binaryFileId : partnerData.binaryFileId||"", "ignoreBinaryDbFlag" : ignoreBinaryDbFlag};
+           		if ("" != $("#partnerConfirmEditor").summernote('code')) {
 					param["userComment"] = replaceWithLink($("#partnerConfirmEditor").summernote('code'));
 				} else {
 					param["userComment"] = "";
 				}
-           		
+           		console.log(param);
            		$.ajax({
     				url : '/partner/changeStatus',
     				type : 'POST',
     				data : param,
     				dataType : 'json',
     				cache : false,
-    				success : function(data){
+    				success : function(data){console.log(data);
     					if(data.isValid == "false") {
     						gridValidMsgNew(data, "list");
     						
@@ -1387,8 +1397,8 @@ var fn = {
     					} else {
     						reloadTabInframe('/partner/list');
     						
-    						if([[${detail.partnerId}]] != ''){
-    							reloadTabInframe('/partner/edit/'+[[${detail.partnerId}]]);	
+    						if (partnerData.partnerId != null){
+    							reloadTabInframe('/partner/edit/'+partnerData.partnerId);	
     						}
     					}
     					
@@ -1405,7 +1415,7 @@ var fn = {
 		}
 	},
 	closePop : function(){
-		$('.sheetSelectPop').hide();
+		$(".ajs-close").trigger("click");
 	},
 	getSheetData : function(){
 		var sheetNum = [];
@@ -1417,11 +1427,11 @@ var fn = {
 		
 		var fileSeq = $('input[name=ossFileId]').val();
 		
-		if(sheetNum.length == 0){
+		if (sheetNum.length == 0) {
 			alert([[#{msg.common.check.sheet}]]);
 			
 			return;
-		}else{
+		} else {
 			loading.show();
 			
 			fn_grid_com.totalGridSaveMode('list');
@@ -1429,7 +1439,7 @@ var fn = {
 			
 			var target = $("#list");
 			var mainData = target.jqGrid('getGridParam','data');
-			var finalData = {"readType":"partner","prjId" : [[${detail.partnerId}]], "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+			var finalData = {"readType":"partner","prjId" : partnerData.partnerId||"", "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
 
 			fn.exeLoadReportData(finalData);
 		}
@@ -1444,7 +1454,7 @@ var fn = {
 		var sheetNum = ["0"];
 		var target = $("#list");
 		var mainData = target.jqGrid('getGridParam','data');
-		var finalData = {"readType":"partner","prjId" : [[${detail.partnerId}]], "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+		var finalData = {"readType":"partner","prjId" : partnerData.partnerId||"", "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
 
 		fn.exeLoadReportData(finalData);
 	},
@@ -1458,7 +1468,7 @@ var fn = {
 		var sheetNum = ["1", "4"];
 		var target = $("#list");
 		var mainData = target.jqGrid('getGridParam','data');
-		var finalData = {"readType":"partner","prjId" : [[${detail.partnerId}]], "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+		var finalData = {"readType":"partner","prjId" : partnerData.partnerId||"", "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
 
 		fn.exeLoadReportData(finalData);
 	},
@@ -1471,16 +1481,16 @@ var fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function(data){
-				if("false" == data.isValid) {
-					if(data.validMsg) {
+				if ("false" == data.isValid) {
+					if (data.validMsg) {
 						alertify.alert(data.validMsg, function(){});
 					} else {
 						alertify.error([[#{msg.common.valid2}]], 0);
 					}
 				} else {
-					$('.sheetSelectPop').hide();
+					fn.closePop();
 						
-					if(data.externalData) {
+					if (data.externalData) {
 						// validData 표시
 						partyValidMsgData_e = data.externalData;
 						//gridValidMsgNew(partyValidMsgData_e, "list");
@@ -1494,7 +1504,7 @@ var fn = {
 					
 					fn.makeOssList(data.resultData);
 					
-					if(data.validMsg) {
+					if (data.validMsg) {
 						alertify.alert(data.validMsg, function(){});
 					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
 						alertify.alert(data.resultData.systemChangeHisStr, function(){});
@@ -1571,9 +1581,9 @@ var fn = {
 		target.append(html);
 	},
 	addWatcher : function(uDiv, uId, uEmail) {
-		var partnerId = [[${detail.partnerId}]];
+		var partnerId = partnerData.partnerId;
 
-		if(partnerId == "") {
+		if (partnerId != null) {
 			return true;
 		}
 		
@@ -1597,20 +1607,20 @@ var fn = {
 	removeWatcher : function(uDiv, uId, obj) {
 		var uEmail = "";
 
-		if("Email" == uId) {
+		if ("Email" == uId) {
 			uEmail = uDiv;
 			uId = "";
 			uDiv = "";
 		}
 
-		var partnerId = [[${detail.partnerId}]];
+		var partnerId = partnerData.partnerId;
 
-		if(partnerId == "") {
+		if (partnerId == null) {
 			return true;
 		}
 		
 		var data = {"partnerId" : partnerId , "parDivision" : uDiv, "parUserId":uId, "parEmail":uEmail};
-
+		
 		$.ajax({
 			url : '/partner/removeWatcher',
 			type : 'POST',
@@ -1619,7 +1629,7 @@ var fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function(resultData){
-				if(resultData.isValid == "true") {
+				if ("true" == resultData.isValid) {
 					$(obj).parent().remove();
 					alertify.success([[#{msg.common.success}]]);
 				}
@@ -1628,7 +1638,11 @@ var fn = {
 		});
 	},
 	copyWatcher : function(obj) {
-		var partnerId = [[${detail.partnerId}]];
+		var partnerId = partnerData.partnerId;
+
+		if (partnerId != null) {
+			return true;
+		}
 		
 		obj["partnerId"] = partnerId;
 		
@@ -1744,7 +1758,7 @@ var fn = {
 		$.ajax({
 			type: "POST",
 			url: '/exceldownload/getExcelPost',
-			data: JSON.stringify({"type":"partnerCheckList", "parameter":[[${detail.partnerId}]]}),
+			data: JSON.stringify({"type":"partnerCheckList", "parameter":partnerData.partnerId||""}),
 			dataType : 'json',
 			cache : false,
 			contentType : 'application/json',
@@ -1761,7 +1775,7 @@ var fn = {
 		});
 	},
     downloadYaml: function () {
-        var params = {'partnerId': [[${detail.partnerId}]], 'partnerName': [[${detail.partnerName}]]};
+        var params = {'partnerId': partnerData.partnerId||"", 'partnerName': partnerData.partnerName||""};
 
         $.ajax({
             type: "POST",
@@ -1787,7 +1801,7 @@ var fn = {
 		var obligationLicense = rowObject["obligationLicense"];
 		var obligationType = rowObject["obligationType"];
 		
-		if(obligationLicense == 10 || obligationLicense == 11) {
+		if (obligationLicense == 10 || obligationLicense == 11) {
 			display="<span class=\"iconSet ops\"></span>";
 		} else if(obligationLicense == 90) {
 			display = '<select id="'+options.rowId+'_notify" onchange="fn.onNotifyCboxClick(' + options.rowId + ')">'
@@ -1915,12 +1929,13 @@ var fn = {
     	}
 	},
 	CheckOssViewPage : function(){
-		if(saveFlag) {
+		if (saveFlag) {
 			if(_popupCheckOssName != null){
 				_popupCheckOssName.close();
 			}
 			
-			_popupCheckOssName = window.open("/oss/checkOssName?prjId="+[[${detail.partnerId}]]+"&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+			var partnerId = partnerData.partnerId||"";
+			_popupCheckOssName = window.open("/oss/checkOssName?prjId="+partnerId+"&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 			if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
 				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
@@ -1939,7 +1954,7 @@ var fn = {
 				_popupCheckOssLicense.close();
 			}
 			
-			_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId="+[[${detail.partnerId}]]+"&referenceDiv=20&targetName=partner", "Check License", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+			_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId="+partnerData.partnerId||""+"&referenceDiv=20&targetName=partner", "Check License", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
 			if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
 				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
@@ -1954,9 +1969,9 @@ var fn = {
 		var partnerId = $("input[name=partnerId]").val();
 		var returnFlag = false;
 
-		if (partnerId||"" == ""){
+		if ("" == partnerId||"") {
 			returnFlag = true;
-		}else{
+		} else {
 			$.ajax({
 				url : '/partner/checkStatus/'+partnerId,
 				type : 'GET',
@@ -1982,7 +1997,7 @@ var fn = {
 		var copyUrl = "";
 		var protocol = window.location.protocol;
 		var host =  window.location.host;
-		copyUrl = protocol + "//" + host + "/partner/view/" + [[${detail.partnerId}]];
+		copyUrl = protocol + "//" + host + "/partner/view/" + partnerData.partnerId||"";
 
 		var langSelect = $('.userLang > select option:selected', window.parent.document)[0];
 		langSelect = $(langSelect).val();
@@ -2038,7 +2053,7 @@ var fn = {
 	},
 	binaryDBSave : function() {
 		var param = {
-			"partnerId" : [[${detail.partnerId}]],
+			"partnerId" : partnerData.partnerId||"",
 			"referenceDiv" : "20"
 		};
 
@@ -2101,16 +2116,7 @@ var fn = {
             return false;
         }
 	},
-	exportList : function(obj) {
-    	var exportListId = '#' + $(obj).siblings("div").attr("id");
-        if ($(exportListId).css('display')=='none') {
-            $(exportListId).show();
-        }else{
-            $(exportListId).hide();
-        }
-        $(exportListId).menu();
-    },
-    selectDownloadFile : function(target) {
+	selectDownloadFile : function(target) {
     	// download file
     	if (target === "report_sub") {
     		fn.downloadExcel();
@@ -2146,30 +2152,31 @@ var fn = {
     },
 	checkSelectDownloadFile : function() {
 		var checkEmptyFlag = false;
-		
-		$.ajax({
-    		type: "POST",
-			url: '/partner/checkSelectDownloadFile',
-			data: JSON.stringify({"partnerId":[[${detail.partnerId}]]}),
-			dataType : 'json',
-			cache : false,
-			async : false,
-			contentType : 'application/json',
-			success: function (data) {
-				if (data.isValid) {
-					checkEmptyFlag = true;
+		if (partnerData.partnerId != null) {
+			$.ajax({
+    			type: "POST",
+				url: '/partner/checkSelectDownloadFile',
+				data: JSON.stringify({"partnerId":partnerData.partnerId}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if (data.isValid) {
+						checkEmptyFlag = true;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
 				}
-			},
-			error: function(data){
-				alertify.error([[#{msg.common.valid2}]], 0);
-			}
-    	});
+    		});
+		}
     	
     	return checkEmptyFlag;
 	},
 	downloadSpdxSpreadSheetExcel : function(){
-		var partnerId = [[${detail.partnerId}]];
-		if ("" !== partnerId) {
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
 			partnerId = "3rd_" + partnerId;
 			
 			$.ajax({
@@ -2193,8 +2200,8 @@ var fn = {
 		}
 	},
 	downloadSpdxRdf : function() {
-		var partnerId = [[${detail.partnerId}]];
-		if ("" !== partnerId) {
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
 			partnerId = "3rd_" + partnerId;
 			
 			$.ajax({
@@ -2218,8 +2225,8 @@ var fn = {
 		}
 	},
 	downloadSpdxTag : function() {
-		var partnerId = [[${detail.partnerId}]];
-		if ("" !== partnerId) {
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
 			partnerId = "3rd_" + partnerId;
 			
 			$.ajax({
@@ -2243,8 +2250,8 @@ var fn = {
 		}
 	},
 	downloadSpdxJson : function() {
-		var partnerId = [[${detail.partnerId}]];
-		if ("" !== partnerId) {
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
 			partnerId = "3rd_" + partnerId;
 			
 			$.ajax({
@@ -2268,8 +2275,8 @@ var fn = {
 		}
 	},
 	downloadSpdxYaml : function() {
-		var partnerId = [[${detail.partnerId}]];
-		if ("" !== partnerId) {
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
 			partnerId = "3rd_" + partnerId;
 			
 			$.ajax({
@@ -2322,7 +2329,7 @@ var fn = {
 
 var datas = {
 	init : function(){
-		if([[${detail.partnerId}]] != "") {
+		if (partnerData.partnerId != null) {
 			fn.getPartyGridData();
 		} else {
 			grid.init();
@@ -2330,47 +2337,50 @@ var datas = {
 			partySubData = [];
 		}
 		
-		var deliveryForm = [[${detail.deliveryForm}]];
+		var deliveryForm = partnerData.deliveryForm||'';
 		
-		if(deliveryForm == '') {
-
+		if ('' == deliveryForm) {
 		} else {
 			$('select[name=deliveryForm]').val(deliveryForm).attr('selected', 'true');
 			$('select[name=deliveryForm]').trigger('change');	
 		}
 
 		var userDivision = $('#division');
-		if([[${detail.partnerId}]] != '' && [[${detail.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
-			for(var i=0;i<userDivision.children().length;i++){
-				if(userDivision.children()[i].value == [[${detail.division}]]) {
-					break;
-				}
-				if(userDivision.children().length - 1 == i ) {
-					var divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), detail.division)}]];
-					userDivision.append("<option value='" + [[${detail.division}]] + "' >" + divisionName+ "</option>");
-					$('#division option:last').attr("selected", "selected");
-					$('#division option:last').change();
-				}
-			}
-		}
+ 		if (partnerData != null) {
+ 			if (partnerData.partnerId != null && partnerData.division != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+ 				for (var i=0;i<userDivision.children().length;i++) {
+ 					if (userDivision.children()[i].value == partnerData.division||"") {
+ 						break;
+ 					}
+ 					if (userDivision.children().length - 1 == i ) {
+ 						var divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), detail.division)}]];
+ 						userDivision.append("<option value='" + partnerData.division||"" + "' >" + divisionName+ "</option>");
+ 						$('#division option:last').attr("selected", "selected");
+ 						$('#division option:last').change();
+ 					}
+ 				}
+ 			}
+ 		}
+		
 
 		userDivision = $('#division');
-		for(var i=0;i<userDivision.children().length;i++){
-			if(userDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
-				break;
-			}
-			if(userDivision.children().length - 1 == i ) {
-				userDivision.append("<option value='"+[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]+"'></option>");
-				if([[${detail.division}]] == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
-					$('#division option:last').attr("selected", "selected");
-					$('#division option:last').change();
+		if (partnerData != null) {
+			for (var i=0;i<userDivision.children().length;i++) {
+				if (userDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+					break;
+				}
+				if (userDivision.children().length - 1 == i ) {
+					userDivision.append("<option value='"+[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]+"'></option>");
+					if (partnerData.division == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
+						$('#division option:last').attr("selected", "selected");
+						$('#division option:last').change();
+					}
 				}
 			}
 		}
-
 		var prjDivision = $("#userDivision");
-		for(var i=0;i<prjDivision.children().length;i++){
-			if(prjDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]] ){
+		for (var i=0;i<prjDivision.children().length;i++) {
+			if (prjDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]] ) {
 				break;
 			}
 			if(prjDivision.children().length-1 == i) {
@@ -2378,7 +2388,7 @@ var datas = {
 			}
 		}
 		
-		if(partnerData) {
+		if (partnerData.partnerWatcher != null) {
 			partnerData.partnerWatcher.forEach(function(watcher, index, obj){
 				var deptUseYn = watcher.deptUseYn || "Y";
 				var userUseYn = watcher.userUseYn || "Y";
@@ -2789,7 +2799,7 @@ var grid = {
 				}
 				
 				// 상태에 따른 화면 처리
-				fn.modeForStatus([[${detail.status}]]);
+				fn.modeForStatus(partnerData.status||"");
 				
 				if(isSort){
 					isSort = false;

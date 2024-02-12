@@ -363,12 +363,12 @@
 			$('#delete').on('click', function(){
 				var editorVal = $("#commentCont").summernote('code');
 				
-				if ($("#commentCont").next().find(".note-editable").text() == "") {
+				if ("" == $("#commentCont").next().find(".note-editable").text()) {
 					alertify.alert([[#{msg.oss.required.deletion}]], function(){});
 					return false;
 				}
 
-				if (deactivateFlag == "Y"){
+				if ("Y" == deactivateFlag) {
 					alertify.alert([[#{msg.oss.required.deactivate.deletion}]], function(){});
 					return false;
 				}
@@ -1981,7 +1981,7 @@
 
 	//유효성 체크 콜백함수
 	function onDeleteValidSuccess(json, status){
-		if(json.isValid == 'false') {
+		if (json.isValid == 'false') {
 			loading.hide();
 			
 			if(json.validMsg == "hasDelNick") {
@@ -2024,7 +2024,7 @@
 				ossGridValidMsg(json, "_licenseChoice");
 			}
 
-		} else if(json.isValid == 'true') {
+		} else if (json.isValid == 'true') {
 			var data = checkVdiff('delete');
 			var v_flag = data.vFlag;
 

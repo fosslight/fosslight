@@ -642,7 +642,7 @@
                 	}
                     
                     alertify.verConfirmDialog(innerHtml, function () {
-                    	if ("" != $($("#confirmEditor").summernote('code')).text()){
+                    	if ("" != $("#confirmEditor").summernote('code')){
                     		$("#noticeForm input[name=userComment]").val($("#confirmEditor").summernote('code'));
                     	} else {
                     		$("#noticeForm input[name=userComment]").val("");
@@ -726,7 +726,7 @@
                 	}
                     
                     alertify.verRejectDialog(innerHtml, function () {
- 						if ("" == $($("#editor3").summernote('code')).text()){
+ 						if ("" == $("#editor3").summernote('code')){
  							alertify.alert([[#{msg.project.required.comments}]], function(){});
 
 							return false;

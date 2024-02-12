@@ -30,7 +30,7 @@
                                    <span class="badge badge-carrot text-md px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">S</span>
                                 </th:block>
                             </span>
-                            <span sec:authorize="hasRole('ROLE_ADMIN')" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
+                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
                             	<th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
                             	<span class="ml-5 projdecBtn">
                             		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
@@ -762,8 +762,8 @@
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </button>
                                             <div class="dropdown-menu" role="menu">
-                                                <a class="dropdown-item" th:onclick="|src_fn.selectDownloadFile('report_sub')|" th:text="'FOSSLight Report (Spreadsheet)'"></a>
-                                                <a class="dropdown-item" th:onclick="|src_fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
+                                                <a class="dropdown-item" style="cursor: pointer;" th:onclick="|src_fn.selectDownloadFile('report_sub')|" th:text="'FOSSLight Report (Spreadsheet)'"></a>
+                                                <a class="dropdown-item" style="cursor: pointer;" th:onclick="|src_fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
                                             </div>
                                         </div>
                                         <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="srcResetUp" th:text="Reset"></button>

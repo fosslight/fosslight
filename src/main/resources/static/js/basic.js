@@ -630,11 +630,7 @@ var reloadTab = function (tabLk, act) {
         }
 
         if (url == tabLk) {
-            if (act == "create") {
-                $(this).attr('src', url);
-            } else if (act == "reload") {
-                $(this).attr('src', url + "?gnbF=Y");
-            }
+            $(this).attr('src', url);
         }
     });
 }
