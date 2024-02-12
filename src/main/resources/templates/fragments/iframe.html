@@ -12,7 +12,7 @@
           </div>
         </div>
         <a class="nav-link bg-grayish-blue text-white" href="#" data-widget="iframe-scrollleft"><i class="fas fa-angle-double-left"></i></a>
-        <ul class="navbar-nav overflow-hidden" role="tablist"></ul>
+        <ul class="navbar-nav overflow-hidden" id="navbarNav" role="tablist"></ul>
         <a class="nav-link bg-grayish-blue text-white" href="#" data-widget="iframe-scrollright"><i class="fas fa-angle-double-right"></i></a>
         <a class="nav-link bg-grayish-blue text-white" href="#" data-widget="iframe-fullscreen"><i class="fas fa-expand"></i></a>
       </div>
@@ -27,5 +27,20 @@
         </div>
       </div>
     </div>
+  <script>
+    var observer = new MutationObserver(function(mutationsList) {
+      for (var mutation of mutationsList) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0 && $("#navbarNav li").length > 4) {
+          var navbarNav = document.getElementById("navbarNav");
+          navbarNav.scrollLeft = navbarNav.scrollWidth - navbarNav.clientWidth;
+          break;
+        }
+      }
+    });
+
+    var targetNode = document.getElementById('navbarNav');
+    observer.observe(targetNode, { childList: true });
+  </script>
 </th:block>
+
 </html>
