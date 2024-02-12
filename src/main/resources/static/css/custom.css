@@ -158,8 +158,8 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .mark {background-color: transparent; font-size: .8rem}
 
 /* loading bar */
-.custom-layout #loading_wrap {position:fixed; z-index:1001; width:100%; height:100%;}
-.custom-layout #loading_wrap .loadingBlind {position:fixed; left:0; top:0; bottom:0; display:block; width:100%; z-index:1002; background:#000;
+#loading_wrap {position:fixed; z-index:1001; width:100%; height:100%;}
+#loading_wrap .loadingBlind {position:fixed; left:0; top:0; bottom:0; display:block; width:100%; z-index:1002; background:#000;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
     opacity: .5;}
