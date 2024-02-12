@@ -99,7 +99,7 @@ public class SelfCheckController extends CoTopComponent {
 		
 		Project searchBean = null;
 		
-		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
+		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF")) || getSessionObject(SESSION_KEY_SEARCH) == null) {
 			deleteSession(SESSION_KEY_SEARCH);
 			
 			searchBean = searchService.getSelfCheckSearchFilter(loginUserName());
@@ -182,7 +182,7 @@ public class SelfCheckController extends CoTopComponent {
 			
 			if (CoConstDef.FLAG_YES.equals(project.getUseYn())) {
 				model.addAttribute("project", project);
-				model.addAttribute("detail", toJson(project));
+				model.addAttribute("detail", project);
 				model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 				model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 				model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
@@ -203,8 +203,9 @@ public class SelfCheckController extends CoTopComponent {
 			model.addAttribute("message", "Reqeusted URL contains Self-Check Project ID that doesn't exist. Please check the Self-Check Project ID again.");
 		}
 		
+		model.addAttribute("viewFlag", CoConstDef.FLAG_YES);
 		
-		return SELF_CHECK.VIEW_JSP;
+		return "selfCheck/edit";
 	}
 	
 	/**

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <th:block th:fragment="commonScript">
 <script th:inline="javascript">
-var userRole = [[${#authentication.authorities[0].authority}]];
+var userRole = [[${sessUserInfo.authority}]];
 var curIdenStatus = [[${project.identificationStatus}]];
 var projectStatus = [[${project.status}]];
 var distributionStatus = [[${project.destributionStatus}]];
@@ -57,7 +57,7 @@ var com_evt = {
 				var innerHtml 	= 'Are you to enter a comment when confirm?<br><br>';
                 innerHtml 		+= '<textarea id="bomConfirmEditor"></textarea>';
                 
-                if(!alertify.bomConfirmDialog){
+                if (typeof alertify.bomConfirmDialog === "undefined"){
 					alertify.dialog('bomConfirmDialog', function() {
 						return {
 							setup: function() {
@@ -94,8 +94,8 @@ var com_evt = {
 					alertify.bomConfirmDialog(innerHtml, function () {
 						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF"};
 						
-						if ("" != $($("#confirmEditor").summernote('code')).text()) {
-							data["userComment"] = replaceWithLink($("#confirmEditor").summernote('code'));
+						if ("" != $("#bomConfirmEditor").summernote('code')) {
+							data["userComment"] = replaceWithLink($("#bomConfirmEditor").summernote('code'));
 						} else {
 							data["userComment"] = "";
 						}
@@ -134,8 +134,8 @@ var com_evt = {
 
 						alertify.bomConfirmDialog(innerHtml, function () {
 	                    	var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF"};
-	                    	if ("" != $($("#confirmEditor").summernote('code')).text()) {
-	                    		data["userComment"] = replaceWithLink($("#confirmEditor").summernote('code'));
+	                    	if ("" != $("#bomConfirmEditor").summernote('code')) {
+	                    		data["userComment"] = replaceWithLink($("#bomConfirmEditor").summernote('code'));
 	                    	} else {
 	                    		data["userComment"] = "";
 	                    	}
@@ -188,7 +188,7 @@ var com_evt = {
 				var innerHtml 	= 'Are you sure you want to reject?<br><br>';
                	innerHtml 		+= '<textarea id="bomRejectEditor"></textarea>';
 				
-               	if (!alertify.bomRejectDialog){
+               	if (typeof alertify.bomRejectDialog === 'undefined') {
 					alertify.dialog('bomRejectDialog', function() {
 						return {
 							setup: function() {
@@ -199,7 +199,8 @@ var com_evt = {
 								}
 								
 								var setup = alertify.confirm().setup();
-								setup.focus.element = -1;
+								
+								setup.focus.element = 1;
 								
 								return setup;
 							},
@@ -213,7 +214,7 @@ var com_evt = {
 					}, false, 'confirm');
             	}
                	
-				alertify.bomRejectDialog(innerHtml, function () {
+               	alertify.bomRejectDialog(innerHtml, function () {
 					var comment = $($("#bomRejectEditor").summernote('code')).text();
                		comment = comment.trim();
 					
@@ -222,12 +223,7 @@ var com_evt = {
 
 						return false;
 					} else {
-						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG"};
-						if ("" != $($("#bomRejectEditor").summernote('code')).text()) {
-							data["userComment"] = $("#bomRejectEditor").summernote('code');
-						} else {
-							data["userComment"] = "";
-						}
+						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : $("#bomRejectEditor").summernote('code')};
 						com_fn.checkSave(data, "PROG");
 					}
 				});
@@ -261,65 +257,18 @@ var com_evt = {
 						return false;
 					}
 					
-					var innerHtml 	= 'Are you to enter a comment when request?<br><br>';
-                    innerHtml 		+= '<textarea id="requestEditor"></textarea>';
-                    
-                    if(!alertify.requestDialog){
-						alertify.dialog('requestDialog', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-									
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-									
-									var setup = alertify.confirm().setup();
-									var buttons = setup.buttons;
-									var customButtons = [];
-									for (var i in buttons) {
-										if ('OK' == buttons[i].text) {
-											customButtons.push(buttons[i]);
-										}
-									}
-									setup.buttons = customButtons;
-									setup.focus.element = 1;
-									
-									return setup;
-								},
-							    hooks: {
-							    	onshow: function() {
-							        	this.elements.dialog.style.maxWidth = 'none';
-							          	this.elements.dialog.style.width = '650px';
-							        }
+					alertify.confirm([[#{msg.common.confirm.continue}]], function(e){
+						if(e) {
+							if (userRole != "ROLE_ADMIN"){
+								if(!com_fn.validBomChangeStatus(isAndroidModel)) {
+									return false;
 								}
-							};
-						}, false, 'confirm');
-                	}
-					
-                    alertify.requestDialog(innerHtml, function () {
-                    	alertify.confirm([[#{msg.common.confirm.continue}]], function(e){
-    						if(e) {
-    							if (userRole != "ROLE_ADMIN"){
-    								if(!com_fn.validBomChangeStatus(isAndroidModel)) {
-    									return false;
-    								}
-    							}
-    							var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REQ"};
-    							var comment = $($("#requestEditor").summernote('code')).text();
-    							
-    							if ("" == comment) {
-    								data["userComment"] = "";
-    							} else {
-    								data["userComment"] = replaceWithLink($("#requestEditor").summernote('code'));
-    							}
-
-    							com_fn.checkSave(data, "REQ");
-    						}
-    					});
-                    });
-                    
-                    $("#requestEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+							}
+							var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REQ", "userComment" : ""};
+							
+							com_fn.checkSave(data, "REQ");
+						}
+					});
 				} else {
 					alertify.alert([[#{msg.project.check.save}]], function(){});
 				}
@@ -340,55 +289,10 @@ var com_evt = {
 					return false;
 				}
 				
-				if(Bom_Save_Flg) {
-					var innerHtml 	= 'Are you to enter a comment when review?<br><br>';
-                    innerHtml 		+= '<textarea id="reviewEditor"></textarea>';
-                    
-                    if(!alertify.reviewDialog){
-						alertify.dialog('reviewDialog', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-									
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-									
-									var setup = alertify.confirm().setup();
-									var buttons = setup.buttons;
-									var customButtons = [];
-									for (var i in buttons) {
-										if ('OK' == buttons[i].text) {
-											customButtons.push(buttons[i]);
-										}
-									}
-									setup.buttons = customButtons;
-									setup.focus.element = 1;
-									
-									return setup;
-								},
-							    hooks: {
-							    	onshow: function() {
-							        	this.elements.dialog.style.maxWidth = 'none';
-							          	this.elements.dialog.style.width = '650px';
-							        }
-								}
-							};
-						}, false, 'confirm');
-                	}
-					
-                    alertify.reviewDialog(innerHtml, function () {
-                    	var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REV"};
-                    	if ("" != $($("#reviewEditor").summernote('code')).text()) {
-                    		data["userComment"] = replaceWithLink($("#reviewEditor").summernote('code'));
-                    	} else {
-                    		data["userComment"] = "";
-                    	}
-                    	
-                    	com_fn.checkSave(data, "REV");
-                    });
-                    
-                    $("#reviewEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+				if (Bom_Save_Flg) {
+					var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REV", "userComment" : ""};
+
+					com_fn.checkSave(data, "REV");
 				} else {
 					alertify.alert([[#{msg.project.check.save}]], function(){});
 				}
@@ -1159,8 +1063,8 @@ var com_fn = {
 									$(".ajs-cancel").trigger("click");
 									
 									window.setTimeout(function(){
-										alertify.alert(com_fn.setMessage("There is an error in src."), function(){});
-										$("#menu-tab > li:eq(1)").find("a").trigger("click");
+										alertify.alert(com_fn.setMessage([[#{msg.project.validation.error}]]), function(){});
+										$("#tabMenuDep").trigger("click");
 									}, 100);
 									
 									return false;
@@ -1189,8 +1093,8 @@ var com_fn = {
 									$(".ajs-cancel").trigger("click");
 									
 									window.setTimeout(function(){
-										alertify.alert(com_fn.setMessage("There is an error in src."), function(){});
-										$("#menu-tab > li:eq(2)").find("a").trigger("click");
+										alertify.alert(com_fn.setMessage([[#{msg.project.validation.error}]]), function(){});
+										$("#tabMenuSrc").trigger("click");
 									}, 100);
 									
 									return false;
@@ -1219,8 +1123,8 @@ var com_fn = {
 									$(".ajs-cancel").trigger("click");
 									
 									window.setTimeout(function(){
-										alertify.alert(com_fn.setMessage("There is an error in bin."), function(){});
-										$("#menu-tab > li:eq(3)").find("a").trigger("click");
+										alertify.alert(com_fn.setMessage([[#{msg.project.validation.error}]]), function(){});
+										$("#tabMenuBin").trigger("click");
 									}, 100);
 									
 									return false;
@@ -1316,7 +1220,7 @@ var com_fn = {
 					var prjId = [[${project.prjId}]];
 					reloadTabInframe("/project/list");
 					
-					if(data.validMsg == "goPackaging") {
+					if (data.validMsg == "goPackaging") {
 						alertify.alert([[#{msg.project.autoredirect.packaging}]], function() {
 							deleteTabInFrame('/project/identification/'+prjId);
 							createTabInFrame(prjId+'_Packaging', "/project/verification/"+prjId);

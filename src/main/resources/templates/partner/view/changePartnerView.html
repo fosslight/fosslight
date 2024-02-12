@@ -9,7 +9,7 @@
 					<tbody>
 						<tr>
 							<td class="text-center" style="vertical-align:middle;" th:text="'Division'"></td>
-							<td>
+							<td id="partnerChangeDivisionPop">
 								<select class="form-control select2" name="partnerDivision" style="width: 100%;">
 									<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
 										<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>

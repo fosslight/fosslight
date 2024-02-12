@@ -157,6 +157,8 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
+		PartnerMaster partnerMaster = new PartnerMaster();
+		model.addAttribute("detail", partnerMaster);
 		
 		return "partner/edit";
 	}
@@ -254,7 +256,9 @@ public class PartnerController extends CoTopComponent{
 			model.addAttribute("message", "Reqeusted URL contains 3rd Party Software ID that doesn't exist. Please check the 3rd Party Software ID again.");
 		}
 		
-		return PARTNER.VIEW_JSP;
+		model.addAttribute("viewFlag", CoConstDef.FLAG_YES);
+		
+		return "partner/edit";
 	}
 	
 	@GetMapping(value=PARTNER.LIST_AJAX)
@@ -979,7 +983,7 @@ public class PartnerController extends CoTopComponent{
 			
 			partnerService.updatePartnerConfirm(partnerMaster);
 			
-			if(partnerMaster != null && !isEmpty(partnerMaster.getBinaryFileId()) &&  !(CoConstDef.FLAG_YES.equals(partnerMaster.getIgnoreBinaryDbFlag()))) {
+			if (partnerMaster != null && !isEmpty(partnerMaster.getBinaryFileId()) &&  !(CoConstDef.FLAG_YES.equals(partnerMaster.getIgnoreBinaryDbFlag()))) {
 				try {
 					ProjectIdentification paramPartner = new ProjectIdentification();
 					paramPartner.setReferenceId(partnerMaster.getPartnerId());

@@ -7,6 +7,7 @@ var objs = [];
 var licenseNames = [];
 var depData;
 var _depLoadListLength = 0;
+var _depUploadFile;
 
 // DEP 이벤트
 var dep_evt = {
@@ -185,7 +186,7 @@ var dep_evt = {
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 						
-						dep_fn.makeFileTag(result[0][0]);
+						_depUploadFile = result[0][0];
 					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
 						dep_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
 
@@ -685,7 +686,7 @@ var dep_fn = {
 			}
 		});
 		
-		if(sheetNum.length == 0) {
+		if (sheetNum.length == 0) {
 			alertify.alert([[#{msg.common.check.sheet}]]);
 			
 			return;
@@ -729,9 +730,7 @@ var dep_fn = {
 				cache : false,
 				contentType : 'application/json',
 				success: function(data){
-					loading.hide();
-
-					if("false" == data.isValid) {
+					if ("false" == data.isValid) {
 						if(data.validMsg) {
 							alertify.alert(data.validMsg, function(){});
 						} else {
@@ -746,8 +745,9 @@ var dep_fn = {
 							depDiffMsgData = data.externalData2;
 						}
 
-						dep_fn.makeOssList(data.resultData);
-
+						dep_fn.makeFileTag(_srcUploadFile);
+						_depUploadFile = undefined;
+						
 						if(data.validMsg) {
 							alertify.alert(data.validMsg, function(){});
 						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
@@ -756,13 +756,12 @@ var dep_fn = {
 					}
 				},
 				error: function(data){
-					loading.hide();
 					$('.ossUpload').children().remove();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
 			});
 		} finally {
-			com_fn.closeAlertifyView();
+			loading.hide();
 		}
 	},
 

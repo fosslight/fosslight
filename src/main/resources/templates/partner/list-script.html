@@ -13,7 +13,7 @@ var refreshParam = {};
 const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT'))}]];
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var changeWatcherArr = [];
-var role = [[${#authentication.authorities[0].authority}]];
+var role = [[${sessUserInfo.authority}]];
 var isReadOnly = [[${isReadOnly}]];
 
 $(document).ready(function () {
@@ -295,19 +295,17 @@ var fn = {
 	}, 
 	changeDivisionSave : function(){
 		var changeDivisionArr = $("#list").jqGrid("getGridParam", "selarrrow");
-		var division = $("#partnerChangeDivisionPop select[name=partnerDivision]").val();
+		var division = $("select[name=partnerDivision]").val();
 
 		alertify.confirm([[#{msg.common.change.division}]], function (e) {
 			if (e) {
-				$('#changeDivisionPop').hide();
-				
 				$.ajax({
 					type: 'POST',
 					url :'/partner/updatePartnerDivision',
 					data: JSON.stringify({'partnerIds':changeDivisionArr, 'parDivision':division}),
 					contentType : 'application/json',
 					success: function (data) {
-						if("true" == data.isValid){
+						if ("true" == data.isValid){
 							alertify.alert([[#{msg.common.success}]], function(){
 								reloadTabInframe('/partner/list');
 								activeTabInFrameList("PARTNER");

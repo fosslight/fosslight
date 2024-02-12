@@ -2040,7 +2040,7 @@
 				$("#complete").hide();
 				$("#drop").hide();
 			} else if(data.createThird) {
-				$('textarea[name=comment]').val(data.createThird);
+				$("[name='additionalInformation']").summernote('code', data.createThird);
 			} else {
 				$("#complete").hide(); 
 				$("#copy").hide();

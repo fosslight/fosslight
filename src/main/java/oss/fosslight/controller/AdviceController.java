@@ -48,7 +48,7 @@ public class AdviceController extends CoTopComponent{
 		AbstractAuthenticationToken auth = (AbstractAuthenticationToken)sec.getAuthentication();
 
 		T2Users sessUserInfo = null;
-		if (!auth.getName().equals("anonymousUser")) {
+		if (auth.getName() != null && !auth.getName().equals("anonymousUser")) {
 			T2Users user = new T2Users();
 			user.setUserId(auth.getName());
 			sessUserInfo = userService.getUserAndAuthorities(user);

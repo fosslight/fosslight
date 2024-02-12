@@ -22,7 +22,7 @@
                                         	<div class="row" style="width: 100%;">
                                         		<div class="col-12">
                                             		<div class="input-group">
-                                                        <input type="search" name="partnerName" class="form-control autoComParty" placeholder="Partner Name" th:value="${searchBean.partnerName}">
+                                                        <input type="search" name="partnerName" class="form-control autoComParty" placeholder="Partner Name" th:value="${searchBean?.partnerName}">
                                                     	<div class="input-group-append">
                                                     		<button type="submit" class="btn btn-default" id="search"><i class="fa fa-search"></i></button>
                                                     	</div>
@@ -53,7 +53,7 @@
                                         <div class="row">
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" id="partnerId" class="form-control" placeholder="Partner ID" th:value="${searchBean.partnerId}">
+                                                    <input type="text" id="partnerId" class="form-control" placeholder="Partner ID" th:value="${searchBean?.partnerId}">
                                                 </div>
                                             </div>
                                             <div class="col-4">
@@ -72,14 +72,14 @@
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" class="form-control" placeholder="3rd Party Software Name" th:value="${searchBean.softwareName}"/>
+                                                    <input type="text" class="form-control" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}"/>
                                                 </div>
                                             </div>
                                      	</div>
                                      	<div class="row">
                                      		<div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" class="form-control" placeholder="3rd Party Software Version" th:value="${searchBean.softwareVersion}"/>
+                                                    <input type="text" class="form-control" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
@@ -111,17 +111,17 @@
                                         <div class="row">
                                         	<div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="creator" class="form-control autoComCreatorDivision" placeholder="Creator" th:value="${searchBean.creator}" />
+                                                    <input type="text" name="creator" class="form-control autoComCreatorDivision" placeholder="Creator" th:value="${searchBean?.creator}" />
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="reviewer" class="form-control autoComReviewer" placeholder="Reviewer" th:value="${searchBean.reviewer}" />
+                                                    <input type="text" name="reviewer" class="form-control autoComReviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" />
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="watchers" class="form-control" placeholder="Watcher" th:value="${searchBean.watchers[0]}" />
+                                                    <input type="text" name="watchers" class="form-control" placeholder="Watcher" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" />
                                                 </div>
                                             </div>
                                         </div>

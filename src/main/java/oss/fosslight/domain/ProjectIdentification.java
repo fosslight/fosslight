@@ -343,6 +343,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private String dependencies;
 	private String refOssName;
+	private String changeFlag;
+	private String addFlag;
 	
 	public String getRedirectLocation() {
 		return redirectLocation;
@@ -2108,5 +2110,21 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setRefOssName(String refOssName) {
 		this.refOssName = refOssName;
+	}
+
+	public String getChangeFlag() {
+		return changeFlag;
+	}
+
+	public void setChangeFlag(String changeFlag) {
+		this.changeFlag = changeFlag;
+	}
+
+	public String getAddFlag() {
+		return addFlag;
+	}
+
+	public void setAddFlag(String addFlag) {
+		this.addFlag = addFlag;
 	}
 }

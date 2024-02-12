@@ -7,6 +7,7 @@ var objs = [];
 var licenseNames = [];
 var srcData;
 var _srcLoadListLength = 0;
+var _srcUploadFile;
 
 var src_evt = {
 	csvDelFileSeq : [],
@@ -174,7 +175,7 @@ var src_evt = {
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 						
-						src_fn.makeFileTag(result[0][0]);
+						_srcUploadFile = result[0][0];
 					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
 						src_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
 
@@ -662,7 +663,7 @@ var src_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
-				if("false" == data.isValid) {
+				if ("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
 					window.location =  '/exceldownload/getFile?id='+data.validMsg;
@@ -695,6 +696,8 @@ var src_fn = {
 		src_fn.exeLoadReportData(finalData);
 	},
 	getSheetData : function(seq){
+		loading.show();
+		
 		var sheetNum = [];
 		
 		$('input:checkbox[name="sheetNameSelect"]').each(function(){
@@ -703,7 +706,8 @@ var src_fn = {
 			}
 		});
 		
-		if(sheetNum.length == 0) {
+		if (sheetNum.length == 0) {
+			loading.hide();
 			alert([[#{msg.common.check.sheet}]]);
 			
 			return;
@@ -748,8 +752,8 @@ var src_fn = {
 				contentType : 'application/json',
 				success: function(data){
 					loading.hide();
-
-					if("false" == data.isValid) {
+					
+					if ("false" == data.isValid) {
 						if(data.validMsg) {
 							alertify.alert(data.validMsg, function(){});
 						} else {
@@ -766,6 +770,9 @@ var src_fn = {
 
 						src_fn.makeOssList(data.resultData);
 
+						src_fn.makeFileTag(_srcUploadFile);
+						_srcUploadFile = undefined;
+						
 						if(data.validMsg) {
 							alertify.alert(data.validMsg, function(){});
 						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
@@ -774,12 +781,12 @@ var src_fn = {
 					}
 				},
 				error: function(data){
-					loading.hide();
 					$('.ossUpload').children().remove();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
 			});
 		} finally {
+			loading.hide();
 			com_fn.closeAlertifyView();
 		}
 	},

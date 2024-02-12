@@ -5,7 +5,7 @@
 var partnerFlag = [[${partnerFlag}]];
 var batFlag = [[${batFlag}]];
 
-$(document).ready(function () {console.log("test");
+$(document).ready(function () {
 	com_evt.init();
 	if (partnerFlag) party_evt.init();
 	dep_evt.init();
@@ -91,14 +91,14 @@ var fn = {
     sendEditor: function (type) {
         //코멘트 저장
         var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
-
+        
         if (!editorVal || editorVal == "") {
             alertify.alert([[#{msg.project.enter.comment}]], function () {
             });
             return false;
         }
         var referenceId = [[${project.prjId}]]
-        var param = {referenceId: referenceId, referenceDiv: '12', contents: editorVal, mailSendType: type};
+        var param = {referenceId: referenceId, referenceDiv: '10', contents: editorVal, mailSendType: type, expansion1 : $(".nav-link.active").text()};
 
         $.ajax({
             url: '/project/sendComment',
@@ -127,7 +127,7 @@ var fn = {
         var referenceId = [[${project.prjId}]]
         var param = {
             referenceId: referenceId
-            , referenceDiv: '13'
+            , referenceDiv: '11'
             , contents: editorVal
         };
         $.ajax({
