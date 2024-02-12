@@ -229,17 +229,40 @@
   	   	if (id != null && prjFlag != null) {
   	    	createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
   	   	} else {
-  	    	var _defaultTabStr = $("#defaultTabAnchorArr").val() || "";
-  			var _sidebar = $("#sidebar").find(".nav-link");
-  			
-  			$.each(_sidebar, function(idx, val){
-  				var _href = $(this).attr("href");
-  				if ("#" != _href && !_href.startsWith("/system")) {
-  					if (_defaultTabStr.indexOf(_href) != -1) {
-  						_initTabs.push($(this));
-  					}
-  				}
-  			});
+          var _defaultTabStr = $("#defaultTabAnchorArr").val() || "";
+          // var _sidebar = $("#sidebar").find(".nav-link");
+          var _defaultTabs = _defaultTabStr.split(',');
+
+          if(_defaultTabs.length > 0) {
+            $('.tab-empty').hide();
+
+            _defaultTabs.forEach(function(tabUrl) {
+              if (tabUrl.includes('/license/list')) {
+                createTab_new('license-list', '/license/list', 'license-list', true);
+              } else if (tabUrl.includes('/project/list')) {
+                createTab_new('project-list', '/project/list', 'project-list', true);
+              } else if (tabUrl.includes('/oss/list')) {
+                createTab_new('oss-list', '/oss/list', 'oss-list', true);
+              } else if (tabUrl.includes('/partner/list')) {
+                createTab_new('partner-list', '/partner/list', 'partner-list', true);
+              } else if (tabUrl.includes('/system/bat')) {
+                createTab_new('bat-list', '/bat/list', 'bat-list', true);
+              } else if (tabUrl.includes('/selfCheck/list')) {
+                createTab_new('selfCheck-list', '/selfCheck/list', 'selfCheck-list', true);
+              } else if (tabUrl.includes('/vulnerability/list')) {
+                createTab_new('vulnerability-list', '/vulnerability/list', 'vulnerability-list', true);
+              }
+            });
+          }
+
+          // $.each(_sidebar, function(idx, val){
+          // 		var _href = $(this).attr("href");
+          // 		if ("#" != _href && !_href.startsWith("/system")) {
+          // 			if (_defaultTabStr.indexOf(_href) != -1) {
+          // 				_initTabs.push($(this));
+          // 			}
+          // 		}
+          // 	});
   		}
   	}
   	</script>
