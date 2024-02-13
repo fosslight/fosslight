@@ -28,18 +28,30 @@
       </div>
     </div>
   <script>
+    /* scroll the navi item to the left whenever navi item is created */
     var observer = new MutationObserver(function(mutationsList) {
       for (var mutation of mutationsList) {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0 && $("#navbarNav li").length > 4) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0 && $("#navbarNav li").length > 1) {
           var navbarNav = document.getElementById("navbarNav");
           navbarNav.scrollLeft = navbarNav.scrollWidth - navbarNav.clientWidth;
           break;
         }
       }
     });
-
     var targetNode = document.getElementById('navbarNav');
     observer.observe(targetNode, { childList: true });
+
+    /* resize the width of jqgrid when iframe is activated */
+    var observer = new MutationObserver(function(mutationsList, observer) {
+      for(var mutation of mutationsList) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class' && $(mutation.target).hasClass('active')) {
+          resizingJqGidSet();
+        }
+      }
+    });
+    var targetNode = document.getElementsByClassName('tab-content')[0]; // tab-content 클래스를 감시 대상으로 설정
+    var config = { attributes: true, subtree: true };
+    observer.observe(targetNode, config);
   </script>
 </th:block>
 
