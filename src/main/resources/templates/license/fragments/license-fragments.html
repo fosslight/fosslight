@@ -5,7 +5,7 @@
     <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
     <div class="hold-transition sidebar-mini">
         <div class="wrapper">
-            <div class="content-wrapper custom-layout">
+            <div class="custom-layout">
                 <div class="grid-area p-2">
                     <div class="jqGridSet" style="overflow: hidden">
                         <table id="list">
@@ -54,6 +54,7 @@
                         </div>
                     </div>
                 </div>
+                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
             </div>
         </div>
     </div>
@@ -285,6 +286,8 @@
                                         }
                                     }
                                 }
+
+                                loading.hide();
                             }
                         });
                     },

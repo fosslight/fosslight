@@ -14,6 +14,7 @@ $(document).ready(function() {
 		data : {ossName : _ossName},
 		contentType : 'application/json',
 		success : function(data){
+            loading.hide();
 			$('#_ossList').jqGrid({
 				datatype: 'local',
 				data : data.ossList,
@@ -35,6 +36,7 @@ $(document).ready(function() {
 						cache : false,
 						data : {ossId : id},
 						success : function(detailResult){
+                            loading.hide();
 							$("#ossDetailInfo").html(detailResult);
 						},
 						error : function(request,status,error){
@@ -51,6 +53,7 @@ $(document).ready(function() {
 				sortname: 'ossVersion',
 				sortorder: 'desc',
 				loadComplete: function(data){
+                    loading.hide();
 					var isSelectedRow = false;
 					
 					if (data.records > 0) {
