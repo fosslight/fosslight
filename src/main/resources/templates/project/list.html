@@ -215,7 +215,7 @@
                     <div class="row px-1">
                         <div class="col-md-6">
                             <div class="row">
-                            	<button type="button" class="btn btn-yellow-01 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.copy()|" th:text="Copy"></button>
+                            	<button type="button" class="btn btn-lg-orange btn-sm width-10rem mr-xm px-3" th:onclick="|fn.copy()|" th:text="Copy"></button>
                                 <div class="btn-group btn-group-sm width-10rem mr-xm" id="ChangeContainer">
                                     <button type="button" class="btn btn-yellow-03 px-3" th:text="Change"></button>
                                     <button type="button" class="btn btn-yellow-03 dropdown-toggle dropdown-icon" data-toggle="dropdown">
@@ -227,13 +227,13 @@
                                         <a class="dropdown-item" href="#" th:onclick="|fn.changeWatcher()|" th:text="Watcher"></a>
                                     </div>
                                 </div>
-                            	<button type="button" class="btn btn-yellow-01 btn-sm width-10rem mr-xm px-3" th:onclick="|fn.bomCompare()|" th:text="'BOM Compare'"></button>
+                            	<button type="button" class="btn btn-lg-orange btn-sm width-10rem mr-xm px-3" th:onclick="|fn.bomCompare()|" th:text="'BOM Compare'"></button>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="row float-right">
-                           		<button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
-                                <button type="button" class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="Add"></button>
+                           		<button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                                <button type="button" class="btn btn-lg-teal btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="Add"></button>
                             </div>
                         </div>
                     </div>

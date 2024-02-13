@@ -2202,7 +2202,7 @@ var src_fn = {
 		$.ajax({
 			url : '/external/request-fl-scan',
 			type : 'POST',
-			data : {'prjId' : '${project.prjId}', 'wgetUrl' : wgetUrl},
+			data : {'prjId' : [[${project.prjId}]], 'wgetUrl' : wgetUrl},
 			dataType : 'json',
 			cache : false,
 			success : function(data){

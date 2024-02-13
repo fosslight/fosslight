@@ -203,14 +203,20 @@
                         <div class="row px-1">
                             <div class="col-md-6">
                                 <div class="row">
-                                    <button class="btn btn-yellow-03 btn-sm width-10rem mr-xm px-3" type="button" th:onclick="|oss_lst_fn.deleteOss()|" th:text="Delete"></button>
+                                    <th:block th:if="${@CommonFunction.isAdmin()}">
+                                        <button class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" type="button" th:onclick="|oss_lst_fn.deleteOss()|" th:text="Delete"></button>
+                                    </th:block>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="row float-right">
-                                    <button class="btn btn-teal-01 btn-sm width-10rem mr-xm px-3" type="button" th:onclick="|createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')|" th:text="'Bulk Registration'"></button>
-                                    <button class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" type="button" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
-                                    <button class="btn btn-dark-01 btn-sm width-6rem mr-xm px-3" type="button" th:onclick="|createTabInFrame('New_OpenSource', '/oss/edit')|" th:text="Add"></button>
+                                    <th:block th:if="${@CommonFunction.isAdmin() and project?.dropYn != 'Y'}">
+                                        <button class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" type="button" th:onclick="|createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')|" th:text="'Bulk Registration'"></button>
+                                    </th:block>
+                                    <button class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" type="button" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                                    <th:block th:if="${@CommonFunction.isAdmin()}">
+                                        <button class="btn btn-milk-pink btn-sm width-6rem mr-xm px-3" type="button" th:onclick="|createTabInFrame('New_OpenSource', '/oss/edit')|" th:text="Add"></button>
+                                    </th:block>
                                 </div>
                             </div>
                         </div>

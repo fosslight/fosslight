@@ -415,14 +415,14 @@ public class ProjectController extends CoTopComponent {
 			if (permissionCheckList.contains(loginUserName())) {
 				permissionFlag = true;
 			}
-			model.addAttribute("isReadOnly", true);
+
 		}
 		
 		if (project.getPublicYn().equals(CoConstDef.FLAG_NO)
 				&& !CommonFunction.isAdmin()
 				&& !permissionFlag) {
 			model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
-			
+			model.addAttribute("isReadOnly", true);
 			return "project/edit";
 //			return "project/view";
 		} else {

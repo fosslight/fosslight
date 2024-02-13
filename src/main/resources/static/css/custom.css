@@ -62,11 +62,15 @@ ul { list-style-type: none; }
 .custom-layout .btn-lg-red:hover {background-color: #7e101b;border-color: #7e101b; }
 .custom-layout .btn-lg-gray {background-color: #6b6b6b; font-weight: 500; color: #fff}
 .custom-layout .btn-lg-gray:hover {background-color: #3f3f3f; }
+.custom-layout .btn-lg-light-gray {background-color: #959ba1; font-weight: 500; color: #fff}
+.custom-layout .btn-lg-light-gray:hover {background-color: #3f3f3f; }
 .custom-layout .btn-light-gray {background-color: #ced4da; font-weight: 500; color: #333333}
 .custom-layout .btn-light-gray:hover {background-color: #595959; color: #fff;}
 .custom-layout .btn-onOff { background-color: #ecebe9;}
 .custom-layout .btn-onOff.active  { background-color: #007bff; color: #fff; }
 .custom-layout .btn-lg-orange { background-color: #ff5a00; font-weight: 500; color: #fff }
+.custom-layout .btn-dark-pink { background-color: #cb6686; font-weight: 500; color: #fff }
+.custom-layout .btn-dark-pink:hover { background-color: #99043d; font-weight: 500; color: #fff }
 .custom-layout .btn-yellow-01 { background-color: #cb8f00; font-weight: 500; color: #fff }
 .custom-layout .btn-yellow-01:hover { background-color: #986b00; }
 .custom-layout .btn-yellow-02 { background-color: #ffb400; font-weight: 500; color: #fff }
@@ -76,6 +80,20 @@ ul { list-style-type: none; }
 .custom-layout .btn-yellow-04 { background-color: #ed7728; font-weight: 500; color: #fff }
 .custom-layout .btn-yellow-04:hover { background-color: #9c4000; }
 .custom-layout .btn-yellow-04.active { background-color: #c95200; }
+.custom-layout .btn-light-blue { background-color: #0f4279ab; font-weight: 500; color: #fff }
+.custom-layout .btn-light-blue:hover { background-color: #194069; }
+.custom-layout .btn-light-orange { background-color: #ee9b60; font-weight: 500; color: #fff }
+.custom-layout .btn-light-orange:hover { background-color: #9b653f; }
+.custom-layout .btn-lg-purple { background-color: #61279E; font-weight: 500; color: #fff }
+.custom-layout .btn-lg-purple:hover { background-color: #321056; }
+.custom-layout .btn-lg-teal { background-color: #0096AA; font-weight: 500; color: #fff }
+.custom-layout .btn-lg-teal:hover { background-color: #005766; }
+.custom-layout .btn-lg-orange { background-color: #e97300; font-weight: 500; color: #fff }
+.custom-layout .btn-lg-orange:hover { background-color: #9c4000; }
+.custom-layout .btn-lg-pink { background-color: #ec008b; font-weight: 500; color: #fff }
+.custom-layout .btn-lg-pink:hover { background-color: #830243; }
+.custom-layout .btn-milk-pink { background-color: #eb7979; font-weight: 500; color: #fff }
+.custom-layout .btn-milk-pink:hover { background-color: #8d4646; font-weight: 500; color: #fff }
 
 .custom-layout .btn-teal-01 { background-color: #008095; font-weight: 500; color: #fff }
 .custom-layout .btn-teal-01:hover { background-color: #005766; }

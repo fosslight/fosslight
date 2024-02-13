@@ -40,6 +40,15 @@
                          	</span>
                         </div>
                         <div class="col-sm-4 float-right mt-1">
+                            <div class="float-right btn-group ml-2">
+                                <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong th:text="Help"></strong></button>
+                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
+                                    <span class="sr-only"></span>
+                                </button>
+                                <div class="dropdown-menu" role="menu">
+                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Main')|" th:text="'How to use FossLight Hub'"></a>
+                                </div>
+                            </div>
                         	<div class="float-right" th:if="${@CommonFunction.isAdmin() == false and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
                         		<button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
                         	</div>
@@ -49,15 +58,7 @@
                                 <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                             </div>
-                            <div class="float-right btn-group mr-1">
-                                <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong th:text="Help"></strong></button>
-                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
-                                    <span class="sr-only"></span>
-                                </button>
-                                <div class="dropdown-menu" role="menu">
-                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Main')|" th:text="'How to use FossLight Hub'"></a>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -707,19 +708,19 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and @CommonFunction.isAdmin()}" 
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.checkOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
+                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.checkOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
+                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
+                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
 
                                         <div class="btn-group mr-xm">
-                                            <button type="button" class="btn btn-yellow-04 btn-sm">Export</button>
-                                            <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                            <button type="button" class="btn btn-lg-light-gray btn-sm">Export</button>
+                                            <button type="button" class="btn btn-lg-light-gray btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </button>
                                             <div class="dropdown-menu" role="menu">
@@ -785,11 +786,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
+                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -835,7 +836,7 @@
                                     <div class="row float-right">
                                         <button sec:authorize="hasRole('ROLE_ADMIN')" type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])" th:text="'Save (Binary DB)'"></button>
                                         <div class="btn-group mr-xm">
-                                            <button type="button" class="btn btn-yellow-04 btn-sm">Export</button>
+                                            <button type="button" class="btn btn-lg-light-gray btn-sm">Export</button>
                                             <button type="button" class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon" data-toggle="dropdown">
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </button>

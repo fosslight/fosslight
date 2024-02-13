@@ -9,6 +9,15 @@
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row">
+                        <div class="float-right btn-group ml-2">
+                            <button type="button" class="btn btn-lg-red px-3 btn-sm helpBtnL"><strong>Help</strong></button>
+                            <button type="button" class="btn btn-lg-red btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <div class="dropdown-menu" role="menu">
+                                <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Packaging')|">How to use FossLight Hub</a>
+                            </div>
+                        </div>
                         <div class="col-sm-8 text-left mt-2">
                             <span class="description-percentage text-lg text-dark-gray text-bold" id="verifyPrjName"></span>
                             <span class="text-dark-gray mx-1" id="verifyCreator"></span>
@@ -19,22 +28,13 @@
                         </div>
                         <div class="col-sm-4 float-right projdecBtn">
                         	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.verificationStatus == 'NA' or project.verificationStatus == 'REV')}">
-                               	<button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" id="verReject" th:text="Reject"></button>
+                               	<button type="button" class="btn btn-milk-pink btn-sm width-6rem mr-xm px-3 reject" id="verReject" th:text="Reject"></button>
                         	</div>
                             <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.verificationStatus != 'NA'}">
                             	<button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" id="verConfirm" th:text="Confirm"></button>
                                 <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" id="verReject" th:text="Reject"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 review" id="verRequest" th:text="Request"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3 restart" id="verReviewStart" th:text="'Review Start'"></button>
-                            </div>
-                            <div class="float-right btn-group mr-1">
-                                <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong>Help</strong></button>
-                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
-                                    <span class="sr-only">Toggle Dropdown</span>
-                                </button>
-                                <div class="dropdown-menu" role="menu">
-                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Packaging')|">How to use FossLight Hub</a>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -316,7 +316,7 @@
                                       	<div class="row" th:if="${project.verificationStatus != 'CONF' and project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}">
                                       		<div class="col-md-12 mb-3">
                                       			<div class="row float-right pr-4">
-                                      				<button type="button" id="save" class="btn btn-dagner btn-sm width-6rem px-3" th:text="Save"></button>
+                                      				<button type="button" id="save" class="btn btn-lg-teal btn-sm width-6rem px-3" th:text="Save"></button>
                                       			</div>
                                       		</div>
                                       	</div>
@@ -410,10 +410,10 @@
                                 	<th:block th:if="${project.dropYn != 'Y'}">
                                 		<button th:if="${(project.verificationStatus == null or project.verificationStatus == 'PROG' or (@CommonFunction.isAdmin() and project.verificationStatus == 'REV' )) and project.viewOnlyFlag == 'N'}"
                                 				type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" name="verify" th:text="Verify"></button>
-                                    	<button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" name="btnSavePath" th:text="Save"></button>
+                                    	<button type="button" class="btn btn-lg-teal btn-sm width-6rem mr-xm px-3" name="btnSavePath" th:text="Save"></button>
                                 	</th:block>
                                     <button type="button" class="btn btn-lg-gray btn-sm width-8rem mr-xm px-3" name="upload_path" th:text="'Upload Path'"></button>
-                                    <button type="button"  class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" name="export_path" th:text="Export"></button>
+                                    <button type="button"  class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" name="export_path" th:text="Export"></button>
                                 </div>
                             </div>
     

@@ -292,15 +292,15 @@
                                 	</th:block>
                                 	<th:block th:if="${@CommonFunction.isAdmin()}">
                                 		<th:block th:if="${project.completeYn == 'Y' and project.statusRequestYn == 'N'}">
-                                			<a th:onclick="|fn.exeProjectComplete('N')|" class="btn btn-yellow-03 float-right" th:text="Open"></a>
+                                			<a th:onclick="|fn.exeProjectComplete('N')|" class="btn btn-milk-pink float-right" th:text="Open"></a>
                                 		</th:block>
                                 		<th:block th:if="${project.completeYn == 'Y' and project.statusRequestYn == 'Y'}">
-                                			<a id="reqToOpen" class="btn btn-yellow-03 float-right" th:text="'Requested to Open'"></a>
+                                			<a id="reqToOpen" class="btn btn-milk-pink float-right" th:text="'Requested to Open'"></a>
                                 		</th:block>
                                 	</th:block>
                                 	<th:block th:unless="${@CommonFunction.isAdmin()}">
                                 		<th:block th:if="${project.completeYn == 'Y' and project.viewOnlyFlag == 'N'}">
-                                			<a id="reqToOpen" class="btn btn-danger float-right" th:text="'Requested to Open'"></a>
+                                			<a id="reqToOpen" class="btn btn-milk-pink float-right" th:text="'Requested to Open'"></a>
                                 		</th:block>
                                 	</th:block>
                                 </th:block>
