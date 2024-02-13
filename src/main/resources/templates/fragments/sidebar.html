@@ -215,7 +215,7 @@
   		} finally {
   			$.each(_initTabs, function (i, cur) {
   				setTimeout(function () {
-					$(cur).trigger("click");
+					//$(cur).trigger("click");
 	  			}, (i) * 1500);
   			});
   		}
@@ -230,27 +230,39 @@
   	    	createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
   	   	} else {
           var _defaultTabStr = $("#defaultTabAnchorArr").val() || "";
-          // var _sidebar = $("#sidebar").find(".nav-link");
+          var _sidebar = $("#sidebar").find(".nav-link");
           var _defaultTabs = _defaultTabStr.split(',');
 
           if(_defaultTabs.length > 0) {
             $('.tab-empty').hide();
 
-            _defaultTabs.forEach(function(tabUrl) {
+            _defaultTabs.forEach(function(tabUrl, index) {
               if (tabUrl.includes('/license/list')) {
-                createTab_new('license-list', '/license/list', 'license-list', true);
-              } else if (tabUrl.includes('/project/list')) {
-                createTab_new('project-list', '/project/list', 'project-list', true);
+                createTab_new('License List', '/license/list', 'license-list', true);
               } else if (tabUrl.includes('/oss/list')) {
-                createTab_new('oss-list', '/oss/list', 'oss-list', true);
+                createTab_new('OSS List', '/oss/list', 'oss-list', true);
+              } else if (tabUrl.includes('/project/list')) {
+                createTab_new('PROJECT LIST', '/project/list', 'project-list', true);
               } else if (tabUrl.includes('/partner/list')) {
-                createTab_new('partner-list', '/partner/list', 'partner-list', true);
+                createTab_new('3rd Party List', '/partner/list', 'partner-list', true);
               } else if (tabUrl.includes('/system/bat')) {
                 createTab_new('Binary DB', '/binary', 'binary', true);
-              } else if (tabUrl.includes('/selfCheck/list')) {
-                createTab_new('selfCheck-list', '/selfCheck/list', 'selfCheck-list', true);
               } else if (tabUrl.includes('/vulnerability/list')) {
-                createTab_new('vulnerability-list', '/vulnerability/list', 'vulnerability-list', true);
+                createTab_new('Vulnerability', '/vulnerability/list', 'vulnerability-list', true);
+              } else if (tabUrl.includes('/selfCheck/list')) {
+                createTab_new('Self-Check List', '/selfCheck/list', 'selfCheck-list', true);
+              }
+
+              /* the last default tab gives an open event when the sidebar is clicked */
+              if (index === _defaultTabs.length - 1) {
+                $.each(_sidebar, function(idx, val){
+                  var _href = $(this).attr("href");
+                  if ("#" != _href && !_href.startsWith("/system")) {
+                    if (tabUrl.indexOf(_href) != -1) {
+                      $(this).trigger("click");
+                    }
+                  }
+                });
               }
             });
           }
