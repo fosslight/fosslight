@@ -287,7 +287,7 @@
                                             </div>
                                             <div class="form-group" th:if="${detail.partnerId != null}">
                                                 <label for="inputName" th:text="#{msg.common.field.creator}"><span class="text-orange" th:text="'*'"></span></label>
-                                                <input type="text" name="creatorNm" class="form-control autoComCreatorDivision" th:value="''" th:disabled="${@CommonFunction.isAdmin() and detail.status != 'CONF'} ? 'disabled'" />
+                                                <input type="text" name="creatorNm" class="form-control autoComCreatorDivision" th:value="''" th:disabled="${@CommonFunction.isAdmin() and detail.status != 'CONF'} ? '' : 'disabled'" />
 												<input type="hidden" name="creator" th:value="${detail != null ? detail.creator : ''}" />
                                             </div>
                                             <div class="form-group" th:if="${detail.partnerId != null}">

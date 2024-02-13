@@ -291,8 +291,9 @@ var list = {
 						alertify.alert([[#{msg.common.search.check.date}]], function(){});
 					}
 				}
-				
-				tableRefreshNew("list");
+
+                resizingJqGidSet();
+				//tableRefreshNew("list");
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {},
 			ondblClickRow: function(rowid,iRow,iCol,e) {

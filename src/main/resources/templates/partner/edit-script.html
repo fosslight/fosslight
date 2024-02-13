@@ -439,7 +439,12 @@ var evt = {
 				$('.ajax-file-upload-statusbar').remove();
 			}
 		});
-		
+
+        // file uploader hide in CONF status
+        if(String([[${detail.status}]]) == 'CONF') {
+            $(".ajax-upload-dragdrop").hide();
+        }
+
 		// email 왓쳐 추가
 		$("#addEmail").click(function(){
 			/* AD ID 정보 */
