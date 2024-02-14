@@ -756,12 +756,13 @@ var dep_fn = {
 					}
 				},
 				error: function(data){
+                    loading.hide();
 					$('.ossUpload').children().remove();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
 			});
 		} finally {
-			loading.hide();
+			//loading.hide();
 		}
 	},
 
