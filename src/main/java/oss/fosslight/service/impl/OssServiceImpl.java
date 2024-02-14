@@ -3031,8 +3031,23 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			int count = 0;
 			int interval = 1000; // 1 sec
 			int idleTime = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_AUTO_ANALYSIS, CoConstDef.CD_IDLE_TIME));
+
+			Project prjInfo = new Project();
+			prjInfo.setPrjId(prjId);
+
+			// script가 success일때 status를 progress로 변경함.
+			OssMaster ossBean = new OssMaster();
+			ossBean.setPrjId(prjId);
+			ossBean.setCreator(loginUserName());
+			ossMapper.setOssAnalysisStatus(ossBean);
+
+			prjInfo = projectMapper.getOssAnalysisData(prjInfo);
+
+			resultMap.put("isValid", true);
+			resultMap.put("returnMsg", "Success");
+			resultMap.put("prjInfo", prjInfo);
 			
-			while (!Thread.currentThread().isInterrupted()) {
+			/*while (!Thread.currentThread().isInterrupted()) {
 				if (count > idleTime) {
 					oss_auto_analysis_log.info("ANALYSIS TIMEOUT PRJ ID : " + prjId);
 					resultMap.put("isValid", false);
@@ -3067,7 +3082,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				count++;
 				
 				Thread.sleep(interval);
-			}
+			}*/
 			// 스크립트 종료
 		} catch(NullPointerException npe) {
 			oss_auto_analysis_log.error("ANALYSIS ERR PRJ ID : " + prjId);
