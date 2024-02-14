@@ -57,61 +57,61 @@ var com_evt = {
 				var innerHtml 	= 'Are you to enter a comment when confirm?<br><br>';
                 innerHtml 		+= '<textarea id="bomConfirmEditor"></textarea>';
                 
-                if (typeof alertify.bomConfirmDialog === "undefined"){
-					alertify.dialog('bomConfirmDialog', function() {
-						return {
-							setup: function() {
-								var settings = alertify.confirm().settings;
-								
-								for (var prop in settings) {
-									this.settings[prop] = settings[prop];
-								}
-								
-								var setup = alertify.confirm().setup();
-								var buttons = setup.buttons;
-								var customButtons = [];
-								for (var i in buttons) {
-									if ('OK' == buttons[i].text) {
-										customButtons.push(buttons[i]);
-									}
-								}
-								setup.buttons = customButtons;
-								setup.focus.element = 1;
-								
-								return setup;
-							},
-						    hooks: {
-						    	onshow: function() {
-						        	this.elements.dialog.style.maxWidth = 'none';
-						          	this.elements.dialog.style.width = '650px';
-						        }
-							}
-						};
-					}, false, 'confirm');
-            	}
+                // if (typeof alertify.bomConfirmDialog === "undefined"){
+				// 	alertify.dialog('bomConfirmDialog', function() {
+				// 		return {
+				// 			setup: function() {
+				// 				var settings = alertify.confirm().settings;
+                //
+				// 				for (var prop in settings) {
+				// 					this.settings[prop] = settings[prop];
+				// 				}
+                //
+				// 				var setup = alertify.confirm().setup();
+				// 				var buttons = setup.buttons;
+				// 				var customButtons = [];
+				// 				for (var i in buttons) {
+				// 					if ('OK' == buttons[i].text) {
+				// 						customButtons.push(buttons[i]);
+				// 					}
+				// 				}
+				// 				setup.buttons = customButtons;
+				// 				setup.focus.element = 1;
+                //
+				// 				return setup;
+				// 			},
+				// 		    hooks: {
+				// 		    	onshow: function() {
+				// 		        	this.elements.dialog.style.maxWidth = 'none';
+				// 		          	this.elements.dialog.style.width = '650px';
+				// 		        }
+				// 			}
+				// 		};
+				// 	}, false, 'confirm');
+            	// }
 				
                 if (com_fn.isAndroidOnly()) {
-					alertify.bomConfirmDialog(innerHtml, function () {
+					// alertify.bomConfirmDialog(innerHtml, function () {
 						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF"};
-						
-						if ("" != $("#bomConfirmEditor").summernote('code')) {
-							data["userComment"] = replaceWithLink($("#bomConfirmEditor").summernote('code'));
-						} else {
-							data["userComment"] = "";
-						}
-						
+
+						// if ("" != $("#bomConfirmEditor").summernote('code')) {
+						// 	data["userComment"] = replaceWithLink($("#bomConfirmEditor").summernote('code'));
+						// } else {
+						// 	data["userComment"] = "";
+						// }
+
 		 				if ($("#ignoreBinaryDbFlag")) {
 		 					data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
 						}
-		 				
+
 		 				// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
 						if(!com_fn.validBomChangeStatus(true)) {
 							return false;
 						}
-						
-						com_fn.checkSave(data, "CONF");	
-					});
-				} else {		 		
+
+						com_fn.checkSave(data, "CONF");
+					//});
+				} else {
 					// 머지 체크
 					if("Y"!= $("#mergeYn").val()){
 						alertify.alert([[#{msg.project.required.merge}]], function(){});
@@ -132,13 +132,13 @@ var com_evt = {
 							return false;
 						}
 
-						alertify.bomConfirmDialog(innerHtml, function () {
+						//alertify.bomConfirmDialog(innerHtml, function () {
 	                    	var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF"};
-	                    	if ("" != $("#bomConfirmEditor").summernote('code')) {
-	                    		data["userComment"] = replaceWithLink($("#bomConfirmEditor").summernote('code'));
-	                    	} else {
-	                    		data["userComment"] = "";
-	                    	}
+	                    	// if ("" != $("#bomConfirmEditor").summernote('code')) {
+	                    	// 	data["userComment"] = replaceWithLink($("#bomConfirmEditor").summernote('code'));
+	                    	// } else {
+	                    	// 	data["userComment"] = "";
+	                    	// }
 	                    	
 	                    	if ($("#ignoreBinaryDbFlag")) {
 	                    		data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
@@ -160,13 +160,13 @@ var com_evt = {
 							});
 
 	 						com_fn.checkSave(data, "CONF");	
-	                    });
+	                    //});
 					} else {
 						alertify.alert([[#{msg.project.check.save}]], function(){});
 					}				
 				}
                 
-                $("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                //$("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			} else {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}	
