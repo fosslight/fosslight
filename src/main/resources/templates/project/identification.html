@@ -41,8 +41,8 @@
                         </div>
                         <div class="col-sm-4 float-right mt-1">
                             <div class="float-right btn-group ml-2">
-                                <button type="button" class="btn btn-danger px-3 btn-sm helpBtnL"><strong th:text="Help"></strong></button>
-                                <button type="button" class="btn btn-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
+                                <button type="button" class="btn btn-outline-danger px-3 btn-sm helpBtnL"><strong th:text="Help"></strong></button>
+                                <button type="button" class="btn btn-outline-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
                                     <span class="sr-only"></span>
                                 </button>
                                 <div class="dropdown-menu" role="menu">
@@ -708,11 +708,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and @CommonFunction.isAdmin()}" 
-                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.checkOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.checkOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -786,11 +786,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-milk-pink btn-sm width-10rem mr-xm px-3" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
