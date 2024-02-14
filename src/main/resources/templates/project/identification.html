@@ -678,6 +678,10 @@
                                     <div class="row"></div>
                                 </div>
                                 <!-- /.bom -->
+
+                                <!-- loading bar -->
+                                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+                                <!-- /. loading bar -->
                             </div>
                         </div>
                     </div>
@@ -908,5 +912,7 @@
 		<input type="hidden" name="rowId" value=""/>
 		<input type="hidden" name="target" value=""/>
 	</form>
+
+
 </body>
 </html>

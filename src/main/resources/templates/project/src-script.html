@@ -696,8 +696,6 @@ var src_fn = {
 		src_fn.exeLoadReportData(finalData);
 	},
 	getSheetData : function(seq){
-		loading.show();
-		
 		var sheetNum = [];
 		
 		$('input:checkbox[name="sheetNameSelect"]').each(function(){
@@ -713,6 +711,7 @@ var src_fn = {
 			return;
 		} else {
 			loading.show();
+            
 			fn_grid_com.totalGridSaveMode('srcList');
 			cleanErrMsg("srcList");
 			
@@ -742,6 +741,7 @@ var src_fn = {
 	},
 	// load report data
 	exeLoadReportData : function(finalData){
+        loading.show();
 		try {
 			$.ajax({
 				url : '/project/getSheetData',
@@ -751,8 +751,6 @@ var src_fn = {
 				cache : false,
 				contentType : 'application/json',
 				success: function(data){
-					loading.hide();
-					
 					if ("false" == data.isValid) {
 						if(data.validMsg) {
 							alertify.alert(data.validMsg, function(){});
@@ -781,12 +779,13 @@ var src_fn = {
 					}
 				},
 				error: function(data){
+                    loading.hide();
 					$('.ossUpload').children().remove();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
 			});
 		} finally {
-			loading.hide();
+			//loading.hide();
 			com_fn.closeAlertifyView();
 		}
 	},
@@ -1255,7 +1254,7 @@ var src_grid = {
 					
 					// 한번에 처리
 					$("#srcList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
-					
+
 					tableRefresh();
 				}
 
@@ -1334,6 +1333,8 @@ var src_grid = {
 				if(srcInfoMsgData) {
 					gridInfoMsg(srcInfoMsgData, "srcList");
 				}
+
+                loading.hide();
 			},
 			removeHighLight : true
 		});
