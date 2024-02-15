@@ -187,7 +187,7 @@
 				<th:block th:if="${license.licenseName != ''}">
 					<p class="bdTop license">
 						<b th:id="${license.licenseName}" th:text="${license.licenseName}"></b><br> <br>
-						<br th:text="${license.licenseText}"></br>
+						<br><span th:utext="${license.licenseText}"></span><br>
 					</p>
 				</th:block>
 			</th:block>

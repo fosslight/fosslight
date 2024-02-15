@@ -22,6 +22,7 @@ var _popupCheckOssName = null;
 var _popupCheckOssLicense = null;
 var saveFlag = false;
 var documentsFileCnt = 0;
+var ossFileObj;
 
 $(document).ready(function () {
 	'use strict';
@@ -292,9 +293,6 @@ var evt = {
 									$("#sheetBody").append(sheetTr);
 								}
 								
-								const sheetHtml = $(".sheetSelectPop").html();
-								$("#sheetBody").empty();
-								
 								if(!alertify.selectSheet){
 									alertify.dialog('selectSheet', function() {
 										return {
@@ -321,28 +319,36 @@ var evt = {
 									}, false, 'alert');
 			                	}
 								
-								alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
-								$('#ossFileId').val(result[0][0].registSeq);
-								fn.makeFileTag(result[0][0], 'ossFile');
+								alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
+								$("#sheetBody").empty();
+								
+								$('.ajax-file-upload-statusbar').fadeOut('slow');
+								$('.ajax-file-upload-statusbar').remove();
+								
+								ossFileObj = result_;
 							}
 						} else {
 							alertify.alert([[#{msg.common.upload.failed}]], function(){});
 						}
 					} else if(result[2] == "SPDX_SPREADSHEET_FILE") {
 						var result_ = result[0][0];
-						if(result && result_.uploadSucc) {
+						if (result && result_.uploadSucc) {
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+							
 							fn.makeFileTag(result_, 'ossFile');
 							fn.getSpdxSpreadsheetData();
 						} else {
 							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
 						}
 					} else {
 						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
 					}
 				}
-				
-				$('.ajax-file-upload-statusbar').fadeOut('slow');
-				$('.ajax-file-upload-statusbar').remove();
 			}
 		});
 		
@@ -1387,7 +1393,7 @@ var fn = {
 				} else {
 					param["userComment"] = "";
 				}
-           		console.log(param);
+           		
            		$.ajax({
     				url : '/partner/changeStatus',
     				type : 'POST',
@@ -1430,7 +1436,7 @@ var fn = {
 			}
 		});
 		
-		var fileSeq = $('input[name=ossFileId]').val();
+		var fileSeq = ossFileObj.registSeq;
 		
 		if (sheetNum.length == 0) {
 			alert([[#{msg.common.check.sheet}]]);
@@ -1478,51 +1484,59 @@ var fn = {
 		fn.exeLoadReportData(finalData);
 	},
 	exeLoadReportData : function(finalData){
-		$.ajax({
-			url : '/project/getSheetData',
-			type : 'POST',
-			data : JSON.stringify(finalData),
-			dataType : 'json',
-			cache : false,
-			contentType : 'application/json',
-			success: function(data){
-				if ("false" == data.isValid) {
-					if (data.validMsg) {
-						alertify.alert(data.validMsg, function(){});
-					} else {
-						alertify.error([[#{msg.common.valid2}]], 0);
-					}
-				} else {
-					fn.closePop();
-						
-					if (data.externalData) {
-						// validData 표시
-						partyValidMsgData_e = data.externalData;
-						//gridValidMsgNew(partyValidMsgData_e, "list");
-					}
-
-					if(data.externalData2) {
-						// validData 표시
-						partyDiffMsgData_e = data.externalData2;
-						//gridDiffMsg(partyDiffMsgData_e, "list");
-					}
-					
-					fn.makeOssList(data.resultData);
-					
-					if (data.validMsg) {
-						alertify.alert(data.validMsg, function(){});
-					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
-						alertify.alert(data.resultData.systemChangeHisStr, function(){});
-					}
-				}
-			},
-			error: function(data){
-				loading.hide();
-				$('.ossUpload').children().remove();
+		try {
+			$.ajax({
+				url : '/project/getSheetData',
+				type : 'POST',
+				data : JSON.stringify(finalData),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(data){
+					loading.hide();
 				
-				alertify.error([[#{msg.common.valid2}]], 0);
-			}
-		});
+					if ("false" == data.isValid) {
+						if (data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					} else {
+						if (data.externalData) {
+							// validData 표시
+							partyValidMsgData_e = data.externalData;
+							//gridValidMsgNew(partyValidMsgData_e, "list");
+						}
+
+						if(data.externalData2) {
+							// validData 표시
+							partyDiffMsgData_e = data.externalData2;
+							//gridDiffMsg(partyDiffMsgData_e, "list");
+						}
+					
+						fn.makeOssList(data.resultData);
+					
+						$('input[name=ossFileId]').val(ossFileObj.registSeq);
+						fn.makeFileTag(ossFileObj, 'ossFile');
+						ossFileObj = undefined;
+					
+						if (data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
+							alertify.alert(data.resultData.systemChangeHisStr, function(){});
+						}
+					}
+				},
+				error: function(data){
+					loading.hide();
+					$('.ossUpload').children().remove();
+				
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		} finally {
+			fn.closePop();
+		}
 	},
 	modeForStatus : function(status){
 		var fileDelete = $(".uploadCase .smallDelete");

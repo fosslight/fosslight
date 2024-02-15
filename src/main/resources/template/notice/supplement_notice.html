@@ -52,7 +52,7 @@
             <th:block th:if="${licenseInfo.licenseText != '' and licenseInfo.obligationType == '10' and !__${#object.contains(licenseInfo.licenseName)}__}">
                 <th:block th:with="__${#object.add(licenseInfo.licenseName)}__">
                     <span th:text="${licenseInfo.licenseName}"></span>
-                    <span th:text="${licenseInfo.licenseText}"></span>
+                    <span th:utext="${licenseInfo.licenseText}"></span>
                 </th:block>
             </th:block>
         </th:block>

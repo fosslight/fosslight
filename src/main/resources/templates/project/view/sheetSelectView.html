@@ -23,8 +23,8 @@
 		</div>
 		<div class="row custom-layout" style="width: 300px;">
 			<div class="col-12">
-				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.closePop()|"></button>
-				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn.getSheetData()|"></button>
+				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|com_fn.closeAlertifyView()|"></button>
+				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" id="sheetApply" th:text="Ok" th:onclick="|fn.getSheetData()|"></button>
 			</div>
 		</div>
 	</div>

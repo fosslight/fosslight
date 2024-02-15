@@ -110,7 +110,7 @@ var fn = {
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
 
-		if(rowObject.ossCount) {
+		if (rowObject.ossCount) {
 			if(parseInt(rowObject.ossCount) > 0) {
 				display = "<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this)\"><i class=\"far fa-file-excel fa-lg ml-1\" title=\"FOSSLight Report\"></i></span>";
 			}
@@ -173,6 +173,8 @@ var fn = {
 		}
 	},
 	downloadReport : function(obj){
+		loading.show();
+		
 		var prjId = $(obj).closest('tr').attr('id');
 		
 		$.ajax({
@@ -183,7 +185,9 @@ var fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
-				if("false" == data.isValid) {
+				loading.hide();
+				
+				if ("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
 					window.location = '/exceldownload/getFile?id='+data.validMsg;
