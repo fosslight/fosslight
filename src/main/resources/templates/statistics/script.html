@@ -27,10 +27,12 @@ var common_fn = {
 		.on('apply.daterangepicker', function(ev, picker) {
 			$("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
 			$("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+			$(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
 		})
 		.on('cancel.daterangepicker', function(ev, picker) {
 			$("input[name='schStartDate']").val("");
 			$("input[name='schEndDate']").val("");
+			$(this).val("");
 		});
 	},
 	bindEvent : function(){

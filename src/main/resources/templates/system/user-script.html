@@ -189,7 +189,7 @@ var fn = {
 		}
 	},
 	resetPassword : function(rowId){
-		if("${'Y' eq adminLockFlag}" && rowId == 'admin') {
+		if ('Y' == [[${adminLockFlag}]] && rowId == 'admin') {
 			alert("Changing admin information is blocked.");
 			return false;
 		}

@@ -895,7 +895,9 @@ var bin_fn = {
 							binInfoMsgData = data.externalData3;
 						}
 						
-						bin_fn.makeOssList(_binUploadFile);
+						bin_fn.makeOssList(data.resultData);
+						
+						bin_fn.makeFileTag(_binUploadFile);
 						_binUploadFile = undefined
 						
 						if(data.validMsg) {

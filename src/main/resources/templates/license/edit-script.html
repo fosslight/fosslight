@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
     <script th:inline="javascript">
-    	var userRole = [[${#authentication.authorities[0].authority}]];
+    	var userRole = [[${sessUserInfo.authority}]];
     	var commentsParam = {referenceDiv : 'license'};
     
         $(window).load(function () {

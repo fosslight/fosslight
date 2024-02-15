@@ -19,7 +19,7 @@ public class ExternalController extends CoTopComponent {
 	
 	@GetMapping(value=EXTERNAL.PAGE, produces = "text/html; charset=utf-8")
 	public String list(HttpServletRequest req, HttpServletResponse res){
-		return EXTERNAL.PAGE_JSP;
+		return "/external/external";
 	}
 	
 }
