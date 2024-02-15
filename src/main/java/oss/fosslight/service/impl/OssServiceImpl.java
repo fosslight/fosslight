@@ -3046,6 +3046,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			resultMap.put("isValid", true);
 			resultMap.put("returnMsg", "Success");
 			resultMap.put("prjInfo", prjInfo);
+
+			Thread.sleep(interval);
 			
 			/*while (!Thread.currentThread().isInterrupted()) {
 				if (count > idleTime) {
