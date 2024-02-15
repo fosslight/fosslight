@@ -319,13 +319,11 @@ $(document).ready(function () {
 var loading = {
     show: function () {
         if ($('#loading_wrap').css("display") == "none" && !onAjaxLoadingHide) {
-            console.log("loading show")
             $('#loading_wrap').show();
         }
     },
     hide: function () {
         if ("Y" != doNotUseAutoLoadingHideFlag) {
-            console.log("loading hides")
             $('#loading_wrap').hide();
         }
     }

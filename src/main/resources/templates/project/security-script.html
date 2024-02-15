@@ -395,6 +395,7 @@ var com_fn = {
 					alertify.success([[#{msg.common.success}]]);
 					saveFlag = true;
 					sec_com_evt.dataInit();
+					reloadTabInframe('/project/list');
 				} else {
 					alertify.error([[#{msg.common.valid2}]], 0);
 				}

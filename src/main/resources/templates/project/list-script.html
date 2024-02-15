@@ -671,29 +671,28 @@ var fn = {
 	displayVulnerability : function(cellvalue, options, rowObject){
 		var display = "";
 		var secCode = "";
+		
 		if (typeof rowObject.secCode !== "undefined") {
 			secCode = rowObject.secCode;
 		}
-        if (parseInt(cellvalue) >= 8.0) {
-        	if ("" != secCode) {
-        		if ("NotFixed" == secCode) {
-        			 //Need to resolve : 8.0 이상 vulnerability 검출, 수정 필요 O
-                    display = '<span class="badge badge-cherry size-sm width-9rem">Need to resolve('+cellvalue+')</span>';
-        		} else {
-        			// Resolved : 8.0 이상 vulnerability 검출, 모두 수정 완료됨
-                    display = '<span class="badge badge-cherry size-sm width-8rem">Resolved('+cellvalue+')</span>';
-        		}
-        	} else {
-        		
-        	}
-        } else if (parseInt(cellvalue) < 8.0 && parseInt(cellvalue) > 0) {
-            // Discovered : 8.0 미만 vulnerability 검출, 수정 필요 X
-            display = '<span class="badge badge-cerebral-gray size-sm width-8rem">Discovered('+cellvalue+')</span>';
-        } else {
-        	display = '<span class="badge badge-cerebral-gray size-sm width-8rem">Discovered(N/A)</span>';
-        }
-        
-        return display;
+		
+		if ("" != secCode) {
+			if (parseInt(cellvalue) >= 8.0) {
+				if ("Fixed" == secCode) {
+					display = '<span class="badge badge-cherry size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Resolved('+cellvalue+')</span>';
+				} else {
+					display = '<span class="badge badge-cherry size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Need to resolve('+cellvalue+')</span>';
+				}	
+			} else if (parseInt(cellvalue) < 8.0 && parseInt(cellvalue) > 0) {
+				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cellvalue+')</span>';
+			} else {
+				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
+			}
+		} else {
+			display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
+		}
+		
+		return display;
 	},
 	displaySecurityTab : function(cellvalue, options, rowObject){
 		var display = "";
@@ -1871,12 +1870,12 @@ var fn = {
 var list = {
 	load : function(){
 		var distributionFlag = [[${distributionFlag}]];
-		var authority = [[${#authentication.authorities[0].authority}]];
+		var authority = [[${sessUserInfo.authority}]];
 		var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
 		var rowList = rowStr.split(",");
 		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 		
-		var colNameArr = [ 'ID', 'Project Name', 'Status', 'Progress', 'Download', 'Security', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer', 
+		var colNameArr = [ 'ID', 'Project Name', 'Status', 'Progress', 'Download', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer', 
 							'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'];
 		var colModelArr = [];
         var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
@@ -1888,8 +1887,6 @@ var list = {
 		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'download', index: 'download', width: 60, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
-		colModelArr.push(colModelObj);
-		colModelObj = {name: '', index: '', width: 60, align: 'center', formatter: fn.displaySecurityTab, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'distributionType', index: 'distributionType', width: 80, align: 'left', sortable : true};
 		colModelArr.push(colModelObj);
