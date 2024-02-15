@@ -136,7 +136,7 @@ function dataValidCheck(mainData) {
  * postdata will be sent to server
  * */
 function makePostData() {
-    postData = []
+    postData = [];
     selectedIds.forEach((idx) => {
         postData.push(ossData[Number(idx)])
     })
@@ -182,8 +182,8 @@ $(document).ready(function()
             var mainData = target.jqGrid('getRowData');
 
             //data Check and make postData
-            dataValidCheck(mainData)
-            makePostData()
+            dataValidCheck(mainData);
+            makePostData();
 
             $.ajax({
                 type: "POST",
@@ -193,6 +193,8 @@ $(document).ready(function()
                 cache : false,
                 dataType: "json",
                 success: (data) => {
+                	loading.hide();
+                	
                     failOss = []
                     _mainLastsel = -1;
                     if (data['res'] == true && data['value'] != []) {
@@ -204,13 +206,12 @@ $(document).ready(function()
                         showErrorMsg();
                         OssBulkGridWarningMessageUtil.setMessagesToCurPage();
                     }
-                    loading.hide();
                 },
                 error: (e) => {
                     OssBulkGridWarningMessageUtil.setMessagesToCurPage();
                     loading.hide();
                 }
-            })
+            });
         })
     }
     
@@ -316,16 +317,18 @@ $(document).ready(function()
             return data;
         },
         onSuccess:function(files,data,xhr,pd) {
-            $("#list").jqGrid('clearGridData');
+        	loading.hide();
+        	
+        	$("#list").jqGrid('clearGridData');
             selectedIds = new Set()
             ossData = []
             failOss = []
+            
             if (data['res'] == true){
                 jsonData = data['value'];
                 makeOssDTOList();
                 stubColData();
                 OssBulkGridWarningMessageUtil.call();
-                loading.hide();
             }
             else if(data['res'] == false){
                 showErrorMsg();
@@ -337,6 +340,9 @@ $(document).ready(function()
             
             $('.ajax-file-upload-statusbar').fadeOut('slow');
 			$('.ajax-file-upload-statusbar').remove();
+        },
+        progressall: function (e, data) {
+        	loading.show();
         }
     });
     IdentificationGridDataExtractor.call();

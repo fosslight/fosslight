@@ -179,6 +179,8 @@ var bom_fn = {
 		});
 	},
 	downloadExcel : function(){
+		loading.show();
+		
 		$.ajax({
 			type: "POST",
 			url: '/exceldownload/getExcelPost',
@@ -187,7 +189,9 @@ var bom_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
-				if("false" == data.isValid) {
+				loading.hide();
+				
+				if ("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
 				    window.location = '/exceldownload/getFile?id='+data.validMsg;
@@ -674,9 +678,6 @@ var bom_fn = {
         		bom_fn.selectDownloadFileValidation(target);
         	}
         }
-        
-        // hide list
-        $("#ExportList").hide();
     },
     selectDownloadFileValidation : function(target) {
     	if (com_fn.checkSelectDownloadFile('BOM')) {
@@ -967,7 +968,7 @@ var bom_data = {
 						var referenceDivList = str.split(",").sort();
 						var referenceName = "";
 						
-						for(var idx in referenceDivList) {
+						for (var idx in referenceDivList) {
 							if(referenceName != "") {
 								referenceName += ",";
 							}
@@ -976,6 +977,8 @@ var bom_data = {
 								referenceName += "3rd";
 							} else if(referenceDivList[idx] =="11") {
 								referenceName += "SRC";
+							} else if(referenceDivList[idx] =="16") {
+								referenceName += "DEP";
 							} else if(referenceDivList[idx] =="15") {
 								referenceName += "BIN";
 							} else if(referenceDivList[idx] =="13") {

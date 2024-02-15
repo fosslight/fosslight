@@ -36,78 +36,88 @@
         });
 
         $('#bulkRestFile').uploadFile({
-          url: '/license/csvFile',
-          multiple: false,
-          dragDrop: true,
-          fileName: 'myfile',
-          allowedTypes: accept1,
-          sequential: true,
-          sequentialCount: 1,
-          dynamicFormData: function () {
-            var data = { registFileId: $('#csvFileId').val(), tabNm: 'BULK' };
-            return data;
-          },
-          onSuccess: function (files, data, xhr, pd) {
-            $('#list').jqGrid('clearGridData');
-            licenseData = [];
-            if (data['res'] == true) {
-              jsonData = data['value'];
-              makeLicenseDTOList();
-              stubColData();
-              loading.hide();
-            } else if (data['res'] == false) {
-              showErrorMsg();
-            } else {
-              if (data['limitCheck'] == null) {
-                showErrorMsg();
-              }
+          	url: '/license/csvFile',
+          	multiple: false,
+         	dragDrop: true,
+          	fileName: 'myfile',
+          	allowedTypes: accept1,
+          	sequential: true,
+          	sequentialCount: 1,
+          	dynamicFormData: function () {
+            	var data = { registFileId: $('#csvFileId').val(), tabNm: 'BULK' };
+            	return data;
+          	},
+          	onSuccess: function (files, data, xhr, pd) {
+          		loading.hide();
+          		
+            	$('#list').jqGrid('clearGridData');
+            	licenseData = [];
+            	
+            	if (data['res'] == true) {
+              		jsonData = data['value'];
+              		makeLicenseDTOList();
+              		stubColData();
+            	} else if (data['res'] == false) {
+              		showErrorMsg();
+            	} else {
+              		if (data['limitCheck'] == null) {
+                		showErrorMsg();
+              		}
+            	}
+            	
+            	$('.ajax-file-upload-statusbar').fadeOut('slow');
+    			$('.ajax-file-upload-statusbar').remove();
+          	},
+          	progressall: function (e, data) {
+            	loading.show();
             }
-          },
-        });
+		});
 
         const target = $("#list");
         if (isClicked == false) {
           isClicked = true;
 
           $("#btn").click(() => {
-            LicenseBulkGridStatusMessageManager.cleanStatusMessages();
-            LicenseBulkGridWarningMessageUtil.cleanMessages();
-            target.jqGrid('saveRow', _mainLastsel);
+				loading.show();
+            	LicenseBulkGridStatusMessageManager.cleanStatusMessages();
+            	LicenseBulkGridWarningMessageUtil.cleanMessages();
+            	target.jqGrid('saveRow', _mainLastsel);
 
-            // load all rows in grid
-            const mainData = target.jqGrid('getRowData');
+            	// load all rows in grid
+            	const mainData = target.jqGrid('getRowData');
 
-            dataValidCheck(mainData)
-            makePostData()
+            	dataValidCheck(mainData);
+            	makePostData();
 
-            $.ajax({
-              type: "POST",
-              contentType: 'application/json',
-              url: "/license/bulkRegAjax",
-              data: JSON.stringify(postData),
-              cache: false,
-              dataType: "json",
-              success: (data) => {
-                failLicense = []
-                _mainLastsel = -1;
-                if (data['res'] == true && data['value'] != []) {
-                  loadedInfo = data['value'];
+            	$.ajax({
+              		type: "POST",
+              		contentType: 'application/json',
+              		url: "/license/bulkRegAjax",
+              		data: JSON.stringify(postData),
+              		cache: false,
+              		dataType: "json",
+              		success: (data) => {
+              			loading.hide();
+              			
+                		failLicense = []
+                		_mainLastsel = -1;
+                		if (data['res'] == true && data['value'] != []) {
+                  			loadedInfo = data['value'];
 
-                  LicenseBulkGridStatusMessageManager.setStatusMessages(loadedInfo);
-                  LicenseBulkGridWarningMessageUtil.call();
+                  			LicenseBulkGridStatusMessageManager.setStatusMessages(loadedInfo);
+                  			LicenseBulkGridWarningMessageUtil.call();
 
-                  alertify.alert([[ #{msg.common.success} ]], function () {
-                  });
-                } else if (data['res'] == false) {
-                  showErrorMsg();
-                  LicenseBulkGridWarningMessageUtil.setMessagesToCurPage();
-                }
-              },
-              error: (e) => {
-                LicenseBulkGridWarningMessageUtil.setMessagesToCurPage();
-              }
-            })
-          })
+                  			alertify.alert([[ #{msg.common.success} ]], function(){});
+                		} else if (data['res'] == false) {
+                  			showErrorMsg();
+                  			LicenseBulkGridWarningMessageUtil.setMessagesToCurPage();
+                		}
+              		},
+              		error: (e) => {
+                		LicenseBulkGridWarningMessageUtil.setMessagesToCurPage();
+              		}
+            	});
+          	});
         }
       }
     }
@@ -261,10 +271,10 @@
      * data fot seding to server
      * */
     function makePostData() {
-      postData = []
-      selectedIds.forEach((idx) => {
-        postData.push(licenseData[Number(idx)])
-      })
+      	postData = [];
+      	selectedIds.forEach((idx) => {
+        	postData.push(licenseData[Number(idx)])
+      	});
     }
 
 

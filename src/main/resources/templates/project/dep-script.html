@@ -745,7 +745,9 @@ var dep_fn = {
 							depDiffMsgData = data.externalData2;
 						}
 
-						dep_fn.makeFileTag(_srcUploadFile);
+						dep_fn.makeOssList(data.resultData);
+						
+						dep_fn.makeFileTag(_depUploadFile);
 						_depUploadFile = undefined;
 						
 						if(data.validMsg) {
@@ -1354,7 +1356,7 @@ var dep_grid = {
 													  fn_grid_com.rowAddNew('depList',depList,"main", null, com_fn.getLicenseName);
 												  }
 												  , delfunc: function () { fn_grid_com.rowDelNew(depList,"main");}
-												  , cloneToTop:false
+												  , cloneToTop:true
 		});
 		
 		$('#depList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
