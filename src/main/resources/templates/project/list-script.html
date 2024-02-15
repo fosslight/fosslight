@@ -27,16 +27,16 @@ var gridTooltip = {
 	typeCodes : [],
     tooltipCont :   "<div class=\"p-1\">" +
                         "<div class=\"my-1\">" +
-                            "<span style=\"float:left !important;\"><i class=\"far fa-file-excel fa-1-5x\" title=\"FOSSLight Report\" style=\"margin-right: 10px !important;\"></i>FOSSLight Report</span>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-excel fa-1-3x\" title=\"FOSSLight Report\" style=\"margin-right: 10px !important;\"></i>FOSSLight Report</span>" +
                         "</div>" +
                         "<div class=\"mb-1\">" +
-                            "<span style=\"float:left !important;\"><i class=\"far fa-file-pdf fa-1-5x\" title=\"Summary Report\" style=\"margin-right: 10px !important;\"></i>Summary Report</span>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-pdf fa-1-3x\" title=\"Summary Report\" style=\"margin-right: 10px !important;\"></i>Summary Report</span>" +
                         "</div>" +
                         "<div class=\"mb-1\">" +
-                            "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-1-5x\" title=\"OSS Notice\" style=\"margin-right: 10px !important;\"></i>OSS Notice</span>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-1-3x\" title=\"OSS Notice\" style=\"margin-right: 10px !important;\"></i>OSS Notice</span>" +
                         "</div>" +
                         "<div class=\"mb-1\>" +
-                            "<span style=\"float:left !important;\"><i class=\"far fa-file-archive fa-1-5x\" title=\"Packaging File\" style=\"margin-right: 10px !important;\"></i>Packaging File</span>" +
+                            "<span style=\"float:left !important;\"><i class=\"far fa-file-archive fa-1-3x\" title=\"Packaging File\" style=\"margin-right: 10px !important;\"></i>Packaging File</span>" +
                         "</div>"+
                     "</div>",
 	existTooltip : false,
@@ -640,28 +640,28 @@ var fn = {
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
         if ("Confirm" == rowObject.identificationStatus){
-        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-5x mr-1\" title=\"FOSSLight Report\"></i></span>';
+        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-3x mr-1\" title=\"FOSSLight Report\"></i></span>';
             if ("" != rowObject.reviewReportFileId){
-            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-5x mr-1\" title=\"FOSSLight Review Report\"></i></span>';
+            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-3x mr-1\" title=\"FOSSLight Review Report\"></i></span>';
             }
         }
 		
 		if ("Confirm" == rowObject.verificationStatus) {
 			if ("99" == rowObject.noticeType || "" == rowObject.noticeFileId) {
 			} else {
-				display += '<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-5x mr-1\" title=\"OSS Notice\"></i></span>';
+				display += '<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-3x mr-1\" title=\"OSS Notice\"></i></span>';
 			}
 			
 			if ("" != rowObject.packageFileId) {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File1\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-3x mr-1\" title=\"Packaging File1\"></i></span>';
 			}
 			
 			if ("" != rowObject.packageFileId2) {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File2\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-3x mr-1\" title=\"Packaging File2\"></i></span>';
 			}
 			
 			if ("" != rowObject.packageFileId3) {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File3\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-3x mr-1\" title=\"Packaging File3\"></i></span>';
 			}
 		}
 		

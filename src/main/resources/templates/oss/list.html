@@ -19,7 +19,7 @@
                                     <div class="card-header" style="border-bottom: none;">
                                         <div class="row">
                                         	<div class="col-md-7 d-flex">
-                                                <div class="form-check width-8rem p-2 pl-3" style="font-size: .85rem; margin-left: 0.3rem">
+                                                <div class="form-check width-8rem p-2 pl-3" style="margin-left: 0.3rem">
                                                     <input class="form-check-input" id="ossNameAllSearchFlag" th:checked="${searchBean.ossNameAllSearchFlag == 'Y' }" type="checkbox">
                                                     <label class="form-check-label text-blue-gray" for="ossNameAllSearchFlag" style="font-weight: normal;" th:text="'Exact Match'"></label>
                                                     <input name="ossNameAllSearchFlag" th:value="${searchBean.ossNameAllSearchFlag}" type="hidden"/>
@@ -105,7 +105,7 @@
                                             </div>
                                         </div>
                                         <th:block sec:authorize="hasRole('ROLE_ADMIN')">
-                                            <a class="small-box-footer mb-2" href="#" id="moreInfoBtn" th:text="More"><i class="fas fa-arrow-circle-down"></i></a>
+                                            <a class="small-box-footer mb-2" href="#" id="moreInfoBtn">More <i class="fas fa-arrow-circle-down"></i></a>
                                             <div class="more-search" id="moreSearchContent" style="display: none">
                                                 <div class="row">
                                                     <div class="col-md-3">
@@ -147,9 +147,8 @@
                                                                     <option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
                                                                 </th:block>
                                                             </select>
-                                                        </div>
                                                     </div>
-                                                    <div class="col-md-4 pt-1 ml-4 d-flex">
+                                                    <div class="col-md-3 ml-4 d-flex">
                                                         <div class="width-5rem">
                                                             <div class="form-check">
                                                                 <div class="form-check-input">
