@@ -870,49 +870,16 @@
                     </div>
                 </div>
                 
-                 <!-- loading bar -->
                 <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
-                <!-- /. loading bar -->
             </section>
         </div>
     </div>
     
-    <div class="sheetSelectPop" style="display: none;">
-		<div class="row" style="width: 300px;">
-			<div class="col-12">
-				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
-        			<div class="row">
-    					<div class="col-12">
-							<table class="table table-hover text-nowrap sheetTable">
-								<thead>
-									<tr>
-                       					<th class="text-center">
-                       						<input class="form-check-input" id="allCheck" type="checkbox" value="Y">
-											<label class="form-check-label text-blue-gray" for="allCheck" style="font-weight: normal;"></label>
-                       					</th>
-                        				<th class="text-left" th:text="sheetName"></th>
-                   					</tr>
-								</thead>
-								<tbody id="sheetBody"></tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="row custom-layout" style="width: 300px;">
-			<div class="col-12">
-				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|com_fn.closeAlertifyView()|"></button>
-				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:id="sheetApply" th:text="Ok"></button>
-			</div>
-		</div>
-	</div>
+    <th:block th:replace="project/view/sheetSelectView"></th:block>
 	
 	<form id="bulkEditForm" method="post" th:action="@{/oss/ossBulkEditPopup}" th:target="bulkEditViewProjectPopup">
 		<input type="hidden" name="rowId" value=""/>
 		<input type="hidden" name="target" value=""/>
 	</form>
-
-
 </body>
 </html>
