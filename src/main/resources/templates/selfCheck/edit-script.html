@@ -24,6 +24,7 @@ var divisionUseFlag = true;
 var projectPermission = [[${projectPermission}]];
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var viewFlag = [[${viewFlag}]];
+var _uploadFileObj;
 
 $(document).ready(function() {
 	'use strict';
@@ -435,23 +436,17 @@ var fn = {
 	openNoticeEditPop : function(data){
 		var result =jQuery.parseJSON(data);
 
-		if(result.isValid == 'false') {
+		if (result.isValid == 'false') {
            	alertify.error([[#{msg.common.valid2}]], 0);
 		} else {
-			var contents = '<textarea cols="80" id="editor3" name="editor3" rows="10"></textarea>';
+			var contents = '<textarea id="editor3" name="editor3"></textarea>';
 			
 			alertify.confirm()
 					.set({'resizable': true, 'startMaximized':true})
 					.set('labels', {ok:'save'})
 					.set('onok', function(event){ fn.saveNoticeEditPop(); return false; })
 					.set('onshow', function(event){
-// 						CKEDITOR.replace( 'editor3', {
-// 					        fullPage: true,
-// 					        allowedContent: true,
-// 					        startupShowBorders: false,
-// 					        height: 620
-// 					    });
-// 						CKEDITOR.instances.editor3.setData(result.resultData);
+						$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 					})
 					.setContent(contents)
 					.show();
@@ -460,7 +455,11 @@ var fn = {
 		}
 	},
 	saveNoticeEditPop : function(){
-		$('#noticeHtml').val(""); // CKEDITOR.instances.editor3.getData());
+		if ("" != $("#editor3").summernote('code')) {
+			$('#noticeHtml').val($("#editor3").summernote('code'));
+		} else {
+			$('#noticeHtml').val("");
+		}
 		
 		$('#noticeForm').ajaxForm({
 			url : '/selfCheck/saveNoticeAjax',
@@ -1502,7 +1501,7 @@ var src_evt = {
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
 						$('.ajax-file-upload-statusbar').remove();
 						
-						src_fn.makeFileTag(result[0][0]);	
+						_uploadFileObj = result[0][0];
 					} else if (result[2] == "SPDX_SPREADSHEET_FILE") {
 						src_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
 
@@ -1805,7 +1804,7 @@ var src_fn = {
 				success: function(data){
 					loading.hide();
 
-					if("false" == data.isValid) {
+					if ("false" == data.isValid) {
 						alertify.error([[#{msg.common.valid2}]], 0);
 						
 						if(data.validMsg) {
@@ -1826,7 +1825,10 @@ var src_fn = {
 
 						src_fn.makeOssList(data.resultData);
 						
-						if(data.validMsg) {
+						src_fn.makeFileTag(_uploadFileObj);
+						_uploadFileObj = undefined;
+						
+						if (data.validMsg) {
 							alertify.alert(data.validMsg, function(){});
 						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
 							alertify.alert(data.resultData.systemChangeHisStr, function(){});

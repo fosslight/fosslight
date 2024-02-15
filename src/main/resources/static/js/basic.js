@@ -2717,6 +2717,14 @@ var tableRefreshNew = function (id) {
                 }
             });
         }, 300);
+    } else if ("_lastStepList" == id) {
+        $('.ui-jqgrid-btable').each(function () {
+        	var id = $(this).attr('id');
+            if ("_lastStepList" == id) {
+            	$(this).jqGrid('setGridWidth', 0, true);
+                $(this).jqGrid('setGridWidth', 790, true);
+           	}
+       	});
     } else {
         window.onload = function () {
             var width = $(".card-body").width() - 40;

@@ -115,8 +115,7 @@
                     <th:block th:if="${#strings.equals(basicInfo.referenceDiv, 'prj') || #strings.equals(basicInfo.referenceDiv, '3rd')}">
                         <div class="col-sm-7 text-left mt-3">
                             <span class="description-percentage text-lg text-dark-gray text-bold">
-                                <b>[<span th:text="${project.prjId}"></span>]<span class="ml-1"
-                                                                                   th:text="${project.prjName}"></span></b>
+                                <b>[<span th:text="${project.prjId}"></span>]<span class="ml-1" th:text="${project.prjName}"></span></b>
                             </span>
                             <span class="text-lg-gray text-smaller ml-2">
                                     <span class="badge badge-info text-md px-2 py-1">B</span>
@@ -131,12 +130,10 @@
                         </div>
                     </th:block>
                     <div class="col-sm-5">
-                        <form class="mb-0" id="commentSchForm"
-                              onkeydown="javascript: if(event.keyCode==13) { fn_commemt.getCommentList(); return false; }">
+                        <form class="mb-0" id="commentSchForm" onkeydown="javascript: if(event.keyCode==13) { fn_commemt.getCommentList(); return false; }">
                             <div class="row mt-3">
                                 <div class="col-4 px-0">
-                                    <select class="custom-select float-right" data-placeholder="Section"
-                                            id="schReferenceDiv" name="schReferenceDiv">
+                                    <select class="custom-select float-right" data-placeholder="Section" id="schReferenceDiv" name="schReferenceDiv">
                                         <option disabled hidden selected>Section</option>
                                         <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_HIS')}">
                                             [[

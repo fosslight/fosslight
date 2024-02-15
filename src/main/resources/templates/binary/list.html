@@ -22,8 +22,7 @@
                                             <div class="col-md-8">
                                                 <div class="row">
                                                     <div class="input-group">
-                                                        <input class="form-control" name="fileName"
-                                                               placeholder="Binary Name" type="text" value=""/>
+                                                        <input class="form-control" name="fileName" placeholder="Binary Name" type="text" value=""/>
                                                         <div class="input-group-append">
                                                             <button class="btn btn-default" id="search" type="submit">
                                                                 <i class="fa fa-search"></i>
@@ -34,11 +33,7 @@
                                             </div>
                                             <div class="col-md-2 d-flex justify-content-start mx-2">
                                                 <div class="input-group-append d-flex align-items-center">
-                                                    <a class="text-blue-gray" data-card-widget="collapse"
-                                                       style="font-size: 1rem" title="Collapse">
-                                                        <!-- <i class="fas fa-cart-plus fa-lg mr-2"></i> -->
-                                                        + Advanced Search
-                                                    </a>
+                                                    <a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem" title="Collapse">+ Advanced Search</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -47,9 +42,7 @@
                                         <div class="row">
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control" name="parentName"
-                                                           placeholder="Project Name"
-                                                           th:value="${searchBean.parentName}" type="text"/>
+                                                    <input class="form-control" name="parentName" placeholder="Project Name" th:value="${searchBean?.parentName}" type="text"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">

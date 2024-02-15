@@ -1040,14 +1040,14 @@ var fn = {
 		var dropFlag = $("#dropFlag").val();
 		var commentFlag = true;
 		
-		var authority = "*${sessUserInfo.authority}";
-		if("ROLE_ADMIN" == authority) {
+		var authority = [[${sessUserInfo.authority}]];
+		if ("ROLE_ADMIN" == authority) {
 			if(changeSeq == 1 || changeSeq == 4) {
 				commentFlag = false;
 			}
 		}
 		
-		if(commentFlag && reason.split(" ").join("") == "") {
+		if (commentFlag && reason.split(" ").join("") == "") {
 			$("#warningMsg").show();
 		} else {
 			switch(changeSeq){
