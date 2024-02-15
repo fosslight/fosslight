@@ -142,7 +142,7 @@ var dep_evt = {
 									checkedTxt = "checked";
 								}
 								
-								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+' onchange="com_fn.sheetNameSelect(this)">'
+								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
 												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
 								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
 								$("#sheetBody").append(sheetTr);
@@ -151,10 +151,7 @@ var dep_evt = {
 							$('#sheetApply').attr('onclick', 'dep_fn.getSheetData('+result[0][0].registSeq+')');
 						}
 						
-						const sheetHtml = $(".sheetSelectPop").html();
-						$("#sheetBody").empty();
-						
-						if(!alertify.selectSheet){
+						if (typeof alertify.selectSheet === "undefined") {
 							alertify.dialog('selectSheet', function() {
 								return {
 									setup: function() {
@@ -180,7 +177,8 @@ var dep_evt = {
 							}, false, 'alert');
 	                	}
 						
-						alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
+						alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
+						$("#sheetBody").empty();
 						
 						$('#depCsvFileId').val(result[0][0].registFileId);
 						$('.ajax-file-upload-statusbar').fadeOut('slow');
@@ -730,6 +728,8 @@ var dep_fn = {
 				cache : false,
 				contentType : 'application/json',
 				success: function(data){
+					loading.hide();
+					
 					if ("false" == data.isValid) {
 						if(data.validMsg) {
 							alertify.alert(data.validMsg, function(){});
@@ -764,7 +764,7 @@ var dep_fn = {
 				}
 			});
 		} finally {
-			//loading.hide();
+			com_fn.closeAlertifyView();
 		}
 	},
 
