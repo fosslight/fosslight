@@ -39,7 +39,7 @@
 				<p>This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.</p>
 			</th:block>
 
-			<th:block th:if="${disclosureObligationSize != '0'}">
+			<th:block th:if="${disclosureObligationSize != 0}">
 				<div style="padding:10px;max-width:800px;">
 					<table class="gridtable" width="100%" aria-label="Open source lists under Copyleft license.">
 						<caption>Open source lists under Copyleft license.</caption>
@@ -106,9 +106,9 @@
 				</p>
 			</th:block>
 
-			<th:block th:if="${noticeObligationSize != '0'}">
+			<th:block th:if="${noticeObligationSize != 0}">
 				<br>
-				<th:block th:if="${disclosureObligationSize != '0'}">
+				<th:block th:if="${disclosureObligationSize != 0}">
 					<p>
 						Please be informed that
 						<th:block th:if="${editCompanyYn == 'Y'}">

@@ -45,7 +45,7 @@
 				</p>
 			</th:block>
 
-			<th:block th:if="${disclosureObligationSize != '0'}">
+			<th:block th:if="${disclosureObligationSize != 0}">
 				<div style="padding:10px;max-width:800px;">
 					<table class="gridtable" width="100%" aria-label="Open source lists under Copyleft license.">
 						<caption>Open source lists under Copyleft license.</caption>
@@ -100,8 +100,8 @@
 				</p>
 			</th:block>
 
-			<th:block th:if="${noticeObligationSize != '0'}">
-				<th:block th:if="${disclosureObligationSize != '0'}">
+			<th:block th:if="${noticeObligationSize != 0}">
+				<th:block th:if="${disclosureObligationSize != 0}">
 					<p th:utext="|Please be informed that ${editCompanyYn == 'Y' ? companyNameFull : 'this'} product may contain open source software listed in the tables below.|"></p>
 				</th:block>
 
