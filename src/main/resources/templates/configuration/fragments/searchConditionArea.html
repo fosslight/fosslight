@@ -131,7 +131,7 @@
                         <div class="form-group mb-2">
                             <div class="row">
                                 <div class="col-md-9">
-                                    <input class="form-control autoComOss" name="ossName" placeholder="Oss Name" th:value="${searchBean.ossName}" type="text"/>
+                                    <input class="form-control" name="ossName" placeholder="Oss Name" th:value="${searchBean.ossName}" type="text"/>
                                 </div>
                                 <div class="col-md-3">
                                 	<div class="icheck-warning">
@@ -147,7 +147,7 @@
                         <div class="form-group mb-2">
                             <div class="row">
                                 <div class="col-md-9">
-                                    <input class="form-control autoComLicense" name="licenseName" placeholder="License Name" th:value="${searchBean.licenseName}" type="text"/>
+                                    <input class="form-control" name="licenseName" placeholder="License Name" th:value="${searchBean.licenseName}" type="text"/>
                                 </div>
                                 <div class="col-md-3">
                                 	<div class="icheck-warning">
@@ -189,7 +189,7 @@
                             <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean?.prjId}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}" type="text"/>
+                            <input class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <div class="input-group" style="width: 100%;">
@@ -232,13 +232,13 @@
                             </select>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
+                            <input class="form-control" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" type="text"/>
+                            <input class="form-control" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComProjectNm" name="watchers" placeholder="Watchers"  th:value="${searchBean?.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
+                            <input class="form-control" name="watchers" placeholder="Watchers"  th:value="${searchBean?.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <select class="select2" name="distributionType" id="distributionTypeSelect" style="width: 100%;">
@@ -254,7 +254,7 @@
                             </select>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComProjectModel" name="modelName" placeholder="Model Name" th:value="${searchBean?.modelName}" type="text"/>
+                            <input class="form-control" name="modelName" placeholder="Model Name" th:value="${searchBean?.modelName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
@@ -362,10 +362,10 @@
                             </script>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
+                            <input class="form-control" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComReviewer" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" type="text"/>
+                            <input class="form-control" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <input class="form-control" name="watchers" placeholder="Watcher" th:value="${searchBean?.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
@@ -434,10 +434,10 @@
                             </script>
                             </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComLicense" name="licenseName" placeholder="License Name" th:value="${searchBean?.licenseName}" type="text"/>
+                            <input class="form-control" name="licenseName" placeholder="License Name" th:value="${searchBean?.licenseName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
+                            <input class="form-control" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <div class="icheck-warning">

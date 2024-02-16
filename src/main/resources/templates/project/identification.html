@@ -46,7 +46,7 @@
                                     <span class="sr-only"></span>
                                 </button>
                                 <div class="dropdown-menu" role="menu">
-                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Main')|" th:text="'How to use FossLight Hub'"></a>
+                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|" th:text="'How to use FossLight Hub'"></a>
                                 </div>
                             </div>
                         	<div class="float-right" th:if="${@CommonFunction.isAdmin() == false and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
