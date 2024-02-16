@@ -56,7 +56,7 @@
 										<span th:if="${hideOssVersionYn != 'Y'}" th:text="${closeSource.ossVersion}"></span>
 									</a>
 									<span th:unless="${closeSource.homepage != ''}" th:text="${closeSource.ossName}"></span>
-									<span th:if="${hideOssVersionYn != 'Y'}" th:text="${closeSource.ossVersion}"></span>
+									<span th:unless="${closeSource.homepage != ''}" th:if="${hideOssVersionYn != 'Y'}" th:text="${closeSource.ossVersion}"></span>
 								</td>
 								<td>
 									<th:block th:each="licenseInfo : ${closeSource.ossComponentsLicense}">
@@ -65,7 +65,7 @@
 										</p>
 									</th:block>
 								</td>
-								<td th:text="${closeSource.copyrightText}"></td>
+								<td th:utext="${closeSource.copyrightText}"></td>
 							</tr>
 						</th:block>
 					</table>
@@ -136,7 +136,7 @@
 										<span th:if="${hideOssVersionYn != 'Y'}" th:text="${openSource.ossVersion}"></span>
 									</a>
 									<span th:unless="${openSource.homepage != ''}" th:text="${openSource.ossName}"></span>
-									<span th:if="${hideOssVersionYn != 'Y'}" th:text="${openSource.ossVersion}"></span>
+									<span th:unless="${openSource.homepage != ''}" th:if="${hideOssVersionYn != 'Y'}" th:text="${openSource.ossVersion}"></span>
 								</td>
 								<td>
 									<th:block th:each="licenseInfo : ${openSource.ossComponentsLicense}">
@@ -146,7 +146,7 @@
 									</th:block>
 								</td>
 								<td>
-									<p th:text="${openSource.copyrightText}"></p>
+									<p th:utext="${openSource.copyrightText}"></p>
 								</td>
 							</tr>
 						</th:block>
@@ -206,7 +206,7 @@
 			</th:block>
 
 			<th:block th:if="${editAppendedYn == 'Y'}">
-				<p class="bdTop" th:text="${appended}"></p>
+				<p class="bdTop" th:utext="${appended}"></p>
 			</th:block>
 		</div>
 	</body>

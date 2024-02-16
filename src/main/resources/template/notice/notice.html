@@ -57,7 +57,7 @@
 										<span th:text="${closeSource.ossName}"></span>
 										<span th:if="${hideOssVersionYn != 'Y'}" th:text="${closeSource.ossVersion}"></span>
 									</a>
-									<span th:if="${closeSource.homepage == ''}">
+									<span th:unless="${closeSource.homepage != ''}">
                             			<span th:text="${closeSource.ossName}"></span>
                             			<span th:if="${hideOssVersionYn != 'Y'}" th:text="${closeSource.ossVersion}"></span>
                         			</span>
@@ -69,7 +69,7 @@
 										</p>
 									</th:block>
 								</td>
-								<td th:text="${closeSource.copyrightText}"></td>
+								<td th:utext="${closeSource.copyrightText}"></td>
 							</tr>
 						</th:block>
 					</table>
@@ -131,7 +131,7 @@
 										<span th:text="${openSource.ossName}"></span>
 										<span th:if="${hideOssVersionYn != 'Y'}" th:text="${openSource.ossVersion}"></span>
 									</a>
-									<span th:if="${openSource.homepage == ''}">
+									<span th:unless="${openSource.homepage != ''}">
                             			<span th:text="${openSource.ossName}"></span>
                             			<span th:if="${hideOssVersionYn != 'Y'}" th:text="${openSource.ossVersion}"></span>
                         			</span>
@@ -144,7 +144,7 @@
 									</th:block>
 								</td>
 								<td>
-									<p th:text="${openSource.copyrightText}"></p>
+									<p th:utext="${openSource.copyrightText}"></p>
 								</td>
 							</tr>
 						</th:block>
