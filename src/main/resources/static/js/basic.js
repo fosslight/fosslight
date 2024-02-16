@@ -513,7 +513,7 @@ var createTab = function (tabNm, tabLk) {
         tabNumber = -1;
 
     if (tab_length > 20) {
-        alertify.error('Can not exceed 20 pages.', 0);
+        alertify.error('More than 20 tabs are opened. Please close the tabs.', 0);
 
         return;
     }
@@ -2627,7 +2627,7 @@ var createTabNew = function (tabNm, tabLk) {
             tabAnchor = tabArr[0].replace(/#/g, '');
 
         if (tab_length > 20) {
-            alertify.error('Can not exceed 20 pages.', 0);
+            alertify.error('More than 20 tabs are opened. Please close the tabs.', 0);
             return;
         }
 
