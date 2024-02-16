@@ -107,7 +107,8 @@ ul { list-style-type: none; }
 .custom-layout .btn-dark-03:hover { background-color: #001429; }
 .custom-layout .btn-dark-04 { background-color: #595959; font-weight: 500; color: #fff }
 .custom-layout .btn-dark-04:hover { background-color: #001429; }
-
+.custom-layout .btn-ivory { background-color: #ecedf0; font-weight: 500; color: #595959 }
+.custom-layout .btn-ivory:hover { background-color: #d3e3fd;}
 .custom-layout .btn-purple { background-color: #8d79ae; font-weight: 500; color: #fff }
 .custom-layout .btn-purple:hover { background-color: #665B7AFF; font-weight: 500; color: #fff }
 
@@ -413,7 +414,7 @@ tr.ui-row-ltr,
 
 .ui-jqgrid tr.ui-row-ltr td,
 .ui-jqgrid tr.ui-row-ltr th {
-    padding: 8.5px;
+    padding: .6rem;
     font-size: 1rem;
 }
 

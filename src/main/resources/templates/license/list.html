@@ -17,25 +17,46 @@
                                        	<div class="card-header" style="border-bottom: none;">
                                            	<div class="row">
                                                	<div class="col-md-7 d-flex">
-													<div class="form-check width-8rem p-2 pl-3" style="margin-left: 0.3rem">
+													<div class="form-check width-8rem p-2 pl-3 mr-2" style="margin-left: 0.3rem">
+														<input class="save-value" name="defaultSearchType" type="hidden" th:value="LICENSE"/>
 														<input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y'} ? 'checked'" type="checkbox" value="Y">
 														<label class="form-check-label text-blue-gray" for="licenseNameAllSearchFlag" style="font-weight: normal;" th:text="'Exact Match'"></label>
-														<input type="hidden" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" />
+														<input class="save-value" type="hidden" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" />
 													</div>
 													<div class="w-100">
 														<div class="input-group">
-															<input class="form-control autoComLicense" name="licenseName" placeholder="Licence Name" th:value="${searchBean.licenseName}" type="search">
+															<input class="form-control autoComLicense save-value" name="licenseName" placeholder="Licence Name" th:value="${searchBean.licenseName}" type="search">
 															<div class="input-group-append">
 																<button class="btn btn-default" id="search" type="submit"><i class="fa fa-search"></i></button>
 															</div>
 														</div>
 													</div>
                                                	</div>
-                                               	<div class="col-md-3 d-flex justify-content-start pl-3">
-                                                   	<div class="input-group-append d-flex align-items-center">
-                                                       	<a class="text-blue-gray" data-card-widget="collapse" id="advancedSearchBnt" style="font-size: 1rem;" th:text="'+ Advanced Search'"></a>
-                                                   	</div>
-                                               	</div>
+												<div class="col-md-3 pl-3">
+													<div class="row">
+														<div class="col-md-5 d-flex justify-content-start">
+															<div class="input-group-append d-flex align-items-center">
+																<a class="text-blue-gray" data-card-widget="collapse"
+																   style="font-size: 1rem;" th:text="'+ Advanced Search'"
+																   title="Collapse"></a>
+															</div>
+														</div>
+														<div class="col-md-7">
+															<div class="float-right pt-1">
+																<button class="btn btn-ivory btn-sm p-2" title="Save" th:onclick="|updateSearchCondition('licenseSearch')|"
+																		type="button" style="font-size: .85rem">
+																	<!--                                                            <span class="material-symbols-outlined">download</span>-->
+																	<i class="fa fa-download mr-xm"></i> Save Search
+																</button>
+																<button class="btn btn-ivory btn-sm p-2" title="Reset" th:onclick="|resetForm('licenseSearch')|"
+																		type="button" style="font-size: .85rem">
+																	<!--   <span class="material-symbols-outlined">restart_alt</span>-->
+																	<i class="fa fa-undo mr-xm"></i> Reset
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
 												<div class="col-md-2">
 													<div class="btn-group float-right mt-1">
 														<button type="button" class="btn btn-outline-danger px-3 btn-sm helpBtnL"><strong>Help</strong></button>
@@ -53,7 +74,7 @@
                                            	<div class="row">
                                                	<div class="col-md-3">
                                                    	<div class="form-group mb-2">
-														<select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
+														<select class="select2 save-value" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
 															<option value=""></option>
 															<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
 																<option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
@@ -63,8 +84,7 @@
                                                	</div>
                                                	<div class="col-md-3">
                                                    	<div class="form-group mb-2">
-
-														<select class="select2" id="obligationTypeSelect" name="obligationType" style="width: 100%; color: gray;">
+														<select class="select2 save-value" id="obligationTypeSelect" name="obligationType" style="width: 100%; color: gray;">
 															<option value=""></option>
 															<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}">
 																<option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.obligationType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
@@ -74,14 +94,14 @@
                                                	</div>
                                                	<div class="col-md-4">
                                                    	<div class="form-group mb-2">
-                                                   		<input type="text" class="form-control" name="webpage" placeholder="Website" th:value="${searchBean.webpage}">
+                                                   		<input type="text" class="form-control save-value" name="webpage" placeholder="Website" th:value="${searchBean.webpage}">
                                                    	</div>
                                                	</div>
                                            	</div>
 											<div class="row">
 												<div class="col-md-10">
 													<div class="form-group mb-2">
-														<select class="select2" id="restrictionSelect" multiple="multiple"  name="restrictions" style="width: 100%;">
+														<select class="select2 save-value" id="restrictionSelect" multiple="multiple"  name="restrictions" style="width: 100%;">
 															<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
 																	th:text="${code.cdDtlNm}"
 																	th:value="${code.cdDtlNo}"
@@ -94,12 +114,12 @@
                                            	<div class="row">
                                                	<div class="col-md-5">
                                                    	<div class="form-group mb-2">
-                                                   		<textarea class="form-control" name="licenseText" placeholder="License Text" rows="3" th:text="${searchBean?.licenseText}"></textarea>
+                                                   		<textarea class="form-control save-value" name="licenseText" placeholder="License Text" rows="3" th:text="${searchBean?.licenseText}"></textarea>
                                                    	</div>
                                                	</div>
                                                	<div class="col-md-5">
                                                    	<div class="form-group mb-2">
-                                                   		<textarea class="form-control" name="description" placeholder="User Guide" rows="3" th:text="${searchBean?.description}"></textarea>
+                                                   		<textarea class="form-control save-value" name="description" placeholder="User Guide" rows="3" th:text="${searchBean?.description}"></textarea>
                                                    	</div>
                                                	</div>
                                            	</div>

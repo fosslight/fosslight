@@ -22,7 +22,8 @@
                                         	<div class="row" style="width: 100%;">
                                         		<div class="col-12">
                                             		<div class="input-group">
-                                                        <input type="search" name="partnerName" class="form-control autoComParty" placeholder="Partner Name" th:value="${searchBean?.partnerName}">
+                                                        <input class="save-value" name="defaultSearchType" type="hidden" th:value="THIRD_PARTY"/>
+                                                        <input type="search" name="partnerName" class="form-control autoComParty save-value" placeholder="Partner Name" th:value="${searchBean?.partnerName}">
                                                     	<div class="input-group-append">
                                                     		<button type="submit" class="btn btn-default" id="search"><i class="fa fa-search"></i></button>
                                                     	</div>
@@ -30,11 +31,31 @@
                                             	</div>
 											</div>
                                    		</div>
-                                        <div class="col-md-3 d-flex justify-content-start pl-3">
-                                       		<div class="input-group-append d-flex align-items-center">
-                                            	<a class="text-blue-gray" data-card-widget="collapse" title="Collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'"></a>
-                                       		</div>
-                                     	</div>
+                                        <div class="col-md-3 pl-3">
+                                            <div class="row">
+                                                <div class="col-md-5 d-flex justify-content-start">
+                                                    <div class="input-group-append d-flex align-items-center">
+                                                        <a class="text-blue-gray" data-card-widget="collapse"
+                                                           style="font-size: 1rem;" th:text="'+ Advanced Search'"
+                                                           title="Collapse"></a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="float-right pt-1">
+                                                        <button class="btn btn-ivory btn-sm p-2" title="Save" th:onclick="|updateSearchCondition('3rdSearch')|"
+                                                                type="button" style="font-size: .85rem">
+                                                            <!--                                                            <span class="material-symbols-outlined">download</span>-->
+                                                            <i class="fa fa-download mr-xm"></i> Save Search
+                                                        </button>
+                                                        <button class="btn btn-ivory btn-sm p-2" title="Reset" th:onclick="|resetForm('3rdSearch')|"
+                                                                type="button" style="font-size: .85rem">
+                                                            <!--   <span class="material-symbols-outlined">restart_alt</span>-->
+                                                            <i class="fa fa-undo mr-xm"></i> Reset
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="col-md-2">
                                             <div class="btn-group float-right mt-1">
                                                 <button type="button" class="btn btn-outline-danger px-3 btn-sm helpBtnL"><strong>Help</strong></button>
@@ -53,7 +74,7 @@
                                         <div class="row">
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" id="partnerId" class="form-control" placeholder="Partner ID" th:value="${searchBean?.partnerId}">
+                                                    <input type="text" id="partnerId" name="partnerId" class="form-control save-value" placeholder="Partner ID" th:value="${searchBean?.partnerId}">
                                                 </div>
                                             </div>
                                             <div class="col-4">
@@ -65,26 +86,26 @@
                                                             </span>
                                                         </div>
                                                         <input type="text" class="form-control" placeholder="Date range" id="schDateRange">
-                                                        <input name="createdDate1" id="createdDate1" type="hidden" th:value="${searchBean?.createdDate1}" />
-                                                        <input name="createdDate2" id="createdDate2" type="hidden" th:value="${searchBean?.createdDate2}" />
+                                                        <input class="save-value" name="createdDate1" id="createdDate1" type="hidden" th:value="${searchBean?.createdDate1}" />
+                                                        <input class="save-value" name="createdDate2" id="createdDate2" type="hidden" th:value="${searchBean?.createdDate2}" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" class="form-control" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}"/>
+                                                    <input type="text" class="form-control save-value" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}"/>
                                                 </div>
                                             </div>
                                      	</div>
                                      	<div class="row">
                                      		<div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" class="form-control" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}"/>
+                                                    <input type="text" class="form-control save-value" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <select class="form-control select2" name="division" id="division" style="width: 100%;">
+                                                    <select class="form-control select2 save-value" name="division" id="division" style="width: 100%;">
                                                         <option value=""></option>
                                                         <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
                                                             <option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}"
@@ -96,9 +117,9 @@
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
-                                                        <select class="form-control select2" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
+                                                        <select class="form-control select2 save-value" multiple="multiple" id="prjStatusSelect" name="status" style="width: 100%;">
                                                             <option th:value="''"></option>
-                                                            <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}"
+                                                            <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}"
                                                                     th:text="${option.cdDtlNm}"
                                                                     th:value="${option.cdDtlNo}"
                                                                     th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
@@ -111,17 +132,17 @@
                                         <div class="row">
                                         	<div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="creator" class="form-control autoComCreatorDivision" placeholder="Creator" th:value="${searchBean?.creator}" />
+                                                    <input type="text" name="creator" class="form-control autoComCreatorDivision save-value" placeholder="Creator" th:value="${searchBean?.creator}" />
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="reviewer" class="form-control autoComReviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}" />
+                                                    <input type="text" name="reviewer" class="form-control autoComReviewer save-value" placeholder="Reviewer" th:value="${searchBean?.reviewer}" />
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="watchers" class="form-control" placeholder="Watcher" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" />
+                                                    <input type="text" name="watchers" class="form-control save-value" placeholder="Watcher" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" />
                                                 </div>
                                             </div>
                                         </div>

@@ -17,17 +17,42 @@
                                 	<div class="card-header" style="border-bottom: none;">
                                         <div class="row">
 											<div class="col-md-7 d-flex">
-												<div class="input-group" style="width: 100%">
-													<input type="search" class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}"/>
-													<div class="input-group-append">
-														<button id="search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+												<div class="row" style="width: 100%;">
+													<div class="col-12">
+														<div class="input-group">
+															<input class="save-value" name="defaultSearchType" type="hidden" th:value="SELF_CHECK"/>
+															<input type="search" class="form-control save-value" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}"/>
+															<div class="input-group-append">
+																<button id="search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+															</div>
+														</div>
 													</div>
 												</div>
 											</div>
-											<div class="col-md-3 d-flex justify-content-start pl-3" style="z-index: 1021">
-                                                <div class="input-group-append d-flex align-items-center">
-                                                    <a class="text-blue-gray" data-card-widget="collapse" title="Collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'"></a>
-                                                </div>
+											<div class="col-md-3 pl-3">
+												<div class="row">
+													<div class="col-md-5 d-flex justify-content-start">
+														<div class="input-group-append d-flex align-items-center">
+															<a class="text-blue-gray" data-card-widget="collapse"
+															   style="font-size: 1rem;" th:text="'+ Advanced Search'"
+															   title="Collapse"></a>
+														</div>
+													</div>
+													<div class="col-md-7">
+														<div class="float-right pt-1">
+															<button class="btn btn-ivory btn-sm p-2" title="Save" th:onclick="|updateSearchCondition('projectSearch')|"
+																	type="button" style="font-size: .85rem">
+																<!--                                                            <span class="material-symbols-outlined">download</span>-->
+																<i class="fa fa-download mr-xm"></i> Save Search
+															</button>
+															<button class="btn btn-ivory btn-sm p-2" title="Reset" th:onclick="|resetForm('projectSearch')|"
+																	type="button" style="font-size: .85rem">
+																<!--   <span class="material-symbols-outlined">restart_alt</span>-->
+																<i class="fa fa-undo mr-xm"></i> Reset
+															</button>
+														</div>
+													</div>
+												</div>
 											</div>
 											<div class="col-md-2">
 												<div class="btn-group float-right mt-1">
@@ -46,13 +71,13 @@
                                 		<div class="row">
                                     		<div class="col-4">
                                         		<div class="form-group">
-													<input type="text" name="prjId" class="form-control" placeholder="ID" th:value="${searchBean?.prjId}"/>
+													<input type="text" name="prjId" class="form-control save-value" placeholder="ID" th:value="${searchBean?.prjId}"/>
                                             	</div>
                                       		</div>
                                         	<div class="col-4">
                                         		<div class="form-group">
                                             		<div class="form-group">
-                                                		<input type="text" class="form-control autoComOss" name="ossName" placeholder="OSS Name" th:value="${searchBean?.ossName}"/>
+                                                		<input type="text" class="form-control autoComOss save-value" name="ossName" placeholder="OSS Name" th:value="${searchBean?.ossName}"/>
                                             		</div>
                                          		</div>
                                   	 		</div>
@@ -63,22 +88,22 @@
 															<span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
 														</div>
                                                     	<input type="text" class="form-control" name="schDate" placeholder="Created Date" id="schDateRange"/>
-                                                    	<input type="hidden" name="schStartDate"/>
-                                                    	<input type="hidden" name="schEndDate"/>
+                                                    	<input class="save-value" type="hidden" name="schStartDate"/>
+                                                    	<input class="save-value" type="hidden" name="schEndDate"/>
                                                		</div>
                                            		</div>
                                       		</div>
                                       		<div class="col-4">
                                           		<div class="form-group">
                                               		<div class="form-group">
-                                                   		<input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}"/>
+                                                   		<input type="text" name="licenseName" class="form-control autoComLicense save-value" placeholder="License Name" th:value="${searchBean?.licenseName}"/>
                                                		</div>
                                            		</div>
                                        		</div>
                                        		<div class="col-4">
                                            		<div class="form-group">
                                               		<div class="form-group">
-                                                  		<input type="text" class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean?.creator}"/>
+                                                  		<input type="text" class="form-control autoComCreatorDivision save-value" name="creator" placeholder="Creator" th:value="${searchBean?.creator}"/>
                                                		</div>
                                           		</div>
                                       		</div>
@@ -98,7 +123,7 @@
                         </div>
                     </div>
 
-                    <div class="row my-3">
+                    <div class="row">
                         <div class="col-md-12 mt-3">
                         	<div class="jqGridSet" id="selfCheckJqgridSet">
                             	<table id="list"><tr><td></td></tr></table>

@@ -22,7 +22,8 @@
                                         	<div class="row" style="width: 100%;">
                                         		<div class="col-12">
                                         			<div class="input-group">
-                                                		<input type="search"  class="form-control autoComProjectNm" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}">
+                                                        <input class="save-value" name="defaultSearchType" type="hidden" th:value="PROJECT"/>
+                                                		<input type="search"  class="form-control autoComProjectNm save-value" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}">
                                                 		<div class="input-group-append">
                                                     		<button id="search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                                                 		</div>
@@ -30,9 +31,29 @@
                                         		</div>
                                         	</div>
                                    		</div>
-                                        <div class="col-md-3 d-flex justify-content-start pl-3">
-                                        	<div class="input-group-append d-flex align-items-center">
-                                            	<a class="text-blue-gray" data-card-widget="collapse" title="Collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'"></a>
+                                        <div class="col-md-3 pl-3">
+                                            <div class="row">
+                                                <div class="col-md-5 d-flex justify-content-start">
+                                                    <div class="input-group-append d-flex align-items-center">
+                                                        <a class="text-blue-gray" data-card-widget="collapse"
+                                                           style="font-size: 1rem;" th:text="'+ Advanced Search'"
+                                                           title="Collapse"></a>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="float-right pt-1">
+                                                        <button class="btn btn-ivory btn-sm p-2" title="Save" th:onclick="|updateSearchCondition('projectSearch')|"
+                                                                type="button" style="font-size: .85rem">
+                                                            <!--                                                            <span class="material-symbols-outlined">download</span>-->
+                                                            <i class="fa fa-download mr-xm"></i> Save Search
+                                                        </button>
+                                                        <button class="btn btn-ivory btn-sm p-2" title="Reset" th:onclick="|resetForm('projectSearch')|"
+                                                                type="button" style="font-size: .85rem">
+                                                            <!--   <span class="material-symbols-outlined">restart_alt</span>-->
+                                                            <i class="fa fa-undo mr-xm"></i> Reset
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-md-2">
@@ -52,7 +73,7 @@
 										<div class="row">
                                             <div class="col-4">
                                                 <div class="form-group mb-2">
-                                                    <input type="text" name="prjId" class="form-control" placeholder="ID" th:value="${searchBean?.prjId}">
+                                                    <input type="text" name="prjId" class="form-control save-value" placeholder="ID" th:value="${searchBean?.prjId}">
                                                 </div>
                                             </div>
                                             <div class="col-4">
@@ -64,14 +85,14 @@
                                                             </span>
                                                         </div>
                                                         <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
-                                                        <input name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean?.schStartDate}" />
-														<input name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean?.schEndDate}" />
+                                                        <input class="save-value" name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean?.schStartDate}" />
+														<input class="save-value" name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean?.schEndDate}" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="form-control select2" id="division" name="prjDivision" style="width: 100%">
+                                                    <select class="form-control select2 save-value" id="division" name="prjDivision" style="width: 100%">
                                                     	<option th:value="''"></option>
                                                     	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
                                                     		<option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}"
@@ -85,21 +106,21 @@
                                             <div class="col-4">
                                                 <div class="form-group mb-2">
                                                 	<div class="input-group">
-                                                    	<input type="text" class="form-control autoComCreatorDivision" placeholder="Creator" name="creator" th:value="${searchBean?.creator}" />
+                                                    	<input type="text" class="form-control autoComCreatorDivision save-value" placeholder="Creator" name="creator" th:value="${searchBean?.creator}" />
                                                 	</div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group mb-2">
                                                 	<div class="input-group">
-                                                    	<input type="text" class="form-control autoComReviewer" placeholder="Reviewer" name="reviewer" th:value="${searchBean?.reviewer}" />
+                                                    	<input type="text" class="form-control autoComReviewer save-value" placeholder="Reviewer" name="reviewer" th:value="${searchBean?.reviewer}" />
                                                 	</div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group mb-2">
                                                 	<div class="input-group">
-                                                    	<input type="text" class="form-control" placeholder="Watcher" name="watchers" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" />
+                                                    	<input type="text" class="form-control save-value" placeholder="Watcher" name="watchers" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" />
                                                 	</div>
                                                 </div>
                                             </div>
@@ -107,7 +128,7 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="select2" name="networkServerType" id="networkServerTypeSelect"
+                                                    <select class="select2 save-value" name="networkServerType" id="networkServerTypeSelect"
                                                             style="width: 100%;">
                                                         <option value=""></option>
                                                         <option value="Y" th:selected="${#strings.equals(searchBean.networkServerType, 'Y')}" th:text="|Yes|"></option>
@@ -131,7 +152,7 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="form-control select2" style="width: 100%;" id="priority" name="priority">
+                                                    <select class="form-control select2 save-value" style="width: 100%;" id="priority" name="priority">
                                                     	<option th:value="''"></option>
                                                         <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}"
                                                             	th:value="${option.cdDtlNo}" 
@@ -145,14 +166,20 @@
                                         	<div class="col-4">
                                                 <div class="form-group mb-2">
                                                 	<div class="input-group">
-                                                    	<input type="text" class="form-control" placeholder="Model Name" name="modelName" th:value="${searchBean?.modelName}"/>
+                                                    	<input type="text" class="form-control save-value" placeholder="Model Name" name="modelName" th:value="${searchBean?.modelName}"/>
                                                 	</div>
                                                 </div>
                                             </div>
-                                            <div sec:authorize="!hasRole('ROLE_ADMIN')" class="col-4 d-flex justify-content-start mx-2">
+                                            <div class="col-4">
+                                                <select class="select2 save-value" name="distributionType" id="distributionTypeSelect" style="width: 100%;">
+                                                    <option value=""></option>
+                                                    <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'), searchBean?.distributionType)}"></th:block>
+                                                </select>
+                                            </div>
+                                            <div sec:authorize="!hasRole('ROLE_ADMIN')" class="col-3 d-flex justify-content-start mx-2">
                                             	<div class="form-group mb-2 d-flex align-items-center">
                                                     <div class="form-check mb-1" style="font-size: .85rem">
-                                                        <input class="form-check-input text-orange" type="checkbox" id="checkbox3" name="publicYn" th:checked="${searchBean.publicYn == 'N'}">
+                                                        <input class="form-check-input text-orange save-value" type="checkbox" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" value="N"/>
                                                         <label class="form-check-label text-lg-gray" for="checkbox3" th:text="'View My Projects Only'"></label>
                                                     </div>
                                                 </div>

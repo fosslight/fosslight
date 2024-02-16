@@ -9,10 +9,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.github.jsonldjava.utils.Obj;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -31,9 +34,11 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.SearchType;
 import oss.fosslight.common.Url.CONFIGURATION;
 import oss.fosslight.domain.*;
+import oss.fosslight.repository.SearchMapper;
 import oss.fosslight.service.ConfigurationService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.util.StringUtil;
 
 @Controller
 @Slf4j
@@ -41,6 +46,7 @@ public class ConfigurationController extends CoTopComponent {
 
 	@Autowired ConfigurationService configurationService;
 	@Autowired SearchService searchService;
+	@Autowired SearchMapper searchMapper;
 	@Autowired T2UserService userService;
 	
 	@GetMapping(value=CONFIGURATION.EDIT, produces = "text/html; charset=utf-8")
@@ -118,8 +124,27 @@ public class ConfigurationController extends CoTopComponent {
 					params.remove(key);
 				}
 			}
-			
-			searchService.saveSearchFilter(params, loginUserName());
+
+			// Extract only fields stored in the existing DB
+//			String type = (String)params.get("defaultSearchType");
+			String userId = loginUserName();
+//			String searchFilterString = searchMapper.selectSearchFilter(type, userId);
+//
+//			Pattern pattern = Pattern.compile("\"([^\"]+)\":");
+//			Matcher matcher = pattern.matcher(searchFilterString);
+//
+//			List<String> array = new ArrayList<>();
+//			while (matcher.find()) {
+//				array.add(matcher.group(1));
+//			}
+//
+//			Map<String, Object> _params = new HashMap<>();
+//			_params.put("defaultSearchType", type);
+//			for(String param : array) {
+//				_params.put(param, (String)params.get(param));
+//			}
+
+			searchService.saveSearchFilter(params, userId);
 			resMap.put("resCd", "10");
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

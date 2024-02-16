@@ -3281,3 +3281,64 @@ function callAutoCompleteFnc(value) {
      	}
 	});
 }
+
+function resetForm(el) {
+    $("#" + el).each(function() {
+        $(this).find('input, textarea, select').each(function() {
+            var $field = $(this);
+            console.log($field.val())
+            if ($field.is(':checkbox') || $field.is(':radio')) {
+                $field.prop('checked', false);
+            } else {
+                $field.val('');
+            }
+        });
+
+        $("#" + el).find('select').each(function() {
+            var $select = $(this);
+            $select.val(null).trigger('change');
+        });
+    });
+}
+
+function updateSearchCondition(el){
+    // multiple checkbox values to comma separate
+    var chkElArr = ["restrictions", "statuses", "status"];
+    $.each(chkElArr, function(index, item){
+        var selectedValues  = "";
+        $('#' + el + ' select[name="'+item+'"]').find(':selected').each(function() {
+            if (selectedValues.length === 0) {
+                selectedValues += $(this).val();
+            } else {
+                selectedValues += "," + $(this).val();
+            }
+        });
+
+        if(selectedValues.length > 0) {
+            appendFormCheckboxValuesEl(el, item, selectedValues);
+        }
+    });
+
+    var formData = $("#" + el + " .save-value").serialize();
+
+    if (formData) {
+        formData = formData.replace(/copyrights/g, 'copyright');
+
+        $.ajax({
+            url: "/configuration/updateDefaultSearchCondition",
+            type: 'POST',
+            dataType: "json",
+            data: formData, // 선택된 요소들의 데이터를 전송합니다.
+            cache: false,
+            success: fn.onUpdateSuccess,
+            error: fn.onError
+        });
+    }
+}
+
+function appendFormCheckboxValuesEl(el, item, selectedValues) {
+    console.log("qnckr");
+    $('#' + el + ' input[name="chk_'+item+'"]').remove();
+    var addEl = '<input class="save-value" type="hidden" name="chk_'+item+'" value="'+ selectedValues +'" />';
+    $('#' + el).append(addEl);
+}
