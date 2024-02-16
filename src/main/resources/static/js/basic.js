@@ -3284,17 +3284,22 @@ function resetForm(el) {
     $("#" + el).each(function() {
         $(this).find('input, textarea, select').each(function() {
             var $field = $(this);
-            console.log($field.val())
-            if ($field.is(':checkbox') || $field.is(':radio')) {
-                $field.prop('checked', false);
-            } else {
-                $field.val('');
+            var name = $field.attr("name");
+            if(name !== 'act' && name !== "defaultSearchType") {
+                if ($field.is(':checkbox') || $field.is(':radio')) {
+                    $field.prop('checked', false);
+                } else {
+                    $field.val('');
+                }
             }
+
         });
 
-        $("#" + el).find('select').each(function() {
+        $(this).find('select').each(function() {
             var $select = $(this);
-            $select.val(null).trigger('change');
+            if (!$select.is(':hidden')) { // 숨겨진 요소가 아닌 경우에만 처리
+                $select.val(null).trigger('change');
+            }
         });
     });
 }
@@ -3335,7 +3340,6 @@ function updateSearchCondition(el){
 }
 
 function appendFormCheckboxValuesEl(el, item, selectedValues) {
-    console.log("qnckr");
     $('#' + el + ' input[name="chk_'+item+'"]').remove();
     var addEl = '<input class="save-value" type="hidden" name="chk_'+item+'" value="'+ selectedValues +'" />';
     $('#' + el).append(addEl);
