@@ -179,10 +179,8 @@
 					}, false, 'confirm');
             	}
 				
-                $("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
-				
-                alertify.confirmDialog(innerHtml, function () {
-                	var comment = $($("#dropEditor").summernote('code')).text();
+                alertify.dropDialog(innerHtml, function () {
+                	var comment = $("#dropEditor").summernote('code');
     				if ("" == comment) {
     					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
     				} else {
@@ -217,6 +215,8 @@
     					}
     				}
                 });
+                
+                $("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			});
 			
 			$("#popCopyConfirmSave").click(function(){
@@ -276,9 +276,7 @@
                 	}
 	               	
 	               	alertify.deletePrjDialog(innerHtml, function () {
-	               		var comment = $($("#prjDelEditor").summernote('code')).text();
-	               		comment = comment.trim();
- 						if ("" == comment){
+	               		if ("" == $("#prjDelEditor").summernote('code')){
  							alertify.alert([[#{msg.project.required.comments}]], function(){});
 
 							return false;
@@ -970,7 +968,7 @@
 			},
 			// 삭제
 			deleteSubmit : function(){
-				var editorVal = "";
+				var editorVal = $("#prjDelEditor").summernote('code');
 				$('input[name=userComment]').val(editorVal);
 				
 				$("#projectForm").ajaxForm({

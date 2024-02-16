@@ -216,6 +216,7 @@ var evt = {
 			url : '/partner/ossFile',
 			multiple:false,
 			dragDrop:true,
+			allowedTypes:accept1,
 			fileName:'myfile',
 			sequential:true,
 			sequentialCount:1,
@@ -252,13 +253,14 @@ var evt = {
 			url : '/partner/ossFile?excel=Y',
 			multiple:false,
 			dragDrop:true,
+			allowedTypes:accept2,
 			fileName:'myfile',
 			sequential:true,
 			sequentialCount:1,
 			onSuccess:function(files,data,xhr,pd){
 				// 161102 jy-seo 파일 업로드 에러처리
 				var result = jQuery.parseJSON(data);
-				console.log(result);
+				
 				if (result == null) {
 					alertify.error([[#{msg.common.valid}]], 0);
 				} else {
@@ -277,10 +279,10 @@ var evt = {
 						var result_ = result[0][0];
 						
 						if (result && result_.uploadSucc) {
-							if (result[1] && result[1].length != 0) {console.log(result[1]);
+							if (result[1] && result[1].length != 0) {
 								for(var i = 0; i < result[1].length; i++){
 									var num = i+1;
-									var checkedTxt = "";console.log(result[1][i]);
+									var checkedTxt = "";
 									var sheetName = result[1][i].name.toUpperCase().trim();
 
 									if (sheetName == "OSS LIST" || sheetName == "OPEN SOURCE SOFTWARE LIST") {
@@ -566,7 +568,7 @@ var evt = {
 		});
 
 		$("#createProject").on("click", function(){
-			if (partnerData != null) {console.log(partnerData);
+			if (partnerData != null) {
 				var partnerId = partnerData.partnerId||"";
 				var partnerName = partnerData.partnerName||"";
 				var softwareName = partnerData.softwareName||"";
@@ -1400,7 +1402,7 @@ var fn = {
     				data : param,
     				dataType : 'json',
     				cache : false,
-    				success : function(data){console.log(data);
+    				success : function(data){
     					if(data.isValid == "false") {
     						gridValidMsgNew(data, "list");
     						
