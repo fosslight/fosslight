@@ -829,11 +829,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${autoAnalysisFlag and project.dropYn != 'Y'}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenAnalysis" th:text="'Auto Analysis'" th:onclick="|bom_fn.analysisValidation()|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenAnalysis" th:text="'Auto Analysis'" th:onclick="|bom_fn.analysisValidation()|"></button>
                                         <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${autoAnalysisFlag and project.dropYn != 'Y'}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenAnalysisResult" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenAnalysisResult" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
                                         <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${project.dropYn != 'Y'}"
-                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
