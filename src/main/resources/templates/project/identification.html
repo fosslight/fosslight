@@ -92,7 +92,7 @@
                             <div class="float-right mr-3" style="margin-top: .35rem">
                                 <button type="button" class="btn btn-purple btn-xs px-3 btnCommentHistory" data-toggle="on" th:text="'Show Comment History'"></button>
                                 <button type="button" class="btn btn-default btn-xs px-3 commentBtn" data-toggle="off" th:text="'Comment Edit'"></button>
-                                <button type="button" class="btn btn-tool ml-3" data-card-widget="collapse" title="Collapse">
+                                <button type="button" class="btn btn-tool ml-3" id="expandBtn" data-card-widget="collapse" title="Collapse">
                                     <i class="fas fa-minus"></i>
                                 </button>
                             </div>
@@ -693,8 +693,8 @@
                                 <div class="col-md-6"></div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
-                                        <button type="button" th:onclick="|party_evt.reset()|" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Reset"></button>
-                                        <button type="button" th:onclick="|party_evt.save()|" class="btn btn-teal-01 btn-sm width-6rem px-3" th:text="Save"></button>
+                                        <button type="button" th:onclick="|party_evt.reset()|" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset" th:text="Reset"></button>
+                                        <button type="button" th:onclick="|party_evt.save()|" class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -733,8 +733,8 @@
                                             </div>
                                         </div>
 
-                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="depResetUp" th:text="Reset"></button>
-                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="depSaveUp" th:text="Save"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset" id="depResetUp" th:text="Reset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave" id="depSaveUp" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -771,8 +771,8 @@
                                                 <a class="dropdown-item" style="cursor: pointer;" th:onclick="|src_fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
                                             </div>
                                         </div>
-                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="srcResetUp" th:text="Reset"></button>
-                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="srcSaveUp" th:text="Save"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset" id="srcResetUp" th:text="Reset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave" id="srcSaveUp" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -809,8 +809,8 @@
                                                 <a class="dropdown-item" th:onclick="|bin_fn.selectDownloadFile('YAML')|" th:text="'FOSSLight Report (YAML)'"></a>
                                             </div>
                                         </div>
-                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="binReset" th:text="Reset"></button>
-                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="binSave" th:text="Save"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset" id="binReset" th:text="Reset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave" id="binSave" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -856,8 +856,8 @@
                                                 <a class="dropdown-item pointer" th:onclick="|bom_fn.selectDownloadFile('cdxXML')|" th:text="'CycloneDX (XML)'"></a>
                                             </div>
                                         </div>
-                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="bomResetUp" th:text="Reset"></button>
-                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="bomSaveUp" th:text="Save"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenSave" id="bomResetUp" th:text="Reset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave" id="bomSaveUp" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>

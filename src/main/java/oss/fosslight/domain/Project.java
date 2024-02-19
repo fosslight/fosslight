@@ -361,6 +361,8 @@ public class Project extends ComBean implements Serializable {
 	private String vulDocInfo;
 	
 	private Float standardScore;
+	private Float secCvssScore;
+	
 	private String copyWatcherLocation;
 	/** add watcher list. */
 	private ArrayList<Map<String, String>> changeWatcherList;
@@ -4429,5 +4431,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setPackageVulDocFileInfo(T2File packageVulDocFileInfo) {
 		this.packageVulDocFileInfo = packageVulDocFileInfo;
+	}
+
+	public Float getSecCvssScore() {
+		return secCvssScore;
+	}
+
+	public void setSecCvssScore(Float secCvssScore) {
+		this.secCvssScore = secCvssScore;
 	}
 }

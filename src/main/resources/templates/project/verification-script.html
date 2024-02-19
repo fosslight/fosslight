@@ -82,12 +82,14 @@
                 height: 'auto',
                 caption: '* Open Source List to disclose source code',
                 loadComplete: function () {
-                    // load후 filepath editmode로 변경
-                    var $this = $(this), ids = $this.jqGrid('getDataIDs'), i, l = ids.length;
+                	if ($("[name='btnSavePath']").is(":visible")) {
+                		// load후 filepath editmode로 변경
+                        var $this = $(this), ids = $this.jqGrid('getDataIDs'), i, l = ids.length;
 
-                    for (i = 0; i < l; i++) {
-                        $this.jqGrid('editRow', ids[i], false); // 	true로 변경하면 엔터키 입력시 saverow되어버림
-                    }
+                        for (i = 0; i < l; i++) {
+                            $this.jqGrid('editRow', ids[i], false); // 	true로 변경하면 엔터키 입력시 saverow되어버림
+                        }
+                	}
                 }
             });
 
@@ -138,8 +140,7 @@
             // 20210617_autoVerify Change Alert ADD
             $("input:checkbox[name='autoVerify']").change(function () {
                 if ($("input:checkbox[name='autoVerify']").is(":checked") == true) {
-                    alertify.alert([[#{msg.project.upload.verify}]], function () {
-                    });
+                    alertify.alert([[#{msg.project.upload.verify}]], function () {});
                 }
             });
         });
@@ -372,6 +373,12 @@
                 });
 
                 $("[name='upload_path']").click(function () {
+                	if (!$("[name='btnSavePath']").is(":visible")) {
+                		alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.verificationStatus, 'identification')}]], function(){});
+            			
+            			return false;
+                	}
+                	
                     $("#changePathPop").show();
                     $("#blind_wrap").show();
                 });
@@ -1135,6 +1142,11 @@
                 });
 
                 $("#uploadAdd_1").click(function (e) {
+                	if (!$("[name='btnSavePath']").is(":visible")) {
+                		alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.identificationStatus, 'identification')}]], function(){});
+            			return false;
+                	}
+                	
                     $(".multiSet > div:eq(1)").prev().show();
                     $(".multiSet > div:eq(1)").show();
                     $("#uploadAdd_1").hide();
@@ -1142,6 +1154,11 @@
                 });
 
                 $("#uploadAdd_2").click(function (e) {
+                	if (!$("[name='btnSavePath']").is(":visible")) {
+                		alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.identificationStatus, 'identification')}]], function(){});
+            			return false;
+                	}
+                	
                     $(".multiSet > div:eq(2)").show();
                     $("#uploadAdd_2").hide();
                     $("#uploadRemove_3").show();
@@ -1169,7 +1186,6 @@
                     var fileSeq = $('input[name=fileSeq_3]').val();
 
                     if (fileSeq == "") {
-                        $(".multiSet > div:eq(1)").prev().hide();
                         $(".multiSet > div:eq(1)").hide();
                         $("#uploadAdd_1").show();
                     } else {
@@ -1198,16 +1214,20 @@
             deleteFile: function (element, fileSeq, i) {
                 $('input[name=fileSeq_' + i + ']').val('');
 
-                var fileSeq_1 = $("[name='fileSeq_1']").val();
-                var fileSeq_2 = $("[name='fileSeq_2']").val();
-                var fileSeq_3 = $("[name='fileSeq_3']").val();
+                var fileSeq = $("[name='fileSeq_"+i+"']").val();
+//              var fileSeq_2 = $("[name='fileSeq_2']").val();
+//              var fileSeq_3 = $("[name='fileSeq_3']").val();
 
                 $('.verifyFile_' + i).show();
                 $("#uploadAdd_" + i).hide();
-
-                if (!(fileSeq_1 == "" && fileSeq_2 == "" && fileSeq_3 == "")) {
-                    $("#uploadRemove_" + i).show();
+				
+                if ("" == fileSeq) {
+                	$("#uploadRemove_" + i).show();
                 }
+                
+//             	if (!(fileSeq_1 == "" && fileSeq_2 == "" && fileSeq_3 == "")) {
+//              	$("#uploadRemove_" + i).show();
+//             	}
 
                 // Packaging에서 OSS Package를 다시 올릴 때 UI 개선
                 // file이 지워지고 실제로 save를 하지 않은 시점부터도 readme, proprietary, Path or File을 hide 시킴.

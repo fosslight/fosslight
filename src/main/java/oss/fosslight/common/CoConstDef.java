@@ -309,12 +309,13 @@ public class CoConstDef {
 	
 	/** 프로젝트 상태 코드 - 205 */
 	public static final String CD_PROJECT_STATUS = "205";
-	public static final String CD_DTL_PROJECT_STATUS_PROGRESS 	= "PROG";
-	public static final String CD_DTL_PROJECT_STATUS_REQUEST 	= "REQ";
-	public static final String CD_DTL_PROJECT_STATUS_REVIEW 	= "REV";
-	public static final String CD_DTL_PROJECT_STATUS_COMPLETE 	= "COMP";
+	public static final String CD_DTL_PROJECT_STATUS_PROGRESS 		= "PROG";
+	public static final String CD_DTL_PROJECT_STATUS_REQUEST 		= "REQ";
+	public static final String CD_DTL_PROJECT_STATUS_REVIEW 		= "REV";
+	public static final String CD_DTL_PROJECT_STATUS_FINAL_REVIEW 	= "FREV";
+	public static final String CD_DTL_PROJECT_STATUS_COMPLETE 		= "COMP";
 //	public static final String CD_DTL_PROJECT_STATUS_DELAY		= "DELAY";
-	public static final String CD_DTL_PROJECT_STATUS_DROP		= "DROP";
+	public static final String CD_DTL_PROJECT_STATUS_DROP			= "DROP";
 	/** status of project Identification and Packaging */
 	public static final String CD_IDENTIFICATION_STATUS		="206";
 	public static final String CD_DTL_IDENTIFICATION_STATUS_PROGRESS 	= "PROG";

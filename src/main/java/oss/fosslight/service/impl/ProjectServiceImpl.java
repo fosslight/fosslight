@@ -207,6 +207,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						if (getSecurityDataCntByProject(bean)) {
+							Float notFixedCvssScore = projectMapper.getCvssScoreForNotFixed(bean.getPrjId());
+							if (notFixedCvssScore != null) {
+								bean.setSecCvssScore(notFixedCvssScore);
+							}
 							if (checkIfVulnerabilityResolutionIsFixed(bean)) {
 								bean.setSecCode("Fixed");
 							} else {
@@ -6161,6 +6165,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					OssMaster om = new OssMaster();
 					om.setOssName(oc.getOssName());
 					om.setOssVersion(avoidNull(oc.getOssVersion()).isEmpty() ? "-" : oc.getOssVersion());
+					om.setPrjId(prjId);
 					
 					Vulnerability vuln = vulnerabilityService.selectNotFixedCveInfo(om);
 					if (vuln != null) {

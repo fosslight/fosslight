@@ -81,13 +81,6 @@ $(document).ready(function () {
         $('html').css('overflow', 'auto');
     }); // 팝업 닫기
 
-    // datepicker format setting
-    $(function () {
-        $('.cal').datepicker({
-            dateFormat: "yymmdd"
-        });
-    }); // 달력
-
     var select = $(".selectSet select");
 
     select.change(function () {
@@ -2619,6 +2612,7 @@ var createTabNew = function (tabNm, tabLk) {
 
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).length > 0) {
         $("#tab--" + tabName).trigger("click");
+        $("#tab--" + tabName).focus();
     } else {
         var $tabs = $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").tabs();
         var tab_length = $tabs.find('.nav-item').length;
@@ -2893,13 +2887,15 @@ const SELECTOR_TAB_PANE = `${SELECTOR_TAB_CONTENT} .tab-pane`
 
 function createTab_new(title, link, uniqueName, autoOpen) {
     const existingPanel = document.querySelector('.tab-pane[aria-labelledby="tab--' + uniqueName + '"]') || null;
-    if (existingPanel) {
-        activateTab(uniqueName);
-        return;
-    }
-
+    
     let tabId = `panel--${uniqueName}`
     let navId = `tab--${uniqueName}`
+    
+    if (existingPanel) {
+        activateTab(uniqueName);
+        $(`${tabId}`).focus();
+        return;
+    }
 
     const newTabListItem = `<li class="nav-item" role="presentation"><a href="#" class="btn-iframe-close" data-widget="iframe-close" data-type="only-this"><i class="fas fa-times"></i></a><a class="nav-link" data-toggle="row" id="${navId}" href="#${tabId}" role="tab" aria-controls="${tabId}" aria-selected="false">${title}</a></li>`
     $(SELECTOR_TAB_NAVBAR_NAV).append(unescape(escape(newTabListItem)))

@@ -15,16 +15,42 @@
                         <div class="col-sm-8 text-left mt-2">
                             <span class="description-percentage text-lg text-dark-gray" id="vPrjName"></span>
                             <span class="text-dark-gray mx-1" id="vCreated"></span>
+                            <span class="ml-2">
+                                <span class="badge badge-info text-md px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">B</span>
+                                <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
+                                    <span class="badge badge-success text-md px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">P</span>
+                                </th:block>
+                                <th:block th:if="${project.secCode != null}">
+                                   <span class="badge badge-carrot text-md px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">S</span>
+                                </th:block>
+                            </span>
+                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
+                            	<th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
+                            	<span class="ml-5 projdecBtn">
+                            		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
+                               		<label class="form-check-label text-lg-gray" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
+                               	</span>
+                            	</th:block>
+                         	</span>
                         </div>
-                        <div class="col-sm-4 float-right">
+                        <div class="col-sm-4 float-right mt-1">
+                        	<div class="float-right btn-group ml-2">
+                                <button type="button" class="btn btn-outline-danger px-3 btn-sm helpBtnL"><strong th:text="Help"></strong></button>
+                                <button type="button" class="btn btn-outline-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
+                                    <span class="sr-only"></span>
+                                </button>
+                                <div class="dropdown-menu" role="menu">
+                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|" th:text="'How to use FossLight Hub'"></a>
+                                </div>
+                            </div>
                         	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
                         		<button type="button" class="btn btn-danger btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
                         	</div>
                             <div class="float-right" th:if="${project.completeYn != 'Y' and project.dropYn != 'Y'}">
-                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" id="bomConfirm" th:text="Confirm"></button>
-                                <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"></button>
-                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3" id="bomRequest" th:text="Request"></button>
-                                <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3" id="bomReviewStart" th:text="'Review Start'"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                                <button type="button" class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                                <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                             </div>
                         </div>
                     </div>
@@ -39,7 +65,7 @@
                                	<li class="nav-item">
                                     <a class="nav-link" id="tabMenuBinAndroid" data-toggle="pill" href="#menu-android" role="tab" aria-controls="menu-android" aria-selected="false" th:text="'BIN(Android)'"></a>
                                 </li>
-                                <li class="nav-item">
+                                <li th:if="${batFlag}" class="nav-item">
                                     <a class="nav-link" id="tabMenuBat" data-toggle="pill" href="#menu-bat" role="tab" aria-controls="menu-bat" aria-selected="false" th:text="'BAT(Optional)'"></a>
                                 </li>
                             </ul>
@@ -47,6 +73,9 @@
                             <div class="float-right mr-3" style="margin-top: .35rem">
                                 <button type="button" class="btn btn-purple btn-xs px-3 btnCommentHistory" data-toggle="on" th:text="'Show Comment History'"></button>
                                 <button type="button" class="btn btn-default btn-xs px-3 commentBtn" data-toggle="off" th:text="'Comment Edit'"></button>
+                                <button type="button" class="btn btn-tool ml-3" id="expandBtn" data-card-widget="collapse" title="Collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -375,8 +404,8 @@
                                         		th:onclick="|binAndroid_fn.binaryDBSave('${project.prjId}')|" th:text="'Save (Binary DB)'"></button>
                                         <button type="button" class="btn btn-lg-light-gray btn-sm width-10rem mr-xm px-3" th:onclick="|binAndroid_fn.downloadExcel()|" th:text="Export"></button>
                                         <button type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.downloadYaml('ANDROID')|" th:text="Yaml"></button>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Reset" id="binAndroidReset"></button>
-                                        <button th:if="${project.dropYn ne 'Y'}" type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:text="Save" id="binAndroidSave"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset" th:text="Reset" id="binAndroidReset"></button>
+                                        <button th:if="${project.dropYn != 'Y'}" type="button" class="btn btn-lg-teal btn-sm width-6rem px-3 idenSave" th:text="Save" id="binAndroidSave"></button>
                                     </div>
                                 </div>
                             </div>
@@ -385,6 +414,13 @@
                         <div class="col-md-12 outerJqGridSet">
                             <table id="binAndroidList"><tr><td></td></tr></table>
                             <div id="binAndroidPager"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row pl-2" name="gridArea" id="gridAreaBat" style="width: 100%;display: none;">
+                    	<div class="col-md-12 outerJqGridSet batBtn">
+                            <table id="batList"><tr><td></td></tr></table>
+                            <div id="batPager"></div>
                         </div>
                     </div>
                 </div>

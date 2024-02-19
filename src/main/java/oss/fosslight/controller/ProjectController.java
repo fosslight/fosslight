@@ -2939,6 +2939,7 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("partnerFlag", partnerFlag);
+		model.addAttribute("newPrjFlag", isEmpty(projectMaster.getIdentificationStatus()) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
 		
 		Map<String, Object> btnShowMap = new HashMap<>();
 		CommonFunction.getDisplayIdentificationBtn(avoidNull(project.getIdentificationStatus()), avoidNull(project.getViewOnlyFlag()), btnShowMap);

@@ -29,6 +29,8 @@ $(function () {
 
 var sec_com_evt = {
 	dataInit : function(){
+		loading.show();
+		
 		var url = '/project/securityGrid/'+[[${project.prjId}]]+'/total';
 		$.ajax({
 			url : url,
@@ -37,6 +39,8 @@ var sec_com_evt = {
 			cache : false,
 			contentType : 'application/json',
 			success : function(data){
+				loading.hide();
+				
 				totalMainData = data.totalGridData;
 				fixedMainData = data.fixedGridData;
 				notfixedMainData = data.notFixedGridData;

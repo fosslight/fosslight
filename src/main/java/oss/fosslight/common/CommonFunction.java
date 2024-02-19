@@ -5457,4 +5457,12 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			return obj;
 		}
 	}
+	
+	public static String getMessageForDisabled(String msgCode, String status, String step) {
+		if (step.equals("identification")) {
+			return getMessage(msgCode , new String[]{CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, status)});
+		} else {
+			return getMessage(msgCode , new String[]{CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, status)});
+		}
+	}
 }
