@@ -30,16 +30,36 @@
   <script>
     /* scroll the navi item to the left whenever navi item is created */
     var observer = new MutationObserver(function(mutationsList) {
+      var navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(function(navLink) {
+        navLink.addEventListener('click', function(event) {
+          console.log('Nav-link가 클릭되었습니다.');
+          moveNaviBar();
+        });
+      });
+
       for (var mutation of mutationsList) {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0 && $("#navbarNav li").length > 1) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
           var navbarNav = document.getElementById("navbarNav");
           navbarNav.scrollLeft = navbarNav.scrollWidth - navbarNav.clientWidth;
           break;
         }
       }
     });
+
     var targetNode = document.getElementById('navbarNav');
     observer.observe(targetNode, { childList: true });
+
+    function moveNaviBar() {
+      var navbarNav = document.getElementById("navbarNav");
+      var activeElement = navbarNav.querySelector('.active');
+      if (activeElement) {
+        var navbarRect = navbarNav.getBoundingClientRect();
+        var activeRect = activeElement.getBoundingClientRect();
+        var scrollLeft = activeRect.left - navbarRect.left - (navbarRect.width - activeRect.width) / 2;
+        navbarNav.scrollLeft = scrollLeft;
+      }
+    }
 
     /* resize the width of jqgrid when iframe is activated */
     var observer = new MutationObserver(function(mutationsList, observer) {

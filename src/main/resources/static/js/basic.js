@@ -391,8 +391,9 @@ function createTabInFrame(tabNm, tabLk) {
     var data = {
         tabData: tabData,
         action: 'create'
-    };
+    }
 
+    moveNaviBar();
     parent.postMessage(JSON.stringify(data), "*");
 
 }
@@ -2653,6 +2654,8 @@ var createTabNew = function (tabNm, tabLk) {
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").hasClass("ui-tabs") === true) {
         $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").removeClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
     }
+
+    moveNaviBar();
 }
 
 var existsTabName = function (tabNm) {
@@ -2915,6 +2918,8 @@ function createTab_new(title, link, uniqueName, autoOpen) {
             })
         })
     }
+
+
 }
 
 function deleteTab_new(uniqueName) {
@@ -2940,6 +2945,8 @@ function reloadTab_new(link, uniqueName, act) {
 }
 
 function activateTab(uniqueName) {
+    moveNaviBar();
+
     let tabId = `panel--${uniqueName}`
     let navId = `tab--${uniqueName}`
 
@@ -3343,4 +3350,17 @@ function appendFormCheckboxValuesEl(el, item, selectedValues) {
     $('#' + el + ' input[name="chk_'+item+'"]').remove();
     var addEl = '<input class="save-value" type="hidden" name="chk_'+item+'" value="'+ selectedValues +'" />';
     $('#' + el).append(addEl);
+}
+
+function moveNaviBar() {
+    console.log("move :: ");
+    var navbarNav = document.getElementById("navbarNav");
+    var activeElement = navbarNav.querySelector('.active');
+    if (activeElement) {
+        var navbarRect = navbarNav.getBoundingClientRect();
+        var activeRect = activeElement.getBoundingClientRect();
+        var scrollLeft = activeRect.left - navbarRect.left - (navbarRect.width - activeRect.width) / 2;
+        navbarNav.scrollLeft = scrollLeft;
+        console.log("move :: " + scrollLeft);
+    }
 }
