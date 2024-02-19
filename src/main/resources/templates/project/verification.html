@@ -12,6 +12,15 @@
                         <div class="col-sm-8 text-left mt-2">
                             <span class="description-percentage text-lg text-dark-gray text-bold" id="verifyPrjName"></span>
                             <span class="text-dark-gray mx-1" id="verifyCreator"></span>
+                           	<span class="ml-2">
+                                <span class="badge badge-info text-md px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">B</span>
+                                <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
+                                    <span class="badge badge-success text-md px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">P</span>
+                                </th:block>
+                                <th:block th:if="${project.secCode != null}">
+                                   <span class="badge badge-carrot text-md px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">S</span>
+                                </th:block>
+                            </span>
                             <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
                             	<input class="form-check-input text-orange" id="approve" name="approve" th:value="Y" type="checkbox">
                                	<label class="form-check-label text-lg-gray" for="approve" th:text="'Approve without verification'"></label>
@@ -79,10 +88,10 @@
                                         <div class="card card-widget bg-ivory mb-3">
                                             <div class="card-body multiSet">
                                             <th:block th:each="i : ${#numbers.sequence(1,3)}">
-                                            <th:block th:if="${i > 1}">
-                                        		<hr class="my-3">
-                                        	</th:block>
                                             <div th:id="fileUploader_+${i}">
+                                            	<th:block th:if="${i > 1}">
+                                        			<hr class="my-3">
+                                        		</th:block>
                                                 <div class="row">
                                                     <div class="col-md-2">
                                                         <span class="text-bold text-lg-gray" th:text="'Package File ' + ${i}"></span>
@@ -109,9 +118,9 @@
                                                                     	</div>
                                                         				<div class="ajax-file-upload-container" style="margin-top:0px;">
                                                         					<ul th:class="uploadList_+${i}">
-                                                        						<li th:if="${file.delYn eq 'N'}">
+                                                        						<li th:if="${file.delYn == 'N'}">
                                                                         			<a class="ajax-file-upload-filename" th:text="${file.origNm}" th:href="@{'/download/' + ${file.fileSeq} + '/' + ${file.logiNm}}"></a>
-                                                                        			<span class="badge bg-danger" style="cursor:pointer;" th:onclick="fn.deleteFile(this, [[${file.fileSeq}]], [[${i}]])">X</span>
+                                                                        			<span th:if="${project.viewOnlyFlag == 'Y' or project.verificationStatus != 'CONF'}" class="badge bg-danger smallDelete" style="cursor:pointer;" th:onclick="fn.deleteFile(this, [[${file.fileSeq}]], [[${i}]])">X</span>
                                                                         			<br>[[${file.createdDate}]]
                                                                    				</li>
                                                         					</ul>
@@ -145,14 +154,14 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-md-1" th:id="BtnSetDynamicCreate_+${i}" th:if="${i < 3}">
-                                                        <button type="button" class="btn btn-outline-danger btn-sm float-right" th:id="uploadAdd_+${i}" th:text="Add" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
+                                                    <div th:if="${project.verificationStatus != 'CONF'}" class="col-md-1" th:id="BtnSetDynamicCreate_+${i}">
+                                                        <button th:if="${i < 3}" type="button" class="btn btn-outline-danger btn-sm float-right" th:id="uploadAdd_+${i}" th:text="Add" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
                                                         <button type="button" class="btn btn-outline-secondary btn-sm float-right" th:id="uploadRemove_+${i}" th:text="Remove" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
                                                     </div>
                                                 </div>
-                                                <div class="row mt-3">
+                                                <div th:if="${(project.verificationStatus == null or project.verificationStatus == 'PROG' or (@CommonFunction.isAdmin() and project.verificationStatus == 'REV' )) and project.viewOnlyFlag eq 'N'}" class="row mt-3">
                                                     <div class="col-7 offset-md-2 text-lg-gray">
-                                                    	<p class="text-smaller" th:text="'* The maximum file size for uploading is 5GB.'"></p>
+                                                    	<p th:id="fileUplWarnMessage_+${i}" class="text-smaller" th:text="'* The maximum file size for uploading is 5GB.'"></p>
                                                     </div>
                                                 </div>
                                         	</div>

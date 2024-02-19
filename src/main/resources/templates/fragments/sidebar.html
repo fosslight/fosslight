@@ -223,9 +223,11 @@
   			    	mutations.forEach(function(mutation) {
   			      		if ($(mutation.target).attr("class").indexOf("active") > -1) {
   			      			var src = $(mutation.target).attr("href");
-  			      			var panelId = $("iframe[src='"+src+"']").parent().attr("id");
-  			      			var tabName = "#tab--" + panelId.substring(7, panelId.length);
-  			      			$(tabName).focus();
+  			      			var pId = $("iframe[src='"+src+"']").parent().attr("id");
+  			      			if (typeof pId !== "undefined") {
+  			      				var tabName = "#tab--" + pId.substring(7, pId.length);
+  			      				$(tabName).focus();
+  			      			}
   			      		}
   			    	});
   				});

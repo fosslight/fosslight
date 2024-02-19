@@ -430,7 +430,7 @@ var com_fn = {
 		var btn_supplement_Notice = $(".supplementNotice");
 		var chkStatus = status||"";
 		
-		if(role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
+		if (role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
 			switch(chkStatus){
 				case "":
 					btn_div.hide();
@@ -1342,13 +1342,19 @@ var com_fn = {
 	checkOssViewPage : function(target){
 		var saveFlag = com_fn.saveFlagObject[target.toUpperCase()];
 		var referenceDiv;
-				
-		if(!saveFlag){
+		
+		if (!$(".idenSave").is(":visible")) {
+			alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.identificationStatus, 'identification')}]], function(){});
+			
+			return false;
+		}
+		
+		if (!saveFlag) {
 			alertify.alert([[#{msg.project.required.checkOssName}]], function(){});
 			
 			return false;
 		}
-
+		
 		switch(target.toUpperCase()){
 			case "SRC":		referenceDiv = "11";	break;
 			case "DEP":		referenceDiv = "16";	break;
@@ -1369,8 +1375,14 @@ var com_fn = {
 	CheckOssLicenseViewPage : function(target){
 		var saveFlag = com_fn.saveFlagObject[target.toUpperCase()];
 		var referenceDiv;
-				
-		if(!saveFlag){
+		
+		if (!$(".idenSave").is(":visible")) {
+			alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.identificationStatus, 'identification')}]], function(){});
+			
+			return false;
+		}
+		
+		if (!saveFlag){
 			alertify.alert([[#{msg.project.required.checkOssLicense}]], function(){});
 			
 			return false;
@@ -1441,6 +1453,12 @@ var com_fn = {
 		});
 	},
     bulkEdit : function(tab){
+    	if (!$(".idenSave").is(":visible")) {
+			alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.identificationStatus, 'identification')}]], function(){});
+			
+			return false;
+		}
+    	
         var gridList;
         var targetGird = "";
         

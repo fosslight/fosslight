@@ -4,6 +4,7 @@
 <script th:inline="javascript">
 var partnerFlag = [[${partnerFlag}]];
 var batFlag = [[${batFlag}]];
+var newPrjFlag = [[${newPrjFlag}]];
 
 $(document).ready(function () {
 	com_evt.init();
@@ -28,6 +29,8 @@ $(document).ready(function () {
 		}
 	});
 
+	if ("N" == newPrjFlag) $("#expandBtn").trigger("click");
+	
 	$('.btnCommentHistory').on('click', function (e) {
         e.preventDefault();
         openCommentHistory('/comment/popup/prj/' + [[${project.prjId}]]);

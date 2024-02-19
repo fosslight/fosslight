@@ -892,12 +892,13 @@
 				$('input[name=prjName]').val(prjName);
 				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
 
-				var editorVal = $('#additionalInformation').summernote('code');
-				$('input[name=comment]').val(editorVal);
-
-				var userComment = $("#comment").summernote('code');
-				$('input[name=userComment]').val(userComment);
-				$("#comment").summernote('code', '');
+				if ("" != $($('#additionalInformation').summernote('code')).text()) {
+					$('input[name=comment]').val($('#additionalInformation').summernote('code'));
+				}
+				
+				if ("" != $($('#comment').summernote('code')).text()) {
+					$('input[name=userComment]').val($('#comment').summernote('code'));
+				}
 				
 				cleanErrMsg("_modelList");
 
@@ -955,16 +956,16 @@
 					$('#checkbox3').val('Y');
 				}
 				
-				$("#projectForm").ajaxForm({
-					url : URL,
-					type : 'POST',
-					dataType: "json",
-					cache : false,
-					success: function(data) {
-						fn.onRegistSuccess(data);
-					},
-					error : fn.onError
-				}).submit();
+ 				$("#projectForm").ajaxForm({
+ 					url : URL,
+ 					type : 'POST',
+ 					dataType: "json",
+ 					cache : false,
+ 					success: function(data) {
+ 						fn.onRegistSuccess(data);
+ 					},
+ 					error : fn.onError
+ 				}).submit();
 			},
 			// 삭제
 			deleteSubmit : function(){
