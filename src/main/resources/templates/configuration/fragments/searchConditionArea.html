@@ -1,3 +1,4 @@
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
 <script type="text/javascript">
     $(document).ready(function () {
         var selectElArr = ["obligationType", "licenseType", "prjDivision", "distributionType", "priority", "networkServerType", "division"];
@@ -63,7 +64,6 @@
     <fieldset class="listSearch">
         <form id="searchConditionForm" name="searchConditionForm">
             <input name="defaultSearchType" type="hidden" th:value="${defaultSearchType}"/>
-            <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
             <th:block th:if="${#strings.equals(defaultSearchType, 'LICENSE')}">
                 <div class="card card-dark card-outline search-form mb-3">
                     <div class="card-header">
@@ -437,7 +437,7 @@
                             <input class="form-control" name="licenseName" placeholder="License Name" th:value="${searchBean?.licenseName}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
-                            <input class="form-control" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
+                            <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
                         </div>
                         <div class="form-group mb-2">
                             <div class="icheck-warning">

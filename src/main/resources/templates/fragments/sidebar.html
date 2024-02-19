@@ -209,14 +209,27 @@
   </aside>
   	<script th:inline="javascript">
   	var _initTabs = new Array();
+  	
   	window.onload = function() {
   		try {
   			initTab();
   		} finally {
-  			$.each(_initTabs, function (i, cur) {
-  				setTimeout(function () {
-					//$(cur).trigger("click");
-	  			}, (i) * 1500);
+  			var config = { attributes: true, childList: true, characterData: true };
+  			var sidebar = $("#sidebar").find(".nav-link");
+  			
+  			$(sidebar).each(function () {
+  			  	var target = this;
+  			  	var observer = new MutationObserver(function(mutations) {
+  			    	mutations.forEach(function(mutation) {
+  			      		if ($(mutation.target).attr("class").indexOf("active") > -1) {
+  			      			var src = $(mutation.target).attr("href");
+  			      			var panelId = $("iframe[src='"+src+"']").parent().attr("id");
+  			      			var tabName = "#tab--" + panelId.substring(7, panelId.length);
+  			      			$(tabName).focus();
+  			      		}
+  			    	});
+  				});
+  			  	observer.observe(target, config);
   			});
   		}
   	}

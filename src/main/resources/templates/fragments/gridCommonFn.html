@@ -202,7 +202,7 @@
                     display += "<span class=\"badge badge-primary mr-1\">Multi</span>";
                 }
                 if (cellvalue.includes("D")) {
-                    display += "<span class=\"badge badge-purple mr-1\">Dual</span>";
+                    display += "<span class=\"badge badge-pink mr-1\">Dual</span>";
                 }
                 if (cellvalue.includes("V")) {
                     display += "<span class=\"badge badge-yellow mr-1\">v-Diff</span>";
@@ -329,7 +329,11 @@
                 return display;
             },
             displayProjectName: function (cellvalue, options, rowObject) {
-            	var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+rowObject["prjId"]+"')\">" + cellvalue + "</span>";
+            	var prjName = cellvalue;
+            	var prjVersion = rowObject.prjVersion;
+            	if ("" != prjVersion) prjName += " (ver. " + prjVersion + ")";
+            	
+            	var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+rowObject["prjId"]+"')\">" + prjName + "</span>";
                 return display;
             },
             // comment 포메터

@@ -588,8 +588,8 @@ var fn = {
 	// Grid distribution cell display
 	displayDistribution : function(cellvalue, options, rowObject){
 		var display = "";
-		var projectStatusDrop = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}";
-		var projectStatusComplete = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}";
+		var projectStatusDrop = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}]];
+		var projectStatusComplete = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}]];
 		
 		if(rowObject.identificationStatus == 'Confirm' && rowObject.verificationStatus == "N/A" && cellvalue == "N/A") {
 			display = cellvalue;
@@ -684,6 +684,8 @@ var fn = {
 	},
 	// Grid vulnerability cell display
 	displayVulnerability : function(cellvalue, options, rowObject){
+		var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
+		
 		var display = "";
 		var secCode = "";
 		
@@ -691,14 +693,18 @@ var fn = {
 			secCode = rowObject.secCode;
 		}
 		
+		if (typeof rowObject.secCvssScore !== "undefined") {
+			cellvalue = rowObject.secCvssScore;
+		}
+		
 		if ("" != secCode) {
-			if (parseInt(cellvalue) >= 8.0) {
+			if (parseFloat(cellvalue) >= standardScore) {
 				if ("Fixed" == secCode) {
 					display = '<span class="badge badge-cherry size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Resolved('+cellvalue+')</span>';
 				} else {
 					display = '<span class="badge badge-cherry size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Need to resolve('+cellvalue+')</span>';
 				}	
-			} else if (parseInt(cellvalue) < 8.0 && parseInt(cellvalue) > 0) {
+			} else if (parseFloat(cellvalue) < standardScore && parseFloat(cellvalue) > 0) {
 				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cellvalue+')</span>';
 			} else {
 				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';

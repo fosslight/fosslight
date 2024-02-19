@@ -297,13 +297,12 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .badge.badge-outline-dark-blue {background-color: #fff;color: #1f2d3d;border: 1px solid #1F2D3D;}
 .badge.badge-transparent { background-color: transparent; color: #ecebe9; border: 1px solid #ecebe9;}
 .badge.badge-purple { background-color: #702f9f!important; color: #fff; }
-.badge.badge-pink { background-color: #e752a3; color: #fff; }
+.badge.badge-pink { background-color: #f5a9f2; color: #fff; }
 .badge.badge-carrot {background-color: #fd7e14; color: #fff;  }
 .badge.badge-disabled {background-color: #cccccc; color: #cccccc;  }
 .badge.badge-blue { background-color: #0080ff; color: #fff; }
 .badge.badge-orange { background-color: #ffa500; color: #fff; }
 .badge.badge-yellow2 { background-color: #ffff00; color: #000; }
-.badge.badge-purple { background-color: #f5a9f2; color: #fff; }
 .badge.badge-gray { background-color: #999; color: #fff; }
 
 /* text color */

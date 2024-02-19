@@ -12,7 +12,7 @@
 <pre class="license-text">
     <th:block th:each="ossInfo : ${mapEntry.value}">
         <p th:text="${ossInfo.ossName} + '(' + ${ossInfo.licenseName} + ')'"></p>
-        <p th:text="${ossInfo.copyrightText}"></p>
+        <p th:utext="${ossInfo.copyrightText}"></p>
     </th:block>
 
 

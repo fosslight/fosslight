@@ -386,4 +386,6 @@ public interface ProjectMapper {
 	List<OssComponents> getDependenciesDataList(Project project);
 
 	int checkProjectDistributeHis(Project project);
+
+	Float getCvssScoreForNotFixed(String prjId);
 }
