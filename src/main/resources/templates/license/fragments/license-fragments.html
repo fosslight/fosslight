@@ -81,9 +81,6 @@
                 var srcObligation = rowObject["obligationDisclosingSrcYn"];
                 var noticeObligation = rowObject["obligationNotificationYn"];
 
-                console.log(srcObligation);
-                console.log(noticeObligation);
-
                 if (srcObligation == 'Y') {
                     display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i><i class=\"far fa-file-code fa-1-3x mr-2\" title=\"Source Code\"></i>";
                 } else if (noticeObligation == 'Y') {
@@ -133,7 +130,7 @@
 
                 if (cellvalue != "" && cellvalue != undefined) {
                     display =
-                        '<span class="badge badge-warning text-xm" data-toggle="tooltip" data-placement="top" title="' + cellvalue + '">R</span>';
+                        '<span class="badge badge-warning text-xm" data-toggle="tooltip" data-placement="bottom" title="' + cellvalue + '">R</span>';
                 }
 
                 return display;

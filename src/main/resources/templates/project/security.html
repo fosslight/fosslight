@@ -16,13 +16,10 @@
                             <span class="text-dark-gray mx-1" id="creator"></span>
                         </div>
                         <div class="col-sm-4 float-right">
-                            <div class="float-right btn-group mr-1">
-                                <button type="button" class="btn btn-outline-danger px-3 btn-sm helpBtnL"><strong>Help</strong></button>
-                                <button type="button" class="btn btn-outline-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
-                                    <span class="sr-only">Toggle Dropdown</span>
-                                </button>
-                                <div class="dropdown-menu" role="menu">
-                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Security')|">How to use FossLight Hub</a>
+                            <div class="helpLink f-left dropdown float-right mt-1">
+                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+                                <div class="dropdown-menu mt-0">
+                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Security')|">How to use FossLight Hub</a>
                                 </div>
                             </div>
                         </div>
@@ -67,7 +64,7 @@
                                 <div class="col-md-6">
                                     <div class="row float-right">
                                         <button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|com_fn.downloadExcel('total')|"><i class="far fa-file-excel mr-2"></i>Export</button>
-                                        <button type="button" class="btn btn-lg-light-gray btn-sm width-6rem px-3" th:onclick="|total.save()|" th:text="Save"></button>
+                                        <button type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:onclick="|total.save()|" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -90,8 +87,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
-                                        <button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|com_fn.downloadExcel('fixed')|"><i class="far fa-file-excel mr-2"></i>Export</button>
-                                        <button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" th:onclick="|fixed.save()|" th:text="Save"></button>
+                                        <button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|com_fn.downloadExcel('fixed')|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                                        <button type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:onclick="|fixed.save()|" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>
@@ -114,8 +111,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="row float-right">
-                                        <button type="button" class="btn btn-teal-01 btn-sm width-6rem mr-xm px-3" th:onclick="|com_fn.downloadExcel('notfixed')|"><i class="far fa-file-excel mr-2"></i>Export</button>
-                                        <button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" th:onclick="|notFixed.save()|" th:text="Save"></button>
+                                        <button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|com_fn.downloadExcel('notfixed')|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                                        <button type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:onclick="|notFixed.save()|" th:text="Save"></button>
                                     </div>
                                 </div>
                             </div>

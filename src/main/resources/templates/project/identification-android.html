@@ -34,13 +34,10 @@
                          	</span>
                         </div>
                         <div class="col-sm-4 float-right mt-1">
-                        	<div class="float-right btn-group ml-2">
-                                <button type="button" class="btn btn-outline-danger px-3 btn-sm helpBtnL"><strong th:text="Help"></strong></button>
-                                <button type="button" class="btn btn-outline-danger btn-sm dropdown-toggle dropdown-icon helpBtnR" data-toggle="dropdown">
-                                    <span class="sr-only"></span>
-                                </button>
-                                <div class="dropdown-menu" role="menu">
-                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|" th:text="'How to use FossLight Hub'"></a>
+                            <div class="helpLink f-left dropdown float-right mt-1">
+                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+                                <div class="dropdown-menu mt-0">
+                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|">How to use FossLight Hub</a>
                                 </div>
                             </div>
                         	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">

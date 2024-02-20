@@ -255,6 +255,8 @@ $(document).ready(function () {
         $("#moreSearchContent").slideToggle();
     });
 
+    $('[data-toggle="tooltip"]').tooltip();
+
     (function ($) {
         //form data -> json data
         $.fn.serializeObject = function () {
@@ -386,7 +388,7 @@ function createTabInFrame(tabNm, tabLk) {
         action: 'create'
     }
 
-    moveNaviBar();
+    //moveNaviBar();
     parent.postMessage(JSON.stringify(data), "*");
 
 }
@@ -2649,7 +2651,7 @@ var createTabNew = function (tabNm, tabLk) {
         $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").removeClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
     }
 
-    moveNaviBar();
+    //moveNaviBar();
 }
 
 var existsTabName = function (tabNm) {
@@ -2941,7 +2943,7 @@ function reloadTab_new(link, uniqueName, act) {
 }
 
 function activateTab(uniqueName) {
-    moveNaviBar();
+    //moveNaviBar();
 
     let tabId = `panel--${uniqueName}`
     let navId = `tab--${uniqueName}`
@@ -3349,7 +3351,6 @@ function appendFormCheckboxValuesEl(el, item, selectedValues) {
 }
 
 function moveNaviBar() {
-    console.log("move :: ");
     var navbarNav = document.getElementById("navbarNav");
     var activeElement = navbarNav.querySelector('.active');
     if (activeElement) {
@@ -3357,6 +3358,5 @@ function moveNaviBar() {
         var activeRect = activeElement.getBoundingClientRect();
         var scrollLeft = activeRect.left - navbarRect.left - (navbarRect.width - activeRect.width) / 2;
         navbarNav.scrollLeft = scrollLeft;
-        console.log("move :: " + scrollLeft);
     }
 }
