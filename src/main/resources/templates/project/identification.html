@@ -34,13 +34,13 @@
                             	<th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
                             	<span class="ml-5 projdecBtn">
                             		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
-                               		<label class="form-check-label text-lg-gray" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
+                               		<label class="form-check-label text-lg-gray mt-1" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
                                	</span>
                             	</th:block>
                          	</span>
                         </div>
                         <div class="col-sm-4 float-right mt-1">
-                            <div class="helpLink f-left dropdown float-right mt-1">
+                            <div class="helpLink f-left dropdown float-right ml-3">
                                 <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
                                 <div class="dropdown-menu mt-0">
                                     <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|">How to use FossLight Hub</a>

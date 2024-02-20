@@ -23,11 +23,11 @@
                             </span>
                             <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
                             	<input class="form-check-input text-orange" id="approve" name="approve" th:value="Y" type="checkbox">
-                               	<label class="form-check-label text-lg-gray" for="approve" th:text="'Approve without verification'"></label>
+                               	<label class="form-check-label text-lg-gray mt-1" for="approve" th:text="'Approve without verification'"></label>
                          	</span>
                         </div>
-                        <div class="col-sm-4 float-right projdecBtn">
-                            <div class="helpLink f-left dropdown float-right mt-1">
+                        <div class="col-sm-4 float-right projdecBtn mt-2">
+                            <div class="helpLink f-left dropdown float-right ml-3">
                                 <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
                                 <div class="dropdown-menu mt-0">
                                     <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Packaging')|">How to use FossLight Hub</a>
