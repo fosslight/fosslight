@@ -1,36 +1,43 @@
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
-<body>
-	<div class="row">
-		<div class="col-12">
-			<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
-				<table class="table table-hover text-nowrap">
-					<thead>
-						<tr>
-                         	<th class="text-center" th:text="Attributes"></th>
-                          	<th class="text-center" th:text="Contents"></th>
-                    	</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td class="text-center" style="vertical-align:middle;" th:text="'Vulnerability Resolution'"></td>
-							<td>
-								<select class="form-control select2" name="vulnerabilityResolution" style="width: 100%;">
-									<option th:value="Unresolved" th:text="Unresolved"></option>
-									<option th:value="Fixed" th:text="Fixed"></option>
-								</select>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+<body class="hold-transition sidebar-mini">
+	<div class="wrapper">
+        <div class="custom-layout">
+        	<section class="content">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-12">
+							<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+								<table class="table table-hover text-nowrap">
+									<thead>
+										<tr>
+                         					<th class="text-center" th:text="Attributes"></th>
+                          					<th class="text-center" th:text="Contents"></th>
+                    					</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td class="text-center" style="vertical-align:middle;" th:text="'Vulnerability Resolution'"></td>
+											<td>
+												<select class="form-control select2" name="vulnerabilityResolution" style="width: 100%;">
+													<option th:value="Unresolved" th:text="Unresolved"></option>
+													<option th:value="Fixed" th:text="Fixed"></option>
+												</select>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="row float-right">
+						<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|com_fn.bulkEditClose()|"></button>
+						<button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:text="Reset" th:onclick="|com_fn.bulkEditReset()|"></button>
+						<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" th:text="Change" th:onclick="|com_fn.bulkEditChange()|"></button>
+					</div>
+				</div>
+			</section>
 		</div>
 	</div>
-	<div class="row float-right custom-layout">
-		<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|com_fn.bulkEditClose()|"></button>
-		<button type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:text="Reset" th:onclick="|com_fn.bulkEditReset()|"></button>
-		<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" th:text="Change" th:onclick="|com_fn.bulkEditChange()|"></button>
-	</div>
-	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
 </body>
 </html>

@@ -43,7 +43,7 @@ ul { list-style-type: none; }
 .custom-layout .text-dark-blue { color: #1F2D3D; }
 .custom-layout .text-cerebral-gray { color: #ecebe9; }
 .custom-layout .text-purple { color: #702f9f; }
-.custom-layout .text-pink { color: #f70ce4; }
+.custom-layout .text-pink { color: #f5a9f2 !important; }
 .custom-layout .text-dark-gray { color: #343a40; }
 .custom-layout .text-gray { color: #999 ; }
 .custom-layout .text-smaller { font-size: smaller;}
@@ -772,6 +772,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
     font-size: .8rem;
     height: auto;
     margin-left: .7rem;
+    width: 88%;
 }
 
 .ui-jqgrid .ui-jqgrid-view input {

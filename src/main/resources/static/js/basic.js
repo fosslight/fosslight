@@ -627,6 +627,12 @@ var reloadTab = function (tabLk, act) {
 
         if (url == tabLk) {
             $(this).attr('src', url);
+            var pId = $(this).parent().attr("id");
+            
+           	if (typeof pId !== "undefined") {
+  				var tabName = "#tab--" + pId.substring(7, pId.length);
+  			    $(tabName).focus();
+  			}
         }
     });
 }
@@ -2613,45 +2619,56 @@ var createTabNew = function (tabNm, tabLk) {
     var tabName = tabNm.replace(pattern, '-');
 
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).length > 0) {
-        $("#tab--" + tabName).trigger("click");
-        $("#tab--" + tabName).focus();
+    	if ("BOM_Compare" == tabName) {
+			$(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).parent().find('.btn-iframe-close').trigger("click");
+			window.setTimeout(function () {
+            	createTabFnc(tabNm, tabName, tabLk)
+        	}, 200);
+		} else {
+			$("#tab--" + tabName).trigger("click");
+       	 	$("#tab--" + tabName).focus();
+		}
     } else {
-        var $tabs = $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").tabs();
-        var tab_length = $tabs.find('.nav-item').length;
-
-        var tabArr = tabLk.split('?'),
-            tabLink = tabArr[0],
-            tabAnchor = tabArr[0].replace(/#/g, '');
-
-        if (tab_length > 20) {
-            alertify.error('More than 20 tabs are opened. Please close the tabs.', 0);
-            return;
-        }
-
-        $tabs.find('.nav-item').removeClass('active');
-        $tabs.find('.nav-link').removeClass('active');
-
-        var frameSrc = tabAnchor;
-        var checkProjIden = tabAnchor.split('/');
-
-        $('.tab-pane').removeClass('show').removeClass('active');
-
-        let navItem = '<li class="nav-item" role="presentation">';
-        navItem += '<a href="#" class="btn-iframe-close" data-widget="iframe-close" data-type="only-this"><i class="fas fa-times"></i></a>';
-        navItem += '<a class="nav-link" data-toggle="row" id="tab--' + tabName + '" href="#panel--' + tabName + '" role="tab" aria-controls="panel--' + tabName + '"> ' + tabNm + ' </a></li>';
-        $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").append(navItem);
-
-        const iframe = '<div class="tab-pane fade" id="panel--' + tabName + '" role="tabpanel" aria-labelledby="tab--' + tabName + '"><iframe src="' + frameSrc + '"></iframe></div>';
-        $(".content-wrapper.iframe-mode").children(".tab-content").append(iframe);
-
-        $("#tab--" + tabName).trigger("click");
+		createTabFnc(tabNm, tabName, tabLk);
     }
 
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").hasClass("ui-tabs") === true) {
         $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").removeClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
     }
-
+    
     //moveNaviBar();
+}
+
+var createTabFnc = function (tabNm, tabName, tabLk) {
+	var $tabs = $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").tabs();
+   	var tab_length = $tabs.find('.nav-item').length;
+
+  	var tabArr = tabLk.split('?'),
+      	tabLink = tabArr[0],
+      	tabAnchor = tabArr[0].replace(/#/g, '');
+
+	if (tab_length > 20) {
+      	alertify.error('More than 20 tabs are opened. Please close the tabs.', 0);
+   		return;
+	}
+
+  	$tabs.find('.nav-item').removeClass('active');
+   	$tabs.find('.nav-link').removeClass('active');
+
+   	var frameSrc = tabAnchor;
+   	var checkProjIden = tabAnchor.split('/');
+
+   	$('.tab-pane').removeClass('show').removeClass('active');
+
+  	let navItem = '<li class="nav-item" role="presentation">';
+   	navItem += '<a href="#" class="btn-iframe-close" data-widget="iframe-close" data-type="only-this"><i class="fas fa-times"></i></a>';
+   	navItem += '<a class="nav-link" data-toggle="row" id="tab--' + tabName + '" href="#panel--' + tabName + '" role="tab" aria-controls="panel--' + tabName + '"> ' + tabNm + ' </a></li>';
+ 	$(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").append(navItem);
+
+ 	const iframe = '<div class="tab-pane fade" id="panel--' + tabName + '" role="tabpanel" aria-labelledby="tab--' + tabName + '"><iframe src="' + frameSrc + '"></iframe></div>';
+ 	$(".content-wrapper.iframe-mode").children(".tab-content").append(iframe);
+
+  	$("#tab--" + tabName).trigger("click");
 }
 
 var existsTabName = function (tabNm) {
@@ -3322,7 +3339,7 @@ function updateSearchCondition(el){
             }
         });
 
-        if(selectedValues.length > 0) {
+        if (selectedValues.length > 0) {
             appendFormCheckboxValuesEl(el, item, selectedValues);
         }
     });

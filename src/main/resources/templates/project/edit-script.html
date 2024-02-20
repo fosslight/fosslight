@@ -620,6 +620,7 @@
 			if([[${project.viewOnlyFlag}]] != "Y" && !isReadOnly) {
 				html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 			}
+			html += '</div>';
 			target.append(html);
 		},
 		addWatcher : function(uDiv, uId, uEmail) {
@@ -891,12 +892,12 @@
 				var prjName = $('input[name=prjName]').val().trim().replace(/[ ]+/g, " "); // ASCII 160 convert -> ASCII 32
 				$('input[name=prjName]').val(prjName);
 				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
-
-				if ("" != $($('#additionalInformation').summernote('code')).text()) {
+				
+				if ("" != $('#additionalInformation').summernote('code')) {
 					$('input[name=comment]').val($('#additionalInformation').summernote('code'));
 				}
 				
-				if ("" != $($('#comment').summernote('code')).text()) {
+				if ("" != $('#comment').summernote('code')) {
 					$('input[name=userComment]').val($('#comment').summernote('code'));
 				}
 				

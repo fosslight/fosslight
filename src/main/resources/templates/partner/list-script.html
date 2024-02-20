@@ -78,7 +78,7 @@ var evt = {
 		$('#search').on('click',function(e){
 			e.preventDefault();
 			var postData = fn.setGridParam();
-			console.log(postData);
+			
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 		});
 		

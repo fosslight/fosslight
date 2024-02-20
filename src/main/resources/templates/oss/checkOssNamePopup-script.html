@@ -563,7 +563,7 @@ var grid_fn = {
 					break;
 			}
 			return $("#ossList").jqGrid ('getGridParam', 'selarrrow').reduce(function(arr, item) {
-			    if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() != "Y"){
+			    if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() == "Y"){
 			        arr.push(item);
 			    }
 			    

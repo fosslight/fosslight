@@ -709,7 +709,7 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and @CommonFunction.isAdmin()}" 
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.checkOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
