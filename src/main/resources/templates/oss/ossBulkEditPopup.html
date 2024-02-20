@@ -16,10 +16,10 @@
                    	</tr>
            		</thead>
            		<tbody>
-           			<tr th:if="${#strings.equals(target, 'depList') or #strings.equals(target, 'srcList') or #strings.equals(target, 'selfCheck') or #strings.equals(target, 'list')}">
-           				<th th:if="${#strings.equals(target, 'depList')}" th:text="'Manifest file'" style="vertical-align: middle; font-size: .9rem;"></th>
-           				<th th:if="${#strings.equals(target, 'srcList')}" th:text="'Source Name or Path'" style="vertical-align: middle; font-size: .9rem;"></th>
-           				<th th:unless="${#strings.equals(target, 'depList') or #strings.equals(target, 'srcList')}" th:text="'Binary Name or Source Path'" style="vertical-align: middle; font-size: .9rem;"></th>
+           			<tr th:if="${target =='depList' or target == 'srcList' or menu == 'selfCheck' or target == 'list'}">
+           				<th th:if="${target =='depList'}" th:text="'Manifest file'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<th th:if="${menu != 'selfCheck' and target == 'srcList'}" th:text="'Source Name or Path'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<th th:unless="${target == 'depList' or (menu != 'selfCheck' and target == 'srcList')}" th:text="'Binary Name or Source Path'" style="vertical-align: middle; font-size: .9rem;"></th>
            				<td>
            					<div class="row">
            						<div class="col-md-10">
@@ -34,7 +34,7 @@
            					</div>
            				</td>
            			</tr>
-           			<tr th:if="${#strings.equals(target, 'binList')}">
+           			<tr th:if="${target == 'binList'}">
            				<th th:text="'Binary Name'" style="vertical-align: middle; font-size: .9rem;"></th>
            				<td>
            					<div class="row">
@@ -118,7 +118,7 @@
            					</div>
            				</td>
            			</tr>
-           			<tr th:if="${!#strings.equals(target, 'selfCheck')}">
+           			<tr th:if="${menu != 'selfCheck'}">
            				<th th:text="'Home Page'" style="vertical-align: middle; font-size: .9rem;"></th>
            				<td>
            					<div class="row">
@@ -150,7 +150,7 @@
            					</div>
            				</td>
            			</tr>
-           			<tr th:if="${!#strings.equals(target, 'selfCheck')}">
+           			<tr th:if="${menu != 'selfCheck'}">
            				<th th:text="'Comment'" style="vertical-align: middle; font-size: .9rem;"></th>
            				<td>
            					<div class="row">

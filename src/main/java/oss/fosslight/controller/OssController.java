@@ -2310,13 +2310,18 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.OSS_BULK_EDIT_POPUP)
-	public String bulkEditPopup(HttpServletRequest req, HttpServletResponse res, 
-			@RequestParam(value="rowId", required=true)String rowId,
-			@RequestParam(value="target", required=true)String target,
-			Model model){
+	public String bulkEditPopup(HttpServletRequest req, HttpServletResponse res
+			, @RequestParam Map<String, String> param
+			, Model model){
 		
-		model.addAttribute("rowId", rowId);
-		model.addAttribute("target", target);
+		model.addAttribute("rowId", (String) param.get("rowId"));
+		model.addAttribute("target", (String) param.get("target"));
+		
+		if (param.containsKey("menu")) {
+			model.addAttribute("menu", (String) param.get("menu"));
+		} else {
+			model.addAttribute("menu", "");
+		}
 		
 		return "oss/ossBulkEditPopup";
 	}

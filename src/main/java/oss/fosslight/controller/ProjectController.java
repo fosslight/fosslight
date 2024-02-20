@@ -423,8 +423,6 @@ public class ProjectController extends CoTopComponent {
 				&& !permissionFlag) {
 			model.addAttribute("projectPermission", CoConstDef.FLAG_NO);
 			model.addAttribute("isReadOnly", true);
-			return "project/edit";
-//			return "project/view";
 		} else {
 			if (!permissionFlag) {
 				List<T2Users> userList = userService.selectAllUsers();
@@ -433,9 +431,9 @@ public class ProjectController extends CoTopComponent {
 					model.addAttribute("userWithDivisionList", userList);
 				}
 			}
-			
-			return "project/edit";
 		}
+		
+		return "project/edit";
 	}
 	
 	@RequestMapping(value = { PROJECT.VIEW_ID }, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
@@ -1400,7 +1398,7 @@ public class ProjectController extends CoTopComponent {
 			Map<String, Object> copyConfirmStatusResultMap = updateCopyConfirmStatus(req, project, confirmStatusCopy, userComment);
 			if (copyConfirmStatusResultMap.get("result").equals("true")) {
 				lastResult.put("confirmCopyStatusSuccess", "true");
-			}else {
+			} else {
 				String falseStep = "";
 				
 				if (copyConfirmStatusResultMap.get("step").equals("verificationProgress")) {
@@ -1469,7 +1467,7 @@ public class ProjectController extends CoTopComponent {
 					identificationStatusRequest = true;
 				}
 			}
-		}else {
+		} else {
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceId(project.getPrjId());
 			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);

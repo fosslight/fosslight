@@ -124,7 +124,7 @@ var Ctrl_fn = {
 		});	
 	},
 	changeProc : function(){
-		$('#loading_wrap_popup').show();
+		loading.show();
 
 		var target = $("#ossList");
 		var result = [];
@@ -213,7 +213,7 @@ var Ctrl_fn = {
 									alertify.success(successMsg, 5); // 5sec동안 message 출력
 								}
 
-								$('#loading_wrap_popup').hide();
+								loading.hide();
 							}
 						},
 						error: function(resultData){}
@@ -222,7 +222,7 @@ var Ctrl_fn = {
 			}, 0);
 		} else {
 			alertify.alert([[#{msg.oss.required.select}]], function(){});
-			$('#loading_wrap_popup').hide();
+			loading.hide();
 		}
 	}
 };
@@ -230,7 +230,7 @@ var grid_fn = {
 		displayStatus : function(cellvalue, options, rowObject){
 			var display = "";
 			var changeFlag = rowObject.changeFlag || rowObject[9];
-
+			
 			if(changeFlag =="Y"){
 				display += "<a class='btnPG wAnd onAnd'>Changed</a>";
 			}
@@ -276,9 +276,10 @@ var grid_fn = {
 			}
 		},
 		getCheckedRow : function(processType){
-			var seq = processType.toUpperCase() == "CHANGE" ? 8 : 9;
+//			var seq = processType.toUpperCase() == "CHANGE" ? 8 : 9;
+			var seq = 9;
 			return $("#ossList").jqGrid ('getGridParam', 'selarrrow').reduce(function(arr, item) {
-				if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() != "Y"){
+				if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() == "Y"){
 					arr.push(item);
 				}
 

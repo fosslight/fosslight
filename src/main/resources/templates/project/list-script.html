@@ -218,7 +218,7 @@ var fn = {
 				}
 				break;
 			case "N/A":
-				display += '<span class="badge badge-gray size-sm width-6rem">Identification</span>';
+				display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Identification</span>';
 				break;
 			default:
 				if (projectStatus == dropStatus){
@@ -228,7 +228,7 @@ var fn = {
 						display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Identification</span>';
 					}
 				} else if (projectStatus == finalReview) {
-					display += "<span class='badge badge-purple hover-purple-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+					display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
 				} else {
 					if ("Y" == rowObject.androidFlag) {
 						if ("Confirm" == identificationStatus) {
@@ -276,45 +276,37 @@ var fn = {
 			} else {
 				switch(verificationStatus) {
 					case "":
-						if (projectStatus == completeStatus) {
-							display += '<span class="badge badge-gray size-sm width-6rem">Packaging</span>';
-						} else if ("Y" == rowObject.statusRequestYn) {
+						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
 							display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 						} else if ("" != identificationStatus) {
 							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 						}
 						break;
 					case "Progress":
-						if (projectStatus == completeStatus) {
-							display += '<span class="badge badge-gray size-sm width-6rem">Packaging</span>';
-						} else if ("Y" == rowObject.statusRequestYn) {
+						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
 							display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 						} else {
 							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 						}
 						break;
 					case "N/A":
-						display += '<span class="badge badge-gray size-sm width-6rem">Packaging</span>';
+						display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 						
 						break;
 					case "Error":
-						display += '<span class="badge badge-gray size-sm width-6rem">Packaging</span>';
+						display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 
 						break;
 					case "Drop":
-						display += '<span class="badge badge-gray size-sm width-6rem">Packaging</span>';
+						display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 
 						break;
 					default:
 						if ("N/A" == rowObject.distributeTarget){
-							display += '<span class="badge badge-gray size-sm width-6rem">Packaging</span>';
+							display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 						} else{
 							if ("Confirm" == verificationStatus) {
-								if (projectStatus == finalReview) {
-									display += "<span class='badge badge-purple hover-purple-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
-								} else {
-									display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
-								}
+								display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 							} else {
 								if (projectStatus == progress) {
 									display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
@@ -323,7 +315,7 @@ var fn = {
 								} else if (projectStatus == review) {
 									display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 								} else if (projectStatus == finalReview) {
-									display += "<span class='badge badge-purple hover-purple-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
+									display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 								}
 							}
 						}
@@ -1676,9 +1668,9 @@ var fn = {
 	},
 	addHtml : function(target, str, division, userId){
 		var rlt = division+((userId!="") ? "/"+userId : "");
-		var html  = '<div class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		var html  = '<div class="external-event mr-2"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 		html += str;
-		if("Y" != [[${searchBean.viewOnlyFlag}]] && !isReadOnly) {
+		if ("Y" != [[${searchBean.viewOnlyFlag}]]) {
 			html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 		}
 		html += '</div>';
@@ -1690,7 +1682,7 @@ var fn = {
 		var adId = $("#adId").val();
 		var domain = $("#emailTemp").val();
 
-		if(adId == "") {
+		if (adId == "") {
 			$("#adId").focus();
 			return alertify.error([[#{enter.watcher.error}]], 0);
 		}
@@ -1880,9 +1872,9 @@ var fn = {
 		$("select[name=prjDomain]").val("").trigger('change');
 		$("select[name=listKind]").val("").trigger('change');
 		$("input[name=listId]").val("");
+		fn.closeAlertify();
 	},
 	closeAlertify : function() {
-		fn.resetChangeWatcherPop();
 		$(".ajs-close").trigger("click");
 	}
 };

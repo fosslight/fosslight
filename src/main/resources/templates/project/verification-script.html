@@ -213,7 +213,7 @@
                     $('#blind_wrap').hide();
                     $('.warningPop').hide();
                 });
-
+				
                 $('#registFile_1').uploadFile({
                     url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=1',
                     multiple: false,
@@ -249,8 +249,7 @@
                         } else {
                             $('.ajax-file-upload-statusbar').fadeOut('slow');
                             $('.ajax-file-upload-statusbar').remove();
-                            alertify.alert(result[1], function () {
-                            });
+                            alertify.alert(result[1], function () {});
                         }
                     },
                 });
@@ -303,7 +302,7 @@
                     fileName: 'myfile',
                     onSuccess: function (e, data) {
                         var result = jQuery.parseJSON(data);
-
+                        
                         if (result[0] != "UNSUPPORTED_FILE") {
                             result.forEach(function (item) {
                                 var appendHtml = '<br>' + item[0].createdDate;
@@ -330,8 +329,7 @@
                         } else {
                             $('.ajax-file-upload-statusbar').fadeOut('slow');
                             $('.ajax-file-upload-statusbar').remove();
-                            alertify.alert(result[1], function () {
-                            });
+                            alertify.alert(result[1], function () {});
                         }
                     },
                 });
@@ -651,8 +649,6 @@
                     alertify.verConfirmDialog(innerHtml, function () {
                     	if ("" != $("#confirmEditor").summernote('code')){
                     		$("#noticeForm input[name=userComment]").val($("#confirmEditor").summernote('code'));
-                    	} else {
-                    		$("#noticeForm input[name=userComment]").val("");
                     	}
                 		
                 		$("#editCompanyName").attr("disabled", false);
@@ -1259,6 +1255,8 @@
 
                     loading.hide();
                 } else {
+                	loading.hide();
+                	
                     if (!$("#companyName").prop("checked")) {
                         $("#editCompanyName").attr("disabled", true);
                     }
@@ -1424,7 +1422,7 @@
                     dataType: 'json',
                     cache: false,
                     contentType: 'application/json',
-                    success: function (data) {
+                    success: function (data) {console.log(data);
                         fn.btnCtl(userRole, status);
                         reloadTabInframe('/project/list');
 
@@ -2243,17 +2241,9 @@
                     "prjId": [[${project.prjId}]]
                     , "verificationStatus": "REQ"
                     , "useCustomNoticeYn": $('#useCustomNoticeYn').val()
-                    , "userComment": CKEDITOR.instances['editor'].getData()
+                    , "userComment": ""
                     , "referenceDiv": "12"
-                    , "allowDownloadNoticeHTMLYn": $("#allowDownloadNoticeHTMLYn").val()
-                    , "allowDownloadNoticeTextYn": $("#allowDownloadNoticeTextYn").val()
-                    , "allowDownloadSimpleHTMLYn": $("#allowDownloadSimpleHTMLYn").val()
-                    , "allowDownloadSimpleTextYn": $("#allowDownloadSimpleTextYn").val()
-                    , "allowDownloadSPDXSheetYn": $("#allowDownloadSPDXSheetYn").val()
-                    , "allowDownloadSPDXRdfYn": $("#allowDownloadSPDXRdfYn").val()
-                    , "allowDownloadSPDXTagYn": $("#allowDownloadSPDXTagYn").val()
-                    , "allowDownloadSPDXJsonYn": $("#allowDownloadSPDXJsonYn").val()
-                    , "allowDownloadSPDXYamlYn": $("#allowDownloadSPDXYamlYn").val()
+                    , "noticeFileFormat": $("#noticeFileFormat").val()
                 };
 
                 //공개의무 리스트가 있고 파일업로드가 완료된 상태이며 verify가 완료 되었을때
@@ -2468,7 +2458,7 @@
                     success: function (json) {
                         json = JSON.parse(json);
                         loading.hide();
-
+						
                         if (json.resCd == '10') {
                             var isReq = true;
                             var validArray = json.verifyValid;

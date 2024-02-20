@@ -119,7 +119,7 @@
 	<div class="row">
 		<div class="col-md-12">
 			<div class="card card-dark custom-layout" style="background-color: #f5f4f3;">
-				<div class="card-body submit-form">
+				<div class="card-body submit-form pb-0">
 					<label th:text="#{msg.common.field.watcher}"></label>
 					<div class="row my-1">
 						<div class="col-4">
@@ -141,7 +141,7 @@
 					</div>
 					<div class="row my-1">
 						<div class="col-4">
-                    		<input class="form-control" type="text" id="adId" name="adId" placeholder="Input email" th:onKeypress="|fn.CheckChar()|">
+                    		<input class="form-control" type="text" id="adId" name="adId" placeholder="Input email" th:onKeypress="|fn.checkChar()|">
                			</div>
                			<div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null 
                                         			&& #lists.size(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))) > 0) ? true : false}">
@@ -159,11 +159,11 @@
                        		<input type="text" id="emailTemp" class="w220" style="display:none;" th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
                 		</th:block>
                   		<th:block th:if="${!useDomainFlag}">
-                    		<input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">
+                    		<input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.checkChar()|">
                  		</th:block>
             			</div>
                			<div class="col-1">
-                    		<button id="addEmail" type="button" class="btn btn btn-default" th:text="Add"></button>
+                    		<button id="addEmail" type="button" class="btn btn btn-default" th:text="Add" th:onclick="|fn.addEmail()|"></button>
                  		</div>
 					</div>
 					<div class="row my-1">
@@ -178,11 +178,11 @@
                     		<input class="form-control" type="text" id="listId" name="listId" placeholder="Input ID you want to copy"/>
                			</div>
                  		<div class="col-1">
-                   			<button id="addList" type="button" class="btn btn-default" th:text="Add"></button>
+                   			<button id="addList" type="button" class="btn btn-default" th:text="Add" th:onclick="|fn.addList()|"></button>
                  		</div>
 					</div>
-					<div class="form-group my-1">
-                		<div id="multiDiv" class="external-events pl-3"></div>
+					<div class="form-group mt-2 mb-3">
+                		<div id="multiDiv" class="external-events ml-1 row"></div>
               		</div>
 				</div>
 			</div>
