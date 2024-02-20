@@ -28,6 +28,26 @@ INSERT INTO `PROCESS_GUIDE` VALUES ('License_Edit_Info', 'License_Edit', '<div s
 ALTER TABLE `PROJECT_MASTER` ADD `CDX_JSON_FILE_ID` int(11) NULL DEFAULT NULL;
 ALTER TABLE `PROJECT_MASTER` ADD `CDX_XML_FILE_ID` int(11) NULL DEFAULT NULL;
 
+UPDATE T2_CODE_DTL
+SET CD_DTL_EXP = '<i class="far fa-file-alt fa-1-3x" title="Notice"></i>'
+WHERE CD_NO='217' AND CD_DTL_NO='10';
+
+UPDATE T2_CODE_DTL
+SET CD_DTL_EXP = '<i class="far fa-file-alt fa-1-3x mr-1" title="Notice"></i><i class="far fa-file-code fa-1-3x" title="Source Code"></i>'
+WHERE CD_NO='217' AND CD_DTL_NO='11';
+
+-- External link list [Demo]
+INSERT INTO `PROCESS_GUIDE` VALUES ('Hompage_Link', 'Main', NULL, 'https://fosslight.org/fosslight-guide-en/about/', 'Y');
+INSERT INTO `PROCESS_GUIDE` VALUES ('Newsletter_Link', 'Main',NULL, 'https://fosslight.org/news/', 'Y');
+INSERT INTO `PROCESS_GUIDE` VALUES ('Tips_Link', 'Main',NULL, 'https://www.youtube.com/@LGEOSPO', 'Y');
+INSERT INTO `PROCESS_GUIDE` VALUES ('Support_Link', 'Main',NULL, 'https://github.com/fosslight/fosslight/issues', 'Y');
+
+-- External link list [LGE] Reference
+-- INSERT INTO `PROCESS_GUIDE` VALUES ('Hompage_Link', 'Main', NULL, 'http://collab.lge.com/main/x/VacZIg', 'Y');
+-- INSERT INTO `PROCESS_GUIDE` VALUES ('Newsletter_Link', 'Main',NULL, 'http://collab.lge.com/main/x/QwYBFw', 'Y');
+-- INSERT INTO `PROCESS_GUIDE` VALUES ('Tips_Link', 'Main',NULL, 'http://collab.lge.com/main/x/Kkh1KQ', 'Y');
+-- INSERT INTO `PROCESS_GUIDE` VALUES ('Support_Link', 'Main',NULL, 'http://clm.lge.com/issue/projects/OSC', 'Y');
+
 -- //@UNDO
 -- SQL to undo the change goes here.
 
