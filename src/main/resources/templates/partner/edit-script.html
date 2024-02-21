@@ -3092,6 +3092,112 @@ var com_fn = {
 		return reMakeArrObj;
     }
 }
+var fn = {
+    handleUserCommentPopupOpen: function () {
+        const param = {
+            "referenceDiv" : "3rd",
+            "referenceId" : [[${detail.partnerId}]]
+        }
+        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+                if (!alertify.editDialog) {
+                    alertify.dialog('editDialog', function () {
+                        return {
+                            main: function (content) {
+                                this.setContent(content);
+                            },
+                            setup: function () {
+                                var setup = alertify.confirm().setup();
+                                setup.buttons = [];
+                                setup.focus.element = 1;
+
+                                return setup;
+                            },
+                            hooks: {
+                                onshow: function() {
+                                    this.elements.dialog.style.maxWidth = 'none';
+                                    this.elements.dialog.style.width = '700px';
+                                }
+                            }
+                        };
+                    });
+                }
+
+                editDailog = alertify.editDialog(res);
+            },
+            null,
+            function () {
+                $("#modifiedCommentInPjtEditor").summernote({
+                    height: 180,
+                    callbacks: {
+                        onInit: function () {
+                            $(this).summernote('code', $("#contents").val());
+                        }
+                    }
+                });
+            });
+    },
+    sendEditor: function (type) {
+        //코멘트 저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        if (!editorVal || editorVal == "") {
+            alertify.alert([[#{msg.project.enter.comment}]], function () {});
+            return false;
+        }
+        var referenceId = [[${detail.partnerId}]]
+        var param = {referenceId: referenceId, referenceDiv: '20', contents: editorVal, mailSendType: type};
+
+        $.ajax({
+            url: '/project/sendComment',
+            type: 'POST',
+            dataType: 'json',
+            cache: false,
+            data: param,
+            success: function (json) {
+                if (json.isValid == 'false') {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    alertify.success([[#{msg.project.sent.comments.success}]]);
+                    $("#userComment").val('');
+                    editDailog.close();
+                }
+            },
+            error: function () {
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+    saveEditor: function () {
+        //코멘트 임시저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        var referenceId = [[${detail.partnerId}]]
+        var param = {
+            referenceId: referenceId
+            , referenceDiv: '21'
+            , contents: editorVal
+        };
+        $.ajax({
+            url: "/project/saveComment",
+            type: "POST",
+            dataType: "json",
+            cache: false,
+            data: param,
+            success: function (json) {
+                if (json.isValid == 'false') {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    alertify.success([[#{msg.common.success}]]);
+                }
+                $("#userComment").val(editorVal);
+                editDailog.close();
+            },
+            error: function () {
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    }
+}
 //]]>
 </script>
 </th:block>

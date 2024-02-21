@@ -791,7 +791,7 @@ var notFixed = {
 var fn = {
 	handleUserCommentPopupOpen: function () {
 		const param = {
-	    	"referenceDiv" : "prj",
+	    	"referenceDiv" : "security",
 	        "referenceId" : [[${project.prjId}]]
 	   	}
 	    getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
@@ -818,7 +818,7 @@ var fn = {
 	     		});
 	  		}
 	  		
-	     	alertify.editDialog(res);
+	     	editDailog = alertify.editDialog(res);
 	   	},
 	   	null,
 	 	function () {
@@ -841,7 +841,7 @@ var fn = {
 	    	return false;
 	   	}
 	 	var referenceId = [[${project.prjId}]]
-	  	var param = {referenceId: referenceId, referenceDiv: '12', contents: editorVal, mailSendType: type};
+	  	var param = {referenceId: referenceId, referenceDiv: '10', contents: editorVal, mailSendType: type};
 
 	  	$.ajax({
 	     	url: '/project/sendComment',
