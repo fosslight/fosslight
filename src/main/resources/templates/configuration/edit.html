@@ -10,7 +10,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="card card-outline card-dark submit-form">
+                        <div class="card card-outline card-info submit-form">
                             <div class="card-header">
                                 <div class="card-title">Basic Info</div>
                             </div>
@@ -33,7 +33,7 @@
                                 </div>
                                 <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG')) eq 'N' }">
                                     <div class="row form-group mb-3">
-                                        <div class="col-12 icheck-warning">
+                                        <div class="col-12 icheck-primary">
                                             <input type="checkbox" th:id="|passwordEnabled|" th:if="${userInfo.userId eq 'admin' and 'Y' eq adminLockFlag}" onclick="alert('Changing admin information is blocked.'); return false;"/>
                                             <input type="checkbox" th:id="|passwordEnabled|" th:unless="${userInfo.userId eq 'admin' and 'Y' eq adminLockFlag}"/>
                                             <label th:text="|Password|" th:for="|passwordEnabled|"></label>
@@ -48,10 +48,10 @@
                                 <input type="button" class="btn btn-info float-right right" id="change" value="change" onclick="fn.changePassword()"/>
                             </div>
                         </div>
-                        <form name="ConfigurationForm" id="ConfigurationForm">
+                        <form name="ConfigurationForm" id="configurationForm_01">
                             <div class="card card-outline card-dark submit-form">
                                 <div class="card-header">
-                                    <div class="card-title">Setting</div>
+                                    <div class="card-title">Default Language</div>
                                 </div>
                                 <div class="card-body">
                                     <div class="row form-group mb-3">
@@ -64,10 +64,22 @@
                                             </select>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="card-footer">
+                                    <input name="save" id="saveButton_01" type="button" value="Save" class="btn btn-lg-gray float-right right" />
+                                </div>
+                            </div>
+                        </form>
+                        <form name="ConfigurationForm" id="configurationForm_02">
+                            <div class="card card-outline card-dark submit-form">
+                                <div class="card-header">
+                                    <div class="card-title">Default List</div>
+                                </div>
+                                <div class="card-body">
                                     <div class="row form-group">
                                         <div class="col-12">
                                             <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DEFAULT_TAB'))}">
-                                                <div class="icheck-warning mb-3" th:if="${code.useYn != 'N'}">
+                                                <div class="icheck-warning ml-2 mb-3" th:if="${code.useYn != 'N'}">
                                                     <input type="checkbox" name="defaultTab" th:id="|defaultTab${code.cdDtlNo}|" th:value="${code.cdDtlNo}"/>
                                                     <label th:for="|defaultTab${code.cdDtlNo}|" th:utext="${code.cdDtlNm}" style="font-weight: normal"></label>
                                                 </div>
@@ -76,11 +88,12 @@
                                     </div>
                                 </div>
                                 <div class="card-footer">
-                                    <input id="save" type="button" value="Save" class="btn btn-dark-04 float-right right" />
+                                    <input name="save" id="saveButton_02" type="button" value="Save" class="btn btn-lg-gray float-right right" />
                                 </div>
                             </div>
                         </form>
                     </div>
+
                     <div class="col-md-6">
                         <div class="card card-outline card-dark submit-form">
                             <div class="card-header">
@@ -97,10 +110,14 @@
                                         <option value="SELF_CHECK">Self-check List</option>
                                     </select>
                                 </div>
+                                <div id="searchConditionArea" style="display: none;"></div>
+                            </div>
 
+                            <div class="card-footer" id="searchConditionBtnArea" style="display: none">
+                                <input id="saveSearchCondition" type="button" value="Save" th:onclick="|fn.updateSearchCondition()|" class="btn btn-lg-gray float-right right" />
                             </div>
                         </div>
-                        <div id="searchConditionArea" style="display: none;"></div>
+
 <!--                        <div class="btnLayout w1025" id="searchConditionBtnArea" style="display: none;">-->
 <!--                            <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btnColor red right" />-->
 <!--                        </div>-->

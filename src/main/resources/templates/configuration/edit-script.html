@@ -27,7 +27,7 @@
                     $("#defaultTab" + val).attr('checked', true);
                 });
             }
-            $('#ConfigurationForm select[name="defaultLocale"]').trigger('change');
+            $('#configurationForm_01 select[name="defaultLocale"]').trigger('change');
             $('#userInfoArea select[name="division"]').trigger('change');
 
             let userDivision = $('#userInfoArea select[name="division"]');
@@ -70,8 +70,9 @@
                 allowClear: true,
             });
 
-            $("#save").on('click',function(){
+            $("input[name='save']").on('click',function(){
                 //var radioVal = $('input[name="defaultTab"]:checked').val();
+                var eId = $(this).attr("id").split("_")[1];
                 if($('input:checkbox[name="defaultTab"]:checked').length == 0){
                     alertify.alert([[#{msg.configuration.required.selectDefaultTab}]], function(){});
                     return false;
@@ -79,7 +80,7 @@
 
                 alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
                     if (e) {
-                        fn.updateSubmit();
+                        fn.updateSubmit(eId);
                     } else {
                         return false;
                     }
@@ -154,8 +155,8 @@
             var addEl = '<input type="hidden" name="chk_'+item+'" value="'+ selectedValues +'" />';
             $("#searchConditionForm").append(addEl);
         },
-        updateSubmit : function(){
-            $("#ConfigurationForm").ajaxForm({
+        updateSubmit : function(eId){
+            $("#configurationForm_" + eId).ajaxForm({
                 url : "/configuration/saveAjax",
                 type : 'POST',
                 dataType:"json",

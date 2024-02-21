@@ -16,7 +16,7 @@
             <div class="col-6">
               <span class="text-right">
                 <i class="fas fa-user-circle text-light mr-1 fa-xs"></i>
-                <a th:onclick="|createTabNew('configuration_edit', '/configuration/edit')|" style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" ></a>
+                <a style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}"></a>
               </span>
               <input type="hidden" id="defaultTabAnchorArr" th:value="${sessUserInfo.defaultTabAnchor}" />
             </div>
@@ -34,16 +34,16 @@
       </div>
 
       <!-- SidebarSearch Form -->
-      <div class="form-inline">
-        <div class="input-group" data-widget="sidebar-search">
-          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
-          <div class="input-group-append">
-            <button class="btn btn-sidebar">
-              <i class="fas fa-search fa-fw"></i>
-            </button>
-          </div>
-        </div>
-      </div>
+<!--      <div class="form-inline">-->
+<!--        <div class="input-group" data-widget="sidebar-search">-->
+<!--          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">-->
+<!--          <div class="input-group-append">-->
+<!--            <button class="btn btn-sidebar">-->
+<!--              <i class="fas fa-search fa-fw"></i>-->
+<!--            </button>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
 
       <!-- Sidebar Menu -->
       <nav class="mt-2">
@@ -128,10 +128,10 @@
 	          	<p th:text="'External Link'"></p>
             </a>
           </li>
-          <li class="nav-item" th:if="${@CommonFunction.isAdmin()}">
-            <a th:href="@{/system/configuration}" class="nav-link">
+          <li class="nav-item">
+            <a th:href="@{/configuration/edit}" class="nav-link">
               <i class="nav-icon fas fa-user-cog"></i>
-	          	<p th:text="Configuration"></p>
+	          	<p th:text="'User Configuration'"></p>
             </a>
           </li>
           <li class="nav-item" th:if="${@CommonFunction.isAdmin()}">
@@ -192,6 +192,12 @@
                 <a th:href="@{/system/binaryDataHistory}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   	<p th:text="'BinaryDB Log'"></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/system/configuration}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p th:text="'Server Setting'"></p>
                 </a>
               </li>
             </ul>

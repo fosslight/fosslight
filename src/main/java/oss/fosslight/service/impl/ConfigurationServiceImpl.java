@@ -18,6 +18,7 @@ import oss.fosslight.domain.T2Users;
 import oss.fosslight.repository.ConfigurationMapper;
 import oss.fosslight.service.ConfigurationService;
 import oss.fosslight.service.T2UserService;
+import oss.fosslight.util.StringUtil;
 
 @Service
 public class ConfigurationServiceImpl implements ConfigurationService {
@@ -30,9 +31,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Override
 	public void updateDefaultSetting(Configuration configuration) {
 		HashMap<String, Object> info = new HashMap<String, Object>();
-		configurationMapper.updateDefaultLocale(configuration);
-		configurationMapper.updateDefaultTab(configuration);
-		
+		if(!StringUtil.isEmpty(configuration.getDefaultLocale())) {
+			configurationMapper.updateDefaultLocale(configuration);
+		}
+
+		if(!StringUtil.isEmpty(configuration.getDefaultTab())) {
+			configurationMapper.updateDefaultTab(configuration);
+		}
+
 		// Security session에 추가 정보(Cusom)를 저장한다(Map형태)
         SecurityContext sec = SecurityContextHolder.getContext();
         AbstractAuthenticationToken auth = (AbstractAuthenticationToken)sec.getAuthentication();
