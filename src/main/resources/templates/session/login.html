@@ -245,21 +245,24 @@
 
         $("#noticeEdit_" + seq).summernote({ height: 200,  toolbar: [], disable: true});
         $("#noticeEdit_" + seq).summernote('disable');
-        
-        $("#btnNotice").click(function () {
+
+        $("#btnNotice_"+ seq).click(function () {
+
+            console.log(":::" + seq);
+
             var checkbox = document.getElementById("chkday_" + seq);
             if (checkbox.checked) {
                 setCookie("noticeYn_" + seq, "N", 1);
             }
 
-            $("#modalContainer").hide();
+            $("#modalContainer_" + seq).hide();
         });
 
-        $("#modalContainer").show();
+        $("#modalContainer_" + seq).show();
 
         // function createPopRegistPop() {
         //     var popRegistPop = document.createElement("div");
-        //     popRegistPop.classList.add("pop", "registPop");
+        //     popRegistPop.classlrdmList.add("pop", "registPop");
         //     popRegistPop.style.width = "600px";
         //     popRegistPop.style.position = "absolute";
         //     return popRegistPop;
@@ -311,7 +314,7 @@
         function createLargeModal() {
             var modalDiv = document.createElement("div");
             modalDiv.classList.add("modal", "fade", "show");
-            modalDiv.id = "modalContainer";
+            modalDiv.id = "modalContainer_" + seq;
             modalDiv.setAttribute("aria-modal", "true");
             modalDiv.setAttribute("role", "dialog");
             modalDiv.style.paddingRight = "14px";
@@ -369,7 +372,7 @@
 
             var saveChangesButton = document.createElement("button");
             saveChangesButton.type = "button";
-            saveChangesButton.id = "btnNotice";
+            saveChangesButton.id = "btnNotice_" + seq;
             saveChangesButton.type = "button";
             saveChangesButton.value = "OK";
             saveChangesButton.className = "okRegister";
