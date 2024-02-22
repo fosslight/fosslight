@@ -393,70 +393,70 @@
                 </div>
             </th:block>
 
-        <th:block th:if="${#strings.equals(defaultSearchType, 'SELF_CHECK')}">
-            <div class="card-body">
-                <div class="form-group mb-2">
-                    <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean?.prjId}" type="text"/>
-                </div>
-                <div class="form-group mb-2">
-                    <input class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}"
-                           type="text"/>
-                </div>
-                <div class="form-group mb-2">
-                    <input class="form-control autoComOss" name="ossName" placeholder="OSS Name"
-                           th:value="${searchBean?.ossName}" type="text"/>
-                </div>
-                <div class="form-group mb-2">
-                    <div class="input-group" style="width: 100%;">
-                        <div class="input-group-prepend">
-                                            <span class="input-group-text">
-                                                <i class="far fa-calendar-alt"></i>
-                                            </span>
+            <th:block th:if="${#strings.equals(defaultSearchType, 'SELF_CHECK')}">
+                <div class="card-body">
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean?.prjId}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}"
+                               type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control autoComOss" name="ossName" placeholder="OSS Name"
+                               th:value="${searchBean?.ossName}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <div class="input-group" style="width: 100%;">
+                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="far fa-calendar-alt"></i>
+                                                </span>
+                            </div>
+                            <input class="form-control" id="createdDate" placeholder="Created Date" type="text">
+                            <input id="schStartDate" name="schStartDate" th:value="${searchBean?.schStartDate}" type="hidden"/>
+                            <input id="schEndDate" name="schEndDate" th:value="${searchBean?.schEndDate}" type="hidden"/>
                         </div>
-                        <input class="form-control" id="createdDate" placeholder="Created Date" type="text">
-                        <input id="schStartDate" name="schStartDate" th:value="${searchBean?.schStartDate}" type="hidden"/>
-                        <input id="schEndDate" name="schEndDate" th:value="${searchBean?.schEndDate}" type="hidden"/>
+                        <script>
+                            var startDate = String([[${searchBean?.schStartDate}]]);
+                            var endDate = String([[${searchBean?.schEndDate}]]);
+
+                            if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+                                var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+                            }
+
+                            $("#createdDate").daterangepicker({
+                                autoUpdateInput: false
+                            }).on('apply.daterangepicker', function (ev, picker) {
+                                $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                                $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                            }).on('cancel.daterangepicker', function (ev, picker) {
+                                $(this).val("");
+                                $("input[name='schStartDate']").val("");
+                                $("input[name='schEndDate']").val("");
+                            });
+                        </script>
                     </div>
-                    <script>
-                        var startDate = String([[${searchBean?.schStartDate}]]);
-                        var endDate = String([[${searchBean?.schEndDate}]]);
-
-                        if (startDate && startDate != 'null' && endDate && endDate != 'null') {
-                            var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
-                            var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
-                            $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
-                        }
-
-                        $("#createdDate").daterangepicker({
-                            autoUpdateInput: false
-                        }).on('apply.daterangepicker', function (ev, picker) {
-                            $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
-                            $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
-                            $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-                        }).on('cancel.daterangepicker', function (ev, picker) {
-                            $(this).val("");
-                            $("input[name='schStartDate']").val("");
-                            $("input[name='schEndDate']").val("");
-                        });
-                    </script>
-                </div>
-                <div class="form-group mb-2">
-                    <input class="form-control" name="licenseName" placeholder="License Name"
-                           th:value="${searchBean?.licenseName}" type="text"/>
-                </div>
-                <div class="form-group mb-2">
-                    <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator"
-                           th:value="${searchBean?.creator}" type="text"/>
-                </div>
-                <div class="form-group mb-2">
-                    <div class="icheck-primary">
-                        <input id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" type="checkbox"
-                               value="N"/>
-                        <label for="publicYn" style="font-weight: normal" th:text="|View My Project Only|"></label>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="licenseName" placeholder="License Name"
+                               th:value="${searchBean?.licenseName}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator"
+                               th:value="${searchBean?.creator}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <div class="icheck-primary">
+                            <input id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" type="checkbox"
+                                   value="N"/>
+                            <label for="publicYn" style="font-weight: normal" th:text="|View My Project Only|"></label>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </th:block>
-</form>
-</fieldset>
+            </th:block>
+        </form>
+    </fieldset>
 </div>

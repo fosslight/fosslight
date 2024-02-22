@@ -2,7 +2,7 @@
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/header :: headFragment"></th:block>
-<th:block th:replace="fragments/default-script :: scriptFragment"></th:block>
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" rel="stylesheet">
 <body class="hold-transition login-page custom-layout">
@@ -18,8 +18,8 @@
         </div>
     </div>
 </div>
-
-</body>
+<div class="pops" style="width: 600px;">
+</div>
 <script th:inline="javascript">
     //<![CDATA[
     /*global $ */
@@ -46,6 +46,26 @@
                     login_fn.excSubmit();
                 }
             });
+
+
+            getAjaxData(null, "/system/notice/getPublishedNotice", "json", function (data) {
+                if (data.noticeList) {
+                    for (var i = 0; i < data.noticeList.length; i++) {
+                        var seq = data.noticeList[i].seq;
+                        var title = data.noticeList[i].title;
+                        var notice = data.noticeList[i].notice;
+
+
+                        console.log(seq);
+                        console.log(title);
+                        console.log(notice);
+
+                        if (getCookie("noticeYn_" + seq) != "N") {
+                            addPopup(title, notice, seq);
+                        }
+                    }
+                }
+            })
         },
         excSubmit: function () {
             formAjaxData("#loginForm", "/session/login-proc",
@@ -216,6 +236,163 @@
                     location.reload();
                 });
             }
+        }
+    }
+
+
+    function addPopup(title, content, seq) {
+        appendChild();
+
+        $("#noticeEdit_" + seq).summernote({ height: 200});
+
+        $("#btnNotice").click(function () {
+            var checkbox = document.getElementById("chkday_" + seq);
+            if (checkbox.checked) {
+                setCookie("noticeYn_" + seq, "N", 1);
+            }
+
+            $("#modalContainer").hide();
+        });
+
+        $("#modalContainer").show();
+
+        // function createPopRegistPop() {
+        //     var popRegistPop = document.createElement("div");
+        //     popRegistPop.classList.add("pop", "registPop");
+        //     popRegistPop.style.width = "600px";
+        //     popRegistPop.style.position = "absolute";
+        //     return popRegistPop;
+        // }
+        //
+        // function createPopData() {
+        //     var popData = document.createElement("div");
+        //     popData.className = "popdata";
+        //     popData.style.padding = "10px 10px 10px";
+        //     return popData;
+        // }
+        //
+        // function createNoticeTitle() {
+        //     var noticeTitle = document.createElement("div");
+        //     noticeTitle.id = "noticeTitle";
+        //     noticeTitle.style.textAlign = "center";
+        //     noticeTitle.style.fontSize = "12pt";
+        //     noticeTitle.style.fontWeight = "bold";
+        //     noticeTitle.style.paddingBottom = "15px";
+        //     noticeTitle.innerHTML = "[Notice] " + title;
+        //     return noticeTitle;
+        // }
+        //
+        // function createNoticeContent() {
+        //     var noticeContent = document.createElement("div");
+        //     noticeContent.id = "noticeContent";;
+        //     noticeContent.innerHTML = '<div id="noticeEdit_' + seq + '" style="width:300px; height:150px;">' + content + '</div>';
+        //     return noticeContent;
+        // }
+        //
+        // function createCheckboxLabel() {
+        //     var checkboxLabel = document.createElement("label");
+        //     checkboxLabel.htmlFor = "chkday_" + seq;
+        //     checkboxLabel.innerHTML = '<input type="checkbox" value="checkbox" name="chkbox" id="chkday_' + seq + '" />&nbsp;Do not show this message again';
+        //     return checkboxLabel;
+        // }
+        //
+        // function createOkButton() {
+        //     var okButton = document.createElement("input");
+        //     okButton.id = "btnNotice";
+        //     okButton.type = "button";
+        //     okButton.value = "OK";
+        //     okButton.className = "okRegister";
+        //     okButton.style.height = "40px";
+        //     okButton.style.cursor = "pointer";
+        //     return okButton;
+        // }
+
+        function createLargeModal() {
+            var modalDiv = document.createElement("div");
+            modalDiv.classList.add("modal", "fade", "show");
+            modalDiv.id = "modalContainer";
+            modalDiv.setAttribute("aria-modal", "true");
+            modalDiv.setAttribute("role", "dialog");
+            modalDiv.style.paddingRight = "14px";
+            modalDiv.style.display = "block";
+
+            var modalDialogDiv = document.createElement("div");
+            modalDialogDiv.classList.add("modal-dialog");
+            modalDialogDiv.style.top = "200px";
+
+            var modalContentDiv = document.createElement("div");
+            modalContentDiv.classList.add("modal-content");
+
+            var modalHeaderDiv = document.createElement("div");
+            modalHeaderDiv.classList.add("modal-header");
+
+            var modalTitle = document.createElement("h4");
+            modalTitle.classList.add("modal-title");
+            modalTitle.textContent = "[Notice] " + title;;
+
+            var closeButton = document.createElement("button");
+            closeButton.type = "button";
+            closeButton.classList.add("close");
+            closeButton.setAttribute("data-dismiss", "modal");
+            closeButton.setAttribute("aria-label", "Close");
+
+            var closeSpan = document.createElement("span");
+            closeSpan.setAttribute("aria-hidden", "true");
+            closeSpan.textContent = "×";
+
+            closeButton.appendChild(closeSpan);
+            modalHeaderDiv.appendChild(modalTitle);
+            modalHeaderDiv.appendChild(closeButton);
+
+            var modalBodyDiv = document.createElement("div");
+            modalBodyDiv.classList.add("modal-body");
+            modalBodyDiv.innerHTML = '<div id="noticeEdit_' + seq + '" style="width:300px; height:150px;">' + content + '</div>';
+
+            var modalFooterDiv = document.createElement("div");
+            modalFooterDiv.classList.add("modal-footer", "justify-content-between");
+
+            var checkboxLabel = document.createElement("label");
+            checkboxLabel.setAttribute("for", "chkday_" + seq);
+
+            var checkboxInput = document.createElement("input");
+            checkboxInput.type = "checkbox";
+            checkboxInput.value = "checkbox";
+            checkboxInput.name = "chkbox";
+            checkboxInput.id = "chkday_" + seq;
+
+            var labelText = document.createTextNode("Do not show this message again");
+
+            checkboxLabel.appendChild(checkboxInput);
+            checkboxLabel.appendChild(document.createTextNode("\u00A0")); // Add non-breaking space
+            checkboxLabel.appendChild(labelText);
+
+            var saveChangesButton = document.createElement("button");
+            saveChangesButton.type = "button";
+            saveChangesButton.id = "btnNotice";
+            saveChangesButton.type = "button";
+            saveChangesButton.value = "OK";
+            saveChangesButton.className = "okRegister";
+            saveChangesButton.classList.add("btn", "btn-danger");
+            saveChangesButton.textContent = "OK";
+
+            modalFooterDiv.appendChild(checkboxLabel);
+            modalFooterDiv.appendChild(saveChangesButton);
+
+            modalContentDiv.appendChild(modalHeaderDiv);
+            modalContentDiv.appendChild(modalBodyDiv);
+            modalContentDiv.appendChild(modalFooterDiv);
+
+            modalDialogDiv.appendChild(modalContentDiv);
+            modalDiv.appendChild(modalDialogDiv);
+
+            return modalDiv;
+        }
+
+
+        function appendChild() {
+            var modal= createLargeModal();
+            var pops = document.querySelector(".pops");
+            pops.appendChild(modal);
         }
     }
     //]]>
