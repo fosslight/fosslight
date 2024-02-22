@@ -40,6 +40,7 @@ ul { list-style-type: none; }
 .custom-layout .text-quartz-gray { color: #8f8986; }
 .custom-layout .text-light-gray { color: #9E9E9E; }
 .custom-layout .text-blue-gray { color: #596d82; }
+.custom-layout .text-gray-white {color: #cccccc; }
 .custom-layout .text-dark-blue { color: #1F2D3D; }
 .custom-layout .text-cerebral-gray { color: #ecebe9; }
 .custom-layout .text-purple { color: #702f9f; }
@@ -180,8 +181,10 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 }
 .custom-layout .nav-pills .nav-link.active, .nav-pills .show>.nav-link { color: #fff;background-color: #a50034; }
 .btn-outline-lg-red { color: #a50034; border-color: #a50034; }
-.btn-outline-lg-red:hover {background-color: #a50034; color: #fff; }
+.btn-outline-lg-red:hover { background-color: #a50034; color: #fff; }
 .custom-layout .mark {background-color: transparent; font-size: .8rem}
+.custom-layout .fileuploader, .custom-layout .multi-fileuploader { max-width: 100%; }
+.custom-layout .uploadSet { max-heigth: 100% !important; }
 
 /* loading bar */
 #loading_wrap {position:fixed; z-index:1001; width:100%; height:100%;}

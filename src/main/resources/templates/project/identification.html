@@ -19,15 +19,15 @@
                             <span class="description-percentage text-lg text-dark-gray" id="vPrjName"></span>
                             <span class="text-dark-gray mx-1" id="vCreated"></span>
                             <span class="ml-2">
-                                <span class="badge badge-info text-md px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">B</span>
+                                <span class="badge badge-info text-sm px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">Basic Information</span>
                                 <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
-                                    <span class="badge badge-success text-md px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">P</span>
+                                    <span class="badge badge-success text-sm px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">Packaging</span>
                                 </th:block>
 <!--                                <th:block th:if="${distributionFlag and project.destributionStatus != 'NA' and (project.destributionStatus != null || project.verificationStatus == 'CONF')}">-->
 <!--                                    <span class="badge badge-danger text-md px-2 py-1" id="distributionTab" title="Go to Distribution tab">D</span>-->
 <!--                                </th:block>-->
                                 <th:block th:if="${project.secCode != null}">
-                                   <span class="badge badge-carrot text-md px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">S</span>
+                                   <span class="badge badge-carrot text-sm px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">Security</span>
                                 </th:block>
                             </span>
                             <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
@@ -550,7 +550,7 @@
                                                         </div>
                                                         <div class="col-lg-11">
                                                             <div class="row">
-                                                                <div class="col-2">
+                                                                <div class="col-lg-2">
                                                                     <p style="text-align:center;" th:text="'FOSSLight Report'"></p>
                                                                 </div>
                                                                 <div class="col-lg-3">

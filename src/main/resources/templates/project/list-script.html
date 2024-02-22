@@ -257,18 +257,21 @@ var fn = {
 				
 				break;
 		}
-		display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
+		// display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 		// packaging
 		if (identificationStatus != 'Confirm') {
+            display += '<span class="text-gray-white text-bold text-md mx-1">&gt;</span>';
 			display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 		} else {
 			if (projectStatus == dropStatus) {
 				switch(verificationStatus) {
 					case "Confirm":
+                        display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 						display += '<span class="badge badge-gray size-sm width-6rem">Packaging</span>';
 
 						break;
 					default:
+                        display += '<span class="text-gray-white text-bold text-md mx-1">&gt;</span>';
 						display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 
 					break;
@@ -277,44 +280,57 @@ var fn = {
 				switch(verificationStatus) {
 					case "":
 						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
+                            display += '<span class="text-gray-white text-bold text-md mx-1">&gt;</span>';
 							display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 						} else if ("" != identificationStatus) {
+                            display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 						}
 						break;
 					case "Progress":
 						if (projectStatus == completeStatus || "Y" == rowObject.statusRequestYn) {
+                            display += '<span class="text-gray-white text-bold text-md mx-1">&gt;</span>';
 							display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 						} else {
+                            display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 							display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 						}
 						break;
 					case "N/A":
+                        display += '<span class="text-gray-white text-bold text-md mx-1">&gt;</span>';
 						display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 						
 						break;
 					case "Error":
+                        display += '<span class="text-gray-white text-bold text-md mx-1">&gt;</span>';
 						display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 
 						break;
 					case "Drop":
+                        display += '<span class="text-gray-white text-bold text-md mx-1">&gt;</span>';
 						display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 
 						break;
 					default:
 						if ("N/A" == rowObject.distributeTarget){
+                            display += '<span class="text-gray-white text-bold text-md mx-1">&gt;</span>';
 							display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>';
 						} else{
 							if ("Confirm" == verificationStatus) {
+                                display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 								display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 							} else {
 								if (projectStatus == progress) {
+                                    display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 									display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 								} else if (projectStatus == request) {
+                                    display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 									display += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 								} else if (projectStatus == review) {
+                                    display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 									display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 								} else if (projectStatus == finalReview) {
+                                    display += '<span class="text-blue-gray text-bold text-md mx-1">&gt;</span>';
 									display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvVerification("+options.rowId+","+rowObject.permission+")\">Packaging</span>";
 								}
 							}

@@ -17,14 +17,14 @@
                                 <span class="description-percentage text-lg text-dark-gray text-bold" id="ePrjName"></span>
                                 <span class="text-dark-gray mx-1" id="eCreator"></span>
                                 <span class="ml-2">
-                                <span class="badge badge-orange text-md px-2 py-1" id="identificationTab" style="cursor: pointer;" title="Go to Identification tab" th:text="I"></span>
+                                <span class="badge badge-orange text-sm px-2 py-1" id="identificationTab" style="cursor: pointer;" title="Go to Identification tab" th:text="Identification"></span>
                                 <span th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}"
-                                    		class="badge badge-success text-md px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab" th:text="P"></span>
+                                    		class="badge badge-success text-sm px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab" th:text="Packaging"></span>
 <!--                                <th:block th:if="${distributionFlag and project.destributionStatus != 'NA' and (project.destributionStatus != null || project.verificationStatus == 'CONF')}">-->
 <!--                                    <span class="badge badge-danger text-md px-2 py-1" id="distributionTab" title="Go to Distribution tab">D</span>-->
 <!--                                </th:block>-->
                                 <th:block th:if="${project.secCode != null}">
-                                   <span class="badge badge-carrot text-md px-2 py-1" id="securityTab" title="Go to Security tab">S</span>
+                                   <span class="badge badge-carrot text-sm px-2 py-1" id="securityTab" title="Go to Security tab">Security</span>
                                 </th:block>
                             </span>
                             </div>

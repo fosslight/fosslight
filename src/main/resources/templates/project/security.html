@@ -15,10 +15,10 @@
                             <span class="description-percentage text-dark-gray" id="prjName"><b></b></span>
                             <span class="text-dark-gray mx-1" id="creator"></span>
                             <span class="ml-2">
-                                <span class="badge badge-info text-md px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">B</span>
-                                <span th:if="${project.identificationStatus != null}" class="badge badge-orange text-md px-2 py-1" id="identificationTab" style="cursor: pointer;" title="Go to Identification tab">I</span>
+                                <span class="badge badge-info text-sm px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">Basic Information</span>
+                                <span th:if="${project.identificationStatus != null}" class="badge badge-orange text-sm px-2 py-1" id="identificationTab" style="cursor: pointer;" title="Go to Identification tab">Identification</span>
                                 <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
-                                    <span class="badge badge-success text-md px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">P</span>
+                                    <span class="badge badge-success text-sm px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">Packaging</span>
                                 </th:block>
                             </span>
                         </div>
