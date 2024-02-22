@@ -163,20 +163,20 @@
                                     </div>
                                     <hr class="my-3">
                                     <div id="content_bat">
-                                        <div name="inputArea" id="inputAreaUpload" class="uploadSet" style="height: 100px;">
+                                        <div name="inputArea" id="inputAreaUpload" class="uploadSet">
                                             <div class="row">
-                                                <div class="col-md-2 pl-3 mt-1">
-                                                    <p class="text-blue-gray" th:text="'Please select a file to upload'"></strong>
+                                                <div class="col-lg-2 pl-3 mt-1">
+                                                    <p class="text-blue-gray" th:text="'Please select a file to upload'"></p>
                                                 </div>
-                                                <div class="col-md-3">
+                                                <div class="col-lg-3">
                                                     <div class="row">
-                                                        <div class="col-1"></div>
-                                                        <div class="col-11" style="display: flex;">
+                                                        <div class="col-lg-1"></div>
+                                                        <div class="col-lg-11" style="display: flex;">
                                                             <div class="fileuploader" id="srcCsvFile" th:text="Upload"></div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-7">
+                                                <div class="col-lg-7">
                                                 	<div class="ajax-file-upload-container" style="margin-top:0px; width:100%;">
                                                 		<ul class="ml-4 csvFileArea">
                                                 			<th:block th:if="${project.csvFile != null}">

@@ -119,13 +119,13 @@
                                                         </div>
                                                         <div class="col-md-11">
                                                             <div class="row">
-                                                                <div class="col-2">
+                                                                <div class="col-lg-2">
                                                                     <p style="text-align:center;" th:text="'FOSSLight Report'"></p>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-lg-3">
                                                                     <div class="multi-fileuploader" id="androidCsvFile" th:text="Upload"></div>
                                                                 </div>
-                                                                <div class="col-md-5">
+                                                                <div class="col-lg-5">
                                                                 	<div class="ajax-file-upload-container" style="margin-top:0px;">
                                                                 		<th:block th:if="${project.androidCsvFile != null}">
                                                             				<ul class="androidCsvFileArea" th:each="csvFile : ${project.androidCsvFile}">
@@ -144,13 +144,13 @@
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-2">
+                                                                <div class="col-lg-2">
                                                                     <p class="text-danger" style="text-align:center;" th:text="'NOTICE'"></p>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-lg-3">
                                                                     <div class="fileuploader" id="androidNoticeFile" th:text="Upload"></div>
                                                                 </div>
-                                                                <div class="col-md-5">
+                                                                <div class="col-lg-5">
                                                                 	<div class="ajax-file-upload-container" style="margin-top:0px;">
                                                                 		<th:block th:if="${project.androidNoticeFile != null}">
                                                             				<ul class="androidNoticeFileArea" th:each="csvFile : ${project.androidNoticeFile}">
@@ -169,13 +169,13 @@
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-2">
+                                                                <div class="col-lg-2">
                                                                     <p style="text-align:center;" th:text="'fosslight_binary.txt'"></p>
                                                                 </div>
-                                                                <div class="col-md-3">
+                                                                <div class="col-lg-3">
                                                                     <div class="fileuploader" id="androidResultFile" th:text="Upload"></div>
                                                                 </div>
-                                                                <div class="col-md-5">
+                                                                <div class="col-lg-5">
                                                                 	<div class="ajax-file-upload-container" style="margin-top:0px;">
                                                                 		<th:block th:if="${project.androidResultFile != null}">
                                                             				<ul class="androidResultFileArea" th:each="csvFile : ${project.androidResultFile}">
@@ -258,13 +258,13 @@
                                                         		</div>
                                                         		<div class="col-md-3">
                                                             		<div class="row">
-                                                                		<div class="col-1"></div>
-                                                                		<div class="col-11" style="display: flex;">
+                                                                		<div class="col-lg-1"></div>
+                                                                		<div class="col-lg-11" style="display: flex;">
                                                                     		<div class="fileuploader" id="androidNoticeFileDummy" th:text="Upload"></div>
                                                                 		</div>
                                                             		</div>
                                                         		</div>
-                                                        		<div class="col-md-7">
+                                                        		<div class="col-lg-7">
                                                         			<div class="ajax-file-upload-container" style="margin-top:0px;">
                                                         			<ul class="androidNoticeFileAreaDummy"></ul>
                                                             		</div>
@@ -277,13 +277,13 @@
                                                         		</div>
                                                         		<div class="col-md-3">
                                                             		<div class="row">
-                                                                		<div class="col-1"></div>
-                                                                		<div class="col-11" style="display: flex;">
+                                                                		<div class="col-lg-1"></div>
+                                                                		<div class="col-lg-11" style="display: flex;">
                                                                     		<div class="fileuploader" id="androidResultFileDummy" th:text="Upload"></div>
                                                                 		</div>
                                                             		</div>
                                                         		</div>
-                                                        		<div class="col-md-7">
+                                                        		<div class="col-lg-7">
                                                         			<div class="ajax-file-upload-container" style="margin-top:0px;">
                                                         			<ul class="androidResultFileAreaDummy"></ul>
                                                             		</div>
@@ -333,9 +333,9 @@
                                     <div id="content_bat">
                                         <div name="content_bat" id="binaryFile">
                                             <div class="row">
-                                                <div class="col-md-10">
+                                                <div class="col-lg-10">
                                                     <div class="row">
-                                                        <div class="col-5" style="display: flex;">
+                                                        <div class="col-lg-5" style="display: flex;">
                                                             <div class="fileuploader" id="batBinaryFile" th:text="Upload"></div>
                                                             <input type="hidden" id="binaryFileId" value="${project.srcCsvFileId}"/>
                                                         </div>
