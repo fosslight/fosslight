@@ -118,13 +118,13 @@
                                 <b>[<span th:text="${project.prjId}"></span>]<span class="ml-1" th:text="${project.prjName}"></span></b>
                             </span>
                             <span class="text-lg-gray text-smaller ml-2">
-                                    <span class="badge badge-info text-md px-2 py-1">B</span>
-                                    <span class="badge badge-orange text-md px-2 py-1">I</span>
+                                    <span class="badge badge-info text-sm px-2 py-1">Basic Information</span>
+                                    <span class="badge badge-orange text-sm px-2 py-1">Identification</span>
                                     <th:block th:if="${project.identificationStatus == 'CONF' and project.verificationStatus != 'NA'}">
-                                         <span class="badge badge-success text-md px-2 py-1">P</span>
+                                         <span class="badge badge-success text-sm px-2 py-1">Packaging</span>
                                     </th:block>
                                     <th:block th:if="${project.verificationStatus == 'CONF' and project.destributionStatus != 'NA'}">
-                                         <span class="badge badge-danger text-md px-2 py-1">D</span>
+                                         <span class="badge badge-danger text-sm px-2 py-1">Distribution</span>
                                     </th:block>
                             </span>
                         </div>
@@ -145,10 +145,12 @@
                             </span>
                         </div>
                     </th:block>
-                    <div class="col-sm-6">
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
                         <form class="mb-0" id="commentSchForm" onkeydown="javascript: if(event.keyCode==13) { fn_commemt.getCommentList(); return false; }">
                             <div class="row mt-3">
-                                <div class="col-4 px-1">
+                                <div class="col-md-3 px-1">
                                     <th:block th:if="${#strings.equals(basicInfo.referenceDiv, 'prj')}">
                                         <select class="custom-select float-right" data-placeholder="Section" id="schReferenceDiv" name="schReferenceDiv">
                                             <option disabled hidden selected>Section</option>
@@ -175,22 +177,27 @@
                                         </select>
                                     </th:block>
                                 </div>
-                                <div class="col-8 px-0">
+                                <div class="col-md-9 px-0">
                                     <div class="input-group">
                                         <input class="form-control" type="text" id="schKeyword" name="schKeyword" autocomplete="off">
                                         <div class="input-group-append">
                                             <button class="btn btn-default" id="search" type="button"><i class="fa fa-search"></i></button>
                                         </div>
+                                        <button class="btn btn-ivory btn-md px-2 ml-1 width-7rem">
+                                            <i class="fas fa-plus mr-2"></i>
+                                            Add
+                                        </button>
                                     </div>
                                     <input name="referenceDiv" th:value="${basicInfo.referenceDiv}" type="hidden">
                                     <input name="referenceId" th:value="${basicInfo.referenceId}" type="hidden">
-                                    <button class="btn btn-ivory btn-md px-2">
-                                        <i class="fas fa-plus mr-2"></i>
-                                        Add
-                                    </button>
+
                                 </div>
+
                             </div>
                         </form>
+                    </div>
+                    <div class="col-md-1">
+
                     </div>
                 </div>
             </div>
