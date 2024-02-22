@@ -243,8 +243,9 @@
     function addPopup(title, content, seq) {
         appendChild();
 
-        $("#noticeEdit_" + seq).summernote({ height: 200});
-
+        $("#noticeEdit_" + seq).summernote({ height: 200,  toolbar: [], disable: true});
+        $("#noticeEdit_" + seq).summernote('disable');
+        
         $("#btnNotice").click(function () {
             var checkbox = document.getElementById("chkday_" + seq);
             if (checkbox.checked) {
