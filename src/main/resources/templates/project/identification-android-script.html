@@ -7,9 +7,17 @@ $(document).ready(function () {
 	binAndroid_evt.init();
 	bat_evt.init();
 	
+	activeTab = "binAndroidDiv";
+	
 	$("[id^=tabMenu]").on("click", function() {
-		var tabId = $(this).attr("id");
+		var tabId = $(this).attr("id");console.log(tabId);
 		tabId = tabId.replace("tabMenu", "");
+		
+		let firstChar = tabId[0];
+		let firstCharLower = firstChar.toLowerCase();
+		let leftChar = tabId.slice(1, tabId.length);
+		activeTab = firstCharLower + leftChar + "Div";
+		
 		$("[name=gridArea]").hide();
 		$("#gridArea"+tabId).show();
 	});

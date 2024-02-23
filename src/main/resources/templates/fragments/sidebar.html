@@ -16,7 +16,7 @@
             <div class="col-6">
               <span class="text-right">
                 <i class="fas fa-user-circle text-light mr-1 fa-xs"></i>
-                <a style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}"></a>
+                <a style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" th:onclick="|createTab_new('User Configuration', '/configuration/edit', 'configuration-edit', true)|"></a>
               </span>
               <input type="hidden" id="defaultTabAnchorArr" th:value="${sessUserInfo.defaultTabAnchor}" />
             </div>

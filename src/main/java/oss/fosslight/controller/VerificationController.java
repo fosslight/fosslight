@@ -228,7 +228,7 @@ public class VerificationController extends CoTopComponent {
 		model.addAttribute("userGuideLicenseList", userGuideLicenseList);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		
-		return VERIFICATION.PAGE_JSP;
+		return "project/verification";
 	}
 	
 	@ResponseBody

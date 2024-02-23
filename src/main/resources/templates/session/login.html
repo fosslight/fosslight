@@ -3,7 +3,9 @@
       xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/header :: headFragment"></th:block>
 <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
-
+<style>
+.note-editable { background-color: #fff!important; }
+</style>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" rel="stylesheet">
 <body class="hold-transition login-page custom-layout">
 <div class="login-box">
@@ -18,7 +20,7 @@
         </div>
     </div>
 </div>
-<div class="pops" style="width: 600px;">
+<div class="pops" style="width: 750px;">
 </div>
 <script th:inline="javascript">
     //<![CDATA[
@@ -319,7 +321,7 @@
 
             var modalDialogDiv = document.createElement("div");
             modalDialogDiv.classList.add("modal-dialog");
-            modalDialogDiv.style.top = "200px";
+            modalDialogDiv.setAttribute("style", "top: 200px; min-width: 700px;");
 
             var modalContentDiv = document.createElement("div");
             modalContentDiv.classList.add("modal-content");

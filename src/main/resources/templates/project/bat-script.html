@@ -39,7 +39,7 @@ var bat_evt = {
 		//bat_fn.getBatGridData();
 		//Not aplicable
 		var aplicable = $('#applicableBat').is(':checked');
-		if(aplicable){
+		if (aplicable){
 			$('.batBtn').hide();
 		}
 		//파일업로드
@@ -311,7 +311,7 @@ var bat_fn = {
 	getBatGridData : function(param){
 		var postParam = (param) ? param : {referenceId:[[${project.prjId}]],referenceDiv:'12'};
 		$.ajax({
-			url : 'lge/project/identificationGridPost',
+			url : suffix + '/project/identificationGridPost',
 			type : 'POST',
 			dataType : 'json',
 			cache : false,
@@ -326,15 +326,15 @@ var bat_fn = {
 				$.each(batSubData,function(key,value) {
 					var strVal = "";
 					
-					for(var i=0; i < value.length; i++){
-						if(value[i].excludeYn == "N"){
+					for (var i=0; i < value.length; i++) {
+						if (value[i].excludeYn == "N") {
 							strVal += value[i].licenseName+",";	
 						}
 					}
 					
-					for(var j=0; j < batMainData.length; j++){
-						if(batMainData[j]["licenseDiv"] == "M"){
-							if(key == batMainData[j]["gridId"]){
+					for (var j=0; j < batMainData.length; j++) {
+						if (batMainData[j]["licenseDiv"] == "M") {
+							if (key == batMainData[j]["gridId"]) {
 								batMainData[j]["licenseName"] = strVal.substring(0,strVal.length-1);
 							}
 						}
@@ -342,7 +342,7 @@ var bat_fn = {
 				});
 				
 				batValidMsgData = []; //초기화
-				if(data.validData) {
+				if (data.validData) {
 					batValidMsgData = data.validData;
 				}
 
@@ -447,7 +447,7 @@ var bat_fn = {
 		loading.show();
 		// src 그리드 데이터
 		$.ajax({
-			url : 'lge/project/identificationGrid/'+[[${project.prjId}]]+'/30',
+			url : suffix + '/project/identificationGrid/'+[[${project.prjId}]]+'/30',
 			type : 'GET',
 			dataType : 'json',
 			cache : false,
@@ -609,10 +609,10 @@ var bat_fn = {
 	changeSelectOption : function(){
 		var value = $('input[name=batselectOption]:checked').val();
 		
-		if(value == 1){
+		if (value == 1) {
 			$('#binaryFile').show();
 			$('#wgetUrl').hide();
-		}else{
+		} else {
 			$('#binaryFile').hide();
 			$('#wgetUrl').show();
 		}

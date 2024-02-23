@@ -587,19 +587,11 @@ var deleteTab = function (tabLk) {
 }
 
 var activeDeleteTab = function () {
-    var tabs = $("#nav-tabs").tabs();
-    var tabNumber = $("#nav-tabs").tabs('option', 'active');
-    var panelId = tabs.find(".ui-tabs-active").remove().attr("aria-controls");
-    $("#" + panelId).remove();
-
-    $('#nav-tabs').tabs('option', 'active', selectTab + 1);
-
-    if (lastTab > selectTab) {
-        lastTab--;
-    }
-
-    tabs.tabs("refresh");
-    $(document).focus();
+    var activeTabId = $(".nav-link.active").attr("id");
+   	var activePanelId = "panel--" + activeTabId.substring(5, activeTabId.length);
+   
+    $("#" + activeTabId).parent().remove();
+    $("#" + activePanelId).remove();
 }
 
 var allDeleteTab = function () {
@@ -2616,13 +2608,11 @@ function openHelpGuideLink(id) {
 var createTabNew = function (tabNm, tabLk) {
     var pattern = /\s/g;
     var tabName = tabNm.replace(pattern, '-');
-
+	
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).length > 0) {
-    	if ("BOM_Compare" == tabName) {
-			$(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).parent().find('.btn-iframe-close').trigger("click");
-			window.setTimeout(function () {
-            	createTabFnc(tabNm, tabName, tabLk)
-        	}, 200);
+    	if ("BOM_Compare" == tabName || "History" == tabName) {
+			deleteTabNew(tabName);
+			createTabFnc(tabNm, tabName, tabLk);
 		} else {
 			$("#tab--" + tabName).trigger("click");
        	 	$("#tab--" + tabName).focus();
@@ -2665,8 +2655,13 @@ var createTabFnc = function (tabNm, tabName, tabLk) {
 
  	const iframe = '<div class="tab-pane fade" id="panel--' + tabName + '" role="tabpanel" aria-labelledby="tab--' + tabName + '"><iframe src="' + frameSrc + '"></iframe></div>';
  	$(".content-wrapper.iframe-mode").children(".tab-content").append(iframe);
+	
+	$("#tab--" + tabName).trigger("click");
+}
 
-  	$("#tab--" + tabName).trigger("click");
+var deleteTabNew = function (tabNm) {
+	$('#tab--' + tabNm).parent().remove();
+	$('#panel--' + tabNm).remove();
 }
 
 var existsTabName = function (tabNm) {
@@ -2729,6 +2724,17 @@ var tableRefreshNew = function (id) {
                 }
             });
         }, 300);
+    } else if ("list3" == id || "depList" == id || "srcList" == id || "binList" == id || "bomList" == id || "binAndroidList" == id) {
+        window.setTimeout(function () {
+			var width = $(".card-header").width() - 20;
+            $('.ui-jqgrid-btable').each(function () {
+                var id = $(this).attr('id');
+                if ("list3" == id || "depList" == id || "srcList" == id || "binList" == id || "bomList" == id || "binAndroidList" == id) {
+                    $(this).jqGrid('setGridWidth', 0, true);
+                    $(this).jqGrid('setGridWidth', width, true);
+                }
+            });
+        }, 300);
     } else if ("_lastStepList" == id) {
         $('.ui-jqgrid-btable').each(function () {
         	var id = $(this).attr('id');
@@ -2737,6 +2743,17 @@ var tableRefreshNew = function (id) {
                 $(this).jqGrid('setGridWidth', 790, true);
            	}
        	});
+    } else if ("_projectList" == id) {
+		window.setTimeout(function () {
+			$('.ui-jqgrid-btable').each(function () {
+        		var id = $(this).attr('id');
+            	if ("_projectList" == id) {
+					var width = $(".col-md-7.px-5").width();
+					$(this).jqGrid('setGridWidth', 0, true);
+               	 	$(this).jqGrid('setGridWidth', width, true);
+           		}
+       		});
+		}, 300);
     } else {
         window.onload = function () {
             var width = $(".card-body").width() - 40;
@@ -3347,6 +3364,8 @@ function updateSearchCondition(el){
     var formData = $("#" + el + " .save-value").serialize();
 
     if (formData) {
+		loading.show();
+		
         formData = formData.replace(/copyrights/g, 'copyright');
 
         $.ajax({

@@ -123,10 +123,10 @@
                                         </div>
                                         <div class="col-md-7 px-5">
                                             <div class="row form-group">
-                                            	<div class="col-3">
+                                            	<div class="col-lg-3">
                                             		<label for="inputName" th:text="#{msg.common.field.Agreement}"></label>
                                             	</div>
-                                                <div class="col-9">
+                                                <div class="col-lg-9">
                                                     <div class="col-12 mb-2 d-flex confirmationUploader" th:style="${confirmationFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
                                                         <div class="float-left" id="confirmationFile" style="max-width: 100%;"></div>
                                                     </div>
@@ -143,10 +143,10 @@
                                                 </div>
                                             </div>
                                             <div class="row form-group">
-                                            	<div class="col-3">
+                                            	<div class="col-lg-3">
                                             		<label for="inputName" th:text="#{msg.common.field.OSSChecklist} + '(Open Source List)'"></label>
                                             	</div>
-                                                <div class="col-9">
+                                                <div class="col-lg-9">
                                                     <div class="col-12 mb-2 d-flex ossUploader" th:style="${ossFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
                                                         <div class="float-left" id="ossFile" style="max-width: 100%;"></div>
                                                     </div>
@@ -163,10 +163,10 @@
                                                 </div>
                                             </div>
                                             <div class="row form-group">
-                                            	<div class="col-3">
+                                            	<div class="col-lg-3">
                                             		<label for="inputName" th:text="'fosslight_binary.txt'"></label>
                                             	</div>
-                                                <div class="col-9">
+                                                <div class="col-lg-9">
                                                     <div class="col-12 mb-2 d-flex binaryUploader" th:style="${binaryFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
                                                         <div class="float-left" id="partnerBinaryFile" style="max-width: 100%;"></div>
                                                     </div>
@@ -183,17 +183,17 @@
                                                 </div>
                                             </div>
                                             <div class="row form-group">
-                                            	<div class="col-3">
+                                            	<div class="col-lg-3">
                                             		<label for="inputName" th:text="#{msg.common.field.relatedDocuments}"></label><br/>
                                             		<span class="text-lg-red text-smaller" th:style="${isCommited} ? 'display: none;'" th:text="'The maximum number of files that can be uploaded is 5.'"></span>
                                             	</div>
-                                                <div class="col-9 documentsUploader">
+                                                <div class="col-lg-9 documentsUploader">
                                                     <div class="col-12 mb-2 d-flex documentsUploader" th:style="${isCntOver} or ${isCommited} ? 'display : none;' : 'display : flex;'">
                                                         <div class="float-left" id="documentsFile" style="max-width: 100%;"></div>
                                                     </div>
                                                 </div>
-                                                <div class="col-3 documentsUploader"></div>
-                                                <div class="col-9 mb-2 d-flex">
+                                                <div class="col-lg-3 documentsUploader"></div>
+                                                <div class="col-lg-9 mb-2 d-flex">
                                                     <ul class="pl-0 documentsFileArea">
                                                     	<th:block th:each="documentsFile : ${detail.documentsFile}">
                                                     		<th:block th:if="${documentsFile.delYn == 'N'}">

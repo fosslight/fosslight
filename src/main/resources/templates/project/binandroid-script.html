@@ -574,7 +574,6 @@ var binAndroid_fn = {
 							}
 						}
 					}
-					
 				}
 			},
 			gridComplete:function (){
@@ -623,14 +622,14 @@ var binAndroid_fn = {
 		});
 	},
 	makeFileTag2 : function(obj){
-		var appendHtml = '&nbsp;&nbsp;'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
 		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'2\')">X</span>'+appendHtml+'</li>';
 		$('.androidCsvFileArea').append(uploadFileTag);
 	},
 	makeFileTag3 : function(obj, deleteFlag){
-		var createdDate = '&nbsp;&nbsp;'+obj.createdDate;
+		var createdDate = '<br>'+obj.createdDate;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		// 여기에 xml,tar.gz,zip file의 경우 변환된 html file인지 확인하고 해당 될경우 delete button을 제거함.
 		var appendHtml = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
@@ -643,7 +642,7 @@ var binAndroid_fn = {
 		$('.androidNoticeFileArea').append(appendHtml);
 	},
 	makeFileTag4 : function(obj){
-		var appendHtml = '&nbsp;&nbsp;'+obj.createdDate;
+		var appendHtml = '<br>'+obj.createdDate;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var makeFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
 		makeFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="binAndroid_fn.deleteCsv(this, \'4\')">X</span>'+appendHtml+'</li>';
@@ -1633,7 +1632,7 @@ var binAndroid_grid = {
 					$("#binAndroidList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
 					$("#binAndroidList_toppager").remove();
 					
-					tableRefresh();
+					tableRefreshNew("binAndroidList");
 				}
 
 			},

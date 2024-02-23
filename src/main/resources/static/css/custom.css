@@ -143,7 +143,7 @@ ul { list-style-type: none; }
     border-top-right-radius: 1rem;
     border-bottom-right-radius: 1rem;
 }
-.custom-layout .help-link.dropdown-toggle { border-radius: 25px;width: 4.5rem;height: 1.8rem;padding:1rem 2.5rem;color: #fff;text-align: center;font-size: 1rem;align-items: center;display: flex;justify-content: center; border: 1.5px solid #dc3545; font-weight:600; color: #dc3545;}
+.custom-layout .help-link.dropdown-toggle { border-radius: 25px;width: 4.5rem;height: 1.8rem;padding:1rem 2rem;color: #fff;text-align: center;font-size: .9rem;align-items: center;display: flex;justify-content: center; border: 1.5px solid #dc3545; font-weight:600; color: #dc3545;}
 .custom-layout .help-link.dropdown-toggle:hover { background-color: #dc3545; color: #fff !important;}
 .custom-layout .helpLink.dropdown .dropdown-menu { top: 3px !important; }
 .custom-layout .helpLink.f-left.dropdown .dropdown-menu { left: -45px !important; }
@@ -324,6 +324,8 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 /* licenseText  */
 .custom-layout #disp_licenseText {background-color: aliceblue;font-size: .8rem;padding: 1rem;margin-top: 1rem;color: #06063b;height: 200px; overflow: scroll;}
+
+.custom-layout .font-normal {font-weight: normal !important;}
 
 /* tooltip */
 .tooltip {

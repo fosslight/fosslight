@@ -240,6 +240,14 @@
                 }
 
                 return paramData;
+            },
+        	onUpdateSuccess : function(json, status){
+                loading.hide();
+                if (json.resCd == '10'){
+                    alertify.success([[#{msg.common.success}]]);
+                } else {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                }
             }
         };
 
