@@ -388,7 +388,6 @@ function createTabInFrame(tabNm, tabLk) {
         action: 'create'
     }
 
-    //moveNaviBar();
     parent.postMessage(JSON.stringify(data), "*");
 
 }
@@ -2635,8 +2634,7 @@ var createTabNew = function (tabNm, tabLk) {
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").hasClass("ui-tabs") === true) {
         $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").removeClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
     }
-    
-    //moveNaviBar();
+
 }
 
 var createTabFnc = function (tabNm, tabName, tabLk) {
@@ -2960,8 +2958,6 @@ function reloadTab_new(link, uniqueName, act) {
 }
 
 function activateTab(uniqueName) {
-    //moveNaviBar();
-
     let tabId = `panel--${uniqueName}`
     let navId = `tab--${uniqueName}`
 
@@ -3309,19 +3305,23 @@ function resetForm(el) {
             var name = $field.attr("name");
             if(name !== 'act' && name !== "defaultSearchType") {
                 if ($field.is(':checkbox') || $field.is(':radio')) {
-                    $field.prop('checked', false);
+                    $field.prop('checked', false)
                 } else {
                     $field.val('');
                 }
             }
+        });
 
+        $(this).find('.select2').each(function() {
+            var $select = $(this);
+            $select.find('option:selected').remove();
+            $select.trigger('change');
         });
 
         $(this).find('select').each(function() {
             var $select = $(this);
-            if (!$select.is(':hidden')) { // 숨겨진 요소가 아닌 경우에만 처리
-                $select.val(null).trigger('change');
-            }
+            $select.find('option:selected').remove();
+            $select.trigger('change');
         });
     });
 }
@@ -3365,15 +3365,4 @@ function appendFormCheckboxValuesEl(el, item, selectedValues) {
     $('#' + el + ' input[name="chk_'+item+'"]').remove();
     var addEl = '<input class="save-value" type="hidden" name="chk_'+item+'" value="'+ selectedValues +'" />';
     $('#' + el).append(addEl);
-}
-
-function moveNaviBar() {
-    var navbarNav = document.getElementById("navbarNav");
-    var activeElement = navbarNav.querySelector('.active');
-    if (activeElement) {
-        var navbarRect = navbarNav.getBoundingClientRect();
-        var activeRect = activeElement.getBoundingClientRect();
-        var scrollLeft = activeRect.left - navbarRect.left - (navbarRect.width - activeRect.width) / 2;
-        navbarNav.scrollLeft = scrollLeft;
-    }
 }
