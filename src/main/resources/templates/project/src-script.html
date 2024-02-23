@@ -1255,6 +1255,8 @@ var src_grid = {
 					$("#srcList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
 				}
 
+				tableRefreshNew("srcList");
+				
 				//sort후 ValidMsgData reload
 				if(isSort){
 					isSort = false;

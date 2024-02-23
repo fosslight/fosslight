@@ -107,6 +107,8 @@ var bomCompareList = {
 		var afPrjId = $("#afterPrjId").val();
 		
 		if (bfPrjId != "" && afPrjId != "") {
+			loading.show();
+			
 			var param = $('#bomcompareSearch').serializeObject();
 			
 			$.ajax({
@@ -114,6 +116,8 @@ var bomCompareList = {
 				, data : param
 				, dataType : "json"
 				, success : function (data){
+					loading.hide();
+					
 					var isValid = data.isValid;
 					
 					if (isValid == "true"){

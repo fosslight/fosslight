@@ -30,12 +30,10 @@
                                    <span class="badge badge-carrot text-sm px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">Security</span>
                                 </th:block>
                             </span>
-                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
+                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom projdecBtn" style="margin-left: 2.5rem; font-size: .85rem">
                             	<th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
-                            	<span class="ml-5 projdecBtn">
                             		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
                                		<label class="form-check-label text-lg-gray mt-1" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
-                               	</span>
                             	</th:block>
                          	</span>
                         </div>

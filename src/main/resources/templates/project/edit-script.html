@@ -406,57 +406,27 @@
 			
 			$("#identificationTab").click(function(){
 				var prjId = $('input[name=prjId]').val();
-				var idx = getTabIndex(prjId+"_Identify");
-				
-				if (idx != ""){
-					fn.changeTabInFrame(idx);
-				} else {
-					fn.createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
-				}
+				createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
 			});
 			
 			$("#packagingTab").click(function(){
 				var prjId = $('input[name=prjId]').val();
-				var idx = getTabIndex(prjId+"_Packaging");
-				
-				if(idx != ""){
-					fn.changeTabInFrame(idx);
-				}else{
-					fn.createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
-				}
+				createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
 			});
 			
 			$("#distributionTab, #distributionTabModel").click(function(){
 				var prjId = $('input[name=prjId]').val();
-				var idx = getTabIndex(prjId+"_Distribute");
-				
-				if(idx != ""){
-					fn.changeTabInFrame(idx);
-				}else{
-					fn.createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
-				}
+				createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
 			});
 			
 			$("#editTab").click(function(){
 				var prjId = $('input[name=prjId]').val();
-				var idx = getTabIndex(prjId+"_Project");
-				
-				if(idx != ""){
-					fn.changeTabInFrame(idx);
-				}else{
-					fn.createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
-				}
+				createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
 			});
 			
 			$("#securityTab").click(function(){
 				var prjId = $('input[name=prjId]').val();
-				var idx = getTabIndex(prjId+"_Security");
-				
-				if(idx != ""){
-					fn.changeTabInFrame(idx);
-				}else{
-					fn.createTabInFrame(prjId+'_Security', '/project/security/'+prjId);
-				}
+				createTabInFrame(prjId+'_Security', '/project/security/'+prjId);
 			});
 			
 			commonAjax.getCreatorDivisionTags().success(function(data, status, headers, config){
@@ -610,7 +580,7 @@
 			
 			activeDeleteTabInFrame();
 			
-			fn.createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
+			createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
 		},	
 		// 왓쳐 엘리먼트 그리기
 		addHtml : function(target, str, division, userId){

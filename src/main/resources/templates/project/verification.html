@@ -14,9 +14,7 @@
                             <span class="text-dark-gray mx-1" id="verifyCreator"></span>
                            	<span class="ml-2">
                                 <span class="badge badge-info text-sm px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">Basic Information</span>
-                                <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
-                                    <span class="badge badge-success text-sm px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">Packaging</span>
-                                </th:block>
+                                <span class="badge badge-orange text-sm px-2 py-1" id="identificationTab" style="cursor: pointer;" title="Go to Identification tab" th:text="Identification"></span>
                                 <th:block th:if="${project.secCode != null}">
                                    <span class="badge badge-carrot text-sm px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">Security</span>
                                 </th:block>
@@ -112,7 +110,7 @@
                                                         				<div th:class="col-md-10" th:classappend="verifyFile_+${i}" th:id="registFileDiv_+${i}" style="display:none;">
                                                                         	<div th:id="registFile_+${i}"></div>
                                                                     	</div>
-                                                        				<div class="ajax-file-upload-container" style="margin-top:0px;">
+                                                        				<div class="ajax-file-upload-container" style="margin-top:0px; width:100%;">
                                                         					<ul th:class="uploadList_+${i}">
                                                         						<li th:if="${file.delYn == 'N'}">
                                                                         			<a class="ajax-file-upload-filename" th:text="${file.origNm}" th:href="@{'/download/' + ${file.fileSeq} + '/' + ${file.logiNm}}"></a>
@@ -127,7 +125,7 @@
                                                         				<div th:class="col-md-10" th:classappend="verifyFile_+${i}" th:id="registFileDiv_+${i}" style="display: flex;">
                                                                         	<div th:id="registFile_+${i}"></div>
                                                                     	</div>
-                                                                    	<div class="ajax-file-upload-container" style="margin-top:0px; display:none;">
+                                                                    	<div class="ajax-file-upload-container" style="margin-top:0px; width:100%; display:none;">
                                                         					<ul th:class="uploadList_+${i}"></ul>
                                                         				</div>
                                                         			</th:block>

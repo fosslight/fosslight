@@ -1323,9 +1323,9 @@ var bin_grid = {
 					
 					// 한번에 처리
 					$("#binList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
-					
-					tableRefresh();
 				}
+				
+				tableRefreshNew("binList");
 				
 				//sort후 ValidMsgData reload
 				if(isSort){

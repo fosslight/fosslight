@@ -2681,41 +2681,48 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public int allowDownloadMultiFlagToBitFlag(Project project) {
 		int bitFlag = 1;
 		
-		if (project.getNoticeFileFormat() != null) {
-			List<String> noticeFileFormatList = Arrays.asList(project.getNoticeFileFormat());
-			if (noticeFileFormatList.contains("chkAllowDownloadNoticeHTML")) {
-				bitFlag |= CoConstDef.FLAG_A;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadNoticeText")) {
-				bitFlag |= CoConstDef.FLAG_B;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadSimpleHTML")) {
-				bitFlag |= CoConstDef.FLAG_C;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadSimpleText")) {
-				bitFlag |= CoConstDef.FLAG_D;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadSPDXSheet")) {
-				bitFlag |= CoConstDef.FLAG_E;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadSPDXRdf")) {
-				bitFlag |= CoConstDef.FLAG_F;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadSPDXTag")) {
-				bitFlag |= CoConstDef.FLAG_G;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadSPDXJson")) {
-				bitFlag |= CoConstDef.FLAG_H;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadSPDXYaml")) {
-				bitFlag |= CoConstDef.FLAG_I;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadCDXJson")) {
-				bitFlag |= CoConstDef.FLAG_J;
-			}
-			if (noticeFileFormatList.contains("chkAllowDownloadCDXXml")) {
-				bitFlag |= CoConstDef.FLAG_K;
-			}
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeHTMLYn())) {
+			bitFlag |= CoConstDef.FLAG_A;
+		}
+			
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadNoticeTextYn())) {
+			bitFlag |= CoConstDef.FLAG_B;
+		}
+		
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleHTMLYn())) {
+			bitFlag |= CoConstDef.FLAG_C;
+		}
+			
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSimpleTextYn())) {
+			bitFlag |= CoConstDef.FLAG_D;
+		}
+			
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXSheetYn())) {
+			bitFlag |= CoConstDef.FLAG_E;
+		}
+			
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXRdfYn())) {
+			bitFlag |= CoConstDef.FLAG_F;
+		}
+			
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXTagYn())) {
+			bitFlag |= CoConstDef.FLAG_G;
+		}
+
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXJsonYn())) {
+			bitFlag |= CoConstDef.FLAG_H;
+		}
+
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadSPDXYamlYn())) {
+			bitFlag |= CoConstDef.FLAG_I;
+		}
+		
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXJsonYn())) {
+			bitFlag |= CoConstDef.FLAG_J;
+		}
+
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXXmlYn())) {
+			bitFlag |= CoConstDef.FLAG_K;
 		}
 		
 		return bitFlag;

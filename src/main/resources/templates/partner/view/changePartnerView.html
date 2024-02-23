@@ -63,7 +63,8 @@
                			<div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null 
                                         			&& #lists.size(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))) > 0) ? true : false}">
                			<th:block th:if="${useDomainFlag}">
-                    		<select class="form-control select2" style="width: 100%;">
+                    		<select class="form-control select2" name="parDomain" style="width: 100%;" th:onchange="|fn.selectDomain()|">
+                    			<option th:value="''" th:text="'Select Domain'"></option>
                         		<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
                             		<th:block th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
                                 		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
@@ -73,7 +74,7 @@
                               		</th:block>
                         		</th:block>
                     		</select>
-                       		<input type="text" id="emailTemp" class="w220" style="display:none;" th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
+                       		<input type="text" id="emailTemp" name="emailTemp" class="w220" style="display:none;" th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
                 		</th:block>
                   		<th:block th:if="${!useDomainFlag}">
                     		<input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">

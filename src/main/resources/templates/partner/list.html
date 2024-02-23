@@ -110,11 +110,11 @@
                                                         </th:block>
                                                     </select>
                                                 </div>
-                                            </div>
+                                            </div> 
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
-                                                        <select class="form-control select2 save-value" multiple="multiple" id="prjStatusSelect" name="status" style="width: 100%;">
+                                                        <select class="form-control select2 save-value" multiple="multiple" id="parStatusSelect" name="status" style="width: 100%;">
                                                             <option th:value="''"></option>
                                                             <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}"
                                                                     th:text="${option.cdDtlNm}"

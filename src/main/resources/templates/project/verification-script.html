@@ -5,8 +5,9 @@
         //<![CDATA[
         /*global $ */
         /*jslint browser: true, nomen: true */
-        var userRole = [[${#authentication.authorities[0].authority}]];
+        var userRole = [[${sessUserInfo.authority}]];
         var curIdenStatus = [[${project.verificationStatus}]];
+        curIdenStatus = curIdenStatus||"";
         var projectStatus = [[${project.status}]];
         var modifyCommentId = '';
         var commentIdx = '';
@@ -145,6 +146,26 @@
                     alertify.alert([[#{msg.project.upload.verify}]], function () {});
                 }
             });
+            
+            $("[id^=tabMenu]").on("click", function() {
+        		var tabId = $(this).attr("id");
+        		tabId = tabId.replace("tabMenu", "");
+        		
+        		if ("Packaging" == tabId && datas.ossList.length < 1) {
+    				alertify.alert([[#{msg.project.verification.confirm.package}]], function(){
+    					$("#tabMenuNotice").click();
+    				});
+    			} else if("Notice" == tabId && isAndroid == "Y") {
+    				$("#tabMenuPackaging").click();
+    				fn.saveOrGetNotice('previewOnly');
+    			}
+        		
+        		if ("Packaging" == tabId) {
+        			$("#girdAreaPackaging").show();
+        		} else {
+        			$("#girdAreaPackaging").hide();
+        		}
+        	});
         });
 
         var datas = {
@@ -2137,7 +2158,7 @@
                     }
                     
                     if (type != "init" && $("#append").prop("checked")) {
-                    	$('#editor2').summernote('disable');
+                    	$('#editor2').summernote('enable');
                     }
                 } else {
                     $("#companyName").attr("disabled", !checked);
@@ -2151,7 +2172,7 @@
                     $("#editEmail").attr("disabled", !checked);
 
                     if (type != "init" && $("#append").prop("checked")) {
-                    	$('#editor2').summernote('enable');
+                    	$('#editor2').summernote('disable');
                     }
                 }
                 
@@ -2563,43 +2584,13 @@
                 $("#verifyCreator").text(vCreated);
 
                 var initDiv = [[${initDiv}]];
-                var tabContent = $(".tabContent");
-                var tabMenuA = $(".nav-item a");
+                var tabDefaultIdx = (datas.ossList.length < 1 || initDiv != null) ? "1" : "0";
                 
-                tabContent.hide();
-                tabMenuA.click(function () {
-                    com_fn.fnTabChange(this);
-                });
-
-                var tabDefaultIdx = "0";
-                if ((typeof datas.ossList !== "undefined" && datas.ossList.length < 1) || (initDiv != null && initDiv.length > 0)) tabDefaultIdx = "1";
-                tabMenuA.eq(tabDefaultIdx).click();
-            },
-            fnTabChange: function (target) {
-                var tabContent = $(".tabContent");
-                var tabMenuA = $(".nav-item a");
-
-                tabContent.hide();
-                activeTabText = $(target).text();
-                activeTab = $(target).attr("rel");
-
-                if (activeTab == "packaging" && datas.ossList.length < 1) {
-                    alertify.alert([[#{msg.project.verification.confirm.package}]], function () {
-                        tabMenuA.eq("1").click();
-                        $("#girdAreaPackaging").hide();
-                    });
-                } else if (activeTab == "notice" && isAndroid == "Y") {
-                    tabMenuA.eq("0").click();
-                    $("#girdAreaPackaging").hide();
-                    fn.saveOrGetNotice('previewOnly');
-                } else {
-                    if (activeTab == "packaging") {
-                        $("#girdAreaPackaging").show();
-                    } else {
-                        $("#girdAreaPackaging").hide();
-                    }
-                    $("#" + activeTab).show();
-                }
+    			if ("1" == tabDefaultIdx) {
+    				$("#tabMenuNotice").click();
+    			} else {
+    				$("#tabMenuPackaging").click();
+    			}
             }
         }
 

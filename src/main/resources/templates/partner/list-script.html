@@ -14,7 +14,6 @@ const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConst
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var changeWatcherArr = [];
 var role = [[${sessUserInfo.authority}]];
-var isReadOnly = [[${isReadOnly}]];
 
 $(document).ready(function () {
 	'use strict';
@@ -27,9 +26,7 @@ $(document).ready(function () {
 		$(".btnAdd").hide();
 	}
 	
-	showHelpLink("3rd-Party_List_Main");
-
-    var startDate = String([[${searchBean?.createdDate1}]]);
+	var startDate = String([[${searchBean?.createdDate1}]]);
     var endDate = String([[${searchBean?.createdDate2}]]);
 
     if (startDate && startDate != 'null' && endDate && endDate != 'null') {
@@ -45,12 +42,12 @@ $(document).ready(function () {
         $("input[name='createdDate2']").val(picker.endDate.format('YYYYMMDD'));
         $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
     })
-        .on('cancel.daterangepicker', function(ev, picker) {
-            $("#schDateRange").val("");
-            $("input[name='createdDate1']").val("");
-            $("input[name='createdDate2']").val("");
-            $('#schDateRange').attr('placeholder', 'Created Date');
-        });
+   	.on('cancel.daterangepicker', function(ev, picker) {
+    	$(this).val("");
+        $("input[name='createdDate1']").val("");
+        $("input[name='createdDate2']").val("");
+        $('#schDateRange').attr('placeholder', 'Created Date');
+  	});
 });
 
 var gridTooltip = {
@@ -71,7 +68,7 @@ var gridTooltip = {
 var evt = {
 	init : function(){
         $('#division').select2({placeholder: "Division", allowClear: true});
-        $('#prjStatusSelect').select2({placeholder: "Status", allowClear: true});
+        $('#parStatusSelect').select2({placeholder: "Status", allowClear: true});
 
 		refreshParam = fn.setGridParam();
 		
@@ -82,11 +79,7 @@ var evt = {
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 		});
 		
-		$(".cal").on("keyup", function(e){
-			calValidation(this, e);
-		});
-		
-		var selectNames = ["parDivision"];
+		var selectNames = ["division", "status"];
 		for (var i in selectNames) {
 			$("select[name=" + selectNames[i] + "] option:eq(0)").prop("selected", true);
 		}
@@ -556,7 +549,7 @@ var fn = {
 		var rlt = division+((userId!="") ? "/"+userId : "");
 		var html  = '<span class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 		html += str;
-		if ("Y" != [[${searchBean.viewOnlyFlag}]] && !isReadOnly) {
+		if ("Y" != [[${searchBean.viewOnlyFlag}]]) {
 			html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 		}
 		html += '</div>';
@@ -746,9 +739,9 @@ var fn = {
     	}
 	},
 	selectDomain : function() {
-		var adIdDomain = $("select[name=prjDomain] option:checked").text();
+		var adIdDomain = $("select[name=parDomain] option:checked").text();
 		if ("Select Domain" == adIdDomain) adIdDomain = "";
-		$("input[name=adIdDomain]").val(adIdDomain);
+		$("input[name=emailTemp]").val(adIdDomain);
 	},
 	resetChangeWatcherPop : function() {
 		changeWatcherArr = [];
@@ -762,7 +755,15 @@ var fn = {
 	closeAlertify : function() {
 		fn.resetChangeWatcherPop();
 		$(".ajs-close").trigger("click");
-	}
+	},
+	onUpdateSuccess : function(json, status){
+        loading.hide();
+        if (json.resCd == '10'){
+            alertify.success([[#{msg.common.success}]]);
+        } else {
+            alertify.error([[#{msg.common.valid2}]], 0);
+        }
+    }
 }
 
 //http

@@ -88,7 +88,7 @@ var list = {
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				var rowData = $("#list").jqGrid('getRowData',rowid);
-				createTabInFrame(rowData['idx']+'_History', '/system/history/edit/'+rowData['idx']);
+				createTabInFrame('History', '/system/history/edit/'+rowData['idx']);
 			}			
 		});
 	}

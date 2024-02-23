@@ -1263,10 +1263,10 @@ var dep_grid = {
 					
 					// 한번에 처리
 					$("#depList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
-					
-					tableRefresh();
 				}
-
+				
+				tableRefreshNew("depList");
+				
 				//sort후 ValidMsgData reload
 				if(isSort){
 					isSort = false;
