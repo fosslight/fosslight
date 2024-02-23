@@ -10,11 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import oss.fosslight.config.HistoryConfig;
-import oss.fosslight.domain.OssAnalysis;
-import oss.fosslight.domain.OssLicense;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.domain.*;
 
 public interface OssService extends HistoryConfig{
 	String registOssMaster(OssMaster ossMaster);
@@ -151,4 +147,6 @@ public interface OssService extends HistoryConfig{
 	String getOssAnalysisStatus(String prjId);
 
 	void deleteOssAnalysis(String prjId);
+
+	void setVdiffInfoForSentMail(String ossName, CoMail mailBean);
 }
