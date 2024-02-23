@@ -1904,8 +1904,7 @@ var list = {
 		var rowList = rowStr.split(",");
 		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 		
-		var colNameArr = [ 'ID', 'Project Name', 'Status', 'OSC Process', 'Download', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer', 
-							'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'];
+		var colNameArr = [ 'ID', 'Project Name', 'Status', 'OSC Process', 'Download', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'];
 		var colModelArr = [];
         var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
 		colModelArr.push(colModelObj);
@@ -1962,8 +1961,8 @@ var list = {
 			colModelObj["editable"] = false;
 		}
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'comment', index: 'comment', width: 70, align: 'left', formatter:fn.displayComment, unformatter:fn.unformatter, sortable : true};
-		colModelArr.push(colModelObj);
+		// colModelObj = {name: 'comment', index: 'comment', width: 70, align: 'left', formatter:fn.displayComment, unformatter:fn.unformatter, sortable : true};
+		// colModelArr.push(colModelObj);
 		colModelObj = {name: 'distributionTypeOfCodeDtlExp', index: 'distributionTypeOfCodeDtlExp', width: 50, hidden:true};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'statusRequestYn', index: 'statusRequestYn', width: 50, hidden:true};
