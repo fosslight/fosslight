@@ -247,6 +247,13 @@
                 fn_comment.getCommentList();
             });
 
+            $(document).keydown(function(event) {
+                if (event.key === 'Enter') {
+                    $('#search').click();
+                    console.log("버튼이 클릭되었습니다.");
+                }
+            });
+
             $('.callOpener').on('click', function (e) {
                 try {
                     var paramId = "";
@@ -341,24 +348,40 @@
             },
             handleCommentPopupOpen: function (_commId, _referenceDiv)  {
                 getAjaxJsonData({commId : _commId, referenceDiv: _referenceDiv}, "/comment/getDivCommentByCommId", "html", function (res) {
+                    let eFlag = false;
+                    document.addEventListener('keydown', function(event) {
+                        if (event.keyCode === 13) { eFlag = true; };
+                    }, true);
+
                     alertify.confirm(res, function (e) {
                         if(e) {
-                            fn_comment.editComment();
+                            if(eFlag) {
+                                eFlag = false;
+                                return false;
+                            } else {
+                                fn_comment.editComment();
+                            }
                         } else {
                             return false;
                         }
-                    }).set('resizable', true)
-                        .resizeTo('680px', '335px');
+                    }).set('resizable', true).resizeTo('680px', '335px');
                 }, null, function () {
-                    $("#modifiedCommentEditor").summernote({
-                        height: 100,
-                        callbacks: {
-                            onInit: function() {
-                                const contents = $("#contents").val();
-                                $(this).summernote('code', contents);
-                            }
+                    if ($("#modifiedCommentEditor").summernote('code')) {
+                        $("#modifiedCommentEditor").summernote('destroy');
+                    }
+
+                    fn_comment.createSummernote();
+                });
+            },
+            createSummernote: function () {
+                $("#modifiedCommentEditor").summernote({
+                    height: 100,
+                    callbacks: {
+                        onInit: function() {
+                            const contents = $("#contents").val();
+                            $(this).summernote('code', contents);
                         }
-                    });
+                    }
                 });
             },
             editComment: function () {
@@ -400,7 +423,10 @@
                                     setup: function () {
                                         return {
                                             buttons: [],
-                                            focus: {element: 0}
+                                            focus: {element: 0},
+                                            options:{
+                                                invokeOnCloseOff: true
+                                            }
                                         };
                                     }
                                 };
