@@ -633,82 +633,42 @@
  						$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                     }
 
-                    var innerHtml 	= 'Are you to enter a comment when confirm?';
-                    innerHtml 		+= '<textarea id="confirmEditor"></textarea>';
-                    
-                    if(!alertify.verConfirmDialog){
-						alertify.dialog('verConfirmDialog', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-									
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-									
-									var setup = alertify.confirm().setup();
-									var buttons = setup.buttons;
-									var customButtons = [];
-									for (var i in buttons) {
-										if ('OK' == buttons[i].text) {
-											customButtons.push(buttons[i]);
-										}
-									}
-									setup.buttons = customButtons;
-									setup.focus.element = 1;
-									
-									return setup;
-								},
-							    hooks: {
-							    	onshow: function() {
-							        	this.elements.dialog.style.maxWidth = 'none';
-							          	this.elements.dialog.style.width = '650px';
-							        }
-								}
-							};
-						}, false, 'confirm');
+                    if ("" != $("#confirmEditor").summernote('code')){
+                		$("#noticeForm input[name=userComment]").val($("#confirmEditor").summernote('code'));
                 	}
-                    
-                    alertify.verConfirmDialog(innerHtml, function () {
-                    	if ("" != $("#confirmEditor").summernote('code')){
-                    		$("#noticeForm input[name=userComment]").val($("#confirmEditor").summernote('code'));
-                    	}
-                		
-                		$("#editCompanyName").attr("disabled", false);
-                        $("#editOssDistributionSite").attr("disabled", false);
-                        $("#editEmail").attr("disabled", false);
+            		
+            		$("#editCompanyName").attr("disabled", false);
+                    $("#editOssDistributionSite").attr("disabled", false);
+                    $("#editEmail").attr("disabled", false);
 
-                        $('#noticeForm').ajaxForm({
-                            url: '/project/verification/noticeAjax?confirm=conf',
-                            type: 'POST',
-                            dataType: "text",
-                            cache: false,
-                            success: function (data) {
-                                var result = jQuery.parseJSON(data);
+                    $('#noticeForm').ajaxForm({
+                        url: '/project/verification/noticeAjax?confirm=conf',
+                        type: 'POST',
+                        dataType: "text",
+                        cache: false,
+                        success: function (data) {
+                            var result = jQuery.parseJSON(data);
 
-                                if (result.isValid == 'false') {
-                                    alertify.error([[#{msg.common.valid2}]], 0);
-                                } else {
-                                    reloadTabInframe('/project/list');
-                                    loading.hide();
-
-                                    var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
-                                    fn.defaultNotice(checkedFlag);
-
-                                    alertify.alert([[#{msg.common.success}]], function () {
-                                        deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
-                                        activeTabInFrameList("PROJECT");
-                                    });
-                                }
-                            },
-                            error: function (data) {
-                                loading.hide();
+                            if (result.isValid == 'false') {
                                 alertify.error([[#{msg.common.valid2}]], 0);
+                            } else {
+                                reloadTabInframe('/project/list');
+                                loading.hide();
+
+                                var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+                                fn.defaultNotice(checkedFlag);
+
+                                alertify.alert([[#{msg.common.success}]], function () {
+                                    deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
+                                    activeTabInFrameList("PROJECT");
+                                });
                             }
-                        }).submit();
-                    });
-                    
-                    $("#confirmEditor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        },
+                        error: function (data) {
+                            loading.hide();
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        }
+                    }).submit();
                 });
 
                 // verReject 버튼
