@@ -318,7 +318,7 @@
                 }
 
                 postAjaxData({'commId': _commId}, "/comment/deleteComment", "json", function (data) {
-                    alertify.error(String([[ #{msg.common.success}]]));
+                    alertify.confirm(String([[ #{msg.common.success}]]));
                     fn_comment.getCommentList();
                 }, function () {
                     alertify.error(String([[ #{msg.common.valid2} ]]), 0);
@@ -433,7 +433,6 @@
                 var referenceId = [[${basicInfo.referenceId}]];
                 var param = {referenceId: referenceId, referenceDiv: basicReferenceDiv, contents: editorVal, mailSendType: type, expansion1 : $(".nav-link.active").text()};
 
-                alert(type);
                 $.ajax({
                     url: '/project/sendComment',
                     type: 'POST',
