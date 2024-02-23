@@ -32,7 +32,8 @@ var com_evt = {
 		
 		$('.btnCommentHistory').on('click', function(e){
 			e.preventDefault();
-			openCommentHistory('/comment/popup/prj/'+[[${project.prjId}]]);
+            var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]];
+            openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
 		});
 
 		// bomConfirm button
@@ -255,7 +256,7 @@ var com_evt = {
 			if (existsTabFlag) {
 				$("#tab--"+tabName).trigger("click");
 			} else {
-				createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
+				callCreateTabInFrame(prjId+'_Project', '/project/edit/'+prjId, 'project-edit_' + prjId, true);
 			}
 		});
 
@@ -267,7 +268,7 @@ var com_evt = {
 			if(existsTabFlag) {
 				$("#tab--"+tabName).trigger("click");
 			} else {
-				createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
+                callCreateTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId, 'project-verification_' + prjId, true);
 			}
 		});
 		
@@ -279,7 +280,7 @@ var com_evt = {
 			if(existsTabFlag) {
 				$("#tab--"+tabName).trigger("click");
 			} else {
-				createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
+                callCreateTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId, 'project-distribution_' + prjId, true);
 			}
 		});
 
@@ -299,7 +300,7 @@ var com_evt = {
 			if (existsTabFlag) {
 				$("#tab--"+tabName).trigger("click");
 			} else{
-				createTabInFrame(prjId+'_Security', '/project/security/'+prjId);
+                callCreateTabInFrame(prjId+'_Security', '/project/security/'+prjId, 'project-security_' + prjId, true);
 			}
 		});
 		

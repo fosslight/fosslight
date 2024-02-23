@@ -68,11 +68,12 @@ public class CommentController extends CoTopComponent {
 
     @RequestMapping(value = COMMENT.POPUP)
     public String index(HttpServletRequest req, HttpServletResponse res, Model model
-            , @PathVariable String rDiv, @PathVariable String rId) {
+            , @PathVariable String rDiv, @PathVariable String _rDiv, @PathVariable String rId) {
         CommentsHistory commentsHistory = new CommentsHistory();
         commentsHistory.setReferenceDiv(rDiv);
         commentsHistory.setReferenceId(rId);
         model.addAttribute("basicInfo", commentsHistory);
+        model.addAttribute("basicReferenceDiv", _rDiv);
 
         if ("prj".equalsIgnoreCase(rDiv) || rDiv.equalsIgnoreCase("security")) {
             model.addAttribute("project", projectService.getProjectBasicInfo(rId));

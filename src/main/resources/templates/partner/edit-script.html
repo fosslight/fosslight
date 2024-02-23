@@ -502,7 +502,8 @@ var evt = {
 		$('.btnCommentHistory').on('click', function(e){
 			e.preventDefault();
 			if (partnerData.partnerId != null) {
-				openCommentHistory('/comment/popup/3rd/' + partnerData.partnerId);
+                var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]];
+                openCommentHistory('/comment/popup/3rd/' + _rDiv + '/' + partnerData.partnerId);
 			}
 			
 		});

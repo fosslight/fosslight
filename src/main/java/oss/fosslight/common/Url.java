@@ -119,7 +119,7 @@ public final class Url {
 		public static final String MORE_COMMENT_LIST = PATH + "/getMoreCommentList";
 		public static final String COMMENT_LIST_JSP = TILES_ROOT + PATH + "/list";
 		
-		public static final String POPUP = PATH + "/popup/{rDiv}/{rId}";
+		public static final String POPUP = PATH + "/popup/{rDiv}/{_rDiv}/{rId}";
 		public static final String POPUP_JSP  = TILES_ROOT + PATH + "/popup";
 		public static final String EDIT_POPUP  = PATH + "/getEditPopup";
 		

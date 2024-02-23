@@ -247,9 +247,6 @@
         $("#noticeEdit_" + seq).summernote('disable');
 
         $("#btnNotice_"+ seq).click(function () {
-
-            console.log(":::" + seq);
-
             var checkbox = document.getElementById("chkday_" + seq);
             if (checkbox.checked) {
                 setCookie("noticeYn_" + seq, "N", 1);

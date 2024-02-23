@@ -33,7 +33,8 @@ $(document).ready(function () {
 	
 	$('.btnCommentHistory').on('click', function (e) {
         e.preventDefault();
-        openCommentHistory('/comment/popup/prj/' + [[${project.prjId}]]);
+        var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]];
+        openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
     });
 });
 
