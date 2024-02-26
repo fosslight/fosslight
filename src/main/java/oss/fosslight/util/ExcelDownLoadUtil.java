@@ -1305,8 +1305,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, String> expandInfo = projectExpandInfo.get(param.getPrjId());
 				String nvdMaxScore = "";
 				
-				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), null);
-				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(param.getPrjId(), null);
+				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), param.getReferenceDiv());
+				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(param.getPrjId(), param.getReferenceDiv());
 				
 				
 				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {

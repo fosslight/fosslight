@@ -213,8 +213,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							}
 						}
 						
-						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
-						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), null);
+						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), bean.getReferenceDiv());
+						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), bean.getReferenceDiv());
 						
 						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
 							nvdMaxScoreInfoList = nvdMaxScoreInfoList.stream().distinct().collect(Collectors.toList());
