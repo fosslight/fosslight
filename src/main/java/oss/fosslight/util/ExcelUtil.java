@@ -45,7 +45,10 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -55,12 +58,18 @@ import oss.fosslight.common.ColumnMissingException;
 import oss.fosslight.common.ColumnNameDuplicateException;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.config.AppConstBean;
-import oss.fosslight.domain.*;
+import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssAnalysis;
+import oss.fosslight.domain.OssComponents;
+import oss.fosslight.domain.OssComponentsLicense;
+import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.Project;
+import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.T2File;
+import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.FileService;
-
-import static oss.fosslight.common.CoConstDef.*;
 
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
@@ -2548,9 +2557,10 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 
+		CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
 		try (
 			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
-			CSVReader csvReader = new CSVReader(csvFile, '|');
+			CSVReader csvReader = new CSVReaderBuilder(csvFile).withCSVParser(parser).build();
 		) {
 			List<String[]> allData = csvReader.readAll();
 			
@@ -3299,9 +3309,11 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 
+
+		CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
 		try (
 			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
-			CSVReader csvReader = new CSVReader(csvFile, '|');
+				CSVReader csvReader = new CSVReaderBuilder(csvFile).withCSVParser(parser).build();
 		) {
 			List<String[]> allData = csvReader.readAll();
 			if (allData != null) {
