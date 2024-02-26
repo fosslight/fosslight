@@ -869,6 +869,7 @@ var bom_data = {
 					$("#bomList").jqGrid('GridUnload');
 					
 					bom_data.loadBomGrid();
+                    bom_fn.bomListHeaderResize();
 					
 					fn_grid_com.addEtcKeyDownEvent($('#bomList'), bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
 					
@@ -998,7 +999,8 @@ var bom_data = {
 					bomList.jqGrid("resetSelection");
 					
 					//------- 로드 된후 그룹 헤더 설정을 해야 사이즈가 깨지지 않음
-					bom_fn.bomListHeaderResize();
+                    // 2024.02.26 버튼 클릭시 헤더가 반복 생성되는 이슈로 getJqGrid 함수에서 호출
+                    // bom_fn.bomListHeaderResize();
 
 					if(bomValidMsgData) {
 						gridValidMsgNew(bomValidMsgData, "bomList");
