@@ -72,10 +72,10 @@
                                 <td class="text-right py-0 align-middle">
                                 <td class="text-right py-0 align-middle">
                                     <div class="btn-group btn-group-sm" th:if="${comment.creator == comment.loginUserName}">
-                                        <button class="btn btn btn-default" type="button" th:data-commId="${comment.commId}" th:data-referenceDiv="${comment.referenceDiv}" name="commentModifyBtn">
+                                        <button class="btn btn btn-default" type="button" th:data-commId="${comment.commId}" th:data-referenceDiv="${comment.referenceDiv}" th:onclick="|fn_comment.commentModify(this)|" name="commentModifyBtn">
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
-                                        <button class="btn btn-lg-red" th:data-commId="${comment.commId}" name="commentDeleteBtn" type="button">
+                                        <button class="btn btn-lg-red" th:data-commId="${comment.commId}" name="commentDeleteBtn" type="button" th:onclick="|fn_comment.commentDelete(this)|">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -98,9 +98,9 @@
             const commentCnt = [[ ${commentListCnt} ]];
             const moreYn = [[ ${moreYn} ]];
 
-            if(commentCnt > 5 && !moreYn) {
+            if (commentCnt > 5 && !moreYn) {
                 $("#moreListDiv").show();
-            }else{
+            } else {
                 $("#moreListDiv").hide();
             }
         });
@@ -113,47 +113,68 @@
             <div class="container-fluid">
                 <div class="row">
                     <th:block th:if="${#strings.equals(basicInfo.referenceDiv, 'prj')}">
-                        <div class="col-sm-12 text-left mt-3">
-                            <span class="description-percentage text-lg text-dark-gray text-bold">
-                                <b>[<span th:text="${project.prjId}"></span>]<span class="ml-1" th:text="${project.prjName}"></span></b>
-                            </span>
-                            <span class="text-lg-gray text-smaller ml-2">
-                                    <span class="badge badge-info text-sm px-2 py-1 callOpener" id="basicInfoPrj">Basic Information</span>
-                                    <span class="badge badge-orange text-sm px-2 py-1 callOpener" id="identification">Identification</span>
-                                    <th:block th:if="${project.identificationStatus == 'CONF' and project.verificationStatus != 'NA'}">
-                                         <span class="badge badge-success text-sm px-2 py-1 callOpener" id="packaging">Packaging</span>
-                                    </th:block>
-                                    <th:block th:if="${project.verificationStatus == 'CONF' and project.destributionStatus != 'NA'}">
-                                         <span class="badge badge-danger text-sm px-2 py-1 callOpener" id="distribution" >Distribution</span>
-                                    </th:block>
-                            </span>
+                        <div class="card card-outline card-dark col-sm-12 text-left mt-3 p-2 mb-0 ml-1">
+                        	<div class="row">
+                        		<div class="col-lg-2">
+                        			<label class="text-dark-gray" th:text="'Project Name'"></label>
+                        		</div>
+                        		<div class="col-lg-10">
+                        			<span class="description-percentage text-lg text-blue-gray text-bold">
+                                		<b><span th:text="${'[' + project.prjId + ']'}"></span><span class="ml-1" th:text="${project.prjName}"></span></b>
+                            		</span>
+                            		<span class="text-lg-gray text-smaller ml-2">
+                            			<span class="badge badge-info text-sm px-2 py-1 callOpener pointer" id="basicInfoPrj">Basic Information</span>
+                              			<span th:if="${project.prjId != null}" class="badge badge-orange text-sm px-2 py-1 callOpener pointer" id="identification">Identification</span>
+                              			<th:block th:if="${project.identificationStatus == 'CONF' and project.verificationStatus != 'NA'}">
+                                			<span class="badge badge-success text-sm px-2 py-1 callOpener pointer" id="packaging">Packaging</span>
+                              			</th:block>
+                              			<th:block th:if="${project.verificationStatus == 'CONF' and project.destributionStatus != 'NA'}">
+                                 			<span class="badge badge-danger text-sm px-2 py-1 callOpener pointer" id="distribution" >Distribution</span>
+                               			</th:block>
+                            		</span>
+                        		</div>
+                        	</div>                            
                         </div>
                     </th:block>
                     <th:block th:if="${#strings.equals(basicInfo.referenceDiv, '3rd')}">
-                        <div class="col-sm-12 text-left mt-3">
-                            <span class="description-percentage text-lg text-dark-gray text-bold">
-                                <b>[<span th:text="${partner.partnerId}"></span>]<span class="ml-1" th:text="${partner.partnerName}"></span></b>
-                            </span>
-                            <span class="description-percentage text-md text-bold text-blue-gray ml-1">
-                                <span th:text="${partner.softwareName}"></span>
-                                <span th:if="${partner.softwareVersion}">
-                                    (<span th:text="${partner.softwareVersion}"></span>)
-                                </span>
-                                <span class="text-lg-gray text-smaller ml-2">
-                                    <span class="btn btn-teal-01 btn-sm text-smaller ml-1" style="padding: 1px; width: 35px;" th:text="3rd"></span>
-                                </span>
-                            </span>
+                        <div class="card card-outline card-dark col-sm-12 text-left mt-3 p-2 mb-0 ml-1">
+                        	<div class="row">
+                        		<div class="col-lg-3">
+                        			<label class="text-dark-gray" th:text="'3rd Party Name'"></label>
+                        		</div>
+                        		<div class="col-lg-9">
+                        			<span class="description-percentage text-lg text-blue-gray text-bold">
+                                		<span th:text="${'[' + partner.partnerId + ']'}"></span><span class="ml-1" th:text="${partner.partnerName}"></span>
+                            		</span>
+                            		<span class="text-lg-gray text-smaller ml-2">
+                                    	<span class="btn btn-teal-01 btn-sm text-smaller ml-1" style="padding: 1px; width: 35px;" th:text="3rd"></span>
+                                	</span>
+                        		</div>
+                        	</div>
+                        	<div class="row">
+                        		<div class="col-lg-3">
+									<label class="text-dark-gray" th:text="'3rd Party Software Name'"></label>
+                            	</div>
+                            	<div class="col-lg-9">
+                            		<span class="description-percentage text-lg text-bold text-blue-gray ml-1">
+                            			<span th:text="${partner.softwareName}"></span>
+                                		<span th:if="${partner.softwareVersion != '' and partner.softwareVersion != null}">
+                                    		(<span th:text="${partner.softwareVersion}"></span>)
+                                		</span>
+                            		</span>
+                            	</div>
+                        	</div>
                         </div>
                     </th:block>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <form class="mb-0" id="commentSchForm" onkeydown="javascript: if(event.keyCode==13) { fn_commemt.getCommentList(); return false; }">
+                        <form class="mb-0" id="commentSchForm">
                             <div class="row mt-3">
                                 <div class="col-md-3 px-1">
-                                    <th:block th:if="${#strings.equals(basicInfo.referenceDiv, 'prj')}">
+                                    <th:block th:if="${basicInfo.referenceDiv == 'prj'}">
                                         <select class="custom-select float-right" data-placeholder="Section" id="schReferenceDiv" name="schReferenceDiv">
-                                            <option disabled hidden selected>Section</option>
+                                            <option value="" th:text="Section"></option>
                                             <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_HIS')}">
                                                 [[
                                                     ${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'),
@@ -179,6 +200,11 @@
                                                 ]]
                                             </option>
                                         </select>
+                                    </th:block>
+                                    <th:block th:if="${basicInfo.referenceDiv == '3rd'}">
+                                    	<select class="custom-select float-right" data-placeholder="Keyword">
+                                    		<option value="" th:text="Keyword"></option>
+                                    	</select>
                                     </th:block>
                                 </div>
                                 <div class="col-md-9 px-0">
@@ -220,8 +246,7 @@
                         <div class="commentBack" id="commentListArea"><div></div></div>
                     </div>
                 </div>
-                <div class="btnLayout" id="moreListDiv"
-                     style="text-align: center; display: none; padding: 0 0; margin-top: 10px;">
+                <div class="btnLayout" id="moreListDiv" style="text-align: center; display: none; padding: 0 0; margin-top: 10px;">
 <!--						<span>-->
 <!--							<input class="btn btn-outline-secondary btn-lg text-lg mb-3" onclick="fn_comment.getMoreCommentList()" type="button"-->
 <!--                                   value="More" style="width: 20%"/>-->
@@ -250,7 +275,6 @@
             $(document).keydown(function(event) {
                 if (event.key === 'Enter') {
                     $('#search').click();
-                    console.log("버튼이 클릭되었습니다.");
                 }
             });
 
@@ -269,10 +293,18 @@
                 } catch (e) {
                 }
             });
-
         });
 
         const fn_comment = {
+        	commentModify : function (obj) {
+            	const commId = $(obj).attr("data-commId");
+            	const referenceDiv = $(obj).attr("data-referenceDiv");
+            	fn_comment.handleCommentPopupOpen(commId, referenceDiv);
+        	},
+        	commentDelete : function (obj) {
+        		const commId = $(obj).attr("data-commId");
+                fn_comment.deleteComment(commId);
+        	},
             getReferenceDiv: function () {
                 basicReferenceDiv = [[${basicReferenceDiv}]];
 
@@ -301,18 +333,8 @@
                     cache: false,
                     data: $('#commentSchForm').serialize(),
                     success: function (res) {
+                    	$('#commentListArea div').empty();
                         $('#commentListArea div').replaceWith(res);
-                        $("button[name='commentModifyBtn']").on("click", function (e){
-                            e.preventDefault();
-                            const commId = $(this).attr("data-commId");
-                            const referenceDiv = $(this).attr("data-referenceDiv");
-                            fn_comment.handleCommentPopupOpen(commId, referenceDiv);
-                        });
-                        $("button[name='commentDeleteBtn']").on("click", function (e){
-                            e.preventDefault();
-                            const commId = $(this).attr("data-commId");
-                            fn_comment.deleteComment(commId);
-                        });
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
                         alertify.error([[ #{msg.common.valid2} ]], 0);
@@ -353,7 +375,32 @@
                         if (event.keyCode === 13) { eFlag = true; };
                     }, true);
 
-                    alertify.confirm(res, function (e) {
+                    if (typeof alertify.editCommentDialog === 'undefined') {
+    					alertify.dialog('editCommentDialog', function() {
+    						return {
+    							setup: function() {
+    								var settings = alertify.confirm().settings;
+    								
+    								for (var prop in settings) {
+    									this.settings[prop] = settings[prop];
+    								}
+    								
+    								var setup = alertify.confirm().setup();
+    								setup.focus.element = 1;
+    								
+    								return setup;
+    							},
+    						    hooks: {
+    						    	onshow: function() {
+    						        	this.elements.dialog.style.maxWidth = 'none';
+    						          	this.elements.dialog.style.width = '680px';
+    						        }
+    							}
+    						};
+    					}, false, 'confirm');
+                	}
+                    
+                    alertify.editCommentDialog(res, function (e) {
                         if(e) {
                             if(eFlag) {
                                 eFlag = false;
@@ -364,7 +411,7 @@
                         } else {
                             return false;
                         }
-                    }).set('resizable', true).resizeTo('680px', '335px');
+                    });
                 }, null, function () {
                     if ($("#modifiedCommentEditor").summernote('code')) {
                         $("#modifiedCommentEditor").summernote('destroy');
@@ -375,7 +422,7 @@
             },
             createSummernote: function () {
                 $("#modifiedCommentEditor").summernote({
-                    height: 100,
+                    height: 180,
                     callbacks: {
                         onInit: function() {
                             const contents = $("#contents").val();
@@ -483,13 +530,14 @@
             saveEditor: function () {
                 //코멘트 임시저장
                 var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
-
+				
                 var referenceId = [[${basicInfo.referenceId}]]
                 var param = {
                     referenceId: referenceId
                     , referenceDiv: userCommentReferenceDiv
                     , contents: editorVal
                 };
+                
                 $.ajax({
                     url: "/project/saveComment",
                     type: "POST",
