@@ -420,7 +420,7 @@
                             				<button id="partyDelete" type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.delete()|" th:text="Delete"></button>
                             				<button id="partyBulkEdit" type="button" class="btn btn-yellow-04 btn-sm width-6rem mr-xm px-3" th:onclick="|fn.bulkEdit()|" th:text="'Bulk Edit'"></button>
                           				</th:block>
-                            			<button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${detail.partnerId != null}" type="button" class="btn btn-danger btn-sm width-9rem mr-xm px-3" 
+                            			<button th:if="${@CommonFunction.isAdmin() and detail.partnerId != null}" type="button" class="btn btn-danger btn-sm width-9rem mr-xm px-3 idenBulkRegist" 
                             					th:onclick="fn_grid_com.ossBulkReg([[${detail.partnerId}]], '20')" th:text="'OSS bulk registration'"></button>
                             		</div>
                             	</div>
@@ -447,8 +447,8 @@
                                             </div>
                                     	</th:block>
                                     	<th:block th:if="${detail.status != 'REQ' and detail.status != 'CONF' and (detail.loginUserRole == 'ROLE_ADMIN' or (detail.loginUserRole != 'ROLE_ADMIN' and detail.status != 'REV')) and detail.viewOnlyFlag != 'Y'}">
-                                    		<button type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3" th:onclick="|fn.CheckOssViewPage('PARTNER')|" th:text="'Check OSS Name'"></button>
-                                    		<button type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3" th:onclick="|fn.CheckOssLicenseViewPage('PARTNER')|" th:text="'Check License'"></button>
+                                    		<button type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3 srcBtn" th:onclick="|fn.CheckOssViewPage('PARTNER')|" th:text="'Check OSS Name'"></button>
+                                    		<button type="button" class="btn btn-yellow-04 btn-sm width-9rem mr-xm px-3 srcBtn" th:onclick="|fn.CheckOssLicenseViewPage('PARTNER')|" th:text="'Check License'"></button>
                                     		<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" id="partyReset" th:onclick="|fn.reset()|" th:text="Reset"></button>
                                     		<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3" id="partySave" th:onclick="|fn.save()|" th:text="Save"></button>
                                     	</th:block>

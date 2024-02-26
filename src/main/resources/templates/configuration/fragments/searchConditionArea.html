@@ -88,10 +88,8 @@
                 <div class="form-group mb-2">
                     <select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%;">
                         <option disabled selected value=""></option>
-                        <th:block
-                                th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-                            <option th:selected="${code.cdDtlNo == searchBean?.licenseType}" th:text="${code.cdDtlNm}"
-                                    th:value="${code.cdDtlNo}"></option>
+                        <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                            <option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}" th:selected="${code.cdDtlNo == searchBean?.licenseType}"></option>
                         </th:block>
                     </select>
                 </div>
@@ -116,13 +114,10 @@
                 <div class="form-group mb-2">
                     <select class="select2" id="obligationTypeSelect" name="obligationType" style="width: 100%;">
                         <option value=""></option>
-                        <th:block
-                                th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}">
-                            <option th:selected="${code.cdDtlNo == searchBean?.obligationType}" th:text="${code.cdDtlNm}"
-                                    th:value="${code.cdDtlNo}"></option>
+                        <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}">
+                            <option th:selected="${code.cdDtlNo == searchBean?.obligationType}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
                         </th:block>
-                        <option th:selected="${searchBean?.obligationType == 'NONE'}" th:text="NONE"
-                                th:value="NONE"></option>
+                        <option th:selected="${searchBean?.obligationType == 'NONE'}" th:text="NONE" th:value="NONE"></option>
                     </select>
                 </div>
             </th:block>
@@ -277,19 +272,16 @@
                 </div>
                 <div class="form-group mb-2">
                     <select class="form-control select2" id="prioritySelect" name="priority" style="width: 100%;">
-                        <th:block
-                                th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
-                            <option th:value="''"></option>
-                            <option th:selected="${searchBean?.priority != null && option.cdDtlNo == searchBean.priority}" th:text="${option.cdDtlNm}"
-                                    th:value="${option.cdDtlNo}"></option>
+                    	<option th:value="''"></option>
+                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                            <option th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}" th:selected="${searchBean?.priority != null && option.cdDtlNo == searchBean.priority}"></option>
                         </th:block>
                     </select>
                 </div>
                 <th:block sec:authorize="!hasRole('ROLE_ADMIN')">
                     <div class="form-group mb-2">
                         <div class="icheck-primary">
-                            <input id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" type="checkbox"
-                                   value="N"/>
+                            <input id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" type="checkbox" value="N"/>
                             <label for="publicYn" style="font-weight: normal" th:text="|View My Projects Only|"></label>
                         </div>
                     </div>
@@ -326,11 +318,8 @@
                             <select class="form-control select2" id="statusSelect" multiple="multiple" name="status"
                                     style="width: 100%;">
                                 <option th:value="''"></option>
-                                <th:block
-                                        th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}">
-                                    <option th:if="${option.useYn != 'N' and option.cdDtlNo != 'NA'}"
-                                            th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}"
-                                            th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}"></option>
+                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}">
+                                    <option th:unless="${option.cdDtlNo == 'NA'}" th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}" th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}"></option>
                                 </th:block>
                             </select>
                         </th:block>
@@ -338,9 +327,9 @@
                     <div class="form-group mb-2">
                         <div class="input-group" style="width: 100%;">
                             <div class="input-group-prepend">
-                                                <span class="input-group-text">
-                                                    <i class="far fa-calendar-alt"></i>
-                                                </span>
+                            	<span class="input-group-text">
+                                 	<i class="far fa-calendar-alt"></i>
+                              	</span>
                             </div>
                             <input class="form-control" id="createdDate" placeholder="Created Date" type="text">
                             <input id="createdDate1" name="createdDate1" th:value="${searchBean?.createdDate1}" type="hidden"/>

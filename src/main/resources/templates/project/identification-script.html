@@ -38,21 +38,6 @@ $(document).ready(function () {
     });
 });
 
-$(document).click(function(e){
-	if(!$("#depExportContainer").has(e.target).length) {
-		$("#depExportList").hide();
-	}
-	if(!$("#srcExportContainer").has(e.target).length) {
-		$("#srcExportList").hide();
-	}
-	if(!$("#binExportContainer").has(e.target).length) {
-		$("#binExportList").hide();
-	}
-	if(!$("#ExportContainer").has(e.target).length) {
-		$("#ExportList").hide();
-	}
-});
-
 /* identification 코멘트 관련 함수 */
 var fn = {
     handleUserCommentPopupOpen: function () {

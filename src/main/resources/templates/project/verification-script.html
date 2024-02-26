@@ -106,7 +106,8 @@
 
             if (typeof datas.ossList !== "undefined" && datas.ossList != null && datas.ossList.length < 1) {
                 $("[name='btnSavePath']").hide();
-
+                $(".packageSelect").prop("disabled", true);
+                
                 if (isAdmin && $("#div_approve")) {
                     $("#div_approve").hide();
                 }
@@ -697,7 +698,7 @@
 									}
 									
 									var setup = alertify.confirm().setup();
-									setup.focus.element = -1;
+									setup.focus.element = 1;
 									
 									return setup;
 								},
@@ -735,6 +736,7 @@
 
                 // verRequest 버튼
                 $('#verRequest').click(function (e) {
+                	e.preventDefault();
 
                     if (fn.checkVerify()) {
                         alertify.error([[#{msg.project.required.verify}]]);
@@ -1278,6 +1280,7 @@
                 var btn_save = $("#save");
                 var btn_verify = $("[name='verify']");
                 var btn_savePath = $("[name='btnSavePath']");
+                var verFileUploder = $(".packageSelect");
 
                 status = status||"";
                 btn_div.show();
@@ -1293,6 +1296,7 @@
                             btn_save.show();
                             btn_verify.show();
                             btn_savePath.show();
+                            verFileUploder.prop("disabled", false);
 
                             break;
                         case "PROG":
@@ -1303,6 +1307,7 @@
                             btn_save.show();
                             btn_verify.show();
                             btn_savePath.show();
+                            verFileUploder.prop("disabled", false);
 
                             break;
                         case "REQ":
@@ -1313,6 +1318,7 @@
                             btn_save.show();
                             btn_verify.show();
                             btn_savePath.show();
+                            verFileUploder.prop("disabled", false);
                             
                             break;
 
@@ -1324,6 +1330,7 @@
                             btn_save.show();
                             btn_verify.show();
                             btn_savePath.show();
+                            verFileUploder.prop("disabled", false);
                             
                             break;
 
@@ -1335,6 +1342,7 @@
                             btn_save.hide();
                             btn_verify.show();
                             btn_savePath.hide();
+                            verFileUploder.prop("disabled", true);
 
                             // 고지문구 버튼 비활성
                             $('#chkUseCustomNotice').prop('disabled', true);
@@ -1351,6 +1359,7 @@
                     btn_restart.hide();
                     btn_save.hide();
                     btn_savePath.hide();
+                    verFileUploder.prop("disabled", true);
                 } else {	// 일반 사용자 일 경우
                     switch (status) {
                         case "":
@@ -1359,6 +1368,7 @@
                             btn_reject.hide();
                             btn_restart.hide();
                             btn_save.show();
+                            verFileUploder.prop("disabled", false);
                             break;
                         case "PROG":
                             btn_review.show();
@@ -1366,6 +1376,7 @@
                             btn_reject.hide();
                             btn_restart.hide();
                             btn_save.show();
+                            verFileUploder.prop("disabled", false);
                             break;
 
                         case "REQ":
@@ -1374,6 +1385,7 @@
                             btn_review.hide();
                             btn_restart.hide();
                             btn_save.hide();
+                            verFileUploder.prop("disabled", true);
                             break;
 
                         case "REV":
@@ -1382,6 +1394,7 @@
                             btn_review.hide();
                             btn_restart.hide();
                             btn_save.hide();
+                            verFileUploder.prop("disabled", true);
                             break;
 
                         case "CONF":
@@ -1391,6 +1404,7 @@
                             btn_restart.hide();
                             btn_save.hide();
                             btn_savePath.hide();
+                            verFileUploder.prop("disabled", true);
                             break;
                     }
                 }

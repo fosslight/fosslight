@@ -79,7 +79,7 @@
                                     <div class="row form-group">
                                         <div class="col-12">
                                             <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DEFAULT_TAB'))}">
-                                                <div class="icheck-warning ml-2 mb-3" th:if="${code.useYn != 'N'}">
+                                                <div class="icheck-warning ml-2 mb-3">
                                                     <input type="checkbox" name="defaultTab" th:id="|defaultTab${code.cdDtlNo}|" th:value="${code.cdDtlNo}"/>
                                                     <label th:for="|defaultTab${code.cdDtlNo}|" th:utext="${code.cdDtlNm}" style="font-weight: normal"></label>
                                                 </div>

@@ -207,19 +207,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						if (getSecurityDataCntByProject(bean)) {
-							Float notFixedCvssScore = projectMapper.getCvssScoreForNotFixed(bean.getPrjId());
-							if (notFixedCvssScore != null) {
-								bean.setSecCvssScore(notFixedCvssScore);
-							}
-							if (checkIfVulnerabilityResolutionIsFixed(bean)) {
-								bean.setSecCode("Fixed");
-							} else {
-								bean.setSecCode("NotFixed");
-							}
+							checkIfVulnerabilityResolutionIsFixed(bean);
 						}
 						
-						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
-						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), null);
+						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), bean.getReferenceDiv());
+						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), bean.getReferenceDiv());
 						
 						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
 							nvdMaxScoreInfoList = nvdMaxScoreInfoList.stream().distinct().collect(Collectors.toList());
@@ -259,8 +251,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return map;
 	}
 	
-	private boolean checkIfVulnerabilityResolutionIsFixed(Project bean) {
-		return projectMapper.selectVulnerabilityResolutionSecurityListCnt(bean) > 0 ? false : true;
+	private void checkIfVulnerabilityResolutionIsFixed(Project bean) {
+		String secCvssScore = "";
+		int fixedCheckCnt = 0;
+		List<OssComponents> sercurityList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
+		
+		if (sercurityList != null && !sercurityList.isEmpty()) {
+			for (OssComponents oc : sercurityList) {
+				if (oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
+					fixedCheckCnt++;
+					continue;
+				}
+				
+				if (isEmpty(secCvssScore)) {
+					secCvssScore = oc.getCvssScore();
+					continue;
+				} else {
+					if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(secCvssScore)) > 0) {
+						secCvssScore = oc.getCvssScore();
+					}
+				}
+			}
+			
+			if (!isEmpty(secCvssScore)) bean.setSecCvssScore(Float.valueOf(secCvssScore));
+			
+			if (fixedCheckCnt == sercurityList.size()) {
+				bean.setSecCode("Fixed");
+			} else {
+				bean.setSecCode("notFixed");
+			}
+		}
 	}
 
 	private boolean getSecurityDataCntByProject(Project project) {

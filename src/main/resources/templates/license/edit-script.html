@@ -191,8 +191,8 @@
                    	cache : false,
                    	data : param,
                    	success : function(res){
-                   		$("#commentListBody").empty();
-    					$("#commentListBody").html(res);
+                   		$("#commentList").empty();
+    					$("#commentList").html(res);
                    	},
                    	error : function(xhr, ajaxOptions, thrownError){
                    		alertify.error([[#{msg.common.valid2}]], 0);

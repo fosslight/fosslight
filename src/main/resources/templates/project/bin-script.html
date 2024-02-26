@@ -1410,14 +1410,20 @@ var bin_grid = {
 			removeHighLight : true
 		});
 		binList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
-		binList.jqGrid('navGrid',"#binPager",{add:true,edit:false,del:true,search:false,refresh:false
-												  , addfunc: function () {
-													  com_fn.saveFlagObject["BIN"] = false;
-													  fn_grid_com.rowAddNew('binList',binList,"main", null, com_fn.getLicenseName);
-												  }
-												  , delfunc: function () { fn_grid_com.rowDelNew(binList,"main");}
-												  , cloneToTop:true
-		});
+		
+		if ($("#binSave").is(":visible")) {
+			binList.jqGrid('navGrid',"#binPager",{add:true,edit:false,del:true,search:false,refresh:false
+				  , addfunc: function () {
+					  com_fn.saveFlagObject["BIN"] = false;
+					  fn_grid_com.rowAddNew('binList',binList,"main", null, com_fn.getLicenseName);
+				  }
+				  , delfunc: function () { fn_grid_com.rowDelNew(binList,"main");}
+				  , cloneToTop:true
+			});
+		} else {
+			binList.jqGrid('navGrid',"#binPager",{add:false,edit:false,del:false,search:false,refresh:false,cloneToTop:true});
+		}
+		
 		
 		$('#binList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
 	}

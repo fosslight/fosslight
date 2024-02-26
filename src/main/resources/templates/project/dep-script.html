@@ -1352,14 +1352,18 @@ var dep_grid = {
 			}
 		});
 		
-		depList.jqGrid('navGrid',"#depPager",{add:true,edit:false,del:true,search:false,refresh:false
-												  , addfunc: function () { 
-													  com_fn.saveFlagObject["DEP"] = false;
-													  fn_grid_com.rowAddNew('depList',depList,"main", null, com_fn.getLicenseName);
-												  }
-												  , delfunc: function () { fn_grid_com.rowDelNew(depList,"main");}
-												  , cloneToTop:true
-		});
+		if ($("#depSaveUp").is(":visible")) {
+			depList.jqGrid('navGrid',"#depPager",{add:true,edit:false,del:true,search:false,refresh:false
+				  , addfunc: function () { 
+					  com_fn.saveFlagObject["DEP"] = false;
+					  fn_grid_com.rowAddNew('depList',depList,"main", null, com_fn.getLicenseName);
+				  }
+				  , delfunc: function () { fn_grid_com.rowDelNew(depList,"main");}
+				  , cloneToTop:true
+			});
+		} else {
+			depList.jqGrid('navGrid',"#depPager",{add:false,edit:false,del:false,search:false,refresh:false,cloneToTop:true});
+		}
 		
 		$('#depList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
 	}

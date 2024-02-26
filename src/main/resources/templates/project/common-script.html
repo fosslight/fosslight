@@ -427,8 +427,11 @@ var com_fn = {
 		var btn_Save = $(".idenSave");
 		var btn_Analysis = $(".idenAnalysis");
 		var btn_Analysis_Result = $(".idenAnalysisResult");
-		var btn_check = $(".btnCheck");
 		var btn_supplement_Notice = $(".supplementNotice");
+		var btn_check = $(".idenCheckBtn");
+		var btn_bulkRegist = $(".idenBulkRegist");
+		var cbx_iden = $(".idenCbx");
+		var fileUploader = $(".fileUploader");
 		var chkStatus = status||"";
 		
 		if (role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
@@ -436,61 +439,68 @@ var com_fn = {
 				case "":
 					btn_div.hide();
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
-
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+					cbx_iden.prop("disabled", false);
+					
 					break;
 				case "PROG":
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
-
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+					cbx_iden.prop("disabled", false);
+					
 					break;
 				case "REQ":
 					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.show();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
-
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+					cbx_iden.prop("disabled", false);
+					
 					break;
 				case "REV":
 					btn_confirm.show();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
-
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+					cbx_iden.prop("disabled", false);
+					
 					break;
 				case "CONF":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
 					btn_Analysis_Result.hide(); btn_supplement_Notice.hide();
 					btn_check.hide();
-
+					cbx_iden.prop("disabled", true);
+					
 					break;
 			}
 		} else if([[${project.viewOnlyFlag}]] == 'Y'){
 			btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
-			btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();
+			btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();cbx_iden.prop("disabled", false);
 		} else { // 일반 사용자 일 경우
 			switch(status){
 				case "":
 					btn_div.hide();
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
-
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+					cbx_iden.prop("disabled", false);
+					
 					break;
 				case "PROG":
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();
-
+					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+					cbx_iden.prop("disabled", false);
+					
 					break;
 				case "REQ":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();
+					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
 
 					break;
 				case "REV":
 					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();
+					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
 
 					break;
 				case "CONF":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
-					btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();
+					btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();btn_bulkRegist.hide();fileUploader.hide();
 					btn_Analysis_Result.hide(); btn_supplement_Notice.hide();
 					btn_check.hide();
 

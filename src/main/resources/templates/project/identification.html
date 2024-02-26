@@ -23,9 +23,6 @@
                                 <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
                                     <span class="badge badge-success text-sm px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">Packaging</span>
                                 </th:block>
-<!--                                <th:block th:if="${distributionFlag and project.destributionStatus != 'NA' and (project.destributionStatus != null || project.verificationStatus == 'CONF')}">-->
-<!--                                    <span class="badge badge-danger text-md px-2 py-1" id="distributionTab" title="Go to Distribution tab">D</span>-->
-<!--                                </th:block>-->
                                 <th:block th:if="${project.secCode != null}">
                                    <span class="badge badge-carrot text-sm px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">Security</span>
                                 </th:block>
@@ -250,19 +247,19 @@
                                             <div class="row mt-1">
                                                 <div class="col-md-4 depBtn" name="search-condition_dep">
                                                     <div class="icheck-secondary d-inline">
-                                                        <input type="radio" id="radio_dep_01" name="depSelectOption" checked th:onchange="|dep_fn.changeSelectOption()|" value="1">
+                                                        <input type="radio" class="idenCbx" id="radio_dep_01" name="depSelectOption" checked th:onchange="|dep_fn.changeSelectOption()|" value="1">
                                                         <label for="radio_dep_01" class="text-sm" th:text="'Upload Analysis Result'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4 depBtn" name="search-condition_dep">
                                                     <div class="icheck-secondary d-inline">
-                                                        <input type="radio" id="radio_dep_02" name="depSelectOption" th:onchange="|dep_fn.changeSelectOption()|" value="2">
+                                                        <input type="radio" class="idenCbx" id="radio_dep_02" name="depSelectOption" th:onchange="|dep_fn.changeSelectOption()|" value="2">
                                                         <label for="radio_dep_02" class="text-sm" th:text="'Project Search'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="icheck-danger d-inline">
-                                                        <input type="checkbox" id="applicableDep" value="N" th:onchange="|com_fn.checkAplicable(this, 'depBtn')|">
+                                                        <input type="checkbox" class="idenCbx" id="applicableDep" value="N" th:onchange="|com_fn.checkAplicable(this, 'depBtn')|">
                                                         <label for="applicableDep" class="text-sm" th:text="'Not Applicable'"></label>
                                                     </div>
                                                 </div>
@@ -280,7 +277,7 @@
                                                         <div class="col-lg-1 pl-3 mt-1">
                                                             <strong th:text="'FOSSLight Report'"></strong>
                                                         </div>
-                                                        <div class="col-lg-3">
+                                                        <div class="col-lg-3 fileUploader">
                                                             <div class="row">
                                                                 <div class="col-lg-1"></div>
                                                                 <div class="col-lg-11" style="display: flex;">
@@ -383,19 +380,19 @@
                                             <div class="row mt-1">
                                                 <div class="col-md-4 srcBtn" name="search-condition_src">
                                                     <div class="icheck-secondary d-inline">
-                                                        <input type="radio" id="srcR1" name="srcSelectOption" th:onchange="|src_fn.changeSelectOption()|" value="1" checked>
+                                                        <input type="radio" class="idenCbx" id="srcR1" name="srcSelectOption" th:onchange="|src_fn.changeSelectOption()|" value="1" checked>
                                                         <label for="srcR1" class="text-sm" th:text="'Upload Analysis Result'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4 srcBtn" name="search-condition_src">
                                                     <div class="icheck-secondary d-inline">
-                                                        <input type="radio" id="srcR2" name="srcSelectOption" th:onchange="|src_fn.changeSelectOption()|" value="2">
+                                                        <input type="radio" class="idenCbx" id="srcR2" name="srcSelectOption" th:onchange="|src_fn.changeSelectOption()|" value="2">
                                                         <label for="srcR2" class="text-sm" th:text="'Project Search'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="icheck-danger d-inline">
-                                                        <input type="checkbox" id="applicableSrc" value="N" th:onchange="|com_fn.checkAplicable(this, 'srcBtn')|">
+                                                        <input type="checkbox" class="idenCbx" id="applicableSrc" value="N" th:onchange="|com_fn.checkAplicable(this, 'srcBtn')|">
                                                         <label for="applicableSrc" class="text-sm" th:text="'Not Applicable'"></label>
                                                     </div>
                                                 </div>
@@ -413,7 +410,7 @@
                                                         <div class="col-lg-1 pl-3 mt-1">
                                                             <strong th:text="'FOSSLight Report'"></strong>
                                                         </div>
-                                                        <div class="col-lg-3">
+                                                        <div class="col-lg-3 fileUploader">
                                                             <div class="row">
                                                                 <div class="col-lg-1"></div>
                                                                 <div class="col-lg-11" style="display: flex;">
@@ -516,19 +513,19 @@
                                             <div class="row mt-1">
                                                 <div class="col-md-4 binBtn" name="search-condition_bin">
                                                     <div class="icheck-secondary d-inline">
-                                                        <input type="radio" id="binR1" value="1" name="binSelectOption" th:onchange="|bin_fn.changeSelectOption()|" checked>
+                                                        <input type="radio" class="idenCbx" id="binR1" value="1" name="binSelectOption" th:onchange="|bin_fn.changeSelectOption()|" checked>
                                                         <label for="binR1" class="text-sm" th:text="'Upload Analysis Result'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4 binBtn" name="search-condition_bin">
                                                     <div class="icheck-secondary d-inline">
-                                                        <input type="radio" id="binR2" value="2" name="binSelectOption" th:onchange="|bin_fn.changeSelectOption()|">
+                                                        <input type="radio" class="idenCbx" id="binR2" value="2" name="binSelectOption" th:onchange="|bin_fn.changeSelectOption()|">
                                                         <label for="binR2" class="text-sm" th:text="'Project Search'"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <div class="icheck-danger d-inline">
-                                                        <input type="checkbox" id="applicableBin" value="N" th:onchange="|com_fn.checkAplicable(this, 'binBtn')|">
+                                                        <input type="checkbox" class="idenCbx" id="applicableBin" value="N" th:onchange="|com_fn.checkAplicable(this, 'binBtn')|">
                                                         <label for="applicableBin" class="text-sm" th:text="'Not Applicable'"></label>
                                                     </div>
                                                 </div>
@@ -550,7 +547,7 @@
                                                                 <div class="col-lg-2">
                                                                     <p style="text-align:center;" th:text="'FOSSLight Report'"></p>
                                                                 </div>
-                                                                <div class="col-lg-3">
+                                                                <div class="col-lg-3 fileUploader">
                                                                     <div class="fileuploader" id="binCsvFile" th:text="Upload"></div>
                                                                 </div>
                                                                 <div class="col-lg-5">
@@ -706,11 +703,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and @CommonFunction.isAdmin()}" 
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -746,11 +743,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Check Oss Name'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Check Oss Name'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'Check License'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'Check License'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|com_fn.bulkEdit('SRC')|" th:text="'Bulk Edit'"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.bulkEdit('SRC')|" th:text="'Bulk Edit'"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -784,11 +781,11 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -827,7 +824,7 @@
                                         <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${autoAnalysisFlag and project.dropYn != 'Y'}"
                                         		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenAnalysisResult" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
                                         <button sec:authorize="hasRole('ROLE_ADMIN')" th:if="${project.dropYn != 'Y'}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
+                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenBulkRegist" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">

@@ -207,30 +207,17 @@
                                   	</div>
                               	</div>
                                 <div class="card-body pt-0" style="padding-bottom: 0;">
-                                    <div clas="col-md-12">
-                                        <table class="table">
-                                       		<tbody id="commentListBody">
-                                       			<tr>
-													<td th:style="'border-top: none;'">
-													<div class="row">
-														<div class="col-md-12">
-															<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
-														</div>
-													</div>
-													</td>
-												</tr>
-                                       		</tbody>
-                                        </table>
-                                    </div>
+                                    <div clas="col-md-12" id="commentList"></div>
                                	</div>
                           	</div>
                       	</div>
                     </div>
+                    
+                    <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
             </section>
             <!-- loading bar -->
             <th:block th:replace="oss/fragments/ossSelectPopup"></th:block>
             <th:block th:replace="oss/fragments/mergeOssCheckPopup"></th:block>
-            <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
             <!-- /. loading bar -->
         </div>
     </div>

@@ -11,18 +11,18 @@
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-sm-8 text-left mt-2">
+                        <div class="col-sm-10 text-left mt-2">
                             <span class="description-percentage text-dark-gray" id="prjName"><b></b></span>
                             <span class="text-dark-gray mx-1" id="creator"></span>
                             <span class="ml-2">
-                                <span class="badge badge-info text-sm px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">Basic Information</span>
-                                <span th:if="${project.identificationStatus != null}" class="badge badge-orange text-sm px-2 py-1" id="identificationTab" style="cursor: pointer;" title="Go to Identification tab">Identification</span>
+                                <span class="badge badge-info text-sm px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab" th:onclick="|sec_com_fn.editTab()|">Basic Information</span>
+                                <span th:if="${project.prjId != null}" class="badge badge-orange text-sm px-2 py-1" id="identificationTab" style="cursor: pointer;" title="Go to Identification tab" th:onclick="|sec_com_fn.identificationTab()|">Identification</span>
                                 <th:block th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}">
-                                    <span class="badge badge-success text-sm px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab">Packaging</span>
+                                    <span class="badge badge-success text-sm px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab" th:onclick="|sec_com_fn.packagingTab()|">Packaging</span>
                                 </th:block>
                             </span>
                         </div>
-                        <div class="col-sm-4 float-right mt-1">
+                        <div class="col-sm-2 float-right mt-1">
                             <div class="helpLink f-left dropdown float-right ml-3">
                                 <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
                                 <div class="dropdown-menu mt-0">
@@ -37,6 +37,7 @@
             <!-- Main content -->
             <section class="content">
             	<div class="container-fluid">
+            		<input type="hidden" name="prjId" th:value="${project.prjId}"/>
                     <div class="card card-dark card-tabs">
                         <div class="card-header p-0 pt-1" style="display:inline-block;">
                         	<div class="float-left" style="display:inline;">

@@ -203,11 +203,10 @@
                                                     <select class="select2" id="licenseTypeSelect" name="licenseType"
                                                             style="width: 100%; color: gray;">
                                                         <option value=""></option>
-                                                        <th:block
-                                                                th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-                                                            <option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}"
-                                                                    th:text="${code.cdDtlNm}"
-                                                                    th:value="${code.cdDtlNo}"></option>
+                                                        <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                                                            <option th:text="${code.cdDtlNm}"
+                                                                    th:value="${code.cdDtlNo}"
+                                                                    th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}"></option>
                                                         </th:block>
                                                     </select>
                                                 </div>

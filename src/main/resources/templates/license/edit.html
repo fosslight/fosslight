@@ -52,7 +52,7 @@
                                                     <select class="select2" id="licenseType" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
                                                         <option value="" disabled selected> </option>
                                                         <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-                                                            <option th:selected="${#strings.equals(code.cdDtlNo, detail?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+                                                            <option th:selected="${code.cdDtlNo == detail?.licenseType}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
                                                         </th:block>
                                                     </select>
                                                 </div>
@@ -176,11 +176,9 @@
                                   	</div>
                               	</div>
                                 <div class="card-body pt-0" style="padding-bottom: 0;">
-                                    <div clas="col-md-12">
-                                        <table class="table">
-                                       		<tbody id="commentListBody"></tbody>
-                                        </table>
-                                    </div>
+                                	<div clas="row">
+                                		<div clas="col-md-12" id="commentList"></div>
+                                	</div>
                                	</div>
                            	</div>
                        	</div>

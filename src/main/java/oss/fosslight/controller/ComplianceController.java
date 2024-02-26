@@ -50,12 +50,12 @@ public class ComplianceController extends CoTopComponent {
 	
 	@GetMapping(value=COMPLIANCE.MODEL_STATUS, produces = "text/html; charset=utf-8")
 	public String getModelStatus(HttpServletRequest req, HttpServletResponse res, Model model){
-		return COMPLIANCE.MODEL_STATUS_JSP;
+		return "compliance/modelStatus";
 	}
 	
 	@GetMapping(value=COMPLIANCE.PARTNER_LIST_STATUS, produces = "text/html; charset=utf-8")
 	public String get3rdStatus(HttpServletRequest req, HttpServletResponse res, Model model){
-		return COMPLIANCE.PARTNER_LIST_STATUS_JSP;
+		return "compliance/3rdList";
 	}
 	
 	@RequestMapping(value=COMPLIANCE.LIST_AJAX)

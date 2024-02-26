@@ -3943,18 +3943,15 @@
 		SELECT TBL.CVSS_SCORE_MAX
 		FROM
 		(	
-			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',NVD.CVSS_SCORE,'@',NVD.CVE_ID) AS CVSS_SCORE_MAX
-			FROM NVD_DATA_SCORE_V3 NVD
+			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID) AS CVSS_SCORE_MAX
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN NVD_CVE_V3 CVE
+			ON NVD.CVE_ID = CVE.CVE_ID
 			INNER JOIN
 			(		SELECT OC.OSS_NAME, OC.OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
 					AND OC.REFERENCE_DIV = #{commponentDiv}
-				</if>
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
-				</if>
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
 					AND OC.OSS_NAME != ''
@@ -3971,7 +3968,7 @@
 										AND	OSS_NAME = OC.OSS_NAME 
 										AND OSS_VERSION = OC.OSS_VERSION 
 										AND VULNERABILITY_RESOLUTION = 'Fixed')
-			ORDER BY NVD.CVSS_SCORE DESC
+			ORDER BY CVE.CVSS_SCORE DESC
 			LIMIT 5
 		) TBL	
 		
@@ -3980,20 +3977,17 @@
 		SELECT TBL.CVSS_SCORE_MAX
 		FROM
 		(	
-			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',NVD.CVSS_SCORE,'@',NVD.CVE_ID) AS CVSS_SCORE_MAX
-			FROM NVD_DATA_SCORE_V3 NVD
+			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID) AS CVSS_SCORE_MAX
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN NVD_CVE_V3 CVE
+			ON NVD.CVE_ID = CVE.CVE_ID
 			INNER JOIN
 			(		SELECT OC.OSS_NAME, NICK.OSS_NICKNAME, OC.OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					INNER JOIN OSS_NICKNAME NICK
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{prjId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
 					AND OC.REFERENCE_DIV = #{commponentDiv}
-				</if>
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
-				</if>
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
 					AND OC.OSS_NAME != ''
@@ -4010,7 +4004,7 @@
 										AND OSS_NAME = OC.OSS_NAME 
 										AND OSS_VERSION = OC.OSS_VERSION 
 										AND VULNERABILITY_RESOLUTION = 'Fixed')
-			ORDER BY NVD.CVSS_SCORE DESC
+			ORDER BY CVE.CVSS_SCORE DESC
 			LIMIT 5
 		) TBL	
 		
@@ -4019,18 +4013,15 @@
 		SELECT TBL.CVSS_SCORE_MAX
 		FROM
 		(	
-			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',NVD.CVSS_SCORE,'@',NVD.CVE_ID) AS CVSS_SCORE_MAX
-			FROM NVD_DATA_SCORE_V3 NVD
+			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID) AS CVSS_SCORE_MAX
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN NVD_CVE_V3 CVE
+			ON NVD.CVE_ID = CVE.CVE_ID
 			INNER JOIN
 			(		SELECT OC.OSS_NAME, OC.OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
 					AND OC.REFERENCE_DIV = #{commponentDiv}
-				</if>
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
-				</if>
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
 					AND OC.OSS_NAME != ''
@@ -4047,7 +4038,7 @@
 										AND OSS_NAME = OC.OSS_NAME 
 										AND OSS_VERSION = ''
 										AND VULNERABILITY_RESOLUTION = 'Fixed')
-			ORDER BY NVD.CVSS_SCORE DESC
+			ORDER BY CVE.CVSS_SCORE DESC
 			LIMIT 5
 		) TBL	
 		
@@ -4056,20 +4047,17 @@
 		SELECT TBL.CVSS_SCORE_MAX
 		FROM
 		(	
-			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',NVD.CVSS_SCORE,'@',NVD.CVE_ID) AS CVSS_SCORE_MAX
-			FROM NVD_DATA_SCORE_V3 NVD
+			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID) AS CVSS_SCORE_MAX
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN NVD_CVE_V3 CVE
+			ON NVD.CVE_ID = CVE.CVE_ID
 			INNER JOIN
 			(		SELECT OC.OSS_NAME, NICK.OSS_NICKNAME, OC.OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					INNER JOIN OSS_NICKNAME NICK
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{prjId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
 					AND OC.REFERENCE_DIV = #{commponentDiv}
-				</if>
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
-				</if>
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
 					AND OC.OSS_NAME != ''
@@ -4086,7 +4074,7 @@
 										AND OSS_NAME = OC.OSS_NAME 
 										AND OSS_VERSION = ''
 										AND VULNERABILITY_RESOLUTION = 'Fixed')
-			ORDER BY NVD.CVSS_SCORE DESC
+			ORDER BY CVE.CVSS_SCORE DESC
 			LIMIT 5
 		) TBL
 	</select>
@@ -4095,18 +4083,15 @@
 		SELECT TBL.CVSS_SCORE_MAX
 		FROM
 		(	
-			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',NVD.CVSS_SCORE,'@',NVD.CVE_ID) AS CVSS_SCORE_MAX
-			FROM NVD_DATA_SCORE_V3 NVD
+			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID) AS CVSS_SCORE_MAX
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN NVD_CVE_V3 CVE
+			ON NVD.CVE_ID = CVE.CVE_ID
 			INNER JOIN
 			(		SELECT OC.OSS_NAME, OC.OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
 					AND OC.REFERENCE_DIV = #{commponentDiv}
-				</if>
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
-				</if>
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
 					AND OC.OSS_NAME != ''
@@ -4123,7 +4108,7 @@
 										AND OSS_NAME = OC.OSS_NAME 
 										AND OSS_VERSION = OC.OSS_VERSION 
 										AND VULNERABILITY_RESOLUTION = 'Fixed')
-			ORDER BY NVD.CVSS_SCORE DESC
+			ORDER BY CVE.CVSS_SCORE DESC
 			LIMIT 5
 		) TBL	
 		
@@ -4132,20 +4117,17 @@
 		SELECT TBL.CVSS_SCORE_MAX
 		FROM
 		(	
-			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',NVD.CVSS_SCORE,'@',NVD.CVE_ID) AS CVSS_SCORE_MAX
-			FROM NVD_DATA_SCORE_V3 NVD
+			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID) AS CVSS_SCORE_MAX
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN NVD_CVE_V3 CVE
+			ON NVD.CVE_ID = CVE.CVE_ID
 			INNER JOIN
 			(		SELECT OC.OSS_NAME, NICK.OSS_NICKNAME, OC.OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					INNER JOIN OSS_NICKNAME NICK
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{prjId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
 					AND OC.REFERENCE_DIV = #{commponentDiv}
-				</if>
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
-				</if>
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
 					AND OC.OSS_NAME != ''
@@ -4162,7 +4144,7 @@
 										AND OSS_NAME = OC.OSS_NAME 
 										AND OSS_VERSION = OC.OSS_VERSION 
 										AND VULNERABILITY_RESOLUTION = 'Fixed')
-			ORDER BY NVD.CVSS_SCORE DESC
+			ORDER BY CVE.CVSS_SCORE DESC
 			LIMIT 5
 		) TBL	
 		
@@ -4171,18 +4153,15 @@
 		SELECT TBL.CVSS_SCORE_MAX
 		FROM
 		(	
-			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',NVD.CVSS_SCORE,'@',NVD.CVE_ID) AS CVSS_SCORE_MAX
-			FROM NVD_DATA_SCORE_V3 NVD
+			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID) AS CVSS_SCORE_MAX
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN NVD_CVE_V3 CVE
+			ON NVD.CVE_ID = CVE.CVE_ID
 			INNER JOIN
 			(		SELECT OC.OSS_NAME, OC.OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					WHERE OC.REFERENCE_ID = #{prjId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
 					AND OC.REFERENCE_DIV = #{commponentDiv}
-				</if>
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
-				</if>
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
 					AND OC.OSS_NAME != ''
@@ -4199,7 +4178,7 @@
 										AND OSS_NAME = OC.OSS_NAME 
 										AND OSS_VERSION = ''
 										AND VULNERABILITY_RESOLUTION = 'Fixed')
-			ORDER BY NVD.CVSS_SCORE DESC
+			ORDER BY CVE.CVSS_SCORE DESC
 			LIMIT 5
 		) TBL	
 		
@@ -4208,20 +4187,17 @@
 		SELECT TBL.CVSS_SCORE_MAX
 		FROM
 		(	
-			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',NVD.CVSS_SCORE,'@',NVD.CVE_ID) AS CVSS_SCORE_MAX
-			FROM NVD_DATA_SCORE_V3 NVD
+			SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID) AS CVSS_SCORE_MAX
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN NVD_CVE_V3 CVE
+			ON NVD.CVE_ID = CVE.CVE_ID
 			INNER JOIN
 			(		SELECT OC.OSS_NAME, NICK.OSS_NICKNAME, OC.OSS_VERSION
 					FROM OSS_COMPONENTS OC
 					INNER JOIN OSS_NICKNAME NICK
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					WHERE OC.REFERENCE_ID = #{prjId}
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
 					AND OC.REFERENCE_DIV = #{commponentDiv}
-				</if>
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(commponentDiv)">
-					AND OC.REFERENCE_DIV IN ('10','11','12','14','15')
-				</if>
 					AND OC.OSS_NAME != '-'
 					AND OC.OSS_NAME IS NOT NULL
 					AND OC.OSS_NAME != ''
@@ -4238,7 +4214,7 @@
 										AND OSS_NAME = OC.OSS_NAME 
 										AND OSS_VERSION = ''
 										AND VULNERABILITY_RESOLUTION = 'Fixed')
-			ORDER BY NVD.CVSS_SCORE DESC
+			ORDER BY CVE.CVSS_SCORE DESC
 			LIMIT 5
 		) TBL
 	</select>
@@ -5158,10 +5134,7 @@
 		ORDER BY LICENSE_NAME
 	</select>
 	
-	<select id="selectVulnerabilityResolutionSecurityListCnt" parameterType="oss.fosslight.domain.Project" resultType="int">
-		SELECT COUNT(1) AS CNT
-		FROM
-		(
+	<select id="selectVulnerabilityResolutionSecurityList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponents">
 			SELECT TBL.*, IFNULL(SEC.VULNERABILITY_RESOLUTION, 'Unresolved') AS VULNERABILITY_RESOLUTION
 			FROM
 			(
@@ -5420,8 +5393,6 @@
 					GROUP BY OC.CUSTOM_OSS_NAME
 				) T4
 			) TBL1
-		) TBL
-		WHERE TBL.VULNERABILITY_RESOLUTION != 'Fixed'
 	</select>
 	
 	<select id="copySecurityDataForProjectCnt" parameterType="oss.fosslight.domain.Project" resultType="int">

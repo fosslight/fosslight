@@ -105,8 +105,7 @@
                                                     <select class="form-control select2 save-value" name="division" id="division" style="width: 100%;">
                                                         <option value=""></option>
                                                         <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                                            <option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}"
-                                                                    th:selected="${#strings.equals(option.cdDtlNo, searchBean?.division)}"></option>
+                                                            <option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}" th:selected="${#strings.equals(option.cdDtlNo, searchBean?.division)}"></option>
                                                         </th:block>
                                                     </select>
                                                 </div>

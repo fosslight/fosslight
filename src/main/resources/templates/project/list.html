@@ -138,12 +138,10 @@
                                                     <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
                                                         <select class="form-control select2" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
                                                             <option th:value="''"></option>
-                                                            <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}"
-                                                                    th:text="${option.cdDtlNm}"
-                                                                    th:value="${option.cdDtlNo}"
-                                                                    th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
-                                                            </option>
-                                                        </select>
+                                                            <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}">
+                                                            	<option th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}" th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}"></option>
+                                                            </th:block>
+                                                     	</select>
                                                     </th:block>
                                                 </div>
                                             </div>
@@ -151,10 +149,9 @@
                                                 <div class="form-group mb-2">
                                                     <select class="form-control select2 save-value" style="width: 100%;" id="priority" name="priority">
                                                     	<option th:value="''"></option>
-                                                        <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}"
-                                                            	th:value="${option.cdDtlNo}" 
-                                                            	th:text="${option.cdDtlNm}" 
-                                                            	th:selected="${searchBean?.priority != null and option.cdDtlNo == searchBean?.priority}"></option>
+                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}"
+                                                        <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.priority != null and option.cdDtlNo == searchBean?.priority}"></option>
+                                                       	</th:block>
                                                     </select>
                                                 </div>
                                             </div>
@@ -170,7 +167,9 @@
                                             <div class="col-4">
                                                 <select class="select2 save-value" name="distributionType" id="distributionTypeSelect" style="width: 100%;">
                                                     <option value=""></option>
-                                                    <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'), searchBean?.distributionType)}"></th:block>
+                                                    <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
+                                                    	<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.distributionType != null && option.cdDtlNo == searchBean?.distributionType}"></option>
+                                                    </th:block>
                                                 </select>
                                             </div>
                                             <div sec:authorize="!hasRole('ROLE_ADMIN')" class="col-3 d-flex justify-content-start mx-2">

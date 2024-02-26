@@ -660,6 +660,8 @@ var fn = {
 	// party 그리드 데이터
 	getPartyGridData : function(){
 		if (partnerData.partnerId != null) {
+			loading.show();
+			
 			$.ajax({
 				url : '/project/identificationGrid/'+partnerData.partnerId+'/20',
 				type : 'GET',
@@ -668,6 +670,8 @@ var fn = {
 				data : {referenceId : partnerData.partnerId},
 				contentType : 'application/json',
 				success : function(data){
+					loading.hide();
+					
 					partyMainData = data.mainData;
 					partyValidMsgData_e = []; //초기화
 					partyDiffMsgData_e = []; //초기화
@@ -1554,24 +1558,25 @@ var fn = {
 		var partyDelete = $("#partyDelete");
 		var partyReset = $("#partyReset");
 		var partySave = $("#partySave");
+		var partyBulkRegist = $(".idenBulkRegist");
 		var objArr = [];
 		
 		objArr.push($("#list"));
 		
-		if(userRole == "ROLE_VIEWER") {
+		if (userRole == "ROLE_VIEWER") {
 			fileDelete.hide(); addWatcher.hide();
-			partyDelete.hide(); partyReset.hide(); partySave.hide();
+			partyDelete.hide(); partyReset.hide(); partySave.hide(); partyBulkRegist.hide();
 		} else {
 			switch(status){
 				case "CONF" :
 					fileDelete.hide(); addWatcher.show();
-					partyDelete.hide(); partyReset.hide(); partySave.hide();
+					partyDelete.hide(); partyReset.hide(); partySave.hide(); partyBulkRegist.hide();
 
 					break;
 				// 추후 추가
 				default :
 					fileDelete.show(); addWatcher.show();
-					partyDelete.show(); partyReset.show(); partySave.show();
+					partyDelete.show(); partyReset.show(); partySave.show(); partyBulkRegist.show();
 
 					break;
 			}
@@ -3021,11 +3026,16 @@ var grid = {
 
 		});
 		partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
-		partnerList.jqGrid('navGrid',"#pager",{add:true,edit:false,del:true,search:false,refresh:false
-												  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('list',partnerList,"main", null, com_fn.getLicenseName);}
-												  , delfunc: function () { fn_grid_com.rowDelNew(partnerList,"main");}
-												  , cloneToTop:true
-		});
+		
+		if ($("#partySave").is(":visible")) {
+			partnerList.jqGrid('navGrid',"#pager",{add:true,edit:false,del:true,search:false,refresh:false
+				  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('list',partnerList,"main", null, com_fn.getLicenseName);}
+				  , delfunc: function () { fn_grid_com.rowDelNew(partnerList,"main");}
+				  , cloneToTop:true
+			});
+		} else {
+			partnerList.jqGrid('navGrid',"#pager",{add:false,edit:false,del:false,search:false,refresh:false,cloneToTop:true});
+		}
 		
 		$('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
 	}

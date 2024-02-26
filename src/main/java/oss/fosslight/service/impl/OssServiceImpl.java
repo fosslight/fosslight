@@ -69,14 +69,7 @@ import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.repository.VulnerabilityMapper;
-import oss.fosslight.service.CommentService;
-import oss.fosslight.service.HistoryService;
-import oss.fosslight.service.OssService;
-import oss.fosslight.service.PartnerService;
-import oss.fosslight.service.ProjectService;
-import oss.fosslight.service.VerificationService;
-import oss.fosslight.service.SelfCheckService;
-import oss.fosslight.service.AutoFillOssInfoService;
+import oss.fosslight.service.*;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationConfig;
@@ -790,7 +783,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			convertDataMap.put("modifierNm", makeUserNameFormat(loginUserName()));
 			convertDataMap.put("ossBeforeNm", makeOssNameFormat(ossMasterBefore));
 			convertDataMap.put("ossAftereNm", makeOssNameFormat(ossMasterAfter));
-			convertDataMap.put("templateURL", "comment/ossRenamed.html");
+			convertDataMap.put("templateURL", "/template/comment/ossRenamed.html");
 			
 			return CommonFunction.VelocityTemplateToString(convertDataMap);
 		}
@@ -2255,7 +2248,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return resMap;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getCheckOssLicenseAjax(ProjectIdentification paramBean, String targetName) {
 		Map<String, Object> resMap = new HashMap<>();
@@ -2309,7 +2301,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		return resMap;
 	}
-	
+
 	@Override
 	public List<ProjectIdentification> checkOssName(List<ProjectIdentification> list){
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
@@ -3021,6 +3013,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			} else {
 				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName);
 			}
+
 			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1), (userName == null ? 0 : 1));
 			
 			ProcessBuilder builder = new ProcessBuilder( "/bin/bash", "-c", analysisCommand );
@@ -3037,8 +3030,25 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			int count = 0;
 			int interval = 1000; // 1 sec
 			int idleTime = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_AUTO_ANALYSIS, CoConstDef.CD_IDLE_TIME));
+
+			Project prjInfo = new Project();
+			prjInfo.setPrjId(prjId);
+
+			// script가 success일때 status를 progress로 변경함.
+			OssMaster ossBean = new OssMaster();
+			ossBean.setPrjId(prjId);
+			ossBean.setCreator(loginUserName());
+			ossMapper.setOssAnalysisStatus(ossBean);
+
+			prjInfo = projectMapper.getOssAnalysisData(prjInfo);
+
+			resultMap.put("isValid", true);
+			resultMap.put("returnMsg", "Success");
+			resultMap.put("prjInfo", prjInfo);
+
+			Thread.sleep(interval);
 			
-			while (!Thread.currentThread().isInterrupted()) {
+			/*while (!Thread.currentThread().isInterrupted()) {
 				if (count > idleTime) {
 					oss_auto_analysis_log.info("ANALYSIS TIMEOUT PRJ ID : " + prjId);
 					resultMap.put("isValid", false);
@@ -3073,7 +3083,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				count++;
 				
 				Thread.sleep(interval);
-			}
+			}*/
 			// 스크립트 종료
 		} catch(NullPointerException npe) {
 			oss_auto_analysis_log.error("ANALYSIS ERR PRJ ID : " + prjId);
@@ -3132,6 +3142,32 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
+	public OssAnalysis getNewestOssInfo2(OssAnalysis bean) {
+		OssAnalysis ossNewistData = ossMapper.getNewestOssInfo2(bean);
+
+		if (ossNewistData != null) {
+			if (!isEmpty(ossNewistData.getDownloadLocationGroup())) {
+				String url = "";
+
+				String[] downloadLocationList = ossNewistData.getDownloadLocationGroup().split(",");
+				// master table에 download location이 n건인 경우에 대해 중복제거를 추가함.
+				String duplicateRemoveUrl =  String.join(",", Arrays.asList(downloadLocationList)
+						.stream()
+						.filter(CommonFunction.distinctByKey(p -> p))
+						.collect(Collectors.toList()));
+
+				if (!isEmpty(duplicateRemoveUrl)) {
+					url = duplicateRemoveUrl;
+				}
+
+				ossNewistData.setDownloadLocation(url);
+			}
+		}
+
+		return ossNewistData;
+	}
+	
+	@Override
 	public OssAnalysis getNewestOssInfo(OssAnalysis bean) {		
 		OssAnalysis ossNewistData = ossMapper.getNewestOssInfo(bean);
 		
@@ -3166,32 +3202,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			ossNewistData.setOssId(null);
 		}
 		
-		return ossNewistData;
-	}
-	
-	@Override
-	public OssAnalysis getNewestOssInfo2(OssAnalysis bean) {
-		OssAnalysis ossNewistData = ossMapper.getNewestOssInfo2(bean);
-
-		if (ossNewistData != null) {
-			if (!isEmpty(ossNewistData.getDownloadLocationGroup())) {
-				String url = "";
-
-				String[] downloadLocationList = ossNewistData.getDownloadLocationGroup().split(",");
-				// master table에 download location이 n건인 경우에 대해 중복제거를 추가함.
-				String duplicateRemoveUrl =  String.join(",", Arrays.asList(downloadLocationList)
-						.stream()
-						.filter(CommonFunction.distinctByKey(p -> p))
-						.collect(Collectors.toList()));
-
-				if (!isEmpty(duplicateRemoveUrl)) {
-					url = duplicateRemoveUrl;
-				}
-
-				ossNewistData.setDownloadLocation(url);
-			}
-		}
-
 		return ossNewistData;
 	}
 	

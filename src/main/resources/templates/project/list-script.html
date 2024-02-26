@@ -702,7 +702,9 @@ var fn = {
 		}
 		
 		if (typeof rowObject.secCvssScore !== "undefined") {
-			cellvalue = rowObject.secCvssScore;
+			if ("Fixed" != secCode) {
+				cellvalue = rowObject.secCvssScore;
+			}
 		}
 		
 		if ("" != secCode) {
@@ -712,13 +714,19 @@ var fn = {
 				} else {
 					display = '<span class="badge badge-cherry size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Need to resolve('+cellvalue+')</span>';
 				}	
-			} else if (parseFloat(cellvalue) < standardScore && parseFloat(cellvalue) > 0) {
+			} else {
+				if (cellvalue != 0) {
+					display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Discovered('+cellvalue+')</span>';
+				} else {
+					display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Discovered(N/A)</span>';
+				}
+			}
+		} else {
+			if (cellvalue != 0) {
 				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cellvalue+')</span>';
 			} else {
 				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
 			}
-		} else {
-			display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
 		}
 		
 		return display;

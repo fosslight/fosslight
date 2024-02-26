@@ -92,7 +92,7 @@
                                                     </div>
                                                     <div class="col-md-2">
                                                         <div class="form-group">
-                                                            <select class="custom-select package text-center" id="packagefile_select" th:name="selectOption_+${i}" th:onchange="|fn.changeSelectOption(this)|">
+                                                            <select class="custom-select package text-center packageSelect" id="packagefile_select" th:name="selectOption_+${i}" th:onchange="|fn.changeSelectOption(this)|">
                                                                 <option value="1" th:selected="true" th:text="Upload"></option>
                                                                 <option value="2" th:text="URL"></option>
                                                                 <option value="3" th:text="'Project Search'"></option>
