@@ -4020,17 +4020,34 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<ProjectIdentification> list = projectMapper.getPartnerOssListValidation(ossComponents);
 		
 		for (ProjectIdentification oc : list){
-			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())){
-				ProjectIdentification PI = new ProjectIdentification();
-				PI.setComponentId(oc.getComponentId());
-				List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
-				if (!subGridData.isEmpty()) {
+			ProjectIdentification PI = new ProjectIdentification();
+			PI.setComponentId(oc.getComponentId());
+			List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
+			
+			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())) {
+				if (subGridData != null && !subGridData.isEmpty()) {
 					PI = subGridData.get(0);
 					
 					oc.setLicenseName(PI.getLicenseName());
 					oc.setLicenseText(PI.getLicenseText());
 					oc.setCopyrightText(PI.getCopyrightText());
+					oc.addComponentLicenseList(PI);
 				}
+			} else {
+				if (subGridData != null && !subGridData.isEmpty()) {
+					for (ProjectIdentification subGrid : subGridData) {
+						if (subGrid.getComponentId().equals(oc.getComponentId())) {
+							oc.addComponentLicenseList(subGrid);
+						}
+					}
+				}
+			}
+		}
+		
+		Map<String, Object> subMap = new HashMap<>();
+		for (ProjectIdentification oc : list){
+			if (oc.getComponentLicenseList() != null && !oc.getComponentLicenseList().isEmpty()) {
+				subMap.put(oc.getGridId(), oc.getComponentLicenseList());
 			}
 		}
 		
@@ -4041,6 +4058,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 			// main grid
 			pv.setAppendix("mainList", list);
+			
+			pv.setAppendix("subListMap", subMap);
 
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			// return validator result
