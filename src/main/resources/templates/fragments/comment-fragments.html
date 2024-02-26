@@ -72,10 +72,10 @@
                                 <td class="text-right py-0 align-middle">
                                 <td class="text-right py-0 align-middle">
                                     <div class="btn-group btn-group-sm" th:if="${comment.creator == comment.loginUserName}">
-                                        <button class="btn btn btn-default" type="button" th:data-commId="${comment.commId}" th:data-referenceDiv="${comment.referenceDiv}" name="commentModifyBtn">
+                                        <button class="btn btn btn-default" type="button" th:data-commId="${comment.commId}" th:data-referenceDiv="${comment.referenceDiv}" th:onclick="|fn_comment.commentModify(this)|" name="commentModifyBtn">
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
-                                        <button class="btn btn-lg-red" th:data-commId="${comment.commId}" name="commentDeleteBtn" type="button">
+                                        <button class="btn btn-lg-red" th:data-commId="${comment.commId}" name="commentDeleteBtn" type="button" th:onclick="|fn_comment.commentDelete(this)|">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -293,10 +293,18 @@
                 } catch (e) {
                 }
             });
-
         });
 
         const fn_comment = {
+        	commentModify : function (obj) {
+            	const commId = $(obj).attr("data-commId");
+            	const referenceDiv = $(obj).attr("data-referenceDiv");
+            	fn_comment.handleCommentPopupOpen(commId, referenceDiv);
+        	},
+        	commentDelete : function (obj) {
+        		const commId = $(obj).attr("data-commId");
+                fn_comment.deleteComment(commId);
+        	},
             getReferenceDiv: function () {
                 basicReferenceDiv = [[${basicReferenceDiv}]];
 
@@ -327,17 +335,6 @@
                     success: function (res) {
                     	$('#commentListArea div').empty();
                         $('#commentListArea div').replaceWith(res);
-                        $("button[name='commentModifyBtn']").on("click", function (e){
-                            e.preventDefault();
-                            const commId = $(this).attr("data-commId");
-                            const referenceDiv = $(this).attr("data-referenceDiv");
-                            fn_comment.handleCommentPopupOpen(commId, referenceDiv);
-                        });
-                        $("button[name='commentDeleteBtn']").on("click", function (e){
-                            e.preventDefault();
-                            const commId = $(this).attr("data-commId");
-                            fn_comment.deleteComment(commId);
-                        });
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
                         alertify.error([[ #{msg.common.valid2} ]], 0);
@@ -378,7 +375,32 @@
                         if (event.keyCode === 13) { eFlag = true; };
                     }, true);
 
-                    alertify.confirm(res, function (e) {
+                    if (typeof alertify.editCommentDialog === 'undefined') {
+    					alertify.dialog('editCommentDialog', function() {
+    						return {
+    							setup: function() {
+    								var settings = alertify.confirm().settings;
+    								
+    								for (var prop in settings) {
+    									this.settings[prop] = settings[prop];
+    								}
+    								
+    								var setup = alertify.confirm().setup();
+    								setup.focus.element = 1;
+    								
+    								return setup;
+    							},
+    						    hooks: {
+    						    	onshow: function() {
+    						        	this.elements.dialog.style.maxWidth = 'none';
+    						          	this.elements.dialog.style.width = '680px';
+    						        }
+    							}
+    						};
+    					}, false, 'confirm');
+                	}
+                    
+                    alertify.editCommentDialog(res, function (e) {
                         if(e) {
                             if(eFlag) {
                                 eFlag = false;
@@ -389,7 +411,7 @@
                         } else {
                             return false;
                         }
-                    }).set('resizable', true).resizeTo('680px', '335px');
+                    });
                 }, null, function () {
                     if ($("#modifiedCommentEditor").summernote('code')) {
                         $("#modifiedCommentEditor").summernote('destroy');
@@ -400,7 +422,7 @@
             },
             createSummernote: function () {
                 $("#modifiedCommentEditor").summernote({
-                    height: 100,
+                    height: 180,
                     callbacks: {
                         onInit: function() {
                             const contents = $("#contents").val();
