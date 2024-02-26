@@ -1297,32 +1297,30 @@ var dep_grid = {
 				}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
-				if ($("#depSaveUp").is(":visible")) {
-					// 체크 박스 영역 제외
-					cleanErrMsg("depList", rowid);
+				// 체크 박스 영역 제외
+				cleanErrMsg("depList", rowid);
 
-					fn_grid_com.setCellEdit(depList, rowid, depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
+				fn_grid_com.setCellEdit(depList, rowid, depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
 
-					// 서브 그리드 제외
-					ondblClickRowBln = false;
-					
-	 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
-	 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
-	 	 			
-					var result = $('#'+rowid+'_licenseName').val().split(",");
+				// 서브 그리드 제외
+				ondblClickRowBln = false;
+				
+ 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
+ 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+ 	 			
+				var result = $('#'+rowid+'_licenseName').val().split(",");
 
-					result.forEach(function(cur,idx){
-						if(cur != ""){
-							var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-							$('#'+rowid+'_licenseNameBtn').append(mult);
-						}
-					});
-					
-					$('#'+rowid+'_licenseName').val("");
-					var nextCol = depList.jqGrid('getGridParam', 'colModel')[iCol].name
-					var nextRow = rowid
-					$('#'+nextRow+"_"+nextCol).focus();
-				}
+				result.forEach(function(cur,idx){
+					if(cur != ""){
+						var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+						$('#'+rowid+'_licenseNameBtn').append(mult);
+					}
+				});
+				
+				$('#'+rowid+'_licenseName').val("");
+				var nextCol = depList.jqGrid('getGridParam', 'colModel')[iCol].name
+				var nextRow = rowid
+				$('#'+nextRow+"_"+nextCol).focus();
 			},
 			onPaging: function(action) {
 				cleanErrMsg("depList");
@@ -1352,18 +1350,14 @@ var dep_grid = {
 			}
 		});
 		
-		if ($("#depSaveUp").is(":visible")) {
-			depList.jqGrid('navGrid',"#depPager",{add:true,edit:false,del:true,search:false,refresh:false
-				  , addfunc: function () { 
-					  com_fn.saveFlagObject["DEP"] = false;
-					  fn_grid_com.rowAddNew('depList',depList,"main", null, com_fn.getLicenseName);
-				  }
-				  , delfunc: function () { fn_grid_com.rowDelNew(depList,"main");}
-				  , cloneToTop:true
-			});
-		} else {
-			depList.jqGrid('navGrid',"#depPager",{add:false,edit:false,del:false,search:false,refresh:false,cloneToTop:true});
-		}
+		depList.jqGrid('navGrid',"#depPager",{add:true,edit:false,del:true,search:false,refresh:false
+			  , addfunc: function () { 
+				  com_fn.saveFlagObject["DEP"] = false;
+				  fn_grid_com.rowAddNew('depList',depList,"main", null, com_fn.getLicenseName);
+			  }
+			  , delfunc: function () { fn_grid_com.rowDelNew(depList,"main");}
+			  , cloneToTop:true
+		});
 		
 		$('#depList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
 	}

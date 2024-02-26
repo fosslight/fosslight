@@ -1363,30 +1363,28 @@ var bin_grid = {
 					fn_grid_com.showBinaryViewPage(binList, rowid, true, binValidMsgData, binDiffMsgData, binInfoMsgData);
 				}
 				
-				if ($("#binSave").is(":visible")) {
-					cleanErrMsg("binList", rowid);
-					fn_grid_com.setCellEdit(binList, rowid, binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
+				cleanErrMsg("binList", rowid);
+				fn_grid_com.setCellEdit(binList, rowid, binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
 
-					// 서브 그리드 제외 
-					ondblClickRowBln = false;
+				// 서브 그리드 제외 
+				ondblClickRowBln = false;
 
-	 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
-	 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
-					var result = $('#'+rowid+'_licenseName').val().split(",");
+ 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
+ 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+				var result = $('#'+rowid+'_licenseName').val().split(",");
 
-					result.forEach(function(cur,idx){
-						if(cur != ""){
-							var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+				result.forEach(function(cur,idx){
+					if(cur != ""){
+						var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 
-							$('#'+rowid+'_licenseNameBtn').append(mult);
-						}
-					});
-					
-					$('#'+rowid+'_licenseName').val("");
-	                var nextCol = binList.jqGrid('getGridParam', 'colModel')[iCol].name
-	                var nextRow = rowid
-	               	$('#'+nextRow+"_"+nextCol).focus();
-				}
+						$('#'+rowid+'_licenseNameBtn').append(mult);
+					}
+				});
+				
+				$('#'+rowid+'_licenseName').val("");
+                var nextCol = binList.jqGrid('getGridParam', 'colModel')[iCol].name
+                var nextRow = rowid
+               	$('#'+nextRow+"_"+nextCol).focus();
 			},
 			onPaging: function(action) {
 				cleanErrMsg("binList");
@@ -1411,19 +1409,14 @@ var bin_grid = {
 		});
 		binList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 		
-		if ($("#binSave").is(":visible")) {
-			binList.jqGrid('navGrid',"#binPager",{add:true,edit:false,del:true,search:false,refresh:false
-				  , addfunc: function () {
-					  com_fn.saveFlagObject["BIN"] = false;
-					  fn_grid_com.rowAddNew('binList',binList,"main", null, com_fn.getLicenseName);
-				  }
-				  , delfunc: function () { fn_grid_com.rowDelNew(binList,"main");}
-				  , cloneToTop:true
-			});
-		} else {
-			binList.jqGrid('navGrid',"#binPager",{add:false,edit:false,del:false,search:false,refresh:false,cloneToTop:true});
-		}
-		
+		binList.jqGrid('navGrid',"#binPager",{add:true,edit:false,del:true,search:false,refresh:false
+			  , addfunc: function () {
+				  com_fn.saveFlagObject["BIN"] = false;
+				  fn_grid_com.rowAddNew('binList',binList,"main", null, com_fn.getLicenseName);
+			  }
+			  , delfunc: function () { fn_grid_com.rowDelNew(binList,"main");}
+			  , cloneToTop:true
+		});
 		
 		$('#binList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
 	}
