@@ -3329,17 +3329,10 @@ function resetForm(el) {
             }
         });
 
-        $(this).find('.select2').each(function() {
+        $(this).find('.select').each(function () {
             var $select = $(this);
-            $select.find('option:selected').remove();
-            $select.trigger('change');
-        });
-
-        $(this).find('select').each(function() {
-            var $select = $(this);
-            $select.find('option:selected').remove();
-            $select.trigger('change');
-        });
+            $select.val(null).trigger('change');
+        })
     });
 }
 
