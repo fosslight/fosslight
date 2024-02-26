@@ -1046,7 +1046,7 @@ CREATE TABLE IF NOT EXISTS `OSS_COMPONENTS` (
   `MODIFIED_DATE` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `COMMENTS` text DEFAULT NULL,
   `REF_DIV` varchar(6) DEFAULT NULL,
-  `DEPENDENCIES` varchar(2000) DEFAULT NULL,
+  `DEPENDENCIES` text DEFAULT NULL,
   `REF_OSS_NAME` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`COMPONENT_ID`),
   KEY `REFERENCE_ID_REFERENCE_DIV` (`REFERENCE_ID`,`REFERENCE_DIV`),
@@ -1669,6 +1669,7 @@ CREATE TABLE IF NOT EXISTS `PROCESS_GUIDE` (
 
 -- 테이블 데이터 fosslight.PROCESS_GUIDE:~0 rows (대략적) 내보내기
 DELETE FROM `PROCESS_GUIDE`;
+INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('License_Edit_Info', 'License_Edit', '<div style="background:#eeeeee; border:1px solid #cccccc; padding:5px 10px">&bull;<strong> SPDX License인 경우 :</strong> SPDX 링크로 website를 추가<br />&bull;<strong> License 이름이 한글인 경우 :</strong> 1. License 이름 영문으로 변경하고, 2. 한글 License명은 License text 최상단에 포함<br />&bull;<strong> MIT/BSD-like인 경우 :</strong> MIT/BSD-like (OSS_Name) 으로 이름을 설정</div>', '', 'Y');
 /*!40000 ALTER TABLE `PROCESS_GUIDE` DISABLE KEYS */;
 /*!40000 ALTER TABLE `PROCESS_GUIDE` ENABLE KEYS */;
 
@@ -1759,6 +1760,7 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `PACKAGE_FILE_ID` int(11) DEFAULT NULL,
   `PACKAGE_FILE_ID2` int(11) DEFAULT NULL,
   `PACKAGE_FILE_ID3` int(11) DEFAULT NULL,
+  `PACKAGE_VUL_DOC_FILE_ID` int(11) DEFAULT NULL,
   `NOTICE_FILE_ID` int(11) DEFAULT NULL,
   `NOTICE_TEXT_FILE_ID` int(11) DEFAULT NULL,
   `REVIEW_REPORT_FILE_ID` int(11) DEFAULT NULL,
@@ -1769,6 +1771,8 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `SPDX_TAG_FILE_ID` int(11) DEFAULT NULL,
   `SPDX_JSON_FILE_ID` int(11) DEFAULT NULL,
   `SPDX_YAML_FILE_ID` int(11) DEFAULT NULL,
+  `CDX_JSON_FILE_ID` int(11) DEFAULT NULL,
+  `CDX_XML_FILE_ID` int(11) DEFAULT NULL,
   `ZIP_FILE_ID` int(11) DEFAULT NULL,
   `USE_CUSTOM_NOTICE_YN` char(1) DEFAULT 'N' COMMENT '사용자 편집 NOTICE 사용여부',
   `COMPLETE_YN` char(1) DEFAULT NULL COMMENT 'COMPLETE 여부',
@@ -1910,6 +1914,7 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 	('111', 'email default contents', '', 'N'),
 	('120', 'File upload Extension', '', 'N'),
 	('121', 'Download Sample File', 'Location of sample files', 'N'),
+	('122', 'Network Server license list', 'Licenses that has obligations for network server', 'N'),
 	('200', 'Division', '', 'N'),
 	('201', 'License Type', '', 'N'),
 	('203', 'License Division', '', 'N'),
@@ -2226,6 +2231,20 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('120', '22', '3rd Party Oss List', '', 'xls,xlsm,xlsx,csv', 10, 'Y'),
 	('120', '31', 'BAT FILE', '', '', 11, 'Y'),
 	('121', '11', 'FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx', '', '/sample/FOSSLight-OSS-Checklist-for-3rdParty_Eng_1.0.xlsx', 2, 'Y'),
+	('122', '1', 'AGPL-1.0', '', '', 1, 'Y'),
+	('122', '2', 'AGPL-3.0', '', '', 2, 'Y'),
+	('122', '3', 'APSL-2.0', '', '', 3, 'Y'),
+	('122', '4', 'CPAL-1.0', '', '', 4, 'Y'),
+	('122', '5', 'TEMP', '', '', 5, 'Y'),
+	('122', '6', 'AFL-3.0', '', '', 6, 'Y'),
+	('122', '7', 'OSL-1.0', '', '', 7, 'Y'),
+	('122', '8', 'OSL-1.1', '', '', 8, 'Y'),
+	('122', '9', 'OSL-2.0', '', '', 9, 'Y'),
+	('122', '10', 'OSL-3.0', '', '', 10, 'Y'),
+	('122', '12', 'restriction test ver1.0', '', '', 12, 'Y'),
+	('122', '13', 'Lesser GNU Affero General Public License', '', '', 13, 'Y'),
+	('122', '14', 'test license ver1.0', '', '', 14, 'Y'),
+	('122', '15', 'New License Test', '', '', 15, 'Y'),
 	('200', '999', 'N/A', '', '', 999, 'Y'),
 	('200', '1', 'Open Source Task', '', '', 1, 'Y'),
 	('201', 'CP', 'Copyleft', '', '', 3, 'Y'),

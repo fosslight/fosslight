@@ -1894,6 +1894,10 @@
 	<delete id="deleteOssAnalysisList" parameterType="String">
 		DELETE FROM OSS_ANALYSIS_MAP WHERE REFERENCE_ID = #{prjId}
 	</delete>
+
+	<delete id="deleteOssAnalysis" parameterType="String">
+		DELETE FROM OSS_ANALYSIS_STATUS WHERE  PRJ_ID = #{prjId}
+	</delete>
 	
 	<insert id="insertOssAnalysisList" parameterType="oss.fosslight.domain.OssMaster">
 		INSERT INTO OSS_ANALYSIS_MAP (
@@ -1917,8 +1921,8 @@
 		  	 , OC.OSS_NAME
 		  	 , OC.OSS_VERSION
 		  	 , GROUP_CONCAT(DISTINCT OCL.LICENSE_NAME SEPARATOR ',') AS LICENSE_NAME
-		  	 , OC.DOWNLOAD_LOCATION
-		  	 , OC.HOMEPAGE
+		  	 , REPLACE(OC.DOWNLOAD_LOCATION, '%40', '@') AS DOWNLOAD_LOCATION
+		  	 , REPLACE(OC.HOMEPAGE, '%40', '@') AS HOMEPAGE
 		  	 , 'N' AS ANALYSIS_YN
 		  	 , 'N' AS COMPLETE_YN
 	  	  FROM OSS_COMPONENTS OC
@@ -1989,22 +1993,48 @@
 			#{prjId}
 		  , 'PROGRESS'
 		  , now()
-		  , #{creator}
+		  <choose>
+		  	<when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
+				,"oscAdmin"
+			</when>
+			<otherwise>
+				, #{creator}
+			</otherwise>
+		  </choose>
 		  , now()
 		  , null
 		  , now()
-		  , #{creator}
+		  <choose>
+			  <when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
+			  ,"oscAdmin"
+			  </when>
+			  <otherwise>
+			  , #{creator}
+			  </otherwise>
+		  </choose>
 		) ON DUPLICATE KEY UPDATE
 			STATUS					= 'PROGRESS'
 		  , ANALYSIS_START_DATE 	= now()
 		  , ANALYSIS_END_DATE		= null
 		  , MODIFIED_DATE 			= now()
-		  , MODIFIER 				= #{creator}
+		    <choose>
+				<when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
+		    ,MODIFIER 				= "oscAdmin"
+		    </when>
+				<otherwise>
+		    , MODIFIER 				= #{creator}
+		    </otherwise>
+			</choose>
 	</insert>
+
+	<select id="getOssAnalysisStatus" parameterType="string" resultType="string">
+		SELECT STATUS FROM OSS_ANALYSIS_STATUS WHERE PRJ_ID = #{prjId}
+	</select>
 	
 	<select id="getNewestOssInfo" parameterType="oss.fosslight.domain.OssAnalysis" resultType="oss.fosslight.domain.OssAnalysis">
 		SELECT #{groupId} AS GROUP_ID 
 			 , A.OSS_NAME
+			 , A.OSS_ID
 		     , (SELECT GROUP_CONCAT(OSS_NICKNAME) FROM OSS_NICKNAME WHERE A.OSS_NAME = OSS_NAME) AS OSS_NICK_NAME
 		     , (SELECT TRIM(GROUP_CONCAT(CONCAT(OSS_LICENSE_COMB, ' ', IF(SHORT_IDENTIFIER = '' OR SHORT_IDENTIFIER IS NULL,  LICENSE_NAME, SHORT_IDENTIFIER),  ' ') ORDER BY OSS_LICENSE_IDX ASC SEPARATOR ''))
 				  FROM OSS_LICENSE_DECLARED OL
@@ -2027,6 +2057,33 @@
 		   AND A.USE_YN = 'Y'
 		 ORDER BY A.MODIFIED_DATE DESC
 		 LIMIT 0, 1
+	</select>
+	
+	<select id="getNewestOssInfo2" parameterType="oss.fosslight.domain.OssAnalysis" resultType="oss.fosslight.domain.OssAnalysis">
+		SELECT #{groupId} AS GROUP_ID
+			 , A.OSS_NAME
+			 , (SELECT GROUP_CONCAT(OSS_NICKNAME) FROM OSS_NICKNAME WHERE A.OSS_NAME = OSS_NAME) AS OSS_NICK_NAME
+			 , (SELECT TRIM(GROUP_CONCAT(CONCAT(OSS_LICENSE_COMB, ' ', IF(SHORT_IDENTIFIER = '' OR SHORT_IDENTIFIER IS NULL,  LICENSE_NAME, SHORT_IDENTIFIER),  ' ') ORDER BY OSS_LICENSE_IDX ASC SEPARATOR ''))
+				FROM OSS_LICENSE_DECLARED OL
+						 INNER JOIN LICENSE_MASTER LM
+									ON OL.LICENSE_ID = LM.LICENSE_ID
+				WHERE OSS_ID = A.OSS_ID) AS LICENSE_NAME
+			 , (SELECT GROUP_CONCAT(IF(LM.SHORT_IDENTIFIER = '' OR LM.SHORT_IDENTIFIER IS NULL , LM.LICENSE_NAME , LM.SHORT_IDENTIFIER) ORDER BY OSS_LICENSE_IDX ASC SEPARATOR ', ')
+				FROM OSS_LICENSE_DETECTED ODT
+						 INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
+				WHERE ODT.OSS_ID = A.OSS_ID) AS DETECTED_LICENSE
+			 , A.DOWNLOAD_LOCATION
+			 , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = A.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
+			 , A.COPYRIGHT AS OSS_COPYRIGHT
+			 , A.HOMEPAGE
+			 , #{result} AS RESULT
+			 , CONCAT(A.OSS_NAME, ' (', IF(A.OSS_VERSION IS NULL OR A.OSS_VERSION = '', 'N/A', A.OSS_VERSION), ') 최신 등록 정보') AS TITLE
+			 , A.SUMMARY_DESCRIPTION
+		FROM OSS_MASTER A
+		WHERE (A.OSS_NAME = #{ossName} OR EXISTS(SELECT 1 FROM OSS_NICKNAME A1 WHERE A1.OSS_NAME = A.OSS_NAME AND A1.OSS_NICKNAME = #{ossName}))
+		  AND A.USE_YN = 'Y'
+		ORDER BY A.MODIFIED_DATE DESC
+			LIMIT 0, 1
 	</select>
 	
 	<update id="updateAnalysisComplete" parameterType="oss.fosslight.domain.OssAnalysis">
@@ -2335,7 +2392,7 @@
     		)
     		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityCheckFlag)">
     		AND CVE_ID NOT IN (SELECT CVE_ID FROM NVD_DATA_SECURITY
-								WHERE OSS_NAME = #{schOssName}
+								WHERE (OSS_NAME = #{schOssName}
 								<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 								AND OSS_VERSION = #{ossVersion}
 								</if>
@@ -2343,7 +2400,7 @@
 								AND OSS_VERSION = ''
 								</if>
 								AND REFERENCE_ID = #{prjId}
-								AND VULNERABILITY_RESOLUTION = 'Fixed')
+								AND VULNERABILITY_RESOLUTION = 'Fixed'))
     		</if>
     	) NVD
 		INNER JOIN NVD_CVE_V3 CVE

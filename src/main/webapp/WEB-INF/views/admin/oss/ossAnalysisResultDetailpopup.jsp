@@ -59,6 +59,9 @@
 				$("[id^=selectTitle]").html(options);
 			},
 			selectTitle : function(seq){
+				var width = $(".detailView1").width()-40;
+            	$("#commentList"+seq).css("width", width);
+				
 				var gridId = $("#selectTitle"+seq).val();
 				var selectData = common_data.detailData.filter(function(cur){
 				    return cur.gridId == gridId;
@@ -74,6 +77,20 @@
 				$("#detailSummaryDescription"+seq).val(selectData.summaryDescription);
 				$("#detailcomment"+seq).val(selectData.comment);
 
+				if (typeof selectData.ossId !== 'undefined') {
+					if ('' == commentTemp){
+						$("input[name=latestOssId]").val(selectData.ossId);
+						Ctrl_fn.getCommentList(seq);
+					} else {
+						if ($('#commentListArea'+seq).find('dl').length == 0) {
+							$('#commentListArea'+seq).append(commentTemp);
+						}
+						$("#commentList"+seq).show();
+					}
+				} else {
+					$("#commentList"+seq).hide();
+				}
+				
 				$(".detailNickName"+seq+" > *").remove(); // nickName clear
 				$(".detailDownloadLocation"+seq+" > *").remove(); //downloadLocation clear
 				$(".detailDetectedLicense"+seq+" > *").remove(); //detectedLicense clear
@@ -346,12 +363,27 @@
 				
 				$(ossForm + ' input[name=\'ossLicensesJson\']').val(JSON.stringify(newRows));
 				
+				var pattern = /\s/g;
 				$(ossForm + ' [name=\'downloadLocations\']').each(function(idx, cur){
-					$(cur).val($(cur).val().trim());
+					var value = $(cur).val().trim();
+					$(cur).val(value);
+					
+					if (value.match(pattern)) {
+						alertify.error("DownloadLocation remove spaces", 0);
+						
+						return false;
+					}
 				});
 				
 				$(ossForm + ' [name=\'homepage\']').each(function(idx, cur){
-					$(cur).val($(cur).val().trim());
+					var value = $(cur).val().trim();
+					$(cur).val(value);
+					
+					if (value.match(pattern)) {
+						alertify.error("Homepage remove spaces", 0);
+						
+						return false;
+					}
 				});
 
 				$(ossForm).ajaxForm({
@@ -455,32 +487,46 @@
 					$(target).val(value);
 				}
 				
-		    	$("input[name=validationType]").val('DOWNLOADLOCATION');
-		    	$("[name='downloadLocation']").val(value);
-				$("#ossForm"+seq).ajaxForm({
-		            url :'/oss/urlDuplicateValidation',
-		            type : 'POST',
-		            dataType:"json",
-		            cache : false,
-			        success : function(json) {
-			        	if(json.externalData2) {
-			        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
-			        			var downloadLocationHtml = json.externalData2.downloadLocation;
-				        		if (downloadLocationHtml.indexOf("createTabInFrame") > -1) {
-				        			downloadLocationHtml = downloadLocationHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+				var pattern = /\s/g;
+				if (value.match(pattern)) {
+					$(target).parent().next("span.urltxt").empty();
+					$(target).parent().next("span.urltxt").css("display", "none");
+					$(target).parent().next().next("span.retxt").empty();
+					$(target).parent().next().next("span.retxt").html("Remove spaces").show();
+				} else {
+					$(target).parent().next().next("span.retxt").empty();
+					$(target).parent().next().next("span.retxt").css("display", "none");
+					
+					$("input[name=validationType]").val('DOWNLOADLOCATION');
+			    	$("[name='downloadLocation']").val(value);
+					$("#ossForm"+seq).ajaxForm({
+			            url :'/oss/urlDuplicateValidation',
+			            type : 'POST',
+			            dataType:"json",
+			            cache : false,
+				        success : function(json) {
+				        	if(json.externalData2) {
+				        		if (typeof json.externalData2.downloadLocation !== 'undefined') {
+				        			var downloadLocationHtml = json.externalData2.downloadLocation;
+					        		if (downloadLocationHtml.indexOf("createTabInFrame") > -1) {
+					        			downloadLocationHtml = downloadLocationHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+					        		}
+					        		
+					        		$(target).parent().next("span.urltxt").empty();
+									$(target).parent().next("span.urltxt").html(downloadLocationHtml).show();
 				        		}
-				        		
-				        		$(target).parent().next("span.urltxt").empty();
-								$(target).parent().next("span.urltxt").html(downloadLocationHtml).show();
-			        		}
-			        	} else {
-				        	$(target).parent().next("span.urltxt").empty();
-			        	}
-			        },
-			        error : Ctrl_fn.onError
-			    }).submit();
+				        	} else {
+					        	$(target).parent().next("span.urltxt").empty();
+				        	}
+				        },
+				        error : Ctrl_fn.onError
+				    }).submit();
+				}
 			},
 			urlDuplicationAll : function(target){
+				var pattern = /\s/g;
+				var patternCnt = 0;
+				
 				var seq = $(target).attr("id").replace(/[^\d]+/g, "");
 				$("#ossForm"+seq+" [name='downloadLocations']").each(function(idx, cur){
 					var value = $(cur).val();
@@ -489,41 +535,53 @@
 						value = value.slice(0, -1); // delete last string
 						$(cur).val(value);
 					}
+					
+					if (value.match(pattern)) {
+						patternCnt++;
+						$(cur).parent().next("span.urltxt").empty();
+						$(cur).parent().next("span.urltxt").css("display", "none");
+						$(cur).parent().next().next("span.retxt").empty();
+						$(cur).parent().next().next("span.retxt").html("Remove spaces");
+					}
 				});
 				
-				$("#ossForm"+seq+" input[name=validationType]").val('DOWNLOADLOCATIONS');
-				
-				$("#ossForm"+seq).ajaxForm({
-					url :'<c:url value="/oss/urlDuplicateValidation"/>',
-		            type : 'POST',
-		            dataType:"json",
-		            cache : false,
-			        success : function(json) {
-			        	if(json.externalData2){
-			        		var diffMsg = json.externalData2.downloadLocations.split("||");
-							
-							$("#ossForm"+seq+" [name='downloadLocations']").each(function(idx, cur){
-								var downloadLocation = $(cur).val();
+				if (patternCnt == 0) {
+					$("#ossForm"+seq+" input[name=validationType]").val('DOWNLOADLOCATIONS');
+					
+					$("#ossForm"+seq).ajaxForm({
+						url :'<c:url value="/oss/urlDuplicateValidation"/>',
+			            type : 'POST',
+			            dataType:"json",
+			            cache : false,
+				        success : function(json) {
+				        	if(json.externalData2){
+				        		var diffMsg = json.externalData2.downloadLocations.split("||");
 								
-								var msg = diffMsg.filter(function(a){
-							        return a.indexOf(downloadLocation) > -1;
-							    })[0];
-								
-								if(msg){
-									msg = msg.split("@@")[1];
-									var downloadLocation = msg.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
-									$(cur).parent().next("span.urltxt").empty();
-									$(cur).parent().next("span.urltxt").html(downloadLocation).show();
-								}						
-							});
-			        	} else {
-			        		$(".detailDownloadLocation"+seq+" > .required > span.urltxt").empty();
-			        	}
-			        	
-			        	Ctrl_fn.homepageDuplication($("#ossForm"+seq+" input[name=homepage]"));
-			        },
-		            error : Ctrl_fn.onError
-			    }).submit();
+								$("#ossForm"+seq+" [name='downloadLocations']").each(function(idx, cur){
+									var downloadLocation = $(cur).val();
+									
+									var msg = diffMsg.filter(function(a){
+								        return a.indexOf(downloadLocation) > -1;
+								    })[0];
+									
+									if(msg){
+										msg = msg.split("@@")[1];
+										var downloadLocation = msg.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+										$(cur).parent().next().next("span.retxt").empty();
+										$(cur).parent().next().next("span.urltxt").css("display", "none");
+										$(cur).parent().next("span.urltxt").empty();
+										$(cur).parent().next("span.urltxt").html(downloadLocation).show();
+									}						
+								});
+				        	} else {
+				        		$(".detailDownloadLocation"+seq+" > .required > span.urltxt").empty();
+				        	}
+				        	
+				        	Ctrl_fn.homepageDuplication($("#ossForm"+seq+" input[name=homepage]"));
+				        },
+			            error : Ctrl_fn.onError
+				    }).submit();
+				}
 			},
 			homepageDuplication : function(target){
 				var value = $(target).val();
@@ -534,30 +592,41 @@
 					$(target).val(value);
 				}
 				
-				$("input[name=validationType]").val('HOMEPAGE');
-				
-				$("#ossForm"+seq).ajaxForm({
-					url :'<c:url value="/oss/urlDuplicateValidation"/>',
-		            type : 'POST',
-		            dataType:"json",
-		            cache : false,
-			        success : function(json) {
-			        	if(json.externalData2) {
-			        		if (typeof json.externalData2.homepage !== 'undefined') {
-			        			var homepageHtml = json.externalData2.homepage;
-				        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
-				        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+				var pattern = /\s/g;
+				if (value.match(pattern)) {
+					$(target).next("span.urltxt").empty();
+					$(target).next("span.urltxt").css("display", "none");
+					$(target).next().next("span.retxt").empty();
+					$(target).next().next("span.retxt").html("Remove spaces").show();
+				} else {
+					$(target).next().next("span.retxt").empty();
+					$(target).next().next("span.retxt").css("display", "none");
+					
+					$("input[name=validationType]").val('HOMEPAGE');
+					
+					$("#ossForm"+seq).ajaxForm({
+						url :'<c:url value="/oss/urlDuplicateValidation"/>',
+			            type : 'POST',
+			            dataType:"json",
+			            cache : false,
+				        success : function(json) {
+				        	if(json.externalData2) {
+				        		if (typeof json.externalData2.homepage !== 'undefined') {
+				        			var homepageHtml = json.externalData2.homepage;
+					        		if (homepageHtml.indexOf("createTabInFrame") > -1) {
+					        			homepageHtml = homepageHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
+					        		}
+					        		
+									$(target).next("span.urltxt").empty();
+									$(target).next("span.urltxt").html(homepageHtml).show();
 				        		}
-				        		
+				        	} else {
 								$(target).next("span.urltxt").empty();
-								$(target).next("span.urltxt").html(homepageHtml).show();
-			        		}
-			        	} else {
-							$(target).next("span.urltxt").empty();
-			        	}
-			        },
-		            error : Ctrl_fn.onError
-			    }).submit();
+				        	}
+				        },
+			            error : Ctrl_fn.onError
+				    }).submit();
+				}
 			},
 			loadUrl : function (target, url) {
 				var ossNameObj = url.split("?")[1];
@@ -760,6 +829,62 @@
 					},
     	            error : Ctrl_fn.onError
     			});
+            },
+            getCommentList : function (seq) {
+            	$.ajax({
+                	url : '<c:url value="/comment/getDivCommentList"/>',
+                    type : 'GET',
+                    dataType : 'json',
+                    cache : false,
+                    data : {
+                        referenceId : $('input[name=latestOssId]').val(),
+                        referenceDiv : '40'
+                    },
+                    success : function(data){
+                    	$('.tabContent'+seq).next().show();
+                    	$('#commentList'+seq).show();
+                    	$('#commentListArea'+seq).children().remove();
+        				
+        				if(data.length != 0) {
+        					for(var i = 0; i < data.length; i++) {
+        						var tempDl = document.createElement("dl");
+        						var commId = data[i].commId;
+        						var tempDt = document.createElement("dt");
+        						var leftSpan = document.createElement("span");
+        						leftSpan.setAttribute("class", "left");
+        						var nameArea = document.createElement("strong");
+        						var commentContentsArea = document.createElement("dd");
+        						
+        						if(data[i].status == "" || data[i].status == null || data[i].status == "undefined") {
+        							nameArea.append(data[i].creator);
+        						} else {
+        							nameArea.append(data[i].status).append("</br>"+data[i].creator);
+        						}
+        						
+        						if (typeof data[i].createdDate !== "undefined") {
+        							var dateArea = document.createElement("span");
+        							dateArea.append(data[i].createdDate);
+        							nameArea.append(" | ");
+        							nameArea.append(dateArea);
+        						}
+        						
+        						leftSpan.appendChild(nameArea);
+        						tempDt.appendChild(leftSpan);
+        						commentContentsArea.innerHTML = replaceWithLink(data[i].contents);
+        						tempDl.appendChild(tempDt).appendChild(commentContentsArea);
+        						$('#commentListArea'+seq).append(tempDl);
+        					}
+        					
+        					commentTemp = $('#commentListArea'+seq).html();
+        					$('#commentListArea'+seq).html(commentTemp);
+        				} else {
+        					$('#commentListArea'+seq).append('<p class="noneTxt">No comments were registered.</p>');
+        				}
+                    },
+                    error : function(xhr, ajaxOptions, thrownError){
+                        alertify.error('<spring:message code="msg.common.valid2" />', 0);
+                    }
+                });
             }
 		};
 
@@ -1742,6 +1867,7 @@
 		</div>
 		<div id="wrap" style="padding: 15px 0px;">
 			<div class="groupSet">
+				<input type="hidden" name="latestOssId"/>
 				<!--  -->
 				<div class="detailView1">
 					<div class="tbws1 w100P">
@@ -1849,6 +1975,7 @@
 												<div class="required">
 													<span><input type="text" name="downloadLocations" id="downloadLocations1" class="w350"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
+													<span class="retxt"></span>
 												</div>
 											</div>
 											<input id="downloadLocationAdd1" type="button" value="+" class="btnCLightAnalysis gray"/>
@@ -1860,6 +1987,7 @@
 											<div class="required">
 												<input name="homepage" type="text" class="w100P" placeholder="http://"  id="detailHomePage1"/>
 												<span class="urltxt"></span>
+												<span class="retxt"></span>
 											</div>
 										</td>
 									</tr>
@@ -1882,6 +2010,12 @@
 							</table>
 						</form>
 					</div>
+					<div class="tabContent1">
+            			<div id="commentList1" class="commentList" style="display:none;">
+                			<strong class="tit">Comments</strong>
+                			<div class="commentBack" id="commentListArea1"></div>
+           		 		</div>
+        			</div>
 				</div>
 				<!--  -->
 				<!--  -->
@@ -1992,6 +2126,7 @@
 												<div class="required">
 													<span><input type="text" name="downloadLocations" id="downloadLocations2" class="w350"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
+													<span class="retxt"></span>
 												</div>
 											</div>
 											<input id="downloadLocationAdd2" type="button" value="+" class="btnCLightAnalysis gray"/>
@@ -2003,6 +2138,7 @@
 											<div class="required">
 												<input name="homepage" type="text" class="w100P" placeholder="http://"  id="detailHomePage2"/>
 												<span class="urltxt"></span>
+												<span class="retxt"></span>
 											</div>
 										</td>
 									</tr>
@@ -2025,6 +2161,12 @@
 							</table>
 						</form>
 					</div>
+					<div class="tabContent2">
+            			<div id="commentList2" class="commentList" style="display:none;">
+                			<strong class="tit">Comments</strong>
+                			<div class="commentBack" id="commentListArea2"></div>
+           		 		</div>
+        			</div>
 				</div>
 				<!--  -->
 				<!--  -->
@@ -2135,6 +2277,7 @@
 												<div class="required">
 													<span><input type="text" name="downloadLocations" id="downloadLocations3" class="w350"/><input type="button" value="Delete" class="smallDelete"/></span>
 													<span class="urltxt"></span>
+													<span class="retxt"></span>
 												</div>
 											</div>
 											<input id="downloadLocationAdd3" type="button" value="+" class="btnCLightAnalysis gray"/>
@@ -2146,6 +2289,7 @@
 											<div class="required">
 												<input name="homepage" type="text" class="w100P" placeholder="http://"  id="detailHomePage3"/>
 												<span class="urltxt"></span>
+												<span class="retxt"></span>
 											</div>
 										</td>
 									</tr>
@@ -2168,6 +2312,12 @@
 							</table>
 						</form>
 					</div>
+					<div class="tabContent3">
+            			<div id="commentList3" class="commentList" style="display:none;">
+                			<strong class="tit">Comments</strong>
+                			<div class="commentBack" id="commentListArea3"></div>
+           		 		</div>
+        			</div>
 				</div>
 				<!--  -->
 			</div>

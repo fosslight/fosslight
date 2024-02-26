@@ -36,6 +36,8 @@ public interface VerificationMapper {
 	
 	File selectVerificationFile(String packageFileId);
 	
+	File selectVerificationVulDocFile(String packageVulDocFileId);
+	
 	T2File selectPackageFileName(@Param("prjId") String prjId, @Param("fileIdx") String fileIdx);
 	
 	void updateVerificationStatusProgress(OssNotice ossNotice);
@@ -71,4 +73,6 @@ public interface VerificationMapper {
 	int updatePackagingReuseMap(Project project);
 
 	OssComponents checkOssNickName2(OssComponents bean);
+
+	void updatePackageVulDocFile(Project project);
 }

@@ -45,7 +45,7 @@ public interface FileService {
 	
 	public String setClearFiles(Map<Object, Object> map);
 	
-	public void deleteFiles(String url, List<T2File> uploadFileInfo, String prjId);
+	public void deleteFiles(String url, List<T2File> uploadFileInfo, String prjId, T2File vulDOCFileInfo);
 	
 	public List<UploadFile> setReusePackagingFile(String refFileSeq);
 

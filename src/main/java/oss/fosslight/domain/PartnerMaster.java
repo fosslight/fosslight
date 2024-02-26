@@ -198,6 +198,10 @@ public class PartnerMaster extends ComBean implements Serializable{
 	
 	private String[] partnerIds;
 	
+	private ArrayList<Map<String, String>> changeWatcherList;
+	
+	private String copyWatcherLocation;
+	
 	/*
 	 * Gets the partner id.
 	 *
@@ -1191,6 +1195,22 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setPartnerIds(String[] partnerIds) {
 		this.partnerIds = partnerIds;
+	}
+
+	public ArrayList<Map<String, String>> getChangeWatcherList() {
+		return changeWatcherList;
+	}
+
+	public void setChangeWatcherList(ArrayList<Map<String, String>> changeWatcherList) {
+		this.changeWatcherList = changeWatcherList;
+	}
+
+	public String getCopyWatcherLocation() {
+		return copyWatcherLocation;
+	}
+
+	public void setCopyWatcherLocation(String copyWatcherLocation) {
+		this.copyWatcherLocation = copyWatcherLocation;
 	}
 	
 }

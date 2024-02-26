@@ -28,8 +28,8 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -69,15 +69,12 @@ import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.repository.VulnerabilityMapper;
-import oss.fosslight.service.CommentService;
-import oss.fosslight.service.HistoryService;
-import oss.fosslight.service.OssService;
-import oss.fosslight.service.PartnerService;
-import oss.fosslight.service.ProjectService;
-import oss.fosslight.service.VerificationService;
+import oss.fosslight.service.*;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationConfig;
+import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 @Service
 @Slf4j
@@ -88,6 +85,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Autowired ProjectService projectService;
 	@Autowired PartnerService partnerService;
 	@Autowired VerificationService verificationService;
+	@Autowired SelfCheckService selfCheckService;
+
+	@Autowired AutoFillOssInfoService autoFillOssInfoService;
 
 	// Mapper
 	@Autowired OssMapper ossMapper;
@@ -511,8 +511,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if ("Duplicated".equalsIgnoreCase(bean.getMergeStr())) {
 					// mail 발송을 위해 삭제전 data 취득
 					Map<String, OssMaster> mailDiffMap = new HashMap<>();
-					OssMaster ossMailInfo1 = getOssInfo(bean.getDelOssId(), true);
-					OssMaster tempBean1 = (OssMaster) BeanUtils.cloneBean(ossMailInfo1);
+					OssMaster tempBean1 = getOssInfo(bean.getDelOssId(), true);
 					
 					List<String> ossNickNameList = new ArrayList<String>();
 
@@ -527,8 +526,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					tempBean1.setOssId(bean.getDelOssId());
 					mailDiffMap.put("before", tempBean1);
 					
-					OssMaster ossMailInfo2 = getOssInfo(bean.getOssId(), true);
-					OssMaster tempBean2 = (OssMaster) BeanUtils.cloneBean(ossMailInfo2);
+					OssMaster tempBean2 = getOssInfo(bean.getOssId(), true);
 					
 					if (tempBean2.getOssNicknames() != null) {
 						for (String nickName : Arrays.asList(tempBean2.getOssNicknames())){
@@ -547,21 +545,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					// 실제로 삭제되는 것은 아님
 					// 이름만 변경해서 비교 메일 발송
 					Map<String, OssMaster> mailDiffMap = new HashMap<>();
-					OssMaster ossMailInfo1 = getOssInfo(bean.getOssId(), true);
-					OssMaster tempBean1 = (OssMaster) BeanUtils.cloneBean(ossMailInfo1);
+					OssMaster tempBean1 = getOssInfo(bean.getOssId(), true);
 					
 					if (tempBean1.getOssNicknames() != null) {
 						tempBean1.setOssNickname(CommonFunction.arrayToString(tempBean1.getOssNicknames(), "<br>"));
 					}
 					
+					tempBean1.setOssId(bean.getOssId());
 					mailDiffMap.put("before", tempBean1);
 
-					OssMaster tempBean2 = (OssMaster) BeanUtils.cloneBean(ossMailInfo1);
-					
 					List<String> ossNickNameList = new ArrayList<String>();
 
-					OssMaster ossMailInfo2 = getOssInfo(ossMaster.getNewOssId(), true);
-					OssMaster beforeBean1 = (OssMaster) BeanUtils.cloneBean(ossMailInfo2);
+					OssMaster tempBean2 = (OssMaster) CommonFunction.copyObject(tempBean1, "OM");
+					OssMaster beforeBean1 = getOssInfo(ossMaster.getNewOssId(), false);
+					
 					if (beforeBean1.getOssNicknames() != null) {
 						for (String nickName : Arrays.asList(beforeBean1.getOssNicknames())) {
 							ossNickNameList.add(nickName);
@@ -1993,10 +1990,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return ossMapper.checkExistsOssByname(bean);
 	}
 
-	private ProjectIdentification generateCheckOSSName(ProjectIdentification bean, Pattern p, List<String> androidPlatformList) {
+	private ProjectIdentification generateCheckOSSName(ProjectIdentification bean, Pattern p, List<String> androidPlatformList, String downloadlocationUrl) {
 		String checkName = "";
 		boolean isValid = false;
-		Matcher ossNameMatcher = p.matcher("https://" + bean.getDownloadLocation());
+		Matcher ossNameMatcher = p.matcher("https://" + downloadlocationUrl);
 		String[] android = null;
 		while (ossNameMatcher.find()) {
 			for (String list : androidPlatformList){
@@ -2194,6 +2191,121 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
+	public Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName) {
+		Map<String, Object> resMap = new HashMap<>();
+		Map<String, Object> map = null;
+		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
+
+		switch(targetName.toUpperCase()) {
+			case CoConstDef.CD_CHECK_OSS_SELF:
+				map = selfCheckService.getIdentificationGridList(paramBean);
+				break;
+			case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+				map = projectService.getIdentificationGridList(paramBean);
+				break;
+			case CoConstDef.CD_CHECK_OSS_PARTNER:
+				map = partnerService.getIdentificationGridList(paramBean);
+				break;
+		}
+
+		// 중간 저장을 기능 대응을 위해 save시 유효성 체크를 data load시로 일괄 변경
+		if (map != null) {
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+			List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
+			pv.setAppendix("mainList", mainData);
+			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+
+			T2CoValidationResult vr = pv.validate(new HashMap<>());
+
+			if (!vr.isValid()) {
+				Map<String, String> validMap = vr.getValidMessageMap();
+				result.addAll(checkOssNameData(mainData, validMap, null));
+				resMap.put("validMap", validMap);
+			}
+
+			if(!vr.isDiff()){
+				Map<String, String> diffMap = vr.getDiffMessageMap();
+				result.addAll(checkOssNameData(mainData, null, diffMap));
+				resMap.put("diffMap", diffMap);
+			}
+
+			result.addAll(checkOssNameData(mainData, null, null));
+		}
+
+		if(result.size() > 0) {
+			result = checkOssName(result);
+			List<ProjectIdentification> valid = new ArrayList<ProjectIdentification>();
+			List<ProjectIdentification> invalid = new ArrayList<ProjectIdentification>();
+			for(ProjectIdentification prj : result){
+				if(prj.getCheckOssList().equals("I")){
+					invalid.add(prj);
+				} else{
+					valid.add(prj);
+				}
+			}
+			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
+					.collect(Collectors.toList()));
+		}
+		return resMap;
+	}
+
+	@Override
+	public Map<String, Object> getCheckOssLicenseAjax(ProjectIdentification paramBean, String targetName) {
+		Map<String, Object> resMap = new HashMap<>();
+		Map<String, Object> map = null;
+		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
+
+		switch(targetName.toUpperCase()) {
+			case CoConstDef.CD_CHECK_OSS_SELF:
+				map = selfCheckService.getIdentificationGridList(paramBean);
+
+				break;
+			case CoConstDef.CD_CHECK_OSS_IDENTIFICATION:
+				map = projectService.getIdentificationGridList(paramBean);
+
+				break;
+
+			case CoConstDef.CD_CHECK_OSS_PARTNER:
+				map = partnerService.getIdentificationGridList(paramBean);
+
+				break;
+		}
+
+		// intermediate storage function correspondence : validation check when loading data
+		if (map != null) {
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+			List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
+			pv.setAppendix("mainList", mainData);
+			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+
+			T2CoValidationResult vr = pv.validate(new HashMap<>());
+
+			if (!vr.isValid()) {
+				Map<String, String> validMap = vr.getValidMessageMap();
+				result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, validMap, null));
+				resMap.put("validMap", validMap);
+			}
+
+			if (!vr.isDiff()){
+				Map<String, String> diffMap = vr.getDiffMessageMap();
+				result.addAll(autoFillOssInfoService.checkOssLicenseData(mainData, null, diffMap));
+				resMap.put("diffMap", diffMap);
+			}
+		}
+
+		if (result.size() > 0) {
+			Map<String, Object> data = autoFillOssInfoService.checkOssLicense(result);
+			resMap.put("list", data.get("checkedData"));
+			resMap.put("error", data.get("error"));
+		}
+		return resMap;
+	}
+
+	@Override
 	public List<ProjectIdentification> checkOssName(List<ProjectIdentification> list){
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
@@ -2247,6 +2359,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 
 				if ( urlSearchSeq > -1 ) {
+					if(urlSearchSeq == 10) { //pythonhosted
+						String name[] =  bean.getDownloadLocation().split("/");
+						bean.setDownloadLocation(checkOssNameUrl.get(2) + name[name.length-2]);
+					}
+
 					bean = downloadlocationFormatter(bean, urlSearchSeq);
 					String downloadlocationUrl = bean.getDownloadLocation();
 					
@@ -2270,7 +2387,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 						} else {
 							if (urlSearchSeq == 7) {
-								generateCheckOSSName(bean, p, androidPlatformList);
+								generateCheckOSSName(bean, p, androidPlatformList, downloadlocationUrl);
 								checkName = bean.getCheckName();
 							} else if (urlSearchSeq == 3 || urlSearchSeq == 5){
 								checkName = generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p);
@@ -2874,7 +2991,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 	
 	@Override
-	public Map<String, Object> startAnalysis(String prjId, String fileSeq){
+	public Map<String, Object> startAnalysis(String prjId, String fileSeq, String userName){
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		T2File fileInfo = new T2File();
 		
@@ -2891,13 +3008,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			fileInfo = fileMapper.selectFileInfo(fileSeq);
 			
 			String EMAIL_VAL = ""; // reviewer와 loginUser의 email
+			String loginUserName = userName != null ? userName : loginUserName();
 			if (prjId.toUpperCase().indexOf("3RD") > -1){
-				EMAIL_VAL = partnerMapper.getReviewerEmail(prjId, loginUserName());
+				EMAIL_VAL = partnerMapper.getReviewerEmail(prjId, loginUserName);
 			} else {
-				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName());
+				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName);
 			}
-			
-			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1));
+
+			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1), (userName == null ? 0 : 1));
 			
 			ProcessBuilder builder = new ProcessBuilder( "/bin/bash", "-c", analysisCommand );
 			
@@ -2913,8 +3031,25 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			int count = 0;
 			int interval = 1000; // 1 sec
 			int idleTime = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_AUTO_ANALYSIS, CoConstDef.CD_IDLE_TIME));
+
+			Project prjInfo = new Project();
+			prjInfo.setPrjId(prjId);
+
+			// script가 success일때 status를 progress로 변경함.
+			OssMaster ossBean = new OssMaster();
+			ossBean.setPrjId(prjId);
+			ossBean.setCreator(loginUserName());
+			ossMapper.setOssAnalysisStatus(ossBean);
+
+			prjInfo = projectMapper.getOssAnalysisData(prjInfo);
+
+			resultMap.put("isValid", true);
+			resultMap.put("returnMsg", "Success");
+			resultMap.put("prjInfo", prjInfo);
+
+			Thread.sleep(interval);
 			
-			while (!Thread.currentThread().isInterrupted()) {
+			/*while (!Thread.currentThread().isInterrupted()) {
 				if (count > idleTime) {
 					oss_auto_analysis_log.info("ANALYSIS TIMEOUT PRJ ID : " + prjId);
 					resultMap.put("isValid", false);
@@ -2949,7 +3084,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				count++;
 				
 				Thread.sleep(interval);
-			}
+			}*/
 			// 스크립트 종료
 		} catch(NullPointerException npe) {
 			oss_auto_analysis_log.error("ANALYSIS ERR PRJ ID : " + prjId);
@@ -3008,6 +3143,32 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
+	public OssAnalysis getNewestOssInfo2(OssAnalysis bean) {
+		OssAnalysis ossNewistData = ossMapper.getNewestOssInfo2(bean);
+
+		if (ossNewistData != null) {
+			if (!isEmpty(ossNewistData.getDownloadLocationGroup())) {
+				String url = "";
+
+				String[] downloadLocationList = ossNewistData.getDownloadLocationGroup().split(",");
+				// master table에 download location이 n건인 경우에 대해 중복제거를 추가함.
+				String duplicateRemoveUrl =  String.join(",", Arrays.asList(downloadLocationList)
+						.stream()
+						.filter(CommonFunction.distinctByKey(p -> p))
+						.collect(Collectors.toList()));
+
+				if (!isEmpty(duplicateRemoveUrl)) {
+					url = duplicateRemoveUrl;
+				}
+
+				ossNewistData.setDownloadLocation(url);
+			}
+		}
+
+		return ossNewistData;
+	}
+	
+	@Override
 	public OssAnalysis getNewestOssInfo(OssAnalysis bean) {		
 		OssAnalysis ossNewistData = ossMapper.getNewestOssInfo(bean);
 		
@@ -3028,6 +3189,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				ossNewistData.setDownloadLocation(url);
 			}
+			
+			if (ossNewistData.getLicenseName() != null && !ossNewistData.getLicenseName().contains(" OR ")) {
+				ProjectIdentification prjOssMaster = new ProjectIdentification();
+				prjOssMaster.setOssId(ossNewistData.getOssId());
+				List<ProjectIdentification> Licenselist = projectMapper.getLicenses(prjOssMaster);
+				if (Licenselist.size() != 0){
+					Licenselist = CommonFunction.makeLicenseExcludeYn(Licenselist);
+					ossNewistData.setLicenseName(CommonFunction.makeLicenseExpressionIdentify(Licenselist, ","));
+				}
+			}
+			
+			ossNewistData.setOssId(null);
 		}
 		
 		return ossNewistData;
@@ -3749,6 +3922,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			} else if (isNewVersion) {
 				mailBean.setParamOssInfo(ossMaster);
 			}
+			
+			if (CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(mailType)
+					|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(mailType)
+					|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(mailType)) {
+				setVdiffInfoForSentMail(ossMaster.getOssName(), mailBean);
+			}
+			
 			CoMailManager.getInstance().sendMail(mailBean);
 
 		} catch (Exception e) {
@@ -3783,6 +3963,31 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return resMap;
 	}
 
+	public void setVdiffInfoForSentMail(String ossName, CoMail mailBean) {
+		List<Map<String, Object>> resultData  = new ArrayList<>();
+		boolean vDiffFlag = ossMapper.checkOssVersionDiff(ossName) > 0 ? true : false;
+
+		if(vDiffFlag) {
+			OssMaster param = new OssMaster();
+			param.setOssNames(new String[] {ossName});
+			Map<String, OssMaster> ossMap = getBasicOssInfoList(param);
+
+			for (String key : ossMap.keySet()) {
+				OssMaster om = ossMap.get(key);
+				Map<String, Object> contentMap = new HashMap<>();
+				contentMap.put("ossNameInfo", om.getOssName() + " (" + om.getOssVersion() + ")");
+				contentMap.put("licenseInfo", CommonFunction.makeLicenseExpression(om.getOssLicenses()));
+				resultData.add(contentMap);
+			}
+			
+			if (resultData != null && !resultData.isEmpty()) {
+				mailBean.setParamList(resultData);
+			} else {
+				mailBean.setParamList(new ArrayList<>());
+			}
+		}
+	}
+	
 	@Override
 	public List<String> getDeactivateOssList() {
 		return ossMapper.getDeactivateOssList();
@@ -3930,5 +4135,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		return vDiffFlag;
+	}
+	
+	@Override
+	public String getOssAnalysisStatus(String prjId) {
+		String status = ossMapper.getOssAnalysisStatus(prjId);
+		return status;
+	}
+
+	@Override
+	public void deleteOssAnalysis(String prjId) {
+		ossMapper.deleteOssAnalysis(prjId);
 	}
 }

@@ -5,39 +5,45 @@
 
 package oss.fosslight.service.impl;
 
-import com.google.gson.reflect.TypeToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.dto.*;
+import oss.fosslight.api.dto.GetOSSDetailsDto;
+import oss.fosslight.api.dto.LicenseDto;
+import oss.fosslight.api.dto.ListOssDto;
+import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.OssLicense;
-import oss.fosslight.domain.T2File;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.repository.OssMapper;
 import oss.fosslight.service.ApiOssService;
 import oss.fosslight.service.FileService;
+import oss.fosslight.service.HistoryService;
+import oss.fosslight.service.OssService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.StringUtil;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
-    /**
-     * The api oss mapper.
-     */
-    @Autowired
-    ApiOssMapper apiOssMapper;
+	/** The api oss mapper. */
+	@Autowired ApiOssMapper apiOssMapper;
 
-    @Autowired
-    OssMapper ossMapper;
+	@Autowired OssService ossService;
 
-    @Autowired
-    FileService fileService;
+	@Autowired HistoryService historyService;
+
+    @Autowired OssMapper ossMapper;
+
+    @Autowired FileService fileService;
 
     private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
 

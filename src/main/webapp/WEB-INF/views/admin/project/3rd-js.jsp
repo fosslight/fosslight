@@ -24,6 +24,7 @@ $(document).ready(function () {
 	<c:if test="${partnerFlag}">
 		party_evt.init();
 	</c:if>
+	dep_evt.init();
 	src_evt.init();
 	bin_evt.init();
 	bom_evt.init();

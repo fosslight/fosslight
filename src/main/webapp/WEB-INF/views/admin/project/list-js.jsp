@@ -11,6 +11,8 @@
 	var refreshParam = {};
 	var totalRow = 0;
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
+	var divisionEmptyCd = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
+	var changeWatcherArr = [];
 	
 	$(document).ready(function () {
 		'use strict';
@@ -184,7 +186,7 @@
 						display = "<div class=\"tcenter\">Drop</div>";
 					} else {
 						if("Y" == rowObject.androidFlag) {
-							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">Start</a></div>";
+							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Start</a></div>";
 						} else {
 							display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Start</a></div>";
 						}
@@ -214,42 +216,50 @@
 							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>";
 						}
 						</c:if>
-					
+						
+						if("Y" == rowObject.identificationSubStatusDep) {
+                            display += "<a class='btnPG onDep' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>"; hasOss = true;
+                        } else if ("N" == rowObject.identificationSubStatusDep) {
+                            display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>";
+                        } else {
+                            display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>";
+                        }
+						
 						// 2018-08-28 choye 수정
 						if(rowObject.identificationSubStatusSrc =="Y" ) {
-							display += "<a class='btnPG onSrc' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">SRC</a>"; hasOss = true;
+							display += "<a class='btnPG onSrc' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>"; hasOss = true;
 						} else if(rowObject.identificationSubStatusSrc == "N") {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">SRC</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">SRC</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>";
 						}
 
 						// 2018-08-28 choye 수정
 						if(rowObject.identificationSubStatusBin =="Y" ) {
-							display += "<a class='btnPG onBin' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">BIN</a>"; hasOss = true;
+							display += "<a class='btnPG onBin' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>"; hasOss = true;
 						} else if(rowObject.identificationSubStatusBin == "N") {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">BIN</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">BIN</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>";
 						}
 
 						if(rowObject.identificationSubStatusBom == 0) {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">BOM</a>";
+							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BOM</a>";
 						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">BOM</a>";
+							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BOM</a>";
 						}
 					} else if("Y" == rowObject.androidFlag) {
 						if(rowObject.identificationSubStatusAndroid =="Y" ) {
-							display += "<a class='btnPG wAnd onAnd' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
+							display += "<a class='btnPG wAnd onAnd' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
 						} else if(rowObject.identificationSubStatusAndroid == "N") {
-							display += "<a class='btnPG wAnd off' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
+							display += "<a class='btnPG wAnd off' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
 						} else {
-							display += "<a class='btnPG wAnd' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
+							display += "<a class='btnPG wAnd' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
 						}
 					}
 					
 					if(rowObject.identificationSubStatusBat =="Y" ) {
-						display += "<a class='btnPG onBat' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BAT</a>";
+						display += "<a class='btnPG onBat' onclick=\"fn.mvIdentification("+options.rowId+",6,"+rowObject.permission+")\">BAT</a>";
 					}
 					
 					break;
@@ -398,14 +408,15 @@
 		// Grid download cell display
 		displayReportDownload : function(cellvalue, options, rowObject){
 			var display = "";
-			
-			if(rowObject.identificationStatus == "Confirm"){
-				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" title=\"FOSSLight Report\">";
-				display+="<input type=\"button\" value=\"Review Report\" class=\"downSet btnReviewReport\" onclick=\"fn.downloadReviewReport(this, "+rowObject.permission+")\" title=\"FOSSLight Review Report\">";
-			} else {
-				display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" disabled>";
-				display+="<input type=\"button\" value=\"Review Report\" class=\"downSet btnReviewReport dis\" onclick=\"fn.downloadReviewReport(this, "+rowObject.permission+")\" title=\"FOSSLight Review Report\">";
-			}
+
+            if(rowObject.identificationStatus == "Confirm"){
+                display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" title=\"FOSSLight Report\">";
+                if(rowObject.reviewReportFileId != ""){
+                    display+="<input type=\"button\" value=\"Review Report\" class=\"downSet btnReviewReport\" onclick=\"fn.downloadReviewReport(this, "+rowObject.permission+")\" title=\"FOSSLight Review Report\">";
+                }
+            } else {
+                display+="<input type=\"button\" value=\"Report\" class=\"downSet btnReport dis\" onclick=\"fn.downloadReport(this,"+rowObject.permission+")\" disabled>";
+            }
 			
 			if(rowObject.verificationStatus == "Confirm"){
 				if(rowObject.noticeType == "99" || rowObject.noticeFileId == "") {
@@ -1084,6 +1095,432 @@
         	return 'title="' + "Double click" + '"';
         }, mvSecurityTab : function(prjId){
 			createTabInFrame(prjId+'_Security', '#<c:url value="/project/security/'+prjId+'"/>');
+		},
+		change : function(obj) {
+			var changeListId = '#' + $(obj).siblings("div").attr("id");
+	        if ($(changeListId).css('display')=='none') {
+	            $(changeListId).show();
+	        }else{
+	            $(changeListId).hide();
+	        }
+	        $(changeListId).menu();
+		},
+		changeWatcher : function() {
+			var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+			if(chk > 0){
+				$("#changeWatcherPop").show();
+			} else {
+				alertify.alert('<spring:message code="msg.project.watcher.selectlist" />', function(){});
+			}
+		},
+		changeWatcherCanCel : function() {
+			fn.resetChangeWatcherPop();
+		},
+		changeWatcherAdd : function() {
+			if (changeWatcherArr.length == 0) {
+				alertify.alert('<spring:message code="msg.common.change.watcher.add" />', function(){});
+				return false;
+			}
+			
+			var msg = "";
+			var notPermissionPrjIds = [];
+			var permissionPrjIds = [];
+			var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+			
+			for (var i in prjIds) {
+				var gridData = $('#list').jqGrid('getRowData',prjIds[i]);
+				if ("1" == gridData.statusPermission) {
+					permissionPrjIds.push(prjIds[i]);
+				} else {
+					notPermissionPrjIds.push(prjIds[i]);
+				}
+			}
+			
+			if (notPermissionPrjIds.length > 0) {
+				msg = '<spring:message code="msg.project.check.division.permissions" />';
+				msg += '<br/> - '
+				for (var i in notPermissionPrjIds) {
+					msg += 'PRJ-' + notPermissionPrjIds[i];
+					if(i < notPermissionPrjIds.length-1){
+						msg += ', ';
+					}
+				}
+			}
+			
+			if (permissionPrjIds.length == 0) {
+				alertify.alert(msg, function(){});
+				return false;
+			}
+			
+			alertify.confirm('<spring:message code="msg.common.change.watcher" />', function (e) {
+				if (e) {
+					var data = {"prjIds" : permissionPrjIds, "changeWatcherList" : changeWatcherArr};
+					
+					$.ajax({
+						url : '<c:url value="/project/addWatchers"/>',
+						type : 'POST',
+						data : JSON.stringify(data),
+						dataType : 'json',
+						cache : false,
+						contentType : 'application/json',
+						success: function(resultData){
+							if(resultData.isValid == "true") {
+								if ("" == msg) {
+									alertify.success('<spring:message code="msg.common.success" />');
+								} else {
+									alertify.alert(msg, function(){});
+								}
+							} else {
+								alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							}
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+					
+					fn.resetChangeWatcherPop();
+				} else {
+					return false;
+				}
+			});
+		},
+		changeWatcherDelete : function() {
+			alertify.confirm('<spring:message code="msg.common.change.watcher" />', function (e) {
+				if (e) {
+					if (changeWatcherArr.length == 0) {
+						alertify.alert('<spring:message code="msg.common.change.watcher.add" />', function(){});
+						return false;
+					}
+					
+					var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+					var data = {"prjIds" : prjIds, "changeWatcherList" : changeWatcherArr};
+					
+					$.ajax({
+						url : '<c:url value="/project/removeWatchers"/>',
+						type : 'POST',
+						data : JSON.stringify(data),
+						dataType : 'json',
+						cache : false,
+						contentType : 'application/json',
+						success: function(resultData){
+							if(resultData.isValid == "true") {
+								alertify.success('<spring:message code="msg.common.success" />');
+							} else {
+								alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							}
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+					
+					fn.resetChangeWatcherPop();
+				} else {
+					return false;
+				}
+			});
+		},
+		selectDivision : function() {
+			var division = $('#prjDivision').val();
+			$('#prjUserId').children().remove();
+			if(division == "") {
+				$('#prjUserId').val("").prev().text("select User").change();
+				return false;
+			}
+			$('#prjUserId').attr('disabled', false);
+			$.ajax({
+				url : '<c:url value="/partner/getUserList"/>',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {'division' : division},
+				success : function(data){
+					data.forEach(function(obj){
+						$('#prjUserId').append('<option value='+obj.userId+'>'+obj.userName+'('+obj.userId+')</option>');
+					});
+					
+					$('#prjUserId').change();
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
+		addWatcherClick : function() {
+			var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+			
+			var $divSel	= $("#prjDivision"),
+				divVal	= $divSel.val(),
+				divTxt	= $divSel.find("option[value='"+divVal+"']").text();
+			
+			var $userSel	= $("#prjUserId"),
+				userVal		= $userSel.val()||"",
+				userTxt		= $userSel.find("option[value='"+userVal+"']").text();
+
+			if(divVal == "" || userVal == "") {
+				return alertify.error('<spring:message code="msg.project.required.selectDivision" />', 0);
+			}
+			
+			var isNew = true;
+			
+			$(".watcherTags").each(function(i, tag){
+				var tagDiv = $(tag).val().split("/")[0]
+				  , tagUid = $(tag).val().split("/")[1];
+				
+				if(divVal == tagDiv) {
+					if(tagUid == 'all') {
+						isNew = false;
+
+						return false;
+					}
+					
+					if(userVal == 'all') {
+						$(tag).closest('span').remove();
+					} else if(tagUid == userVal) {
+						isNew = false;
+					}
+				}
+			});
+			
+			if(isNew) {
+				var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
+				fn.addWatcherData(divVal, userVal, '');
+ 				fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+			}
+		},
+		addWatcherData : function (uDiv, uId, uEmail) {
+			var dataObj = {};
+			dataObj["prjDivision"] = uDiv;
+			dataObj["prjUserId"] = uId;
+			dataObj["prjEmail"] = uEmail;
+			changeWatcherArr.push(dataObj);
+		},
+		removeWatcher : function (uDiv, uId) {
+			var uEmail = "";
+			if("Email" == uId) {
+				uEmail = uDiv;
+				uId = "";
+				uDiv = "";
+			}
+			
+			changeWatcherArr.forEach(function(cur, index){
+				var obj = cur;
+				if (uId === obj["prjUserId"] && uDiv === obj["prjDivision"] && uEmail === obj["prjEmail"]) {
+					changeWatcherArr.splice(index, 1);
+				}
+			});
+		},
+		addHtml : function(target, str, division, userId){
+			var rlt = division+((userId!="") ? "/"+userId : "");
+			var html  = '<span id="'+userId+'"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+			html += '<strong>'+str+'</strong>';
+			if('${project.viewOnlyFlag}' != "Y") {
+				html += '<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\');" /></span>';
+			}
+			target.append(html);
+
+			$('div.multiTxtSet2 .smallDelete').on('click', function(){
+				$(this).parent().remove();
+			});
+		},
+		addEmail : function() {
+			var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+			
+			var adId = $("#adId").val();
+			var domain = $("#emailTemp").val();
+
+			if(adId == "") {
+				$("#adId").focus();
+				return alertify.error('<spring:message code="enter.watcher.error" />', 0);
+			}
+			
+			var _email = adId + "@" + domain;
+			var regEmail = /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+
+			if (!regEmail.test(_email)) {
+				$("#adId").focus();
+
+				return alertify.error('<spring:message code="invalid.email.error" />', 0);
+			}
+			
+			$.ajax({
+				type: "POST",
+				url: '<c:url value="/system/user/checkEmail"/>', 
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {'email' : _email},
+				success: function (data) {
+					var obj = {};
+					if("true" == data.isValid) {
+						var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
+						obj["prjDivision"] = data.division;
+						obj["prjUserId"] = data.userId;
+						obj["prjEmail"] = '';
+						
+						fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
+					} else {
+						obj["prjDivision"] = '';
+						obj["prjUserId"] = '';
+						obj["prjEmail"] = _email;
+						
+						fn.addHtml($("#multiDiv"), _email, _email, "Email");
+					}
+					
+					changeWatcherArr.push(obj);
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+			
+			$("#adId").val('');
+			$("#emailTemp").val('');
+			$("#domain").val("${ct:getConstDef('CD_DTL_DEFAULT_DOMAIN')}").trigger('change');
+		},
+		addList : function() {
+			var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+			var listKind = $("#listKind").val(),
+			listId = $("#listId").val();
+			
+			if(fn.chkListValidation(listKind, listId)) {
+				var obj = {};
+				obj["listKind"] = listKind;
+				obj["listId"] = listId;
+			
+				fn.copyWatcher(obj, prjIds);
+			}
+		},
+		chkListValidation : function(listKind, listId){
+			if(listKind == ""){
+				alertify.error('<spring:message code="msg.project.watcher.selectlist" />', 0);
+				return false;
+			}
+			
+			if(listId == ""){
+				alertify.error('<spring:message code="msg.project.watcher.required.copyid" />', 0);
+				return false;
+			}
+			
+			return true;
+		},
+		copyWatcher : function(obj, prjIds) {
+			for (var i in prjIds) {
+				var prjId = prjIds[i];
+				obj["prjId"] = prjId;
+				obj["copyWatcherLocation"] = "list";
+				
+				$.ajax({
+					url : '<c:url value="/project/copyWatcher"/>',
+					type : 'POST',
+					data : JSON.stringify(obj),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(resultData){
+						var copyWatcher = resultData.copyWatcher;
+						
+						if(copyWatcher.length){
+							for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+								var isNew = true
+								  , division = copyWatcher[i].prjDivision || ""
+								  , divisionName = copyWatcher[i].prjDivisionName || ""
+								  , userId = copyWatcher[i].prjUserId || ""
+								  , userName = copyWatcher[i].prjUserName || ""
+								  , email = copyWatcher[i].prjEmail || ""
+								  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+								  , userUseYn = copyWatcher[i].userUseYn || "Y";
+								
+								$(".watcherTags").each(function(idx, tag){
+									var tagDiv = $(tag).val().split("/")[0]
+									  , tagUid = $(tag).val().split("/")[1];
+									  
+									if(division == tagDiv) {
+										if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+											isNew = false;
+											
+											return false;
+										} else if(tagUid == userId) {
+											isNew = false;	// 이미 등록된 watcher가 있을경우
+										}
+									}
+									
+									if(tagUid == "Email") {
+										if(email == tagDiv) {
+											isNew = false;
+										}
+									}
+								});
+								
+								if(isNew){
+									var obj = {};
+									if(email != ""){
+										obj["prjDivision"] = '';
+										obj["prjUserId"] = '';
+										obj["prjEmail"] = _email;
+										
+										fn.addHtml($("#multiDiv"), email, email, "Email");
+									} else {
+										var str = "";
+										
+										if(userName == "") {
+											str = divisionName;
+										} else {
+											str = '<b';
+
+											if(divisionEmptyCd != division) {
+												if(deptUseYn == "N"){
+													str += ' class="deleteUser"';
+												}
+												
+												str += '>'+divisionName+'</b>/<b';
+											}
+											
+											if(userUseYn == "N"){
+												str += ' class="deleteUser"';
+											}
+											
+											str += '>'+userName+'</b>';
+										}
+										
+										obj["prjDivision"] = division;
+										obj["prjUserId"] = userId;
+										obj["prjEmail"] = '';
+										
+										fn.addHtml($("#multiDiv"), str, division, userId);
+									}
+									
+									changeWatcherArr.push(obj);
+								}
+							}
+						}
+					},
+					error : fn.onError
+				});
+			}
+		},
+		checkChar : function(){
+			if(event.keyCode == 64){//@ 특수문자 체크
+				alertify.alert('<spring:message code="msg.login.check.char" />', function(){});
+        		
+				event.returnValue = false;
+        	}
+		},
+		selectDomain : function() {
+			var adIdDomain = $("select[name=prjDomain] option:checked").text();
+			if ("Select Domain" == adIdDomain) adIdDomain = "";
+			$("input[name=adIdDomain]").val(adIdDomain);
+		},
+		resetChangeWatcherPop : function() {
+			changeWatcherArr = [];
+			$("#multiDiv").children().remove();
+			$("select[name=prjDivision]").val("").trigger('change');
+			$("select[name=prjDomain]").val("").trigger('change');
+			$("select[name=listKind]").val("").trigger('change');
+			$("input[name=listId]").val("");
+			$('#changeWatcherPop').hide();
+			$("#ChangeList").hide();
 		}
 	};
 	
@@ -1280,7 +1717,7 @@
 					
 					// identification의 status tex를 더블클릭시 bom으로 이동
 					if(isAdmin && iCol == 5 || !isAdmin && iCol == 4) {
-						fn.mvIdentification(rowid, "4", rowData['permission']);
+						fn.mvIdentification(rowid, "5", rowData['permission']);
 					} else if(isAdmin && iCol == 6 || !isAdmin && iCol == 5) {
 						if(rowData.verificationStatus == ''|| rowData.verificationStatus == 'N/A') {
 							

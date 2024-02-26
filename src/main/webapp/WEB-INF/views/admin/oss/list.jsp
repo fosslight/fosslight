@@ -107,6 +107,9 @@
 		</fieldset>
 		<!---->
 		<div class="btnLayout">
+			<c:if test="${ct:isAdmin()}">
+				<input id="delete" type="button" value="Delete" class="btnOssSelect btnColor left" onclick="fn.deleteOss();"/>
+			</c:if>
 			<span class="right">
 				<c:if test="${ct:isAdmin() and project.dropYn ne 'Y'}">
 					<input type="button" value="Bulk registration" onclick="createTabInFrame('BulkReg_Oss', '#/oss/ossBulkReg')" class="btnColor red" style="width: 125px;" />

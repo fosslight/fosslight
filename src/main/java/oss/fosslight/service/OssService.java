@@ -10,11 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import oss.fosslight.config.HistoryConfig;
-import oss.fosslight.domain.OssAnalysis;
-import oss.fosslight.domain.OssLicense;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.domain.*;
 
 public interface OssService extends HistoryConfig{
 	String registOssMaster(OssMaster ossMaster);
@@ -97,9 +93,11 @@ public interface OssService extends HistoryConfig{
 	
 	int getAnalysisListPage(int rows, String prjId);
 	
-	Map<String, Object> startAnalysis(String prjId, String fileId);
+	Map<String, Object> startAnalysis(String prjId, String fileId, String userName);
 	
 	OssAnalysis getNewestOssInfo(OssAnalysis bean);
+
+	OssAnalysis getNewestOssInfo2(OssAnalysis bean);
 	
 	Map<String, Object> updateAnalysisComplete(OssAnalysis bean) throws Exception;
 	
@@ -142,4 +140,13 @@ public interface OssService extends HistoryConfig{
 	int checkOssVersionDiff(String ossName);
 
 	boolean checkOssTypeForAnalysisResult(OssAnalysis ossAnalysis);
+	Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName);
+
+	Map<String, Object> getCheckOssLicenseAjax(ProjectIdentification paramBean, String targetName);
+
+	String getOssAnalysisStatus(String prjId);
+
+	void deleteOssAnalysis(String prjId);
+
+	void setVdiffInfoForSentMail(String ossName, CoMail mailBean);
 }

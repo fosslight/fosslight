@@ -393,7 +393,7 @@
 				if(idx != ""){
 					changeTabInFrame(idx);
 				}else{
-					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
+					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/5"/>');
 				}
 			});
 			

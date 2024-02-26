@@ -57,6 +57,7 @@
 	 	<put-attribute name="scripts" 				value="/WEB-INF/views/template/layout/admin/scripts_ifr4.7.jsp" />
 	 	<put-attribute name="common-js" 			value="/WEB-INF/views/admin/project/common-js.jsp" />
 	 	<put-attribute name="3rd-js" 				value="/WEB-INF/views/admin/project/3rd-js.jsp" />
+	 	<put-attribute name="dep-js" 				value="/WEB-INF/views/admin/project/dep-js.jsp" />
 	 	<put-attribute name="src-js" 				value="/WEB-INF/views/admin/project/src-js.jsp" />
 	 	<put-attribute name="bin-js" 				value="/WEB-INF/views/admin/project/bin-js.jsp" />
 	 	<put-attribute name="binAndroid-js" 		value="/WEB-INF/views/admin/project/binAndroid-js.jsp" />

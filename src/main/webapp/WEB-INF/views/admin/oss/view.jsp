@@ -12,7 +12,7 @@
 				</colgroup>
 				<tbody>
 					<tr>
-						<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
+						<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /><a class='btnIcon ossI' style="margin-left:5px;" onclick="showOssViewPage(this);">Detail Info</a></th>
 						<td class="dCase">
 							<div class="required">
 								<div id="ossName" class="viewOssTd"></div>
@@ -36,6 +36,10 @@
 								<div id="ossVersion" class="viewOssTd" ></div>
 							</div>
 						</td>
+					</tr>
+					<tr>
+						<th class="dCase"><spring:message code="msg.common.field.OSS.type" /></th>
+						<td class="dCase"><span name="ossType"></span></td>
 					</tr>
 					<tr>
 						<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /><br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>

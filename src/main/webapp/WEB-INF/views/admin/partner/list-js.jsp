@@ -10,6 +10,8 @@
 	var totalRow = 0;
 	var refreshParam = {};
 	const G_ROW_CNT = "${ct:getCodeExpString(ct:getConstDef('CD_EXCEL_DOWNLOAD'), ct:getConstDef('CD_MAX_ROW_COUNT'))}";
+	var divisionEmptyCd = "${ct:getConstDef('CD_USER_DIVISION_EMPTY')}";
+	var changeWatcherArr = [];
 	
 	$(document).ready(function () {
 		'use strict';
@@ -279,6 +281,399 @@
 		}, 
 		changeDivisionCancel : function(){
 			$('#partnerChangeDivisionPop').hide();
+		},
+		change : function(obj) {
+			var changeListId = '#' + $(obj).siblings("div").attr("id");
+	        if ($(changeListId).css('display')=='none') {
+	            $(changeListId).show();
+	        }else{
+	            $(changeListId).hide();
+	        }
+	        $(changeListId).menu();
+		},
+		changeWatcher : function() {
+			var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+			if(chk > 0){
+				$("#changeWatcherPop").show();
+			} else {
+				alertify.alert('<spring:message code="msg.project.watcher.selectlist" />', function(){});
+			}
+		},
+		changeWatcherCanCel : function() {
+			fn.resetChangeWatcherPop();
+		},
+		changeWatcherAdd : function() {
+			alertify.confirm('<spring:message code="msg.common.change.watcher" />', function (e) {
+				if (e) {
+					if (changeWatcherArr.length == 0) {
+						alertify.alert('<spring:message code="msg.common.change.watcher.add" />', function(){});
+						return false;
+					}
+					
+					var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+					var data = {"partnerIds" : partnerIds, "changeWatcherList" : changeWatcherArr};
+					
+					$.ajax({
+						url : '<c:url value="/partner/addWatchers"/>',
+						type : 'POST',
+						data : JSON.stringify(data),
+						dataType : 'json',
+						cache : false,
+						contentType : 'application/json',
+						success: function(resultData){
+							if(resultData.isValid == "true") {
+								alertify.success('<spring:message code="msg.common.success" />');
+							} else {
+								alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							}
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+					
+					fn.resetChangeWatcherPop();
+				} else {
+					return false;
+				}
+			});
+		},
+		changeWatcherDelete : function() {
+			alertify.confirm('<spring:message code="msg.common.change.watcher" />', function (e) {
+				if (e) {
+					if (changeWatcherArr.length == 0) {
+						alertify.alert('<spring:message code="msg.common.change.watcher.add" />', function(){});
+						return false;
+					}
+					
+					var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+					var data = {"partnerIds" : partnerIds, "changeWatcherList" : changeWatcherArr};
+					
+					$.ajax({
+						url : '<c:url value="/partner/removeWatchers"/>',
+						type : 'POST',
+						data : JSON.stringify(data),
+						dataType : 'json',
+						cache : false,
+						contentType : 'application/json',
+						success: function(resultData){
+							if(resultData.isValid == "true") {
+								alertify.success('<spring:message code="msg.common.success" />');
+							} else {
+								alertify.error('<spring:message code="msg.common.valid2" />', 0);
+							}
+						},
+						error : function(){
+							alertify.error('<spring:message code="msg.common.valid2" />', 0);
+						}
+					});
+					
+					fn.resetChangeWatcherPop();
+				} else {
+					return false;
+				}
+			});
+		},
+		selectDivision : function() {
+			var division = $('#parDivision').val();
+			$('#parUserId').children().remove();
+			if(division == "") {
+				$('#parUserId').val("").prev().text("select User").change();
+				return false;
+			}
+			$('#parUserId').attr('disabled', false);
+			$.ajax({
+				url : '<c:url value="/partner/getUserList"/>',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {'division' : division},
+				success : function(data){
+					data.forEach(function(obj){
+						$('#parUserId').append('<option value='+obj.userId+'>'+obj.userName+'('+obj.userId+')</option>');
+					});
+					
+					$('#parUserId').change();
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+		},
+		addWatcherClick : function() {
+			var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+			
+			var $divSel	= $("#parDivision"),
+				divVal	= $divSel.val(),
+				divTxt	= $divSel.find("option[value='"+divVal+"']").text();
+			
+			var $userSel	= $("#parUserId"),
+				userVal		= $userSel.val()||"",
+				userTxt		= $userSel.find("option[value='"+userVal+"']").text();
+
+			if(divVal == "" || userVal == "") {
+				return alertify.error('<spring:message code="msg.project.required.selectDivision" />', 0);
+			}
+			
+			var isNew = true;
+			
+			$(".watcherTags").each(function(i, tag){
+				var tagDiv = $(tag).val().split("/")[0]
+				  , tagUid = $(tag).val().split("/")[1];
+				
+				if(divVal == tagDiv) {
+					if(tagUid == 'all') {
+						isNew = false;
+
+						return false;
+					}
+					
+					if(userVal == 'all') {
+						$(tag).closest('span').remove();
+					} else if(tagUid == userVal) {
+						isNew = false;
+					}
+				}
+			});
+			
+			if(isNew) {
+				var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
+				fn.addWatcherData(divVal, userVal, '');
+ 				fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+			}
+		},
+		addWatcherData : function (uDiv, uId, uEmail) {
+			var dataObj = {};
+			dataObj["parDivision"] = uDiv;
+			dataObj["parUserId"] = uId;
+			dataObj["parEmail"] = uEmail;
+			changeWatcherArr.push(dataObj);
+		},
+		removeWatcher : function (uDiv, uId) {
+			var uEmail = "";
+			if("Email" == uId) {
+				uEmail = uDiv;
+				uId = "";
+				uDiv = "";
+			}
+			
+			changeWatcherArr.forEach(function(cur, index){
+				var obj = cur;
+				if (uId === obj["parUserId"] && uDiv === obj["parDivision"] && uEmail === obj["parEmail"]) {
+					changeWatcherArr.splice(index, 1);
+				}
+			});
+		},
+		addHtml : function(target, str, division, userId){
+			var rlt = division+((userId!="") ? "/"+userId : "");
+			var html  = '<span id="'+userId+'"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+			html += '<strong>'+str+'</strong>';
+			if('${project.viewOnlyFlag}' != "Y") {
+				html += '<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\');" /></span>';
+			}
+			target.append(html);
+
+			$('div.multiTxtSet2 .smallDelete').on('click', function(){
+				$(this).parent().remove();
+			});
+		},
+		addEmail : function() {
+			var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+			
+			var adId = $("#adId").val();
+			var domain = $("#emailTemp").val();
+
+			if(adId == "") {
+				$("#adId").focus();
+				return alertify.error('<spring:message code="enter.watcher.error" />', 0);
+			}
+			
+			var _email = adId + "@" + domain;
+			var regEmail = /([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+
+			if (!regEmail.test(_email)) {
+				$("#adId").focus();
+
+				return alertify.error('<spring:message code="invalid.email.error" />', 0);
+			}
+			
+			$.ajax({
+				type: "POST",
+				url: '<c:url value="/system/user/checkEmail"/>', 
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {'email' : _email},
+				success: function (data) {
+					var obj = {};
+					if("true" == data.isValid) {
+						var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
+						obj["parDivision"] = data.division;
+						obj["parUserId"] = data.userId;
+						obj["parEmail"] = '';
+						
+						fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
+					} else {
+						obj["parDivision"] = '';
+						obj["parUserId"] = '';
+						obj["parEmail"] = _email;
+						
+						fn.addHtml($("#multiDiv"), _email, _email, "Email");
+					}
+					
+					changeWatcherArr.push(obj);
+				},
+				error: function(data){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
+			
+			$("#adId").val('');
+			$("#emailTemp").val('');
+			$("#domain").val("${ct:getConstDef('CD_DTL_DEFAULT_DOMAIN')}").trigger('change');
+		},
+		addList : function() {
+			var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+			var listKind = $("#listKind").val(),
+			listId = $("#listId").val();
+			
+			if(fn.chkListValidation(listKind, listId)) {
+				var obj = {};
+				obj["listKind"] = listKind;
+				obj["listId"] = listId;
+			
+				fn.copyWatcher(obj, partnerIds);
+			}
+		},
+		chkListValidation : function(listKind, listId){
+			if(listKind == ""){
+				alertify.error('<spring:message code="msg.project.watcher.selectlist" />', 0);
+				return false;
+			}
+			
+			if(listId == ""){
+				alertify.error('<spring:message code="msg.project.watcher.required.copyid" />', 0);
+				return false;
+			}
+			
+			return true;
+		},
+		copyWatcher : function(obj, partnerIds) {
+			for (var i in partnerIds) {
+				var partnerId = partnerIds[i];
+				obj["partnerId"] = partnerId;
+				obj["copyWatcherLocation"] = "list";
+				
+				$.ajax({
+					url : '<c:url value="/partner/copyWatcher"/>',
+					type : 'POST',
+					data : JSON.stringify(obj),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(resultData){
+						var copyWatcher = resultData.copyWatcher;
+						
+						if(copyWatcher.length){
+							for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+								var isNew = true
+								  , division = copyWatcher[i].division || ""
+								  , divisionName = copyWatcher[i].parDivisionName || ""
+								  , userId = copyWatcher[i].parUserId || ""
+								  , userName = copyWatcher[i].parUserName || ""
+								  , email = copyWatcher[i].parEmail || ""
+								  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+								  , userUseYn = copyWatcher[i].userUseYn || "Y";
+								
+								$(".watcherTags").each(function(idx, tag){
+									var tagDiv = $(tag).val().split("/")[0]
+									  , tagUid = $(tag).val().split("/")[1];
+									  
+									if(division == tagDiv) {
+										if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+											isNew = false;
+											
+											return false;
+										} else if(tagUid == userId) {
+											isNew = false;	// 이미 등록된 watcher가 있을경우
+										}
+									}
+									
+									if(tagUid == "Email") {
+										if(email == tagDiv) {
+											isNew = false;
+										}
+									}
+								});
+								
+								if(isNew){
+									var obj = {};
+									if(email != ""){
+										obj["parDivision"] = '';
+										obj["parUserId"] = '';
+										obj["parEmail"] = _email;
+										
+										fn.addHtml($("#multiDiv"), email, email, "Email");
+									} else {
+										var str = "";
+										
+										if(userName == "") {
+											str = divisionName;
+										} else {
+											str = '<b';
+
+											if(divisionEmptyCd != division) {
+												if(deptUseYn == "N"){
+													str += ' class="deleteUser"';
+												}
+												
+												str += '>'+divisionName+'</b>/<b';
+											}
+											
+											if(userUseYn == "N"){
+												str += ' class="deleteUser"';
+											}
+											
+											str += '>'+userName+'</b>';
+										}
+										
+										obj["parDivision"] = division;
+										obj["parUserId"] = userId;
+										obj["parEmail"] = '';
+										
+										fn.addHtml($("#multiDiv"), str, division, userId);
+									}
+									
+									changeWatcherArr.push(obj);
+								}
+							}
+						}
+					},
+					error : fn.onError
+				});
+			}
+		},
+		checkChar : function(){
+			if(event.keyCode == 64){//@ 특수문자 체크
+				alertify.alert('<spring:message code="msg.login.check.char" />', function(){});
+        		
+				event.returnValue = false;
+        	}
+		},
+		selectDomain : function() {
+			var adIdDomain = $("select[name=prjDomain] option:checked").text();
+			if ("Select Domain" == adIdDomain) adIdDomain = "";
+			$("input[name=adIdDomain]").val(adIdDomain);
+		},
+		resetChangeWatcherPop : function() {
+			changeWatcherArr = [];
+			$("#multiDiv").children().remove();
+			$("select[name=parDivision]").val("").trigger('change');
+			$("select[name=parDomain]").val("").trigger('change');
+			$("select[name=listKind]").val("").trigger('change');
+			$("input[name=listId]").val("");
+			$('#changeWatcherPop').hide();
+			$("#ChangeList").hide();
 		}
 	}
 	

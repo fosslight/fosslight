@@ -25,7 +25,7 @@
 					</colgroup>
 					<tbody>
 						<tr>
-							<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /></th>
+							<th class="dCase txStr"><spring:message code="msg.common.field.OSS.name" /><a class='btnIcon ossI' style="margin-left:5px;" onclick="fn.showOssViewPage(this);">Detail Info</a></th>
 							<td class="dCase">
 								<div class="required">
 									<input name="ossName" type="text" class="autoComOss w350" value="${ossName}"/>
@@ -53,10 +53,14 @@
 							<th class="dCase"><spring:message code="msg.common.field.OSS.version" /></th>
 							<td class="dCase">
 								<div class="required">	
-									<input name="ossVersion" type="text" class="w350" value="${ossVersion}"/><span name="ossType"></span>
+									<input name="ossVersion" type="text" class="w350" value="${ossVersion}"/></span>
 									<span class="retxt"></span>
 								</div>
 							</td>
+						</tr>
+						<tr>
+							<th class="dCase"><spring:message code="msg.common.field.OSS.type" /></th>
+							<td class="dCase"><span name="ossType"></span></td>
 						</tr>
 						<tr>
 							<th class="dCase txStr"><spring:message code="msg.common.field.declaredLicense" /><br><input type="button" id="btnShowLicenseText" value="Show license text" class="btnCLight gray"></th>
@@ -105,6 +109,7 @@
 									<div class="required">
 										<span><input type="text" name="downloadLocations" class="w725"/><input type="button" value="Delete" class="smallDelete"/></span>
 										<span class="urltxt"></span>
+										<span class="retxt"></span>
 									</div>
 								</div>
 								<input id="downloadLocationAdd" type="button" value="+ Add" class="btnCLight gray"/>
@@ -116,6 +121,7 @@
 								<div class="required">
 									<input name="homepage" type="text" class="w100P" placeholder="http://" value="${homepage }"/>
 									<span class="urltxt"></span>
+									<span class="retxt"></span>
 								</div>
 							</td>
 						</tr>

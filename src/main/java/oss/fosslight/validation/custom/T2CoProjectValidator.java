@@ -128,7 +128,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 						
 						break;
 					case PROC_TYPE_IDENTIFICATION_BOM_MERGE:
-						validateProjectBomMerge(map, errMap, diffMap);
+						validateProjectBomMerge(map, errMap, diffMap, infoMap);
 						
 						break;
 					case PROC_TYPE_SELFCHECK :
@@ -717,7 +717,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 	
 	@SuppressWarnings("unchecked")
 	private void validateProjectBomMerge(Map<String, String> map, Map<String, String> errMap,
-			Map<String, String> diffMap) {
+			Map<String, String> diffMap, Map<String, String> infoMap) {
 		// ossComponetList==> grid 데이터(사용자 등록 데이터)
 		if (ossComponetList != null) {
 
@@ -979,6 +979,18 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 
+				{ // ADD OSS_VERSION REQUIRED MSG
+					if (!isEmpty(bean.getOssName()) 
+							&& !bean.getOssName().equals("-") 
+							&& isEmpty(bean.getOssVersion())) {
+						if (!errMap.containsKey("OSS_VERSION." + bean.getComponentId())) {
+							if (ossService.checkOssVersionDiff(bean.getOssName()) > 0) {
+								diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.REQUIRED");
+							}
+						}
+					}
+				}
+				
 				// 관리되지 않은 라이선스가 포함되어 있는 경우
 				if (bean.getOssComponentsLicenseList() != null) {
 					for (OssComponentsLicense license : bean.getOssComponentsLicenseList()) {
@@ -1068,6 +1080,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 							diffMap.put("LICENSE_NAME." + bean.getComponentId(), "Recommended : " + licenseText );
 						}
 					}
+					
+					if (!diffMap.containsKey("COPYRIGHT_TEXT." + bean.getComponentId()) && !isEmpty(bean.getCopyrightText())) {
+						if (!checkOssData(ossInfoByName.get(checkKey), bean.getCopyrightText(), "COPYRIGHT")) {
+							infoMap.put("COPYRIGHT_TEXT." + bean.getComponentId(), "COPYRIGHT.DIFFERENT");
+						}
+					}
 				}
 			}
 		}
@@ -1082,7 +1100,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 			return false;
 		}
 
-		String[] splitCheckVal = val.split(",");
+		String[] splitCheckVal = null;
+		if (kind.equals("COPYRIGHT")) {
+			splitCheckVal = new String[] {val};
+		} else {
+			splitCheckVal = val.split(",");
+		}
 		
 		switch (kind) {
 		case "DOWNLOAD":
@@ -1110,11 +1133,43 @@ public class T2CoProjectValidator extends T2CoValidator {
 		boolean splitFlag = false;
 		
 		for (String checkVal : splitCheckVal) {
-			checkVal = linkPatternCompile(checkOssNameUrl, checkVal);
-			splitFlag = checkVal.split("//").length == 2 ? true : false;
-			
-			if (!isEmpty(getData) && !kind.equals("DOWNLOAD")) {
-				if (kind.equals("HOMEPAGE")) {
+			if (kind.equals("COPYRIGHT")) {
+				if (getData.equalsIgnoreCase(checkVal)) return true;
+			} else {
+				checkVal = linkPatternCompile(checkOssNameUrl, checkVal);
+				splitFlag = checkVal.split("//").length == 2 ? true : false;
+				
+				if (!isEmpty(getData) && !kind.equals("DOWNLOAD")) {
+					if (kind.equals("HOMEPAGE")) {
+						if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
+							checkVal = checkVal.split("//")[1];
+						}
+						
+						if (checkVal.startsWith("www.")) {
+							checkVal = checkVal.substring(5, checkVal.length());
+						}
+						
+						if (getData.contains(";")) {
+							getData = getData.split(";")[0];
+						}
+						
+						getData = linkPatternCompile(checkOssNameUrl, getData);
+						
+						if (getData.startsWith("http://") || getData.startsWith("https://")) {
+							getData = getData.split("//")[1];
+						}
+						
+						if (getData.startsWith("www.")) {
+							getData = getData.substring(5, getData.length());
+						}
+					}
+					
+					if (!getData.toUpperCase().equals(checkVal.toUpperCase())) {
+						return true;
+					}
+				}
+				
+				if (kind.equals("DOWNLOAD") && !isEmpty(getData2)){
 					if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
 						checkVal = checkVal.split("//")[1];
 					}
@@ -1123,8 +1178,35 @@ public class T2CoProjectValidator extends T2CoValidator {
 						checkVal = checkVal.substring(5, checkVal.length());
 					}
 					
-					if (getData.contains(";")) {
-						getData = getData.split(";")[0];
+					boolean chkFlag = false;
+					
+					for (String downloadLocation : getData2.split(",")){
+						downloadLocation = linkPatternCompile(checkOssNameUrl, downloadLocation);
+						
+						if (downloadLocation.startsWith("http://") || downloadLocation.startsWith("https://")) {
+							downloadLocation = downloadLocation.split("//")[1];
+						}
+						
+						if (downloadLocation.startsWith("www.")) {
+							downloadLocation = downloadLocation.substring(5, downloadLocation.length());
+						}
+						
+						if (downloadLocation.toUpperCase().equals(checkVal.toUpperCase())) {
+							chkFlag = true;
+							break;
+						}
+					}
+					
+					if (!chkFlag) {
+						return true;
+					}
+				} else if (kind.equals("DOWNLOAD") && !isEmpty(getData) && isEmpty(getData2)){
+					if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
+						checkVal = checkVal.split("//")[1];
+					}
+					
+					if (checkVal.startsWith("www.")) {
+						checkVal = checkVal.substring(5, checkVal.length());
 					}
 					
 					getData = linkPatternCompile(checkOssNameUrl, getData);
@@ -1136,65 +1218,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 					if (getData.startsWith("www.")) {
 						getData = getData.substring(5, getData.length());
 					}
-				}
-				
-				if (!getData.toUpperCase().equals(checkVal.toUpperCase())) {
-					return true;
-				}
-			}
-			
-			if (kind.equals("DOWNLOAD") && !isEmpty(getData2)){
-				if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
-					checkVal = checkVal.split("//")[1];
-				}
-				
-				if (checkVal.startsWith("www.")) {
-					checkVal = checkVal.substring(5, checkVal.length());
-				}
-				
-				boolean chkFlag = false;
-				
-				for (String downloadLocation : getData2.split(",")){
-					downloadLocation = linkPatternCompile(checkOssNameUrl, downloadLocation);
 					
-					if (downloadLocation.startsWith("http://") || downloadLocation.startsWith("https://")) {
-						downloadLocation = downloadLocation.split("//")[1];
+					if (!getData.toUpperCase().equals(checkVal.toUpperCase())) {
+						return true;
 					}
-					
-					if (downloadLocation.startsWith("www.")) {
-						downloadLocation = downloadLocation.substring(5, downloadLocation.length());
-					}
-					
-					if (downloadLocation.toUpperCase().equals(checkVal.toUpperCase())) {
-						chkFlag = true;
-						break;
-					}
-				}
-				
-				if (!chkFlag) {
-					return true;
-				}
-			}else if (kind.equals("DOWNLOAD") && !isEmpty(getData) && isEmpty(getData2)){
-				if ((checkVal.startsWith("http://") || checkVal.startsWith("https://")) && splitFlag) {
-					checkVal = checkVal.split("//")[1];
-				}
-				
-				if (checkVal.startsWith("www.")) {
-					checkVal = checkVal.substring(5, checkVal.length());
-				}
-				
-				getData = linkPatternCompile(checkOssNameUrl, getData);
-				
-				if (getData.startsWith("http://") || getData.startsWith("https://")) {
-					getData = getData.split("//")[1];
-				}
-				
-				if (getData.startsWith("www.")) {
-					getData = getData.substring(5, getData.length());
-				}
-				
-				if (!getData.toUpperCase().equals(checkVal.toUpperCase())) {
-					return true;
 				}
 			}
 		}
@@ -2352,6 +2379,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 							diffMap.put("LICENSE_NAME." + bean.getGridId(), "Recommended : " + licenseText );
 						}
 					}
+					
+					if (!diffMap.containsKey("COPYRIGHT_TEXT." + bean.getGridId()) && !isEmpty(bean.getCopyrightText())) {
+						if (!checkOssData(ossInfo.get(checkKey), bean.getCopyrightText(), "COPYRIGHT")) {
+							infoMap.put("COPYRIGHT_TEXT." + bean.getGridId(), "COPYRIGHT.DIFFERENT");
+						}
+					}
 				}
 				
 				// exception 처리
@@ -2388,6 +2421,17 @@ public class T2CoProjectValidator extends T2CoValidator {
 					}
 				}
 
+				{ // ADD OSS_VERSION REQUIRED MSG
+					if (!isEmpty(bean.getOssName()) 
+							&& !bean.getOssName().equals("-") 
+							&& isEmpty(bean.getOssVersion())) {
+						if (!errMap.containsKey("OSS_VERSION." + bean.getGridId())) {
+							if (ossService.checkOssVersionDiff(bean.getOssName()) > 0) {
+								diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.REQUIRED");
+							}
+						}
+					}
+				}
 			} // end of loop
 			
 			Map<String, List<BinaryData>> checkBinaryInfoMap = new HashMap<>();
@@ -2493,6 +2537,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 								// oss name + version + license 까지 동일하면 match info Matched message 표시
 								infoMap.put(errKey, basicKey + ".MATCHED");
 							}
+						}
+						// 기 등록된 binary 정보가 없으면
+						else if (checkBinaryInfoMap.containsKey(binaryName)) {
+							infoMap.put(errKey, basicKey + ".NEW_BINARY_OSS");
 						}
 					}
 				}

@@ -748,4 +748,15 @@
 	<delete id="deleteLicenseWebPages" parameterType="oss.fosslight.domain.LicenseMaster">
 		DELETE FROM LICENSE_WEBPAGE WHERE LICENSE_ID = #{licenseId}
 	</delete>
+	
+	<update id="updateLicenseMasterForRestriction" parameterType="oss.fosslight.domain.LicenseMaster">
+		UPDATE LICENSE_MASTER 
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(restriction)">
+			SET RESTRICTION = #{restriction} 
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(restriction)">
+			SET RESTRICTION = null
+		</if>
+		WHERE LICENSE_ID = #{licenseId}
+	</update>
 </mapper>

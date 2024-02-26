@@ -5,10 +5,11 @@ plugins {
 	id 'war'
 	id 'eclipse' // optional (to generate Eclipse project files)
 	id 'idea' // optional (to generate IntelliJ IDEA project files)
+	id "com.google.cloud.tools.jib" version "3.3.1"
 }
 
 group = 'oss.fosslight'
-version = '1.6.1'
+version = '1.6.2'
 sourceCompatibility = '11'
 
 configurations {
@@ -131,5 +132,73 @@ dependencies {
 	testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 	implementation group: 'org.springframework.ldap', name: 'spring-ldap-core', version: '2.3.8.RELEASE'
 	
+	implementation group: 'org.cyclonedx', name: 'cyclonedx-core-java', version: '7.3.2'
+	
 	implementation files('libs/tlsh-4.6.0.jar')
+}
+
+jib {
+	from {
+		image = 'adoptopenjdk/openjdk11:jre-11.0.15_10-ubuntu'
+        if (project.hasProperty('jib.multiplatform')) {
+            platforms {
+                platform {
+                    architecture = 'arm64'
+                    os = 'linux'
+                }
+                platform {
+                    architecture = 'arm'
+                    os = 'linux'
+                }
+                platform {
+                    architecture = 'ppc64le'
+                    os = 'linux'
+                }
+                platform {
+                    architecture = 's390x'
+                    os = 'linux'
+                }
+                platform {
+                    architecture = 'amd64'
+                    os = 'linux'
+                }
+            }
+        }
+	}
+
+	container {
+		ports=['8180']
+		args = ['java', '-jar', "/app/FOSSLight-${project.version}.war".toString(), '--root.dir=/data/fosslight', '--server.port=8180']
+		workingDirectory='/app'
+		creationTime = "USE_CURRENT_TIMESTAMP"
+	}
+
+	extraDirectories {
+		paths {
+			path {
+				from = 'build/libs'
+				into = '/app'
+				includes=["FOSSLight-${project.version}.war"]
+			}
+			path {
+				from = file('verify')
+				into = '/app/verify'
+			}
+			path {
+				from = 'db'
+				into = '/app/wait-for'
+				includes=['wait-for']
+			}
+			path {
+				from = file('LICENSES')
+				into = '/app/LICENSES'
+			}
+			path {
+				from = file('src/main/resources/template')
+				into = '/app/template'
+			}
+		}
+		permissions['/app/wait-for']='555'
+		permissions['/app/verify/verify']='555'
+	}
 }
