@@ -61,7 +61,7 @@ public class ConfigurationController extends CoTopComponent {
 		model.addAttribute("userInfo", userService.getLoginUserInfo());
 		return "configuration/edit";
 	}
-	
+
 	@PostMapping(value=CONFIGURATION.SAVE_AJAX, produces = "text/html; charset=utf-8")
 	public @ResponseBody ResponseEntity<Object> updateDefaultSetting(@ModelAttribute Configuration configuration, HttpServletRequest req, HttpServletResponse res){
 		HashMap<String,Object> resMap = new HashMap<>();
@@ -72,9 +72,25 @@ public class ConfigurationController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 			resMap.put("resCd", "20");
 		}
+
 		return makeJsonResponseHeader(resMap);
 	}
-	
+
+	@PostMapping(value=CONFIGURATION.UPDATE_LOCALE_AJAX, produces = "text/html; charset=utf-8")
+	public @ResponseBody ResponseEntity<Object> updateDefaultLocaleSetting(@ModelAttribute Configuration configuration, HttpServletRequest req, HttpServletResponse res){
+		HashMap<String,Object> resMap = new HashMap<>();
+		try {
+			String result = configurationService.updateDefaultLocaleSetting(configuration);
+			resMap.put("resCd", "10");
+			resMap.put("result", result);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			resMap.put("resCd", "20");
+		}
+
+		return makeJsonResponseHeader(resMap);
+	}
+
 	@GetMapping(value=CONFIGURATION.VIEW_SEARCH_CONDITION_AJAX, produces = "text/html; charset=utf-8")
 	public String loadDefaultSearchCondition(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Configuration configuration, Model model){
 

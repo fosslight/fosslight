@@ -326,52 +326,56 @@ var loading = {
 
 /* iFrame에서 호출 (보안문제로 broadcast하여 호출) */
 function receiveMessage(event) {
-if ('undefined' !== typeof event.data && 'string' === typeof event.data) {
-    var data = JSON.parse(event.data);
+    if ('undefined' !== typeof event.data && 'string' === typeof event.data) {
+        var data = JSON.parse(event.data);
 
-    switch (data.action) {
-        case 'create':
-            createTabNew(data.tabData[0], data.tabData[1]);
+        switch (data.action) {
+            case 'create':
+                createTabNew(data.tabData[0], data.tabData[1]);
 
-            break;
-        case 'delete':
-            deleteTab(data.tabData[0]);
+                break;
+            case 'delete':
+                deleteTab(data.tabData[0]);
 
-            break;
-        case 'activeDelete':
-            activeDeleteTab();
+                break;
+            case 'activeDelete':
+                activeDeleteTab();
 
-            break;
-        case 'allDelete':
-            allDeleteTab();
+                break;
+            case 'allDelete':
+                allDeleteTab();
 
-            break;
-        case 'return':
-            returnTab();
+                break;
+            case 'return':
+                returnTab();
 
-            break;
-        case 'reload':
-            reloadTab(data.tabData[0], data.action);
+                break;
+            case 'reload':
+                reloadTab(data.tabData[0], data.action);
 
-            break;
-        case 'change':
-            changeTab(data.tabData[0]);
+                break;
+            case 'change':
+                changeTab(data.tabData[0]);
 
-            break;
-        case 'create_new':
-            createTab_new(data.tabData[0], data.tabData[1], data.tabData[2], data.tabData[3]);
+                break;
+            case 'create_new':
+                createTab_new(data.tabData[0], data.tabData[1], data.tabData[2], data.tabData[3]);
 
-            break;
-        case 'delete_new':
-            deleteTab_new(data.tabData[0]);
+                break;
+            case 'delete_new':
+                deleteTab_new(data.tabData[0]);
 
-            break;
-        case 'reload_new':
-            reloadTab_new(data.tabData[0], data.tabData[1], data.action);
+                break;
+            case 'reload_new':
+                reloadTab_new(data.tabData[0], data.tabData[1], data.action);
 
-            break;
+                break;
+            case 'changeURL':
+                changeURL(data.link);
+
+                break;
+        }
     }
-}
 }
 
 if ('addEventListener' in window) {
@@ -3044,6 +3048,10 @@ var callDeleteTabInFrame = function (uniqueName) {
     };
 
     parent.postMessage(JSON.stringify(data), "*");
+}
+
+function changeURL(url) {
+    window.location.href = url;
 }
 
 $(window).load(function () {

@@ -70,9 +70,17 @@
                 allowClear: true,
             });
 
-            $("input[name='save']").on('click',function(){
-                //var radioVal = $('input[name="defaultTab"]:checked').val();
-                var eId = $(this).attr("id").split("_")[1];
+            $("#saveDefaultLocaleButton").on('click',function(){
+                alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+                    if (e) {
+                        fn.updateDefaultLocale();
+                    } else {
+                        return false;
+                    }
+                });
+            });
+
+            $("#saveDefaultListTabButton").on('click',function(){
                 if($('input:checkbox[name="defaultTab"]:checked').length == 0){
                     alertify.alert([[#{msg.configuration.required.selectDefaultTab}]], function(){});
                     return false;
@@ -80,7 +88,7 @@
 
                 alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
                     if (e) {
-                        fn.updateSubmit(eId);
+                        fn.updateDefaultTabList();
                     } else {
                         return false;
                     }
@@ -155,8 +163,33 @@
             var addEl = '<input type="hidden" name="chk_'+item+'" value="'+ selectedValues +'" />';
             $("#searchConditionForm").append(addEl);
         },
-        updateSubmit : function(eId){
-            $("#configurationForm_" + eId).ajaxForm({
+        updateDefaultLocale : function () {
+            $("#configurationLocaleForm").ajaxForm({
+                url : "/configuration/updateDefaultLocale",
+                type : 'POST',
+                dataType:"json",
+                cache : false,
+                success: function(json, status){
+                    loading.hide();
+                    if(json.resCd == '10'){
+                        alertify.success([[#{msg.common.success}]]);
+
+                        setTimeout(function() {
+                            var data = {
+                                link: "/index?lang=" + json.result,
+                                action: 'changeURL'
+                            };
+                            parent.postMessage(JSON.stringify(data), "*");
+                        }, 1500);
+                    }else{
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                },
+                error : fn.onError
+            }).submit();
+        },
+        updateDefaultTabList : function(eId){
+            $("#configurationListForm").ajaxForm({
                 url : "/configuration/saveAjax",
                 type : 'POST',
                 dataType:"json",

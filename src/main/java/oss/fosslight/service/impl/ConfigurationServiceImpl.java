@@ -31,9 +31,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Override
 	public void updateDefaultSetting(Configuration configuration) {
 		HashMap<String, Object> info = new HashMap<String, Object>();
-		if(!StringUtil.isEmpty(configuration.getDefaultLocale())) {
-			configurationMapper.updateDefaultLocale(configuration);
-		}
 
 		if(!StringUtil.isEmpty(configuration.getDefaultTab())) {
 			configurationMapper.updateDefaultTab(configuration);
@@ -52,6 +49,31 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         
         auth.setDetails(info);
 	}
+
+	@Override
+	public String updateDefaultLocaleSetting(Configuration configuration) {
+		HashMap<String, Object> info = new HashMap<String, Object>();
+
+		if(!StringUtil.isEmpty(configuration.getDefaultLocale())) {
+			configurationMapper.updateDefaultLocale(configuration);
+		}
+
+		// Security session에 추가 정보(Cusom)를 저장한다(Map형태)
+		SecurityContext sec = SecurityContextHolder.getContext();
+		AbstractAuthenticationToken auth = (AbstractAuthenticationToken)sec.getAuthentication();
+
+		//User Detail
+		T2Users user = new T2Users();
+		user.setUserId(auth.getName());
+		T2Users getUser = userService.getUserAndAuthorities(user);
+
+		info.put("sessUserInfo", getUser);
+
+		auth.setDetails(info);
+
+		return configurationMapper.selectDefaultLocale(configuration);
+	}
+
 
 //	@Override
 //	public void updateDefaultLocale(Configuration configuration) {
