@@ -2130,6 +2130,12 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(comments)">
 			, COMMENTS
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(dependencies)">
+			, DEPENDENCIES
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
+			, REF_OSS_NAME
+			</if>
 			)
 			VALUES
 			(
@@ -2169,6 +2175,12 @@
 			, #{adminCheckYn}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(comments)">
 			, #{comments}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(dependencies)">
+			, #{dependencies}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
+			, #{refOssName}
 			</if>
 			)
 	</insert>
