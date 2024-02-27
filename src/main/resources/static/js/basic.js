@@ -3341,6 +3341,14 @@ function resetForm(el) {
             var $select = $(this);
             $select.val(null).trigger('change');
         })
+
+        $(this).find('.select2').each(function () {
+            var $select = $(this);
+            $select.find('option:selected').remove();
+
+            // 선택된 값을 초기화하고 변경 이벤트를 트리거합니다.
+            $select.val(null).trigger('change');
+        })
     });
 }
 

@@ -678,13 +678,16 @@ public final class Url {
 		
 		public static final String EDIT = PATH + "/edit";
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
-		
+
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
+
+		public static final String UPDATE_LOCALE_AJAX = PATH + "/updateDefaultLocale";
 
 		public static final String VIEW_SEARCH_CONDITION_AJAX = PATH + "/loadDefaultSearchCondition";
 		public static final String VIEW_SEARCH_CONDITION_JSP = TILES_AJAX_ROOT + PATH + "/searchConditionArea";
 		
 		public static final String UPDATE_SEARCH_CONDITION_AJAX = PATH + "/updateDefaultSearchCondition";
+
 	}
 	
 	public static final class SENT_MAIL {
