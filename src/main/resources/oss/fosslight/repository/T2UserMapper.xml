@@ -336,6 +336,14 @@
 		AND B.CD_NO = '200'
 	WHERE A.USE_YN = 'Y' ORDER BY DIVISION, A.USER_NAME
 	</select>
+
+    <select id="selectAllUsersUpdatedDivision" resultType="oss.fosslight.domain.T2Users" parameterType="String">
+        SELECT
+            A.USER_ID, A.USER_NAME, A.EMAIL, A.DIVISION AS DIVISION
+        FROM
+            T2_USERS A
+        WHERE A.DIVISION = #{division} ORDER BY DIVISION, A.USER_NAME
+    </select>
 	
 	<select id="selectCheckEmail" parameterType="String" resultType="oss.fosslight.domain.T2Users"> 
     /*email check*/
