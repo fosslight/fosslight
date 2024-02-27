@@ -195,7 +195,8 @@ public class BinaryDataService  extends CoTopComponent {
 		
 		insertBatConfirmBinOssWithChecksum(null, prjName, platformName, platformVer, binaryTextFile, list);
 	}
-	
+
+	@Transactional
 	public void insertBatConfirmBinOssWithChecksum(String gubn, String prjName, String platformName, String platformVer, T2File binaryTextFile, List<ProjectIdentification> list) {
 		
 		//bin binary.txt 파일 정보를 추출한다.
@@ -342,8 +343,7 @@ public class BinaryDataService  extends CoTopComponent {
 		}
 	}
 	
-	
-	@Transactional
+
 	private void mergeBinaryOssInfo(Map<String, BinaryAnalysisResult> batInfoMap) {
 
 		List<BinaryData> historyList = new ArrayList<>();
@@ -459,6 +459,7 @@ public class BinaryDataService  extends CoTopComponent {
 			
 	}
 
+	@Transactional
 	public void insertBatConfirmAndroidBinOssWithChecksum(String prjName, String platformName, String platformVer,
 			String fileId, List<ProjectIdentification> list) {
 		if(!isEmpty(fileId) && list != null && !list.isEmpty()) {
@@ -732,7 +733,7 @@ public class BinaryDataService  extends CoTopComponent {
 		return loadData;
 	}
 	
-	@Transactional
+
 	private void addOssComponentByBinaryInfo(List<OssComponents> componentList,
 			Map<String, List<BinaryData>> binaryRegInfoMap) {
 
@@ -878,7 +879,6 @@ public class BinaryDataService  extends CoTopComponent {
 
 	
 
-	@Transactional
 	private void addOssComponentByBinaryInfoPartner(List<OssComponents> componentList,
 			Map<String, List<BinaryData>> binaryRegInfoMap) {
 
@@ -1100,7 +1100,7 @@ public class BinaryDataService  extends CoTopComponent {
 		}
 	}
 	
-	@Transactional
+	
 	private void addOssComponentByBinaryInfoAndroid(List<OssComponents> componentList,
 			Map<String, List<BinaryData>> binaryRegInfoMap) {
 
@@ -1238,6 +1238,7 @@ public class BinaryDataService  extends CoTopComponent {
 		}
 	}
 
+	@Transactional
 	public void autoIdentificationWithBinryTextFilePartner(PartnerMaster partner) {
 
 		// oss name과 license가 설정되지 않은 oss coponent를 찾는다.

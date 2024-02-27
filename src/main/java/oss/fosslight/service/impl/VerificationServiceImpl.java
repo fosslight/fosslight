@@ -1256,8 +1256,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		return ossComponentList == null || ossComponentList.isEmpty();
 	}
 	
-	@Transactional
-	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
+
 	private void updateProjectStatus(Project project) {
 		//다운로드 허용 플래그
 		project.setAllowDownloadBitFlag(allowDownloadMultiFlagToBitFlag(project));
@@ -1268,6 +1267,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	
 	@Override
 	@Transactional
+	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	public void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception {
 		if (copyConfirmFlag) {
 			projectMapper.updateConfirmCopyVerificationDestributionStatus(project);
