@@ -16,7 +16,7 @@
             <div class="col-6">
               <span class="text-right">
                 <i class="fas fa-user-circle text-light mr-1 fa-xs"></i>
-                <a style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" th:onclick="|createTab_new('User Configuration', '/configuration/edit', 'configuration-edit', true)|"></a>
+                <a style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" th:onclick="|createTab_new('User Settings', '/configuration/edit', 'configuration-edit', true)|"></a>
               </span>
               <input type="hidden" id="defaultTabAnchorArr" th:value="${sessUserInfo.defaultTabAnchor}" />
             </div>
@@ -57,25 +57,25 @@
           <li class="nav-item">
           	<a th:href="@{/license/list}" class="nav-link" id="license-list">
               <i class="nav-icon fas fa-list"></i>
-              	<p th:text="'License List'"></p>
+              	<p th:text="'License'"></p>
             </a>
           </li>
           <li class="nav-item">
             <a th:href="@{/oss/list}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
-              	<p th:text="'OSS List'"></p>
+              	<p th:text="'Open Source'"></p>
             </a>
           </li>
           <li class="nav-item" th:if="${projectFlag}">
             <a th:href="@{/project/list}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
-              	<p th:text="'Project List'"></p>
+              	<p th:text="'Project'"></p>
             </a>
           </li>
           <li th:if="${partnerFlag}" class="nav-item">
             <a th:href="@{/partner/list}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
-              	<p th:text="'3rd Party List'"></p>
+              	<p th:text="'3rd Party'"></p>
             </a>
           </li>
           <li th:if="${batFlag}" class="nav-item">
@@ -99,7 +99,7 @@
           <li class="nav-item">
             <a th:href="@{/selfCheck/list}" class="nav-link">
               <i class="nav-icon fas fa-list"></i>
-              	<p th:text="'Self-Check List'"></p>
+              	<p th:text="'Self-Check'"></p>
             </a>
           </li>
           <li class="nav-item" th:if="${complianceStatusFlag and (projectFlag or partnerFlag)}">
@@ -131,7 +131,7 @@
           <li class="nav-item">
             <a th:href="@{/configuration/edit}" class="nav-link">
               <i class="nav-icon fas fa-user-cog"></i>
-	          	<p th:text="'User Configuration'"></p>
+	          	<p th:text="'User Settings'"></p>
             </a>
           </li>
           <li class="nav-item" th:if="${@CommonFunction.isAdmin()}">
@@ -259,19 +259,19 @@
 
             _defaultTabs.forEach(function(tabUrl, index) {
               if (tabUrl.includes('/license/list')) {
-                createTab_new('License List', '/license/list', 'license-list', true);
+                createTab_new('License', '/license/list', 'license-list', true);
               } else if (tabUrl.includes('/oss/list')) {
-                createTab_new('OSS List', '/oss/list', 'oss-list', true);
+                createTab_new('Open Source', '/oss/list', 'oss-list', true);
               } else if (tabUrl.includes('/project/list')) {
-                createTab_new('Project List', '/project/list', 'project-list', true);
+                createTab_new('Project', '/project/list', 'project-list', true);
               } else if (tabUrl.includes('/partner/list')) {
-                createTab_new('3rd Party List', '/partner/list', 'partner-list', true);
+                createTab_new('3rd Party', '/partner/list', 'partner-list', true);
               } else if (tabUrl.includes('/system/bat')) {
                 createTab_new('Binary DB', '/binary', 'binary', true);
               } else if (tabUrl.includes('/vulnerability/list')) {
                 createTab_new('Vulnerability', '/vulnerability/list', 'vulnerability-list', true);
               } else if (tabUrl.includes('/selfCheck/list')) {
-                createTab_new('Self-Check List', '/selfCheck/list', 'selfCheck-list', true);
+                createTab_new('Self-Check', '/selfCheck/list', 'selfCheck-list', true);
               }
 
               /* the last default tab gives an open event when the sidebar is clicked */
