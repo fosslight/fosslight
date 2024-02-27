@@ -34,7 +34,10 @@ public class T2Users extends ComBean implements Serializable{
 	
 	/** The division. */
 	private String division;
-	
+
+	/** The Number of rows displayed per page. */
+	private Integer numbersOfRowPerPage;
+
 	/** The enabled. */
 	private String enabled; // 사용 구분
 	
@@ -181,6 +184,24 @@ public class T2Users extends ComBean implements Serializable{
 	 */
 	public void setDivision(String division) {
 		this.division = division;
+	}
+
+	/**
+	 * Gets the numbersOfRowPerPage.
+	 *
+	 * @return numbersOfRowPerPage the new numbersOfRowPerPage
+	 */
+	public Integer getNumbersOfRowPerPage() {
+		return numbersOfRowPerPage;
+	}
+
+	/**
+	 * Sets the division.
+	 *
+	 * @param numbersOfRowPerPage the new numbersOfRowPerPage
+	 */
+	public void setNumbersOfRowPerPage(Integer numbersOfRowPerPage) {
+		this.numbersOfRowPerPage = numbersOfRowPerPage;
 	}
 
 	/**
