@@ -56,10 +56,10 @@
 					<i class="flag-icon flag-icon-us"></i>
 				</a>
 				<div class="dropdown-menu dropdown-menu-right p-0">
-					<a href="#" class="dropdown-item active" onclick="selectLang('en_US')">
+					<a href="#" class="dropdown-item active" onclick="selectDefaultLocale('en_US')">
 						<i class="flag-icon flag-icon-us mr-2"></i> English
 					</a>
-					<a href="#" class="dropdown-item" onclick="selectLang('ko_KR')">
+					<a href="#" class="dropdown-item" onclick="selectDefaultLocale('ko_KR')">
 						<i class="flag-icon flag-icon-kr mr-2"></i> Korean
 					</a>
 				</div>
@@ -72,10 +72,10 @@
 		});
 
 		document.addEventListener('DOMContentLoaded', function () {
-			setLanguageFromUrl();
+			setDefaultLocaleFromUrl();
 		});
 
-		function setLanguageFromUrl() {
+		function setDefaultLocaleFromUrl() {
 			const urlParams = new URLSearchParams(window.location.search);
 			const langParam = urlParams.get('lang');
 
@@ -87,6 +87,16 @@
 				navLink.innerHTML = '<i class="flag-icon flag-icon-kr"></i>';
 			}
 		}
+
+		function selectDefaultLocale(val) {
+			const param = {"defaultLocale": val}
+			postAjaxData(param, "/configuration/updateDefaultLocale", "json", function (data) {
+				if (data.resCd == '10') {
+					window.location.replace('?lang=' + data.result);
+				}
+			});
+		}
+
 	</script>
 </th:block>
 </html>

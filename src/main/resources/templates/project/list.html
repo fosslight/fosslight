@@ -149,8 +149,8 @@
                                                 <div class="form-group mb-2">
                                                     <select class="form-control select2 save-value" style="width: 100%;" id="priority" name="priority">
                                                     	<option th:value="''"></option>
-                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}"
-                                                        <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.priority != null and option.cdDtlNo == searchBean?.priority}"></option>
+                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.priority != null and option.cdDtlNo == searchBean?.priority}"></option>
                                                        	</th:block>
                                                     </select>
                                                 </div>
