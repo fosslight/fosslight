@@ -57,7 +57,7 @@ ul { list-style-type: none; }
 .custom-layout .icon-light-gray { color: #ced4da;}
 .custom-layout .icon-light-gray:hover { color: #595959; }
 
-.custom-layout .dropdown-item { font-size: .8rem; }
+.custom-layout .dropdown-item { font-size: .9rem; }
 /* btn color option */
 .custom-layout .btn-lg-red { background-color: #a50034; font-weight: 500; color: #fff }
 .custom-layout .btn-lg-red:hover {background-color: #7e101b;border-color: #7e101b; }
@@ -110,6 +110,8 @@ ul { list-style-type: none; }
 .custom-layout .btn-dark-04:hover { background-color: #001429; }
 .custom-layout .btn-ivory { background-color: #ecedf0; font-weight: 500; color: #595959 }
 .custom-layout .btn-ivory:hover { background-color: #d3e3fd;}
+.custom-layout .btn-grid-light-gray { background-color: #f8f9fa; font-weight: 500; color: #595959 }
+.custom-layout .btn-grid-light-gray:hover { background-color: #d3e3fd;}
 .custom-layout .btn-purple { background-color: #8d79ae; font-weight: 500; color: #fff }
 .custom-layout .btn-purple:hover { background-color: #665B7AFF; font-weight: 500; color: #fff }
 
@@ -147,6 +149,10 @@ ul { list-style-type: none; }
 .custom-layout .help-link.dropdown-toggle:hover { background-color: #dc3545; color: #fff !important;}
 .custom-layout .helpLink.dropdown .dropdown-menu { top: 3px !important; }
 .custom-layout .helpLink.f-left.dropdown .dropdown-menu { left: -45px !important; }
+.custom-layout .ui-jqgrid .dropdown-menu.col-local { top: 35px !important;left: -250px !important; width: 300px; }
+.custom-layout .ui-jqgrid .dropdown-menu.col-local a{ color: #0070c0; text-decoration: none; font-weight: normal }
+.custom-layout .ui-jqgrid .dropdown-menu.col-local a:hover { color: #0070c0; text-decoration: underline; font-weight: normal }
+
 /*popup*/
 .custom-layout #promptPopup {width:470px; height:560px;}
 .custom-layout .ossSelectPop, .custom-layout .mergeOssCheckPop {
@@ -499,9 +505,8 @@ tr.ui-search-toolbar input  {
     border-radius: 4px;
 }
 
-/*.ui-jqgrid .ui-pg-table td {*/
-/*    width: 23px;*/
-/*}*/
+.ui-jqgrid #list_toppager { overflow: visible; }
+.ui-jqgrid #pg_list_toppager #list_toppager_center, .ui-jqgrid #pg_list_toppager #list_toppager_right { display: none; }
 
 .ui-jqgrid .ui-pg-table td:nth-child(3) div[dir="ltr"]{
     margin: 0px 10px 3px 12px;
@@ -746,7 +751,7 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 }
 
 .ui-jqgrid .ui-jqgrid-view button:hover {
-    border: none;
+    /*border: none;*/
 /*	background-color: #c4e2ff; */
 }
 

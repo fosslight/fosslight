@@ -3394,3 +3394,152 @@ function appendFormCheckboxValuesEl(el, item, selectedValues) {
     var addEl = '<input class="save-value" type="hidden" name="chk_'+item+'" value="'+ selectedValues +'" />';
     $('#' + el).append(addEl);
 }
+
+let division;
+let defaultColNames =[];
+let savedColNames = [];
+
+function createDropdownButton() {
+    var newButton = document.createElement('button');
+    newButton.setAttribute('type', 'button');
+    newButton.classList.add('btn', 'btn-lg', 'btn-grid-light-gray', 'float-right', 'mr-1');
+    newButton.setAttribute('data-toggle', 'dropdown');
+    newButton.setAttribute('id', 'setUpColumnButton');
+    newButton.setAttribute('aria-expanded', 'false');
+    newButton.innerHTML = '<i class="fas fa-lg fa-cog"></i>';
+    return newButton;
+}
+
+function createDropdownMenu(options) {
+    const { _division, _totalColInfos, _defaultColNames, _savedColNames } = options;
+    division = _division;
+    defaultColNames = _defaultColNames;
+    savedColNames = _savedColNames;
+
+    const titleArea = document.createElement('div');
+    titleArea.className = "text-lg-gray pl-3"
+    titleArea.textContent = "Columns Setting"
+
+    const dropdownMenu = document.createElement('div');
+    dropdownMenu.classList.add('dropdown-menu', 'col-local');
+    dropdownMenu.setAttribute('id', 'setUpColumnMenu');
+
+    dropdownMenu.appendChild(titleArea);
+    dropdownMenu.appendChild(createDivider());
+    dropdownMenu.appendChild(createMenuItem('Restore Defaults', 'text-danger', 'dropdown-item'));
+
+    const dropdownItemArea = document.createElement('div');
+    dropdownItemArea.style.height = '300px';
+    dropdownItemArea.style.overflowY = 'scroll';
+
+    _totalColInfos.forEach(colInfo => {
+        const label = Object.keys(colInfo)[0];
+        const id = colInfo[label];
+        dropdownItemArea.appendChild(createCheckboxItem(label, id));
+    });
+
+    dropdownMenu.appendChild(dropdownItemArea);
+    dropdownMenu.appendChild(createDivider());
+    dropdownMenu.appendChild(createButtonArea());
+
+    return dropdownMenu;
+}
+
+function createMenuItem(text, href, className) {
+    const menuItem = document.createElement('a');
+    menuItem.className = className;
+    menuItem.href = href;
+    menuItem.textContent = text;
+    return menuItem;
+}
+
+function createDivider(className) {
+    const hr = document.createElement('div');
+    hr.className = 'dropdown-divider';
+    return hr;
+}
+
+function createCheckboxItem(label, id) {
+    const dropdownItem = document.createElement('span');
+    dropdownItem.className = 'dropdown-item';
+
+    const divCustomCheckbox = document.createElement('div');
+    divCustomCheckbox.className = 'custom-control custom-checkbox ml-1';
+
+    const inputCheckbox = document.createElement('input');
+    inputCheckbox.className = 'custom-control-input';
+    inputCheckbox.type = 'checkbox';
+    inputCheckbox.id = id;
+
+    if (defaultColNames.includes(id)) {
+        inputCheckbox.checked = true;
+        inputCheckbox.disabled = true;
+    } else {
+        if (savedColNames.includes(id)) {
+            inputCheckbox.checked = true;
+        }
+    }
+
+    const labelCheckbox = document.createElement('label');
+    labelCheckbox.className = 'custom-control-label';
+    labelCheckbox.htmlFor = id;
+    labelCheckbox.style.paddingTop = '2px';
+    labelCheckbox.style.fontWeight = '400';
+    labelCheckbox.textContent = label;
+
+    divCustomCheckbox.appendChild(inputCheckbox);
+    divCustomCheckbox.appendChild(labelCheckbox);
+
+    dropdownItem.appendChild(divCustomCheckbox);
+
+    return dropdownItem;
+}
+
+function saveColumnLocalization() {
+    // Save to database using AJAX
+
+
+    // Update grid display in the view
+    const checkedIds = [];
+    const checkboxes = document.querySelectorAll('.custom-control-input');
+    checkboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+            checkedIds.push(checkbox.id);
+        }
+    });
+
+    const checkedColNames = [];
+    checkedIds.forEach(function(id) {
+        var colName = id.replace('customCheckbox', '');
+        checkedColNames.push(colName);
+    });
+
+    const grid = $("#list");
+    const allColNames = grid.jqGrid('getGridParam', 'colNames');
+    allColNames.forEach(function(colName, index) {
+        if (checkedColNames.includes(colName)) {
+            grid.jqGrid('showCol', colName);
+        } else {
+
+            console.log("hide ::" + colName);
+            grid.jqGrid('hideCol', colName);
+        }
+    });
+}
+
+function createButtonArea() {
+    var buttonArea = document.createElement("div");
+    buttonArea.appendChild(createButton('Save', 'btn btn-ivory float-right mr-1 text-sm', 'saveColumnLocalization()'));
+    buttonArea.appendChild(createButton('Cancel', 'btn btn-default float-right mr-1 text-sm'));
+    return buttonArea;
+}
+
+function createButton(text, className, clickFunction) {
+    var button = document.createElement("button");
+    button.className = className;
+    button.textContent = text;
+    button.setAttribute("onclick", clickFunction);
+    return button;
+}
+
+

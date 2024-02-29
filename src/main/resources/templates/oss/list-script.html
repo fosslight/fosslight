@@ -344,7 +344,7 @@
                             return obj.records;
                         }
                     },
-                    colNames: ['', 'ID', 'OSS Type', 'OSS Name', 'Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
+                    colNames: ['', 'ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
                     colModel: [
                         {
                             name: 'group', width: 20, align: 'center',
@@ -433,6 +433,8 @@
                     rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
                     rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]]),
                     autowidth: true,
+                    toppager:true,
+                    buttompager: false,
                     pager: '#pager',
                     gridview: true,
                     viewrecords: true,
@@ -455,7 +457,7 @@
                                     }
                                 });
 
-                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2"data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
                                 .attr("title", oss_lst_data.licenseTypeInformation)
                                 .tooltip({
                                     content: function () {
@@ -539,6 +541,51 @@
                         });
 
                         $('.listghead_0').hide(); // hide basic groupHeader
+
+                        /* columns licalization */
+                        var parentElement = document.querySelector('#list_toppager');
+                        var setUpColumnButton = document.getElementById('setUpColumnButton');
+
+                        if (!setUpColumnButton) {
+                            var division = 'oss';
+                            var totalColInfos = [
+                                {'ID': 'id'},
+                                {'OSS Type': 'ossType'},
+                                {'OSS Name': 'ossName'},
+                                {'OSS Version': 'ossVersion'},
+                                {'License Name': 'licenseName'},
+                                {'LicenseType': 'licenseType'},
+                                {'Obligation': 'obligation'},
+                                {'DownloadLocation': 'downloadLocation'},
+                                {'Homepage': 'homepage'},
+                                {'Description': 'description'},
+                                {'CVE ID': 'cveId'}];
+                            var defaultColNames = ['ossName', 'ossVersion', 'licenseName', 'obligation']
+                            var savedColNames = ['description', 'cveId'];
+
+                            var dropdownMenuOptions = {
+                                _division: division,
+                                _totalColInfos: totalColInfos,
+                                _defaultColNames: defaultColNames,
+                                _savedColNames: savedColNames
+                            };
+
+                            var dropdownArea = document.createElement('div');
+                            dropdownArea.className = 'dropdown';
+                            var newButton = createDropdownButton();
+                            var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+
+                            dropdownArea.appendChild(newButton);
+                            dropdownArea.appendChild(dropdownMenu);
+
+                            parentElement.appendChild(dropdownArea);
+
+                            document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+                                event.stopPropagation();
+                                var dropdownMenu = document.getElementById("setUpColumnMenu");
+                                dropdownMenu.classList.toggle("show");
+                            });
+                        }
                     },
                     // ondblClickRow: function (rowid, iRow, iCol, e) {
                     //     if (iCol != 0) {
