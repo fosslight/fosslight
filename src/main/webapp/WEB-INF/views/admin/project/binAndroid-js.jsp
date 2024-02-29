@@ -1135,24 +1135,6 @@ var binAndroid_fn = {
 
 			return false;	
 		}
-		
-		var diffMsgDataList = JSON.parse(JSON.stringify(binAndroidDiffMsgData), function(key, value){
-			if(key.toUpperCase().indexOf("LICENSENAME") > -1){
-				if(value.indexOf("Declared") == -1){
-					return value;
-				}
-			}else{
-				return value;
-			}
-		});
-		
-		var DiffCnt = Object.keys(diffMsgDataList).reduce(binAndroid_fn.checkErrorData, []).length;
-		
-        if(DiffCnt > 0){
-        	alertify.alert("<spring:message code='msg.project.download.notice' />", function(){});
-
-			return false;
-        }
 
         var notExcludeRow = $("#binAndroidList").getRowData().filter(function(a){ return a.excludeYn == "N"; }).length;
 

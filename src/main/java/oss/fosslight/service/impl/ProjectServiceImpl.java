@@ -4994,7 +4994,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		// OSS Name, OSS Version, License에 Warning message(빨간색, 파란색)가 있는 Row 또는 Binary Name이 공란인 Row
-		if (emptyBinaryPathCnt > 0 || errCnt > 0 || diffCnt > 0) {
+		if (emptyBinaryPathCnt > 0 || errCnt > 0 ) {
 			validMsg = "You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.";
 		}
 		
