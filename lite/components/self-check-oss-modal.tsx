@@ -77,7 +77,7 @@ export default function SelfCheckOSSModal({
           '- Homepage URL'
         ].join('\n');
 
-        if (confirm(confirmMsg)) {
+        if (window.confirm(confirmMsg)) {
           setLicenses([{ licenseId: license.licenseId, licenseName: license.licenseName }]);
           setValue('copyright', copyright);
           setValue('downloadUrl', downloadUrl);
