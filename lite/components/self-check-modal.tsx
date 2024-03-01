@@ -1,6 +1,6 @@
 import { useAPI } from '@/lib/hooks';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Editor from './editor';
 import Modal from './modal';
@@ -18,13 +18,7 @@ export default function SelfCheckModal({
 }) {
   const [wait, setWait] = useState(false);
   const router = useRouter();
-  const { register, handleSubmit, watch, setValue } = useForm({
-    defaultValues: {
-      projectName: values?.projectName || '',
-      projectVersion: values?.projectVersion || '',
-      comment: values?.comment || ''
-    }
-  });
+  const { register, handleSubmit, reset, watch, setValue } = useForm();
 
   // Mode (create or edit)
   const isCreate = !values;
@@ -33,7 +27,7 @@ export default function SelfCheckModal({
   const createEditProjectRequest = useAPI('post', '/selfCheck/saveAjax', {
     onStart: () => setWait(true),
     onSuccess: (res) => {
-      if (res.data.isValid) {
+      if (res.data.isValid === 'true') {
         alert(`Successfully ${isCreate ? 'created' : 'edited'} project`);
 
         onHide();
@@ -43,11 +37,26 @@ export default function SelfCheckModal({
           refetch();
         }
       } else {
-        alert(`Failed in ${isCreate ? 'creating' : 'editing'} project`);
+        alert(
+          `Failed in ${isCreate ? 'creating' : 'editing'} project${
+            res.data.prjName ? ` (${res.data.prjName})` : ''
+          }`
+        );
       }
     },
     onFinish: () => setWait(false)
   });
+
+  useEffect(() => {
+    if (show) {
+      reset({
+        projectName: values?.projectName || '',
+        projectVersion: values?.projectVersion || '',
+        comment: values?.comment || ''
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show]);
 
   return (
     <Modal show={show} onHide={onHide} size="sm" hideByBackdrop={false}>

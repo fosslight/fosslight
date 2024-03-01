@@ -776,6 +776,7 @@ export default function SelfCheckOSS({
                   &ensp;
                   {oss.path ? (
                     <span
+                      className="break-all"
                       dangerouslySetInnerHTML={{
                         __html: highlight(oss.path, filters.path)
                       }}
