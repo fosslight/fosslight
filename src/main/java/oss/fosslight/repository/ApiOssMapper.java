@@ -40,4 +40,8 @@ public interface ApiOssMapper {
 	List<VulnerabilityDto> getOssVulnerabilityList(String ossId);
 	List<OssDto> getOssAutocompleteCandidates();
 	List<OssDto> selectRecentOss(int limit);
+
+	List<String> getDownloadLocationListByOssName(String ossName);
+
+	List<String> getHomepageListByOssName(String ossName);
 }

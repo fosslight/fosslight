@@ -50,4 +50,6 @@ public interface LicenseService extends HistoryConfig{
 	Map<String, Object> getLicenseDataMap(String gridId, boolean status, String msg);
 
     Map<String, Object> saveLicense(LicenseMaster licenseMaster);
+
+	void deleteLicenseMasterForRestriction(LicenseMaster licenseMaster);
 }

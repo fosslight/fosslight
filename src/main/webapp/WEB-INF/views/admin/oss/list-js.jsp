@@ -174,6 +174,78 @@
 			display = "<a href='" + url + "' class='urlLink' target='_blank'>" + cellvalue + "</a>";
 			
 			return display;
+		},
+		deleteOss : function() {
+			var deleteIds = [];
+			
+			$("#list input[type=checkbox]").each(function() {
+				if ($(this).is(":checked")) {
+					var obj = {};
+					
+					var name = $(this).attr('name');
+					var ossId = name.split("_")[2];
+					deleteIds.push(ossId);
+				}
+			});
+						
+			if (deleteIds.length > 0) {
+				var innerHtml = '<div class="grid-container" style="width:470px; height:350px;">Do you want to delete the oss ?';
+				innerHtml    += '	<div class="grid-width-100" style="width:470px; height:310px; margin-top:10px;">';
+				innerHtml    += '		<div id="editor" style="width:470px; height:300px;"></div>';
+				innerHtml    += '	</div>';
+				innerHtml    += '</div>';
+				
+				alertify.confirm(innerHtml, function (e) {
+					if (e) {
+						var comment = CKEDITOR.instances['editor'].getData();
+						if("" == comment){
+							alertify.alert('<spring:message code="msg.oss.required.deletion" />', function(){});
+
+							return false;
+						} else {
+							fn.multiDelAjax(deleteIds, comment);
+						}
+					} else {
+						CKEDITOR.instances['editor'].setData("");
+					}
+				});
+				
+				initCKEditorToolbar("editor");
+			} else {
+				alertify.alert('<spring:message code="msg.oss.select.ossTable" />', function(){});
+			}
+		},
+		multiDelAjax : function (deleteIds, comment) {
+			loading.show();
+			
+			$.ajax({
+				url : '<c:url value="/oss/multiDelAjax"/>',
+				type : 'POST',
+				dataType : 'json',
+				cache : false,
+				data : {'ossIds' : deleteIds, "comment" : comment},
+				success : function(data){
+					loading.hide();
+					var msg = '<spring:message code="msg.common.success" />';
+					
+					if (typeof data.notDelOssList !== "undefined") {
+						var notDelOss = data.notDelOssList;
+						msg = '<spring:message code="msg.oss.cannot.delete" />';
+						msg += '<br/>';
+						for (var i in notDelOss) {
+							msg += '<br/>';
+							msg += '&emsp;&#8259; ' + notDelOss[i];
+						}
+					}
+					
+					alertify.alert(msg, function(){
+						reloadTabInframe('<c:url value="/oss/list"/>');
+					});
+				},
+				error : function(){
+					alertify.error('<spring:message code="msg.common.valid2" />', 0);
+				}
+			});
 		}
 	}
 	
@@ -319,6 +391,23 @@
 					//3. Group sub display icon period in the following lists.
 					$('tr td[isgroup="true"]', grid).parent().find('td:first')
 					.prepend($('<span class="ui-icon ui-icon-carat-1-sw"></span>').css('display','inline-block'));
+					
+					//4. Group sub display check box
+					var isAdmin = ${ct:isAdmin()};
+					if (isAdmin) {
+						$('#list > tbody > tr').not('[id^=listghead_0]').each(function(){
+							var prevLocation = $(this).prev().prop('id');
+							var nextLocation = $(this).next().prop('id');
+							
+							if (typeof prevLocation !== "undefined" && typeof nextLocation !== "undefined"
+									|| typeof prevLocation !== "undefined") {
+								var position = $(this).prop('id');
+								var addCheckBox = '<input role="checkbox" type="checkbox" id="jqg_list_'+position+'" class="cbox" name="jqg_list_'+position+'">&emsp;';
+								
+								$(this).children().eq(0).prepend(addCheckBox);
+							}
+						});
+					}
 					
 					//group + - toggle
 					$('span.groupBtns').on('click', function(e) {

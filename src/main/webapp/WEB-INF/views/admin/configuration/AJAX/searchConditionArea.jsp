@@ -282,7 +282,7 @@ $(document).ready(function() {
 						</dd>
 						<dd class="">
 							<label class="vmiddle" style="width: 50%; text-align: left;">View My Project Only</label>
-							<input type="checkbox" id="checkbox3" name="publicYn" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' }/>
+							<input type="checkbox" id="checkbox3" name="publicYn" value="N" ${searchBean.publicYn eq 'N' ? 'checked="checked"' : '' }/>
 						</dd>
 					</dl>
 				</c:when>

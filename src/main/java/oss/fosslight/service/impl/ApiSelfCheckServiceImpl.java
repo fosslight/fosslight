@@ -174,9 +174,32 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
         var identification = new ProjectIdentification();
         identification.setReferenceId(id);
         identification.setReferenceDiv(CoConstDef.CD_DTL_SELF_COMPONENT_ID);
-        var res = selfCheckService.getIdentificationGridList(identification);
-        List<ProjectIdentification> mainData = (List<ProjectIdentification>) res.get("mainData");
+        Map<String, Object> map = selfCheckService.getIdentificationGridList(identification);
+        List<ProjectIdentification> mainData = (List<ProjectIdentification>) map.get("mainData");
+        Map<String, List<ProjectIdentification>> subListMap = (Map<String, List<ProjectIdentification>>) map.get("subData");
+        List<String> unconfirmedLicenseNames = (List<String>) map.get("unconfirmedLicenseList");
 
+        // validation
+        T2CoProjectValidator pv = new T2CoProjectValidator();
+        Map<String, String> validationMap = new HashMap<>();
+
+        pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
+        pv.setAppendix("mainList", mainData);
+        pv.setAppendix("subListMap", subListMap);
+
+        T2CoValidationResult vr = pv.validate(new HashMap<>());
+
+        List<ProjectIdentification> mainDataList = CommonFunction.identificationUnclearObligationCheck(mainData, vr.getErrorCodeMap(), vr.getWarningCodeMap());
+
+        // sort
+        if (!vr.isValid()) {
+            validationMap = vr.getValidMessageMap();
+            mainData = (List<ProjectIdentification>) CommonFunction.identificationSortByValidInfo(mainDataList, validationMap, vr.getDiffMessageMap(), vr.getInfoMessageMap(), true, true);
+        } else {
+            mainData = (List<ProjectIdentification>) CommonFunction.identificationSortByValidInfo(mainDataList, null, null, null, true, true);
+        }
+
+        // map
         List<SelfCheckOssDto> list = mainData.stream()
                 .map(projectIdentification -> {
                     var oss = new SelfCheckOssDto(projectIdentification);
@@ -206,7 +229,6 @@ public class ApiSelfCheckServiceImpl implements ApiSelfCheckService {
                     return oss;
                 })
                 .collect(Collectors.toList());
-
         return list;
     }
 

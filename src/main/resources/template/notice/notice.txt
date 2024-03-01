@@ -9,7 +9,12 @@ $hash$hash$hash Open Source Software Notice $hash$hash$hash
 #if($!{disclosureObligationSize} != "0")	
 #foreach( $!{closeSource} in $!{disclosureObligationList} ) 
 $!{closeSource.ossName} #if($!{hideOssVersionYn} != "Y")$!{closeSource.ossVersion}#end (#foreach( $!{licenseInfo} in $!{closeSource.ossComponentsLicense})$!{licenseInfo.licenseName},#end)
+#if($!{closeSource.homepage} != "")
+$!{closeSource.homepage}
+#end
+#if($!{closeSource.copyrightText} != "")
 $!{closeSource.copyrightText}
+#end
 
 #end
 #if($!{editCompanyYn} == "Y" && $!{editDistributionSiteUrlYn} == "Y")The source code for the above may be obtained free of charge from $!{companyNameFull} at $!{distributionSiteUrl}.#end
@@ -17,14 +22,17 @@ $!{closeSource.copyrightText}
 #if($!{editDistributionSiteUrlYn} == "N") #end
 #if($!{editDistributionSiteUrlYn} == "Y" && $!{editEmailYn} == "Y")#if($!{editCompanyYn} == "Y")$!{companyNameFull}#end#if($!{editCompanyYn} == "N")We#end will also provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.#end
 #if($!{editDistributionSiteUrlYn} == "N" && $!{editEmailYn} == "Y")#if($!{editCompanyYn} == "Y")$!{companyNameFull}#end#if($!{editCompanyYn} == "N")We#end will provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to $!{email}. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.#end
-#if($!{editEmailYn} == "N") #end 
+#if($!{editEmailYn} == "N") #end
 #end
 
 #if($!{noticeObligationSize} != "0")
 Please be informed that #if($!{editCompanyYn} == "Y") $!{companyNameFull} #end #if($!{editCompanyYn} == "N") this #end product may contain open source software listed in the tables below.
 
-#foreach( $!{openSource} in $!{noticeObligationList} ) 
+#foreach( $!{openSource} in $!{noticeObligationList} )
 $!{openSource.ossName} #if($!{hideOssVersionYn} != "Y")$!{openSource.ossVersion}#end (#foreach( $!{licenseInfo} in $!{openSource.ossComponentsLicense})$!{licenseInfo.licenseName},#end)
+#if($!{openSource.homepage} != "")
+$!{openSource.homepage}
+#end
 #if($!{openSource.copyrightText} != "")
 $!{openSource.copyrightText}
 #end

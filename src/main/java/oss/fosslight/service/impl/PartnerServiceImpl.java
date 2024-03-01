@@ -245,8 +245,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 					delFile.setFileSeq(fileSeq);
 					delFile.setGubn("A");
 
-					fileService.deletePhysicalFile(delFile, "PARTNER");
 					fileMapper.updateFileDelYnKessan(delFile);
+					fileService.deletePhysicalFile(delFile, "PARTNER");
 				}
 			}
 		}
@@ -634,8 +634,12 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		} else {
 			// 이미 추가된 watcher 체크
 			if (partnerMapper.existsWatcherByUser(project) == 0) {
-				// watcher 추가
-				partnerMapper.insertWatcher(project);
+				if (partnerMapper.existsWatcherByUserDivistion(project) > 0) {
+					partnerMapper.updateWatcherDivision(project);
+				} else {
+					// watcher 추가
+					partnerMapper.insertWatcher(project);
+				}
 			}
 		}
 	}
@@ -673,7 +677,12 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	}
 	
 	@Override
-	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster){
+	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster) {
+		return getPartnerValidationList(partnerMaster, false);
+	}
+	
+	@Override
+	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster, boolean coReview){
 		ProjectIdentification prjBean = new ProjectIdentification();
 		
 		prjBean.setReferenceId(partnerMaster.getPartnerId());
@@ -701,7 +710,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			
 			if ((CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(partnerInfo.getStatus())
 					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(partnerInfo.getStatus()))
-					&& CommonFunction.isAdmin()) {
+					&& (CommonFunction.isAdmin() || coReview)) {
 				pv.setCheckForAdmin(true);
 			}
 

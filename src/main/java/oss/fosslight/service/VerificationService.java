@@ -30,9 +30,9 @@ public interface VerificationService {
 	
 	boolean getNoticeHtmlFile(OssNotice ossNotice, String html) throws IOException;
 
-	boolean getReviewReportPdfFile(OssNotice ossNotice) throws IOException;
+	boolean getReviewReportPdfFile(String prjId) throws IOException;
 
-	boolean getReviewReportPdfFile(OssNotice ossNotice, String html) throws IOException;
+	boolean getReviewReportPdfFile(String prjId, String html) throws IOException;
 	
 	ResponseEntity<FileSystemResource> getNotice(String fileName, String rESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX) throws IOException;
 
@@ -59,6 +59,8 @@ public interface VerificationService {
 	void changePackageFileNameDistributeFormat(String prjId);
 	
 	Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice);
+	
+	Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice, boolean isProtocol);
 	
 	OssNotice selectOssNoticeOne(String prjId);
 	
@@ -89,4 +91,6 @@ public interface VerificationService {
 	void registOssNoticeConfirmStatus(OssNotice ossNotice);
 
 	String changePackageFileNameCombine(String prjId);
+
+	void deleteFile(Map<Object, Object> map);
 }

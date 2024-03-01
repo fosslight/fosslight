@@ -66,7 +66,7 @@ public class ProjectIdentificationRequestReviewIntegrationTest {
         Map<String, Map<String, String>> responseMapForProject = new ObjectMapper().readValue(response.getContentAsString(), Map.class);
         prjId = responseMapForProject.get("resultData").get("prjId");
 
-        String content = "{\"merge\":\"Y\",\"gridData\":\"[]\",\"referenceId\":\"" + prjId + "\"}";
+	String content = "{\"merge\":\"Y\",\"gridData\":\"[]\",\"referenceId\":\"" + prjId + "\",\"checkGridData\":\"[]\"}";
         mockMvc.perform(post("/project/saveBom")
                 .content(content)
                 .header("user-agent", USER_AGENT)

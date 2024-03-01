@@ -528,6 +528,7 @@ var bin_fn = {
 			onSelectRow: function(id){},
 			autoencode: true,
 			gridview: true,
+			rowNum: 1000,
  			sortname: 'referenceId',
 			viewrecords: true,
  			sortorder: 'desc',

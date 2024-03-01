@@ -458,6 +458,77 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@PostMapping(value={OSS.MULTI_DEL_AJAX})
+	public @ResponseBody ResponseEntity<Object> multiDelAjax(
+			@ModelAttribute OssMaster ossMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		String resCd="00";
+		HashMap<String, Object> resMap = new HashMap<>();
+		String[] ossIds = ossMaster.getOssIds();
+		List<String> notDelOssList = new ArrayList<>();
+		
+		for (String ossId : ossIds) {
+			String existOssCnt = ossService.checkExistOssConf(ossId);
+			
+			if (Integer.parseInt(existOssCnt) > 0) {
+				OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(ossId); 
+				String notDelOss = oss.getOssName() + " (" + avoidNull(oss.getOssVersion(), "N/A") + ")";
+				notDelOssList.add(notDelOss);
+			} else {
+				OssMaster ossMailBean = ossService.getOssInfo(ossId, true);
+				
+				OssMaster param = new OssMaster();
+				param.setOssId(ossId);
+				param.setOssName(ossMailBean.getOssName());
+				param.setComment(ossMaster.getComment());
+				param.setLoginUserName(loginUserName());
+				param.setCreatedDate(ossMailBean.getCreatedDate());
+				
+				if (ossMailBean.getOssNicknames() != null) {
+					ossMailBean.setOssNickname(CommonFunction.arrayToString(ossMailBean.getOssNicknames(), "<br>"));	
+				}
+				
+				putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
+				
+				try {
+					History h = ossService.work(param);
+					
+					h.sethAction(CoConstDef.ACTION_CODE_DELETE);
+					historyService.storeData(h);
+				} catch(Exception e) {
+					log.error(e.getMessage(), e);
+				}
+				
+				try {
+					CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_DELETE);
+					mailBean.setParamOssId(ossId);
+					mailBean.setComment(param.getComment());
+					mailBean.setParamOssInfo(ossMailBean);
+					
+					CoMailManager.getInstance().sendMail(mailBean);
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+
+				// 삭제처리
+				try {
+					ossService.deleteOssMaster(param);
+					resCd="10";
+					CoCodeManager.getInstance().refreshOssInfo();
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+		resMap.put("resCd", resCd);
+		if (notDelOssList != null && !notDelOssList.isEmpty()) resMap.put("notDelOssList", notDelOssList);
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
 	@PostMapping(value=OSS.DEL_OSS_VERSION_MERGE_AJAX)
 	public @ResponseBody ResponseEntity<Object> delOssWithVersionMeregeAjax(
 			@ModelAttribute OssMaster ossMaster
@@ -1459,7 +1530,8 @@ public class OssController extends CoTopComponent{
 			Model model,
 			@PathVariable String targetName) {
 		Map<String, Object> resMap = new HashMap<>();
-		Map<String, Object> map = null;
+		resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
+		/*Map<String, Object> map = null;
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		
 		switch(targetName.toUpperCase()) {
@@ -1517,7 +1589,7 @@ public class OssController extends CoTopComponent{
 			}
 			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
 					.collect(Collectors.toList()));
-		}
+		}*/
 		
 		return makeJsonResponseHeader(resMap);
 	}
@@ -1652,7 +1724,7 @@ public class OssController extends CoTopComponent{
 			downloadId = ExcelDownLoadUtil.getExcelDownloadId("autoAnalysis", ossBean.getPrjId(), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
 			if (!isEmpty(downloadId)) {
-				result = ossService.startAnalysis(ossBean.getPrjId(), downloadId);
+				result = ossService.startAnalysis(ossBean.getPrjId(), downloadId, null);
 				return makeJsonResponseHeader(result);
 			}
 			
@@ -1736,6 +1808,12 @@ public class OssController extends CoTopComponent{
 		Type typeAnalysis = new TypeToken<List<OssAnalysis>>() {}.getType();
 		List<OssAnalysis> analysisResultData = new ArrayList<OssAnalysis>();
 		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
+		for (OssAnalysis oa : analysisResultData) {
+			if (oa.getTitle().contains("최신 등록 정보")) {
+				oa.setOssId(ossService.getOssInfo(null, oa.getOssName(), false).getOssId());
+			}
+		}
+		
 		String sessionKey = CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_ANALYSIS_RESULT_DATA, groupId);
 		
 		if (getSessionObject(sessionKey) != null) {
@@ -1765,6 +1843,10 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> detailData = (List<OssAnalysis>) getSessionObject(sessionKey);
 		
 		if (detailData != null) {
+			for (OssAnalysis oa : detailData) {
+				if (ossService.checkOssTypeForAnalysisResult(oa)) oa.setOssType("V");
+			}
+			
 			result.put("isValid", true);
 			result.put("detailData", detailData);
 			result.put("cloneLicenseData", new OssMaster());

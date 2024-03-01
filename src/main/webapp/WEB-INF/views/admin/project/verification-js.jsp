@@ -19,6 +19,7 @@
 	var distributionStatus = '${project.destributionStatus}';
 	var deleteFileList = new Array();
 	var isAndroid = '${project.androidFlag}'; 
+	var appendReadOnlyFlag = false;
 	
 	$(document).ready(function () {
 		'use strict';
@@ -101,6 +102,7 @@
 				$(".editYn").css("background-color", "#f3f6f8");
 				
 				if(CKEDITOR.instances.editor2) {
+					appendReadOnlyFlag = true;
 					CKEDITOR.instances.editor2.config.readOnly = true;
 				}
 			}
@@ -109,6 +111,7 @@
 				$(".editYn").attr("readonly", true);
 				$(".editYn").css("background-color", "#f3f6f8");
 				if(CKEDITOR.instances.editor2) {
+					appendReadOnlyFlag = true;
 					CKEDITOR.instances.editor2.config.readOnly = true;
 				}
 			}
@@ -116,6 +119,7 @@
 		
 		if("${ossNotice.editNoticeYn}" == "N"){
 			if(CKEDITOR.instances.editor2) {
+				appendReadOnlyFlag = true;
 				CKEDITOR.instances.editor2.config.readOnly = true;
 			}
 		}
@@ -395,17 +399,9 @@
 					} else {
 						var result = data.resultData;
 						var target = $('#list');
-						var rowData = target.jqGrid("getRowData");
-						var rowid = "";
 						
-						for(var i = 0; i < result.length; i++){
-							for(var j = 0; j < rowData.length; j++){
-								if(result[i].ossName == rowData[j].ossName && result[i].ossVersion == rowData[j].ossVersion && result[i].licenseName == rowData[j].licenseName){
-									rowid = rowData[j].componentId;
-								}
-							}
-							
-							target.jqGrid("setCell", rowid, "filePath", result[i].filePath);
+						for (var i = 0; i < result.length; i++){
+							target.jqGrid("setCell", result[i].componentId, "filePath", result[i].filePath);
 						}
 						
 						target.jqGrid().trigger('reloadGrid');
@@ -1001,7 +997,7 @@
 				if(idx != "") {
 					changeTabInFrame(idx);
 				} else {
-					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/4"/>');
+					createTabInFrame(prjId+'_Identify', '#<c:url value="/project/identification/'+prjId+'/5"/>');
 				}
 			});
 			$("#packagingTab").click(function(){
@@ -1233,13 +1229,14 @@
 			
 			btn_div.show();
 			if(role=="ROLE_ADMIN"){ // 관리자 권한 일 경우
+				$("#approve").attr("disabled", false);
+				
 				switch(status){
 					case "":
 						btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-						$("#approve").attr("disabled",false);
 
 						break;
 					case "PROG":
@@ -1247,7 +1244,6 @@
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-						$("#approve").attr("disabled",false);
 
 						break;
 					case "REQ":
@@ -1255,9 +1251,7 @@
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-	
-						$("#approve").attr("disabled",true);
-
+						
 						break;
 						
 					case "REV":
@@ -1265,9 +1259,7 @@
 						btn_save.show();
 						btn_verify.show();
 						btn_savePath.show();
-	
-						$("#approve").attr("disabled",true);
-
+						
 						break;
 						
 					case "CONF":
@@ -1281,7 +1273,6 @@
 						$('#noticeEditor').prop('disabled', true);
 						$('#noticeEditor').css('opacity', 0.5);
 						
-						$("#approve").attr("disabled",true);
 						break;
 						
 				}
@@ -1959,7 +1950,7 @@
 		appendEditVisible : function(target){
 			var checked = $(target).prop("checked");
 			
-			if(checked) {
+			if(checked || "CONF" == curIdenStatus) {
 				$("#editAppend").show();
 			} else {
 				$("#editAppend").hide();
@@ -2098,7 +2089,7 @@
 				if(editAppendedYn == "Y"){
 					$("#append").trigger("click").attr("checked", true);
 
-					if(CKEDITOR.instances.editor2) {
+					if(CKEDITOR.instances.editor2 && !appendReadOnlyFlag) {
 						CKEDITOR.instances.editor2.config.readOnly = false;
 					}
 				}

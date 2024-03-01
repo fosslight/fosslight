@@ -64,7 +64,15 @@
 				
 				// restrictions은 licenseMaster에서 String으로 선언되어 있기 때문에 gson변환시 에러가 발생
 				// array형으로 받을 수 있도록 다른이름에 재설정한다.
-				data.arrRestriction = data.restrictions;
+				if (typeof data.restrictions !== "undefined") {
+					if (Array.isArray(data.restrictions)) {
+						data.arrRestriction = data.restrictions;
+					} else {
+						var restrictionArr = [];
+						restrictionArr.push(data.restrictions);
+						data.arrRestriction = restrictionArr;
+					}
+				}
 				data.restrictions = "";
 				
 				$.ajax({

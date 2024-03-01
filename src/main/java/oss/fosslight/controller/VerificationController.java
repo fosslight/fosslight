@@ -84,6 +84,8 @@ public class VerificationController extends CoTopComponent {
 		project.setPrjId(prjId);
 		
 		Project projectMaster = projectService.getProjectDetail(project);
+		projectMaster.setVulDocInfo(CommonFunction.getMessageForVulDOC(req, "info"));
+		projectMaster.setVulDocInst(CommonFunction.getMessageForVulDOC(req, "inst").replace("<br />", " "));
 		
 		if (!StringUtil.isEmpty(projectMaster.getCreator())){
 			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
@@ -134,6 +136,10 @@ public class VerificationController extends CoTopComponent {
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
 		
+		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
+			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());
+			model.addAttribute("vulDocFile", file);
+		}
 		model.addAttribute("verify", toJson(verificationService.getVerificationOne(project)));
 		model.addAttribute("ossList", toJson(list));
 		model.addAttribute("files", files);
@@ -152,6 +158,8 @@ public class VerificationController extends CoTopComponent {
 		project.setPrjId(prjId);
 		
 		Project projectMaster = projectService.getProjectDetail(project);
+		projectMaster.setVulDocInfo(CommonFunction.getMessageForVulDOC(req, "info"));
+		projectMaster.setVulDocInst(CommonFunction.getMessageForVulDOC(req, "inst"));
 		
 		if (!StringUtil.isEmpty(projectMaster.getCreator())){
 			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
@@ -173,6 +181,7 @@ public class VerificationController extends CoTopComponent {
 		}
 		
 		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
+		list = verificationService.setMergeGridData(list);
 		
 		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();
 		// 중목제거용
@@ -201,7 +210,10 @@ public class VerificationController extends CoTopComponent {
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId()));
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
 		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
-		
+		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
+			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());
+			model.addAttribute("vulDocFile", file);
+		}
 		model.addAttribute("verify", toJson(verificationService.getVerificationOne(project)));
 		model.addAttribute("ossList", toJson(list));
 		model.addAttribute("files", files);
@@ -228,13 +240,14 @@ public class VerificationController extends CoTopComponent {
 
 		Map<String, MultipartFile> fileMap = req.getFileMap();
 		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
-
+		String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
+		
 		//파일 등록
 		if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1 ) {
 			file.setCreator(loginUserName());
 
 			//파일 확장자 체크
-			String codeExp = codeMapper.getCodeDetail("120", "16").getCdDtlExp();
+			String codeExp = !fileSeq.equals("4") ? codeMapper.getCodeDetail("120", "16").getCdDtlExp() : codeMapper.getCodeDetail("120", "40").getCdDtlExp();
 			String[] exts = codeExp.split(",");
 			boolean fileExtCheck = false;
 			for (String s : exts) {
@@ -257,9 +270,7 @@ public class VerificationController extends CoTopComponent {
 		resultList.add(list);
 		
 		// 20210625_fileUpload 시 projectMaster table save_START
-		String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
 		String registFileId = list.get(0).getRegistSeq();
-		
 		verificationService.setUploadFileSave(prjId, fileSeq, registFileId);
 		// 20210625_fileUpload 시 projectMaster table save_END
 		
@@ -271,9 +282,13 @@ public class VerificationController extends CoTopComponent {
 				MimeTypeUtils.APPLICATION_JSON_VALUE+"; charset=utf-8"})
 	public @ResponseBody ResponseEntity<Object> uploadVerification(File file, MultipartHttpServletRequest req, HttpServletRequest request, HttpServletResponse res, Model model) throws Exception{
 		log.info("URI: "+ "/project/verification/uploadVerification");
+		Project projectMaster = new Project();
+		projectMaster.setPrjId(req.getParameter("prjId"));
+		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
+		list = verificationService.setMergeGridData(list);
 		
 		//엑셀 분석
-		List<ProjectIdentification> verificationList = ExcelUtil.getVerificationList(req, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+		List<OssComponents> verificationList = ExcelUtil.getVerificationList(req, list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
 		
 		if (verificationList == null) {
 			return makeJsonResponseHeader(false, "");
@@ -390,6 +405,8 @@ public class VerificationController extends CoTopComponent {
 			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
 			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
 			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
+			@RequestParam(value="allowDownloadCDXJsonYn", defaultValue="")String allowDownloadCDXJsonYn, //
+			@RequestParam(value="allowDownloadCDXXmlYn", defaultValue="")String allowDownloadCDXXmlYn, //
 			OssNotice ossNotice	//
 			) throws IOException {
 		log.info("URI: "+ "/project/verification/noticeAjax");
@@ -444,17 +461,17 @@ public class VerificationController extends CoTopComponent {
 				project.setAllowDownloadSPDXTagYn(allowDownloadSPDXTagYn);
 				project.setAllowDownloadSPDXJsonYn(allowDownloadSPDXJsonYn);
 				project.setAllowDownloadSPDXYamlYn(allowDownloadSPDXYamlYn);
+				project.setAllowDownloadCDXJsonYn(allowDownloadCDXJsonYn);
+				project.setAllowDownloadCDXXmlYn(allowDownloadCDXXmlYn);
 				
 				project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
 				
 				// 프로젝트 기본정보의 distribution type이 verify까지만인 경우, distribute status를 N/A 처리한다.
 				{
 					prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
-					
-					if ("T".equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase())
-							|| (CoConstDef.FLAG_NO.equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType())).trim().toUpperCase()) 
-									&& verificationService.checkNetworkServer(ossNotice.getPrjId())
-							)
+					String distributionType = codeMapper.getCodeDetail(CoConstDef.CD_DISTRIBUTION_TYPE, prjInfo.getDistributionType()).getCdDtlExp();
+					if ("T".equalsIgnoreCase(avoidNull(distributionType))
+							|| (CoConstDef.FLAG_NO.equalsIgnoreCase(avoidNull(distributionType)) && verificationService.checkNetworkServer(ossNotice.getPrjId()))
 							|| CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(prjInfo.getDistributeTarget()) // 배포사이트 사용안함으로 설정한 경우
 							) {
 						project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
@@ -555,25 +572,14 @@ public class VerificationController extends CoTopComponent {
 		log.info("URI: "+ "/project/verification/reportAjax");
 		log.debug("PARAM: "+ "prjId="+prjId);
 
-		OssNotice ossNotice = new OssNotice();
-		ossNotice.setDomain(CommonFunction.getDomain(req));
-		ossNotice.setPrjId(prjId);
-
 		String resultHtml = "";
 
 		try {
-			ossNotice.setDomain(CommonFunction.getDomain(req)); // domain Setting
-
-			Project prjMasterInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
-			String noticeFileId = prjMasterInfo.getNoticeFileId();
-			log.debug("PARAM: "+ "noticeFileId="+noticeFileId);
-
 			// create review file
-			if (isEmpty(noticeFileId)) {
-				if (!verificationService.getReviewReportPdfFile(ossNotice)) {
-					return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
-				}
+			if (!verificationService.getReviewReportPdfFile(prjId)) {
+				return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
 			}
+
 		} catch (Exception e) {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
@@ -638,6 +644,8 @@ public class VerificationController extends CoTopComponent {
 			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
 			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
 			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
+			@RequestParam(value="allowDownloadCDXJsonYn", defaultValue="")String allowDownloadCDXJsonYn, //
+			@RequestParam(value="allowDownloadCDXXmlYn", defaultValue="")String allowDownloadCDXXmlYn, //
 			HttpServletResponse res, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/saveAjax");
 		
@@ -686,7 +694,9 @@ public class VerificationController extends CoTopComponent {
 		project.setAllowDownloadSPDXTagYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXTagYn 	 : CoConstDef.FLAG_NO);
 		project.setAllowDownloadSPDXJsonYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXJsonYn 	 : CoConstDef.FLAG_NO);
 		project.setAllowDownloadSPDXYamlYn(	 CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadSPDXYamlYn 	 : CoConstDef.FLAG_NO);
-
+		project.setAllowDownloadCDXJsonYn(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadCDXJsonYn 	 : CoConstDef.FLAG_NO);
+		project.setAllowDownloadCDXXmlYn(CoConstDef.FLAG_YES.equals(ossNotice.getEditNoticeYn()) ? allowDownloadCDXXmlYn 	 : CoConstDef.FLAG_NO);
+		
 		verificationService.updateProjectAllowDownloadBitFlag(project);
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
@@ -950,7 +960,7 @@ public class VerificationController extends CoTopComponent {
 
 		ResponseEntity<FileSystemResource> result = null;
 		String prjId = req.getParameter("prjId");
-		result = verificationService.getReviewReport(prjId, CommonFunction.emptyCheckProperty("notice.path", "/notice"));
+		result = verificationService.getReviewReport(prjId, CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport"));
 
 		return result;
 	}
@@ -988,5 +998,19 @@ public class VerificationController extends CoTopComponent {
 		}
 		
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
+	}
+	
+	@PostMapping(value=VERIFICATION.DELETE_FILE)
+	public @ResponseBody ResponseEntity<Object> deleteFile (@RequestBody Map<Object, Object> map, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception{
+		log.info("URI: "+ "/project/verification/deleteFile");
+		
+		try {
+			verificationService.deleteFile(map);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+		
+		return makeJsonResponseHeader();
 	}
 }

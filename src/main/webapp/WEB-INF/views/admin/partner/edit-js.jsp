@@ -27,7 +27,6 @@ var saveFlag = false;
 		evt.init();
 		evt.tabInit();
 		datas.init();
-		grid.init();
 
 		<c:if test="${batFlag}">
 		//if('${detail.partnerId}' != ""){
@@ -2130,7 +2129,7 @@ var saveFlag = false;
 	    	});
 	    	
 	    	return checkEmptyFlag;
-		}
+		},
 		downloadSpdxSpreadSheetExcel : function(){
 			var partnerId = "${detail.partnerId}";
 			if ("" !== partnerId) {
@@ -2263,6 +2262,7 @@ var saveFlag = false;
 			if('${detail.partnerId}' != "") {
 				fn.getPartyGridData();
 			} else {
+				grid.init();
 				partyMainData = [];
 				partySubData = [];
 			}

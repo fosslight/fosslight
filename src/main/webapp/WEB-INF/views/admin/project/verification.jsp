@@ -162,7 +162,7 @@
 													<span class="checkSet"></span>	
 												</div>
 												<div class="uploadSet" id="fileUplWarnMessage_${i}" style="display:none;">
-													<span>* The maximum file size for uploading is 4GB.</span>
+													<span>* The maximum file size for uploading is 5GB.</span>
 												</div>
 											</div>
 										</c:if>
