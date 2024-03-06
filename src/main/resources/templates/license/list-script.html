@@ -347,6 +347,7 @@
                     rowNum: rowNum,
                     rowList: rowList,
                     autowidth: true,
+                    toppager: true,
                     pager: '#pager',
                     gridview: true,
                     sortable: function (permutation) {
@@ -439,7 +440,7 @@
                         }
 
                         /* columns licalization */
-                        var parentElement = document.querySelector('#pg_pager #pager_left');
+                        var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
                         var setUpColumnButton = document.getElementById('setUpColumnButton');
 
                         if (!setUpColumnButton) {

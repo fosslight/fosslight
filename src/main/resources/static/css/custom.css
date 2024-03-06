@@ -30,7 +30,7 @@ ul { list-style-type: none; }
 .content-wrapper.iframe-mode .navbar-nav .nav-link.active {color: #333;background-color: #fff;margin-top: .3rem;border: none;border-radius: .2rem .2rem 0 0;}
 .content-wrapper.iframe-mode .btn-iframe-close { color: #333;right: .5rem;top: .5rem;z-index: 10;background-color: #d8d8d8;border-radius: 15px;height: 15px;width: 15px;display: flex;align-items: center;justify-content: center; }
 .content-wrapper.iframe-mode .navbar-nav .fas {font-size: xx-small;}
-
+.content-wrapper {background-color: #f0f3f9; }
 /* text */
 .custom-layout .text-lg-red { color: #a50034; }
 .custom-layout .text-orange { color: #ff5a00; }
@@ -149,7 +149,7 @@ ul { list-style-type: none; }
 .custom-layout .help-link.dropdown-toggle:hover { background-color: #dc3545; color: #fff !important;}
 .custom-layout .helpLink.dropdown .dropdown-menu { top: 3px !important; }
 .custom-layout .helpLink.f-left.dropdown .dropdown-menu { left: -45px !important; }
-.custom-layout .ui-jqgrid .dropdown-menu.col-local { top: -445px !important;left: 5px !important; width: 300px; }
+.custom-layout .ui-jqgrid .dropdown-menu.col-local { top: 35px !important;left: 5px !important; width: 300px; }
 .custom-layout .ui-jqgrid .dropdown-menu.col-local a{ color: #0070c0; text-decoration: none; font-weight: normal }
 .custom-layout .ui-jqgrid .dropdown-menu.col-local a:hover { color: #0070c0; text-decoration: underline; font-weight: normal }
 
@@ -421,7 +421,7 @@ tr.ui-row-ltr,
 }
 
 .ui-jqgrid .ui-jqgrid-hbox table.ui-jqgrid-htable {
-    background-color: #f8f9fa;
+    background-color: #f9faff;
     border: none;
 }
 
@@ -504,7 +504,8 @@ tr.ui-search-toolbar input  {
     padding: 3px;
     border-radius: 4px;
 }
-
+.ui-jqgrid #pager { border-bottom: 1px solid #dee2e6 !important; }
+.ui-jqgrid #list_toppager { border-top: 1px solid #dee2e6 !important; height: 37px !important; padding: 3px 5px !important; }
 .ui-jqgrid #list_toppager, .ui-jqgrid #pager { overflow: visible; }
 .ui-jqgrid #pg_list_toppager #list_toppager_center, .ui-jqgrid #pg_list_toppager #list_toppager_right { display: none; }
 

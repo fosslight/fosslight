@@ -433,6 +433,7 @@
                     rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
                     rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]]),
                     autowidth: true,
+                    toppager: true,
                     pager: '#pager',
                     gridview: true,
                     viewrecords: true,
@@ -541,7 +542,7 @@
                         $('.listghead_0').hide(); // hide basic groupHeader
 
                         /* columns licalization */
-                        var parentElement = document.querySelector('#pg_pager #pager_left');
+                        var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
                         var setUpColumnButton = document.getElementById('setUpColumnButton');
 
                         if (!setUpColumnButton) {

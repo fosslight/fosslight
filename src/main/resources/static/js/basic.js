@@ -3402,7 +3402,7 @@ let savedColNames = [];
 function createDropdownButton() {
     var newButton = document.createElement('button');
     newButton.setAttribute('type', 'button');
-    newButton.classList.add('btn', 'btn-lg', 'btn-grid-light-gray', 'float-left', 'mr-1');
+    newButton.classList.add('btn', 'btn-sm', 'btn-grid-light-gray', 'float-left', 'mr-1');
     newButton.setAttribute('data-toggle', 'dropdown');
     newButton.setAttribute('id', 'setUpColumnButton');
     newButton.setAttribute('aria-expanded', 'false');

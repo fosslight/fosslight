@@ -264,6 +264,7 @@ var list = {
 			rowList: rowList,
 			editurl:'clientArray',
  			autowidth: true,
+            toppager: true,
 			pager: '#pager',
 			gridview: true,
 			sortable: function (permutation) {
@@ -297,7 +298,7 @@ var list = {
 				}
 
                 /* columns licalization */
-                var parentElement = document.querySelector('#pg_pager #pager_left');
+                var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
                 var setUpColumnButton = document.getElementById('setUpColumnButton');
 
                 if (!setUpColumnButton) {
