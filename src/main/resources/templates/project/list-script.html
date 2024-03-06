@@ -2052,6 +2052,7 @@ var list = {
                 if (!setUpColumnButton) {
                     var division = 'project';
                     var totalColInfos = [
+                        {'Checkbox' : 'cb'},
                         {'ID' : 'prjId'},
                         {'Project Name': 'prjName'},
                         {'Status': 'status'},
@@ -2061,13 +2062,7 @@ var list = {
                         {'Vulnerability(Max Score)': 'cvssScore'},
                         {'Division': 'division'},
                         {'Creator': 'creator'},
-                        {'Reviewer': 'reviewer'},
-                        {'Additional Information': 'comment'},
-                        {'distributionTypeOfCodeDtlExp': 'distributionTypeOfCodeDtlExp'},
-                        {'statusRequestYn': 'statusRequestYn'},
-                        {'priority': 'priority'},
-                        {'permission': 'permission'},
-                        {'statusPermission': 'statusPermission'}];
+                        {'Reviewer': 'reviewer'}]
                     var defaultColNames = ['prjId', 'prjName', 'status', 'progress']
                     var savedColNames = [];
 

@@ -3345,8 +3345,6 @@ function resetForm(el) {
         $(this).find('.select2').each(function () {
             var $select = $(this);
             $select.find('option:selected').remove();
-
-            // 선택된 값을 초기화하고 변경 이벤트를 트리거합니다.
             $select.val(null).trigger('change');
         })
     });
@@ -3554,11 +3552,9 @@ function restoreDefaults() {
     checkboxes.forEach(function(checkbox) {
         const id = checkbox.id.replace('col_option_', '');
         if (defaultColNames.includes(id)) {
-            console.log("click :: " + id);
             checkbox.checked = true;
 
         } else {
-            console.log("unclick :: " + id);
             checkbox.checked = false;
         }
     });

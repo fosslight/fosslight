@@ -306,14 +306,11 @@ var list = {
                     var totalColInfos = [
                         {'ID' : 'prjId'},
                         {'Project Name (Version)': 'prjName'},
-                        {'Version': 'prjVersion'},
-                        {'Operating System': 'osType'},
                         {'Download': 'download'},
                         {'Vulnerability': 'cvssScore'},
                         {'Division': 'division'},
                         {'Creator': 'creator'},
-                        {'Created Date': 'createdDate'},
-                        {'oss count': 'ossCount'}];
+                        {'Created Date': 'createdDate'}];
 
                     if ([[${!distributionFlag}]]) {
                         totalColInfos.push({'Distribution Type': 'distributionType'});

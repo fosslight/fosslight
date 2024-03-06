@@ -894,6 +894,7 @@ var partnerList = {
 			rowList: rowList,
 			editurl:'clientArray',
 			autowidth: true,
+            toppager: true,
 			pager: '#pager',
 			gridview: true,
 			sortable: function(permutation){
@@ -961,6 +962,56 @@ var partnerList = {
 						}							
 					}
 				}
+
+                /* columns licalization */
+                var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
+                var setUpColumnButton = document.getElementById('setUpColumnButton');
+
+                if (!setUpColumnButton) {
+                    var division = 'partner';
+                    var totalColInfos = [
+                        {'Checkbox' : 'cb'},
+                        {'ID' : 'partnerId'},
+                        {'3rd Party Name': 'partnerName'},
+                        {'Software Name (Version)': 'softwareName'},
+                        {'Software Version': 'softwareVersion'},
+                        {'Status': 'status'},
+                        {'Delivery Form': 'deliveryForm'},
+                        {'Description': 'description'},
+                        {'CVE ID': 'cveId'},
+                        {'Vulnerability': 'cvssScore'},
+                        {'Division': 'division'},
+                        {'Creator': 'creator'},
+                        {'Created Date': 'createdDate'},
+                        {'Updated Date': 'modifiedDate'},
+                        {'Reviewer': 'reviewer'}];
+                    var defaultColNames = ['partnerId', 'partnerName', 'softwareName', 'status']
+                    var savedColNames = [];
+
+                    var dropdownMenuOptions = {
+                        _division: division,
+                        _totalColInfos: totalColInfos,
+                        _defaultColNames: defaultColNames,
+                        _savedColNames: savedColNames
+                    };
+
+                    var dropdownArea = document.createElement('div');
+                    dropdownArea.className = 'dropdown';
+                    var newButton = createDropdownButton();
+                    var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+
+                    dropdownArea.appendChild(newButton);
+                    dropdownArea.appendChild(dropdownMenu);
+
+                    parentElement.appendChild(dropdownArea);
+
+                    document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        var dropdownMenu = document.getElementById("setUpColumnMenu");
+                        dropdownMenu.classList.toggle("show");
+                    });
+                }
+
 // 				if(!gridTooltip.existTooltip){
 // 					$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_status"))
 // 						.attr("title", gridTooltip.tooltipCont).tooltip({

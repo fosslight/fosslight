@@ -344,23 +344,23 @@
                             return obj.records;
                         }
                     },
-                    colNames: ['', 'ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
+                    colNames: ['ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
                     colModel: [
                         {
-                            name: 'group', width: 20, align: 'center',
-                            cellattr: function (rowId, tv, rawObject, cm, rdata) {
-                                return ' colspan=2'
-                            },
+                            name: 'group', width: 90, align: 'center',
+                            // cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            //     return ' colspan=2'
+                            // },
                             formatter: function myFormatter(cellvalue, options, rowObject) {
                                 return rowObject.ossId;
                             }
                         }
-                        , {
-                            name: 'ossId', index: 'ossId', width: 80, align: 'center',
-                            cellattr: function (rowId, tv, rawObject, cm, rdata) {
-                                return ' style="display:none;"';
-                            }
-                        }
+                        // , {
+                        //     name: 'space', index: '', width: 80, align: 'center',
+                        //     cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                        //         return ' style="display:none;"';
+                        //     }
+                        // }
                         , {
                             name: 'ossType',
                             index: 'ossType',
@@ -548,7 +548,7 @@
                         if (!setUpColumnButton) {
                             var division = 'oss';
                             var totalColInfos = [
-                                {'ID': 'id'},
+                                {'ID': 'group'},
                                 {'OSS Type': 'ossType'},
                                 {'OSS Name': 'ossName'},
                                 {'OSS Version': 'ossVersion'},
@@ -558,7 +558,7 @@
                                 {'DownloadLocation': 'downloadLocation'},
                                 {'Homepage': 'homepage'},
                                 {'Description': 'description'},
-                                {'CVE ID': 'cveId'}];
+                                {'Vulnerability': 'cveId'}];
                             var defaultColNames = ['ossName', 'ossVersion', 'licenseName', 'obligation']
                             var savedColNames = [];
 
