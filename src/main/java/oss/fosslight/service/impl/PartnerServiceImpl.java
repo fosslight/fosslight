@@ -560,17 +560,18 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		projectMapper.updateComponentsLicenseInfo(project);
 		
 		// 상태 변경
-		changeStatus(partnerMaster);		
+		changeStatus(partnerMaster, false);
 	}
 	
 	@Override
 	@CacheEvict(value="autocompletePartnerCache", allEntries=true)
-	public void changeStatus(PartnerMaster partnerMaster) {
+	public void changeStatus(PartnerMaster partnerMaster, boolean isCoReviewer) {
 		CoMail mailBean = null;
 		
+
 		if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(partnerMaster.getStatus())) {
 			PartnerMaster orgPartnerMaster = partnerMapper.selectPartnerMaster(partnerMaster);
-			if (isEmpty(orgPartnerMaster.getReviewer())) {
+			if (isEmpty(orgPartnerMaster.getReviewer()) && !isCoReviewer) {
 				partnerMaster.setReviewer(partnerMaster.getLoginUserName());
 				mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED);
 				mailBean.setToIds(new String[] {partnerMaster.getLoginUserName()});
