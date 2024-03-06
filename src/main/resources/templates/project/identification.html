@@ -348,7 +348,7 @@
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
                                                         <div class="col-10">
-                                                            <a class="btn btn-yellow-04 btn-sm float-right px-3" th:onclick="|dep_fn.showDialog()|" th:text="load"></a>
+                                                            <a class="btn btn-outline-lg-red btn-sm float-right px-3" th:onclick="|dep_fn.showDialog()|" th:text="load"></a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -481,7 +481,7 @@
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
                                                         <div class="col-10">
-                                                            <a class="btn btn-yellow-04 btn-sm float-right px-3" th:onclick="|src_fn.showDialog()|" th:text="load"></a>
+                                                            <a class="btn btn-outline-lg-red btn-sm float-right px-3" th:onclick="|src_fn.showDialog()|" th:text="load"></a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -639,7 +639,7 @@
                                                     <div class="row">
                                                         <div class="col-2" th:text="'Detail preview'"></div>
                                                         <div class="col-10">
-                                                            <a class="btn btn-yellow-04 btn-xs float-right px-3" th:onclick="|bin_fn.showDialog()|" th:text="load" style="font-size: .8rem"></a>
+                                                            <a class="btn btn-outline-lg-red btn-xs float-right px-3" th:onclick="|bin_fn.showDialog()|" th:text="load" style="font-size: .8rem"></a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -705,9 +705,9 @@
                                         <button th:if="${project.dropYn != 'Y' and @CommonFunction.isAdmin()}" 
                                         		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Check Oss Name'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'Check License'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.bulkEdit('DEP')|" th:text="'Bulk Edit'"></button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -743,9 +743,9 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Check Oss Name'"></button>
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Check Oss Name'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'Check License'"></button>
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'Check License'"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:onclick="|com_fn.bulkEdit('SRC')|" th:text="'Bulk Edit'"></button>
                                     </div>
@@ -781,9 +781,9 @@
                                 <div class="col-md-6">
                                     <div class="row float-left pl-2">
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:text="'Check Oss Name'" th:onclick="|com_fn.CheckOssViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                        		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
+                                        		type="button" class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:text="'Check License'" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"></button>
                                         <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
                                         		type="button" class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn" th:text="'Bulk Edit'" th:onclick="|com_fn.bulkEdit('BIN')|"></button>
                                     </div>

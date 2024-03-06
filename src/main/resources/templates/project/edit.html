@@ -290,7 +290,7 @@
                                 			<a th:onclick="|fn.exeProjectComplete('N')|" class="btn btn-danger float-right" th:text="Open"></a>
                                 		</th:block>
                                 		<th:block th:if="${project.completeYn == 'Y' and project.statusRequestYn == 'Y'}">
-                                			<a id="reqToOpen" class="btn btn-dangerpink float-right" th:text="'Requested to Open'"></a>
+                                			<a id="reqToOpen" class="btn btn-danger float-right" th:text="'Requested to Open'"></a>
                                 		</th:block>
                                 	</th:block>
                                 	<th:block th:unless="${@CommonFunction.isAdmin()}">
