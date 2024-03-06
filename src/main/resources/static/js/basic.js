@@ -3402,7 +3402,7 @@ let savedColNames = [];
 function createDropdownButton() {
     var newButton = document.createElement('button');
     newButton.setAttribute('type', 'button');
-    newButton.classList.add('btn', 'btn-lg', 'btn-grid-light-gray', 'float-right', 'mr-1');
+    newButton.classList.add('btn', 'btn-lg', 'btn-grid-light-gray', 'float-left', 'mr-1');
     newButton.setAttribute('data-toggle', 'dropdown');
     newButton.setAttribute('id', 'setUpColumnButton');
     newButton.setAttribute('aria-expanded', 'false');
@@ -3426,7 +3426,7 @@ function createDropdownMenu(options) {
 
     dropdownMenu.appendChild(titleArea);
     dropdownMenu.appendChild(createDivider());
-    dropdownMenu.appendChild(createMenuItem('Restore Defaults', 'text-danger', 'dropdown-item'));
+    dropdownMenu.appendChild(createMenuItem('Restore Defaults', '#', 'dropdown-item', 'restoreDefaults()'))
 
     const dropdownItemArea = document.createElement('div');
     dropdownItemArea.style.height = '300px';
@@ -3445,11 +3445,16 @@ function createDropdownMenu(options) {
     return dropdownMenu;
 }
 
-function createMenuItem(text, href, className) {
+function createMenuItem(text, href, className, onClickFunction) {
     const menuItem = document.createElement('a');
     menuItem.className = className;
     menuItem.href = href;
     menuItem.textContent = text;
+    menuItem.onclick = function(event) {
+        event.preventDefault();
+        onClickFunction();
+    };
+    menuItem.setAttribute("onclick", onClickFunction);
     return menuItem;
 }
 
@@ -3469,7 +3474,7 @@ function createCheckboxItem(label, id) {
     const inputCheckbox = document.createElement('input');
     inputCheckbox.className = 'custom-control-input';
     inputCheckbox.type = 'checkbox';
-    inputCheckbox.id = id;
+    inputCheckbox.id = 'col_option_'+ id;
 
     if (defaultColNames.includes(id)) {
         inputCheckbox.checked = true;
@@ -3482,7 +3487,7 @@ function createCheckboxItem(label, id) {
 
     const labelCheckbox = document.createElement('label');
     labelCheckbox.className = 'custom-control-label';
-    labelCheckbox.htmlFor = id;
+    labelCheckbox.htmlFor = 'col_option_'+ id;
     labelCheckbox.style.paddingTop = '2px';
     labelCheckbox.style.fontWeight = '400';
     labelCheckbox.textContent = label;
@@ -3510,27 +3515,28 @@ function saveColumnLocalization() {
 
     const checkedColNames = [];
     checkedIds.forEach(function(id) {
-        var colName = id.replace('customCheckbox', '');
+        var colName = id.replace('col_option_', '');
         checkedColNames.push(colName);
     });
 
     const grid = $("#list");
-    const allColNames = grid.jqGrid('getGridParam', 'colNames');
+    const allColNames = grid.jqGrid('getGridParam', 'colModel');
     allColNames.forEach(function(colName, index) {
-        if (checkedColNames.includes(colName)) {
-            grid.jqGrid('showCol', colName);
+        let _colName = colName.name
+        if (checkedColNames.includes(_colName)) {
+            grid.jqGrid('showCol', _colName);
         } else {
-
-            console.log("hide ::" + colName);
-            grid.jqGrid('hideCol', colName);
+            grid.jqGrid('hideCol', _colName);
         }
     });
+
+    resizingJqGidSet();
 }
 
 function createButtonArea() {
     var buttonArea = document.createElement("div");
     buttonArea.appendChild(createButton('Save', 'btn btn-ivory float-right mr-1 text-sm', 'saveColumnLocalization()'));
-    buttonArea.appendChild(createButton('Cancel', 'btn btn-default float-right mr-1 text-sm'));
+    buttonArea.appendChild(createButton('Cancel', 'btn btn-default float-right mr-1 text-sm', 'removeDropdownMenu()'));
     return buttonArea;
 }
 
@@ -3540,6 +3546,26 @@ function createButton(text, className, clickFunction) {
     button.textContent = text;
     button.setAttribute("onclick", clickFunction);
     return button;
+}
+
+function restoreDefaults() {
+    event.preventDefault();
+    const checkboxes = document.querySelectorAll('.custom-control-input');
+    checkboxes.forEach(function(checkbox) {
+        const id = checkbox.id.replace('col_option_', '');
+        if (defaultColNames.includes(id)) {
+            console.log("click :: " + id);
+            checkbox.checked = true;
+
+        } else {
+            console.log("unclick :: " + id);
+            checkbox.checked = false;
+        }
+    });
+}
+
+function removeDropdownMenu() {
+    $("#setUpColumnMenu").removeClass("show");
 }
 
 

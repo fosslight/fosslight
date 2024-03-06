@@ -2044,6 +2044,56 @@ var list = {
 
                     gridTooltip.existTooltip = true;
                 }
+
+                /* columns licalization */
+                var parentElement = document.querySelector('#pg_pager #pager_left');
+                var setUpColumnButton = document.getElementById('setUpColumnButton');
+
+                if (!setUpColumnButton) {
+                    var division = 'project';
+                    var totalColInfos = [
+                        {'ID' : 'prjId'},
+                        {'Project Name': 'prjName'},
+                        {'Status': 'status'},
+                        {'OSC Process': 'progress'},
+                        {'Download': 'download'},
+                        {'Distribution Type': 'distributionType'},
+                        {'Vulnerability(Max Score)': 'cvssScore'},
+                        {'Division': 'division'},
+                        {'Creator': 'creator'},
+                        {'Reviewer': 'reviewer'},
+                        {'Additional Information': 'comment'},
+                        {'distributionTypeOfCodeDtlExp': 'distributionTypeOfCodeDtlExp'},
+                        {'statusRequestYn': 'statusRequestYn'},
+                        {'priority': 'priority'},
+                        {'permission': 'permission'},
+                        {'statusPermission': 'statusPermission'}];
+                    var defaultColNames = ['prjId', 'prjName', 'status', 'progress']
+                    var savedColNames = [];
+
+                    var dropdownMenuOptions = {
+                        _division: division,
+                        _totalColInfos: totalColInfos,
+                        _defaultColNames: defaultColNames,
+                        _savedColNames: savedColNames
+                    };
+
+                    var dropdownArea = document.createElement('div');
+                    dropdownArea.className = 'dropdown';
+                    var newButton = createDropdownButton();
+                    var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+
+                    dropdownArea.appendChild(newButton);
+                    dropdownArea.appendChild(dropdownMenu);
+
+                    parentElement.appendChild(dropdownArea);
+
+                    document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        var dropdownMenu = document.getElementById("setUpColumnMenu");
+                        dropdownMenu.classList.toggle("show");
+                    });
+                }
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {
 				

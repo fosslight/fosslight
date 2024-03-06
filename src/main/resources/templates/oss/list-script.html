@@ -433,8 +433,6 @@
                     rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
                     rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]]),
                     autowidth: true,
-                    toppager:true,
-                    buttompager: false,
                     pager: '#pager',
                     gridview: true,
                     viewrecords: true,
@@ -543,7 +541,7 @@
                         $('.listghead_0').hide(); // hide basic groupHeader
 
                         /* columns licalization */
-                        var parentElement = document.querySelector('#list_toppager');
+                        var parentElement = document.querySelector('#pg_pager #pager_left');
                         var setUpColumnButton = document.getElementById('setUpColumnButton');
 
                         if (!setUpColumnButton) {
@@ -561,7 +559,7 @@
                                 {'Description': 'description'},
                                 {'CVE ID': 'cveId'}];
                             var defaultColNames = ['ossName', 'ossVersion', 'licenseName', 'obligation']
-                            var savedColNames = ['description', 'cveId'];
+                            var savedColNames = [];
 
                             var dropdownMenuOptions = {
                                 _division: division,

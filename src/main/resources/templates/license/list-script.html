@@ -437,6 +437,54 @@
                                 });
                             }
                         }
+
+                        /* columns licalization */
+                        var parentElement = document.querySelector('#pg_pager #pager_left');
+                        var setUpColumnButton = document.getElementById('setUpColumnButton');
+
+                        if (!setUpColumnButton) {
+                            var division = 'license';
+                            var totalColInfos = [
+                                {'ID' : 'licenseId'},
+                                {'License Name (Identifier)': 'licenseName'},
+                                {'Identifier': 'shortIdentifier'},
+                                {'License Type': 'licenseType'},
+                                {'Restriction': 'restriction'},
+                                {'Obligation': 'obligation'},
+                                {'Website': 'webpage'}];
+
+                            if ([[${@CommonFunction.isAdmin()}]]) {
+                                totalColInfos.push({'Creator': 'creator'});
+                                totalColInfos.push({'Created Date': 'createdDate'});
+                                totalColInfos.push({'Modifier': 'modifier'});
+                                totalColInfos.push({'Modified Date': 'modifiedDate'});
+                            }
+                            var defaultColNames = ['licenseName', 'restriction', 'obligation']
+                            var savedColNames = [];
+
+                            var dropdownMenuOptions = {
+                                _division: division,
+                                _totalColInfos: totalColInfos,
+                                _defaultColNames: defaultColNames,
+                                _savedColNames: savedColNames
+                            };
+
+                            var dropdownArea = document.createElement('div');
+                            dropdownArea.className = 'dropdown';
+                            var newButton = createDropdownButton();
+                            var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+
+                            dropdownArea.appendChild(newButton);
+                            dropdownArea.appendChild(dropdownMenu);
+
+                            parentElement.appendChild(dropdownArea);
+
+                            document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+                                event.stopPropagation();
+                                var dropdownMenu = document.getElementById("setUpColumnMenu");
+                                dropdownMenu.classList.toggle("show");
+                            });
+                        }
                     },
                     onSelectRow: function (id) {
                         $('#' + id + 'description').width(130).height(140);

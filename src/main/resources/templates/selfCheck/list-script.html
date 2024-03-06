@@ -295,6 +295,54 @@ var list = {
 						alertify.alert([[#{msg.common.search.check.date}]], function(){});
 					}
 				}
+
+                /* columns licalization */
+                var parentElement = document.querySelector('#pg_pager #pager_left');
+                var setUpColumnButton = document.getElementById('setUpColumnButton');
+
+                if (!setUpColumnButton) {
+                    var division = 'selfCheck';
+                    var totalColInfos = [
+                        {'ID' : 'prjId'},
+                        {'Project Name (Version)': 'prjName'},
+                        {'Version': 'prjVersion'},
+                        {'Operating System': 'osType'},
+                        {'Download': 'download'},
+                        {'Vulnerability': 'cvssScore'},
+                        {'Division': 'division'},
+                        {'Creator': 'creator'},
+                        {'Created Date': 'createdDate'},
+                        {'oss count': 'ossCount'}];
+
+                    if ([[${!distributionFlag}]]) {
+                        totalColInfos.push({'Distribution Type': 'distributionType'});
+                    }
+                    var defaultColNames = ['id', 'prjName']
+                    var savedColNames = [];
+
+                    var dropdownMenuOptions = {
+                        _division: division,
+                        _totalColInfos: totalColInfos,
+                        _defaultColNames: defaultColNames,
+                        _savedColNames: savedColNames
+                    };
+
+                    var dropdownArea = document.createElement('div');
+                    dropdownArea.className = 'dropdown';
+                    var newButton = createDropdownButton();
+                    var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+
+                    dropdownArea.appendChild(newButton);
+                    dropdownArea.appendChild(dropdownMenu);
+
+                    parentElement.appendChild(dropdownArea);
+
+                    document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+                        event.stopPropagation();
+                        var dropdownMenu = document.getElementById("setUpColumnMenu");
+                        dropdownMenu.classList.toggle("show");
+                    });
+                }
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {},
 			ondblClickRow: function(rowid,iRow,iCol,e) {

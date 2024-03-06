@@ -149,7 +149,7 @@ ul { list-style-type: none; }
 .custom-layout .help-link.dropdown-toggle:hover { background-color: #dc3545; color: #fff !important;}
 .custom-layout .helpLink.dropdown .dropdown-menu { top: 3px !important; }
 .custom-layout .helpLink.f-left.dropdown .dropdown-menu { left: -45px !important; }
-.custom-layout .ui-jqgrid .dropdown-menu.col-local { top: 35px !important;left: -250px !important; width: 300px; }
+.custom-layout .ui-jqgrid .dropdown-menu.col-local { top: -445px !important;left: 5px !important; width: 300px; }
 .custom-layout .ui-jqgrid .dropdown-menu.col-local a{ color: #0070c0; text-decoration: none; font-weight: normal }
 .custom-layout .ui-jqgrid .dropdown-menu.col-local a:hover { color: #0070c0; text-decoration: underline; font-weight: normal }
 
@@ -505,7 +505,7 @@ tr.ui-search-toolbar input  {
     border-radius: 4px;
 }
 
-.ui-jqgrid #list_toppager { overflow: visible; }
+.ui-jqgrid #list_toppager, .ui-jqgrid #pager { overflow: visible; }
 .ui-jqgrid #pg_list_toppager #list_toppager_center, .ui-jqgrid #pg_list_toppager #list_toppager_right { display: none; }
 
 .ui-jqgrid .ui-pg-table td:nth-child(3) div[dir="ltr"]{
