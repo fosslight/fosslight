@@ -32,7 +32,7 @@
                                     </th:block>
                                     <th:block
                                             th:unless="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
-                                        <span class="text-yellow text-md text-bold">Review</span>
+                                        <span class="text-yellow t  ext-md text-bold">Review</span>
                                     </th:block>
                                 </th:block>
                                 <th:block th:if="${project.status == 'COMP'}">

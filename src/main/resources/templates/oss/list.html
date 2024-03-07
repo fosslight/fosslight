@@ -146,8 +146,6 @@
                                         </div>
                                     </div>
                                     <th:block sec:authorize="hasRole('ROLE_ADMIN')">
-                                        <a class="small-box-footer mb-2" href="#" id="moreInfoBtn">More <i
-                                                class="fas fa-arrow-circle-down"></i></a>
                                         <div class="more-search" id="moreSearchContent">
                                             <div class="row mb-2">
                                                 <div class="col-md-3">
@@ -201,63 +199,15 @@
                                                         </th:block>
                                                     </select>
                                                 </div>
-                                                <div class="col-md-3 ml-4 d-flex">
-                                                    <div class="width-5rem">
-                                                        <div class="form-check">
-                                                            <div class="form-check-input">
-                                                                <input class="form-check-input" id="noneLicenseFlag"
-                                                                       name="ossTypeSearch" type="checkbox" value="N"/>
-                                                                <label class="form-check-label text-blue-gray mb-2"
-                                                                       for="noneLicenseFlag" style="font-weight: normal"
-                                                                       title="None">
-                                                                    <span class="badge badge-dark"
-                                                                          th:text="None"></span>
-                                                                </label>
-                                                            </div>
 
-                                                        </div>
-                                                    </div>
-                                                    <div class="width-5rem">
-                                                        <div class="form-check">
-                                                            <div class="form-check-input">
-                                                                <input class="form-check-input" id="multiLicenseFlag"
-                                                                       name="ossTypeSearch" type="checkbox" value="M">
-                                                                <label class="form-check-label text-blue-gray mb-2"
-                                                                       for="multiLicenseFlag"
-                                                                       style="font-weight: normal" title="Multi">
-                                                                    <span class="badge badge-primary"
-                                                                          th:text="Multi"></span>
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="width-5rem">
-                                                        <div class="form-check">
-                                                            <div class="form-check-input">
-                                                                <input class="form-check-input" id="dualLicenseFlag"
-                                                                       name="ossTypeSearch" type="checkbox" value="D">
-                                                                <label class="form-check-label text-blue-gray mb-2"
-                                                                       for="dualLicenseFlag" style="font-weight: normal"
-                                                                       title="Dual">
-                                                                    <span class="badge badge-purple"
-                                                                          th:text="Dual"></span>
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="width-5rem">
-                                                        <div class="form-check">
-                                                            <div class="form-check-input">
-                                                                <input class="form-check-input" id="versionDiffFlag"
-                                                                       name="ossTypeSearch" type="checkbox" value="V"/>
-                                                                <label class="form-check-label text-blue-gray mb-2"
-                                                                       for="versionDiffFlag" style="font-weight: normal"
-                                                                       title="Version Difference">
-                                                                    <span class="badge badge-yellow"
-                                                                          th:text="v-Diff"></span>
-                                                                </label>
-                                                            </div>
-                                                        </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group mb-2">
+                                                        <select class="select2 save-value" multiple="multiple" name="ossTypeSearch" id="ossTypeSearchSelect" style="width: 100%;">
+                                                            <option th:text="None" th:value="N"></option>
+                                                            <option th:text="Multi" th:value="M"></option>
+                                                            <option th:text="Dual" th:value="D"></option>
+                                                            <option th:text="v-Diff" th:value="V"></option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>
