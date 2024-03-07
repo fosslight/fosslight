@@ -2529,7 +2529,19 @@
                         alertify.error([[#{msg.common.valid2}]], 0);
                     }
                 });
-            }
+            },
+            mvEditTab : function(prjId){
+                createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
+            },
+            mvIdentification : function(prjId){
+                createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/'+6);
+            },
+            mvVerification : function(prjId){
+                createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
+            },
+            mvSecurityTab : function(prjId){
+                createTabInFrame(prjId+'_Security', '/project/security/'+prjId);
+            },
         }
 
         var com_fn = {

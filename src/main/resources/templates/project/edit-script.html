@@ -1748,7 +1748,19 @@
 			copyConfirmClose : function() {
 				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
 				fn.closeAlertifyView();
-			}
+			},
+            mvEditTab : function(prjId){
+                createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
+            },
+            mvIdentification : function(prjId){
+                createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/'+6);
+            },
+            mvVerification : function(prjId){
+                createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
+            },
+            mvSecurityTab : function(prjId){
+                createTabInFrame(prjId+'_Security', '/project/security/'+prjId);
+            },
 		}
 	
 	var fn_comment = {

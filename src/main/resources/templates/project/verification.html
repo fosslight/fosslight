@@ -10,19 +10,210 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-8 text-left mt-2">
-                            <span class="description-percentage text-lg text-dark-gray text-bold" id="verifyPrjName"></span>
-                            <span class="text-dark-gray mx-1" id="verifyCreator"></span>
-                           	<span class="ml-2">
-                                <span class="badge badge-info text-sm px-2 py-1" id="editTab" style="cursor: pointer;" title="Go to Basic information tab">Basic Information</span>
-                                <span class="badge badge-orange text-sm px-2 py-1" id="identificationTab" style="cursor: pointer;" title="Go to Identification tab" th:text="Identification"></span>
-                                <th:block th:if="${project.secCode != null}">
-                                   <span class="badge badge-carrot text-sm px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">Security</span>
+                        <span class="description-percentage text-lg text-dark-gray">
+                            <a class="text-dark-gray text-bold hover-line" href="#"
+                               title="Go to Basic information tab" th:onclick="fn.mvEditTab([[${project.prjId}]])">[[${project.prjName}]]</a>
+                        </span>
+                            <span class="ml-2">
+                            <span class="mx-2">
+                                <th:block th:if="${project.status == 'DROP'}">
+                                    <span class="text-gray text-md text-bold">Drop</span>
+                                </th:block>
+                                <th:block th:if="${project.status == 'REQ'}">
+                                    <span class="text-pink text-md text-bold">Reqeust</span>
+                                </th:block>
+                                <th:block th:if="${project.status == 'REV'}">
+                                    <th:block th:if="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE')
+                                    or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA')
+                                    or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
+                                        <span class="text-purple text-md text-bold">Final Review</span>
+                                    </th:block>
+                                    <th:block
+                                            th:unless="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
+                                        <span class="text-yellow text-md text-bold">Review</span>
+                                    </th:block>
+                                </th:block>
+                                <th:block th:if="${project.status == 'COMP'}">
+                                    <span class="text-dark text-md text-bold">Complete</span>
+                                </th:block>
+                                <th:block
+                                        th:unless="${project.status == 'COMP' or project.status == 'DROP' or project.status == 'REQ' or project.status == 'REV'}">
+                                    <span class="text-success text-md text-bold">Progress</span>
                                 </th:block>
                             </span>
-                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom" style="margin-left: 2.5rem; font-size: .85rem">
-                            	<input class="form-check-input text-orange" id="approve" name="approve" th:value="Y" type="checkbox">
-                               	<label class="form-check-label text-lg-gray mt-1" for="approve" th:text="'Approve without verification'"></label>
+                            <span class="mx-2">
+                                 <!--indetification-->
+                                <th:block th:if="${project.identificationStatus == null}">
+                                    <th:block th:if="${project.status == 'DROP'}">
+                                        <span class="badge badge-outline-gray-white size-md width-6rem">Identification</span>
+                                    </th:block>
+                                    <th:block th:unless="${project.status == 'DROP'}">
+                                        <span class="badge badge-success size-md width-6rem" th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                    </th:block>
+                                </th:block>
+
+                                <th:block th:if="${project.identificationStatus == 'N/A'}">
+                                    <span class="badge badge-outline-gray-white size-md width-6rem">Identification</span>
+                                </th:block>
+
+                                <th:block
+                                        th:unless="${project.identificationStatus == null or project.identificationStatus == 'N/A'}">
+                                   <th:block th:if="${project.status == 'DROP'}">
+                                       <th:block th:if="${project.identificationStatus == 'CONF'}">
+                                           <span class="badge badge-gray size-md width-6rem" th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                       </th:block>
+                                        <th:block th:unless="${project.identificationStatus == 'CONF'}">
+                                           <span class="badge badge-gray size-md width-6rem" th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                       </th:block>
+                                    </th:block>
+                                    <th:block
+                                            th:if="${project.status == 'REV' and ((project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA'))}">
+                                        <span class='badge badge-outline-dark-blue hover-light-btn text-sm px-2 py-1' th:onclick="fn.mvIdentification([[${project.prjId}]])"
+                                              style='cursor:pointer;'>Identification</span>
+                                    </th:block>
+                                    <th:block
+                                            th:unless="${project.status == 'DROP' or (project.status == 'REV' and ((project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')))}">
+                                        <th:block th:if="${project.identificationStatus == 'CONF'}">
+                                            <span class='badge badge-outline-dark-blue hover-light-btn text-sm px-2 py-1' th:onclick="fn.mvIdentification([[${project.prjId}]])"
+                                                  style='cursor:pointer;'>Identification</span>
+                                        </th:block>
+                                        <th:block th:unless="${project.identificationStatus == 'CONF'}">
+                                            <th:block th:if="${project.status == 'REQ'}">
+                                                <span class='badge badge-pink hover-pink-btn text-sm px-2 py-1' th:onclick="fn.mvIdentification([[${project.prjId}]])"
+                                                      style='cursor:pointer;'>Identification</span>
+                                            </th:block>
+                                            <th:block th:if="${project.status == 'REV'}">
+                                                <span class='badge badge-yellow hover-yellow-btn text-sm px-2 py-1' th:onclick="fn.mvIdentification([[${project.prjId}]])"
+                                                      style='cursor:pointer;'>Identification</span>
+                                            </th:block>
+                                            <th:block
+                                                    th:unless="${project.status == 'COMP' or project.status == 'DROP' or project.status == 'REQ' or project.status == 'REV'}">
+                                                <span class='badge badge-success hover-success-btn text-sm px-2 py-1' th:onclick="fn.mvIdentification([[${project.prjId}]])"
+                                                      style='cursor:pointer;'>Identification</span>
+                                            </th:block>
+                                        </th:block>
+                                    </th:block>
+                                </th:block>
+
+                                <!--packaging-->
+                                <th:block th:if="${project.verificationStatus == null}">
+                                   <th:block th:if="${identificationStatus == null}">
+                                        <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                        <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
+                                    </th:block>
+                                    <th:block th:unless="${identificationStatus == null}">
+                                        <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                      <span class='badge badge-success hover-success-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
+                                            style='cursor:pointer;'>Packaging</span>
+                                    </th:block>
+                                </th:block>
+                                <th:block th:if="${project.verificationStatus == 'PROG'}">
+                                    <th:block th:if="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
+                                        <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                        <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
+                                    </th:block>
+                                    <th:block th:unless="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
+                                        <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                        <span class='badge badge-success hover-success-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
+                                              style='cursor:pointer;'>Packaging</span>
+                                    </th:block>
+                                </th:block>
+                               <th:block th:if="${project.verificationStatus == 'NA'}">
+                                   <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                   <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
+                               </th:block>
+                                <th:block th:if="${project.verificationStatus == 'Error'}">
+                                    <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                   <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
+                                </th:block>
+                                <th:block th:if="${project.verificationStatus == 'Drop'}">
+                                    <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                   <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
+                                </th:block>
+                                <th:block
+                                        th:unless="${project.verificationStatus == null or project.verificationStatus == 'PROG' or project.verificationStatus == 'NA' or project.verificationStatus == 'Error' or project.verificationStatus == 'Drop'}">
+                                    <th:block th:if="${project.distributeTarget == 'N/A'}">
+                                        <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                        <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
+                                    </th:block>
+                                    <th:block th:unless="${project.distributeTarget == 'N/A'}">
+                                        <th:block th:if="${project.verificationStatus == 'CONF'}">
+                                          <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
+                                                          style='cursor:pointer;'>Packaging</span>
+                                        </th:block>
+                                        <th:block th:unless="${project.verificationStatus == 'CONF'}">
+                                            <th:block th:if="${project.status == 'PROG'}">
+                                                <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                <span class='badge badge-success hover-success-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
+                                                      style='cursor:pointer;'>Packaging</span>
+                                            </th:block>
+                                            <th:block th:if="${project.status == 'REQ'}">
+                                                <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
+                                                      style='cursor:pointer;'>Packaging</span>
+                                            </th:block>
+                                            <th:block th:if="${project.status == 'REV'}">
+                                                <th:block th:if="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE')
+                                                    or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA')
+                                                    or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
+                                                    <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
+                                                          style='cursor:pointer;'>Packaging</span>
+                                                </th:block>
+                                                <th:block
+                                                        th:unless="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
+                                                    <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                    <span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
+                                                          style='cursor:pointer;'>Packaging</span>
+                                                </th:block>
+                                            </th:block>
+                                        </th:block>
+                                    </th:block>
+                                </th:block>
+                            </span>
+                                <!--vulnerability-->
+                            <span class="mx-2">
+                                <th:block th:unless="${project.secCode == null}">
+                                    <th:block th:if="${project.secCvssScore >= 7.0}">
+                                        <th:blcok th:if="${project.secCode == 'Fixed'}">
+                                            <span class="badge badge-cherry text-md width-9rem pointer p-1" th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Resolved([[${project.secCvssScore}]])</span>
+                                        </th:blcok>
+                                         <th:blcok th:unless="${project.secCode == 'Fixed'}">
+                                             <span class="badge badge-cherry text-md width-9rem pointer p-1" th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Need to resolve([[${project.secCvssScore}]])</span>
+                                        </th:blcok>
+                                    </th:block>
+                                    <th:block th:unless="${project.secCvssScore >= 7.0}">
+                                         <th:block th:if="${project.secCvssScore == 0}">
+                                           <span class="badge badge-blue text-md width-9rem pointer p-1">Discovered(N/A)</span>
+                                        </th:block>
+                                        <th:block th:unless="${project.secCvssScore == 0}">
+                                            <span class="badge badge-blue text-md width-9rem pointer p-1">Discovered([[${project.secCvssScore}]])</span>
+                                        </th:block>
+                                    </th:block>
+                                </th:block>
+                                <th:block th:if="${project.secCode == null}">
+                                    <th:block th:if="${project.secCvssScore == 0}">
+                                        <span class="badge badge-cerebral-gray text-md width-9rem pointer p-1">Discovered(N/A)</span>
+                                    </th:block>
+                                    <th:block th:unless="${project.secCvssScore == 0}">
+                                        <span class="badge badge-cerebral-gray text-md width-9rem pointer p-1">Discovered(N/A)</span>
+                                    </th:block>
+                                </th:block>
+                            </span>
+                        </span>
+                            <span class="icheck-danger center-atom projdecBtn"
+                                  style="margin-left: 2.5rem; font-size: .85rem"
+                                  th:if="${@CommonFunction.isAdmin()}">
+                            	<th:block
+                                        th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
+                            		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag"
+                                           name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
+                               		<label class="form-check-label text-lg-gray mt-1" for="ignoreBinaryDbFlag"
+                                           th:text="'Do not register in binary DB'"></label>
+                            	</th:block>
                          	</span>
+                            </span>
                         </div>
                         <div class="col-sm-4 float-right projdecBtn mt-2">
                             <div class="helpLink f-left dropdown float-right ml-3">

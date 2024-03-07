@@ -341,7 +341,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			project.setAnalysisStartDate(analysisStatus.getAnalysisStartDate());
 			project.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
 		}
-		
+
+//		project.setStandardScore(Float.valueOf(standardScore));
+//		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+//		if (getSecurityDataCntByProject(project)) {
+//			project.setSecCode(CoConstDef.FLAG_YES);
+//		}
+
 		if (project.getAndroidFlag().equals(CoConstDef.FLAG_YES)) {
 			project.setStandardScore(Float.valueOf(standardScore));
 			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
@@ -356,6 +362,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					project.setSecCode(CoConstDef.FLAG_YES);
 				}
 			}
+		}
+
+		if (getSecurityDataCntByProject(project)) {
+			checkIfVulnerabilityResolutionIsFixed(project);
 		}
 		project.setStandardScore(null);
 		return project;

@@ -22,7 +22,7 @@ ul { list-style-type: none; }
 .custom-layout table thead input {box-sizing: border-box;}
 .custom-layout table thead input[type="checkbox"] {width: 22px;padding: 3px;}
 .custom-layout .custom-narrow-item { font-size: .85rem; height: 2rem;}
-
+.custom-layout .hover-line:hover { text-decoration: underline; color: #0f74a8 }
 /* iframe mode nav link */
 .content-wrapper.iframe-mode .navbar-expand {border-bottom: none !important;}
 .content-wrapper.iframe-mode .nav-link.dropdown-toggle { border-radius: 15px;width: 4.5rem;height: 1.8rem;margin: .5rem 1rem;color: #fff;text-align: center;font-size: 1rem;align-items: center;display: flex;justify-content: center; }

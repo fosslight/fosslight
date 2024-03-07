@@ -4,74 +4,284 @@
 <th:block th:replace="project/edit-script :: contentScript"></th:block>
 <th:block th:replace="project/view-script :: viewScript"></th:block>
 <body class="hold-transition sidebar-mini">
-    <!-- Site wrapper -->
-    <div class="wrapper">
-        <div class="content-wrapper custom-layout">
-            <!-- Main content -->
-
-                <section class="content-header">
-                    <div class="container-fluid">
-                        <th:block th:if="${project.prjId != null}">
-                        <div class="row">
-                            <div class="col-sm-10 text-left mt-2">
-                                <span class="description-percentage text-lg text-dark-gray text-bold" id="ePrjName"></span>
-                                <span class="text-dark-gray mx-1" id="eCreator"></span>
-                                <span class="ml-2">
-                                <span th:if="${project.prjId != null}" class="badge badge-orange text-sm px-2 py-1" id="identificationTab" style="cursor: pointer;" title="Go to Identification tab" th:text="Identification"></span>
-                                <span th:if="${project.verificationStatus != 'NA' and (project.verificationStatus != null or project.identificationStatus == 'CONF')}"
-                                    		class="badge badge-success text-sm px-2 py-1" id="packagingTab" style="cursor: pointer;" title="Go to Packaging tab" th:text="Packaging"></span>
-                                <th:block th:if="${project.secCode != null}">
-                                   <span class="badge badge-carrot text-sm px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab" th:text="Security"></span>
+<!-- Site wrapper -->
+<div class="wrapper">
+    <div class="content-wrapper custom-layout">
+        <!-- Main content -->
+        <section class="content-header">
+            <div class="container-fluid">
+                <th:block th:if="${project.prjId != null}">
+                    <div class="row">
+                        <div class="col-sm-10 text-left mt-2">
+                               <span class="description-percentage text-lg text-dark-gray">
+                                <a class="text-dark-gray text-bold hover-line" href="#"
+                                   title="Go to Basic information tab" th:onclick="fn.mvEditTab([[${project.prjId}]])">[[${project.prjName}]]</a>
+                                </span>
+                            <span class="ml-2">
+                            <span class="mx-2">
+                                <th:block th:if="${project.status == 'DROP'}">
+                                    <span class="text-gray text-md text-bold">Drop</span>
+                                </th:block>
+                                <th:block th:if="${project.status == 'REQ'}">
+                                    <span class="text-pink text-md text-bold">Reqeust</span>
+                                </th:block>
+                                <th:block th:if="${project.status == 'REV'}">
+                                    <th:block th:if="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE')
+                                    or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA')
+                                    or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
+                                        <span class="text-purple text-md text-bold">Final Review</span>
+                                    </th:block>
+                                    <th:block
+                                            th:unless="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
+                                        <span class="text-yellow text-md text-bold">Review</span>
+                                    </th:block>
+                                </th:block>
+                                <th:block th:if="${project.status == 'COMP'}">
+                                    <span class="text-dark text-md text-bold">Complete</span>
+                                </th:block>
+                                <th:block
+                                        th:unless="${project.status == 'COMP' or project.status == 'DROP' or project.status == 'REQ' or project.status == 'REV'}">
+                                    <span class="text-success text-md text-bold">Progress</span>
                                 </th:block>
                             </span>
-                            </div>
-                            <div class="col-sm-2 float-right mt-1">
-                                <div class="helpLink f-left dropdown float-right mt-1">
-                                    <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
-                                    <div class="dropdown-menu mt-0">
-                                        <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_BasicInfo_Main')|">How to use FossLight Hub</a>
-                                    </div>
+                            <span class="mx-2">
+                                 <!--indetification-->
+                                <th:block th:if="${project.identificationStatus == null}">
+                                    <th:block th:if="${project.status == 'DROP'}">
+                                        <span class="badge badge-outline-gray-white size-md width-6rem">Identification</span>
+                                    </th:block>
+                                    <th:block th:unless="${project.status == 'DROP'}">
+                                        <span class="badge badge-success size-md width-6rem"
+                                              th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                    </th:block>
+                                </th:block>
+
+                                <th:block th:if="${project.identificationStatus == 'N/A'}">
+                                    <span class="badge badge-outline-gray-white size-md width-6rem">Identification</span>
+                                </th:block>
+
+                                <th:block
+                                        th:unless="${project.identificationStatus == null or project.identificationStatus == 'N/A'}">
+                                   <th:block th:if="${project.status == 'DROP'}">
+                                       <th:block th:if="${project.identificationStatus == 'CONF'}">
+                                           <span class="badge badge-gray size-md width-6rem"
+                                                 th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                       </th:block>
+                                        <th:block th:unless="${project.identificationStatus == 'CONF'}">
+                                           <span class="badge badge-gray size-md width-6rem"
+                                                 th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                       </th:block>
+                                    </th:block>
+                                    <th:block
+                                            th:if="${project.status == 'REV' and ((project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA'))}">
+                                        <span class='badge badge-outline-dark-blue hover-light-btn text-sm px-2 py-1'
+                                              style='cursor:pointer;'
+                                              th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                    </th:block>
+                                    <th:block
+                                            th:unless="${project.status == 'DROP' or (project.status == 'REV' and ((project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')))}">
+                                        <th:block th:if="${project.identificationStatus == 'CONF'}">
+                                            <span class='badge badge-outline-dark-blue hover-light-btn text-sm px-2 py-1'
+                                                  style='cursor:pointer;'
+                                                  th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                        </th:block>
+                                        <th:block th:unless="${project.identificationStatus == 'CONF'}">
+                                            <th:block th:if="${project.status == 'REQ'}">
+                                                <span class='badge badge-pink hover-pink-btn text-sm px-2 py-1'
+                                                      style='cursor:pointer;'
+                                                      th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                            </th:block>
+                                            <th:block th:if="${project.status == 'REV'}">
+                                                <span class='badge badge-yellow hover-yellow-btn text-sm px-2 py-1'
+                                                      style='cursor:pointer;'
+                                                      th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                            </th:block>
+                                            <th:block
+                                                    th:unless="${project.status == 'COMP' or project.status == 'DROP' or project.status == 'REQ' or project.status == 'REV'}">
+                                                <span class='badge badge-success hover-success-btn text-sm px-2 py-1'
+                                                      style='cursor:pointer;'
+                                                      th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
+                                            </th:block>
+                                        </th:block>
+                                    </th:block>
+                                </th:block>
+
+                                <!--packaging-->
+                                <th:block th:if="${project.verificationStatus == null}">
+                                   <th:block th:if="${identificationStatus == null}">
+                                        <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                        <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
+                                    </th:block>
+                                    <th:block th:unless="${identificationStatus == null}">
+                                        <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                      <span class='badge badge-success hover-success-btn size-sm width-6rem'
+                                            style='cursor:pointer;'
+                                            th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                    </th:block>
+                                </th:block>
+                                <th:block th:if="${project.verificationStatus == 'PROG'}">
+                                    <th:block th:if="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
+                                        <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                        <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
+                                    </th:block>
+                                    <th:block th:unless="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
+                                        <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                        <span class='badge badge-success hover-success-btn size-sm width-6rem'
+                                              style='cursor:pointer;'
+                                              th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                    </th:block>
+                                </th:block>
+                               <th:block th:if="${project.verificationStatus == 'NA'}">
+                                   <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                   <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
+                               </th:block>
+                                <th:block th:if="${project.verificationStatus == 'Error'}">
+                                    <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                   <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
+                                </th:block>
+                                <th:block th:if="${project.verificationStatus == 'Drop'}">
+                                    <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                   <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
+                                </th:block>
+                                <th:block
+                                        th:unless="${project.verificationStatus == null or project.verificationStatus == 'PROG' or project.verificationStatus == 'NA' or project.verificationStatus == 'Error' or project.verificationStatus == 'Drop'}">
+                                    <th:block th:if="${project.distributeTarget == 'N/A'}">
+                                        <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                        <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
+                                    </th:block>
+                                    <th:block th:unless="${project.distributeTarget == 'N/A'}">
+                                        <th:block th:if="${project.verificationStatus == 'CONF'}">
+                                          <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem'
+                                                          style='cursor:pointer;'
+                                                          th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                        </th:block>
+                                        <th:block th:unless="${project.verificationStatus == 'CONF'}">
+                                            <th:block th:if="${project.status == 'PROG'}">
+                                                <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                <span class='badge badge-success hover-success-btn size-sm width-6rem'
+                                                      style='cursor:pointer;'
+                                                      th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                            </th:block>
+                                            <th:block th:if="${project.status == 'REQ'}">
+                                                <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem'
+                                                      style='cursor:pointer;'
+                                                      th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                            </th:block>
+                                            <th:block th:if="${project.status == 'REV'}">
+                                                <th:block th:if="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE')
+                                                    or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA')
+                                                    or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
+                                                    <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem'
+                                                          style='cursor:pointer;'
+                                                          th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                                </th:block>
+                                                <th:block
+                                                        th:unless="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
+                                                    <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                                    <span class='badge badge-yellow hover-yellow-btn size-sm width-6rem'
+                                                          style='cursor:pointer;'
+                                                          th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                                </th:block>
+                                            </th:block>
+                                        </th:block>
+                                    </th:block>
+                                </th:block>
+                            </span>
+                                <!--vulnerability-->
+                            <span class="mx-2">
+                                <th:block th:unless="${project.secCode == null}">
+                                    <th:block th:if="${project.secCvssScore >= 7.0}">
+                                        <th:blcok th:if="${project.secCode == 'Fixed'}">
+                                            <span class="badge badge-cherry text-md width-9rem pointer p-1" th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Resolved([[${project.secCvssScore}]])</span>
+                                        </th:blcok>
+                                         <th:blcok th:unless="${project.secCode == 'Fixed'}">
+                                             <span class="badge badge-cherry text-md width-9rem pointer p-1" th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Need to resolve([[${project.secCvssScore}]])</span>
+                                        </th:blcok>
+                                    </th:block>
+                                    <th:block th:unless="${project.secCvssScore >= 7.0}">
+                                         <th:block th:if="${project.secCvssScore == 0}">
+                                           <span class="badge badge-blue text-md width-9rem pointer p-1">Discovered(N/A)</span>
+                                        </th:block>
+                                        <th:block th:unless="${project.secCvssScore == 0}">
+                                            <span class="badge badge-blue text-md width-9rem pointer p-1">Discovered([[${project.secCvssScore}]])</span>
+                                        </th:block>
+                                    </th:block>
+                                </th:block>
+                                <th:block th:if="${project.secCode == null}">
+                                    <th:block th:if="${project.secCvssScore == 0}">
+                                        <span class="badge badge-cerebral-gray text-md width-9rem pointer p-1">Discovered(N/A)</span>
+                                    </th:block>
+                                    <th:block th:unless="${project.secCvssScore == 0}">
+                                        <span class="badge badge-cerebral-gray text-md width-9rem pointer p-1">Discovered(N/A)</span>
+                                    </th:block>
+                                </th:block>
+                            </span>
+                        </span>
+                        </div>
+                        <div class="col-sm-2 float-right mt-1">
+                            <div class="helpLink f-left dropdown float-right mt-1">
+                                <a aria-expanded="false" aria-haspopup="true" class="help-link dropdown-toggle" data-toggle="dropdown"
+                                   href="#" role="button">Help</a>
+                                <div class="dropdown-menu mt-0">
+                                    <a class="dropdown-item" href="#"
+                                       th:onclick="|openHelpGuideLink('Project_List_BasicInfo_Main')|">How to use
+                                        FossLight Hub</a>
                                 </div>
                             </div>
                         </div>
-                        </th:block>
                     </div>
-                </section>
+                </th:block>
+            </div>
+        </section>
 
-            <section class="content">
-                <div class="row">
-                    <div class="col-md-9">
-                        <div class="card card-secondary submit-form">
-                            <div class="card-header">
-                                <h3 class="card-title text-white mt-1 ml-1">Basic Information</h3>
-                            </div>
-                            <form name="projectForm" id="projectForm" action="" method="post">
-            				<input type="hidden" name="prjId" style="display: none;"/>
-							<input type="hidden" name="prjModelJson" style="display: none;"/>
-							<input type="hidden" name="comment" />
-							<input type="hidden" name="userComment" />
-							<input type="hidden" name="commId" />
-							<input type="hidden" name="statusRequestYn" />
-							<input type="hidden" name="division" th:value="${project.division}"/>
-							<input type="hidden" id="refPartnerId" name="refPartnerId" th:value="${project.refPartnerId}" />
-							<input type="hidden" id="identificationStatusConfFlag" th:value="${project.identificationStatusConfFlag}" />
-							<input type="hidden" id="verificationStatusConfFlag" th:value="${project.verificationStatusConfFlag}" />
+        <section class="content">
+            <div class="row">
+                <div class="col-md-9">
+                    <div class="card card-secondary submit-form">
+                        <div class="card-header">
+                            <h3 class="card-title text-white mt-1 ml-1">Basic Information</h3>
+                        </div>
+                        <form action="" id="projectForm" method="post" name="projectForm">
+                            <input name="prjId" style="display: none;" type="hidden"/>
+                            <input name="prjModelJson" style="display: none;" type="hidden"/>
+                            <input name="comment" type="hidden"/>
+                            <input name="userComment" type="hidden"/>
+                            <input name="commId" type="hidden"/>
+                            <input name="statusRequestYn" type="hidden"/>
+                            <input name="division" th:value="${project.division}" type="hidden"/>
+                            <input id="refPartnerId" name="refPartnerId" th:value="${project.refPartnerId}"
+                                   type="hidden"/>
+                            <input id="identificationStatusConfFlag" th:value="${project.identificationStatusConfFlag}"
+                                   type="hidden"/>
+                            <input id="verificationStatusConfFlag" th:value="${project.verificationStatusConfFlag}"
+                                   type="hidden"/>
                             <div class="card-body">
                                 <div class="row form-group">
-                                	<div class="col-md-6 required">
-                                		<label for="inputName" th:text="#{msg.common.field.project.name}"></label><span class="text-orange">*</span>
-                                    	<input type="text" id="prjName" name="prjName" class="form-control" th:value="${project.prjName}" th:disabled="${isReadOnly}">
-                                    	<span class="retxt text-danger text-sm" th:text="'This field is required.'"></span>
-                                	</div>
+                                    <div class="col-md-6 required">
+                                        <label for="inputName" th:text="#{msg.common.field.project.name}"></label><span
+                                            class="text-orange">*</span>
+                                        <input class="form-control" id="prjName" name="prjName" th:disabled="${isReadOnly}"
+                                               th:value="${project.prjName}" type="text">
+                                        <span class="retxt text-danger text-sm"
+                                              th:text="'This field is required.'"></span>
+                                    </div>
                                     <div class="col-md-4">
                                         <label for="inputName" th:text="#{msg.common.field.project.version}"></label>
-                                        <input type="text" id="inputName" name="prjVersion" class="form-control" th:value="${project.prjVersion}" th:disabled="${isReadOnly}">
+                                        <input class="form-control" id="inputName" name="prjVersion" th:disabled="${isReadOnly}"
+                                               th:value="${project.prjVersion}" type="text">
                                     </div>
                                     <div class="col-md-2">
-                                        <label for="inputName" th:text="#{msg.common.field.priority}"></label><span class="text-orange">*</span>
-                                        <select class="form-control select2" style="width: 100%;" id="priority" name="priority" th:disabled="${isReadOnly}">
-                                            <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
-                                                <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.priority != null && #strings.equals(option.cdDtlNo, project.priority)}"></option>
+                                        <label for="inputName" th:text="#{msg.common.field.priority}"></label><span
+                                            class="text-orange">*</span>
+                                        <select class="form-control select2" id="priority" name="priority"
+                                                style="width: 100%;" th:disabled="${isReadOnly}">
+                                            <th:block
+                                                    th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                                <option th:selected="${project.priority != null && #strings.equals(option.cdDtlNo, project.priority)}" th:text="${option.cdDtlNm}"
+                                                        th:value="${option.cdDtlNo}"></option>
                                             </th:block>
                                         </select>
                                     </div>
@@ -82,9 +292,11 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="btn-group ml-2">
-                                                    <button type="button" id="identificationStatus" class="btn text-sm btn-default width-14rem"></button>
-                                                    <button type="button" id="verificationStatus" class="btn text-sm btn-default width-14rem"></button>
-<!--                                                    <button type="button" id="destributionStatus" class="btn text-sm btn-default width-14rem"></button>-->
+                                                    <button class="btn text-sm btn-default width-14rem" id="identificationStatus"
+                                                            type="button"></button>
+                                                    <button class="btn text-sm btn-default width-14rem" id="verificationStatus"
+                                                            type="button"></button>
+                                                    <!--                                                    <button type="button" id="destributionStatus" class="btn text-sm btn-default width-14rem"></button>-->
                                                     <span id="downloadBtn"></span>
                                                 </div>
                                             </div>
@@ -92,56 +304,81 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div th:if="${project.viewOnlyFlag != 'Y'}" class="col-md-12">
+                                    <div class="col-md-12" th:if="${project.viewOnlyFlag != 'Y'}">
                                         <div class="form-group">
                                             <label for="inputName" th:text="#{msg.common.field.permission}"></label>
                                             <div class="form-group">
                                                 <div class="col-sm-12">
                                                     <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                                         <label class="btn btn-sm btn-onOff px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio1" value="Y" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="" th:text="Everyone" th:disabled="${isReadOnly}">
+                                                            <input autocomplete="off" checked="" id="permissionRadio1"
+                                                                   name="publicYn"
+                                                                   th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}"
+                                                                   th:disabled="${isReadOnly}" th:text="Everyone" type="radio"
+                                                                   value="Y">
                                                         </label>
                                                         <label class="btn btn-sm btn-onOff active px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Watcher'" th:disabled="${isReadOnly}">
+                                                            <input autocomplete="off" id="permissionRadio2" name="publicYn"
+                                                                   th:checked="${project != null && #strings.equals(project.publicYn, 'N')}"
+                                                                   th:disabled="${isReadOnly}"
+                                                                   th:text="'Creator & Watcher'" type="radio"
+                                                                   value="N">
                                                         </label>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <input type="hidden" name="distributeTarget" value="NA"/>
-									<input type="hidden" name="noticeType" value="10"/>
+                                    <input name="distributeTarget" type="hidden" value="NA"/>
+                                    <input name="noticeType" type="hidden" value="10"/>
                                 </div>
                                 <div class="row">
-                                	<div class="col-md-6 mb-0">
-                                        <label for="inputName" th:text="#{msg.common.field.OS}"></label><span class="text-orange">*</span>
-                                    	<select class="form-control select2" id="osType" name="osType" style="width: 100%;" th:disabled="${isReadOnly}">
-                                   			<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
-                                        		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.osType)}"></option>
-                                       		</th:block>
-                                    	</select>
-                                    	<div class="row mt-2 pl-2 pr-2">
-                                    		<input type="text" id="osTypeEtc" name="osTypeEtc" class="form-control" style="display: none;" th:disabled="true"/>
-                                    		<span class="retxt text-danger text-sm"></span>
-                                    	</div>
+                                    <div class="col-md-6 mb-0">
+                                        <label for="inputName" th:text="#{msg.common.field.OS}"></label><span
+                                            class="text-orange">*</span>
+                                        <select class="form-control select2" id="osType" name="osType"
+                                                style="width: 100%;" th:disabled="${isReadOnly}">
+                                            <th:block
+                                                    th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
+                                                <option th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.osType)}" th:text="${option.cdDtlNm}"
+                                                        th:value="${option.cdDtlNo}"></option>
+                                            </th:block>
+                                        </select>
+                                        <div class="row mt-2 pl-2 pr-2">
+                                            <input class="form-control" id="osTypeEtc" name="osTypeEtc" style="display: none;"
+                                                   th:disabled="true" type="text"/>
+                                            <span class="retxt text-danger text-sm"></span>
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-0">
                                         <div class="form-group mb-0">
-                                            <label for="inputName" th:text="#{msg.common.field.distributionType}"></label><span class="text-orange">*</span>
-                                            <select class="form-control select2" name="distributionType" style="width: 100%;" th:disabled="${isReadOnly}">
-                                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
-                                                    <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${project.distributionType != null && option.cdDtlNo == project.distributionType}"></option>
+                                            <label for="inputName"
+                                                   th:text="#{msg.common.field.distributionType}"></label><span
+                                                class="text-orange">*</span>
+                                            <select class="form-control select2" name="distributionType"
+                                                    style="width: 100%;" th:disabled="${isReadOnly}">
+                                                <th:block
+                                                        th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
+                                                    <option th:selected="${project.distributionType != null && option.cdDtlNo == project.distributionType}" th:text="${option.cdDtlNm}"
+                                                            th:value="${option.cdDtlNo}"></option>
                                                 </th:block>
                                             </select>
                                             <div class="row mt-2">
-                                                <p class="text-primary text-sm mx-3" th:text="'Network service only?'"></p>
+                                                <p class="text-primary text-sm mx-3"
+                                                   th:text="'Network service only?'"></p>
                                                 <div class="form-group clearfix">
                                                     <div class="icheck-primary d-inline">
-                                                        <input type="radio" id="networkServerType_Y" name="networkServerType" value="Y" th:checked="${project.networkServerType != null && project.networkServerType == 'Y'} ? 'checked'" th:disabled="${isReadOnly}"/>
+                                                        <input id="networkServerType_Y" name="networkServerType"
+                                                               th:checked="${project.networkServerType != null && project.networkServerType == 'Y'} ? 'checked'" th:disabled="${isReadOnly}"
+                                                               type="radio"
+                                                               value="Y"/>
                                                         <label for="networkServerType_Y" th:text="Yes"></label>
                                                     </div>
                                                     <div class="icheck-primary d-inline" style="margin-left: 5px;">
-                                                        <input type="radio" id="networkServerType_N" name="networkServerType" value="N" th:checked="${project.networkServerType == null || (project.networkServerType != null && project.networkServerType == 'N')} ? 'checked'" th:disabled="${isReadOnly}"/>
+                                                        <input id="networkServerType_N" name="networkServerType"
+                                                               th:checked="${project.networkServerType == null || (project.networkServerType != null && project.networkServerType == 'N')} ? 'checked'" th:disabled="${isReadOnly}"
+                                                               type="radio"
+                                                               value="N"/>
                                                         <label for="networkServerType_N" th:text="No"></label>
                                                     </div>
                                                 </div>
@@ -155,180 +392,230 @@
                                     <label for="inputName" th:text="'Model Information'"></label>
                                     <div class="row" th:unless="${isReadOnly}">
                                         <div class="col-md-10 mb-2 d-flex">
-                                       		<div class="float-left" id="modelFile" style="max-width: 100%;"></div>
+                                            <div class="float-left" id="modelFile" style="max-width: 100%;"></div>
                                         </div>
                                         <div class="col-md-2">
-                                        	<button type="button" class="btn btn-default btn-sm float-right px-5" th:text="Download" th:onclick="|fn.downloadModelList()|"><i class="fa fa-download"></i></button>
+                                            <button class="btn btn-default btn-sm float-right px-5" th:onclick="|fn.downloadModelList()|"
+                                                    th:text="Download" type="button"><i
+                                                    class="fa fa-download"></i></button>
                                         </div>
                                     </div>
                                     <div class="jqGridSet">
-                                        <table id="_modelList"><tr><td></td></tr></table>
+                                        <table id="_modelList">
+                                            <tr>
+                                                <td></td>
+                                            </tr>
+                                        </table>
                                         <div id="pagerModel"></div>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="additionalInformation" th:text="#{msg.common.field.additionalInformation}"></label>
-                                    <textarea th:if="${isReadOnly}" class="form-control" rows="3" th:text="${detail?.comment}" disabled></textarea>
-                                    <textarea th:unless="${isReadOnly}" class="form-control" id="additionalInformation" name="additionalInformation" rows="3"></textarea>
+                                    <label for="additionalInformation"
+                                           th:text="#{msg.common.field.additionalInformation}"></label>
+                                    <textarea class="form-control" disabled rows="3"
+                                              th:if="${isReadOnly}" th:text="${detail?.comment}"></textarea>
+                                    <textarea class="form-control" id="additionalInformation" name="additionalInformation"
+                                              rows="3" th:unless="${isReadOnly}"></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="exampleInputFile" th:text="#{msg.common.field.watcher}"></label>
                                     <th:block th:unless="${isReadOnly}">
                                         <div class="row">
                                             <div class="col-4">
-                                                <select class="form-control select2" style="width: 100%;" th:id="prjDivision" th:name="prjDivision" th:onchange="|fn.selectDivision()|">
-                                                    <option th:value="''" th:text="'Select Division'"></option>
-                                                    <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                                        <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                                <select class="form-control select2" style="width: 100%;"
+                                                        th:id="prjDivision" th:name="prjDivision"
+                                                        th:onchange="|fn.selectDivision()|">
+                                                    <option th:text="'Select Division'" th:value="''"></option>
+                                                    <th:block
+                                                            th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+                                                        <option th:text="${option.cdDtlNm}"
+                                                                th:value="${option.cdDtlNo}"></option>
                                                     </th:block>
                                                 </select>
                                             </div>
                                             <div class="col-7">
-                                                <select class="form-control select2" style="width: 100%;" th:id="prjUserId" th:name="prjUserId">
-                                                    <option th:value="''" th:text="'Select User'"></option>
+                                                <select class="form-control select2" style="width: 100%;"
+                                                        th:id="prjUserId" th:name="prjUserId">
+                                                    <option th:text="'Select User'" th:value="''"></option>
                                                 </select>
                                             </div>
                                             <div class="col-1">
-                                                <button id="addWatcher" type="button" class="btn btn-default" th:text="Add"></button>
+                                                <button class="btn btn-default" id="addWatcher" th:text="Add"
+                                                        type="button"></button>
                                             </div>
                                         </div>
                                         <div class="row my-1">
                                             <div class="col-4">
-                                                <input class="form-control" type="text" id="adId" name="adId" placeholder="Input email" th:onKeypress="|fn.CheckChar()|">
+                                                <input class="form-control" id="adId" name="adId" placeholder="Input email"
+                                                       th:onKeypress="|fn.CheckChar()|" type="text">
                                             </div>
                                             <div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null
                                         												&& #lists.size(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))) > 0) ? true : false}">
                                                 <th:block th:if="${useDomainFlag}">
                                                     <select class="form-control select2" style="width: 100%;">
-                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
-                                                            <th:block th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
-                                                                <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                                        <th:block
+                                                                th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
+                                                            <th:block
+                                                                    th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
+                                                                <option th:text="${option.cdDtlNm}"
+                                                                        th:value="${option.cdDtlNo}"></option>
                                                             </th:block>
-                                                            <th:block th:if="${!#strings.contains(option.cdDtlNm, '직접입력')}">
-                                                                <option th:value="${option.cdDtlNo}" th:text="|@${option.cdDtlNm}|"></option>
+                                                            <th:block
+                                                                    th:if="${!#strings.contains(option.cdDtlNm, '직접입력')}">
+                                                                <option th:text="|@${option.cdDtlNm}|"
+                                                                        th:value="${option.cdDtlNo}"></option>
                                                             </th:block>
                                                         </th:block>
                                                     </select>
-                                                    <input type="text" id="emailTemp" class="w220" style="display:none;"
-                                                           th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
+                                                    <input class="w220" id="emailTemp" style="display:none;" th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"
+                                                           type="text"/>
                                                 </th:block>
                                                 <th:block th:if="${!useDomainFlag}">
-                                                    <input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">
+                                                    <input class="form-control" id="emailTemp" name="emailTemp"
+                                                           placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|"
+                                                           type="text">
                                                 </th:block>
                                             </div>
                                             <div class="col-1">
-                                                <button id="addEmail" type="button" class="btn btn btn-default" th:text="Add"></button>
+                                                <button class="btn btn btn-default" id="addEmail" th:text="Add"
+                                                        type="button"></button>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-4">
-                                                <select id="listKind" class="form-control select2" style="width: 100%;">
-                                                    <option th:value="''" th:text="'Select List'"></option>
-                                                    <option th:if="${partnerFlag}" th:text="'3rd Party List'" th:value="par"></option>
-                                                    <option th:if="${batFlag}" th:text="'BAT List'" th:value="bat"></option>
+                                                <select class="form-control select2" id="listKind" style="width: 100%;">
+                                                    <option th:text="'Select List'" th:value="''"></option>
+                                                    <option th:if="${partnerFlag}" th:text="'3rd Party List'"
+                                                            th:value="par"></option>
+                                                    <option th:if="${batFlag}" th:text="'BAT List'"
+                                                            th:value="bat"></option>
                                                 </select>
                                             </div>
                                             <div class="col-7">
-                                                <input class="form-control" type="text" id="listId" name="listId" placeholder="Input ID you want to copy"/>
+                                                <input class="form-control" id="listId" name="listId" placeholder="Input ID you want to copy"
+                                                       type="text"/>
                                             </div>
                                             <div class="col-1">
-                                                <button id="addList" type="button" class="btn btn-default" th:text="Add"></button>
+                                                <button class="btn btn-default" id="addList" th:text="Add"
+                                                        type="button"></button>
                                             </div>
                                         </div>
                                     </th:block>
                                     <div class="form-group mt-2">
-                                        <div id="multiDiv" class="external-events ml-1 row"></div>
+                                        <div class="external-events ml-1 row" id="multiDiv"></div>
                                     </div>
                                 </div>
                                 <th:block th:if="${project.prjId != null and project.copyFlag != 'Y'}">
-                                <div class="row form-group">
-                                	<div class="col-12">
-                                		<label th:text="#{msg.common.field.creator}"></label>
-                                    	<input type="text" name="creatorNm" class="form-control autoComCreatorDivision" th:disabled="${@CommonFunction.isAdmin() == false} ? 'disabled'" />
-                                    	<input type="hidden" name="creator" th:value="${project?.creator}" />
-                                	</div>
-                                </div>
-                                <div class="row form-group">
-                                	<div class="col-12">
-                                		<label th:text="#{msg.common.field.division}"></label>
-                                		<select class="form-control select2" style="width: 100%;" id="creatorDivision" name="creatorDivision" th:disabled="${project.viewOnlyFlag != 'N'} ? 'disabled'" th:onchange="|fn.selectCreatorDivision(this)|">
-                                        	<option th:value="''" th:text="'Select Division'"></option>
-                                        	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                            	<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${option.cdDtlNo == project.division}"></option>
-                                        	</th:block>
-                                    	</select>
-                                	</div>
-                                </div>
-                                <div class="row form-group">
-                                	<div class="col-12">
-                                		<label th:text="#{msg.common.field.reviewer}"></label>
-                                    	<input type="text" name="reviewer" class="form-control" th:value="${project?.reviewerName}" th:disabled="true" />
-                                	</div>
-                                </div>
+                                    <div class="row form-group">
+                                        <div class="col-12">
+                                            <label th:text="#{msg.common.field.creator}"></label>
+                                            <input class="form-control autoComCreatorDivision" name="creatorNm"
+                                                   th:disabled="${@CommonFunction.isAdmin() == false} ? 'disabled'"
+                                                   type="text"/>
+                                            <input name="creator" th:value="${project?.creator}" type="hidden"/>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-12">
+                                            <label th:text="#{msg.common.field.division}"></label>
+                                            <select class="form-control select2" id="creatorDivision"
+                                                    name="creatorDivision" style="width: 100%;"
+                                                    th:disabled="${project.viewOnlyFlag != 'N'} ? 'disabled'"
+                                                    th:onchange="|fn.selectCreatorDivision(this)|">
+                                                <option th:text="'Select Division'" th:value="''"></option>
+                                                <th:block
+                                                        th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+                                                    <option th:selected="${option.cdDtlNo == project.division}" th:text="${option.cdDtlNm}"
+                                                            th:value="${option.cdDtlNo}"></option>
+                                                </th:block>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row form-group">
+                                        <div class="col-12">
+                                            <label th:text="#{msg.common.field.reviewer}"></label>
+                                            <input class="form-control" name="reviewer" th:disabled="true"
+                                                   th:value="${project?.reviewerName}" type="text"/>
+                                        </div>
+                                    </div>
                                 </th:block>
                                 <div class="form-group" th:unless="${isReadOnly}">
                                     <label for="comment" th:text="Comment"></label>
                                     <textarea id="comment" rows="3"></textarea>
                                 </div>
                             </div>
-                            </form>
-                            <!-- /.card-body -->
-                            <div class="card-footer clearfix" th:unless="${isReadOnly}">
-                            	<th:block th:if="${project.prjId != null}">
-                            		<a th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}" id="delete" th:onclick="|fn.deletePrj()|" class="btn btn-secondary float-left" th:text="Delete"></a>
-                            		<a th:if="${project.viewOnlyFlag == 'N'}" id="drop" class="btn btn-dark-02 float-left" style="margin-left: 5px; display: none;" th:text="|Drop|"></a>
-                            	</th:block>
-                                <th:block th:if="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
-                                	<a th:onclick="|fn.save()|" class="btn btn-teal-01 float-right" th:text="|Save|"></a>
+                        </form>
+                        <!-- /.card-body -->
+                        <div class="card-footer clearfix" th:unless="${isReadOnly}">
+                            <th:block th:if="${project.prjId != null}">
+                                <a class="btn btn-secondary float-left" id="delete"
+                                   th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}" th:onclick="|fn.deletePrj()|"
+                                   th:text="Delete"></a>
+                                <a class="btn btn-dark-02 float-left" id="drop" style="margin-left: 5px; display: none;"
+                                   th:if="${project.viewOnlyFlag == 'N'}" th:text="|Drop|"></a>
+                            </th:block>
+                            <th:block
+                                    th:if="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
+                                <a class="btn btn-teal-01 float-right" th:onclick="|fn.save()|" th:text="|Save|"></a>
+                            </th:block>
+                            <th:block
+                                    th:unless="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
+                                <th:block th:if="${project.dropYn == 'Y' and project.statusRequestYn == 'N'}">
+                                    <a class="btn btn-yellow-03 float-right" th:onclick="|fn.exeProjectComplete('N')|"
+                                       th:text="Open"></a>
                                 </th:block>
-                                <th:block th:unless="${(project.completeYn == 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}">
-                                	<th:block th:if="${project.dropYn == 'Y' and project.statusRequestYn == 'N'}">
-                                		<a th:onclick="|fn.exeProjectComplete('N')|" class="btn btn-yellow-03 float-right" th:text="Open"></a>
-                                	</th:block>
-                                	<th:block th:if="${@CommonFunction.isAdmin()}">
-                                		<th:block th:if="${project.completeYn == 'Y' and project.statusRequestYn == 'N'}">
-                                			<a th:onclick="|fn.exeProjectComplete('N')|" class="btn btn-danger float-right" th:text="Open"></a>
-                                		</th:block>
-                                		<th:block th:if="${project.completeYn == 'Y' and project.statusRequestYn == 'Y'}">
-                                			<a id="reqToOpen" class="btn btn-danger float-right" th:text="'Requested to Open'"></a>
-                                		</th:block>
-                                	</th:block>
-                                	<th:block th:unless="${@CommonFunction.isAdmin()}">
-                                		<th:block th:if="${project.completeYn == 'Y' and project.viewOnlyFlag == 'N'}">
-                                			<a id="reqToOpen" class="btn btn-danger float-right" th:text="'Requested to Open'"></a>
-                                		</th:block>
-                                	</th:block>
+                                <th:block th:if="${@CommonFunction.isAdmin()}">
+                                    <th:block th:if="${project.completeYn == 'Y' and project.statusRequestYn == 'N'}">
+                                        <a class="btn btn-danger float-right" th:onclick="|fn.exeProjectComplete('N')|"
+                                           th:text="Open"></a>
+                                    </th:block>
+                                    <th:block th:if="${project.completeYn == 'Y' and project.statusRequestYn == 'Y'}">
+                                        <a class="btn btn-danger float-right" id="reqToOpen"
+                                           th:text="'Requested to Open'"></a>
+                                    </th:block>
                                 </th:block>
-                                <a th:onclick="|fn.copy()|" id="copy" class="btn btn-teal-02 float-right" style="margin-right: 5px; display: none;" th:text="|Copy|"></a>
-                                <a th:onclick="|fn.exeProjectComplete('Y')|" th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-teal-02 float-right" id="complete" style="margin-right: 5px; display: none;" th:text="|Complete|"></a>
-                                <a th:onclick="|fn.shareUrl()|" th:if="${project.prjId != null}" class="btn btn-teal-02 float-right" style="margin-right: 5px;" th:text="|Share URL|"></a>
-                                <input type="hidden" id="copyUrl"/>
+                                <th:block th:unless="${@CommonFunction.isAdmin()}">
+                                    <th:block th:if="${project.completeYn == 'Y' and project.viewOnlyFlag == 'N'}">
+                                        <a class="btn btn-danger float-right" id="reqToOpen"
+                                           th:text="'Requested to Open'"></a>
+                                    </th:block>
+                                </th:block>
+                            </th:block>
+                            <a class="btn btn-teal-02 float-right" id="copy" style="margin-right: 5px; display: none;"
+                               th:onclick="|fn.copy()|" th:text="|Copy|"></a>
+                            <a class="btn btn-teal-02 float-right" id="complete"
+                               style="margin-right: 5px; display: none;" th:if="${project.viewOnlyFlag == 'N'}"
+                               th:onclick="|fn.exeProjectComplete('Y')|" th:text="|Complete|"></a>
+                            <a class="btn btn-teal-02 float-right" style="margin-right: 5px;"
+                               th:if="${project.prjId != null}" th:onclick="|fn.shareUrl()|" th:text="|Share URL|"></a>
+                            <input id="copyUrl" type="hidden"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3" th:unless="${isReadOnly}">
+                    <div class="card card-lg-red" style="position:sticky;top:10px;">
+                        <div class="card-header">
+                            <h3 class="card-title" th:text="Comment"></h3>
+                            <div class="card-tools">
+                                <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"
+                                        type="button"><i class="fas fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-body pt-0" style="padding-bottom: 0;">
+                            <div clas="row">
+                                <div clas="col-md-12" id="commentList">
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3" th:unless="${isReadOnly}">
-                            <div class="card card-lg-red" style="position:sticky;top:10px;">
-                                <div class="card-header">
-                                    <h3 class="card-title" th:text="Comment"></h3>
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
-                                    </div>
-                                </div>
-                                <div class="card-body pt-0" style="padding-bottom: 0;">
-                                    <div clas="row">
-                                        <div clas="col-md-12" id="commentList">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                    </div>
                 </div>
-            </section>
-            <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
-        </div>
+            </div>
+        </section>
+        <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
     </div>
-    <th:block th:replace="project/view/requestToOpenView"></th:block>
-    <th:block th:replace="project/view/copyConfirmView"></th:block>
+</div>
+<th:block th:replace="project/view/requestToOpenView"></th:block>
+<th:block th:replace="project/view/copyConfirmView"></th:block>
 </body>
 </html>
