@@ -96,15 +96,23 @@
                                 </th:block>
 
                                 <!--packaging-->
-                                <th:block th:if="${project.verificationStatus == null}">
-                                   <th:block th:if="${project.identificationStatus == null}">
+                                  <th:block th:if="${project.identificationStatus != 'CONF'}">
+                                         <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                        <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
+                                </th:block>
+                                <th:block th:unless="${project.identificationStatus != 'CONF'}">
+<th:block th:if="${project.verificationStatus == null}">
+                                   <th:block th:if="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
                                         <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
                                         <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
                                     </th:block>
-                                    <th:block th:unless="${project.identificationStatus == null}">
-                                        <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                      <span class='badge badge-success hover-success-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
-                                            style='cursor:pointer;'>Packaging</span>
+                                    <th:block th:unless="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
+                                        <th:block th:unless="${project.identificationStatus == null}">
+                                            <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                            <span class='badge badge-success hover-success-btn size-sm width-6rem'
+                                                  style='cursor:pointer;'
+                                                  th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                        </th:block>
                                     </th:block>
                                 </th:block>
                                 <th:block th:if="${project.verificationStatus == 'PROG'}">
@@ -114,8 +122,9 @@
                                     </th:block>
                                     <th:block th:unless="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
                                         <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                        <span class='badge badge-success hover-success-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
-                                              style='cursor:pointer;'>Packaging</span>
+                                        <span class='badge badge-success hover-success-btn size-sm width-6rem'
+                                              style='cursor:pointer;'
+                                              th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
                                     </th:block>
                                 </th:block>
                                <th:block th:if="${project.verificationStatus == 'NA'}">
@@ -139,37 +148,43 @@
                                     <th:block th:unless="${project.distributeTarget == 'N/A'}">
                                         <th:block th:if="${project.verificationStatus == 'CONF'}">
                                           <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
-                                                          style='cursor:pointer;'>Packaging</span>
+                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem'
+                                                          style='cursor:pointer;'
+                                                          th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
                                         </th:block>
                                         <th:block th:unless="${project.verificationStatus == 'CONF'}">
                                             <th:block th:if="${project.status == 'PROG'}">
                                                 <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                <span class='badge badge-success hover-success-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
-                                                      style='cursor:pointer;'>Packaging</span>
+                                                <span class='badge badge-success hover-success-btn size-sm width-6rem'
+                                                      style='cursor:pointer;'
+                                                      th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
                                             </th:block>
                                             <th:block th:if="${project.status == 'REQ'}">
                                                 <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
-                                                      style='cursor:pointer;'>Packaging</span>
+                                                <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem'
+                                                      style='cursor:pointer;'
+                                                      th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
                                             </th:block>
                                             <th:block th:if="${project.status == 'REV'}">
                                                 <th:block th:if="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE')
                                                     or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA')
                                                     or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
                                                     <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
-                                                          style='cursor:pointer;'>Packaging</span>
+                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem'
+                                                          style='cursor:pointer;'
+                                                          th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
                                                 </th:block>
                                                 <th:block
                                                         th:unless="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
                                                     <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                    <span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' th:onclick="fn.mvVerification([[${project.prjId}]])"
-                                                          style='cursor:pointer;'>Packaging</span>
+                                                    <span class='badge badge-yellow hover-yellow-btn size-sm width-6rem'
+                                                          style='cursor:pointer;'
+                                                          th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
                                                 </th:block>
                                             </th:block>
                                         </th:block>
                                     </th:block>
+                                </th:block>
                                 </th:block>
                             </span>
                                 <!--vulnerability-->

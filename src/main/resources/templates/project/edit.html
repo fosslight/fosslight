@@ -15,7 +15,7 @@
                         <div class="col-sm-10 text-left mt-2">
                                <span class="description-percentage text-lg text-dark-gray">
                                 <a class="text-dark-gray text-bold hover-line" href="#"
-                                   title="Go to Basic information tab" th:onclick="fn.mvEditTab([[${project.prjId}]])">[[${project.prjName}]]</a>
+                                   th:onclick="fn.mvEditTab([[${project.prjId}]])" title="Go to Basic information tab">[[${project.prjName}]]</a>
                                 </span>
                             <span class="ml-2">
                             <span class="mx-2">
@@ -107,16 +107,23 @@
                                 </th:block>
 
                                 <!--packaging-->
-                                <th:block th:if="${project.verificationStatus == null}">
-                                   <th:block th:if="${project.identificationStatus == null}">
+                                  <th:block th:if="${project.identificationStatus != 'CONF'}">
+                                         <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
+                                        <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
+                                </th:block>
+                                <th:block th:unless="${project.identificationStatus != 'CONF'}">
+<th:block th:if="${project.verificationStatus == null}">
+                                   <th:block th:if="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
                                         <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
                                         <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
                                     </th:block>
-                                    <th:block th:unless="${project.identificationStatus == null}">
-                                        <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                      <span class='badge badge-success hover-success-btn size-sm width-6rem'
-                                            style='cursor:pointer;'
-                                            th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                    <th:block th:unless="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
+                                        <th:block th:unless="${project.identificationStatus == null}">
+                                            <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
+                                            <span class='badge badge-success hover-success-btn size-sm width-6rem'
+                                                  style='cursor:pointer;'
+                                                  th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
+                                        </th:block>
                                     </th:block>
                                 </th:block>
                                 <th:block th:if="${project.verificationStatus == 'PROG'}">
@@ -189,16 +196,19 @@
                                         </th:block>
                                     </th:block>
                                 </th:block>
+                                </th:block>
                             </span>
                                 <!--vulnerability-->
                             <span class="mx-2">
                                 <th:block th:unless="${project.secCode == null}">
                                     <th:block th:if="${project.secCvssScore >= 7.0}">
                                         <th:blcok th:if="${project.secCode == 'Fixed'}">
-                                            <span class="badge badge-cherry text-md width-9rem pointer p-1" th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Resolved([[${project.secCvssScore}]])</span>
+                                            <span class="badge badge-cherry text-md width-9rem pointer p-1"
+                                                  th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Resolved([[${project.secCvssScore}]])</span>
                                         </th:blcok>
                                          <th:blcok th:unless="${project.secCode == 'Fixed'}">
-                                             <span class="badge badge-cherry text-md width-9rem pointer p-1" th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Need to resolve([[${project.secCvssScore}]])</span>
+                                             <span class="badge badge-cherry text-md width-9rem pointer p-1"
+                                                   th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Need to resolve([[${project.secCvssScore}]])</span>
                                         </th:blcok>
                                     </th:block>
                                     <th:block th:unless="${project.secCvssScore >= 7.0}">
@@ -223,7 +233,8 @@
                         </div>
                         <div class="col-sm-2 float-right mt-1">
                             <div class="helpLink f-left dropdown float-right mt-1">
-                                <a aria-expanded="false" aria-haspopup="true" class="help-link dropdown-toggle" data-toggle="dropdown"
+                                <a aria-expanded="false" aria-haspopup="true" class="help-link dropdown-toggle"
+                                   data-toggle="dropdown"
                                    href="#" role="button">Help</a>
                                 <div class="dropdown-menu mt-0">
                                     <a class="dropdown-item" href="#"
@@ -263,14 +274,16 @@
                                     <div class="col-md-6 required">
                                         <label for="inputName" th:text="#{msg.common.field.project.name}"></label><span
                                             class="text-orange">*</span>
-                                        <input class="form-control" id="prjName" name="prjName" th:disabled="${isReadOnly}"
+                                        <input class="form-control" id="prjName" name="prjName"
+                                               th:disabled="${isReadOnly}"
                                                th:value="${project.prjName}" type="text">
                                         <span class="retxt text-danger text-sm"
                                               th:text="'This field is required.'"></span>
                                     </div>
                                     <div class="col-md-4">
                                         <label for="inputName" th:text="#{msg.common.field.project.version}"></label>
-                                        <input class="form-control" id="inputName" name="prjVersion" th:disabled="${isReadOnly}"
+                                        <input class="form-control" id="inputName" name="prjVersion"
+                                               th:disabled="${isReadOnly}"
                                                th:value="${project.prjVersion}" type="text">
                                     </div>
                                     <div class="col-md-2">
@@ -280,7 +293,8 @@
                                                 style="width: 100%;" th:disabled="${isReadOnly}">
                                             <th:block
                                                     th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
-                                                <option th:selected="${project.priority != null && #strings.equals(option.cdDtlNo, project.priority)}" th:text="${option.cdDtlNm}"
+                                                <option th:selected="${project.priority != null && #strings.equals(option.cdDtlNo, project.priority)}"
+                                                        th:text="${option.cdDtlNm}"
                                                         th:value="${option.cdDtlNo}"></option>
                                             </th:block>
                                         </select>
@@ -292,9 +306,11 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <div class="btn-group ml-2">
-                                                    <button class="btn text-sm btn-default width-14rem" id="identificationStatus"
+                                                    <button class="btn text-sm btn-default width-14rem"
+                                                            id="identificationStatus"
                                                             type="button"></button>
-                                                    <button class="btn text-sm btn-default width-14rem" id="verificationStatus"
+                                                    <button class="btn text-sm btn-default width-14rem"
+                                                            id="verificationStatus"
                                                             type="button"></button>
                                                     <!--                                                    <button type="button" id="destributionStatus" class="btn text-sm btn-default width-14rem"></button>-->
                                                     <span id="downloadBtn"></span>
@@ -314,11 +330,13 @@
                                                             <input autocomplete="off" checked="" id="permissionRadio1"
                                                                    name="publicYn"
                                                                    th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}"
-                                                                   th:disabled="${isReadOnly}" th:text="Everyone" type="radio"
+                                                                   th:disabled="${isReadOnly}" th:text="Everyone"
+                                                                   type="radio"
                                                                    value="Y">
                                                         </label>
                                                         <label class="btn btn-sm btn-onOff active px-3">
-                                                            <input autocomplete="off" id="permissionRadio2" name="publicYn"
+                                                            <input autocomplete="off" id="permissionRadio2"
+                                                                   name="publicYn"
                                                                    th:checked="${project != null && #strings.equals(project.publicYn, 'N')}"
                                                                    th:disabled="${isReadOnly}"
                                                                    th:text="'Creator & Watcher'" type="radio"
@@ -340,12 +358,14 @@
                                                 style="width: 100%;" th:disabled="${isReadOnly}">
                                             <th:block
                                                     th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
-                                                <option th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.osType)}" th:text="${option.cdDtlNm}"
+                                                <option th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.osType)}"
+                                                        th:text="${option.cdDtlNm}"
                                                         th:value="${option.cdDtlNo}"></option>
                                             </th:block>
                                         </select>
                                         <div class="row mt-2 pl-2 pr-2">
-                                            <input class="form-control" id="osTypeEtc" name="osTypeEtc" style="display: none;"
+                                            <input class="form-control" id="osTypeEtc" name="osTypeEtc"
+                                                   style="display: none;"
                                                    th:disabled="true" type="text"/>
                                             <span class="retxt text-danger text-sm"></span>
                                         </div>
@@ -359,7 +379,8 @@
                                                     style="width: 100%;" th:disabled="${isReadOnly}">
                                                 <th:block
                                                         th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
-                                                    <option th:selected="${project.distributionType != null && option.cdDtlNo == project.distributionType}" th:text="${option.cdDtlNm}"
+                                                    <option th:selected="${project.distributionType != null && option.cdDtlNo == project.distributionType}"
+                                                            th:text="${option.cdDtlNm}"
                                                             th:value="${option.cdDtlNo}"></option>
                                                 </th:block>
                                             </select>
@@ -369,14 +390,16 @@
                                                 <div class="form-group clearfix">
                                                     <div class="icheck-primary d-inline">
                                                         <input id="networkServerType_Y" name="networkServerType"
-                                                               th:checked="${project.networkServerType != null && project.networkServerType == 'Y'} ? 'checked'" th:disabled="${isReadOnly}"
+                                                               th:checked="${project.networkServerType != null && project.networkServerType == 'Y'} ? 'checked'"
+                                                               th:disabled="${isReadOnly}"
                                                                type="radio"
                                                                value="Y"/>
                                                         <label for="networkServerType_Y" th:text="Yes"></label>
                                                     </div>
                                                     <div class="icheck-primary d-inline" style="margin-left: 5px;">
                                                         <input id="networkServerType_N" name="networkServerType"
-                                                               th:checked="${project.networkServerType == null || (project.networkServerType != null && project.networkServerType == 'N')} ? 'checked'" th:disabled="${isReadOnly}"
+                                                               th:checked="${project.networkServerType == null || (project.networkServerType != null && project.networkServerType == 'N')} ? 'checked'"
+                                                               th:disabled="${isReadOnly}"
                                                                type="radio"
                                                                value="N"/>
                                                         <label for="networkServerType_N" th:text="No"></label>
@@ -395,7 +418,8 @@
                                             <div class="float-left" id="modelFile" style="max-width: 100%;"></div>
                                         </div>
                                         <div class="col-md-2">
-                                            <button class="btn btn-default btn-sm float-right px-5" th:onclick="|fn.downloadModelList()|"
+                                            <button class="btn btn-default btn-sm float-right px-5"
+                                                    th:onclick="|fn.downloadModelList()|"
                                                     th:text="Download" type="button"><i
                                                     class="fa fa-download"></i></button>
                                         </div>
@@ -414,7 +438,8 @@
                                            th:text="#{msg.common.field.additionalInformation}"></label>
                                     <textarea class="form-control" disabled rows="3"
                                               th:if="${isReadOnly}" th:text="${detail?.comment}"></textarea>
-                                    <textarea class="form-control" id="additionalInformation" name="additionalInformation"
+                                    <textarea class="form-control" id="additionalInformation"
+                                              name="additionalInformation"
                                               rows="3" th:unless="${isReadOnly}"></textarea>
                                 </div>
                                 <div class="form-group">
@@ -446,7 +471,8 @@
                                         </div>
                                         <div class="row my-1">
                                             <div class="col-4">
-                                                <input class="form-control" id="adId" name="adId" placeholder="Input email"
+                                                <input class="form-control" id="adId" name="adId"
+                                                       placeholder="Input email"
                                                        th:onKeypress="|fn.CheckChar()|" type="text">
                                             </div>
                                             <div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null
@@ -467,12 +493,14 @@
                                                             </th:block>
                                                         </th:block>
                                                     </select>
-                                                    <input class="w220" id="emailTemp" style="display:none;" th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"
+                                                    <input class="w220" id="emailTemp" style="display:none;"
+                                                           th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"
                                                            type="text"/>
                                                 </th:block>
                                                 <th:block th:if="${!useDomainFlag}">
                                                     <input class="form-control" id="emailTemp" name="emailTemp"
-                                                           placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|"
+                                                           placeholder="Input your Email Domain"
+                                                           th:onKeypress="|fn.CheckChar()|"
                                                            type="text">
                                                 </th:block>
                                             </div>
@@ -492,7 +520,8 @@
                                                 </select>
                                             </div>
                                             <div class="col-7">
-                                                <input class="form-control" id="listId" name="listId" placeholder="Input ID you want to copy"
+                                                <input class="form-control" id="listId" name="listId"
+                                                       placeholder="Input ID you want to copy"
                                                        type="text"/>
                                             </div>
                                             <div class="col-1">
@@ -525,7 +554,8 @@
                                                 <option th:text="'Select Division'" th:value="''"></option>
                                                 <th:block
                                                         th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                                    <option th:selected="${option.cdDtlNo == project.division}" th:text="${option.cdDtlNm}"
+                                                    <option th:selected="${option.cdDtlNo == project.division}"
+                                                            th:text="${option.cdDtlNm}"
                                                             th:value="${option.cdDtlNo}"></option>
                                                 </th:block>
                                             </select>
@@ -549,7 +579,8 @@
                         <div class="card-footer clearfix" th:unless="${isReadOnly}">
                             <th:block th:if="${project.prjId != null}">
                                 <a class="btn btn-secondary float-left" id="delete"
-                                   th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}" th:onclick="|fn.deletePrj()|"
+                                   th:if="${project.completeYn != 'Y' and project.viewOnlyFlag == 'N'}"
+                                   th:onclick="|fn.deletePrj()|"
                                    th:text="Delete"></a>
                                 <a class="btn btn-dark-02 float-left" id="drop" style="margin-left: 5px; display: none;"
                                    th:if="${project.viewOnlyFlag == 'N'}" th:text="|Drop|"></a>
