@@ -1,77 +1,74 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="partner/list-header :: headerFragment"></th:block>
 <th:block th:replace="partner/list-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
-    <!-- Site wrapper -->
-    <div class="wrapper">
-        <div class="content-wrapper custom-layout">
-            <!-- Content Header (Page header) -->
-            <section class="content-header"></section>
-            <!-- Main content -->
-            <section class="content">
-                <div class="container-fluid">
-                	<form id="3rdSearch" name="3rdSearch">
-                	<input name="act" type="hidden" value="search"/> 
+<!-- Site wrapper -->
+<div class="wrapper">
+    <div class="content-wrapper custom-layout">
+        <!-- Content Header (Page header) -->
+        <section class="content-header"></section>
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <form id="3rdSearch" name="3rdSearch">
+                    <input name="act" type="hidden" value="search"/>
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card card-dark card-outline collapsed-card search-form mb-3">
                                 <div class="card-header" style="border-bottom: none;">
                                     <div class="row">
-                                    	<div class="col-md-7 d-flex">
-                                        	<div class="row" style="width: 100%;">
-                                        		<div class="col-12">
-                                            		<div class="input-group">
-                                                        <input class="save-value" name="defaultSearchType" type="hidden" th:value="THIRD_PARTY"/>
-                                                        <input type="search" name="partnerName" class="form-control autoComParty save-value" placeholder="Partner Name" th:value="${searchBean?.partnerName}">
-                                                    	<div class="input-group-append">
-                                                    		<button type="submit" class="btn btn-default" id="search"><i class="fa fa-search"></i></button>
-                                                    	</div>
-                                              		</div>
-                                            	</div>
-											</div>
-                                   		</div>
-                                        <div class="col-md-3 pl-3">
+                                        <div class="col-md-7 d-flex">
+                                            <div class="row" style="width: 100%;">
+                                                <div class="col-12">
+                                                    <div class="input-group">
+                                                        <input class="save-value" name="defaultSearchType" th:value="THIRD_PARTY"
+                                                               type="hidden"/>
+                                                        <input class="form-control autoComParty save-value" name="partnerName"
+                                                               placeholder="Partner Name"
+                                                               th:value="${searchBean?.partnerName}"
+                                                               type="search">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default" id="search" type="submit"><i
+                                                                    class="fa fa-search"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 pl-3">
                                             <div class="row">
-                                                <div class="col-md-7 d-flex justify-content-start">
+                                                <div class="col-sm-7 d-flex justify-content-start">
                                                     <div class="input-group-append d-flex align-items-center">
                                                         <a class="text-blue-gray" data-card-widget="collapse"
                                                            style="font-size: 1rem;" th:text="'+ Advanced Search'"
                                                            title="Collapse"></a>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-5">
-                                                    <div class="float-right pt-1">
-                                                        <button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('3rdSearch')|" data-toggle="tooltip" title="Save Search"
-                                                                type="button">
-                                                            <!--                                                            <span class="material-symbols-outlined">download</span>-->
-                                                            <i class="fa fa-download mr-xm"></i>
-                                                        </button>
-                                                        <button class="btn btn-ivory btn-sm btn-icon" th:onclick="|resetForm('3rdSearch')|" data-toggle="tooltip" title="Reset"
-                                                                type="button">
-                                                            <!--   <span class="material-symbols-outlined">restart_alt</span>-->
-                                                            <i class="fa fa-undo mr-xm"></i>
-                                                        </button>
+                                                <div class="col-sm-5">
+                                                    <div class="helpLink f-left dropdown float-right mt-1">
+                                                        <a aria-expanded="false" aria-haspopup="true"
+                                                           class="help-link dropdown-toggle" data-toggle="dropdown" href="#"
+                                                           role="button">Help</a>
+                                                        <div class="dropdown-menu mt-0">
+                                                            <a class="dropdown-item" href="#"
+                                                               th:onclick="|openHelpGuideLink('Party_List_Main')|">How
+                                                                to use FossLight Hub</a>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-2">
-                                            <div class="helpLink f-left dropdown float-right mt-1">
-                                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
-                                                <div class="dropdown-menu mt-0">
-                                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Party_List_Main')|">How to use FossLight Hub</a>
-                                                </div>
-                                            </div>
-                                     	</div>
-                                	</div>
+                                    </div>
                                 </div>
                                 <div class="card-body py-1">
                                     <form action="enhanced-results.html">
                                         <div class="row">
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" id="partnerId" name="partnerId" class="form-control save-value" placeholder="Partner ID" th:value="${searchBean?.partnerId}">
+                                                    <input class="form-control save-value" id="partnerId" name="partnerId"
+                                                           placeholder="Partner ID" th:value="${searchBean?.partnerId}"
+                                                           type="text">
                                                 </div>
                                             </div>
                                             <div class="col-4">
@@ -82,145 +79,219 @@
                                                                 <i class="far fa-calendar-alt"></i>
                                                             </span>
                                                         </div>
-                                                        <input type="text" class="form-control" placeholder="Date range" id="schDateRange">
-                                                        <input class="save-value" name="createdDate1" id="createdDate1" type="hidden" th:value="${searchBean?.createdDate1}" />
-                                                        <input class="save-value" name="createdDate2" id="createdDate2" type="hidden" th:value="${searchBean?.createdDate2}" />
+                                                        <input class="form-control" id="schDateRange" placeholder="Date range"
+                                                               type="text">
+                                                        <input class="save-value" id="createdDate1" name="createdDate1"
+                                                               th:value="${searchBean?.createdDate1}" type="hidden"/>
+                                                        <input class="save-value" id="createdDate2" name="createdDate2"
+                                                               th:value="${searchBean?.createdDate2}" type="hidden"/>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" class="form-control save-value" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}"/>
+                                                    <input class="form-control save-value" name="softwareName"
+                                                           placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}"
+                                                           type="text"/>
                                                 </div>
                                             </div>
-                                     	</div>
-                                     	<div class="row">
-                                     		<div class="col-4">
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" class="form-control save-value" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}"/>
+                                                    <input class="form-control save-value" name="softwareVersion"
+                                                           placeholder="3rd Party Software Version"
+                                                           th:value="${searchBean?.softwareVersion}"
+                                                           type="text"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <select class="form-control select2 save-value" name="division" id="division" style="width: 100%;">
+                                                    <select class="form-control select2 save-value" id="division"
+                                                            name="division" style="width: 100%;">
                                                         <option value=""></option>
-                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                                            <option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}" th:selected="${#strings.equals(option.cdDtlNo, searchBean?.division)}"></option>
+                                                        <th:block
+                                                                th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+                                                            <option th:selected="${#strings.equals(option.cdDtlNo, searchBean?.division)}"
+                                                                    th:text="${option?.cdDtlNm}"
+                                                                    th:value="${option.cdDtlNo}"></option>
                                                         </th:block>
                                                     </select>
                                                 </div>
-                                            </div> 
+                                            </div>
                                             <div class="col-md-4">
                                                 <div class="form-group">
-                                                    <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
-                                                        <select class="form-control select2 save-value" multiple="multiple" id="parStatusSelect" name="status" style="width: 100%;">
+                                                    <th:block
+                                                            th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
+                                                        <select class="form-control select2 save-value"
+                                                                id="parStatusSelect" multiple="multiple" name="status"
+                                                                style="width: 100%;">
                                                             <option th:value="''"></option>
                                                             <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}"
+                                                                    th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}"
                                                                     th:text="${option.cdDtlNm}"
-                                                                    th:value="${option.cdDtlNo}"
-                                                                    th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}">
+                                                                    th:value="${option.cdDtlNo}">
                                                             </option>
                                                         </select>
                                                     </th:block>
                                                 </div>
                                             </div>
-                                     	</div>
+                                        </div>
                                         <div class="row">
-                                        	<div class="col-4">
+                                            <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="creator" class="form-control autoComCreatorDivision save-value" placeholder="Creator" th:value="${searchBean?.creator}" />
+                                                    <input class="form-control autoComCreatorDivision save-value" name="creator"
+                                                           placeholder="Creator"
+                                                           th:value="${searchBean?.creator}" type="text"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="reviewer" class="form-control autoComReviewer save-value" placeholder="Reviewer" th:value="${searchBean?.reviewer}" />
+                                                    <input class="form-control autoComReviewer save-value" name="reviewer"
+                                                           placeholder="Reviewer"
+                                                           th:value="${searchBean?.reviewer}" type="text"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input type="text" name="watchers" class="form-control save-value" placeholder="Watcher" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" />
+                                                    <input class="form-control save-value" name="watchers" placeholder="Watcher"
+                                                           th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}"
+                                                           type="text"/>
                                                 </div>
                                             </div>
                                         </div>
                                         <th:block sec:authorize="hasRole('ROLE_ADMIN')">
-                                        	<a class="small-box-footer mb-2" href="#" id="moreInfoBtn">More <i class="fas fa-arrow-circle-down"></i></a>
-                                            <div class="more-search" id="moreSearchContent" style="display: none">
-                                            	<div class="row">
-                                        			<div class="col-4">
-                                                		<div class="form-group">
-                                                    		<input type="text" name="ossName" class="form-control autoComOss" placeholder="Oss Name" th:value="${searchBean?.ossName}" />
-                                                		</div>
-                                            		</div>
-                                            		<div class="col-4">
-                                                		<div class="form-group">
-                                                    		<input type="text" name="ossVersion" class="form-control autoComOss" placeholder="Oss Version" th:value="${searchBean?.ossVersion}" />
-                                                		</div>
-                                            		</div>
-                                            		<div class="col-4">
-                                                		<div class="form-group">
-                                                    		<input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
-                                                		</div>
-                                          			</div>
-                                        		</div>
-                                        		<div class="row">
-                                        			<div class="col-4">
-                                                		<div class="form-group">
-                                                			<textarea class="form-control" name="binaryName" placeholder="Binary Name" rows="3" th:utext="${searchBean?.binaryName}"></textarea>
-                                                		</div>
-                                            		</div>
-                                            		<div class="col-4">
-                                                		<div class="form-group">
-                                                    		<textarea class="form-control" name="userComment" placeholder="Comment" rows="3" th:utext="${searchBean?.comment}"></textarea>
-                                                		</div>
-                                            		</div>
-                                            		<div class="col-4">
-                                                		<div class="form-group">
-                                                    		<textarea class="form-control" name="description" placeholder="Description" rows="3" th:utext="${searchBean?.description}"></textarea>
-                                                		</div>
-                                          			</div>
-                                        		</div>
+                                            <a class="small-box-footer mb-2" href="#" id="moreInfoBtn">More <i
+                                                    class="fas fa-arrow-circle-down"></i></a>
+                                            <div class="more-search" id="moreSearchContent">
+                                                <div class="row">
+                                                    <div class="col-4">
+                                                        <div class="form-group">
+                                                            <input class="form-control autoComOss" name="ossName"
+                                                                   placeholder="Oss Name"
+                                                                   th:value="${searchBean?.ossName}"
+                                                                   type="text"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="form-group">
+                                                            <input class="form-control autoComOss" name="ossVersion"
+                                                                   placeholder="Oss Version"
+                                                                   th:value="${searchBean?.ossVersion}"
+                                                                   type="text"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="form-group">
+                                                            <input class="form-control autoComLicense" name="licenseName"
+                                                                   placeholder="License Name"
+                                                                   th:value="${searchBean?.licenseName}"
+                                                                   type="text"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-4">
+                                                        <div class="form-group">
+                                                            <textarea class="form-control" name="binaryName"
+                                                                      placeholder="Binary Name" rows="3"
+                                                                      th:utext="${searchBean?.binaryName}"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="form-group">
+                                                            <textarea class="form-control" name="userComment"
+                                                                      placeholder="Comment" rows="3"
+                                                                      th:utext="${searchBean?.comment}"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="form-group">
+                                                            <textarea class="form-control" name="description"
+                                                                      placeholder="Description" rows="3"
+                                                                      th:utext="${searchBean?.description}"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </th:block>
-                                   	</div>
+                                        <div class="row mt-1 mb-2">
+                                            <div class="col-12">
+                                                <div class=" d-flex justify-content-center pt-1">
+														<span class="mx-1">
+															<button class="btn btn-ivory btn-sm btn-icon px-3"
+                                                                    data-placement="right"
+                                                                    data-toggle="tooltip"
+                                                                    th:onclick="|updateSearchCondition('3rdSearch')|"
+                                                                    title="Save Search"
+                                                                    type="button">
+															<!--                                                            <span class="material-symbols-outlined">download</span>-->
+															<i class="fa fa-download mr-3"></i>save condition
+														</button>
+														</span>
+                                                    <span class="mx-1">
+															<button class="btn btn-light-red btn-sm btn-icon px-3"
+                                                                    data-placement="right"
+                                                                    data-toggle="tooltip"
+                                                                    th:onclick="|resetForm('3rdSearch')|"
+                                                                    title="Reset"
+                                                                    type="button">
+															<!--   <span class="material-symbols-outlined">restart_alt</span>-->
+															<i class="fa fa-undo mr-3"></i>reset
+														</button>
+														</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                 </div>
                             </div>
                         </div>
-                        </form>
-                    </div>
-					
-                    <div class="row px-1">
-                        <div class="col-md-6">
-                            <div class="row float-left">
-                            	<div class="btn-group btn-group-sm width-10rem mr-xm" id="ChangeContainer">
-                            		<button type="button" class="btn btn-yellow-03 px-3 ml-2" th:text="Change"></button>
-                                    <button type="button" class="btn btn-yellow-03 dropdown-toggle dropdown-icon" data-toggle="dropdown">
-                                        <span class="sr-only" th:text="'Toggle Dropdown'"></span>
-                                    </button>
-                                    <div class="dropdown-menu" id="ChangeList" role="menu">
-                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeDivision()|" th:text="Division"></a>
-                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeWatcher()|" th:text="Watcher"></a>
-                                    </div>
-                            	</div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="row float-right" style="margin-right: .1rem;">
-                                <button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
-                                <button type="button" class="btn btn-lg-teal btn-sm width-6rem mr-xm px-3 btnAdd" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|" th:text="Add"></button>
-                            </div>
-                        </div>
-                    </div>
+                </form>
+            </div>
 
-                    <div class="row">
-                        <div class="col-12 mt-3">
-                            <div class="col-sm-12 jqGridSet">
-                                <table id="list"><tr><td></td></tr></table>
-                                <div id="pager"></div>
+            <div class="row px-1">
+                <div class="col-md-6">
+                    <div class="row float-left">
+                        <div class="btn-group btn-group-sm width-10rem mr-xm" id="ChangeContainer">
+                            <button class="btn btn-yellow-03 px-3 ml-2" th:text="Change" type="button"></button>
+                            <button class="btn btn-yellow-03 dropdown-toggle dropdown-icon" data-toggle="dropdown"
+                                    type="button">
+                                <span class="sr-only" th:text="'Toggle Dropdown'"></span>
+                            </button>
+                            <div class="dropdown-menu" id="ChangeList" role="menu">
+                                <a class="dropdown-item" href="#" th:onclick="|fn.changeDivision()|"
+                                   th:text="Division"></a>
+                                <a class="dropdown-item" href="#" th:onclick="|fn.changeWatcher()|"
+                                   th:text="Watcher"></a>
                             </div>
                         </div>
                     </div>
-            </section>
-        </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row float-right" style="margin-right: .1rem;">
+                        <button class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"
+                                type="button"><i class="far fa-file-excel mr-2"></i>Export
+                        </button>
+                        <button class="btn btn-lg-teal btn-sm width-6rem mr-xm px-3 btnAdd" th:onclick="|createTabInFrame('New_3rdParty', '/partner/edit')|"
+                                th:text="Add" type="button"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 mt-3">
+                    <div class="col-sm-12 jqGridSet">
+                        <table id="list">
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
+</div>
 </body>
 </html>

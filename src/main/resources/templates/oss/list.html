@@ -19,8 +19,10 @@
                                 <div class="card-header" style="border-bottom: none;">
                                     <div class="row">
                                         <div class="col-md-7 d-flex">
-                                            <div class="form-check width-8rem p-2 pl-3 mr-2" style="margin-left: 0.3rem">
-                                                <input class="save-value" name="defaultSearchType" type="hidden" th:value="OSS"/>
+                                            <div class="form-check width-8rem p-2 pl-3 mr-2"
+                                                 style="margin-left: 0.3rem">
+                                                <input class="save-value" name="defaultSearchType" th:value="OSS"
+                                                       type="hidden"/>
                                                 <input class="form-check-input" id="ossNameAllSearchFlag"
                                                        th:checked="${searchBean.ossNameAllSearchFlag == 'Y' }"
                                                        type="checkbox">
@@ -43,36 +45,22 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-md-3 pl-3">
+                                        <div class="col-md-5 pl-3">
                                             <div class="row">
-                                                <div class="col-md-7 d-flex justify-content-start">
+                                                <div class="col-sm-7 d-flex justify-content-start">
                                                     <div class="input-group-append d-flex align-items-center">
                                                         <a class="text-blue-gray" data-card-widget="collapse"
                                                            style="font-size: 1rem;" th:text="'+ Advanced Search'"
                                                            title="Collapse"></a>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-5">
-                                                    <div class="float-right pt-1">
-                                                        <button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('ossSearch')|" data-toggle="tooltip" data-placement="right" title="Save Search"
-                                                                type="button">
-<!--                                                            <span class="material-symbols-outlined">download</span>-->
-                                                            <i class="fa fa-download mr-xm"></i>
-                                                        </button>
-                                                        <button class="btn btn-ivory btn-sm btn-icon" th:onclick="|resetForm('ossSearch')|" data-toggle="tooltip" data-placement="right" title="Reset"
-                                                                type="button">
-                                                         <!--   <span class="material-symbols-outlined">restart_alt</span>-->
-                                                            <i class="fa fa-undo mr-xm"></i>
-                                                        </button>
+                                                <div class="col-sm-5">
+                                                    <div class="helpLink f-left dropdown float-right mt-1">
+                                                        <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+                                                        <div class="dropdown-menu mt-0">
+                                                            <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('OSS_List_Main')|">How to use FossLight Hub</a>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-2 pr-3">
-                                            <div class="helpLink f-left dropdown float-right mt-1">
-                                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
-                                                <div class="dropdown-menu mt-0">
-                                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('OSS_List_Main')|">How to use FossLight Hub</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -112,7 +100,8 @@
                                                            name="homepageAllSearchFlag"
                                                            th:value="${searchBean.homepageAllSearchFlag}" type="hidden">
                                                 </div>
-                                                <input class="form-control save-value" name="homepage" placeholder="Website"
+                                                <input class="form-control save-value" name="homepage"
+                                                       placeholder="Website"
                                                        th:value="${searchBean.homepage}" type="text">
                                             </div>
                                         </div>
@@ -136,7 +125,8 @@
                                     <div class="row">
                                         <div class="col-md-5">
                                             <div class="form-group mb-2">
-                                                <input class="form-control save-value" id="cvssScoreInput" name="cvssScore"
+                                                <input class="form-control save-value" id="cvssScoreInput"
+                                                       name="cvssScore"
                                                        placeholder="Vulnerability (>=)"
                                                        th:value="${searchBean.cvssScore}" type="text">
                                             </div>
@@ -158,7 +148,7 @@
                                     <th:block sec:authorize="hasRole('ROLE_ADMIN')">
                                         <a class="small-box-footer mb-2" href="#" id="moreInfoBtn">More <i
                                                 class="fas fa-arrow-circle-down"></i></a>
-                                        <div class="more-search" id="moreSearchContent" style="display: none">
+                                        <div class="more-search" id="moreSearchContent">
                                             <div class="row mb-2">
                                                 <div class="col-md-3">
                                                     <div class="form-group mb-2">
@@ -203,10 +193,11 @@
                                                     <select class="select2" id="licenseTypeSelect" name="licenseType"
                                                             style="width: 100%; color: gray;">
                                                         <option value=""></option>
-                                                        <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-                                                            <option th:text="${code.cdDtlNm}"
-                                                                    th:value="${code.cdDtlNo}"
-                                                                    th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}"></option>
+                                                        <th:block
+                                                                th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                                                            <option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}"
+                                                                    th:text="${code.cdDtlNm}"
+                                                                    th:value="${code.cdDtlNo}"></option>
                                                         </th:block>
                                                     </select>
                                                 </div>
@@ -272,6 +263,32 @@
                                             </div>
                                         </div>
                                     </th:block>
+                                    <div class="row mt-1 mb-2">
+                                        <div class="col-12">
+                                            <div class=" d-flex justify-content-center pt-1">
+														<span class="mx-1">
+															<button class="btn btn-ivory btn-sm btn-icon px-3"
+                                                                    data-placement="right"
+                                                                    data-toggle="tooltip" th:onclick="|updateSearchCondition('ossSearch')|"
+                                                                    title="Save Search"
+                                                                    type="button">
+															<!--                                                            <span class="material-symbols-outlined">download</span>-->
+															<i class="fa fa-download mr-3"></i>save condition
+														</button>
+														</span>
+                                                <span class="mx-1">
+															<button class="btn btn-light-red btn-sm btn-icon px-3"
+                                                                    data-placement="right"
+                                                                    data-toggle="tooltip" th:onclick="|resetForm('ossSearch')|"
+                                                                    title="Reset"
+                                                                    type="button">
+															<!--   <span class="material-symbols-outlined">restart_alt</span>-->
+															<i class="fa fa-undo mr-3"></i>reset
+														</button>
+														</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -281,7 +298,8 @@
                     <div class="col-md-6">
                         <div class="row">
                             <th:block th:if="${@CommonFunction.isAdmin()}">
-                                <button class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|oss_lst_fn.deleteOss()|"
+                                <button class="btn btn-danger btn-sm width-10rem mr-xm px-3"
+                                        th:onclick="|oss_lst_fn.deleteOss()|"
                                         th:text="Delete" type="button"></button>
                             </th:block>
                         </div>
@@ -289,15 +307,18 @@
                     <div class="col-md-6">
                         <div class="row float-right">
                             <th:block th:if="${@CommonFunction.isAdmin() and project?.dropYn != 'Y'}">
-                                <button class="btn btn-danger btn-sm width-10rem mr-xm px-3" th:onclick="|createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')|"
+                                <button class="btn btn-danger btn-sm width-10rem mr-xm px-3"
+                                        th:onclick="|createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')|"
                                         th:text="'Bulk Registration'"
                                         type="button"></button>
                             </th:block>
-                            <button class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"
+                            <button class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3"
+                                    th:onclick="|fn.downloadExcel()|"
                                     type="button"><i class="far fa-file-excel mr-2"></i>Export
                             </button>
                             <th:block th:if="${@CommonFunction.isAdmin()}">
-                                <button class="btn btn-danger btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_OpenSource', '/oss/edit')|"
+                                <button class="btn btn-danger btn-sm width-6rem mr-xm px-3"
+                                        th:onclick="|createTabInFrame('New_OpenSource', '/oss/edit')|"
                                         th:text="Add"
                                         type="button"></button>
                             </th:block>

@@ -110,9 +110,12 @@ ul { list-style-type: none; }
 .custom-layout .btn-dark-04:hover { background-color: #001429; }
 .custom-layout .btn-ivory { background-color: #ecedf0; font-weight: 500; color: #595959 }
 .custom-layout .btn-ivory:hover { background-color: #d3e3fd;}
+.custom-layout .btn-light-red { background-color: #ffd6d6; font-weight: 500; color: #595959 }
+.custom-layout .btn-light-red:hover { background-color: #d3e3fd; }
+
 .custom-layout .btn-grid-light-gray { background-color: #f8f9fa; font-weight: 500; color: #595959 }
 .custom-layout .btn-grid-light-gray:hover { background-color: #d3e3fd;}
-.custom-layout .btn-purple { background-color: #8d79ae; font-weight: 500; color: #fff }
+.custom-layout .btn-purple { background-color: #e3ab9a80; font-weight: 500; color: #fff }
 .custom-layout .btn-purple:hover { background-color: #665B7AFF; font-weight: 500; color: #fff }
 
 /* append input area*/
