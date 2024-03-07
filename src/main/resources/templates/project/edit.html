@@ -23,7 +23,7 @@
                                     <span class="text-gray text-md text-bold">Drop</span>
                                 </th:block>
                                 <th:block th:if="${project.status == 'REQ'}">
-                                    <span class="text-pink text-md text-bold">Reqeust</span>
+                                    <span class="text-pink text-md text-bold">Request</span>
                                 </th:block>
                                 <th:block th:if="${project.status == 'REV'}">
                                     <th:block th:if="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE')
@@ -108,11 +108,11 @@
 
                                 <!--packaging-->
                                 <th:block th:if="${project.verificationStatus == null}">
-                                   <th:block th:if="${identificationStatus == null}">
+                                   <th:block th:if="${project.identificationStatus == null}">
                                         <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
                                         <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
                                     </th:block>
-                                    <th:block th:unless="${identificationStatus == null}">
+                                    <th:block th:unless="${project.identificationStatus == null}">
                                         <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
                                       <span class='badge badge-success hover-success-btn size-sm width-6rem'
                                             style='cursor:pointer;'
