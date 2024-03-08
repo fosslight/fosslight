@@ -68,37 +68,24 @@
                                 </div>
                                 <div class="card-body py-1">
                                     <div class="row">
-                                        <div class="col-md-5">
-                                            <div class="form-group mb-2">
-                                                <div class="form-check mb-1" style="font-size: .85rem">
-                                                    <input class="form-check-input" id="licenseNameAllSearchFlag"
-                                                           th:checked="${searchBean.licenseNameAllSearchFlag == 'Y'}"
-                                                           type="checkbox"/>
-                                                    <label class="form-check-label text-lg-gray"
-                                                           for="licenseNameAllSearchFlag"
-                                                           th:text="'Exact Match'"></label>
-                                                    <input class="form-check-input text-orange save-value"
-                                                           name="licenseNameAllSearchFlag"
-                                                           th:value="${searchBean.licenseNameAllSearchFlag}"
-                                                           type="hidden"/>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-2 inner-checkbox">
+                                                <div class="form-check mb-1">
+                                                    <input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y'}" type="checkbox"/>
+                                                    <label class="form-check-label text-lg-gray" for="licenseNameAllSearchFlag" th:text="'Exact Match'"></label>
+                                                    <input class="form-check-input text-orange save-value" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" type="hidden"/>
                                                 </div>
                                                 <input class="form-control autoComLicense save-value" name="licenseName"
                                                        placeholder="License Name" th:value="${searchBean.licenseName}"
                                                        type="text"/>
                                             </div>
                                         </div>
-                                        <div class="col-md-5">
-                                            <div class="form-group mb-2">
-                                                <div class="form-check mb-1" style="font-size: .85rem">
-                                                    <input class="form-check-input text-orange"
-                                                           id="homepageAllSearchFlag"
-                                                           th:checked="${searchBean.homepageAllSearchFlag == 'Y'}"
-                                                           type="checkbox">
-                                                    <label class="form-check-label text-lg-gray"
-                                                           for="homepageAllSearchFlag" th:text="'Exact Match'"></label>
-                                                    <input class="form-check-input text-orange save-value"
-                                                           name="homepageAllSearchFlag"
-                                                           th:value="${searchBean.homepageAllSearchFlag}" type="hidden">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-2 inner-checkbox">
+                                                <div class="form-check mb-1">
+                                                    <input class="form-check-input text-orange" id="homepageAllSearchFlag" th:checked="${searchBean.homepageAllSearchFlag == 'Y'}" type="checkbox">
+                                                    <label class="form-check-label text-lg-gray" for="homepageAllSearchFlag" th:text="'Exact Match'"></label>
+                                                    <input class="form-check-input text-orange save-value" name="homepageAllSearchFlag" th:value="${searchBean.homepageAllSearchFlag}" type="hidden">
                                                 </div>
                                                 <input class="form-control save-value" name="homepage"
                                                        placeholder="Website"
@@ -107,14 +94,14 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-5">
+                                        <div class="col-md-6">
                                             <div class="form-group mb-2">
                                                 <textarea class="form-control save-value" name="copyrights"
                                                           placeholder="Copyright Text" rows="3"
                                                           th:text="${searchBean.copyright}"></textarea>
                                             </div>
                                         </div>
-                                        <div class="col-md-5">
+                                        <div class="col-md-6">
                                             <div class="form-group mb-2">
                                                 <textarea class="form-control save-value" name="summaryDescription"
                                                           placeholder="Description" rows="3"
@@ -123,7 +110,7 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-5">
+                                        <div class="col-md-6">
                                             <div class="form-group mb-2">
                                                 <input class="form-control save-value" id="cvssScoreInput"
                                                        name="cvssScore"
@@ -131,7 +118,7 @@
                                                        th:value="${searchBean.cvssScore}" type="text">
                                             </div>
                                         </div>
-                                        <div class="col-md-5 d-flex justify-content-start mx-2">
+                                        <div class="col-md-6 d-flex justify-content-start">
                                             <div class="form-group mb-2 d-flex align-items-center">
                                                 <div class="form-check mb-1" style="font-size: .85rem">
                                                     <input class="form-check-input text-orange" id="deactivateFlag"

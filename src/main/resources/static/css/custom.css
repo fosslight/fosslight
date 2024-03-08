@@ -281,7 +281,12 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .form-control:disabled { background-color: #a2b9e24d}
 .custom-layout .select2-container--default.select2-container--disabled .select2-selection--multiple { background-color: #a2b9e24d}
 .custom-layout .select2-container--default.select2-container--disabled .select2-selection--single { background-color: #a2b9e24d}
+.custom-layout .form-group.inner-checkbox .form-check { font-size: .85rem; position: relative; }
+.custom-layout .form-group.inner-checkbox .form-check-input { position: absolute; right: 93px; top: 6px; }
+.custom-layout .form-group.inner-checkbox .form-check-label { position: absolute; right: 12px; top: 6px; }
 .lg .select2-container--default .select2-selection--multiple { height: 3rem }
+
+
 /* comment */
 .custom-layout .user-block .username { margin-left: 0;}
 /* content-header */
@@ -338,7 +343,8 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 /* tooltip */
 .tooltip {
-    top: 50px !important;
+    top: 35px !important;
+    left: -10px !important;
     font-size: .85rem;
     position: absolute;
 }
@@ -880,7 +886,7 @@ td .retxt, div .retxt {padding-top:2px; font-size:13px; color:red !important;}
 .urltxt {display:none; padding-top:2px; font-size:13px; color:blue !important;}
 div .retxtb {padding-top:2px; font-size:13px; color:blue !important;}
 div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
-.urlLink {display:block;color:#0070c0 !important;text-decoration:underline !important;}
+.urlLink {display:block;color:#0070c0 !important;text-decoration:underline;}
 .is-warning {border-color: #007bff !important;}
 .custom-is-invalid {border-color: #dc3545 !important;}
 .useCustomNotice {color:#FF0000;}

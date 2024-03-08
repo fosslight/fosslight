@@ -199,13 +199,13 @@
                 var display = "";
 
                 if (cellvalue.includes("M")) {
-                    display += "<span class=\"badge badge-primary mr-1\">Multi</span>";
+                    display += "<div class='text-sm'>Multi</div>";
                 }
                 if (cellvalue.includes("D")) {
-                    display += "<span class=\"badge badge-pink mr-1\">Dual</span>";
+                    display += "<div class='text-sm'>Dual</div>";
                 }
                 if (cellvalue.includes("V")) {
-                    display += "<span class=\"badge badge-yellow mr-1\">v-Diff</span>";
+                    display += "<div class='text-sm'>V-Diff</div>";
                 }
 
                 return display;

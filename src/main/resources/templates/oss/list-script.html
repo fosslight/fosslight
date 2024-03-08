@@ -161,17 +161,17 @@
             licenseTypeInformation:
                 "<div class=\"p-1\">" +
                     "<div style=\"float:left\">" +
-                        "<span class=\"badge badge-primary mr-1\">Multi</span>" +
+                        "<strong class=\"mr-1 text-danger\">Multi</strong>" +
                         "<strong>Multi License</strong>" +
                         "<br>The OSS contains source codes under multiple licenses.<br />본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.<br />(e.g. lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> src is GPL-2.0)</p>" +
                     "</div>" +
                     "<div>" +
-                        "<span class=\"badge badge-pink mr-1\">Dual</span>" +
+                        "<strong class=\"mr-1 text-danger\">Dual</strong>" +
                         "<strong>Dual License</strong>" +
                         "<br>You can select one of registered licenses.<br />본 OSS는 등록된 License 중 하나를 선택할 수 있습니다.<br />(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</p>" +
                     "</div>" +
                     "<div>" +
-                        "<span class=\"badge badge-yellow mr-1\">v-diff</span>" +
+                        "<strong class=\"mr-1 text-danger\">V-Diff</strong>" +
                         "<strong>Version different licenses</strong>" +
                         "<br>The OSS is distributed under different licenses according to its version<span style=\"text-decoration : underline;\">versions</span>.<br />본 OSS는 Version에 따라 다른 License로 배포되고 있습니다.<br />(e.g. v1.0 is under GPL-2.0 and v2.0 is under BSD-3-Clause)</p>" +
                     "</div>" +
@@ -306,12 +306,26 @@
             ossNameLinkFormat: function (cellvalue, options, rowObject) {
             	var display = "";
             	var url = "/oss/edit/" + rowObject['ossId'];
-            	
-            	if (cellvalue.indexOf("<span class") > -1) {
-            		display = "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
-            	} else {
-            		display = "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink\" style=\"margin-left: 1.8rem; cursor: pointer;\">" + cellvalue + "</a>";
-            	}
+                var ossNickname = rowObject['ossNickname'];
+
+                if(ossNickname != null && ossNickname.length > 0) {
+                    if (ossNickname.indexOf('|') !== -1) {
+                        let ossNicknameArray = ossNickname.split('|');
+
+                        let str;
+                        if (ossNicknameArray.length <= 5) {
+                            str = ossNicknameArray.join('<br />');
+                        } else {
+                            str = ossNicknameArray.slice(0, 5).join('<br />') + '<br />...'
+                             /*   '<br /><i class=\'fas fa-ellipsis-h\'></i>';*/
+                        }
+                        ossNickname = str;
+                    }
+                    display += "<a class=\"d-inline-block\" style=\"cursor: pointer;\" data-toggle=\"tooltip\" data-html=\"true\" data-placement=\"right\" title=\"" + ossNickname + "\">[Nick]</a>"
+                    display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block ml-1\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
+                } else {
+                    display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
+                }
             	 
                 return display;
             },
@@ -590,6 +604,8 @@
                                 dropdownMenu.classList.toggle("show");
                             });
                         }
+
+                        $('[data-toggle="tooltip"]').tooltip({html: true});
                     },
                     // ondblClickRow: function (rowid, iRow, iCol, e) {
                     //     if (iCol != 0) {
