@@ -55,7 +55,7 @@
                                        	</div>
                                        	<div class="card-body py-1">
                                            	<div class="row">
-                                               	<div class="col-md-3">
+                                               	<div class="col-md-4">
                                                    	<div class="form-group mb-2">
 														<select class="select2 save-value" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
 															<option value=""></option>
@@ -65,7 +65,7 @@
 														</select>
                                                    	</div>
                                                	</div>
-                                               	<div class="col-md-3">
+                                               	<div class="col-md-4">
                                                    	<div class="form-group mb-2">
 														<select class="select2 save-value" id="obligationTypeSelect" name="obligationType" style="width: 100%; color: gray;">
 															<option value=""></option>
@@ -82,7 +82,7 @@
                                                	</div>
                                            	</div>
 											<div class="row">
-												<div class="col-md-10">
+												<div class="col-md-12">
 													<div class="form-group mb-2">
 														<select class="select2 save-value" id="restrictionSelect" multiple="multiple"  name="restrictions" style="width: 100%;">
 															<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
@@ -95,12 +95,12 @@
 												</div>
 											</div>
                                            	<div class="row">
-                                               	<div class="col-md-5">
+                                               	<div class="col-md-6">
                                                    	<div class="form-group mb-2">
                                                    		<textarea class="form-control save-value" name="licenseText" placeholder="License Text" rows="3" th:text="${searchBean?.licenseText}"></textarea>
                                                    	</div>
                                                	</div>
-                                               	<div class="col-md-5">
+                                               	<div class="col-md-6">
                                                    	<div class="form-group mb-2">
                                                    		<textarea class="form-control save-value" name="description" placeholder="User Guide" rows="3" th:text="${searchBean?.description}"></textarea>
                                                    	</div>
