@@ -71,7 +71,7 @@
             });
 
             $("#saveDefaultLocaleButton").on('click',function(){
-                alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+                alertify.confirm([[#{msg.common.confirm.save2}]], function (e) {
                     if (e) {
                         fn.updateDefaultLocale();
                     } else {
@@ -172,15 +172,11 @@
                 success: function(json, status){
                     loading.hide();
                     if(json.resCd == '10'){
-                        alertify.success([[#{msg.common.success}]]);
-
-                        setTimeout(function() {
-                            var data = {
-                                link: "/index?lang=" + json.result,
-                                action: 'changeURL'
-                            };
-                            parent.postMessage(JSON.stringify(data), "*");
-                        }, 1500);
+                        var data = {
+                            link: "/index?lang=" + json.result,
+                            action: 'changeURL'
+                        };
+                        parent.postMessage(JSON.stringify(data), "*");
                     }else{
                         alertify.error([[#{msg.common.valid2}]], 0);
                     }
