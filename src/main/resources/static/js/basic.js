@@ -1885,16 +1885,14 @@ function viewRefresh() {
 
 // 브라우저 창 크기에 따라 jqGrid Width 자동 조절
 function tableRefresh() {
-    var width = $('.tab-content').width();
-
     $('.ui-jqgrid-btable').each(function () {
         var id = $(this).attr('id');
-
+		
         if (id.indexOf('_') == -1) {
-            $(this).jqGrid('setGridWidth', 0, true);
-            $(this).jqGrid('setGridWidth', width, true);
+			$(this).jqGrid('setGridWidth', 0, true);
+            $(this).jqGrid('setGridWidth', $('.contents-area').width() - 10, true);
         }
-    })
+    });
 }
 
 // UI BLOCK FOR ELEMENT
@@ -2679,12 +2677,29 @@ var existsTabName = function (tabNm) {
 var securityTableWidth = 0;
 var tableRefreshNew = function (id) {
     const tableRefreshList = ["_3rdAddList", "_list", "_list2", "_list-1", "_list-2", "_depProjectList1", "_depProjectList2", "_depAddList", "_srcProjectList1", "_srcProjectList2", "_srcAddList"
-        , "_binProjectList1", "_binProjectList2", "_binAddList", "_binaryFileList", "_binAndroidProjectList1", "_binAndroidProjectList2", "list", "totalList", "fixedList", "notFixedList", "_vulnInfoList"];
-
-    if ("_srcProjectList1" == id || "_srcProjectList2" == id || "_srcAddList" == id || "_depProjectList1" == id || "_depProjectList2" == id || "_depAddList" == id
+        , "_binProjectList1", "_binProjectList2", "_binAddList", "_binaryFileList", "_binAndroidProjectList1", "_binAndroidProjectList2", "list", "totalList", "fixedList", "notFixedList", "_vulnInfoList", "_modelList", "_modelDeleteList"];
+	
+	if ("refresh" == id) {
+		var width = $('.contents-area').width() - 70;
+        $('.ui-jqgrid-btable').each(function () {
+       		var tId = $(this).attr('id');
+           	if (tableRefreshList.includes(tId)) {
+				if ("list" == tId) {
+					$(this).jqGrid('setGridWidth', 0, true);
+              		$(this).jqGrid('setGridWidth', $('.contents-area').width() - 10, true);
+				} else if ("_modelList" == tId || "_modelDeleteList" == tId) {
+					$(this).jqGrid('setGridWidth', 0, true);
+              		$(this).jqGrid('setGridWidth', width + 35, true);
+				} else {
+					$(this).jqGrid('setGridWidth', 0, true);
+              		$(this).jqGrid('setGridWidth', width, true);
+				}
+         	}
+      	});
+	} else if ("_srcProjectList1" == id || "_srcProjectList2" == id || "_srcAddList" == id || "_depProjectList1" == id || "_depProjectList2" == id || "_depAddList" == id
     		|| "_binaryFileList" == id || "_binAndroidProjectList1" == id || "_binAndroidProjectList2" == id || "_list-1" == id || "_list-2" == id) {
         window.setTimeout(function () {
-            var width = $(".card-body").width() - 40;
+            var width = $('.contents-area').width() - 70;
             $('.ui-jqgrid-btable').each(function () {
                 var id = $(this).attr('id');
                 if (tableRefreshList.includes(id)) {
@@ -2718,16 +2733,14 @@ var tableRefreshNew = function (id) {
             });
         }, 300);
     } else if ("_modelList" == id) {
-        window.setTimeout(function () {
-			var width = $(".card-body").width();
-            $('.ui-jqgrid-btable').each(function () {
-                var id = $(this).attr('id');
-                if ("_modelList" == id) {
-                    $(this).jqGrid('setGridWidth', 0, true);
-                    $(this).jqGrid('setGridWidth', width, true);
-                }
-            });
-        }, 300);
+        var width = $(".card-body").width();
+       	$('.ui-jqgrid-btable').each(function () {
+        	var id = $(this).attr('id');
+         	if ("_modelList" == id) {
+           		$(this).jqGrid('setGridWidth', 0, true);
+              	$(this).jqGrid('setGridWidth', width, true);
+          	}
+      	});
     } else if ("list3" == id || "depList" == id || "srcList" == id || "binList" == id || "bomList" == id || "binAndroidList" == id) {
         window.setTimeout(function () {
 			var width = $(".card-header").width() - 20;
