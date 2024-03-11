@@ -147,27 +147,27 @@ var fn = {
 		
 		switch(cellvalue){
 			case progress:
-				display = "<span class=\"text-success text-bold\">" + cellvalue + "</span>";
+				display = "<span class=\"text-success\">" + cellvalue + "</span>";
 
 				break;
 			case request:
-				display = "<span class=\"text-pink text-bold\">" + cellvalue + "</span>";
+				display = "<span class=\"text-pink\">" + cellvalue + "</span>";
 
 				break;
 			case review:
-				display = "<span class=\"text-yellow text-bold\">" + cellvalue + "</span>";
+				display = "<span class=\"text-yellow\">" + cellvalue + "</span>";
 
 				break;
 			case finalReview:
-				display = "<span class=\"text-purple text-bold\">" + cellvalue + "</span>";
+				display = "<span class=\"text-purple\">" + cellvalue + "</span>";
 
 				break;
 			case complete:
-				display = "<span class=\"text-dark-blue text-bold\">" + cellvalue + "</span>";
+				display = "<span class=\"text-dark-blue\">" + cellvalue + "</span>";
 
 				break;
 			case drop:
-				display = "<span class=\"text-gray text-bold\">" + cellvalue + "</span>";
+				display = "<span class=\"text-gray\">" + cellvalue + "</span>";
 
 				break;
 		}
@@ -663,28 +663,28 @@ var fn = {
 	displayReportDownload : function(cellvalue, options, rowObject){
 		var display = "";
         if ("Confirm" == rowObject.identificationStatus){
-        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-3x mr-1\" title=\"FOSSLight Report\"></i></span>';
+        	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-excel hover-icon fa-1-3x mr-1\"></i></span>';
             if ("" != rowObject.reviewReportFileId){
-            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-3x mr-1\" title=\"FOSSLight Review Report\"></i></span>';
+            	display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadReviewReport(this,'+rowObject.permission+')\"><i class=\"far fa-file-pdf hover-icon fa-1-3x mr-1\"></i></span>';
             }
         }
 		
 		if ("Confirm" == rowObject.verificationStatus) {
 			if ("99" == rowObject.noticeType || "" == rowObject.noticeFileId) {
 			} else {
-				display += '<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-3x mr-1\" title=\"OSS Notice\"></i></span>';
+				display += '<span style=\"cursor:pointer;\" onclick=\"fn.downloadNotice(this,'+rowObject.permission+')\"><i class=\"far fa-file-code hover-icon fa-1-3x mr-1\"></i></span>';
 			}
 			
 			if ("" != rowObject.packageFileId) {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-3x mr-1\" title=\"Packaging File1\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackage(this,'+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-3x mr-1\"></i></span>';
 			}
 			
 			if ("" != rowObject.packageFileId2) {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-3x mr-1\" title=\"Packaging File2\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'2\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-3x mr-1\"></i></span>';
 			}
 			
 			if ("" != rowObject.packageFileId3) {
-				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-3x mr-1\" title=\"Packaging File3\"></i></span>';
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-3x mr-1\"></i></span>';
 			}
 		}
 		
@@ -1912,26 +1912,26 @@ var list = {
 		var rowList = rowStr.split(",");
 		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 		
-		var colNameArr = [ 'ID', 'Project Name', 'Status', 'OSC Process', 'Download', 'Distribution Type', 'Vulnerability<br>(Max Score)', 'Division', 'Creator', 'Reviewer'
+		var colNameArr = [ 'ID', 'Project Name', 'Status', 'OSC Process', 'Download', 'Distribution Type', 'Security', 'Division', 'Creator', 'Reviewer'
 							, 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'];
 		var colModelArr = [];
-        var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int'};
+        var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int', title: false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjName', index: 'prjName', width: 140, align: 'left', formatter: fn_grid_com.displayProjectName, unformat: fn_grid_com.unformatter, cellattr: fn.toolTipDoubleclick};
+		colModelObj = {name: 'prjName', index: 'prjName', width: 140, align: 'left', formatter: fn_grid_com.displayProjectName, unformat: fn_grid_com.unformatter, title: false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true};
+		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true, title: false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'download', index: 'download', width: 60, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'distributionType', index: 'distributionType', width: 80, align: 'left', sortable : true};
+		colModelObj = {name: 'distributionType', index: 'distributionType', width: 80, align: 'left', sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'division', index: 'division', width: 70, align: 'left', sortable : true};
+		colModelObj = {name: 'division', index: 'division', width: 70, align: 'left', sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'creator', index: 'creator', width: 50, align: 'left', sortable : true};
+		colModelObj = {name: 'creator', index: 'creator', width: 50, align: 'left', sortable : true, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'reviewer', index: 'reviewer', width: 50, align: 'left',edittype:'text', formatter:fn.getUserName
                 , editoptions: {
@@ -1963,6 +1963,7 @@ var list = {
 						}
 				}
 				, sortable : true
+                ,  title:false
 			};
 		if ("ROLE_ADMIN" == authority) {
 			colModelObj["editable"] = true;
@@ -1970,17 +1971,17 @@ var list = {
 			colModelObj["editable"] = false;
 		}
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'comment', index: 'comment', width: 70, align: 'left', formatter:fn.displayComment, unformatter:fn.unformatter, sortable : true, hidden:true};
+		colModelObj = {name: 'comment', index: 'comment', width: 70, align: 'left', formatter:fn.displayComment, unformatter:fn.unformatter, sortable : true, hidden:true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'distributionTypeOfCodeDtlExp', index: 'distributionTypeOfCodeDtlExp', width: 50, hidden:true};
+		colModelObj = {name: 'distributionTypeOfCodeDtlExp', index: 'distributionTypeOfCodeDtlExp', width: 50, hidden:true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'statusRequestYn', index: 'statusRequestYn', width: 50, hidden:true};
+		colModelObj = {name: 'statusRequestYn', index: 'statusRequestYn', width: 50, hidden:true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'priority', index: 'priority', width: 50,hidden:true};
+		colModelObj = {name: 'priority', index: 'priority', width: 50, hidden:true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'permission', index: 'permission', width: 50, hidden:true};
+		colModelObj = {name: 'permission', index: 'permission', width: 50, hidden:true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50,hidden:true};
+		colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50, hidden:true, title:false};
 		colModelArr.push(colModelObj);
 		
 		$("#list").jqGrid({
@@ -2044,6 +2045,12 @@ var list = {
 
                     gridTooltip.existTooltip = true;
                 }
+
+                $('#jqgh_list_cvssScore').attr("title", "Vulnerability (Max Score)").tooltip({
+                    content: function () {
+                        return $(this).prop('title');
+                    }
+                });
 
                 /* columns licalization */
                 var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
