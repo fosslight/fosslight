@@ -817,10 +817,6 @@ var partnerList = {
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'deliveryForm', index: 'deliveryForm', width: 50, align: 'center', formatter: fn.displayDeliveryForm, sortable : true};
-	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'description', index: 'description', width: 100, align: 'left', sortable : true, formatter:fn.displayComment, unformatter:fn.unformatter};
-	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
@@ -828,10 +824,6 @@ var partnerList = {
 	        colModelObj = {name: 'division', index: 'division', width: 100, align: 'left', sortable : true};
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'creator', index: 'creator', width: 70, align: 'center', sortable : true};
-	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
-	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'reviewer', index: 'reviewer', width: 80, align: 'left', formatter: 'select', edittype:'text', formatter:fn.getUserName 
 					  , editoptions: {
@@ -886,8 +878,7 @@ var partnerList = {
 				total:function(obj){return obj.total;},
 				records:function(obj){return obj.records;}
 			},
-		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description'
-			  	, 'CVE ID', 'Vulnera<br/>bility', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
+		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'CVE ID', 'Vulnera<br/>bility', 'Division', 'Creator', 'Reviewer', 'Comment', 'fileName'],
             colModel: colModelArr,
 			onSelectRow: function(id){},
 			rowNum: rowNum,
@@ -976,14 +967,10 @@ var partnerList = {
                         {'Software Name (Version)': 'softwareName'},
                         {'Software Version': 'softwareVersion'},
                         {'Status': 'status'},
-                        {'Delivery Form': 'deliveryForm'},
-                        {'Description': 'description'},
                         {'CVE ID': 'cveId'},
                         {'Vulnerability': 'cvssScore'},
                         {'Division': 'division'},
                         {'Creator': 'creator'},
-                        {'Created Date': 'createdDate'},
-                        {'Updated Date': 'modifiedDate'},
                         {'Reviewer': 'reviewer'}];
                     var defaultColNames = ['partnerId', 'partnerName', 'softwareName', 'status']
                     var savedColNames = [];

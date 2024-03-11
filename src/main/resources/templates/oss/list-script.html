@@ -363,23 +363,23 @@
                             return obj.records;
                         }
                     },
-                    colNames: ['ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
+                    colNames: ['','ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
                     colModel: [
                         {
-                            name: 'group', width: 90, align: 'center',
-                            // cellattr: function (rowId, tv, rawObject, cm, rdata) {
-                            //     return ' colspan=2'
-                            // },
+                            name: 'group', width: 20, align: 'center',
+                            cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                                return ' colspan=2'
+                            },
                             formatter: function myFormatter(cellvalue, options, rowObject) {
                                 return rowObject.ossId;
                             }
                         }
-                        // , {
-                        //     name: 'space', index: '', width: 80, align: 'center',
-                        //     cellattr: function (rowId, tv, rawObject, cm, rdata) {
-                        //         return ' style="display:none;"';
-                        //     }
-                        // }
+                        , {
+                            name: 'ossId', index: 'ossId', width: 80, align: 'center',
+                            cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                                return ' style="display:none;"';
+                            }
+                        }
                         , {
                             name: 'ossType',
                             index: 'ossType',
@@ -576,9 +576,9 @@
                                 {'Obligation': 'obligation'},
                                 {'DownloadLocation': 'downloadLocation'},
                                 {'Homepage': 'homepage'},
-                                {'Description': 'description'},
-                                {'Vulnerability': 'cveId'}];
-                            var defaultColNames = ['ossName', 'ossVersion', 'licenseName', 'obligation']
+                                {'Description': 'summaryDescription'},
+                                {'Vulnerability': 'cvssScore'}];
+                            var defaultColNames = ['group', 'ossId', 'ossName', 'ossVersion', 'licenseName', 'obligation']
                             var savedColNames = [];
 
                             var dropdownMenuOptions = {

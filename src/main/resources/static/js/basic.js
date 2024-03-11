@@ -3521,10 +3521,12 @@ function saveColumnLocalization() {
     const allColNames = grid.jqGrid('getGridParam', 'colModel');
     allColNames.forEach(function(colName, index) {
         let _colName = colName.name
-        if (checkedColNames.includes(_colName)) {
-            grid.jqGrid('showCol', _colName);
-        } else {
-            grid.jqGrid('hideCol', _colName);
+        if(!defaultColNames.includes(_colName)) {
+            if (checkedColNames.includes(_colName)) {
+                grid.jqGrid('showCol', _colName);
+            } else {
+                grid.jqGrid('hideCol', _colName);
+            }
         }
     });
 
@@ -3553,7 +3555,6 @@ function restoreDefaults() {
         const id = checkbox.id.replace('col_option_', '');
         if (defaultColNames.includes(id)) {
             checkbox.checked = true;
-
         } else {
             checkbox.checked = false;
         }
