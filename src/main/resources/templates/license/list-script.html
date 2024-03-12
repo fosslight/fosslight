@@ -295,7 +295,13 @@
                 colModelArr.push(colModelObj);
                 colModelObj = {name: 'webpage', index: 'webpage', width: 60, align: 'left', formatter: 'link'};
                 colModelArr.push(colModelObj);
-                colModelObj = {name: 'description', index: 'description', width: 150, align: 'left'};
+                colModelObj = {name: 'description', index: 'description', width: 150, align: 'left',
+                    cellattr: function (rowId, val, rawObject, cm, rdata) {
+                        return 'title="' + rawObject['description'] + '" style="cursor: pointer;"';
+                    },
+                    formatter: function (cellvalue, options, rowObject) {
+                        return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
+                    }};
                 colModelArr.push(colModelObj);
                 if ([[${@CommonFunction.isAdmin()}]]) {
                     colModelObj = {name: 'creator', index: 'creator', width: 80, align: 'center'};
