@@ -410,7 +410,6 @@ var com_fn = {
 		var btn_Analysis = $(".idenAnalysis");
 		var btn_Analysis_Result = $(".idenAnalysisResult");
 		var btn_check = $(".btnCheck");
-		var btn_supplement_Notice = $(".supplementNotice");
 		
 		if(role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
 			switch(status){
@@ -438,7 +437,7 @@ var com_fn = {
 				case "CONF":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
-					btn_Analysis_Result.hide(); btn_supplement_Notice.hide();
+					btn_Analysis_Result.hide();
 					btn_check.hide();
 
 					break;
@@ -472,7 +471,7 @@ var com_fn = {
 				case "CONF":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();
-					btn_Analysis_Result.hide(); btn_supplement_Notice.hide();
+					btn_Analysis_Result.hide();
 					btn_check.hide();
 
 					break;
