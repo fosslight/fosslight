@@ -70,6 +70,10 @@
                                 </div>
                             </div>
                         </form>
+
+                    </div>
+
+                    <div class="col-md-6">
                         <form name="ConfigurationForm" id="configurationListForm">
                             <div class="card card-outline card-dark submit-form">
                                 <div class="card-header">
@@ -92,31 +96,28 @@
                                 </div>
                             </div>
                         </form>
-                    </div>
+<!--                        <div class="card card-outline card-dark submit-form">-->
+<!--                            <div class="card-header">-->
+<!--                                <div class="card-title">Default Search Conditions</div>-->
+<!--                            </div>-->
+<!--                            <div class="card-body">-->
+<!--                                <div class="col-12">-->
+<!--                                    <select class="select2" id="defaultSearch" name="defaultSearch" th:onchange="|fn.loadSearchCondition()|" style="width: 100%">-->
+<!--                                        <option value=""></option>-->
+<!--                                        <option value="LICENSE">License List</option>-->
+<!--                                        <option value="OSS">OSS List</option>-->
+<!--                                        <option value="PROJECT">Project List</option>-->
+<!--                                        <option value="THIRD_PARTY">3rd Party List</option>-->
+<!--                                        <option value="SELF_CHECK">Self-check List</option>-->
+<!--                                    </select>-->
+<!--                                </div>-->
+<!--                                <div id="searchConditionArea" style="display: none;"></div>-->
+<!--                            </div>-->
 
-                    <div class="col-md-6">
-                        <div class="card card-outline card-dark submit-form">
-                            <div class="card-header">
-                                <div class="card-title">Default Search Conditions</div>
-                            </div>
-                            <div class="card-body">
-                                <div class="col-12">
-                                    <select class="select2" id="defaultSearch" name="defaultSearch" th:onchange="|fn.loadSearchCondition()|" style="width: 100%">
-                                        <option value=""></option>
-                                        <option value="LICENSE">License List</option>
-                                        <option value="OSS">OSS List</option>
-                                        <option value="PROJECT">Project List</option>
-                                        <option value="THIRD_PARTY">3rd Party List</option>
-                                        <option value="SELF_CHECK">Self-check List</option>
-                                    </select>
-                                </div>
-                                <div id="searchConditionArea" style="display: none;"></div>
-                            </div>
-
-                            <div class="card-footer" id="searchConditionBtnArea" style="display: none">
-                                <input id="saveSearchCondition" type="button" value="Save" th:onclick="|fn.updateSearchCondition()|" class="btn btn-lg-gray float-right right" />
-                            </div>
-                        </div>
+<!--                            <div class="card-footer" id="searchConditionBtnArea" style="display: none">-->
+<!--                                <input id="saveSearchCondition" type="button" value="Save" th:onclick="|fn.updateSearchCondition()|" class="btn btn-lg-gray float-right right" />-->
+<!--                            </div>-->
+<!--                        </div>-->
 
 <!--                        <div class="btnLayout w1025" id="searchConditionBtnArea" style="display: none;">-->
 <!--                            <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btnColor red right" />-->
