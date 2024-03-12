@@ -339,19 +339,26 @@ var com_fn = {
 		
 		$("[name=gridArea]").hide();
 		
-		switch (initDiv) {
-			case "0" : activateTab = "#tabMenuBom"; activateGridArea = "#gridAreaBom";
-				break;
-			case "1" : activateTab = "#tabMenuDep"; activateGridArea = "#gridAreaDep";
-				break;
-			case "2" : activateTab = "#tabMenuSrc"; activateGridArea = "#gridAreaSrc";
-				break;
-			case "3" : activateTab = "#tabMenuBin"; activateGridArea = "#gridAreaBin";
-				break;
-			default : activateTab = "#tabMenuParty"; activateGridArea = "#gridAreaParty";
-				break;
-		}
-		
+		// switch (initDiv) {
+		// 	case "0" : activateTab = "#tabMenuParty"; activateGridArea = "#gridAreaParty";
+		// 		break;
+		// 	case "1" : activateTab = "#tabMenuDep"; activateGridArea = "#gridAreaDep";
+		// 		break;
+		// 	case "2" : activateTab = "#tabMenuSrc"; activateGridArea = "#gridAreaSrc";
+		// 		break;
+		// 	case "3" : activateTab = "#tabMenuBin"; activateGridArea = "#gridAreaBin";
+		// 		break;
+		// 	default : activateTab = "#tabMenuBom"; activateGridArea = "#gridAreaBom";
+		// 		break;
+		// }
+
+        switch (initDiv) {
+            case "4" : activateTab = "#tabMenuBinAndroid"; activateGridArea = "#tabMenuBom";
+                break;
+            default : activateTab = "#tabMenuBom"; activateGridArea = "#gridAreaBom";
+                break;
+        }
+
 		$(activateTab).trigger("click");
 		$(activateGridArea).show();
 	},
