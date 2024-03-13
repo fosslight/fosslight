@@ -410,28 +410,44 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="form-group">
-                                    <label for="inputName" th:text="'Model Information'"></label>
-                                    <div class="row" th:unless="${isReadOnly}">
-                                        <div class="col-md-10 mb-2 d-flex">
-                                            <div class="float-left" id="modelFile" style="max-width: 100%;"></div>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <button class="btn btn-default btn-sm float-right px-5"
-                                                    th:onclick="|fn.downloadModelList()|"
-                                                    th:text="Download" type="button"><i
-                                                    class="fa fa-download"></i></button>
-                                        </div>
-                                    </div>
-                                    <div class="jqGridSet">
-                                        <table id="_modelList">
-                                            <tr>
-                                                <td></td>
-                                            </tr>
-                                        </table>
-                                        <div id="pagerModel"></div>
-                                    </div>
+                                    <ul class="nav nav-pills nav-sidebar flex-column" data-accordion="false" data-widget="treeview"
+                                        role="menu">
+                                        <li class="nav-item">
+                                            <a class="nav-link my-1 ml-0 pl-0 width-12rem" href="#" onclick="fn.tableRefresh()">
+                                                <label for="inputName" th:text="'Model Information'"></label>
+                                                <i class="right fas fa-angle-left ml-1"></i>
+                                            </a>
+                                            <ul class="nav nav-treeview">
+                                                <li class="nav-item">
+                                                    <div class="row" th:unless="${isReadOnly}">
+                                                        <div class="col-lg-10 mb-2 d-flex">
+                                                            <div class="float-left" id="modelFile" style="max-width: 100%;"></div>
+                                                        </div>
+                                                        <div class="col-lg-2">
+                                                            <button class="btn btn-default btn-sm float-right px-5"
+                                                                    th:onclick="|fn.downloadModelList()|"
+                                                                    th:text="Download" type="button"><i
+                                                                    class="fa fa-download"></i></button>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <div class="jqGridSet">
+                                                        <table id="_modelList">
+                                                            <tr>
+                                                                <td></td>
+                                                            </tr>
+                                                        </table>
+                                                        <div id="pagerModel"></div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+
+
+
                                 </div>
                                 <div class="form-group">
                                     <label for="additionalInformation"
