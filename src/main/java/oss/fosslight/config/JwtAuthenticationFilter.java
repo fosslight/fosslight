@@ -47,11 +47,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);	
 		} else {
 			cookieUtil.deleteCookie(req, res, "X-FOSS-AUTH-TOKEN");
-//			if(isAjaxRequest(req)) {
+			if(isAjaxRequest(req)) {
 				ResponseUtil.DefaultAlertAndGo(res, "로그인 세션이 만료되었습니다. 로그인 화면으로 이동합니다.", SESSION.LOGIN);
-//			} else {
-//				res.sendRedirect(SESSION.LOGIN);
-//			}
+			} else {
+				ResponseUtil.redirect(res, SESSION.LOGIN);
+			}
 			return;				
 		}
 
