@@ -9,12 +9,7 @@
             <section class="content-header">
                 <div class="container-fluid">
                 	<div class="row">
-                        <div class="col-sm-6 text-left mt-2">
-                        	<div th:if="${detail.loginUserRole == 'ROLE_ADMIN' and detail.status == 'REV' and binaryFile != null}" class="form-check width-8rem pl-3" style="font-size: .85rem; margin-left: 0.3rem; width: 100%;">
-                               	<input class="form-check-input" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" value="N" type="checkbox">
-                                <label class="form-check-label text-blue-gray" for="ignoreBinaryDbFlag" style="font-weight: normal;" th:text="'Do not register in binary DB'"></label>
-                          	</div>
-                        </div>
+                        <div class="col-sm-6 text-left mt-2"></div>
                         <div class="col-sm-6 float-right" th:if="${detail.viewOnlyFlag != 'Y' and detail.loginUserRole != 'ROLE_VIEWER'}">
                         	<div class="float-right">
                         		<button th:if="${detail.status == 'CONF'}" type="button" class="btn btn-dark-03 btn-sm width-10rem mr-xm px-3" id="createProject" th:text="'Create Project for OSS Notice'"></button>
@@ -165,6 +160,10 @@
                                             <div class="row form-group">
                                             	<div class="col-lg-3">
                                             		<label for="inputName" th:text="'fosslight_binary.txt'"></label>
+                                                    <div th:if="${detail.loginUserRole == 'ROLE_ADMIN' and detail.status == 'REV' and binaryFile != null}" class="form-check pl-3">
+                                                        <input class="form-check-input" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" value="N" type="checkbox" style="margin-top: 0.4rem !important;">
+                                                        <label class="form-check-label text-blue-gray text-sm" for="ignoreBinaryDbFlag" style="font-weight: normal;" th:text="'Do not register in binary DB'"></label>
+                                                    </div>
                                             	</div>
                                                 <div class="col-lg-9">
                                                     <div class="col-12 mb-2 d-flex binaryUploader" th:style="${binaryFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">

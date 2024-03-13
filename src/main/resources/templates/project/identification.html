@@ -233,18 +233,6 @@
                                 </th:block>
                             </span>
                         </span>
-                        <span class="icheck-danger center-atom projdecBtn"
-                              style="margin-left: 2.5rem; font-size: .85rem"
-                              th:if="${@CommonFunction.isAdmin()}">
-                            	<th:block
-                                        th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
-                            		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag"
-                                           name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
-                               		<label class="form-check-label text-lg-gray mt-1" for="ignoreBinaryDbFlag"
-                                           th:text="'Do not register in binary DB'"></label>
-                            	</th:block>
-                         	</span>
-                        </span>
                     </div>
                     <div class="col-sm-4 float-right mt-1">
                         <div class="helpLink f-left dropdown float-right ml-3">
@@ -610,6 +598,7 @@
                                                                                    th:text="${csvFile.origNm}"></a>
                                                                                 <input type="hidden"
                                                                                        value="${csvFile.fileSeq}"/>
+
                                                                                 <span class="badge bg-danger"
                                                                                       style="cursor:pointer;"
                                                                                       th:onclick="|com_fn.deleteFiles(this, '1')|"
@@ -784,7 +773,7 @@
                                                                                    th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"
                                                                                    th:text="${csvFile.origNm}"></a>
                                                                                 <input type="hidden"
-                                                                                       value="${csvFile.fileSeq}"/>
+                                                                                       th:value="${csvFile.fileSeq}"/>
                                                                                 <span class="badge bg-danger"
                                                                                       style="cursor:pointer;"
                                                                                       th:onclick="|com_fn.deleteFiles(this, '1')|"
@@ -934,14 +923,13 @@
                                             <div class="row mt-3" id="content-bin">
                                                 <div class="col-12">
                                                     <div class="row">
-                                                        <div class="col-md-1 pl-3 mt-1">
+                                                        <div class="col-md-1 pl-3 mt-1 mr-3">
                                                             <strong th:text="'FOSSLight Report'"></strong>
                                                         </div>
-                                                        <div class="col-lg-11">
+                                                        <div class="col-lg-10">
                                                             <div class="row">
-                                                                <div class="col-lg-2">
-                                                                    <p style="text-align:center;"
-                                                                       th:text="'FOSSLight Report'"></p>
+                                                                <div class="col-lg-2 pl-1">
+                                                                    <p th:text="'FOSSLight Report'"></p>
                                                                 </div>
                                                                 <div class="col-lg-3 fileUploader">
                                                                     <div class="fileuploader" id="binCsvFile"
@@ -974,9 +962,19 @@
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-lg-2">
-                                                                    <p style="text-align:center;"
-                                                                       th:text="'fosslight_binary.txt'"></p>
+                                                                <div class="col-lg-2 pl-1">
+                                                                    <p style="margin-bottom: 0.4rem !important;" th:text="'fosslight_binary.txt'"></p>
+                                                                    <div>
+                                                                        <div class="form-check center-atom projdecBtn"
+                                                                              th:if="${@CommonFunction.isAdmin()}">
+                                                                            <th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
+                                                                                <input class="form-check-input" id="ignoreBinaryDbFlag"
+                                                                                       name="ignoreBinaryDbFlag" th:value="N" type="checkbox" style="margin-top: 0.42rem !important;">
+                                                                                <label class="form-check-label text-blue-gray text-sm" for="ignoreBinaryDbFlag"
+                                                                                       th:text="'Do not register in binary DB'"></label>
+                                                                            </th:block>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                                 <div class="col-lg-3">
                                                                     <div class="fileuploader" id="binBinaryFile"

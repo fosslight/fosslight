@@ -24,12 +24,6 @@
                                    <span class="badge badge-carrot text-sm px-2 py-1" id="securityTab" style="cursor: pointer;" title="Go to Security tab">Security</span>
                                 </th:block>
                             </span>
-                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom projdecBtn" style="margin-left: 2.5rem; font-size: .85rem">
-                            	<th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
-                            		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
-                               		<label class="form-check-label text-lg-gray" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
-                            	</th:block>
-                         	</span>
                         </div>
                         <div class="col-sm-4 float-right mt-1">
                             <div class="helpLink f-left dropdown float-right ml-3">
@@ -111,14 +105,14 @@
                                             <div class="row mt-3" id="content_android">
                                                 <div class="col-12">
                                                     <div class="row">
-                                                        <div class="col-md-1 pl-3 mt-1">
+                                                        <div class="col-md-1 pl-3 mt-1 mr-3">
                                                             <strong th:text="'Android Model'"></strong>
                                                         </div>
-                                                        <div class="col-md-11">
+                                                        <div class="col-lg-10">
                                                             <div class="row">
-                                                                <div class="col-lg-2">
-                                                                    <p style="text-align:center;" th:text="'FOSSLight Report'"></p>
-                                                                </div>
+                                                                <div class="col-lg-2 pl-3">
+                                                                    <p th:text="'FOSSLight Report'"></p>
+                                                                </div>>
                                                                 <div class="col-lg-3">
                                                                     <div class="multi-fileuploader" id="androidCsvFile" th:text="Upload"></div>
                                                                 </div>
@@ -141,8 +135,8 @@
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-lg-2">
-                                                                    <p class="text-danger" style="text-align:center;" th:text="'NOTICE'"></p>
+                                                                <div class="col-lg-2 pl-3">
+                                                                    <p class="text-danger" th:text="'NOTICE'"></p>
                                                                 </div>
                                                                 <div class="col-lg-3">
                                                                     <div class="fileuploader" id="androidNoticeFile" th:text="Upload"></div>
@@ -166,8 +160,19 @@
                                                                 </div>
                                                             </div>
                                                             <div class="row">
-                                                                <div class="col-lg-2">
-                                                                    <p style="text-align:center;" th:text="'fosslight_binary.txt'"></p>
+                                                                <div class="col-lg-2 pl-3">
+                                                                    <p style="margin-bottom: 0.4rem !important;" th:text="'fosslight_binary.txt'"></p>
+                                                                    <div class="ml-3">
+                                                                        <div class="form-check center-atom projdecBtn"
+                                                                             th:if="${@CommonFunction.isAdmin()}">
+                                                                            <th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
+                                                                                <input class="form-check-input text-orange" id="ignoreBinaryDbFlag"
+                                                                                       name="ignoreBinaryDbFlag" th:value="N" type="checkbox" style="margin-top: 0.42rem !important;">
+                                                                                <label class="form-check-label text-lg-gray text-sm" for="ignoreBinaryDbFlag"
+                                                                                       th:text="'Do not register in binary DB'"></label>
+                                                                            </th:block>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                                 <div class="col-lg-3">
                                                                     <div class="fileuploader" id="androidResultFile" th:text="Upload"></div>
@@ -178,7 +183,7 @@
                                                             				<ul class="androidResultFileArea" th:each="csvFile : ${project.androidResultFile}">
                                                                     			<li th:if="${csvFile.delYn eq 'N'}">
                                                                         			<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
-                                                                        			<input type="hidden" value="${csvFile.fileSeq}"/>
+                                                                        			<input type="hidden" th:value="${csvFile.fileSeq}"/>
                                                                         			<span class="badge bg-danger" style="cursor:pointer;" th:onclick="|binAndroid_fn.deleteCsv(this, '4')|" th:text="X"></span>
                                                                         			<br>[[${csvFile.createdDate}]]
                                                                    				</li>
