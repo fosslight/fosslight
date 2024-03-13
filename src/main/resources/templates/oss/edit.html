@@ -16,8 +16,11 @@
                             <div class="card card-secondary submit-form">
                                 <div class="card-header">
                                     <h3 class="card-title text-white"></h3>
-                                    <div class="card-tools">
-                                        <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button"><i class="fas fa-minus"></i></button>
+                                    <div class="card-tools" th:unless="${isReadOnly}">
+                                        <button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Sync" type="button" id="sync"><i class="fas fa-sync"></i></button>
+										<button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Copy" type="button" id="copy"><i class="fas fa-copy"></i></button>
+										<button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Delete" type="button" id="delete"><i class="fas fa-trash"></i></button>
+										<button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Save" type="button" id="save"><i class="fas fa-save"></i></button>
                                     </div>
                                 </div>
                                 <form id="ossForm" name="ossForm">
@@ -190,12 +193,12 @@
                                   	</div>
                                 </div>
                                 </form>
-                                <div class="card-footer clearfix" th:unless="${isReadOnly}">
-                                	<button th:if="${ossId != null}" type="button" class="btn btn-secondary float-left" id="delete" th:text="Delete"></button>
-                                	<button type="button" class="btn btn-teal-01 float-right mx-1" id="save" th:text="Save"></button>
-                                   	<button th:if="${ossId != null}" type="button" class="btn btn-default float-right mx-1" id="copy" th:text="Copy"></button>
-                                   	<button th:if="${ossId != null}" type="button" class="btn btn-default float-right mx-1" id="sync" th:text="Sync"></button>
-                              	</div>
+<!--                                <div class="card-footer clearfix" th:unless="${isReadOnly}">-->
+<!--                                	<button th:if="${ossId != null}" type="button" class="btn btn-secondary float-left" id="delete" th:text="Delete"></button>-->
+<!--                                	<button type="button" class="btn btn-teal-01 float-right mx-1" id="save" th:text="Save"></button>-->
+<!--                                   	<button th:if="${ossId != null}" type="button" class="btn btn-default float-right mx-1" id="copy" th:text="Copy"></button>-->
+<!--                                   	<button th:if="${ossId != null}" type="button" class="btn btn-default float-right mx-1" id="sync" th:text="Sync"></button>-->
+<!--                              	</div>-->
                             </div>
                         </div>
                         <div class="col-md-3 commentList" th:unless="${isReadOnly}" th:if="${ossId != null}">

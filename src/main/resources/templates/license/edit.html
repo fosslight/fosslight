@@ -20,10 +20,9 @@
                         <div class="col-md-9">
                             <div class="card card-secondary submit-form">
                                 <div class="card-header">
-                                    <div class="card-tools">
-                                        <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
+                                    <div class="card-tools" th:unless="${isReadOnly}">
+                                        <button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Delete" type="button" id="delete"><i class="fas fa-trash"></i></button>
+                                        <button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Save" type="button" id="save"><i class="fas fa-save"></i></button>
                                     </div>
                                 </div>
                                 <div class="card-body">
@@ -161,10 +160,10 @@
                                       	<textarea class="form-control" id="commentInput" name='commentInput' rows="3" style="height: 800px" th:disabled ="${not @CommonFunction.isAdmin()}"></textarea>
                                   	</div>
                                 </div>
-                                <div class="card-footer clearfix" th:unless="${isReadOnly}">
-                                	<a class="btn btn-secondary float-left" href="javascript:void(0)" id="delete" th:text="|Delete|"></a>
-                                    <a class="btn btn-teal-01 float-right" href="javascript:void(0)" id="save" th:text="|Save|"></a>
-                              	</div>
+<!--                                <div class="card-footer clearfix" th:unless="${isReadOnly}">-->
+<!--                                	<a class="btn btn-secondary float-left" href="javascript:void(0)" id="delete" th:text="|Delete|"></a>-->
+<!--                                    <a class="btn btn-teal-01 float-right" href="javascript:void(0)" id="save" th:text="|Save|"></a>-->
+<!--                              	</div>-->
                             </div>
                         </div>
                         <div class="col-md-3" th:unless="${isReadOnly}" th:if="${licenseInfo != null && licenseInfo.licenseId != null}">
