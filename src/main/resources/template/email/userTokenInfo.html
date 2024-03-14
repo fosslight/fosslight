@@ -26,7 +26,7 @@
                 <tr>
                     <td style="background:#ddd" width="1"></td>
                     <td style="padding:40px;">
-                        <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null && contentsTitle != ''}" th:text="${contentsTitle}"></div>
+                        <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null && contentsTitle != ''}" th:utext="${contentsTitle}"></div>
                         <pre>
 							<th:block th:if="${mailType == '800'}">
 									FOSSLight Hub-Access Token was issued as follows.

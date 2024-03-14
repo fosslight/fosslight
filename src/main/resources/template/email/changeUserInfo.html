@@ -24,8 +24,8 @@
 						<tr>
 							<td width="1" th:style="'background:#ddd'"></td>
 							<td th:style="'padding:40px;'">
-								<div th:if="${contentsTitle != null && contentsTitle != ''}" th:style="'padding-bottom:10px;font-size:16px;font-weight:bold;'" th:text="${contentsTitle}"></div>
-								<div th:if="${contentsSubTitle != null && contentsSubTitle != ''}" th:style="'font-size:12px;'" th:text="${contentsSubTitle}"></div>
+								<div th:if="${contentsTitle != null && contentsTitle != ''}" th:style="'padding-bottom:10px;font-size:16px;font-weight:bold;'" th:utext="${contentsTitle}"></div>
+								<div th:if="${contentsSubTitle != null && contentsSubTitle != ''}" th:style="'font-size:12px;'" th:utext="${contentsSubTitle}"></div>
 								<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:text="'« User Information »'"></h2>
 								<div th:if="${changed_user_info != null}">
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">

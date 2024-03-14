@@ -24,14 +24,14 @@
 				<tr>
 					<td width="1" style="background:#ddd"></td>
 					<td style="padding:40px;">
-						<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:text="${contentsTitle}"></div>
-						<p th:if="${contentsSubTitle}" style="font-size:12px;" th:text="${contentsSubTitle}"></p>
+						<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+						<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
 						<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 							<col style="width:40%">
 							<col style="width:*">
 							<tr>
 								<th align="left" style="padding:5px;background:#f0f0f0;">Comment</th>
-								<td style="padding:5px;" th:text="${comment}"></td>
+								<td style="padding:5px;" th:utext="${comment}"></td>
 							</tr>
 						</table>
 						<br />

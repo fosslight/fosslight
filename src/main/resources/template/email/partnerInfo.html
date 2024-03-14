@@ -24,11 +24,11 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null && contentsTitle != ''}" th:text="${contentsTitle}"></div>
-								<p style="font-size:12px;" th:if="${contentsSubTitle != null && && contentsSubTitle != ''}" th:text="${contentsSubTitle}"></p>
+								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null && contentsTitle != ''}" th:utext="${contentsTitle}"></div>
+								<p style="font-size:12px;" th:if="${contentsSubTitle != null && && contentsSubTitle != ''}" th:utext="${contentsSubTitle}"></p>
 								<div th:if="${comment}">
 									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;" th:text="${comment}"></div>
+									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
 								</div>
 
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
@@ -40,43 +40,43 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">3rd party Name</th>
-										<td style="padding:5px;" th:text="|(${partner_basic_info.partnerId}) ${partner_basic_info.partnerName}|"></td>
+										<td style="padding:5px;" th:utext="|(${partner_basic_info.partnerId}) ${partner_basic_info.partnerName}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Software Name</th>
-										<td style="padding:5px;" th:text="${partner_basic_info.softwareName}"></td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.softwareName}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Software Version</th>
-										<td style="padding:5px;" th:text="${partner_basic_info.softwareVersion}"></td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.softwareVersion}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Delivery Form</th>
-										<td style="padding:5px;" th:text="${partner_basic_info.deliveryForm}"></td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.deliveryForm}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Description</th>
-										<td style="padding:5px;" th:text="${partner_basic_info.description}"></td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.description}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Commitment</th>
-										<td style="padding:5px;" th:text="${partner_basic_info.confirmationFileId}"></td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.confirmationFileId}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Checklist</th>
-										<td style="padding:5px;" th:text="${partner_basic_info.ossFileId}"></td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.ossFileId}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
-										<td style="padding:5px;" th:text="${partner_basic_info.creator}"></td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.creator}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Division</th>
-										<td style="padding:5px;" th:text="${partner_basic_info.division}"></td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.division}"></td>
 									</tr>
 									<tr th:if="${partner_basic_info.reviewer}">
 										<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Reviewer'" th:align="'left'"></th>
-										<td th:style="'padding:5px;'" th:text="${partner_basic_info.reviewer}"></td>
+										<td th:style="'padding:5px;'" th:utext="${partner_basic_info.reviewer}"></td>
 									</tr>
 								</table>
 
@@ -90,32 +90,32 @@
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Need to disclose'"></th>
 										</tr>
 										<tr th:each="oss : ${partner_disclose_oss_info}">
-											<td th:style="'padding:5px;'" th:text="${oss.ossName}"></td>
-											<td th:style="'padding:5px;'" th:text="${oss.ossVersion}"></td>
-											<td th:style="'padding:5px;'" th:text="${oss.licenseName}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.ossName}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.ossVersion}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.licenseName}"></td>
 											<td th:style="'padding:5px; text-align: center;'" th:text="'O'"></td>
 										</tr>
 										<tr th:each="oss : ${partner_not_disclose_oss_info}">
-											<td th:style="'padding:5px;'" th:text="${oss.ossName}"></td>
-											<td th:style="'padding:5px;'" th:text="${oss.ossVersion}"></td>
-											<td th:style="'padding:5px;'" th:text="${oss.licenseName}"></td>
-											<td th:style="'padding:5px;'" th:text="''"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.ossName}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.ossVersion}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.licenseName}"></td>
+											<td th:style="'padding:5px;'" th:utext="''"></td>
 										</tr>
 									</table>
 								</div>
 
 								<div th:if="${partner_oss_info}">
-									<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:text="'« OSS List »'"></h2>
+									<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:utext="'« OSS List »'"></h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">
 										<tr>
-											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'OSS Name'"></th>
-											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'OSS Version'"></th>
-											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'License Name'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'OSS Name'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'OSS Version'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'License Name'"></th>
 										</tr>
 										<tr th:each="oss : ${partner_oss_info}">
-											<td th:style="'padding:5px;'" th:text="${oss.ossName}"></td>
-											<td th:style="'padding:5px;'" th:text="${oss.ossVersion}"></td>
-											<td th:style="'padding:5px;'" th:text="${oss.licenseName}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.ossName}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.ossVersion}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.licenseName}"></td>
 										</tr>
 									</table>
 								</div>

@@ -24,14 +24,14 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-								<div th:if="${contentsTitle != null && contentsTitle != ''}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:text="${contentsTitle}"></div>
+								<div th:if="${contentsTitle != null && contentsTitle != ''}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
 
 								<pre>
-								<th:block th:if="${mailType == '810'}" th:text="|The file, ${fileName}, has been uploaded to Project ID ${prjId}.|"></th:block>
-								<th:block th:if="${mailType == '810'}" th:text="|Failed to upload file for Project ID ${prjId}.|">
+								<th:block th:if="${mailType == '810'}" th:utext="|The file, ${fileName}, has been uploaded to Project ID ${prjId}.|"></th:block>
+								<th:block th:if="${mailType == '810'}" th:utext="|Failed to upload file for Project ID ${prjId}.|">
 									<ul>
-										<li th:text="|File name attempted to upload: ${fileName}|"></li>
-										<li th:text="|Failure message: ${errorMsg}|"></li>
+										<li th:utext="|File name attempted to upload: ${fileName}|"></li>
+										<li th:utext="|Failure message: ${errorMsg}|"></li>
 									</ul>
 								</th:block>
 								</pre>
