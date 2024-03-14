@@ -351,32 +351,36 @@
                                     <input name="noticeType" type="hidden" value="10"/>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md-6 mb-0">
+                                    <div class="col-md-6 mb-0 required">
                                         <label for="inputName" th:text="#{msg.common.field.OS}"></label><span
                                             class="text-orange">*</span>
-                                        <select class="form-control select2" id="osType" name="osType"
-                                                style="width: 100%;" th:disabled="${isReadOnly}">
-                                            <th:block
-                                                    th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
-                                                <option th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.osType)}"
-                                                        th:text="${option.cdDtlNm}"
-                                                        th:value="${option.cdDtlNo}"></option>
-                                            </th:block>
-                                        </select>
+                                        <span>
+                                             <select class="form-control select2" id="osType" name="osType"
+                                                     style="width: 100%;" th:disabled="${isReadOnly}">
+                                                <option value="">&nbsp</option>
+                                                <th:block
+                                                        th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
+                                                    <option th:selected="${project.distributionType != null && #strings.equals(option.cdDtlNo, project.osType)}"
+                                                            th:text="${option.cdDtlNm}"
+                                                            th:value="${option.cdDtlNo}"></option>
+                                                </th:block>
+                                            </select>
+                                        </span>
                                         <div class="row mt-2 pl-2 pr-2">
                                             <input class="form-control" id="osTypeEtc" name="osTypeEtc"
                                                    style="display: none;"
                                                    th:disabled="true" type="text"/>
-                                            <span class="retxt text-danger text-sm"></span>
                                         </div>
+                                        <span class="retxt text-danger text-sm" th:text="|'This field is required.'|"></span>
                                     </div>
-                                    <div class="col-md-6 mb-0">
+                                    <div class="col-md-6 mb-0 required">
                                         <div class="form-group mb-0">
                                             <label for="inputName"
                                                    th:text="#{msg.common.field.distributionType}"></label><span
                                                 class="text-orange">*</span>
                                             <select class="form-control select2" name="distributionType"
                                                     style="width: 100%;" th:disabled="${isReadOnly}">
+                                                <option value="">&nbsp</option>
                                                 <th:block
                                                         th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
                                                     <option th:selected="${project.distributionType != null && option.cdDtlNo == project.distributionType}"
@@ -398,7 +402,7 @@
                                                     </div>
                                                     <div class="icheck-primary d-inline" style="margin-left: 5px;">
                                                         <input id="networkServerType_N" name="networkServerType"
-                                                               th:checked="${project.networkServerType == null || (project.networkServerType != null && project.networkServerType == 'N')} ? 'checked'"
+                                                               th:checked="${project.networkServerType != null && project.networkServerType == 'N'} ? 'checked'"
                                                                th:disabled="${isReadOnly}"
                                                                type="radio"
                                                                value="N"/>
@@ -445,9 +449,6 @@
                                             </ul>
                                         </li>
                                     </ul>
-
-
-
                                 </div>
                                 <div class="form-group">
                                     <label for="additionalInformation"
