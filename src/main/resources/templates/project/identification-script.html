@@ -14,22 +14,16 @@ $(document).ready(function () {
 	// bin_evt.init();
 	// bom_evt.init();
 	if (batFlag) bat_evt.init();
-	
+
+    dep_evt.init();
+    src_evt.init();
+    bin_evt.init();
+    bom_evt.init();
+
 	$("[id^=tabMenu]").on("click", function() {
 		var tabId = $(this).attr("id");
 		tabId = tabId.replace("tabMenu", "");
 		$("[name=gridArea]").hide();
-
-        switch(tabId){
-            case "Dep" : dep_evt.init();
-                break;
-            case "Src" : src_evt.init();
-                break;
-            case "Bin" : bin_evt.init();
-                break;
-            case "Bom" : bom_evt.init();
-                break;
-        }
 
 		var applicable = $("#applicable" + tabId).is(':checked');
 		$("#gridArea"+tabId).show();
