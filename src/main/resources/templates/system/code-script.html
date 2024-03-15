@@ -28,7 +28,8 @@ var evt = {
 			fn.saveCode('codeDtl');
 		});
 		
-		$('#search').click(function(){
+		$('#search').click(function(e){
+            e.preventDefault();
 			var postData=$('#codeSearch').serializeObject();
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 		});
