@@ -47,9 +47,36 @@ var com_evt = {
 					}
 				} else {
 					if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
-						alertify.alert('<spring:message code="msg.project.validation.error" />');
-						
-						return false;
+						var adminCheckList = $("#bomList").jqGrid('getGridParam','data').filter(function(element, index) {
+							var adminCheckYn = element.adminCheckYn;
+							return "Y" == adminCheckYn;
+						});
+		
+						if (adminCheckList.length > 0) {
+							var customKeys = [];
+							var keys = Object.keys(bomValidMsgData);
+							
+							keys.forEach(function(obj){
+								if (obj.indexOf(".") > -1) {
+									var key = obj.split(".")[1];
+									if (!customKeys.includes(key)) customKeys.push(key);
+								}
+							});
+									
+							var includeIds = adminCheckList.filter(function(cur) {
+								return customKeys.includes(cur.componentId);
+							});
+			
+							if (includeIds.length != customKeys.length) {
+								alertify.alert('<spring:message code="msg.project.validation.error" />');
+				
+								return false;
+							}
+						} else {
+							alertify.alert('<spring:message code="msg.project.validation.error" />');
+			
+							return false;
+						}
 					}
 				}
 				
