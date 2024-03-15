@@ -3176,12 +3176,13 @@ public class ProjectController extends CoTopComponent {
 		srcData = (List<ProjectIdentification>) fromJson(srcMainGrid, srcType);
 
 		List<List<ProjectIdentification>> srcSubData = CommonFunction.setOssComponentLicense(srcData);
-		
-		srcSubData = CommonFunction.mergeGridAndSession(
-				CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
-				srcSubData,
-				CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
-		
+
+		if(srcSubData.isEmpty()) {
+			srcSubData = CommonFunction.mergeGridAndSession(
+					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId), srcData,
+					srcSubData,
+					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+		}
 		// bin
 		Type binType = new TypeToken<List<ProjectIdentification>>() {
 		}.getType();
@@ -3189,17 +3190,19 @@ public class ProjectController extends CoTopComponent {
 		binData = (List<ProjectIdentification>) fromJson(binMainGrid, binType);
 
 		List<List<ProjectIdentification>> binSubData = CommonFunction.setOssComponentLicense(binData);
-		
-		binSubData = CommonFunction.mergeGridAndSession(
-				CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData,
-				binSubData,
-				CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+
+		if(binSubData.isEmpty()) {
+			binSubData = CommonFunction.mergeGridAndSession(
+					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId), binData,
+					binSubData,
+					CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+		}
 
 		// 체크 서비스 호출
 		String errMsg = projectService.checkChangedIdentification(prjId, partyData, srcData, srcSubData, binData,
 				binSubData, (String) map.get("applicableParty"), (String) map.get("applicableSrc"),
 				(String) map.get("applicableBin"));
-		
+
 		if (!isEmpty(errMsg)) {
 			return makeJsonResponseHeader(false, errMsg);
 		}
