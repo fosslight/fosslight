@@ -105,15 +105,15 @@ var com_evt = {
 						return false;
 					}
 					
-//					com_fn.checkSave(data, "CONF");	
+					com_fn.checkSave(data, "CONF");	
 				} else {		 		
 					// 머지 체크
-/* 					if("Y"!= $("#mergeYn").val()){
+ 					if("Y"!= $("#mergeYn").val()){
 						alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
 						com_fn.fnTabChange($(".tabMenu a:eq(5)"));	
 
 						return false;
-					} */
+					}
 					
 					if(Bom_Save_Flg){
 						if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
@@ -132,7 +132,7 @@ var com_evt = {
 	 					if($("#ignoreBinaryDbFlag")) {
 							data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData()), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
 						}
-/* 
+ 
 						loading.show();
 						$.ajax({
 							url :'<c:url value="/project/verification/reviewReportAjax?prjId=${project.prjId}"/>',
@@ -148,7 +148,7 @@ var com_evt = {
 							}
 						});
 
-	 					com_fn.checkSave(data, "CONF");	 */
+	 					com_fn.checkSave(data, "CONF");
 					} else {
 						alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
 					}				
