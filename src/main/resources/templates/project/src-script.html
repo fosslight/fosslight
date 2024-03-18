@@ -13,6 +13,7 @@ var src_evt = {
 	csvDelFileSeq : [],
 	csvFileSeq : [],
 	init: function(){
+        $("#loading_wrap_src").show();
 		src_fn.getSrcGridData();
 		
 		$('#_srcAddList').jqGrid(src_fn.setParamProject3());
@@ -680,7 +681,7 @@ var src_fn = {
 		$('.ossSelectPop').hide();
 	},
 	getCsvData : function (seq){
-		loading.show();
+        $("#loading_wrap_src").show();
 		fn_grid_com.totalGridSaveMode('srcList');
 		cleanErrMsg("srcList");
 
@@ -703,7 +704,7 @@ var src_fn = {
 		});
 		
 		if (sheetNum.length == 0) {
-			loading.hide();
+            $("#loading_wrap_src").hide();
 			alert([[#{msg.common.check.sheet}]]);
 			
 			return;
@@ -725,7 +726,7 @@ var src_fn = {
 	getSpdxSpreadsheetData : function(seq){
 		var sheetNum = ["1", "4"];
 
-		loading.show();
+		loading.show('0fjkf');
 		fn_grid_com.totalGridSaveMode('srcList');
 		cleanErrMsg("srcList");
 
@@ -739,7 +740,7 @@ var src_fn = {
 	},
 	// load report data
 	exeLoadReportData : function(finalData){
-        loading.show();
+        $("#loading_wrap_src").show();
 		try {
 			$.ajax({
 				url : '/project/getSheetData',
@@ -749,8 +750,8 @@ var src_fn = {
 				cache : false,
 				contentType : 'application/json',
 				success: function(data){
-					loading.hide();
-					
+                    $("#loading_wrap_src").hide();
+
 					if ("false" == data.isValid) {
 						if(data.validMsg) {
 							alertify.alert(data.validMsg, function(){});
@@ -779,7 +780,7 @@ var src_fn = {
 					}
 				},
 				error: function(data){
-                    loading.hide();
+                    $("#loading_wrap_src").hide();
 					$('.ossUpload').children().remove();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
@@ -900,6 +901,7 @@ var src_fn = {
 //SRC 그리드
 var src_grid = {
 	load: function(){
+        $("#loading_wrap_src").show();
 		var currentOssName = "";
 		var ondblClickRowBln = false;
 		var srcList = $("#srcList");
@@ -1333,7 +1335,7 @@ var src_grid = {
 					gridInfoMsg(srcInfoMsgData, "srcList");
 				}
 
-                loading.hide();
+                $("#loading_wrap_src").hide();
 			},
 			removeHighLight : true
 		});

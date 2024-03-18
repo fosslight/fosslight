@@ -14,6 +14,7 @@ var dep_evt = {
 	csvDelFileSeq : [],
 	csvFileSeq : [],
 	init: function(){
+        $("#loading_wrap_dep").show();
 		dep_fn.getDepGridData();
 		
 		$('#_depAddList').jqGrid(dep_fn.setParamProject3());
@@ -662,7 +663,7 @@ var dep_fn = {
 		$('.ossSelectPop').hide();
 	},
 	getCsvData : function (seq){
-		loading.show();
+        $("#loading_wrap_bom").show();
 		fn_grid_com.totalGridSaveMode('depList');
 		cleanErrMsg("depList");
 
@@ -689,7 +690,7 @@ var dep_fn = {
 			
 			return;
 		} else {
-			loading.show();
+            $('#loading_wrap_dep').show();
 			fn_grid_com.totalGridSaveMode('depList');
 			cleanErrMsg("depList");
 			
@@ -705,7 +706,7 @@ var dep_fn = {
 	getSpdxSpreadsheetData : function(seq){
 		var sheetNum = ["1", "4"];
 
-		loading.show();
+        $('#loading_wrap_dep').show();
 		fn_grid_com.totalGridSaveMode('depList');
 		cleanErrMsg("depList");
 
@@ -728,7 +729,7 @@ var dep_fn = {
 				cache : false,
 				contentType : 'application/json',
 				success: function(data){
-					loading.hide();
+                    $("#loading_wrap_dep").hide();
 					
 					if ("false" == data.isValid) {
 						if(data.validMsg) {
@@ -758,8 +759,8 @@ var dep_fn = {
 					}
 				},
 				error: function(data){
-                    loading.hide();
-					$('.ossUpload').children().remove();
+                    $("#loading_wrap_dep").hide();
+                    $('.ossUpload').children().remove();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
 			});
@@ -910,6 +911,7 @@ var dep_fn = {
 // 그리드
 var dep_grid = {
 	load: function(){
+        $("#loading_wrap_dep").show();
 		var currentOssName = "";
 		var ondblClickRowBln = false;
 		var depList = $("#depList");
@@ -1337,6 +1339,7 @@ var dep_grid = {
 				if(depDiffMsgData) {
 					gridDiffMsg(depDiffMsgData, "depList");
 				}
+                $('#loading_wrap_dep').hide();
 			},
 			removeHighLight : true
 		});

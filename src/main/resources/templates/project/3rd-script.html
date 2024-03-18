@@ -18,6 +18,7 @@ var _3rdLoadListLength = 0;
 
 var party_evt = {
 	init : function(){
+        $("#loading_wrap_3rd").show();
 		party_evt.getPartGridData();
 		//Not aplicable
 		var aplicable = $('#party').is(':checked');
@@ -719,6 +720,7 @@ var party_evt = {
 
 var part_grid = {
 		load: function(){
+            $("#loading_wrap_3rd").show();
 			var currentOssName = "";
 			var ondblClickRowBln = false;
 			var partList = $("#list3");
@@ -790,7 +792,9 @@ var part_grid = {
 					
 					if(partInfoData) {
 						gridInfoMsg(partInfoData, "list3");
-					}				
+					}
+
+                    $("#loading_wrap_3rd").hide();
 				}
 			});
 			$("#list3").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});

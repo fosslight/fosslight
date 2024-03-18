@@ -14,6 +14,7 @@ var bom_evt = {
 	commentIdx : [[${project.commentIdx}]],
 	commentTemp : '',
 	init : function(){
+        $("#loading_wrap_bom").show();
 		if(curIdenStatus == "REV" && $("#binaryDB")){
 			$("#binaryDB").show();
 		}
@@ -179,7 +180,7 @@ var bom_fn = {
 		});
 	},
 	downloadExcel : function(){
-		loading.show();
+        $("#loading_wrap_bom").show();
 		
 		$.ajax({
 			type: "POST",
@@ -189,7 +190,7 @@ var bom_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
-				loading.hide();
+                $("#loading_wrap_bom").hide();
 				
 				if ("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid2}]], 0);
@@ -796,7 +797,7 @@ var bom_fn = {
 	loadAnalysisUrl : function (target, url) {
 		createTabInFrame(target, url);
 	},
-	displayVulnerability : function(cellvalue, options, rowObject){
+	displayVulnerability : function (cellvalue, options, rowObject) {
 		var display = "";
 		var _url = "";
 		var prjId = [[${project.prjId}]];
@@ -880,6 +881,7 @@ var bom_data = {
 			});
 		},
 		loadBomGrid : function(){
+            $("#loading_wrap_bom").show();
 			var bomList = $('#bomList');
 			bomList.jqGrid({
 				  datatype: 'local'
@@ -945,7 +947,7 @@ var bom_data = {
 					$("#bomList_source").css({'border-right': '1px solid #cbc7bd'}); // restriction 을 추가하면서 css에서 마지막 th의 border를 삭제하는 처리의 차선책
 					var str= "";
 			 		var arr = [];
-			 		arr = bomList.jqGrid('getDataIDs');
+                    arr = bomList.jqGrid('getDataIDs');
 
 					for(var i in arr){
 						
@@ -1098,7 +1100,8 @@ var bom_data = {
 					fn_grid_com.totalGridSaveMode('bomList');
 				}
 				, gridComplete: function(){
-					tableRefresh();
+                    $("#loading_wrap_bom").hide();
+                    tableRefresh();
 				}
 			});
 
