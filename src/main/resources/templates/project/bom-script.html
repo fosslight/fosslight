@@ -1101,6 +1101,11 @@ var bom_data = {
 				}
 				, gridComplete: function(){
                     $("#loading_wrap").hide();
+
+                    initCount++;
+                    if (initCount === 4) {
+                        $('#loading_wrap_total').hide();
+                    }
                     tableRefresh();
 				}
 			});

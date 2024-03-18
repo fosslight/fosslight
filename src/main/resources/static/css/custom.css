@@ -197,12 +197,12 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .fileuploader, .custom-layout .multi-fileuploader { max-width: 100%; }
 
 /* loading bar */
-#loading_wrap, #loading_wrap_3rd, #loading_wrap_bin, #loading_wrap_bom, #loading_wrap_dep, #loading_wrap_src {position:fixed; z-index:1001; width:100%; height:100%;}
-#loading_wrap .loadingBlind, #loading_wrap_3rd .loadingBlind, #loading_wrap_bin .loadingBlind, #loading_wrap_bom .loadingBlind, #loading_wrap_dep .loadingBlind, #loading_wrap_src .loadingBlind {position:fixed; left:0; top:0; bottom:0; display:block; width:100%; z-index:1002; background:#000;
+#loading_wrap, #loading_wrap_total{position:fixed; z-index:1001; width:100%; height:100%;}
+#loading_wrap .loadingBlind, #loading_wrap_total .loadingBlind {position:fixed; left:0; top:0; bottom:0; display:block; width:100%; z-index:1002; background:#000;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
     opacity: .5;}
-#loading_wrap img, #loading_wrap_3rd img, #loading_wrap_bin img, #loading_wrap_bom img, #loading_wrap_dep img, loading_wrap_src img{position:fixed; top:0; left:0; right:0; bottom:0; z-index:1000; margin:auto; width:48px; height:48px;}
+#loading_wrap img, #loading_wrap_total img{position:fixed; top:0; left:0; right:0; bottom:0; z-index:1000; margin:auto; width:48px; height:48px;}
 
 /* card */
 .card-lg-red:not(.card-outline)>.card-header { background-color: #a50034;color: #fff; }

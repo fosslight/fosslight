@@ -1407,6 +1407,11 @@ var bin_grid = {
 					gridInfoMsg(binInfoMsgData, "binList");
 				}
                 $("#loading_wrap").hide();
+
+                initCount++;
+                if (initCount === 4) {
+                    $('#loading_wrap_total').hide();
+                }
 			},
 			removeHighLight : true
 		});

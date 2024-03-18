@@ -1340,6 +1340,11 @@ var dep_grid = {
 					gridDiffMsg(depDiffMsgData, "depList");
 				}
                 $("#loading_wrap").hide();
+
+                initCount++;
+                if (initCount === 4) {
+                    $('#loading_wrap_total').hide();
+                }
 			},
 			removeHighLight : true
 		});
