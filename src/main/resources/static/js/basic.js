@@ -3578,4 +3578,10 @@ function removeDropdownMenu() {
     $("#setUpColumnMenu").removeClass("show");
 }
 
-
+function initPromise(event) {
+    return new Promise((resolve, reject) => {
+        event.init(() => {
+            resolve();
+        });
+    });
+}

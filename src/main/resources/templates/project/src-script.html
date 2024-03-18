@@ -13,7 +13,7 @@ var src_evt = {
 	csvDelFileSeq : [],
 	csvFileSeq : [],
 	init: function(){
-        $("#loading_wrap_src").show();
+        $("#loading_wrap").show();
 		src_fn.getSrcGridData();
 		
 		$('#_srcAddList').jqGrid(src_fn.setParamProject3());
@@ -681,7 +681,7 @@ var src_fn = {
 		$('.ossSelectPop').hide();
 	},
 	getCsvData : function (seq){
-        $("#loading_wrap_src").show();
+        $("#loading_wrap").show();
 		fn_grid_com.totalGridSaveMode('srcList');
 		cleanErrMsg("srcList");
 
@@ -704,12 +704,12 @@ var src_fn = {
 		});
 		
 		if (sheetNum.length == 0) {
-            $("#loading_wrap_src").hide();
+            $("#loading_wrap").hide();
 			alert([[#{msg.common.check.sheet}]]);
 			
 			return;
 		} else {
-			loading.show();
+            $("#loading_wrap").show();
 
 			fn_grid_com.totalGridSaveMode('srcList');
 			cleanErrMsg("srcList");
@@ -726,7 +726,7 @@ var src_fn = {
 	getSpdxSpreadsheetData : function(seq){
 		var sheetNum = ["1", "4"];
 
-		loading.show('0fjkf');
+        $("#loading_wrap").show();
 		fn_grid_com.totalGridSaveMode('srcList');
 		cleanErrMsg("srcList");
 
@@ -740,7 +740,7 @@ var src_fn = {
 	},
 	// load report data
 	exeLoadReportData : function(finalData){
-        $("#loading_wrap_src").show();
+        $("#loading_wrap").show();
 		try {
 			$.ajax({
 				url : '/project/getSheetData',
@@ -750,7 +750,7 @@ var src_fn = {
 				cache : false,
 				contentType : 'application/json',
 				success: function(data){
-                    $("#loading_wrap_src").hide();
+                    $("#loading_wrap").hide();
 
 					if ("false" == data.isValid) {
 						if(data.validMsg) {
@@ -780,7 +780,7 @@ var src_fn = {
 					}
 				},
 				error: function(data){
-                    $("#loading_wrap_src").hide();
+                    $("#loading_wrap").hide();
 					$('.ossUpload').children().remove();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
@@ -901,7 +901,7 @@ var src_fn = {
 //SRC 그리드
 var src_grid = {
 	load: function(){
-        $("#loading_wrap_src").show();
+        $("#loading_wrap").show();
 		var currentOssName = "";
 		var ondblClickRowBln = false;
 		var srcList = $("#srcList");
@@ -1335,7 +1335,7 @@ var src_grid = {
 					gridInfoMsg(srcInfoMsgData, "srcList");
 				}
 
-                $("#loading_wrap_src").hide();
+                $("#loading_wrap").hide();
 			},
 			removeHighLight : true
 		});

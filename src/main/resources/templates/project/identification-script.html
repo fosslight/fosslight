@@ -9,16 +9,17 @@ var newPrjFlag = [[${newPrjFlag}]];
 $(document).ready(function () {
 	com_evt.init();
 	if (partnerFlag) party_evt.init();
-	//  dep_evt.init();
-	// src_evt.init();
-	// bin_evt.init();
-	// bom_evt.init();
 	if (batFlag) bat_evt.init();
 
-    dep_evt.init();
-    src_evt.init();
-    bin_evt.init();
-    bom_evt.init();
+    $('#loading_wrap').show();
+    Promise.all([
+        initPromise(dep_evt),
+        initPromise(src_evt),
+        initPromise(bin_evt),
+        initPromise(bom_evt)
+    ]).then(() => {
+        $('#loading_wrap').hide();
+    });
 
 	$("[id^=tabMenu]").on("click", function() {
 		var tabId = $(this).attr("id");

@@ -13,6 +13,7 @@ var _binUploadFile;
 var bin_evt = {
 	csvDelFileSeq : [],
 	init: function(){
+        $("#loading_wrap").show();
 		bin_fn.getBinGridData();
 		$('#_binAddList').jqGrid(bin_fn.setParamProject3());
 		var binList = $("#binList");
@@ -786,7 +787,7 @@ var bin_fn = {
 			
 			return;
 		} else {
-			loading.show();
+            $("#loading_wrap").show();
 			
 			var target = $("#binList");
 			fn_grid_com.totalGridSaveMode('binList');
@@ -798,7 +799,7 @@ var bin_fn = {
 		}
 	},
 	getCsvData : function(seq){
-		loading.show();
+        $("#loading_wrap").show();
 		fn_grid_com.totalGridSaveMode('binList');
 		cleanErrMsg("binList");
 
@@ -812,7 +813,7 @@ var bin_fn = {
 	getSpdxSpreadsheetData : function(seq){
 		var sheetNum = ["1", "4"];
 
-		loading.show();
+        $("#loading_wrap").show();
 		fn_grid_com.totalGridSaveMode('binList');
 		cleanErrMsg("binList");
 
@@ -833,8 +834,8 @@ var bin_fn = {
 		
 		var binCsvFileId = $('#binCsvFileId').val();
 		var binBinaryFileId = $('#binBinaryFileId').val();
-		
-		loading.show();
+
+        $("#loading_wrap").show();
 		
 		var target = $("#binList");
 		// 메인 그리드
@@ -871,7 +872,7 @@ var bin_fn = {
 				cache : false,
 				contentType : 'application/json',
 				success: function(data){
-					loading.hide();
+                    $("#loading_wrap").hide();
 
 					if("false" == data.isValid) {
 						if(data.validMsg) {
@@ -906,7 +907,7 @@ var bin_fn = {
 					}
 				},
 				error: function(data){
-					loading.hide();
+                    $("#loading_wrap").hide();
 					$('.ossUpload').children().remove();
 					
 					alertify.error([[#{msg.common.valid}]], 0);
@@ -985,6 +986,7 @@ var bin_fn = {
 //SRC 그리드
 var bin_grid = {
 	load: function(){
+        $("#loading_wrap").show();
 		var currentOssName = "";
 		var ondblClickRowBln = false;
 		var binList = $("#binList");
@@ -1404,6 +1406,7 @@ var bin_grid = {
 				if(binInfoMsgData) {
 					gridInfoMsg(binInfoMsgData, "binList");
 				}
+                $("#loading_wrap").hide();
 			},
 			removeHighLight : true
 		});

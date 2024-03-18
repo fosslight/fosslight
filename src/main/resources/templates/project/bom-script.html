@@ -14,7 +14,7 @@ var bom_evt = {
 	commentIdx : [[${project.commentIdx}]],
 	commentTemp : '',
 	init : function(){
-        $("#loading_wrap_bom").show();
+        $("#loading_wrap").show();
 		if(curIdenStatus == "REV" && $("#binaryDB")){
 			$("#binaryDB").show();
 		}
@@ -180,7 +180,7 @@ var bom_fn = {
 		});
 	},
 	downloadExcel : function(){
-        $("#loading_wrap_bom").show();
+        $("#loading_wrap").show();
 		
 		$.ajax({
 			type: "POST",
@@ -190,7 +190,7 @@ var bom_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
-                $("#loading_wrap_bom").hide();
+                $("#loading_wrap").hide();
 				
 				if ("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid2}]], 0);
@@ -881,7 +881,7 @@ var bom_data = {
 			});
 		},
 		loadBomGrid : function(){
-            $("#loading_wrap_bom").show();
+            $("#loading_wrap").show();
 			var bomList = $('#bomList');
 			bomList.jqGrid({
 				  datatype: 'local'
@@ -1100,7 +1100,7 @@ var bom_data = {
 					fn_grid_com.totalGridSaveMode('bomList');
 				}
 				, gridComplete: function(){
-                    $("#loading_wrap_bom").hide();
+                    $("#loading_wrap").hide();
                     tableRefresh();
 				}
 			});
