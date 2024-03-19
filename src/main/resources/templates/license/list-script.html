@@ -270,20 +270,20 @@
                 colModelObj = {
                     name: 'licenseName',
                     index: 'licenseName',
-                    width: 200,
+                    width: 160,
                     align: 'left',
                     formatter: fn.displayLicenseName,
                     unformat: fn_grid_com.unformatter,
                 };
                 colModelArr.push(colModelObj);
-                colModelObj = {name: 'shortIdentifier', index: 'shortIdentifier', width: 100, align: 'left', hidden: true};
+                colModelObj = {name: 'shortIdentifier', index: 'shortIdentifier', width: 50, align: 'left', hidden: true};
                 colModelArr.push(colModelObj);
-                colModelObj = {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'};
+                colModelObj = {name: 'licenseType', index: 'licenseType', width: 60, align: 'center'};
                 colModelArr.push(colModelObj);
                 colModelObj = {
                     name: 'restriction',
                     index: 'restriction',
-                    width: 70,
+                    width: 30,
                     align: 'center',
                     formatter: fn_grid_com.displayLicenseRestriction,
                     unformat: fn_grid_com.unformatter,
@@ -291,11 +291,11 @@
                     search: false
                 };
                 colModelArr.push(colModelObj);
-                colModelObj = {name: 'obligation', index: 'obligation', width: 65, align: 'left', sortable: false};
+                colModelObj = {name: 'obligation', index: 'obligation', width: 50, align: 'left', sortable: false};
                 colModelArr.push(colModelObj);
-                colModelObj = {name: 'webpage', index: 'webpage', width: 60, align: 'left', formatter: 'link'};
+                colModelObj = {name: 'webpage', index: 'webpage', width: 80, align: 'left', formatter: 'link'};
                 colModelArr.push(colModelObj);
-                colModelObj = {name: 'description', index: 'description', width: 150, align: 'left',
+                colModelObj = {name: 'description', index: 'description', width: 100, align: 'left',
                     cellattr: function (rowId, val, rawObject, cm, rdata) {
                         return 'title="' + rawObject['description'] + '" style="cursor: pointer;"';
                     },
@@ -304,23 +304,23 @@
                     }};
                 colModelArr.push(colModelObj);
                 if ([[${@CommonFunction.isAdmin()}]]) {
-                    colModelObj = {name: 'creator', index: 'creator', width: 80, align: 'center'};
+                    colModelObj = {name: 'creator', index: 'creator', width: 40, align: 'center'};
                     colModelArr.push(colModelObj);
                     colModelObj = {
                         name: 'createdDate',
                         index: 'createdDate',
-                        width: 75,
+                        width: 45,
                         align: 'center',
                         formatter: 'date',
                         formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}
                     };
                     colModelArr.push(colModelObj);
-                    colModelObj = {name: 'modifier', index: 'modifier', width: 80, align: 'center'};
+                    colModelObj = {name: 'modifier', index: 'modifier', width: 40, align: 'center'};
                     colModelArr.push(colModelObj);
                     colModelObj = {
                         name: 'modifiedDate',
                         index: 'modifiedDate',
-                        width: 75,
+                        width: 40,
                         align: 'center',
                         formatter: 'date',
                         formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}
@@ -363,6 +363,8 @@
                     sortorder: 'desc',
                     loadonce: false,
                     height: 'auto',
+                    //utoScroll: true, // 가로 스크롤 자동 활성화
+                    // shrinkToFit:false,  // width를 자동설정 해주는 기능
                     gridComplete: function () {
 
                         if (!data.existTooltip) {

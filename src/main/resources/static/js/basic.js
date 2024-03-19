@@ -3068,9 +3068,9 @@ function changeURL(url) {
 }
 
 $(window).load(function () {
-    resizingJqGidSet();
-    resizingInnerJqGidSet();
-    resizingOuterJqGidSet();
+    // resizingJqGidSet();
+    // resizingInnerJqGidSet();
+    // resizingOuterJqGidSet();
     // /* 브라우저 창 크기에 따라 jqGrid Width 자동 조절 */
     $(window)
         .bind("resize", function () {

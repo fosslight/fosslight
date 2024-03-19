@@ -809,23 +809,23 @@ var partnerList = {
 			var colModelArr = [];
 	        var colModelObj = {name: 'partnerId', index: 'partnerId', width: 30, align: 'center', key:true, sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'partnerName', index: 'partnerName', width: 100, align: 'left', sortable : true};
+	        colModelObj = {name: 'partnerName', index: 'partnerName', width: 80, align: 'left', sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'softwareName', index: 'softwareName', width: 100, align: 'left', sortable : true};
+	        colModelObj = {name: 'softwareName', index: 'softwareName', width: 80, align: 'left', sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'softwareVersion', index: 'softwareVersion', width: 40, align: 'left', sortable : true, hidden:true};
+	        colModelObj = {name: 'softwareVersion', index: 'softwareVersion', width: 30, align: 'left', sortable : true, hidden:true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true};
+	        colModelObj = {name: 'status', index: 'status', width: 40, align: 'center', formatter: fn.displayStatus, sortable : true};
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
+	        colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 30, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'division', index: 'division', width: 100, align: 'left', sortable : true};
+	        colModelObj = {name: 'division', index: 'division', width: 30, align: 'left', sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'creator', index: 'creator', width: 70, align: 'center', sortable : true};
+	        colModelObj = {name: 'creator', index: 'creator', width: 30, align: 'center', sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'reviewer', index: 'reviewer', width: 80, align: 'left', formatter: 'select', edittype:'text', formatter:fn.getUserName 
+	        colModelObj = {name: 'reviewer', index: 'reviewer', width: 30, align: 'left', formatter: 'select', edittype:'text', formatter:fn.getUserName
 					  , editoptions: {
 							dataInit:
 								function (e) {
