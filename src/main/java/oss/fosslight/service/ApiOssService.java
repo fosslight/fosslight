@@ -5,6 +5,10 @@
 
 package oss.fosslight.service;
 
+import oss.fosslight.api.dto.GetOSSDetailsDto;
+import oss.fosslight.api.dto.ListOssDto;
+import oss.fosslight.api.dto.OssDto;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -17,4 +21,12 @@ public interface ApiOssService {
 	public List<Map<String, Object>> getLicenseInfo(String licenseName);
 	
 	String[] getOssNickNameListByOssName(String ossName);
+
+	ListOssDto.Result listOss(ListOssDto.Request request);
+
+	String getOssExcel(ListOssDto.Request request) throws Exception;
+
+	List<OssDto> listNameSearchResult(String name, int limit);
+	List<OssDto> listRecentOss(int limit);
+	GetOSSDetailsDto.Result getOss(String id);
 }

@@ -46,6 +46,14 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateTo)">
 				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{updateDateTo},'%Y%m%d')
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+	                AND T1.PRJ_NAME = #{prjName}
+	            </if>
+				<if test="!@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+					AND T1.PRJ_NAME LIKE CONCAT('%', #{prjName}, '%')
+				</if>
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 				AND (
 						T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
@@ -141,6 +149,14 @@
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateTo)">
 				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{updateDateTo},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+				 <if test="@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+					 AND T1.PRJ_NAME = #{prjName}
+				 </if>
+				 <if test="!@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+					 AND T1.PRJ_NAME LIKE CONCAT('%', #{prjName}, '%')
+				 </if>
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 				AND (

@@ -504,7 +504,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_LICENSE_UPDATE_TYPE = "22";
 	public static final String CD_MAIL_TYPE_LICENSE_RENAME = "23";
 	public static final String CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT = "230";
-	
+	public static final String CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT = "231";
+
 	/** Mail Type [FOSSLight] Open source license has been removed */
 	public static final String CD_MAIL_TYPE_LICENSE_DELETE = "29";
 	public static final String CD_MAIL_TYPE_PROJECT_REVIEWER_ADD = "30"; // reviewer가 없는 상태에서 새로운 reviewer를 등록한 case

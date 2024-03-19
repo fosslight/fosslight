@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "airbnb-base",
+    "airbnb-typescript/base",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "import/prefer-default-export": "off",
+    "no-alert": "off",
+    "global-require": "off"
+  },
+  "parserOptions": {
+    "project": ["tsconfig.json"]
+  }
+}

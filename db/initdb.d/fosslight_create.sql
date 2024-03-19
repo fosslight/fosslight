@@ -1616,6 +1616,7 @@ CREATE TABLE IF NOT EXISTS `PRE_PROJECT_MASTER` (
   `MODIFIER` varchar(50) DEFAULT NULL,
   `MODIFIED_DATE` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `DELETE_MEMO` longtext DEFAULT NULL,
+  `PACKAGE_FILE_IDS` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`PRJ_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
@@ -2096,6 +2097,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('102', '93', '[FOSSLight] Vulnerability Recalculated', '', '', 93, 'Y'),
 	('102', '99', '[FOSSLight][PRJ-${Project ID}] ${User} changed a reviewer from ${Reviewer} to ${ReviewerTo} : "${Project Name}"', '', 'Reviewer has been changed to ${Reviewer Info}', 99, 'Y'),
 	('102', '100', '[FOSSLight][PRJ-${Project ID}] Packaging, ${User} requested : " ${Project Name}"', '', '', 100, 'Y'),
+    ('102', '231', '[FOSSLight][LIC] Invalid License Identified', '', '', 231, 'Y'),
 	('103', '10', 'OSS 등록(OSS기본정보)', '', '100', 10, 'Y'),
 	('103', '11', 'OSS 변경정보', '', '', 11, 'Y'),
 	('103', '12', 'OSS 변경정보(LICENSE TYPE이 변경된 경우)', '', '', 12, 'Y'),
@@ -2209,6 +2211,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('110', '60', 'vulnerabilityInfo.html', '', '91,93', 9, 'Y'),
 	('110', '70', 'binaryDBDataCommitInfo.html', '', '47,470', 17, 'Y'),
 	('110', '71', 'resetUserPassword.html', '', '817', 18, 'Y'),
+	('110', '231', 'licenseInvalidNotify.html', '', '231', 20, 'Y'),
 	('111', '35', 'project complete default contents', '', '<p> <strong>Project 에 대한 Open Source Compliance Process가 모두 수행되어 Complete 처리합니다. </strong><br />OSS 고지문이나 Packaging 파일에 대한 수정이 필요하신 경우, Basic Information탭 우측하단의 "Request to Open" 버튼을 클릭하여 Status 변경 요청하시기 바랍니다.<br />단, Distribution에서 Model 추가/삭제는 Status 변경 없이 가능합니다.</p> <p><strong>The Open Source Compliance Process for the Project is completed.</strong><br />If you need to modify the OSS Notice or the Packaging file, please request the status change to re-perform the Identification or Packaging by clicking "Request to Open" button on Basic Information Tab.<br />However, you can add or delete models in the distribution without changing the status.</p>', 35, 'Y'),
 	('111', '812', 'project drop default contents', '', '<p><Strong>Open Source Compliance Process 수행 완료하지 않고, Drop 처리됩니다.</strong><br />다시 Open Source Compliance Process를 진행하고자 하시는 경우, Basic Informatoin탭 우측하단의 "Open" 버튼을 클릭 후 진행하시기 바랍니다.</p> <p><strong>The status of the project changes to \'Drop\', so you don\'t need to complete the Open Source Compliance process.</strong><br />If you want to proceed the Open Source Compliance Process again, please click "Open" button on Basic information Tab.</p>', 812, 'Y'),
 	('111', '33', 'Project Created', '', '<p>Identification 탭에 Open Source 목록을 작성 후 BOM 탭에서 Request를 클릭하여 리뷰 요청하십시오.<br />Fill out the Open Source list in the Identification  and request a review by clicking Request in the BOM tab.<br /><br />- Guide : https://fosslight.org/fosslight-guide-en/tutorial/1_project.html#2-identification</p>', 33, 'Y'),

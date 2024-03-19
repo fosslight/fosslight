@@ -37,6 +37,17 @@ services:
       --logging.path=${LOGGING_PATH:-/data/fosslight/logs}
       --verify.bin.path=./verify
       --export.template.path=./template"
+  lite:
+    build:
+      context: ./lite
+      dockerfile: ./Dockerfile
+      args:
+        - PRODUCT_MODE=${PRODUCT_MODE:-false}
+    container_name: fosslight_lite
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
   mail:
     image: mailserver/docker-mailserver:10
     container_name: fosslight_mail

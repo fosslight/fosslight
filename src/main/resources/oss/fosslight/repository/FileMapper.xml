@@ -226,7 +226,8 @@
 
 	<select id="selectFileInfoById" parameterType="String" resultType="oss.fosslight.domain.T2File">
 	SELECT
-		*
+		*,
+		DATE_FORMAT(REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
 	FROM
 		T2_FILE
 	WHERE

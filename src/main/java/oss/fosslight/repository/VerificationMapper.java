@@ -5,6 +5,7 @@
 
 package oss.fosslight.repository;
 
+import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.domain.File;
 import java.util.List;
 
@@ -22,7 +23,9 @@ public interface VerificationMapper {
 	OssNotice selectOssNoticeOne(Project project);
 	
 	List<OssComponents> selectVerifyOssList(Project project);
-	
+
+	List<OssDto> selectSelfCheckVerifyOssList(String selfCheckId);
+
 	void updateComment(CommentsHistory commentHistory);
 	
 	void deleteComment(CommentsHistory commentHistory);
