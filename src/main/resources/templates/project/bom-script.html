@@ -406,17 +406,17 @@ var bom_fn = {
 			$("#"+id+"_adminCheck").val("N");
 		}
 	},
-	bomListHeaderResize : function(rowId){
-		// 그리드 그룹 헤더 복원
-		//$("#bomList").jqGrid('destroyGroupHeader', false);
-		// 그리드 그룹 헤더 설정
-		// $("#bomList").jqGrid('setGroupHeaders', {
-		// 	useColSpanStyle: true,
-		// 	groupHeaders:[
-		// 		{startColumnName: 'notify', numberOfColumns: 2, titleText: '<label style="font-weight: bold;">Obligation</label>'},
-		// 	]
-		// });
-	},
+    bomListHeaderResize : function(rowId){
+        // 그리드 그룹 헤더 복원
+        $("#bomList").jqGrid('destroyGroupHeader', false);
+        // 그리드 그룹 헤더 설정
+        $("#bomList").jqGrid('setGroupHeaders', {
+            useColSpanStyle: true,
+            groupHeaders:[
+                {startColumnName: 'notify', numberOfColumns: 2, titleText: '<label style="font-weight: bold;">Obligation</label>'},
+            ]
+        });
+    },
 	adminCheck : function(rows, validArr, target){
 		var result = false;
 		var success = true;
@@ -870,7 +870,7 @@ var bom_data = {
 					$("#bomList").jqGrid('GridUnload');
 					
 					bom_data.loadBomGrid();
-                    bom_fn.bomListHeaderResize();
+                    //bom_fn.bomListHeaderResize();
 					
 					fn_grid_com.addEtcKeyDownEvent($('#bomList'), bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
 					
@@ -1122,7 +1122,6 @@ var bom_data = {
 			});
 			
 			$('#bomList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"800px"});
-            $('#bomList').closest(".ui-jqgrid-htable").css({"table-layout":"auto"});
 
             $("#bomList").jqGrid('setGroupHeaders', {
                 useColSpanStyle: true,
