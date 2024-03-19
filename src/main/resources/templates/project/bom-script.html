@@ -935,7 +935,7 @@ var bom_data = {
 				, editurl:'clientArray'
 	 			, autowidth: true
                 , height: 'auto'
-                , shrinkToFit:false
+                , shrinkToFit: false
 				, gridview: true
 			   	, pager: '#bomPager'
 				, recordpos:'right'
@@ -1049,7 +1049,8 @@ var bom_data = {
 					}
 					
 					tableRefreshNew("bomList");
-				}
+
+                }
 				, onSelectRow: function(rowid,status,eventObject) {}
 				, beforeSelectRow: function(rowid, e) {
 					return true;
@@ -1121,11 +1122,12 @@ var bom_data = {
 			});
 			
 			$('#bomList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"800px"});
+            $('#bomList').closest(".ui-jqgrid-htable").css({"table-layout":"auto"});
 
-            jQuery("#bomList").jqGrid('setGroupHeaders', {
+            $("#bomList").jqGrid('setGroupHeaders', {
                 useColSpanStyle: true,
                 groupHeaders:[
-                    {startColumnName: 'notify', numberOfColumns: 2, titleText: '<label style="font-weight: bold;">Obligation</label>'}
+                    {startColumnName: 'notify', numberOfColumns: 2, titleText: '<label>Obligation</label>'}
                 ]
             });
 		}

@@ -434,8 +434,10 @@ tr.ui-row-ltr,
 .ui-jqgrid .ui-jqgrid-hbox table.ui-jqgrid-htable {
     background-color: #f9faff;
     border: none;
-    table-layout: auto;
+    /*table-layout: auto;*/
 }
+
+#gbox_bomList .ui-jqgrid-hbox table.ui-jqgrid-htable { table-layout: auto; }
 
 .ui-jqgrid .ui-th-column {
     background-color: transparent;
