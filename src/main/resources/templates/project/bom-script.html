@@ -408,14 +408,14 @@ var bom_fn = {
 	},
 	bomListHeaderResize : function(rowId){
 		// 그리드 그룹 헤더 복원
-//		$("#bomList").jqGrid('destroyGroupHeader', false);
+		//$("#bomList").jqGrid('destroyGroupHeader', false);
 		// 그리드 그룹 헤더 설정
-		$("#bomList").jqGrid('setGroupHeaders', {
-			useColSpanStyle: true, 
-			groupHeaders:[
-				{startColumnName: 'notify', numberOfColumns: 2, titleText: '<label style="font-weight: bold;">Obligation</label>'},
-			]
-		});
+		// $("#bomList").jqGrid('setGroupHeaders', {
+		// 	useColSpanStyle: true,
+		// 	groupHeaders:[
+		// 		{startColumnName: 'notify', numberOfColumns: 2, titleText: '<label style="font-weight: bold;">Obligation</label>'},
+		// 	]
+		// });
 	},
 	adminCheck : function(rows, validArr, target){
 		var result = false;
@@ -934,7 +934,8 @@ var bom_data = {
 				, autoencode: true
 				, editurl:'clientArray'
 	 			, autowidth: true
-	 			, height: '500px'
+                , height: 'auto'
+                , shrinkToFit:false
 				, gridview: true
 			   	, pager: '#bomPager'
 				, recordpos:'right'
@@ -950,7 +951,7 @@ var bom_data = {
                     arr = bomList.jqGrid('getDataIDs');
 
 					for(var i in arr){
-						
+
 						if(bomList.jqGrid('getCell',arr[i],'refComponentId')==""){ // MERGE 상태
 							bomList.jqGrid('setCell',arr[i],'group',bomList.jqGrid('getCell',arr[i],'componentIdx'));
 							bomList.jqGrid('setCell',arr[i],'refComponentId',bomList.jqGrid('getCell',arr[i],'componentId'));
@@ -958,24 +959,24 @@ var bom_data = {
 							bomList.jqGrid('setCell',arr[i],'group',bomList.jqGrid('getCell',arr[i],'refComponentIdx'));
 							bomList.jqGrid('setCell',arr[i],'referenceDiv',bomList.jqGrid('getCell',arr[i],'refDiv'));
 						}
-						
+
 						// 하위색 설정
 						if(i!=0
 						   && bomList.jqGrid('getCell',arr[i],'ossName') == bomList.jqGrid('getCell',arr[i-1],'ossName')
 						   && bomList.jqGrid('getCell',arr[i],'ossVersion') == bomList.jqGrid('getCell',arr[i-1],'ossVersion')){
 						   bomList.jqGrid('setCell',arr[i],'mergePreDiv', "99"); // 하위 referenceDiv 구분 임의 99 설정
 						}
-						
+
 						// 레퍼런스 DIV 설정
 						str = bomList.jqGrid('getCell',arr[i],'referenceDiv');
 						var referenceDivList = str.split(",").sort();
 						var referenceName = "";
-						
+
 						for (var idx in referenceDivList) {
 							if(referenceName != "") {
 								referenceName += ",";
 							}
-							
+
 							if(referenceDivList[idx] =="10") {
 								referenceName += "3rd";
 							} else if(referenceDivList[idx] =="11") {
@@ -988,9 +989,9 @@ var bom_data = {
 								referenceName += "BOM";
 							}
 						}
-						
+
 						bomList.jqGrid('setCell',arr[i],'referenceDiv', referenceName);
-						
+
 						if(bomList.jqGrid('getCell',arr[i],'obligationType') == 90) {
 							$("#"+arr[i]+"_source").parent().css("background", "CornflowerBlue");
 							$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
@@ -1119,7 +1120,14 @@ var bom_data = {
 				}	
 			});
 			
-			$('#bomList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"800px", "overflow-y" : "scroll"});
+			$('#bomList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"800px"});
+
+            jQuery("#bomList").jqGrid('setGroupHeaders', {
+                useColSpanStyle: true,
+                groupHeaders:[
+                    {startColumnName: 'notify', numberOfColumns: 2, titleText: '<label style="font-weight: bold;">Obligation</label>'}
+                ]
+            });
 		}
 	}
 

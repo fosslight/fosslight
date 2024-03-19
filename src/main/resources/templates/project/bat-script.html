@@ -809,6 +809,7 @@ var bat_grid_list = {
 								autoencode: true,
 								editurl:'clientArray',
 					 			autowidth: true,
+                                shrinkToFit:false,
 								height: 'auto',
 								gridview: true,
 								pager: '#batPager',
@@ -976,7 +977,7 @@ var bat_grid_list = {
 											  , delfunc: function () { fn_grid_com.rowDel(batList,"main");}
 											  , cloneToTop:true
 		});
-		$('#batList').closest(".ui-jqgrid-bdiv").css({"height":"500px", "overflow-y" : "scroll"});
+		$('#batList').closest(".ui-jqgrid-bdiv").css({"height":"500px"});
 	},
 	batFileGrid : function(){
 		$('#_binaryFileList').jqGrid({

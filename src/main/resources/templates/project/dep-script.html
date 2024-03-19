@@ -1215,6 +1215,7 @@ var dep_grid = {
 			editurl:'clientArray',
  			autowidth: true,
 			height: 'auto',
+            shrinkToFit:false,
 			gridview: true,
 		   	pager: '#depPager',
 			rowNum: 200,
@@ -1226,6 +1227,7 @@ var dep_grid = {
 			cellsubmit : 'clientArray',
 			ignoreCase: true,
 			multiselect: true,
+            multiselectWidth: 30,
 		    onSortCol: function (index, columnIndex, sortOrder) {
 		    	isSort = true;
 		    },
@@ -1367,7 +1369,7 @@ var dep_grid = {
 			  , cloneToTop:true
 		});
 		
-		$('#depList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
+		$('#depList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
 	}
 }
 </script>

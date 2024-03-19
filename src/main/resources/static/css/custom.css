@@ -434,6 +434,7 @@ tr.ui-row-ltr,
 .ui-jqgrid .ui-jqgrid-hbox table.ui-jqgrid-htable {
     background-color: #f9faff;
     border: none;
+    table-layout: auto;
 }
 
 .ui-jqgrid .ui-th-column {
@@ -476,13 +477,13 @@ tr.ui-row-ltr,
     border-right: .6px solid #dee2e6 !important;
     border-bottom: 2.8px solid #dee2e6 !important;
     border-top: .6px solid #dee2e6 !important;
+    text-align: center;
 }
 
 /* jqGrid pagination */
 /*.ui-jqgrid .ui-pg-table {*/
 /*    table-layout: auto !important;*/
 /*}*/
-
 .ui-jqgrid .ui-jqgrid-pager {
     background-color: #f7f7f7;
     border-top: .8px solid #ced4da;
@@ -568,7 +569,7 @@ html .ui-button.ui-state-disabled:active {
     font-weight: bold !important;
     font-size: 1rem;
 }
-
+.ui-jqgrid .ui-jqgrid-htable th { text-align: center; }
 .ui-state-default .ui-jqgrid-btable > td[aria-describedby="list_cb"] { width: 30px !important;}
 .ui-jqgrid .ui-jqgrid-htable #main_jqGrid_01_cb { width: 30px !important;}
 .ui-jqgrid .ui-jqgrid-htable .cbox { padding: 0;}

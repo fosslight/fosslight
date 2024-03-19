@@ -2882,6 +2882,7 @@ var grid = {
 			editurl:'clientArray',
 			autowidth: true,
 			height: 'auto',
+            shrinkToFit:false,
 			gridview: true,
 			pager: '#pager',
 			rowNum: 200,
@@ -2893,6 +2894,7 @@ var grid = {
 			cellsubmit : 'clientArray',
 			ignoreCase: true,
 			multiselect: true,
+            multiselectWidth: 32,
 			onSortCol: function (index, columnIndex, sortOrder) {
 				isSort = true;
 			},
@@ -3037,7 +3039,7 @@ var grid = {
 			partnerList.jqGrid('navGrid',"#pager",{add:false,edit:false,del:false,search:false,refresh:false,cloneToTop:true});
 		}
 		
-		$('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
+		$('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
 	}
 }
 

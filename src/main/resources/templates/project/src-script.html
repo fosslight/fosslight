@@ -1204,6 +1204,7 @@ var src_grid = {
 			editurl:'clientArray',
  			autowidth: true,
 			height: 'auto',
+            shrinkToFit:false,
 			gridview: true,
 		   	pager: '#srcPager',
 			rowNum: 200,
@@ -1363,7 +1364,8 @@ var src_grid = {
 			  , cloneToTop:true
 		});
 		
-		$('#srcList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px", "overflow-y" : "scroll"});
+		$('#srcList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+        $('#srcList').closest(".ui-jqgrid-htable").css({"table-layout":"auto"});
 	}
 }
 </script>
