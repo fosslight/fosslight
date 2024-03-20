@@ -1003,7 +1003,7 @@ var bom_data = {
 					
 					//------- 로드 된후 그룹 헤더 설정을 해야 사이즈가 깨지지 않음
                     // 2024.02.26 버튼 클릭시 헤더가 반복 생성되는 이슈로 getJqGrid 함수에서 호출
-                    // bom_fn.bomListHeaderResize();
+                    bom_fn.bomListHeaderResize();
 
 					if(bomValidMsgData) {
 						gridValidMsgNew(bomValidMsgData, "bomList");
@@ -1120,15 +1120,8 @@ var bom_data = {
 					}
 				}	
 			});
-			
-			$('#bomList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"800px"});
 
-            $("#bomList").jqGrid('setGroupHeaders', {
-                useColSpanStyle: true,
-                groupHeaders:[
-                    {startColumnName: 'notify', numberOfColumns: 2, titleText: '<label>Obligation</label>'}
-                ]
-            });
+			$('#bomList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"800px"});
 		}
 	}
 
