@@ -1010,7 +1010,7 @@
                             if (_ossId != "" && _ossId != undefined) {
                                 createTabInFrame(_ossId + '_Opensource', '/oss/edit/' + _ossId);
                             } else {
-                                if ('${sessUserInfo.authority}' == 'ROLE_ADMIN') {
+                                if ('ROLE_ADMIN' == [[${sessUserInfo.authority}]]) {
                                     onAjaxLoadingHide = true;
 
                                     var ossData = {

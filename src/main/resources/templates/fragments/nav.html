@@ -8,10 +8,16 @@
 	<script th:inline="javascript">
 		$(document).ready(function(){
 			$('[data-toggle="tooltip"]').tooltip();
+			
+			if ([[${sessUserInfo.division}]] === [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+				alertify.alert([[#{msg.configuration.notice.devision}]], function (e) {
+					if (e) {
+						$('.userSettings').get(0).click();
+					}
+				});
+			}
 		});
  
-		
-
 		function setDefaultLocaleFromUrl() {
 			const urlParams = new URLSearchParams(window.location.search);
 			const langParam = urlParams.get('lang');
