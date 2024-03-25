@@ -83,6 +83,7 @@ public final class Url {
 		public static final String VALIDATION = PATH + "/validation";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
 		public static final String DELETE_COMMENT = PATH + "/deleteComment";
@@ -114,6 +115,7 @@ public final class Url {
 		public static final String PATH = "/comment";
 		
 		public static final String COMMENT_LIST = PATH + "/getCommentList";
+		public static final String COMMENT_ALL_LIST = PATH + "/getCommentAllList";
 		public static final String CUS_COMMENT_LIST = PATH + "/getCusCommentList";
 		
 		public static final String MORE_COMMENT_LIST = PATH + "/getMoreCommentList";
@@ -175,6 +177,7 @@ public final class Url {
 		public static final String CHECK_EXIST_OSS_CONF = PATH + "/checkExistOssConf";
 		public static final String CHECK_VD_DIFF = PATH + "/checkVdiff";
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
+		public static final String SEND_COMMENT = PATH + "/sendComment";
 		public static final String DELETE_COMMENT = PATH + "/deleteComment";
 		public static final String OSS_MERGE_CHECK_LIST = PATH + "/ossMergeCheckList/{ossId}/{newOssId}";
 		
@@ -273,6 +276,7 @@ public final class Url {
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		
 		public static final String SAVE_3RD = PATH + "/save3rd";
 		public static final String SAVE_DEP = PATH + "/saveDep";
@@ -302,6 +306,8 @@ public final class Url {
 		public static final String UPDATE_PROJECT_STATUS = PATH + "/updateProjectStatus";
 		
 		public static final String IDENTIFICATION_ID_DIV = PATH + "/identification/{prjId}/{initDiv}";
+		public static final String IDENTIFICATION_ID_DIV_MODE = PATH + "/identification/{prjId}/{initDiv}/{mode}";
+		public static final String IDENTIFICATION_ID_DIV_DELETE = PATH + "/identification/delete/{prjId}/{initDiv}";
 		public static final String IDENTIFICATION_JSP = TILES_ROOT + PATH + "/identification";
 		public static final String IDENTIFICATION_CD = PATH + "/identificationProject/{code}";
 
@@ -426,6 +432,8 @@ public final class Url {
 
 		public static final String DOWNLOAD_PACKAGING_MULTI = PATH + "/downloadPackageMulti";
 		public static final String DELETE_FILE = PATH + "/deleteFile";
+		
+		public static final String DEFAULT_NOTICE_INFO = PATH + "/getDefaultNoticeInfo";
 	}
 	
 	public static final class DISTRIBUTION {
@@ -455,6 +463,7 @@ public final class Url {
 		public static final String EDIT = PATH + "/edit";
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
 		public static final String EDIT_ID =  PATH + "/edit/{partnerId}";
+		public static final String MODE_CONVERSION = PATH + "/{mode}/{partnerId}";
 		
 		public static final String VIEW_ID =  PATH + "/view/{partnerId}";
 		public static final String VIEW_JSP = TILES_ROOT + PATH + "/view";
@@ -466,6 +475,7 @@ public final class Url {
 		
 		public static final String CHANGE_DIVISION_AJAX = PATH + "/changeDivisionAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		
 		public static final String AUTOCOMPLETE_CONF_NM_AJAX = PATH + "/autoCompleteConfNmAjax";
 		public static final String AUTOCOMPLETE_CONF_ID_AJAX = PATH + "/autoCompleteConfIdAjax";
@@ -590,6 +600,7 @@ public final class Url {
 		
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		
 		public static final String LICENSE_USERGUIDE_HTML_NM = PATH + "/getLicenseUserGuideHtml/{licenseName}";
 		public static final String ADD_WATCHER = PATH + "/addWatcher";

@@ -160,92 +160,59 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <th:block sec:authorize="hasRole('ROLE_ADMIN')">
-                                            <div class="more-search" id="moreSearchContent">
-                                                <div class="row">
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <input class="form-control autoComOss" name="ossName"
-                                                                   placeholder="Oss Name"
-                                                                   th:value="${searchBean?.ossName}"
-                                                                   type="text"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <input class="form-control autoComOss" name="ossVersion"
-                                                                   placeholder="Oss Version"
-                                                                   th:value="${searchBean?.ossVersion}"
-                                                                   type="text"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <input class="form-control autoComLicense" name="licenseName"
-                                                                   placeholder="License Name"
-                                                                   th:value="${searchBean?.licenseName}"
-                                                                   type="text"/>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <textarea class="form-control" name="binaryName"
-                                                                      placeholder="Binary Name" rows="3"
-                                                                      th:utext="${searchBean?.binaryName}"></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <textarea class="form-control" name="userComment"
-                                                                      placeholder="Comment" rows="3"
-                                                                      th:utext="${searchBean?.comment}"></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-4">
-                                                        <div class="form-group">
-                                                            <textarea class="form-control" name="description"
-                                                                      placeholder="Description" rows="3"
-                                                                      th:utext="${searchBean?.description}"></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        <th:block th:if="${@CommonFunction.isAdmin()}">
+                                        	<div class="row">
+                                        		<div class="col-4">
+                                                	<div class="form-group">
+                                                    	<input type="text" name="ossName" class="form-control autoComOss" placeholder="OSS Name" th:value="${searchBean?.ossName}" />
+                                                	</div>
+                                            	</div>
+                                            	<div class="col-4">
+                                                	<div class="form-group">
+                                                    	<input type="text" name="ossVersion" class="form-control autoComOss" placeholder="OSS Version" th:value="${searchBean?.ossVersion}" />
+                                                	</div>
+                                            	</div>
+                                            	<div class="col-4">
+                                                	<div class="form-group">
+                                                    	<input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
+                                                	</div>
+                                          		</div>
+                                        	</div>
+                                        	<div class="row">
+                                        		<div class="col-4">
+                                                	<div class="form-group">
+                                                		<textarea class="form-control" name="binaryName" placeholder="Binary Name" rows="3" th:utext="${searchBean?.binaryName}"></textarea>
+                                                	</div>
+                                            	</div>
+                                            	<div class="col-4">
+                                                	<div class="form-group">
+                                                    	<textarea class="form-control" name="userComment" placeholder="Comment" rows="3" th:utext="${searchBean?.comment}"></textarea>
+                                                	</div>
+                                            	</div>
+                                            	<div class="col-4">
+                                                	<div class="form-group">
+                                                    	<textarea class="form-control" name="description" placeholder="Description" rows="3" th:utext="${searchBean?.description}"></textarea>
+                                                	</div>
+                                          		</div>
+                                        	</div>
                                         </th:block>
-                                        <div class="row mt-1 mb-2">
-                                            <div class="col-12">
-                                                <div class=" d-flex justify-content-center pt-1">
-														<span class="mx-1">
-															<button class="btn btn-ivory btn-sm btn-icon px-3"
-                                                                    data-placement="right"
-                                                                    data-toggle="tooltip"
-                                                                    th:onclick="|updateSearchCondition('3rdSearch')|"
-                                                                    title="Save Search"
-                                                                    type="button">
-															<!--                                                            <span class="material-symbols-outlined">download</span>-->
-															<i class="fa fa-download mr-3"></i>save condition
-														</button>
-														</span>
-                                                    <span class="mx-1">
-															<button class="btn btn-light-red btn-sm btn-icon px-3"
-                                                                    data-placement="right"
-                                                                    data-toggle="tooltip"
-                                                                    th:onclick="|resetForm('3rdSearch')|"
-                                                                    title="Reset"
-                                                                    type="button">
-															<!--   <span class="material-symbols-outlined">restart_alt</span>-->
-															<i class="fa fa-undo mr-3"></i>reset
-														</button>
-														</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <div class="row">
+                               				<div class="col-md-12">
+                               					<div class="p-2 text-center">
+                                         			<button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('3rdSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-download mr-xm"></i> save conditions
+                                         			</button>
+                                           			<button class="btn btn-ivory btn-sm btn-icon ml-2" th:onclick="|resetForm('3rdSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-undo mr-xm"></i> reset
+                                           			</button>
+                                       			</div>
+                               				</div>
+                               			</div>
                                 </div>
                             </div>
                         </div>
+                	</div>
                 </form>
-            </div>
 
             <div class="row px-1">
                 <div class="col-md-6">
@@ -288,6 +255,8 @@
                     </div>
                 </div>
             </div>
+     	</div>
+     	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>       
         </section>
     </div>
 </div>

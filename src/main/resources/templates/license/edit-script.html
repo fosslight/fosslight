@@ -111,8 +111,10 @@
                 
                 if (lic_edit_data.detail != null) {
                 	commentsParam["referenceId"] = lic_edit_data.detail.licenseId;
-        			fn_comment.getCommentList(commentsParam);
                 }
+                
+                commentsParam["height"] = $(window).height() - 120;
+    			fn_comment.getCommentList(commentsParam);
             }
         }
 
@@ -179,10 +181,126 @@
         	},
         	closeAlertifyView : function() {
         		$(".ajs-close").trigger("click");
-        	}
+        	},
+        	handleUserCommentPopupOpen : function () {
+				// 코멘트 팝업
+		        const param = {
+		            "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE_USER')}]],
+		            "referenceId" : lic_edit_data.detail.licenseId
+		        }
+				
+		        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+		        	if (!alertify.editDialog){
+						alertify.dialog('editDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+								
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+								
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 0;
+								
+									return setup;
+								},
+						    	hooks: {
+						    		onshow: function() {
+						        		this.elements.dialog.style.maxWidth = 'none';
+						          		this.elements.dialog.style.width = '700px';
+						        	}
+								}
+							};
+						}, false, 'confirm');
+		    		}
+				
+					alertify.editDialog(res);
+		      	},
+		       	null,
+		      	function () {
+		         	$("#modifiedCommentInPjtEditor").summernote({
+		            	height: 180,
+		              	callbacks: {
+		                 	onInit: function () {
+		                      	$(this).summernote('code', $("#userContents").val());
+		                 	}
+		              	}
+		           	});
+		     	});
+			},
+			sendEditor : function(type){
+				//코멘트 저장
+				var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+				
+				if(!editorVal || editorVal == "") {
+					alertify.alert([[#{msg.project.enter.comment}]], function(){});
+					
+					return false;
+				}
+				
+				var param = {referenceId : lic_edit_data.detail.licenseId, referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE')}]], contents : replaceWithLink(editorVal), mailSendType : type};
+				
+				$.ajax({
+					url : '/project/sendComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						if (json.isValid == 'false'){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							alertify.success([[#{msg.project.sent.comments.success}]]);
+							$("#modifiedCommentInPjtEditor").summernote('code', '');
+							$("#userContents").val('');
+							$('.ajs-close').trigger("click");
+		                    fn_comment.getCommentList(commentsParam);
+		                    
+		                    if (_popupComment == null || _popupComment.closed) {
+		                    } else {
+		                    	_popupComment.callbackFunction();
+		                    }
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			},
+			saveEditor : function(){
+				//코멘트 임시저장
+				var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+				var register = [[${sessUserInfo.userId}]];
+				var param = {referenceId : lic_edit_data.detail.licenseId, referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE_USER')}]], contents : editorVal};
+				
+				$.ajax({
+					url : '/project/saveComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						if(json.isValid == 'false'){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							alertify.success([[#{msg.common.success}]]);
+							$("#userContents").val(editorVal);
+							$('.ajs-close').trigger("click");
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
         }
         
         var fn_comment = {
+        	callbackFunction : function () {
+            	fn_comment.getCommentList(commentsParam);
+            },
             getCommentList : function(param){
             	$.ajax({
                		url : '/comment/getCusCommentList',
@@ -191,6 +309,9 @@
                    	cache : false,
                    	data : param,
                    	success : function(res){
+                   		if (typeof param.height !== undefined) {
+    						$(".comment-card-body").attr("style", "max-height:" + param.height + "px; overflow-y: auto;");
+    					}
                    		$("#commentList").empty();
     					$("#commentList").html(res);
                    	},
@@ -244,11 +365,12 @@
             	});
         	},
         	updateComments : function (_commId, _referenceDiv, _referenceId) {
-        		if ("" == $("#commentEdit").next().find(".note-editable").text()) {
+        		var summernoteVal = $("#commentEdit").summernote('code');
+        		if ("" == summernoteVal) {
         			alertify.alert("Please enter a comment", function(){});
         			return false;
         		} else {
-        			var param = {commId : _commId, contents : replaceWithLink($("#commentEdit").summernote('code')), referenceDiv: _referenceDiv, referenceId: _referenceId};
+        			var param = {commId : _commId, contents : replaceWithLink(summernoteVal), referenceDiv: _referenceDiv, referenceId: _referenceId};
         			$.ajax({
         				url : '/comment/updateComment',
         				type : 'POST',
@@ -291,7 +413,31 @@
         	},
         	closeAlertifyView : function () {
         		fn.closeAlertifyView();
-        	}
+        	},
+    		activateCommentArea : function () {
+    			var commentRow = $("#commentList .card-body").length;
+    			
+    			// change tab area
+    			if (!$(".editInfoCommentArea").is(":visible")) {
+    				$(".editInfoAreaTop").hide();
+    				$(".editInfoAreaBottom").hide();
+    				$(".editInfoArea").removeClass("col-md-10");
+    				$(".editInfoArea").addClass("col-lg-9");
+    				$(".editInfoCommentArea").show();
+    				resizingJqGidSet();
+    			} else {
+    				$(".editInfoAreaTop").show();
+    				$(".editInfoArea").removeClass("col-lg-9");
+    				$(".editInfoArea").addClass("col-md-10");
+    				$(".editInfoAreaBottom").show();
+    	 			$(".editInfoCommentArea").hide();
+    	 			resizingJqGidSet();
+    			}
+    		},
+    		showCommentHistory : function () {
+    			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE')}]];
+    	        openCommentHistory('/comment/popup/license/' + _rDiv + '/' + [[${detail.licenseId}]]);
+    		}
         }
         
         function deleteSubmit(){

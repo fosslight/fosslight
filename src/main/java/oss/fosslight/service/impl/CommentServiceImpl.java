@@ -60,8 +60,12 @@ public class CommentServiceImpl implements CommentService {
 		
 		if (deleteUserComment && isNew && (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_PARTNER_HIS.equals(bean.getReferenceDiv()) 
-				|| CoConstDef.CD_DTL_COMMENT_PROJECT_HIS.equals(bean.getReferenceDiv()))) {
+				|| CoConstDef.CD_DTL_COMMENT_PROJECT_HIS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_SECURITY_HIS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_LICENSE.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_OSS.equals(bean.getReferenceDiv()))) {
 			switch (bean.getReferenceDiv()) {
 				case CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS:
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICATION_USER);
@@ -79,8 +83,20 @@ public class CommentServiceImpl implements CommentService {
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_USER);
 					
 					break;
+				case CoConstDef.CD_DTL_COMMENT_SECURITY_HIS:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_SECURITY_USER);
+					
+					break;
 				case CoConstDef.CD_DTL_COMMENT_PARTNER_HIS:
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
+					
+					break;
+				case CoConstDef.CD_DTL_COMMENT_LICENSE:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_LICENSE_USER);
+					
+					break;
+				case CoConstDef.CD_DTL_COMMENT_OSS:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS_USER);
 					
 					break;
 				default:

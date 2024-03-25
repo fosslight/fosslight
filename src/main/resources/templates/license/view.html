@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<body class="hold-transition sidebar-mini">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <div class="custom-layout ml-2 mr-2" style="height: auto">
+            <section class="content">
+            	<div class="card col-md-9 mt-2">
+            		<div class="card-header" style="border-bottom : 0">
+						<h3 class="card-title">License Information</h3>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-lg-6">
+								<div class="table-responsive">
+									<table class="table">
+										<tbody>
+											<tr class="text-smaller">
+												<th style="width: 30%" th:text="#{msg.common.field.licenseName}"></th>
+												<td th:text="${licenseInfo?.licenseName}"></td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.nickname}"></th>
+												<td>
+													<th:block th:each="licenseNickname, status : ${detail.licenseNicknames}">
+														[[${licenseNickname}]]<span th:if="${status.count != status.size}" th:text="', '"></span>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.SPDX}"></th>
+												<td th:text="${licenseInfo.shortIdentifier}"></td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.licenseType}"></th>
+												<td th:text="${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'), licenseInfo?.licenseType)}"></td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.attribution}"></th>
+												<td th:utext="${detail?.attribution}"></td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.obligation}"></th>
+												<td>
+													<th:block th:if="${licenseInfo?.obligationNotificationYn == 'Y'}">
+														<i class="far fa-file-alt fa-1-3x" title="Notice"></i>
+													</th:block>
+													<th:block th:if="${licenseInfo?.obligationDisclosingSrcYn == 'Y'}">
+														<i class="far fa-file-code fa-1-3x" title="Source Code"></i>
+													</th:block>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="col-lg-6">
+								<div class="table-responsive">
+									<table class="table">
+										<tbody>
+											<tr class="text-smaller">
+												<th style="width: 30%" th:text="#{msg.common.field.restriction}"></th>
+												<td th:text="${detail?.restriction}"></td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.licenseWebsite}"></th>
+												<td>
+													<th:block th:if="${#lists.size(detail?.webpages) > 0}" th:each="webpage, status : ${detail?.webpages}">
+														<a href="${webpage}" class="urlLink" target="_blank" th:text="${webpage}"></a>
+														<th:block th:if="${status.count != status.size}">
+															<br>
+														</th:block>
+													</th:block>
+													<th:block th:if="${#lists.size(detail?.webpages) == 0 and detail?.webpage != null}">
+														<a href="${detail?.webpage}" class="urlLink" target="_blank" th:text="${detail?.webpage}"></a>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.userGuide}"></th>
+												<td th:utext="${licenseInfo?.description}"></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="col-lg-12">
+								<div class="table-responsive">
+									<table class="table">
+										<tbody>
+											<tr class="text-smaller">
+												<th style="width: 15%" th:text="#{msg.common.field.licenseText}"></th>
+												<td class="viewTextArea" th:utext="${detail?.licenseText}"></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

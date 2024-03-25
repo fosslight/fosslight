@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.*;
 import oss.fosslight.common.Url.OSS;
+import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.domain.*;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
@@ -283,7 +284,7 @@ public class OssController extends CoTopComponent{
 			for (String name : detectedLicenseNames) {
 				detectedLicenseIdByName.put(name, CommonFunction.getLicenseIdByName(name));
 			}
-			model.addAttribute("detectedLicenseIdByName", toJson(detectedLicenseIdByName));
+			model.addAttribute("detectedLicenseIdByName", detectedLicenseIdByName);
 		} else {
 			model.addAttribute("detectedLicenseIdByName", null);
 		}
@@ -328,11 +329,7 @@ public class OssController extends CoTopComponent{
 		List<String> downloadLocationList = new ArrayList<>();
 		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 
-		if (!CommonFunction.isAdmin()) {
-			model.addAttribute("isReadOnly", true);
-		}
-
-		return "oss/edit";
+		return CommonFunction.isAdmin() ? "oss/edit" : "oss/view";
 	}
 	
 	@GetMapping(value={OSS.POPUPLIST_ID}, produces = "text/html; charset=utf-8")
@@ -822,6 +819,14 @@ public class OssController extends CoTopComponent{
 		}
 		
 		return makeJsonResponseHeader(result);
+	}
+	
+	@PostMapping(value =OSS.SEND_COMMENT)
+	public @ResponseBody ResponseEntity<Object> sendComment(@ModelAttribute CommentsHistory commentsHistory,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		commentService.registComment(commentsHistory);
+		
+		return makeJsonResponseHeader();
 	}
 	
 	@PostMapping(value=OSS.DELETE_COMMENT)

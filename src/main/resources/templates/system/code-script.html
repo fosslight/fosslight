@@ -28,8 +28,7 @@ var evt = {
 			fn.saveCode('codeDtl');
 		});
 		
-		$('#search').click(function(e){
-            e.preventDefault();
+		$('#search').click(function(){
 			var postData=$('#codeSearch').serializeObject();
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 		});
@@ -428,7 +427,8 @@ var codeList = {
 
                     $("#btnSaveCodeDetail").hide();
                     $("#list2").jqGrid('GridUnload');
-                    tableRefreshNew("list");
+                    
+                    tableRefresh();
 				}
 				// 다른 row 클릭 시
 				, onSelectRow: function(rowid,status,eventObject) {

@@ -61,6 +61,10 @@
 			$("#allDelete").hide();
 		}
 
+		if ("Y" != copyFlag) {
+			fn.displayProjectInfo();
+		}
+		
 		// If packaging step equals confirmed, OSS Notice not editable
 		if('CONF' == verificationStatus){
 			fn.disabledVerificationConfirm(true);
@@ -76,12 +80,7 @@
 			$("#noticeTypeEtc").attr("disabled", true);
 		}
 
-		var ePrjName = [[${project.prjName}]] +(([[${project.prjVersion}]]!="")?' ('+[[${project.prjVersion}]]+')':"");
-		var createdDate = [[${@CommonFunction.formatDateSimple(project.createdDate)}]];
-		var eCreator = [[${project.prjUserName}]] +" "+ [[${project.prjDivisionName} ]] +' ('+createdDate+')';
-		
-		$("#ePrjName").text(ePrjName);
-		$("#eCreator").text(eCreator);
+		fn.displayProjectInfo();
 	});
 	
 	// 이벤트
@@ -527,6 +526,267 @@
 	};
 	
 	var fn = {
+		displayProjectInfo : function() {
+				var display = "";
+				
+				var pNm = [[${project.prjName}]];
+				var pVer = [[${project.prjVersion}]];
+				if ("" != pVer && pVer != null) pNm += " (v" + pVer + ")";
+				
+				var prjName = "<span class=\"description-percentage text-dark-gray\">";
+				prjName += "<a class=\"text-dark-gray text-bold hover-line urlLink goToEditLink\" style=\"cursor: pointer;\" onclick=\"fn.mvEditTab(" + [[${project.prjId}]] + ")\" title=\"" + pNm + "\">" + pNm + "</a></span>";
+				display += prjName;
+				
+				// status
+				var status = "<span class=\"ml-2\"> | </span>";
+				var projectStatus = [[${project.status}]];
+				var customStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), project.status)}]];
+				
+				switch(projectStatus){
+				case 'REQ':
+					status += "<span class=\"text-pink text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				case 'REV':
+					status += "<span class=\"text-yellow text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				case 'DROP':
+					status += "<span class=\"text-gray text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				case 'FREV':
+					status += "<span class=\"text-purple text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				case 'COMP':
+					status += "<span class=\"text-dark-blue text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				default:
+					status += "<span class=\"text-success text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				}
+				display += status;
+				
+				// osc progress
+				var identificationStatus = [[${project.identificationStatus}]];
+				identificationStatus = identificationStatus||"";
+				var verificationStatus = [[${project.verificationStatus}]];
+				verificationStatus = verificationStatus||"";
+				var destributionStatus = [[${project.destributionStatus}]];
+				destributionStatus = destributionStatus||"";
+				var statusRequestYn = [[${project.statusRequestYn}]];
+				statusRequestYn = statusRequestYn||"";
+				
+				var oscProgress = "<span class=\"ml-2\"> | </span>";
+				if ("" != identificationStatus) {
+					if ("DROP" == projectStatus) {
+						if ("CONF" == identificationStatus) {
+							oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Identification</span>';
+						} else {
+							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Identification</span>';
+						}
+					} else if ("FREV" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
+						if ("Y" == [[${project.androidFlag}]]) {
+							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
+						} else {
+							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
+						}
+					} else {
+						var initDiv = "";
+						if ("Y" == [[${project.androidFlag}]]) {
+							initDiv = "4";
+						} else {
+							initDiv = "5";
+						}
+						
+						if ("CONF" == identificationStatus) {
+							oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
+							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+						} else if ("PROG" == projectStatus) {
+							oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
+							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+						} else if ("REQ" == projectStatus) {
+							oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
+							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+						} else if ("REV" == projectStatus) {
+							oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
+							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+						}
+					}
+				} else {
+					if ("DROP" == projectStatus) {
+						oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem ml-2">Identification</span>';
+					} else {
+						oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
+						if ("Y" == [[${project.androidFlag}]]) {
+							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
+						} else {
+							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
+						}
+					}
+				}
+				
+				if ("CONF" != identificationStatus) {
+					oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+					oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+				} else {
+					oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+					if ("DROP" == projectStatus) {
+						if ("CONF" == verificationStatus) {
+							oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Packaging</span>';
+						} else {
+							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+						}
+					} else {
+						if ("" == verificationStatus) {
+							if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+							} else if ("" != identificationStatus) {
+								oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+							}
+						} else if ("PROG" == verificationStatus) {
+							if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+							} else {
+								oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+							}
+						} else if ("REV" == verificationStatus) {
+							oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+						} else if ("REQ" == verificationStatus) {
+							oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+						} else if ("NA" == verificationStatus || "DROP" == verificationStatus) {
+							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+						} else {
+							if ("CONF" == verificationStatus) {
+								oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+							} else {
+								if ("NA" == [[${project.distributeTarget}]]) {
+									oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+								} else {
+									if ("PROG" == projectStatus) {
+										oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+									} else if ("REQ" == projectStatus) {
+										oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+									} else if ("REV" == projectStatus) {
+										oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+									} else if ("FREV" == projectStatus) {
+										oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+									}
+								}
+							}
+						}
+					}
+				}
+				
+				if ("CONF" == identificationStatus && "NA" == verificationStatus && "NA" == destributionStatus) {
+					oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+					oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
+				} else if ("CONF" != verificationStatus) {
+					oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+					oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
+				} else {
+					if ("DROP" == projectStatus){
+						oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+						oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Distribution</span>';
+					} else {
+						switch (destributionStatus){
+							case "":
+								if ("COMP" != projectStatus){
+									oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+									oscProgress += "<span class='badge badge-success size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
+								} else {
+									oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+									oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Distribution</span>';
+								}
+								
+								break;
+							case "ERROR":
+								oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+								oscProgress += "<span class='badge badge-danger size-sm width-6rem ml-2' style='cursor:pointer;' onMouseOver='this.innerHTML=\"Error\"' onMouseOut='this.innerHTML=\"Distribution\"' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
+
+								break;
+							case "NA":
+								oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
+
+								break;
+							default:
+								if ("NA" == [[${project.distributeTarget}]]){
+									oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+									oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
+								} else{
+									oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+									if ("DONE" == destributionStatus) {
+										oscProgress += "<span class='badge badge-outline-dark-blue size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
+									} else {
+										if ("PROG" == projectStatus) {
+											oscProgress += "<span class='badge badge-success size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
+										} else if ("REQ" == projectStatus) {
+											oscProgress += "<span class='badge badge-pink size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
+										} else if ("REV" == projectStatus) {
+											oscProgress += "<span class='badge badge-yellow size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
+										} else if ("FREV" == projectStatus) {
+											oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
+										} 
+									}
+								}
+								
+								break;
+						}
+					}
+				}
+				
+				display += oscProgress;
+				
+				// vulnerability score
+				var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
+				var vulnerability = "<span class=\"ml-2\"> | </span>";
+				
+				var cvssScore = [[${project.cvssScore}]];
+				var secCode = [[${project.secCode}]];
+				var secCvssScore = [[${project.secCvssScore}]];
+				
+				if (secCvssScore != null && (secCode != null && "Fixed" != secCode)) {
+					cvssScore = secCvssScore;
+				}
+				
+				if (secCode != null) {
+					if ("Fixed" == secCode) {
+						if (cvssScore != null && cvssScore != 0) {
+							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(" + cvssScore + ")</span>";
+						} else {
+							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(N/A)</span>";
+						}
+					} else {
+						if (cvssScore >= standardScore) {
+							vulnerability += "<span class=\"badge badge-cherry size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Need to resolve(" + cvssScore + ")</span>";
+						} else {
+							if (cvssScore != null && cvssScore != 0) {
+								vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(" + cvssScore + ")</span>";
+							} else {
+								vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(N/A)</span>";
+							}
+						}
+					}
+				} else {
+					if (cvssScore != null && cvssScore != 0) {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem ml-2\">Discovered("+cvssScore+")</span>";
+					} else {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem ml-2\">Discovered(N/A)</span>";
+					}
+				}
+				
+				display += vulnerability;
+				$("#displayProjectInfo").html(display);
+				
+				if ($(".goToEditLink").width() > 300) {
+					$(".goToEditLink").addClass("ellipsis");
+				}
+		},
 		save : function() {
 			var confirmMsg = "";
 			var ossNotice = $("[name='noticeType']:checked").val();

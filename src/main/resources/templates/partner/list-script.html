@@ -87,6 +87,13 @@ var evt = {
 }
 
 var fn = {
+	displaySoftwareName : function (cellvalue, options, rowObject) {
+		var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+options.rowId+"')\">" + cellvalue + "</span>";
+        return display;
+	},
+	mvEditTab : function (partnerId) {
+		createTabInFrame(partnerId+'_3rdParty', '/partner/edit/'+partnerId);
+	},
 	unformatter : function(cellvalue, options, rowObject){
 		return cellvalue;
 	},
@@ -809,23 +816,31 @@ var partnerList = {
 			var colModelArr = [];
 	        var colModelObj = {name: 'partnerId', index: 'partnerId', width: 30, align: 'center', key:true, sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'partnerName', index: 'partnerName', width: 80, align: 'left', sortable : true};
+	        colModelObj = {name: 'partnerName', index: 'partnerName', width: 120, align: 'left', sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'softwareName', index: 'softwareName', width: 80, align: 'left', sortable : true};
+	        colModelObj = {name: 'softwareName', index: 'softwareName', width: 170, align: 'left', formatter: fn.displaySoftwareName, sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'softwareVersion', index: 'softwareVersion', width: 30, align: 'left', sortable : true, hidden:true};
+	        colModelObj = {name: 'softwareVersion', index: 'softwareVersion', width: 40, align: 'left', sortable : true, hidden:true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'status', index: 'status', width: 40, align: 'center', formatter: fn.displayStatus, sortable : true};
+	        colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'deliveryForm', index: 'deliveryForm', width: 50, align: 'center', formatter: fn.displayDeliveryForm, sortable : true, hidden: true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'description', index: 'description', width: 100, align: 'left', sortable : true, formatter:fn.displayComment, unformatter:fn.unformatter, hidden: true};
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 30, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
+	        colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'division', index: 'division', width: 30, align: 'left', sortable : true};
+	        colModelObj = {name: 'division', index: 'division', width: 80, align: 'left', sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'creator', index: 'creator', width: 30, align: 'center', sortable : true};
+	        colModelObj = {name: 'creator', index: 'creator', width: 80, align: 'center', sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'reviewer', index: 'reviewer', width: 30, align: 'left', formatter: 'select', edittype:'text', formatter:fn.getUserName
+	        colModelObj = {name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true, hidden: true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true, hidden: true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'reviewer', index: 'reviewer', width: 80, align: 'left', formatter: 'select', edittype:'text', formatter:fn.getUserName 
 					  , editoptions: {
 							dataInit:
 								function (e) {
@@ -878,14 +893,14 @@ var partnerList = {
 				total:function(obj){return obj.total;},
 				records:function(obj){return obj.records;}
 			},
-		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'CVE ID', 'Vulnera<br/>bility', 'Division', 'Creator', 'Reviewer', 'Comment', 'fileName'],
+		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description'
+			  	, 'CVE ID', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
             colModel: colModelArr,
 			onSelectRow: function(id){},
 			rowNum: rowNum,
 			rowList: rowList,
 			editurl:'clientArray',
 			autowidth: true,
-            toppager: true,
 			pager: '#pager',
 			gridview: true,
 			sortable: function(permutation){
@@ -893,6 +908,7 @@ var partnerList = {
 			sortname: 'partnerId',
 			viewrecords: true,
 			sortorder: 'desc',
+			toppager:true,
 			loadonce: false,
 			height: 'auto',
 			multiselect : true,
@@ -955,49 +971,53 @@ var partnerList = {
 				}
 
                 /* columns licalization */
-                var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
-                var setUpColumnButton = document.getElementById('setUpColumnButton');
+//                 var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
+//                 var setUpColumnButton = document.getElementById('setUpColumnButton');
 
-                if (!setUpColumnButton) {
-                    var division = 'partner';
-                    var totalColInfos = [
-                        {'Checkbox' : 'cb'},
-                        {'ID' : 'partnerId'},
-                        {'3rd Party Name': 'partnerName'},
-                        {'Software Name (Version)': 'softwareName'},
-                        {'Software Version': 'softwareVersion'},
-                        {'Status': 'status'},
-                        {'CVE ID': 'cveId'},
-                        {'Vulnerability': 'cvssScore'},
-                        {'Division': 'division'},
-                        {'Creator': 'creator'},
-                        {'Reviewer': 'reviewer'}];
-                    var defaultColNames = ['partnerId', 'partnerName', 'softwareName', 'status']
-                    var savedColNames = [];
+//                 if (!setUpColumnButton) {
+//                     var division = 'partner';
+//                     var totalColInfos = [
+//                         {'Checkbox' : 'cb'},
+//                         {'ID' : 'partnerId'},
+//                         {'3rd Party Name': 'partnerName'},
+//                         {'Software Name (Version)': 'softwareName'},
+//                         {'Software Version': 'softwareVersion'},
+//                         {'Status': 'status'},
+//                         {'Delivery Form': 'deliveryForm'},
+//                         {'Description': 'description'},
+//                         {'CVE ID': 'cveId'},
+//                         {'Vulnerability': 'cvssScore'},
+//                         {'Division': 'division'},
+//                         {'Creator': 'creator'},
+//                         {'Created Date': 'createdDate'},
+//                         {'Updated Date': 'modifiedDate'},
+//                         {'Reviewer': 'reviewer'}];
+//                     var defaultColNames = ['partnerId', 'partnerName', 'softwareName', 'status']
+//                     var savedColNames = [];
 
-                    var dropdownMenuOptions = {
-                        _division: division,
-                        _totalColInfos: totalColInfos,
-                        _defaultColNames: defaultColNames,
-                        _savedColNames: savedColNames
-                    };
+//                     var dropdownMenuOptions = {
+//                         _division: division,
+//                         _totalColInfos: totalColInfos,
+//                         _defaultColNames: defaultColNames,
+//                         _savedColNames: savedColNames
+//                     };
 
-                    var dropdownArea = document.createElement('div');
-                    dropdownArea.className = 'dropdown';
-                    var newButton = createDropdownButton();
-                    var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+//                     var dropdownArea = document.createElement('div');
+//                     dropdownArea.className = 'dropdown';
+//                     var newButton = createDropdownButton();
+//                     var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
 
-                    dropdownArea.appendChild(newButton);
-                    dropdownArea.appendChild(dropdownMenu);
+//                     dropdownArea.appendChild(newButton);
+//                     dropdownArea.appendChild(dropdownMenu);
 
-                    parentElement.appendChild(dropdownArea);
+//                     parentElement.appendChild(dropdownArea);
 
-                    document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
-                        event.stopPropagation();
-                        var dropdownMenu = document.getElementById("setUpColumnMenu");
-                        dropdownMenu.classList.toggle("show");
-                    });
-                }
+//                     document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+//                         event.stopPropagation();
+//                         var dropdownMenu = document.getElementById("setUpColumnMenu");
+//                         dropdownMenu.classList.toggle("show");
+//                     });
+//                 }
 
 // 				if(!gridTooltip.existTooltip){
 // 					$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_status"))
@@ -1008,9 +1028,21 @@ var partnerList = {
 // 					});
 // 					gridTooltip.existTooltip = true;
 // 				}
+
+				if ($("#list_toppager_left").find('button').length == 0) {
+               		var appendIcon = "";
+                 	if ([[${@CommonFunction.isAdmin()}]]) {
+                   		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Partner\" onclick=\"createTabInFrame('New_3rdParty', '/partner/edit')\"><i class=\"fas fa-plus\"></i></button>";
+                    	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deletePartner()\"><i class=\"far fa-trash-alt\"></i></button>";
+                  	}
+                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
+                            
+                  	$("#list_toppager_left").append(appendIcon);
+            	}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
-				createTabInFrame(rowid+'_3rdParty', '/partner/edit/'+rowid);
+//				createTabInFrame(rowid+'_3rdParty', '/partner/edit/'+rowid);
 			},
 			postData : refreshParam
 		})

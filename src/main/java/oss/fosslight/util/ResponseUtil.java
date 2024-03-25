@@ -53,7 +53,7 @@ public class ResponseUtil {
 
 	public static void redirect(HttpServletResponse response, String url) throws IOException {
 		response.setContentType("text/html; charset=UTF-8");
-		response.getWriter().printf("<script>location.href='%s';</script>", url);
+		response.getWriter().printf("<script>window.parent.location.href='%s';</script>", url);
 	}
 
 	public static void write(HttpServletResponse response, String contents) throws IOException {

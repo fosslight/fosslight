@@ -300,7 +300,11 @@
                         return 'title="' + rawObject['description'] + '" style="cursor: pointer;"';
                     },
                     formatter: function (cellvalue, options, rowObject) {
-                        return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
+                    	if (cellvalue != null && "" != cellvalue) {
+                    		return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
+                    	} else {
+                    		return "";
+                    	}
                     }};
                 colModelArr.push(colModelObj);
                 if ([[${@CommonFunction.isAdmin()}]]) {

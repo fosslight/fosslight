@@ -4,7 +4,7 @@
 <th:block th:replace="selfCheck/list-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-        <div class="content-wrapper custom-layout bg-white">
+        <div class="custom-layout bg-white">
 			<section class="content-header"></section>
 			<section class="content">
                 <div class="container-fluid">
@@ -21,6 +21,7 @@
 													<div class="col-12">
 														<div class="input-group">
 															<input class="save-value" name="defaultSearchType" type="hidden" th:value="SELF_CHECK"/>
+															<button type="button" class="badge badge-outline-gray-white bg-light width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_SelfCheck', '/selfCheck/edit')|" th:text="|+ Add|"></button>
 															<input type="search" class="form-control save-value" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}"/>
 															<div class="input-group-append">
 																<button id="search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
@@ -29,22 +30,16 @@
 													</div>
 												</div>
 											</div>
-											<div class="col-md-5 pl-3">
-												<div class="row">
-													<div class="col-sm-7 d-flex justify-content-start">
-														<div class="input-group-append d-flex align-items-center">
-															<a class="text-blue-gray" data-card-widget="collapse"
-															   style="font-size: 1rem;" th:text="'+ Advanced Search'"
-															   title="Collapse"></a>
-														</div>
-													</div>
-													<div class="col-sm-5">
-														<div class="helpLink f-left dropdown float-right mt-1">
-															<a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
-															<div class="dropdown-menu mt-0">
-																<a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Check_List_Main')|">How to use FossLight Hub</a>
-															</div>
-														</div>
+											<div class="col-md-3 pl-3 d-flex justify-content-start">
+												<div class="input-group-append d-flex align-items-center">
+													<a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'" title="Collapse"></a>
+												</div>
+											</div>
+											<div class="col-md-2 pr-3">
+												<div class="helpLink f-left dropdown float-right mt-1">
+													<a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+													<div class="dropdown-menu mt-0">
+														<a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Check_List_Main')|">How to use FossLight Hub</a>
 													</div>
 												</div>
 											</div>
@@ -91,32 +86,18 @@
                                           		</div>
                                       		</div>
                                    		</div>
-										<div class="row mt-1 mb-2">
-											<div class="col-12">
-												<div class=" d-flex justify-content-center pt-1">
-														<span class="mx-1">
-															<button class="btn btn-ivory btn-sm btn-icon px-3"
-																	data-placement="right"
-																	data-toggle="tooltip" th:onclick="|updateSearchCondition('projectSearch')|"
-																	title="Save Search"
-																	type="button">
-															<!--                                                            <span class="material-symbols-outlined">download</span>-->
-															<i class="fa fa-download mr-3"></i>save condition
-														</button>
-														</span>
-													<span class="mx-1">
-															<button class="btn btn-light-red btn-sm btn-icon px-3"
-																	data-placement="right"
-																	data-toggle="tooltip" th:onclick="|resetForm('projectSearch')|"
-																	title="Reset"
-																	type="button">
-															<!--   <span class="material-symbols-outlined">restart_alt</span>-->
-															<i class="fa fa-undo mr-3"></i>reset
-														</button>
-														</span>
-												</div>
-											</div>
-										</div>
+                                   		<div class="row">
+                               				<div class="col-md-12">
+                               					<div class="p-2 text-center">
+                                         			<button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('projectSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-download mr-xm"></i> save conditions
+                                         			</button>
+                                           			<button class="btn btn-ivory btn-sm btn-icon ml-2" th:onclick="|resetForm('projectSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-undo mr-xm"></i> reset
+                                           			</button>
+                                       			</div>
+                               				</div>
+                               			</div>
                                 	</div>
                             	</div>
                         	</div>
@@ -125,10 +106,10 @@
                     <div class="row px-1">
                         <div class="col-md-6"></div>
                         <div class="col-md-6">
-                            <div class="row float-right">
+<!--                    	<div class="row float-right">
                               	<button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
                                <button type="button" class="btn btn-lg-teal btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_SelfCheck', '/selfCheck/edit')|" th:text="Add"></button>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
 

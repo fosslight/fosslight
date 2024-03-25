@@ -25,6 +25,7 @@
 													</div>
 													<div class="w-100">
 														<div class="input-group">
+															<button type="button" class="badge badge-outline-gray-white bg-light width-4rem text-smaller fw-4 mr-xm" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="|+ Add|"></button>
 															<input class="form-control autoComLicense save-value" name="licenseName" placeholder="Licence Name" th:value="${searchBean.licenseName}" type="search">
 															<div class="input-group-append">
 																<button class="btn btn-default" id="search" type="submit"><i class="fa fa-search"></i></button>

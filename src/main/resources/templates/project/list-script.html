@@ -708,21 +708,25 @@ var fn = {
 		}
 		
 		if ("" != secCode) {
-			if (parseFloat(cellvalue) >= standardScore) {
-				if ("Fixed" == secCode) {
-					display = '<span class="badge badge-cherry size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Resolved('+cellvalue+')</span>';
+			if ("Fixed" == secCode) {
+				if (cellvalue != null && cellvalue != 0) {
+					display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Resolved('+cellvalue+')</span>';
 				} else {
-					display = '<span class="badge badge-cherry size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Need to resolve('+cellvalue+')</span>';
-				}	
+					display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Resolved(N/A)</span>';
+				}
 			} else {
-				if (cellvalue != 0) {
-					display = '<span class="badge badge-blue size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Discovered('+cellvalue+')</span>';
+				if (parseFloat(cellvalue) >= standardScore) {
+					display = '<span class="badge badge-cherry size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Need to resolve('+cellvalue+')</span>';	
 				} else {
-					display = '<span class="badge badge-blue size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Discovered(N/A)</span>';
+					if (cvssScore != null && cvssScore != 0) {
+						display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Discovered('+cellvalue+')</span>';
+					} else {
+						display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Discovered(N/A)</span>';
+					}
 				}
 			}
 		} else {
-			if (cellvalue != 0) {
+			if (cellvalue != null && cellvalue != 0) {
 				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cellvalue+')</span>';
 			} else {
 				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
@@ -762,7 +766,7 @@ var fn = {
 		if (parseInt(permission) > 0){
 			createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/'+initDiv);
 		} else {
-			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 		}
 	},
 	// Grid veritification display event
@@ -770,7 +774,7 @@ var fn = {
 		if (parseInt(permission) > 0){
 			createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
 		} else {
-			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 		}
 	},
 	// Grid distribution display event
@@ -778,7 +782,7 @@ var fn = {
 //		if(parseInt(permission) > 0){
 //			createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
 //		} else {
-//			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+//			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 //		}
 	},
 	// Grid reviewer change event
@@ -863,7 +867,7 @@ var fn = {
 				}
 			});
 		} else {
-			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 		}
 	},
 	downloadNotice : function(obj, permission){
@@ -873,7 +877,7 @@ var fn = {
 			//파일 이름 임시
 			location.href = '/project/verification/downloadNotice?prjId='+prjId;
 		} else {
-			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 		}
 	},
 	downloadReviewReport : function(obj, permission){
@@ -882,7 +886,7 @@ var fn = {
 
 			location.href = '/project/verification/downloadReviewReport?prjId='+prjId;
 		} else {
-			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 		}
 	},
 	downloadPackage : function(obj, permission){
@@ -891,7 +895,7 @@ var fn = {
 			
 			location.href = '/project/verification/downloadPackage?prjId='+prjId;
 		} else {
-			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 		}
 	},
 	downloadPackageMulti : function(obj, fileIdx, permission){
@@ -900,7 +904,7 @@ var fn = {
 			
 			location.href = '/project/verification/downloadPackageMulti?prjId='+prjId+'&fileIdx='+fileIdx;
 		} else {
-			alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 		}
 	},
 	setGridParam : function(){
@@ -1000,7 +1004,7 @@ var fn = {
 					}
 				});
 			} else {
-				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 			}
 		}
 	},
@@ -1012,7 +1016,7 @@ var fn = {
 			if (parseInt(rowData["permission"]) > 0) {
 				createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
 			} else {
-				alertify.alert([[#{msg.project.check.division.permissions}]], function(){});
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]], function(){});
 			}
 		}
 	},
@@ -1400,7 +1404,7 @@ var fn = {
 							var list = [];
 							list = data.resultData;
 							
-							var msg = [[#{msg.project.check.division.permissions}]];
+							var msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]];
 							msg += '<br/> - '
 
 							for(var i=0; i<list.length; i++){
@@ -1515,7 +1519,7 @@ var fn = {
 		}
 		
 		if (notPermissionPrjIds.length > 0) {
-			msg = [[#{msg.project.check.division.permissions}]];
+			msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'projects')}]];
 			msg += '<br/> - '
 			for (var i in notPermissionPrjIds) {
 				msg += 'PRJ-' + notPermissionPrjIds[i];
@@ -1906,34 +1910,34 @@ var fn = {
 // jqGrid
 var list = {
 	load : function(){
-		var distributionFlag = [[${distributionFlag}]];
 		var authority = [[${sessUserInfo.authority}]];
 		var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
 		var rowList = rowStr.split(",");
 		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 		
-		var colNameArr = [ 'ID', 'Project Name', 'Status', 'OSC Process', 'Download', 'Distribution Type', 'Security', 'Division', 'Creator', 'Reviewer'
+		var customSecurityColumn = "<span title='Vunlerability (Max Score)'>Security</span>";
+		var colNameArr = [ 'ID', 'Project Name', 'Status', 'OSC Process', 'Download', 'Distribution Type', customSecurityColumn, 'Division', 'Creator', 'Reviewer'
 							, 'Additional<br>Information', 'distributionTypeOfCodeDtlExp', 'statusRequestYn', 'priority', 'permission', 'statusPermission'];
 		var colModelArr = [];
-        var colModelObj = {name: 'prjId', index: 'prjId', width: 30, align: 'center', sorttype: 'int', title: false};
+        var colModelObj = {name: 'prjId', index: 'prjId', width: 40, align: 'center', sorttype: 'int', title: false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjName', index: 'prjName', width: 80, align: 'left', formatter: fn_grid_com.displayProjectName, unformat: fn_grid_com.unformatter, title: false};
+		colModelObj = {name: 'prjName', index: 'prjName', width: 140, align: 'left', formatter: fn_grid_com.displayProjectName, unformat: fn_grid_com.unformatter, title: false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'status', index: 'status', width: 30, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true, title: false};
+		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true, title: false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'progress', index: 'progress', width: 60, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
+		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'download', index: 'download', width: 20, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
+		colModelObj = {name: 'download', index: 'download', width: 60, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'distributionType', index: 'distributionType', width: 30, align: 'left', sortable : true, title:false};
+		colModelObj = {name: 'distributionType', index: 'distributionType', width: 80, align: 'left', sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 40, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false, title:false};
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'division', index: 'division', width: 30, align: 'left', sortable : true, title:false};
+		colModelObj = {name: 'division', index: 'division', width: 50, align: 'left', sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'creator', index: 'creator', width: 30, align: 'left', sortable : true, title:false};
+		colModelObj = {name: 'creator', index: 'creator', width: 50, align: 'left', sortable : true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'reviewer', index: 'reviewer', width: 30, align: 'left',edittype:'text', formatter:fn.getUserName
+		colModelObj = {name: 'reviewer', index: 'reviewer', width: 50, align: 'left',edittype:'text', formatter:fn.getUserName
                 , editoptions: {
 					dataInit:
 						function (e) {
@@ -2101,24 +2105,24 @@ var list = {
 				
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
-				var rowData = $("#list").jqGrid('getRowData',rowid);
-				var isAdmin = [[${@CommonFunction.isAdmin()}]];
+// 				var rowData = $("#list").jqGrid('getRowData',rowid);
+// 				var isAdmin = [[${@CommonFunction.isAdmin()}]];
 
-				if('true' == isAdmin && iCol == 5 || 'false' == isAdmin && iCol == 4) {
-					fn.mvIdentification(rowid, "5", rowData['permission']);
-				} else if('true' == isAdmin && iCol == 6 || 'false' == isAdmin && iCol == 5) {
-					if(rowData.verificationStatus == ''|| rowData.verificationStatus == 'N/A') {
+// 				if('true' == isAdmin && iCol == 5 || 'false' == isAdmin && iCol == 4) {
+// 					fn.mvIdentification(rowid, "5", rowData['permission']);
+// 				} else if('true' == isAdmin && iCol == 6 || 'false' == isAdmin && iCol == 5) {
+// 					if(rowData.verificationStatus == ''|| rowData.verificationStatus == 'N/A') {
 
-					} else {
-						fn.mvVerification(rowData['prjId'], rowData['permission']);
-					}
-				} else if('true' == isAdmin && iCol == 7 || 'false' == isAdmin && iCol == 6) {
-					if(rowData.destributionStatus == '' || rowData.destributionStatus == 'N/A') {
+// 					} else {
+// 						fn.mvVerification(rowData['prjId'], rowData['permission']);
+// 					}
+// 				} else if('true' == isAdmin && iCol == 7 || 'false' == isAdmin && iCol == 6) {
+// 					if(rowData.destributionStatus == '' || rowData.destributionStatus == 'N/A') {
 
-					} else {
-						fn.mvDistribution(rowData['prjId'], rowData['permission']);
-					}
-				}
+// 					} else {
+// 						fn.mvDistribution(rowData['prjId'], rowData['permission']);
+// 					}
+// 				}
 			},
 			postData: refreshParam
 		});

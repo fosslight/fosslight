@@ -704,6 +704,51 @@
                     }
                 }
             },
+            rowDelAll : function (target, flag) {
+            	$("#loading_wrap").show();
+
+                setTimeout(function () {
+                    try {
+                        if (flag == "main") {
+                            var targetDataObj = target.selector;
+                            onAjaxLoadingHide = false;
+
+                            var dataArray = target.jqGrid('getGridParam', 'data');
+
+                            //bat 일 경우
+                            if (targetDataObj == "#batList" || targetDataObj == "#binAndroidList") {
+                                if (target.jqGrid("getCell", selrow, "customBinaryYn") == "Y") {
+                                    for (var i = dataArray.length - 1; i >= 0; i--) {
+                                        var selrow = dataArray[i].componentId;
+                                        target.jqGrid('collapseSubGridRow', selrow);
+                                        target.jqGrid('delRowData', selrow);
+                                    }
+
+                                    if ("#binAndroidList" == targetDataObj) {
+                                        fn_grid_com.deleteLocalDataAfterDelRowNew(target, [], flag);
+                                    } else if ("#batList" == targetDataObj) {
+                                        fn_grid_com.deleteLocalDataAfterDelRowNew(target, [], flag);
+                                    }
+                                } else {
+                                    alertify.error([[#{msg.common.cannot.delete}]], 0);
+                                }
+                            } else {
+                                for (var i = dataArray.length - 1; i >= 0; i--) {
+                                    var selrow = dataArray[i].componentId;
+                                    target.jqGrid('collapseSubGridRow', selrow);
+                                    target.jqGrid('delRowData', selrow);
+                                }
+
+                                fn_grid_com.deleteLocalDataAfterDelRowNew(target, [], flag);
+                            }
+                        }
+                    } catch (e) {
+                        alertify.error([[#{msg.common.cannot.delete}]], 0);
+                    } finally {
+                        $("#loading_wrap").hide();
+                    }
+                }, 300);
+            },
             // 행삭제 메인 & 서브 (new)
             rowDelNew: function (target, flag) {
                 $("#loading_wrap").show();

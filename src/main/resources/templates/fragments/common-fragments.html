@@ -6,6 +6,12 @@
         <img alt="loading" th:src="@{/images/loading.gif}"/>
     </div>
 </th:block>
+<th:block th:fragment="loadingIdenFragment">
+    <div class="loading" id="loading_iden" style="display:none;">
+        <div class="loadingBlind"></div>
+        <img alt="loading" th:src="@{/images/loading.gif}"/>
+    </div>
+</th:block>
 <th:block th:fragment="promptPopupFragment">
     <div id="promptPopup">
         [[ ${data.context} ]]

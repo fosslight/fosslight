@@ -23,8 +23,12 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.Url.COMMENT;
 import oss.fosslight.domain.CommentsHistory;
+import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.PartnerMaster;
 import oss.fosslight.service.CommentService;
+import oss.fosslight.service.LicenseService;
+import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.StringUtil;
@@ -38,12 +42,25 @@ public class CommentController extends CoTopComponent {
     ProjectService projectService;
     @Autowired
     PartnerService partnerService;
+    @Autowired
+    OssService ossService;
+    @Autowired
+    LicenseService licenseService;
 
     @GetMapping(value = {COMMENT.COMMENT_LIST}, produces = "text/html; charset=utf-8")
     public String getCommentList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
         model.addAttribute("commentList", commentService.getCommentListHis(commentsHistory));
         model.addAttribute("commentListCnt", commentService.getCommentListHisCnt(commentsHistory));
         model.addAttribute("moreYn", false);
+
+        return "fragments/comment-fragments :: commentAreaFragment";
+    }
+    
+    @GetMapping(value = {COMMENT.COMMENT_ALL_LIST}, produces = "text/html; charset=utf-8")
+    public String getCommentAllList(CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
+    	commentsHistory.setMoreFlag(CoConstDef.FLAG_YES);
+        model.addAttribute("commentList", commentService.getCommentListHis(commentsHistory));
+        model.addAttribute("commentListCnt", commentService.getCommentListHisCnt(commentsHistory));
 
         return "fragments/comment-fragments :: commentAreaFragment";
     }
@@ -66,7 +83,7 @@ public class CommentController extends CoTopComponent {
         return "fragments/comment-fragments :: commentAreaFragment";
     }
 
-    @RequestMapping(value = COMMENT.POPUP)
+    @GetMapping(value = COMMENT.POPUP)
     public String index(HttpServletRequest req, HttpServletResponse res, Model model
             , @PathVariable String rDiv, @PathVariable String _rDiv, @PathVariable String rId) {
         CommentsHistory commentsHistory = new CommentsHistory();
@@ -82,6 +99,14 @@ public class CommentController extends CoTopComponent {
             partnerMaster.setPartnerId(rId);
 
             model.addAttribute("partner", partnerService.getPartnerMasterOne(partnerMaster));
+        } else if (rDiv.equalsIgnoreCase("oss")) {
+        	OssMaster om = new OssMaster();
+        	om.setOssId(rId);
+        	model.addAttribute("ossInfo", ossService.getOssMasterOne(om));
+        } else if (rDiv.equalsIgnoreCase("license")) {
+        	LicenseMaster lm = new LicenseMaster();
+        	lm.setLicenseId(rId);
+        	model.addAttribute("licenseInfo", licenseService.getLicenseMasterOne(lm));
         }
 
         return "fragments/comment-fragments :: commentHistoryAreaFragment";

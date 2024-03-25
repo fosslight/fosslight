@@ -13,7 +13,7 @@
       <div class="user-panel mt-2 pb-1 mb-3 text-center">
         <div class="info" style="width: 100%;">
           <div class="row">
-            <div class="col-6">
+            <div class="col-9">
               <span class="text-right">
                 <i class="fas fa-user-circle text-light mr-1 fa-xs"></i>
                 <a style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" th:onclick="|createTab_new('User Settings', '/configuration/edit', 'configuration-edit', true)|"></a>
@@ -23,10 +23,9 @@
             <div class="col-1">
               <span class="text-center"><a href="#">|</a></span>
             </div>
-            <div class="col-4">
+            <div class="col-2">
               <span class="text-left">
-                <i class="fas fa-sign-out-alt text-light mr-1 fa-xs"></i>
-                <a class="text-right" th:href="@{/session/logout-proc}" th:text="Logout"></a>
+                <i class="fas fa-sign-out-alt text-light mr-1 fa-xs pointer" th:onclick="|fn.logoutProc()|"></i>
               </span>
             </div>
           </div>
@@ -242,6 +241,12 @@
   		}
   	}
 
+  	var fn = {
+  	  	logoutProc : function () {
+  	  		window.location.href = "/session/logout-proc";
+  	  	}
+  	}
+  	
   	function initTab() {
   		var query = window.location.search;
   	   	var param = new URLSearchParams(query);

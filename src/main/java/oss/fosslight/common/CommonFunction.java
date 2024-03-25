@@ -101,6 +101,7 @@ import oss.fosslight.domain.UploadFile;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
+import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
@@ -134,6 +135,12 @@ public class CommonFunction extends CoTopComponent {
 	
 	public static void setPartnerService(PartnerService service) {
 		partnerService = service;
+	}
+	
+	private static SelfCheckService selfCheckService;
+	
+	public static void setSelfCheckService(SelfCheckService service) {
+		selfCheckService = service;
 	}
 	
     public static String getCoConstDefVal(String nm) {
@@ -5014,7 +5021,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				List<Project> watcherList = projectService.getWatcherList(param);
 				if (watcherList != null) {
 					for (Project watcher : watcherList) {
-						if (!userIdList.contains(watcher.getPrjUserId())) userIdList.add(watcher.getPrjUserId());
+						if (!isEmpty(watcher.getPrjUserId()) && !userIdList.contains(watcher.getPrjUserId())) userIdList.add(watcher.getPrjUserId());
 					}
 				}
 				
@@ -5038,7 +5045,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				userIdList.add(bean.getCreator());
 				if (bean.getPartnerWatcher() != null) {
 					for (String watcher : bean.getPartnerWatcher().stream().map(e -> e.getUserId()).collect(Collectors.toList())) {
-						userIdList.add(watcher);
+						if (!isEmpty(watcher)) userIdList.add(watcher);
 					}
 				}
 				
@@ -5052,6 +5059,30 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 			break;
+			
+		case "selfCheck":
+			Project param2 = new Project();
+			for (int i=0; i<prjIds.length; i++) {
+				userIdList = new ArrayList<>();
+				param2.setPrjId(prjIds[i]);
+				
+				Project bean = selfCheckService.getProjectDetail(param2);
+				userIdList.add(bean.getCreator());
+				
+				if (bean.getWatcherList() != null) {
+					for (Project watcher : bean.getWatcherList()) {
+						if (!isEmpty(watcher.getPrjUserId()) && !userIdList.contains(watcher.getPrjUserId())) userIdList.add(watcher.getPrjUserId());
+					}
+				}
+				
+				if (!isEmpty(userId)) {
+					if (!userIdList.contains(userId)) {
+						notPermissionList.add(prjIds[i]);
+					}
+				} else {
+					notPermissionList = userIdList;
+				}
+			}
 		}
 		
 		Collections.sort(notPermissionList);
@@ -5276,6 +5307,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				if (!cvssScoreCheckFlag) {
 					rtnScoreList.add(cvssScoreMaxStr);
 				}
+			} else {
+				rtnScoreList.add(cvssScoreMaxStr);
 			}
 		}
 		
@@ -5464,5 +5497,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		} else {
 			return getMessage(msgCode , new String[]{CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, status)});
 		}
+	}
+	
+	public static String getCustomMessage(String msgCode, String contents) {
+		return getMessage(msgCode, new String[]{contents});
 	}
 }

@@ -32,13 +32,13 @@
 				<strong class="left">Open Source Software Notice</strong>
 				<span class="right"><sup th:text="${noticeTitle}"></sup></span>
 			</h2>
-			<th:block th:if="${editCompanyYn eq 'Y'}">
+			<th:block th:if="${editCompanyYn == 'Y'}">
 				<p>
 					This product from <span th:text="${companyNameFull}"></span> contains the open source software detailed below.
 					Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
 				</p>
 			</th:block>
-			<th:block th:if="${editCompanyYn ne 'Y'}">
+			<th:block th:if="${editCompanyYn != 'Y'}">
 				<p>
 					This product contains the open source software detailed below.
 					Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.
@@ -54,7 +54,7 @@
 							<th width="159">License</th>
 							<th width="443">Copyright</th>
 						</tr>
-						<tr th:each="${closeSource in disclosureObligationList}">
+						<tr th:each="closeSource : ${disclosureObligationList}">
 							<td>
 								<a th:if="${closeSource.homepage != ''}" th:href="${closeSource.homepage}" target='_blank' rel='noreferrer noopener'>
 									<span th:text="${closeSource.ossName}"></span>
@@ -64,7 +64,7 @@
 								<span th:if="${hideOssVersionYn != 'Y'}" th:text="${closeSource.ossVersion}"></span>
 							</td>
 							<td>
-								<p th:each="${licenseInfo in closeSource.ossComponentsLicense}">
+								<p th:each="licenseInfo : ${closeSource.ossComponentsLicense}">
 									<a th:href="'#' + ${licenseInfo.licenseName}" th:text="${licenseInfo.licenseName}"></a>
 								</p>
 							</td>
@@ -129,7 +129,7 @@
 									</p>
 								</td>
 								<td>
-									<p th:text="${openSource.copyrightText}"></p>
+									<p th:utext="${openSource.copyrightText}"></p>
 								</td>
 							</tr>
 						</th:block>
@@ -138,30 +138,28 @@
 				</div>
 			</th:block>
 
-			<th:block th:if="${attributionList or ossAttributionList}">
-				<th:block th:if="${attributionList}">
-					<th:block th:each="attr : ${attributionList}">
+			<th:block th:if="${attributionList != null}">
+				<th:block th:each="attr : ${attributionList}">
+					<p th:if="${isSimpleNotice != 'Y'}" class="bdTop">
+						<b th:text="${attr.licenseName} + ' Attribution'"></b>
+					</p>
+					<p th:if="${isSimpleNotice != 'N'}">
+						<b th:text="${attr.licenseName} + ' Attribution'"></b>
+					</p>
+					<p th:utext="${attr.attribution}"></p>
+				</th:block>
+			</th:block>
+
+			<th:block th:if="${ossAttributionList != null}">
+				<th:block th:each="value : ${ossAttributionList}">
+					<th:block th:with="s=${value.split('__')}, ossname=${s[0]}, attribution=${s[1]}">
 						<p th:if="${isSimpleNotice != 'Y'}" class="bdTop">
-							<b th:text="${attr.licenseName} + ' Attribution'"></b>
+							<b th:text="${ossname + ' Attribution'}"></b>
 						</p>
 						<p th:if="${isSimpleNotice != 'N'}">
-							<b th:text="${attr.licenseName} + ' Attribution'"></b>
+							<b th:text="${ossname + ' Attribution'}"></b>
 						</p>
-						<p th:text="${attr.attribution}"></p>
-					</th:block>
-				</th:block>
-
-				<th:block th:if="${ossAttributionList}">
-					<th:block th:each="value : ${ossAttributionList}">
-						<th:block th:with="s=${value.split('__')}, ossname=${s[0]}, attribution=${s[1]}">
-							<p th:if="${isSimpleNotice != 'Y'}" class="bdTop">
-								<b th:text="${ossname + ' Attribution'}"></b>
-							</p>
-							<p th:if="${isSimpleNotice != 'N'}">
-								<b th:text="${ossname + ' Attribution'}"></b>
-							</p>
-							<p th:text="${attribution}"></p>
-						</th:block>
+						<p th:utext="${attribution}"></p>
 					</th:block>
 				</th:block>
 			</th:block>
@@ -172,7 +170,7 @@
 				<th:block th:if="${license.licenseName != ''}">
 					<p class="bdTop">
 						<b th:id="${license.licenseName}" th:text="${license.licenseName}"></b><br> <br>
-						<br th:text="${license.licenseText}"></br>
+						<br th:utext="${license.licenseText}"></br>
 					</p>
 				</th:block>
 			</th:block>
@@ -185,7 +183,7 @@
 							<li th:id="${license.licenseName}">
 								<span th:text="${license.licenseName}"></span> :
 								<a th:href="${license.webpage}" target='_blank' rel='noreferrer noopener'>
-									<span th:text="${license.webpage}"></span>
+									<span th:utext="${license.webpage}"></span>
 								</a>
 							</li>
 						</th:block>
@@ -194,7 +192,7 @@
 			</th:block>
 
 			<th:block th:if="${editAppendedYn == 'Y'}">
-				<p class="bdTop" th:text="${appended}"></p>
+				<p class="bdTop" th:utext="${appended}"></p>
 			</th:block>
 			<th:block th:if="${editAppendedYn == 'N'}"></th:block>
 

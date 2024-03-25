@@ -12,7 +12,41 @@
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-sm-8 text-left mt-2">
+                    	<div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
+                    	<div class="float-right align-items-center mt-2" style="margin-left: auto;">
+                            <div class="helpLink f-left dropdown float-right">
+                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
+                                <div class="dropdown-menu mt-0">
+                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|" th:text="|How to use FossLight Hub|"></a>
+                                    <a class="dropdown-item text-dark" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Identification', 'I')|" th:text="'Role of Creator & Reviewer'"></a>
+                                </div>
+                            </div>
+                            <div class="float-right" sec:authorize="!hasRole('ROLE_ADMIN')" th:if="${project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV'}">
+                        		<button type="button" class="btn btn-dark-03 btn-sm width-6rem px-1" id="bomReject" th:text="Reject"></button>
+                        		<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments"></i> Comment</button>
+                        	</div>
+                        	<div class="float-right">
+                        		<button type="button" th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF'}"
+                                		class="btn btn-dark-03 btn-sm width-6rem px-1" id="autoReview" th:text="'Auto Review'"></button>
+                                <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                		type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                                <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                		type="button" class="btn btn-dark-03 btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                                <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                		type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                                <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                		type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments"></i> Comment</button>
+                            </div>
+                            <span th:if="${@CommonFunction.isAdmin()}" class="icheck-danger center-atom projdecBtn" style="font-size: .85rem">
+                            	<th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
+                            		<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
+                               		<label class="form-check-label text-lg-gray mt-1" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
+                            	</th:block>
+                         	</span>
+                        </div>
+                        
+<!--                   	<div class="col-sm-8 text-left mt-2">
                             <span class="description-percentage text-lg text-dark-gray" id="vPrjName"></span>
                             <span class="text-dark-gray mx-1" id="vCreated"></span>
                             <span class="ml-2">
@@ -41,7 +75,7 @@
                                 <button type="button" class="btn btn-dark-04 btn-sm width-6rem px-3 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
                                 <button type="button" class="btn btn-dark-04 btn-sm width-8rem px-3 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </section>
@@ -112,7 +146,7 @@
                                                             <div class="row">
                                                                 <div class="col-lg-2 pl-3">
                                                                     <p th:text="'FOSSLight Report'"></p>
-                                                                </div>>
+                                                                </div>
                                                                 <div class="col-lg-3">
                                                                     <div class="multi-fileuploader" id="androidCsvFile" th:text="Upload"></div>
                                                                 </div>

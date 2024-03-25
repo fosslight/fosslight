@@ -171,6 +171,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					identification.setMerge(CoConstDef.FLAG_NO);
 					
 					List<String> customNvdMaxScoreInfoList = new ArrayList<>();
+					CommonFunction.setProjectService(this);
 					
 					// 코드변환처리
 					for (Project bean : list) {
@@ -199,6 +200,23 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						bean.setDestributionStatus(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));
 						// DIVISION
 						bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
+						
+						List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {bean.getPrjId()}, "project");
+						if (permissionCheckList != null) {
+							if (bean.getPublicYn().equals(CoConstDef.FLAG_NO)
+									&& !CommonFunction.isAdmin() 
+									&& !permissionCheckList.contains(loginUserName())) {
+								bean.setPermission(0);
+								bean.setStatusPermission(0);
+							} else {
+								if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+									bean.setStatusPermission(0);
+								} else {
+									bean.setStatusPermission(1);
+								}
+								bean.setPermission(1);
+							}
+						}
 						
 						if (!CoConstDef.FLAG_YES.equals(androidFlag)) {
 							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
@@ -254,10 +272,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	private void checkIfVulnerabilityResolutionIsFixed(Project bean) {
 		String secCvssScore = "";
 		int fixedCheckCnt = 0;
-		List<OssComponents> sercurityList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
+		List<OssComponents> securityList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
 		
-		if (sercurityList != null && !sercurityList.isEmpty()) {
-			for (OssComponents oc : sercurityList) {
+		if (securityList != null && !securityList.isEmpty()) {
+			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion())).collect(Collectors.toList()).size();
+			
+			for (OssComponents oc : securityList) {
 				if (oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
 					fixedCheckCnt++;
 					continue;
@@ -275,7 +295,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			if (!isEmpty(secCvssScore)) bean.setSecCvssScore(Float.valueOf(secCvssScore));
 			
-			if (fixedCheckCnt == sercurityList.size()) {
+			if (fixedCheckCnt == securityListCnt) {
 				bean.setSecCode("Fixed");
 			} else {
 				bean.setSecCode("notFixed");
@@ -341,32 +361,67 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			project.setAnalysisStartDate(analysisStatus.getAnalysisStartDate());
 			project.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
 		}
-
-//		project.setStandardScore(Float.valueOf(standardScore));
-//		project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-//		if (getSecurityDataCntByProject(project)) {
-//			project.setSecCode(CoConstDef.FLAG_YES);
-//		}
-
+		
 		if (project.getAndroidFlag().equals(CoConstDef.FLAG_YES)) {
 			project.setStandardScore(Float.valueOf(standardScore));
 			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-			if (getSecurityDataCntByProject(project)) {
-				project.setSecCode(CoConstDef.FLAG_YES);
-			}
 		} else {
 			if (!project.getIdentificationSubStatusBom().equals("0")) {
 				project.setStandardScore(Float.valueOf(standardScore));
 				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				if (getSecurityDataCntByProject(project)) {
-					project.setSecCode(CoConstDef.FLAG_YES);
-				}
 			}
 		}
-
+		
+		CommonFunction.setProjectService(this);
+		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {project.getPrjId()}, "project");
+		if (permissionCheckList != null) {
+			if (project.getPublicYn().equals(CoConstDef.FLAG_NO)
+					&& !CommonFunction.isAdmin() 
+					&& !permissionCheckList.contains(loginUserName())) {
+				project.setPermission(0);
+				project.setStatusPermission(0);
+			} else {
+				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+					project.setStatusPermission(0);
+				} else {
+					project.setStatusPermission(1);
+				}
+				project.setPermission(1);
+			}
+		}
+		
+		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
+		
 		if (getSecurityDataCntByProject(project)) {
 			checkIfVulnerabilityResolutionIsFixed(project);
 		}
+		
+		List<String> customNvdMaxScoreInfoList = new ArrayList<>();
+		List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(project.getPrjId(), project.getReferenceDiv());
+		List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(project.getPrjId(), project.getReferenceDiv());
+		
+		if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
+			nvdMaxScoreInfoList = nvdMaxScoreInfoList.stream().distinct().collect(Collectors.toList());
+			String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
+			if (conversionCveInfo != null) {
+				customNvdMaxScoreInfoList.add(conversionCveInfo);
+			}
+		}
+		
+		if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
+			customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
+		}
+		
+		if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
+			String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
+			if (conversionCveInfo != null) {
+				String[] conversionCveData = conversionCveInfo.split("\\@");
+				project.setCvssScore(conversionCveData[3]);
+				project.setCveId(conversionCveData[4]);
+				project.setVulnYn(CoConstDef.FLAG_YES);
+			}
+		}
+		
 		project.setStandardScore(null);
 		return project;
 	}
@@ -1281,6 +1336,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (isEmpty(notice.getAppended())){
 					notice.setAppended(CoCodeManager.getCodeExpString(distributeCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_APPENDED));
 				}
+				
+				notice.setNoticeFileFormat(new String[]{"chkAllowDownloadNoticeHTML"});
 			} else if (CoConstDef.FLAG_YES.equals(notice.getEditNoticeYn())
 					&& CoConstDef.CD_NOTICE_TYPE_GENERAL.equals(notice.getNoticeType())) {
 				
@@ -1310,7 +1367,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					notice.setEditNoticeYn(CoConstDef.FLAG_YES);
 				}
 			}
-		} catch (Exception e) {
+		} catch (Exception e) {e.printStackTrace();
 			log.error(e.getMessage(), e);
 		}
 		
@@ -5961,6 +6018,13 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				if (fileInfo2 == null && prjInfo.getBinCsvFileId() != null) {
 					if (prjInfo.getBinCsvFileId().equals(fileInfo.getFileId())) {
 						project.setBinCsvFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
+				}
+				
+				if (fileInfo2 == null && prjInfo.getBinBinaryFileId() != null) {
+					if (prjInfo.getBinBinaryFileId().equals(fileInfo.getFileId())) {
+						project.setBinBinaryFileFlag(CoConstDef.FLAG_YES);
 						fileDeleteCheckFlag = true;
 					}
 				}

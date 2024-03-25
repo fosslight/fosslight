@@ -213,7 +213,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			if (!isEmpty(checkedLicense1)) {
 				if (!currentLicense.equals(checkedLicense1)) {
 					String evidence = getMessage("check.evidence.exist.nameAndVersion");
-					oss.setChangeFlag(CoConstDef.FLAG_YES);
 					oss.setCheckOssList("Y");
 					oss.setCheckLicense(checkedLicense1);
 					oss.setCheckedEvidence(evidence);
@@ -226,7 +225,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			if (!isEmpty(checkedLicense2)) {
 				if (!currentLicense.equals(checkedLicense2)) {
 					String evidence = getMessage("check.evidence.exist.downloadLocationAndVersion");
-					oss.setChangeFlag(CoConstDef.FLAG_YES);
 					oss.setCheckOssList("Y");
 					oss.setCheckLicense(checkedLicense2);
 					oss.setCheckedEvidence(evidence);
@@ -240,7 +238,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			if (!isEmpty(checkedLicense3)) {
 				if (!currentLicense.equals(checkedLicense3)) {
 					String evidence = getMessage("check.evidence.exist.downloadLocation");
-					oss.setChangeFlag(CoConstDef.FLAG_YES);
 					oss.setCheckOssList("Y");
 					oss.setCheckLicense(checkedLicense3);
 					oss.setCheckedEvidence(evidence);
@@ -273,7 +270,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 				if (!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE") && !checkedLicense.isEmpty()) {
 					String evidence = getMessage("check.evidence.github.downloadLocation");
-					oss.setChangeFlag(CoConstDef.FLAG_YES);
 					oss.setCheckOssList("Y");
 					oss.setCheckLicense(checkedLicense);
 					oss.setCheckedEvidence(evidence);
@@ -306,7 +302,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 
 				if (!currentLicense.equals(checkedLicense) && !checkedLicense.equals("NOASSERTION") && !checkedLicense.equals("NONE") && !checkedLicense.isEmpty()) {
 					String evidence = getMessage("check.evidence.clearlyDefined.downloadLocationAndVersion");
-					oss.setChangeFlag(CoConstDef.FLAG_YES);
 					oss.setCheckOssList("Y");
 					oss.setCheckLicense(checkedLicense);
 					oss.setCheckedEvidence(evidence);

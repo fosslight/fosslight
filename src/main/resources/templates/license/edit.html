@@ -4,10 +4,18 @@
 <th:block th:replace="license/edit-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-        <div class="content-wrapper custom-layout" style="height: auto">
+        <div class="custom-layout ml-2 mr-2" style="height: auto">
             <!-- Content Header (Page header) -->
             <section class="content-header">
                 <div class="container-fluid">
+                	<div class="row">
+                		<div class="col-sm-9 text-left mt-2"></div>
+                		<div class="col-sm-3 float-right mt-1">
+                			<div class="float-right" th:if="${detail?.licenseId != null}">
+                        		<button class="btn btn-block btn-outline-secondary btn-sm width-7rem px-1 ml-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments"></i> Comment</button>
+                        	</div>
+                		</div>
+                	</div>
                 </div><!-- /.container-fluid -->
             </section>
             <section class="content">
@@ -17,12 +25,14 @@
                     <input name="restriction" type="hidden"/>
 
                     <div class="row">
-                        <div class="col-md-9">
+                    	<div class="col-md-1 editInfoAreaTop" style="display: none;"></div>
+                        <div class="col-md-9 editInfoArea">
                             <div class="card card-secondary submit-form">
                                 <div class="card-header">
-                                    <div class="card-tools" th:unless="${isReadOnly}">
-                                        <button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Delete" type="button" id="delete"><i class="fas fa-trash"></i></button>
-                                        <button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Save" type="button" id="save"><i class="fas fa-save"></i></button>
+                                    <div class="card-tools">
+                                        <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="card-body">
@@ -155,26 +165,25 @@
                                         <label for="attributionInput" th:text="#{msg.common.field.attribution}"></label>
                                         <textarea class="form-control" id="attributionInput" name="attribution" rows="4" th:text="${detail?.attribution}" th:disabled ="${isReadOnly}"></textarea>
                                     </div>
-                                    <div class="form-group" th:unless="${isReadOnly}">
-                                    	<label for="commentInput" th:text="Comment"></label>
-                                      	<textarea class="form-control" id="commentInput" name='commentInput' rows="3" style="height: 800px" th:disabled ="${not @CommonFunction.isAdmin()}"></textarea>
-                                  	</div>
                                 </div>
-<!--                                <div class="card-footer clearfix" th:unless="${isReadOnly}">-->
-<!--                                	<a class="btn btn-secondary float-left" href="javascript:void(0)" id="delete" th:text="|Delete|"></a>-->
-<!--                                    <a class="btn btn-teal-01 float-right" href="javascript:void(0)" id="save" th:text="|Save|"></a>-->
-<!--                              	</div>-->
+                                <div class="card-footer clearfix" th:unless="${isReadOnly}">
+                                	<a class="btn btn-secondary float-left" href="javascript:void(0)" id="delete" th:text="|Delete|"></a>
+                                    <a class="btn btn-teal-01 float-right" href="javascript:void(0)" id="save" th:text="|Save|"></a>
+                              	</div>
                             </div>
                         </div>
-                        <div class="col-md-3" th:unless="${isReadOnly}" th:if="${licenseInfo != null && licenseInfo.licenseId != null}">
+                        <div class="col-md-1 editInfoAreaBottom" style="display: none;"></div>
+                        <div class="col-md-3 editInfoCommentArea">
                          	<div class="card card-lg-red" style="position:sticky; top:10px;">
                             	<div class="card-header">
                                 	<h3 class="card-title" th:text="Comment"></h3>
                                     <div class="card-tools">
-                                    	<button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button"><i class="fas fa-minus"></i></button>
+                                    	<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
+                            			<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
+                                    	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
                                   	</div>
                               	</div>
-                                <div class="card-body pt-0" style="padding-bottom: 0;">
+                                <div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
                                 	<div clas="row">
                                 		<div clas="col-md-12" id="commentList"></div>
                                 	</div>

@@ -735,9 +735,14 @@ public class T2UserServiceImpl implements T2UserService {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> checkByADUser(String user_id, String user_pw, Map<String, Object> rtnMap) {
-		String rtnEmail = (String) rtnMap.get("email");
+		String rtnEmail = "";
+		if (rtnMap.containsKey("email")) {
+			rtnEmail = (String) rtnMap.get("email");
+		}
+		
 		List<String[]> searchResult = null;
 		
 		if (StringUtil.isNotEmpty(user_pw)) {
@@ -761,14 +766,17 @@ public class T2UserServiceImpl implements T2UserService {
 							return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
 						}
 					});
-					
+					for (String[] result : searchResult) {
+						log.info(result[0]);log.info(result[1]);
+					}
+						
 					rtnMap.put("isAuthenticated", true);
 				} else {
 					rtnMap.put("isAuthenticated", false);
 					return rtnMap;
 				}
 			} catch (Exception e) {
-				log.warn("ERROR Message :" + e.getMessage());
+				log.error("ERROR Message :" + e.getMessage());
 				rtnMap.put("isAuthenticated", false);
 				return rtnMap;
 			}
@@ -782,8 +790,9 @@ public class T2UserServiceImpl implements T2UserService {
 				if (searchResult != null) {
 					int cnt = 1;
 					for(int i=0;i<searchResult.size();i++) {
-						String email = searchResult.get(i)[0];
-						String displayName = searchResult.get(i)[1];
+						String[] userInfo = searchResult.get(i);
+						String email = userInfo[0];
+						String displayName = userInfo[1];
 						
 						if (StringUtil.isEmptyTrimmed(displayName)) {
 							userName = email.split("@")[0];
@@ -808,13 +817,13 @@ public class T2UserServiceImpl implements T2UserService {
 				}
 				
 				if (StringUtil.isEmptyTrimmed(userEmail) || StringUtil.isEmptyTrimmed(userName)) {
-					log.debug("Cannot find Ldap user information : " + user_id);
+					log.info("Cannot find Ldap user information : " + user_id);
 					rtnMap.put("isAuthenticated", false);
 					return rtnMap;
 				}
 				
 				if (Integer.parseInt(userEmailCnt) > 1 && StringUtil.isNotEmpty(userEmail)) {
-					log.debug("ldap user email duplicate : " + user_id);
+					log.info("ldap user email duplicate : " + user_id);
 					rtnMap.put("isAuthenticated", false);
 					rtnMap.put("msg", "enter email");
 					

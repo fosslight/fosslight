@@ -53,7 +53,7 @@ import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoAdminValidator;
 
-@Component
+@Component("CoTopComponent")
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 public class CoTopComponent {
 	

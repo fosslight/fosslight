@@ -4,7 +4,7 @@
 <th:block th:replace="system/history-edit-script :: script"></th:block>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-        <div class="content-wrapper custom-layout">
+        <div class="custom-layout">
             <section class="content-header">
                 <div class="container-fluid">
                 	<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
@@ -27,7 +27,7 @@
                                       					<div class="col-3">
                           									<span class="text-bold" th:text="Name"></span>
                       									</div>
-                      									<div class="col-9" th:text="${basicInfo.hTitle}"></div>
+                      									<div class="col-9" th:text="${basicInfo?.hTitle}"></div>
                                       				</div>
                                       			</div>
                                       		</div>
@@ -37,7 +37,7 @@
                                       					<div class="col-3">
                           									<span class="text-bold" th:text="Type"></span>
                       									</div>
-                      									<div class="col-9" th:text="${basicInfo.hTypeNm}"></div>
+                      									<div class="col-9" th:text="${basicInfo?.hTypeNm}"></div>
                                       				</div>
                                       			</div>
                                       			<div class="col-6">
@@ -45,7 +45,7 @@
                                       					<div class="col-3">
                           									<span class="text-bold" th:text="Action"></span>
                       									</div>
-                      									<div class="col-9" th:text="${basicInfo.hAction}"></div>
+                      									<div class="col-9" th:text="${basicInfo?.hAction}"></div>
                                       				</div>
                                       			</div>
                                       		</div>
@@ -55,7 +55,8 @@
                                       					<div class="col-3">
                           									<span class="text-bold" th:text="Modifier"></span>
                       									</div>
-                      									<div class="col-9" th:text="${basicInfo.modifier + ' (' + #strings.setSplit(basicInfo.modifiedDate, '.')[0] + ')'}"></div>
+                      									<div class="col-9" th:text="${basicInfo?.modifiedDate != null} ? ${basicInfo?.modifier + ' (' + #strings.setSplit(basicInfo?.modifiedDate, '.')[0] + ')'} : ${basicInfo?.modifier}">
+                      									</div>
                                       				</div>
                                       			</div>
                                       		</div>

@@ -159,6 +159,7 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		PartnerMaster partnerMaster = new PartnerMaster();
 		model.addAttribute("detail", partnerMaster);
+		model.addAttribute("editMode", CoConstDef.FLAG_YES);
 		
 		return "partner/edit";
 	}
@@ -196,12 +197,31 @@ public class PartnerController extends CoTopComponent{
 		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
 		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
 		
+		CommonFunction.setPartnerService(partnerService);
+		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+		if (permissionCheckList != null) {
+			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+					&& !CommonFunction.isAdmin() 
+					&& !permissionCheckList.contains(loginUserName())) {
+				partnerMaster.setPermission(0);
+				partnerMaster.setStatusPermission(0);
+			} else {
+				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+					partnerMaster.setStatusPermission(0);
+				} else {
+					partnerMaster.setStatusPermission(1);
+				}
+				partnerMaster.setPermission(1);
+			}
+		}
+		
 		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
 		
 		if (prjList.size() > 0) {
 			model.addAttribute("prjList", prjList);
 		}
 		
+		model.addAttribute("editMode", CoConstDef.FLAG_NO);
 		model.addAttribute("detail", partnerMaster);
 		model.addAttribute("detailJson", partnerMaster);
 		model.addAttribute("confirmationFile", confirmationFile);
@@ -214,6 +234,79 @@ public class PartnerController extends CoTopComponent{
 		return "partner/edit";
 	}
 	
+	@PostMapping(value=PARTNER.MODE_CONVERSION, produces = "text/html; charset=utf-8")
+	public String modeConversion(@PathVariable String mode, @PathVariable String partnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+		
+		T2File confirmationFile = new T2File();
+		confirmationFile.setFileSeq(partnerMaster.getConfirmationFileId());
+		confirmationFile = fileMapper.getFileInfo(confirmationFile);
+		
+		partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
+		
+		T2File ossFile = new T2File();
+		ossFile.setFileSeq(partnerMaster.getOssFileId());
+		ossFile = fileMapper.getFileInfo(ossFile);
+		
+		String binaryFileId = partnerMaster.getBinaryFileId();
+		T2File binaryFile = new T2File();
+		
+		if (!isEmpty(binaryFileId)){
+			binaryFile.setFileSeq(binaryFileId);
+			binaryFile = fileMapper.getFileInfo(binaryFile);
+			
+			model.addAttribute("binaryFile", binaryFile);
+		}
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
+		comHisBean.setReferenceId(partnerMaster.getPartnerId());
+		partnerMaster.setUserComment(commentService.getUserComment(comHisBean));
+		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
+		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
+		
+		CommonFunction.setPartnerService(partnerService);
+		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+		if (permissionCheckList != null) {
+			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+					&& !CommonFunction.isAdmin() 
+					&& !permissionCheckList.contains(loginUserName())) {
+				partnerMaster.setPermission(0);
+				partnerMaster.setStatusPermission(0);
+			} else {
+				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+					partnerMaster.setStatusPermission(0);
+				} else {
+					partnerMaster.setStatusPermission(1);
+				}
+				partnerMaster.setPermission(1);
+			}
+		}
+		
+		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
+		
+		if (prjList.size() > 0) {
+			model.addAttribute("prjList", prjList);
+		}
+		
+		model.addAttribute("editMode", CoConstDef.FLAG_NO);
+		model.addAttribute("detail", partnerMaster);
+		model.addAttribute("detailJson", partnerMaster);
+		model.addAttribute("confirmationFile", confirmationFile);
+		model.addAttribute("ossFile", ossFile);
+		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
+		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
+		
+		if (mode.equals("edit")) {
+			return "partner/fragments/edit :: editFragments";
+		} else {
+			return "partner/fragments/edit :: viewFragments";
+		}
+	}
 	
 	@GetMapping(value=PARTNER.VIEW_ID, produces = "text/html; charset=utf-8")
 	public String view(@PathVariable String partnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
@@ -258,7 +351,7 @@ public class PartnerController extends CoTopComponent{
 		
 		model.addAttribute("viewFlag", CoConstDef.FLAG_YES);
 		
-		return "partner/edit";
+		return "partner/view";
 	}
 	
 	@GetMapping(value=PARTNER.LIST_AJAX)
@@ -296,7 +389,30 @@ public class PartnerController extends CoTopComponent{
 		Map<String, Object> map = null;
 		try{
 			map = partnerService.getPartnerMasterList(partnerMaster);
-		}catch(Exception e){
+			
+			@SuppressWarnings("unchecked")
+			List<PartnerMaster> list = (List<PartnerMaster>) map.get("rows");
+			CommonFunction.setPartnerService(partnerService);
+			
+			for (PartnerMaster bean : list) {
+				List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {bean.getPartnerId()}, "partner");
+				if (permissionCheckList != null) {
+					if (avoidNull(bean.getPublicYn()).equals(CoConstDef.FLAG_NO)
+							&& !CommonFunction.isAdmin() 
+							&& !permissionCheckList.contains(loginUserName())) {
+						bean.setPermission(0);
+						bean.setStatusPermission(0);
+					} else {
+						if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+							bean.setStatusPermission(0);
+						} else {
+							bean.setStatusPermission(1);
+						}
+						bean.setPermission(1);
+					}
+				}
+			}
+		} catch(Exception e){
 			log.error(e.getMessage());
 		}
 		
@@ -703,6 +819,48 @@ public class PartnerController extends CoTopComponent{
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
 			}
+		}
+
+		resMap.put("resCd", resCd);
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value=PARTNER.MULTI_DEL_AJAX)
+	public @ResponseBody ResponseEntity<Object> multiDelAjax(
+			@ModelAttribute PartnerMaster partnerMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		HashMap<String, Object> resMap = new HashMap<>();
+		String resCd = "00";
+		PartnerMaster param = new PartnerMaster();
+		param.setUserComment(partnerMaster.getUserComment());
+		
+		for (String partnerId : partnerMaster.getPartnerIds()) {
+			param.setPartnerId(partnerId);
+			
+			try{
+				History h = partnerService.work(param);
+				h.sethAction(CoConstDef.ACTION_CODE_DELETE);	
+				historyService.storeData(h);
+			} catch (Exception e){
+				log.error(e.getMessage());
+			}
+			
+			try {
+				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_DELETED);
+				mailBean.setParamPartnerId(param.getPartnerId());
+				if (!isEmpty(param.getUserComment())) {
+					mailBean.setComment(param.getUserComment());
+				}
+				CoMailManager.getInstance().sendMail(mailBean);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			partnerService.deletePartnerMaster(param);
+			resCd="10";
 		}
 
 		resMap.put("resCd", resCd);

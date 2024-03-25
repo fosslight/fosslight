@@ -138,16 +138,26 @@ public class LicenseController extends CoTopComponent{
 		}
 		
 		model.addAttribute("detail", licenseMaster);
-
-
-		String role = loginUserRole();
-
-		if (!"ROLE_ADMIN".equals(loginUserRole())) {
-			model.addAttribute("isReadOnly", true);
+		
+		if ("ROLE_ADMIN".equals(loginUserRole())) {
+			return "license/edit";
+		} else {
+			if (!isEmpty(licenseMaster.getRestriction())) {
+				List<String> restrictionList = Arrays.asList(licenseMaster.getRestriction().split(","));
+				String restrictionStr = "";
+				for (String restriction : restrictionList) {
+					if (isEmpty(restriction)) continue;
+					
+					if (!isEmpty(restrictionStr)) {
+						restrictionStr += ", ";
+					}
+					restrictionStr += CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restriction);
+				}
+				if (!isEmpty(restrictionStr)) licenseMaster.setRestriction(restrictionStr);
+			}
+			
+			return "liense/view";
 		}
-
-		return "license/edit";
-
 	}
 	
 	@PostMapping(value=LICENSE.VALIDATION)

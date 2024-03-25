@@ -521,6 +521,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The ref partner id. */
 	private String refPartnerId;
+	
+	/** The ref partner name. */
+	private String refPartnerName;
 
 	/** The readme content. */
 	// README 파일 용
@@ -4439,5 +4442,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setSecCvssScore(Float secCvssScore) {
 		this.secCvssScore = secCvssScore;
+	}
+
+	public String getRefPartnerName() {
+		return refPartnerName;
+	}
+
+	public void setRefPartnerName(String refPartnerName) {
+		this.refPartnerName = refPartnerName;
 	}
 }

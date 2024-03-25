@@ -137,19 +137,34 @@ public class VerificationController extends CoTopComponent {
 			}
 		}
 		
+		boolean existsFileFlag = false;
 		List<File> files = new ArrayList<File>();
-		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId()));
-		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
-		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
+		File packageFile = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId());
+		File packageFile2 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2());
+		File packageFile3 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3());
+		
+		if (packageFile != null) {
+			existsFileFlag = true;
+		}
+		if (packageFile2 != null) {
+			existsFileFlag = true;
+		}
+		if (packageFile3 != null) {
+			existsFileFlag = true;
+		}
+		files.add(packageFile);
+		files.add(packageFile2);
+		files.add(packageFile3);
 		
 		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
 			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());
 			model.addAttribute("vulDocFile", file);
 		}
+		
 		model.addAttribute("verify", verificationService.getVerificationOne(project));
 		model.addAttribute("ossList", list);
 		model.addAttribute("files", files);
-		
+		model.addAttribute("existsFileFlag", existsFileFlag);
 		model.addAttribute("userGuideLicenseList", userGuideLicenseList);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		
@@ -1077,5 +1092,27 @@ public class VerificationController extends CoTopComponent {
 		}
 		
 		return makeJsonResponseHeader();
+	}
+	
+	@PostMapping(value=VERIFICATION.DEFAULT_NOTICE_INFO)
+	public @ResponseBody ResponseEntity<Object> defaultNoticeInfo (@RequestBody Map<Object, Object> map, HttpServletRequest request, HttpServletResponse response, Model model) throws Exception{
+		log.info("URI: "+ "/project/verification/getDefaultNoticeInfo");
+		
+		OssNotice _noticeInfo = null;
+		
+		try {
+			Project param = new Project();
+			param.setPrjId((String) map.get("prjId"));
+			_noticeInfo = projectService.setCheckNotice(param);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, e.getMessage());
+		}
+		
+		if (_noticeInfo != null) {
+			return makeJsonResponseHeader(true, "true", _noticeInfo);
+		} else {
+			return makeJsonResponseHeader(false, "false");
+		}
 	}
 }

@@ -1995,6 +1995,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 				
 				break;
+			case "partner" :		//identification > 3rd List
+				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+				
+				break;
 			case "license" :	//License List
 				Type 				licenseType = new TypeToken<LicenseMaster>(){}.getType();
 				LicenseMaster 		license 	= (LicenseMaster) fromJson(dataStr, licenseType);

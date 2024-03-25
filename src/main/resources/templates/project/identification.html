@@ -15,263 +15,40 @@
         <section class="content-header">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-sm-8 text-left mt-2">
-                        <span class="description-percentage text-lg text-dark-gray">
-                            <a class="text-dark-gray text-bold hover-line" href="#"
-                               th:onclick="fn.mvEditTab([[${project.prjId}]])" title="Go to Basic information tab">[[${project.prjName}]]</a>
-                        </span>
-                        <span class="ml-2">
-                            <span class="mx-2">
-                                <th:block th:if="${project.status == 'DROP'}">
-                                    <span class="text-gray text-md text-bold">Drop</span>
-                                </th:block>
-                                <th:block th:if="${project.status == 'REQ'}">
-                                    <span class="text-pink text-md text-bold">Request</span>
-                                </th:block>
-                                <th:block th:if="${project.status == 'REV'}">
-                                    <th:block th:if="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE')
-                                    or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA')
-                                    or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
-                                        <span class="text-purple text-md text-bold">Final Review</span>
-                                    </th:block>
-                                    <th:block
-                                            th:unless="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
-                                        <span class="text-yellow text-md text-bold">Review</span>
-                                    </th:block>
-                                </th:block>
-                                <th:block th:if="${project.status == 'COMP'}">
-                                    <span class="text-dark text-md text-bold">Complete</span>
-                                </th:block>
-                                <th:block
-                                        th:unless="${project.status == 'COMP' or project.status == 'DROP' or project.status == 'REQ' or project.status == 'REV'}">
-                                    <span class="text-success text-md text-bold">Progress</span>
-                                </th:block>
-                            </span>
-                            <span class="mx-2">
-                                 <!--indetification-->
-                                <th:block th:if="${project.identificationStatus == null}">
-                                    <th:block th:if="${project.status == 'DROP'}">
-                                        <span class="badge badge-outline-gray-white size-md width-6rem">Identification</span>
-                                    </th:block>
-                                    <th:block th:unless="${project.status == 'DROP'}">
-                                        <span class="badge badge-success size-md width-6rem"
-                                              th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
-                                    </th:block>
-                                </th:block>
-
-                                <th:block th:if="${project.identificationStatus == 'N/A'}">
-                                    <span class="badge badge-outline-gray-white size-md width-6rem">Identification</span>
-                                </th:block>
-
-                                <th:block
-                                        th:unless="${project.identificationStatus == null or project.identificationStatus == 'NA'}">
-                                   <th:block th:if="${project.status == 'DROP'}">
-                                       <th:block th:if="${project.identificationStatus == 'CONF'}">
-                                           <span class="badge badge-gray size-md width-6rem"
-                                                 th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
-                                       </th:block>
-                                        <th:block th:unless="${project.identificationStatus == 'CONF'}">
-                                           <span class="badge badge-gray size-md width-6rem"
-                                                 th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
-                                       </th:block>
-                                    </th:block>
-                                    <th:block
-                                            th:if="${project.status == 'REV' and ((project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA'))}">
-                                        <span class='badge badge-outline-dark-blue hover-light-btn text-sm px-2 py-1'
-                                              style='cursor:pointer;'
-                                              th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
-                                    </th:block>
-                                    <th:block
-                                            th:unless="${project.status == 'DROP' or (project.status == 'REV' and ((project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')))}">
-                                        <th:block th:if="${project.identificationStatus == 'CONF'}">
-                                            <span class='badge badge-outline-dark-blue hover-light-btn text-sm px-2 py-1'
-                                                  style='cursor:pointer;'
-                                                  th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
-                                        </th:block>
-                                        <th:block th:unless="${project.identificationStatus == 'CONF'}">
-                                            <th:block th:if="${project.status == 'REQ'}">
-                                                <span class='badge badge-pink hover-pink-btn text-sm px-2 py-1'
-                                                      style='cursor:pointer;'
-                                                      th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
-                                            </th:block>
-                                            <th:block th:if="${project.status == 'REV'}">
-                                                <span class='badge badge-yellow hover-yellow-btn text-sm px-2 py-1'
-                                                      style='cursor:pointer;'
-                                                      th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
-                                            </th:block>
-                                            <th:block
-                                                    th:unless="${project.status == 'COMP' or project.status == 'DROP' or project.status == 'REQ' or project.status == 'REV'}">
-                                                <span class='badge badge-success hover-success-btn text-sm px-2 py-1'
-                                                      style='cursor:pointer;'
-                                                      th:onclick="fn.mvIdentification([[${project.prjId}]])">Identification</span>
-                                            </th:block>
-                                        </th:block>
-                                    </th:block>
-                                </th:block>
-
-                                <!--packaging-->
-                                <th:block th:if="${project.identificationStatus != 'CONF'}">
-                                         <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
-                                        <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
-                                </th:block>
-                                <th:block th:unless="${project.identificationStatus != 'CONF'}">
-<th:block th:if="${project.verificationStatus == null}">
-                                   <th:block th:if="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
-                                        <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
-                                        <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
-                                    </th:block>
-                                    <th:block th:unless="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
-                                        <th:block th:unless="${project.identificationStatus == null}">
-                                            <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                            <span class='badge badge-success hover-success-btn size-sm width-6rem'
-                                                  style='cursor:pointer;'
-                                                  th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
-                                        </th:block>
-                                    </th:block>
-                                </th:block>
-                                <th:block th:if="${project.verificationStatus == 'PROG'}">
-                                    <th:block th:if="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
-                                        <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
-                                        <span class="badge badge-outline-gray-white text-sm px-2 py-1">Packaging</span>
-                                    </th:block>
-                                    <th:block th:unless="${project.status == 'COMP' or project.statusRequestYn == 'Y'}">
-                                        <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                        <span class='badge badge-success hover-success-btn size-sm width-6rem'
-                                              style='cursor:pointer;'
-                                              th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
-                                    </th:block>
-                                </th:block>
-                               <th:block th:if="${project.verificationStatus == 'NA'}">
-                                   <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
-                                   <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
-                               </th:block>
-                                <th:block th:if="${project.verificationStatus == 'Error'}">
-                                    <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
-                                   <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
-                                </th:block>
-                                <th:block th:if="${project.verificationStatus == 'Drop'}">
-                                    <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
-                                   <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
-                                </th:block>
-                                <th:block
-                                        th:unless="${project.verificationStatus == null or project.verificationStatus == 'PROG' or project.verificationStatus == 'NA' or project.verificationStatus == 'Error' or project.verificationStatus == 'Drop'}">
-                                    <th:block th:if="${project.distributeTarget == 'N/A'}">
-                                        <span class="text-gray-white text-bold text-md mx-1">&gt;</span>
-                                        <span class="badge badge-outline-gray-white size-sm width-6rem">Packaging</span>
-                                    </th:block>
-                                    <th:block th:unless="${project.distributeTarget == 'N/A'}">
-                                        <th:block th:if="${project.verificationStatus == 'CONF'}">
-                                          <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem'
-                                                          style='cursor:pointer;'
-                                                          th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
-                                        </th:block>
-                                        <th:block th:unless="${project.verificationStatus == 'CONF'}">
-                                            <th:block th:if="${project.status == 'PROG'}">
-                                                <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                <span class='badge badge-success hover-success-btn size-sm width-6rem'
-                                                      style='cursor:pointer;'
-                                                      th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
-                                            </th:block>
-                                            <th:block th:if="${project.status == 'REQ'}">
-                                                <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem'
-                                                      style='cursor:pointer;'
-                                                      th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
-                                            </th:block>
-                                            <th:block th:if="${project.status == 'REV'}">
-                                                <th:block th:if="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE')
-                                                    or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA')
-                                                    or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
-                                                    <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                    <span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem'
-                                                          style='cursor:pointer;'
-                                                          th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
-                                                </th:block>
-                                                <th:block
-                                                        th:unless="${(project.verificationStatus == 'CONF' and project.destributionStatus == 'DONE') or (project.verificationStatus == 'CONF' and project.destributionStatus == 'NA') or (project.verificationStatus == 'NA' and project.destributionStatus == 'NA')}">
-                                                    <span class="text-blue-gray text-bold text-md mx-1">&gt;</span>
-                                                    <span class='badge badge-yellow hover-yellow-btn size-sm width-6rem'
-                                                          style='cursor:pointer;'
-                                                          th:onclick="fn.mvVerification([[${project.prjId}]])">Packaging</span>
-                                                </th:block>
-                                            </th:block>
-                                        </th:block>
-                                    </th:block>
-                                </th:block>
-                                </th:block>
-                            </span>
-                            <!--vulnerability-->
-                            <span class="mx-2">
-                                <th:block th:unless="${project.secCode == null}">
-                                    <th:block th:if="${project.secCvssScore >= 7.0}">
-                                        <th:blcok th:if="${project.secCode == 'Fixed'}">
-                                            <span class="badge badge-cherry text-md width-9rem pointer p-1"
-                                                  th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Resolved([[${project.secCvssScore}]])</span>
-                                        </th:blcok>
-                                         <th:blcok th:unless="${project.secCode == 'Fixed'}">
-                                             <span class="badge badge-cherry text-md width-9rem pointer p-1"
-                                                   th:onclick="fn.mvSecurityTab([[${project.prjId}]])">Need to resolve([[${project.secCvssScore}]])</span>
-                                        </th:blcok>
-                                    </th:block>
-                                    <th:block th:unless="${project.secCvssScore >= 7.0}">
-                                         <th:block th:if="${project.secCvssScore == 0}">
-                                           <span class="badge badge-blue text-md width-9rem pointer p-1">Discovered(N/A)</span>
-                                        </th:block>
-                                        <th:block th:unless="${project.secCvssScore == 0}">
-                                            <span class="badge badge-blue text-md width-9rem pointer p-1">Discovered([[${project.secCvssScore}]])</span>
-                                        </th:block>
-                                    </th:block>
-                                </th:block>
-                                <th:block th:if="${project.secCode == null}">
-                                    <th:block th:if="${project.secCvssScore == 0}">
-                                        <span class="badge badge-cerebral-gray text-md width-9rem pointer p-1">Discovered(N/A)</span>
-                                    </th:block>
-                                    <th:block th:unless="${project.secCvssScore == 0}">
-                                        <span class="badge badge-cerebral-gray text-md width-9rem pointer p-1">Discovered(N/A)</span>
-                                    </th:block>
-                                </th:block>
-                            </span>
-                        </span>
-                    </div>
-                    <div class="col-sm-4 float-right mt-1">
-                        <div class="helpLink f-left dropdown float-right ml-3">
-                            <a aria-expanded="false" aria-haspopup="true" class="help-link dropdown-toggle"
-                               data-toggle="dropdown"
-                               href="#" role="button">Help</a>
-                            <div class="dropdown-menu mt-0">
-                                <a class="dropdown-item" href="#"
-                                   th:onclick="|openHelpGuideLink('Project_List_Identification')|">How to use FossLight
-                                    Hub</a>
-                            </div>
-                        </div>
-                        <div class="float-right"
-                             th:if="${@CommonFunction.isAdmin() == false and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
-                            <button class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3" id="bomReject" th:text="Reject"
-                                    type="button"></button>
-                        </div>
-                        <div class="float-right"
-                             th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
-                            <button class="btn btn-dark-04 btn-sm width-6rem px-3 confirm" id="bomConfirm"
-                                    th:style="${display.confirmBtn == 'N'} ? 'display:none;'" th:text="Confirm"
-                                    type="button"></button>
-                            <button class="btn btn-dark-03 btn-sm width-6rem mr-xm px-3 reject" id="bomReject"
-                                    th:style="${display.rejectBtn == 'N'} ? 'display:none;'" th:text="Reject"
-                                    type="button"></button>
-                            <button class="btn btn-dark-04 btn-sm width-6rem px-3 review" id="bomRequest"
-                                    th:style="${display.requestBtn == 'N'} ? 'display:none;'" th:text="Request"
-                                    type="button"></button>
-                            <button class="btn btn-dark-04 btn-sm width-8rem px-3 restart" id="bomReviewStart"
-                                    th:style="${display.reviewBtn == 'N'} ? 'display:none;'" th:text="'Review Start'"
-                                    type="button"></button>
-                        </div>
-
-                    </div>
+                	<div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
+                	<div class="float-right align-items-center mt-2" style="margin-left: auto;">
+                      	<div class="helpLink f-left dropdown float-right px-1">
+                          	<a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
+                          	<div class="dropdown-menu mt-0">
+                             	<a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|" th:text="|How to use FossLight Hub|"></a>
+                               	<a class="dropdown-item text-dark" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Identification', 'I')|" th:text="'Role of Creator & Reviewer'"></a>
+                         	</div>
+                      	</div>
+                       	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
+                        	<button type="button" class="btn btn-dark-03 btn-sm width-6rem px-1" id="bomReject" th:text="Reject"></button>
+                        	<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
+                     	</div>
+                      	<div class="float-right">
+                        	<button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF'}"
+                               		type="button" class="btn btn-danger btn-sm width-6rem px-1" id="autoReview" th:text="'Auto Review'"></button>
+                         	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                	type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                         	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                	type="button" class="btn btn-dark-03 btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                          	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                	type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                           	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
+                                	type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
+                          	<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
+                      	</div>
+                	</div>
                 </div>
             </div>
         </section>
         <section class="content">
             <div class="container-fluid">
+            	<div class="row">
+            	<div class="contents-area col-lg-9">
                 <div class="card card-dark card-tabs">
                     <div class="card-header p-0 pt-1" style="display:inline-block;">
                         <div class="float-left" style="display:inline;">
@@ -308,16 +85,6 @@
                                        id="tabMenuBat" role="tab" th:text="BAT"></a>
                                 </li>
                             </ul>
-                        </div>
-                        <div class="float-right mr-3" style="margin-top: .35rem">
-                            <button class="btn btn-purple btn-xs px-3 btnCommentHistory" data-toggle="on"
-                                    th:text="'Show Comment History'"
-                                    type="button"></button>
-                            <button class="btn btn-tool ml-3" data-card-widget="collapse" id="expandBtn"
-                                    title="Collapse"
-                                    type="button">
-                                <i class="fas fa-minus"></i>
-                            </button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -597,8 +364,7 @@
                                                                                    th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"
                                                                                    th:text="${csvFile.origNm}"></a>
                                                                                 <input type="hidden"
-                                                                                       value="${csvFile.fileSeq}"/>
-
+                                                                                       th:value="${csvFile.fileSeq}"/>
                                                                                 <span class="badge bg-danger"
                                                                                       style="cursor:pointer;"
                                                                                       th:onclick="|com_fn.deleteFiles(this, '1')|"
@@ -923,13 +689,14 @@
                                             <div class="row mt-3" id="content-bin">
                                                 <div class="col-12">
                                                     <div class="row">
-                                                        <div class="col-md-1 pl-3 mt-1 mr-3">
+                                                        <div class="col-md-1 pl-3 mt-1">
                                                             <strong th:text="'FOSSLight Report'"></strong>
                                                         </div>
-                                                        <div class="col-lg-10">
+                                                        <div class="col-lg-11">
                                                             <div class="row">
-                                                                <div class="col-lg-2 pl-1">
-                                                                    <p th:text="'FOSSLight Report'"></p>
+                                                                <div class="col-lg-2">
+                                                                    <p style="text-align:center;"
+                                                                       th:text="'FOSSLight Report'"></p>
                                                                 </div>
                                                                 <div class="col-lg-3 fileUploader">
                                                                     <div class="fileuploader" id="binCsvFile"
@@ -1415,14 +1182,26 @@
                     </div>
                 </div>
             </div>
-            <div class="loading" id="loading_wrap" style="display:none;">
-                <div class="loadingBlind"></div>
-                <img alt="loading" th:src="@{/images/loading.gif}"/>
+            	<div class="col-lg-3 comment-area">
+                	<div class="card card-lg-red" style="position:sticky;top:10px;">
+                     	<div class="card-header">
+                           	<h3 class="card-title" th:text="Comment"></h3>
+                           	<div class="card-tools">
+                           		<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
+                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
+                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
+                           	</div>
+                      	</div>
+                      	<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
+                           	<div clas="row">
+                               	<div clas="col-md-12" id="commentList"></div>
+                         	</div>
+                  		</div>
+                    </div>
+           		</div>
+			</div>
             </div>
-            <div class="loading" id="loading_wrap_total" style="display:none;">
-                <div class="loadingBlind"></div>
-                <img alt="loading" th:src="@{/images/loading.gif}"/>
-            </div>
+            <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
         </section>
     </div>
 </div>

@@ -233,6 +233,22 @@ public class SelfCheckController extends CoTopComponent {
 
 		Map<String, Object> map = selfCheckService.getProjectList(project);
 
+		@SuppressWarnings("unchecked")
+		List<Project> list = (List<Project>) map.get("rows");
+		CommonFunction.setSelfCheckService(selfCheckService);
+		
+		for (Project prj : list) {
+			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {prj.getPrjId()}, "selfCheck");
+			if (permissionCheckList != null) {
+				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+					prj.setStatusPermission(0);
+				} else {
+					prj.setStatusPermission(1);
+				}
+				prj.setPermission(1);
+			}
+		}
+		
 		return makeJsonResponseHeader(map);
 	}
 	
@@ -515,6 +531,21 @@ public class SelfCheckController extends CoTopComponent {
 		
 		return makeJsonResponseHeader(resMap);
 	}
+	
+	@PostMapping(value = SELF_CHECK.MULTI_DEL_AJAX)
+	public @ResponseBody ResponseEntity<Object> multiDelAjax(@ModelAttribute Project project, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		HashMap<String, Object> resMap = new HashMap<>();
+		
+		for (String prjId : project.getPrjIds()) {
+			project.setPrjId(prjId);
+			selfCheckService.deleteProject(project);
+			resMap.put("resCd", "10");
+		}
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
 	@GetMapping(value=SELF_CHECK.LICENSE_USERGUIDE_HTML_NM, produces = "text/html; charset=utf-8")
 	public @ResponseBody String getLicenseUserGuideHtml(@PathVariable String licenseName, HttpServletRequest req, HttpServletResponse res, Model model){
 		LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(licenseName).toUpperCase());

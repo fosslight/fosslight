@@ -202,11 +202,176 @@ var fn = {
 		var prjName = rowObject['prjName'];
 		var prjVersion = rowObject['prjVersion']||'';
 		
-		if(prjVersion != ''){
+		if (prjVersion != ''){
 			prjName += ' (' + prjVersion + ')';
 		}
 		
-		return prjName;
+		var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+options.rowId+"')\">" + prjName + "</span>";
+	   	return display;
+	},
+	mvEditTab : function (prjId) {
+		createTabInFrame(prjId+'_selfCheck', '/selfCheck/edit/'+prjId);
+	},
+	deleteSelfCheck : function () {
+		var selfIds = new Array();
+		selfIds = $("#list").jqGrid("getGridParam", "selarrrow");
+    	
+    	if (selfIds.length > 0) {
+    		var permissions = new Array();
+    		var notPermissions = new Array();
+			
+			for (var i in selfIds) {
+				var rowData = $('#list').jqGrid('getRowData', selfIds[i]);
+				if (rowData.statusPermission > 0) {
+					permissions.push(selfIds[i]);
+				} else {
+					notPermissions.push(selfIds[i]);
+				}
+			}
+    		
+			if (permissions.length > 0) {
+				permissions.sort();
+				if (notPermissions.length > 0) notPermissions.sort();
+				
+				var innerHtml 	= [[#{msg.selfcheck.confirm.remove.project}]] + '<br><br>';
+	           	innerHtml 		+= '<textarea id="delSelfEditor"></textarea>';
+	           	
+	           	if (!alertify.delSelfDialog){
+	    			alertify.dialog('delSelfDialog', function() {
+	    				return {
+	    					setup: function() {
+	    						var settings = alertify.confirm().settings;
+	    						
+	    						for (var prop in settings) {
+	    							this.settings[prop] = settings[prop];
+	    						}
+	    						
+	    						var setup = alertify.confirm().setup();
+	    						setup.focus.element = 0;
+	    						
+	    						return setup;
+	    					},
+	    				    hooks: {
+	    				    	onshow: function() {
+	    				        	this.elements.dialog.style.maxWidth = 'none';
+	    				          	this.elements.dialog.style.width = '650px';
+	    				        }
+	    					}
+	    				};
+	    			}, false, 'confirm');
+	        	}
+	           	
+	           	alertify.delSelfDialog(innerHtml, function () {
+	           		if ("" == $("#delSelfEditor").summernote('code')){
+						alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+						return false;
+					} else {
+						fn.deleteSubmit(permissions, notPermissions);
+					}
+				});
+				
+				$("#delSelfEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			} else {
+				var notPermissionsLength = notPermissions.length;
+				if (notPermissionsLength > 0) notPermissions.sort();
+				
+				var message = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'self-check')}]];
+				message += "<br>&emsp;- ";
+				notPermissions.forEach (function (el, index) {
+					message += "SELF-" + el;
+					if (index < notPermissionsLength-1) {
+						message += ", ";
+					}
+				});
+				
+				alertify.alert(message, function(){});
+				return false;
+			}
+    	} else {
+    		alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+			return false;
+    	}
+	},
+	deleteSubmit : function (selfIds, notPermissions) {
+		$.ajax({
+			url : '/selfCheck/multiDelAjax',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : {'prjIds' : selfIds, deleteMemo : replaceWithLink($("#delSelfEditor").summernote('code'))},
+			success: function(data){
+				if ("10" == data.resCd) {
+					var message = "";
+					var notPermissionsLength = notPermissions.length;
+					var permissionsLength = selfIds.length;
+					
+					if (notPermissionsLength > 0) {
+						message = [[${@CommonFunction.getCustomMessage('msg.common.check.delete.success', 'self-check')}]];
+						message += "<br>&emsp;- ";
+						selfIds.forEach (function (el, index) {
+							message += "SELF-" + el;
+							if (index < permissionsLength-1) {
+								message += ", ";
+							}
+						});
+						
+						message += "<br><br>";
+						message += [[${@CommonFunction.getCustomMessage('msg.common.check.delete.fail', 'self-check')}]];
+						message += "<br>&emsp;- ";
+						notPermissions.forEach (function (el, index) {
+							message += "SELF-" + el;
+							if (index < notPermissionsLength-1) {
+								message += ", ";
+							}
+						});
+					} else {
+						message = [[${@CommonFunction.getCustomMessage('msg.common.delete.success', 'self-check')}]];
+						message += "<br>&emsp;- ";
+						selfIds.forEach (function (el, index) {
+							message += "SELF-" + el;
+							if (index < permissionsLength-1) {
+								message += ", ";
+							}
+						});
+					}
+					
+					if (typeof alertify.mulDelSelfDialog === 'undefined') {
+						alertify.dialog('mulDelSelfDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.alert().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.alert().setup();
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '550px';
+							        }
+								}
+							};
+						}, false, 'alert');
+	            	}
+					
+					alertify.mulDelSelfDialog(message, function(e) {
+						reloadTabInframe('/selfCheck/list');
+					});
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			},
+			error: function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
 	}
 }
 
@@ -217,34 +382,33 @@ var list = {
 		var rowList = rowStr.split(",");
 		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 		
-		var colNameArr = ['ID', 'Project Name (Version)', 'Version', 'Operating System', 'Distribution Type', 'Download', '', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'oss count'];
+		var colNameArr = ['ID', 'Project Name (Version)', 'Version', 'Operating System', 'Download', '', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'oss count', 'permission', 'statusPermission'];
 		var colModelArr = [];
-		var colModelObj = {name: 'prjId', index: 'prjId', width: 50, align: 'center', sorttype: 'int'};
+		var colModelObj = {name: 'prjId', index: 'prjId', width: 35, align: 'center', sorttype: 'int'};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjName', index: 'prjName', width: 240, align: 'left', formatter:fn.displayProjectInfo, unformatter:fn.unformatter};
+		colModelObj = {name: 'prjName', index: 'prjName', width: 250, align: 'left', formatter:fn.displayProjectInfo, unformatter:fn.unformatter};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'prjVersion', index: 'prjVersion', width: 50, align: 'left',hidden:true};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'osType', index: 'osTypeEtc', width: 100, align: 'left', sortable : true/* , formatter:fn.displayOsType */, hidden:true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'distributionType', index: 'destributionName', width: 100, align: 'left', sortable : true};
-		if ([[${!distributionFlag}]]) {
-			colModelObj["hidden"] = true;
-		}
-		colModelArr.push(colModelObj);
 		colModelObj = {name: 'download', index: 'download', width: 50, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : true};
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'division', index: 'division', width: 70, align: 'left', sortable : true};
+		colModelObj = {name: 'division', index: 'division', width: 60, align: 'left', sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'creator', index: 'creator', width: 70, align: 'left'}
+		colModelObj = {name: 'creator', index: 'creator', width: 60, align: 'left'}
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
+		colModelObj = {name: 'createdDate', index: 'createdDate', width: 60, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'ossCount', index: 'ossCount', width: 50, align: 'left',hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'permission', index: 'permission', width: 50, hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50,hidden:true};
 		colModelArr.push(colModelObj);
 		
 		$("#list").jqGrid({
@@ -264,7 +428,6 @@ var list = {
 			rowList: rowList,
 			editurl:'clientArray',
  			autowidth: true,
-            toppager: true,
 			pager: '#pager',
 			gridview: true,
 			sortable: function (permutation) {
@@ -272,7 +435,10 @@ var list = {
 			sortname: 'prjId',
 			viewrecords: true,
 			sortorder: 'desc',
+			toppager:true,
 			height: 'auto',
+			multiselect : true,
+            multiselectWidth: 35,
 			loadonce:false,
 			loadComplete:function(data) {
 				totalRow = data.records;
@@ -296,58 +462,68 @@ var list = {
 						alertify.alert([[#{msg.common.search.check.date}]], function(){});
 					}
 				}
+				
+				/* columns licalization */
+//                 var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
+//                 var setUpColumnButton = document.getElementById('setUpColumnButton');
 
-                /* columns licalization */
-                var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
-                var setUpColumnButton = document.getElementById('setUpColumnButton');
+//                 if (!setUpColumnButton) {
+//                     var division = 'selfCheck';
+//                     var totalColInfos = [
+//                         {'ID' : 'prjId'},
+//                         {'Project Name (Version)': 'prjName'},
+//                         {'Download': 'download'},
+//                         {'Vulnerability': 'cvssScore'},
+//                         {'Division': 'division'},
+//                         {'Creator': 'creator'},
+//                         {'Created Date': 'createdDate'}];
 
-                if (!setUpColumnButton) {
-                    var division = 'selfCheck';
-                    var totalColInfos = [
-                        {'ID' : 'prjId'},
-                        {'Project Name (Version)': 'prjName'},
-                        {'Download': 'download'},
-                        {'Vulnerability': 'cvssScore'},
-                        {'Division': 'division'},
-                        {'Creator': 'creator'},
-                        {'Created Date': 'createdDate'}];
+//                     if ([[${!distributionFlag}]]) {
+//                         totalColInfos.push({'Distribution Type': 'distributionType'});
+//                     }
+//                     var defaultColNames = ['id', 'prjName']
+//                     var savedColNames = [];
 
-                    if ([[${!distributionFlag}]]) {
-                        totalColInfos.push({'Distribution Type': 'distributionType'});
-                    }
-                    var defaultColNames = ['id', 'prjName']
-                    var savedColNames = [];
+//                     var dropdownMenuOptions = {
+//                         _division: division,
+//                         _totalColInfos: totalColInfos,
+//                         _defaultColNames: defaultColNames,
+//                         _savedColNames: savedColNames
+//                     };
 
-                    var dropdownMenuOptions = {
-                        _division: division,
-                        _totalColInfos: totalColInfos,
-                        _defaultColNames: defaultColNames,
-                        _savedColNames: savedColNames
-                    };
+//                     var dropdownArea = document.createElement('div');
+//                     dropdownArea.className = 'dropdown';
+//                     var newButton = createDropdownButton();
+//                     var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
 
-                    var dropdownArea = document.createElement('div');
-                    dropdownArea.className = 'dropdown';
-                    var newButton = createDropdownButton();
-                    var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+//                     dropdownArea.appendChild(newButton);
+//                     dropdownArea.appendChild(dropdownMenu);
 
-                    dropdownArea.appendChild(newButton);
-                    dropdownArea.appendChild(dropdownMenu);
+//                     parentElement.appendChild(dropdownArea);
 
-                    parentElement.appendChild(dropdownArea);
-
-                    document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
-                        event.stopPropagation();
-                        var dropdownMenu = document.getElementById("setUpColumnMenu");
-                        dropdownMenu.classList.toggle("show");
-                    });
-                }
+//                     document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+//                         event.stopPropagation();
+//                         var dropdownMenu = document.getElementById("setUpColumnMenu");
+//                         dropdownMenu.classList.toggle("show");
+//                     });
+//                 }
+				
+				if ($("#list_toppager_left").find('button').length == 0) {
+               		var appendIcon = "";
+               		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Self-Check\" onclick=\"createTabInFrame('New_SelfCheck', '/selfCheck/edit')\"><i class=\"fas fa-plus\"></i></button>";
+                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete Self-Check\" onclick=\"fn.deleteSelfCheck()\"><i class=\"far fa-trash-alt\"></i></button>";
+                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
+                            
+                  	$("#list_toppager_left").append(appendIcon);
+            	}
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
-				var rowData = $("#list").jqGrid('getRowData',rowid);
-				var isAdmin = [[${@CommonFunction.isAdmin()}]];
+//				var rowData = $("#list").jqGrid('getRowData',rowid);
+//				var isAdmin = [[${@CommonFunction.isAdmin()}]];
 				
-				createTabInFrame(rowData['prjId']+'_selfCheck', '/selfCheck/edit/'+rowData['prjId']);
+//				createTabInFrame(rowData['prjId']+'_selfCheck', '/selfCheck/edit/'+rowData['prjId']);
 			},
 			postData : refreshParam
 		});

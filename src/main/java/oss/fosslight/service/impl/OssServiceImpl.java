@@ -2429,7 +2429,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							bean.setCheckName(checkName);
 							bean.setDownloadLocation(downloadLocation);
 							if (!bean.getOssName().equals(bean.getCheckName())) {
-								bean.setChangeFlag(CoConstDef.FLAG_YES);
 								result.add(bean);
 							}
 						}
@@ -2495,7 +2494,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							bean.setCheckOssList("Y");
 							bean.setCheckName(checkName);
 							if (!bean.getOssName().equals(bean.getCheckName())) {
-								bean.setChangeFlag(CoConstDef.FLAG_YES);
 								bean.setDownloadLocation(downloadLocation);
 								result.add(bean);
 							}
