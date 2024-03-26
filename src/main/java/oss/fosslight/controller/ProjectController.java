@@ -181,8 +181,6 @@ public class ProjectController extends CoTopComponent {
 		model.addAttribute("partnerFlag", CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		
-		CommonFunction.setProjectService(projectService);
-		
 		return "project/list";
 	}
 	
@@ -390,7 +388,6 @@ public class ProjectController extends CoTopComponent {
 		boolean permissionFlag = false;
 		
 		if (!CommonFunction.isAdmin()) {
-			CommonFunction.setProjectService(projectService);
 			project.setPrjIds(new String[] {prjId});
 			permissionCheckList = CommonFunction.checkUserPermissions("", project.getPrjIds(), "project");
 			if (permissionCheckList.contains(loginUserName())) {
@@ -4852,7 +4849,6 @@ public class ProjectController extends CoTopComponent {
 		List<String> permissionCheckList = null;
 		
 		if (!CommonFunction.isAdmin()) {
-			CommonFunction.setProjectService(projectService);
 			permissionCheckList = CommonFunction.checkUserPermissions(loginUserName(), project.getPrjIds(), "project");
 		}
 		

@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -71,7 +69,6 @@ import org.springframework.context.annotation.PropertySources;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.reflect.TypeToken;
-import com.opencsv.CSVWriter;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -95,9 +92,9 @@ import oss.fosslight.domain.Statistics;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.OssMapper;
-import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.SelfCheckMapper;
 import oss.fosslight.service.BinaryDataHistoryService;
+import oss.fosslight.service.CacheService;
 import oss.fosslight.service.ComplianceService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.LicenseService;
@@ -118,27 +115,27 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String 						downloadpath 	= "";
 	private static String						writepath		= CommonFunction.emptyCheckProperty("export.template.path", "/template");
 	// Service
-	private static PartnerService 				partnerService 	= (PartnerService)	getWebappContext().getBean(PartnerService.class);
-	private static LicenseService 				licenseService 	= (LicenseService)	getWebappContext().getBean(LicenseService.class);
-	private static ProjectService 				projectService 	= (ProjectService)	getWebappContext().getBean(ProjectService.class);
-	private static T2UserService 				userService 	= (T2UserService) 	getWebappContext().getBean(T2UserService.class);
-	private static OssService 					ossService 		= (OssService) 		getWebappContext().getBean(OssService.class);
-	private static FileService					fileService	= (FileService)	getWebappContext().getBean(FileService.class);
-	private static SelfCheckService 			selfCheckService 	= (SelfCheckService)	getWebappContext().getBean(SelfCheckService.class);
-	private static VerificationService 			verificationService 	= (VerificationService)	getWebappContext().getBean(VerificationService.class);
-	private static BinaryDataHistoryService 	binaryDataHistoryService 	= (BinaryDataHistoryService)	getWebappContext().getBean(BinaryDataHistoryService.class);
-	private static VulnerabilityService 		vulnerabilityService 	= (VulnerabilityService)	getWebappContext().getBean(VulnerabilityService.class);
-	private static ComplianceService 			complianceService = (ComplianceService) getWebappContext().getBean(ComplianceService.class);
-	private static StatisticsService 			statisticsService = (StatisticsService) getWebappContext().getBean(StatisticsService.class);
-	private static ProjectService 				prjService	= (ProjectService)	getWebappContext().getBean(ProjectService.class);
+	private static PartnerService 				partnerService 	= getWebappContext().getBean(PartnerService.class);
+	private static LicenseService 				licenseService 	= getWebappContext().getBean(LicenseService.class);
+	private static ProjectService 				projectService 	= getWebappContext().getBean(ProjectService.class);
+	private static T2UserService 				userService 	= getWebappContext().getBean(T2UserService.class);
+	private static OssService 					ossService 		= getWebappContext().getBean(OssService.class);
+	private static FileService					fileService		= getWebappContext().getBean(FileService.class);
+	private static SelfCheckService 			selfCheckService 	= getWebappContext().getBean(SelfCheckService.class);
+	private static VerificationService 			verificationService 	= getWebappContext().getBean(VerificationService.class);
+	private static BinaryDataHistoryService 	binaryDataHistoryService 	= getWebappContext().getBean(BinaryDataHistoryService.class);
+	private static VulnerabilityService 		vulnerabilityService 	= getWebappContext().getBean(VulnerabilityService.class);
+	private static ComplianceService 			complianceService = getWebappContext().getBean(ComplianceService.class);
+	private static StatisticsService 			statisticsService = getWebappContext().getBean(StatisticsService.class);
+	private static ProjectService 				prjService	= getWebappContext().getBean(ProjectService.class);
+	private static CacheService					cacheService	= getWebappContext().getBean(CacheService.class);
 	
 	// Mapper
-	private static ProjectMapper				projectMapper	= (ProjectMapper)		getWebappContext().getBean(ProjectMapper.class);
-	private static OssMapper					ossMapper		= (OssMapper)			getWebappContext().getBean(OssMapper.class);
-	private static SelfCheckMapper				selfCheckMapper = (SelfCheckMapper)  	getWebappContext().getBean(SelfCheckMapper.class);
+	private static OssMapper					ossMapper		= getWebappContext().getBean(OssMapper.class);
+	private static SelfCheckMapper				selfCheckMapper = getWebappContext().getBean(SelfCheckMapper.class);
 	
 	// Controller
-	private static ProjectController projectController	= (ProjectController)	getWebappContext().getBean(ProjectController.class);
+	private static ProjectController projectController	= getWebappContext().getBean(ProjectController.class);
 	
 	private static final int MAX_RECORD_CNT = 99999;
 	private static final int MAX_RECORD_CNT_LIST = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_EXCEL_DOWNLOAD, CoConstDef.CD_MAX_ROW_COUNT))+1;	
@@ -1311,31 +1308,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Project param = projectList.get(i);
 				Map<String, String> expandInfo = projectExpandInfo.get(param.getPrjId());
 				String nvdMaxScore = "";
-				
-				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), null);
-				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(param.getPrjId(), null);
-				
-				
-				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
-					if (conversionCveInfo != null) {
-						customNvdMaxScoreInfoList.add(conversionCveInfo);
-					}
+				String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(param.getPrjId(), null);
+				if (conversionCveInfo != null) {
+					String[] conversionCveData = conversionCveInfo.split("\\@");
+					nvdMaxScore = conversionCveData[3];
 				}
-				
-				if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
-					customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
-				}
-				
-				if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
-						nvdMaxScore = conversionCveData[3];
-					}
-				}
-				
-				customNvdMaxScoreInfoList.clear();
 				
 				String[] rowParam = {
 					param.getPrjId()

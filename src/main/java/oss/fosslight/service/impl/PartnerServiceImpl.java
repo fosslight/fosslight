@@ -44,6 +44,7 @@ import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
+import oss.fosslight.service.CacheService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
@@ -55,15 +56,16 @@ import oss.fosslight.validation.T2CoValidationResult;
 @Slf4j
 public class PartnerServiceImpl extends CoTopComponent implements PartnerService {
 	// Service
-	@Autowired ProjectService projectService;
-	@Autowired FileService fileService;
-	@Autowired OssService ossService;
+	@Autowired private ProjectService projectService;
+	@Autowired private FileService fileService;
+	@Autowired private OssService ossService;
 
 	// Mapper
-	@Autowired PartnerMapper partnerMapper;
-	@Autowired CommentMapper commentMapper;
-	@Autowired FileMapper fileMapper;
-	@Autowired ProjectMapper projectMapper;
+	@Autowired private PartnerMapper partnerMapper;
+	@Autowired private CommentMapper commentMapper;
+	@Autowired private FileMapper fileMapper;
+	@Autowired private ProjectMapper projectMapper;
+	@Autowired private CacheService cacheService;
 	
 	@Override
 	@Cacheable(value="autocompletePartnerCache", key="{#root.methodName, #partnerMaster?.creator, #partnerMaster?.status}")
@@ -104,42 +106,22 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	@Override
 	@Transactional
 	public Map<String, Object> getPartnerMasterList(PartnerMaster partnerMaster) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		
 		int records = partnerMapper.selectPartnerMasterTotalCount(partnerMaster);
 		partnerMaster.setTotListSize(records);
 		List<PartnerMaster> list = partnerMapper.selectPartnerList(partnerMaster);
 		
 		if (list != null) {
-			Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
-			List<String> customNvdMaxScoreInfoList = new ArrayList<>();
-			for (PartnerMaster bean : list) {
-				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
-				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
-				
-				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
-					if (conversionCveInfo != null) {
-						customNvdMaxScoreInfoList.add(conversionCveInfo);
-					}
+			list.forEach(bean -> {
+				String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				if (conversionCveInfo != null) {
+					String[] conversionCveData = conversionCveInfo.split("\\@");
+					bean.setCvssScore(conversionCveData[3]);
+					bean.setCveId(conversionCveData[4]);
+					bean.setVulnYn(CoConstDef.FLAG_YES);
 				}
-				
-				if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
-					customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
-				}
-				
-				if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
-						bean.setCvssScore(conversionCveData[3]);
-						bean.setCveId(conversionCveData[4]);
-						bean.setVulnYn(CoConstDef.FLAG_YES);
-					}
-					
-					customNvdMaxScoreInfoList.clear();
-				}
-			}			
+			});			
 		}
 
 		
