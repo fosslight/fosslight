@@ -59,6 +59,7 @@ ul { list-style-type: none; }
 
 .custom-layout .dropdown-item { font-size: .9rem; }
 /* btn color option */
+
 .custom-layout .btn-lg-red { background-color: #a50034; font-weight: 500; color: #fff }
 .custom-layout .btn-lg-red:hover {background-color: #7e101b;border-color: #7e101b; }
 .custom-layout .btn-lg-gray {background-color: #6b6b6b; font-weight: 500; color: #fff}
