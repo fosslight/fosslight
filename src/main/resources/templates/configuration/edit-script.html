@@ -208,8 +208,8 @@
         changePassword : function(){
             var params = {};
             var password = $("#password").val();
-            var userName = $('#userInfoArea input[name="userName"]').val();
-            var division = $.trim($('#userInfoArea select[name="division"] option:selected').val());
+            var userName = $('input[name="userName"]').val();
+            var division = $.trim($('select[name="division"] option:selected').val());
             var confirmMsg = "";
             if(division === [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
                 confirmMsg = [[#{msg.configuration.confirm.save}]];
