@@ -393,7 +393,7 @@ tr.ui-row-ltr,
 .ui-jqgrid .ui-jqgrid-resize-mark {
     border: .6px solid #dee2e6;
 }
-.ui-jqgrid .ui-jqgrid-bdiv {overflow-x: hidden;}
+/*.ui-jqgrid .ui-jqgrid-bdiv {overflow-x: hidden;}*/
 .ui-state-hover,
 .ui-widget-content .ui-state-hover,
 .ui-widget-header .ui-state-hover,
