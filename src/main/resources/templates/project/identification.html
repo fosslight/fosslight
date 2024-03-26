@@ -25,20 +25,20 @@
                          	</div>
                       	</div>
                        	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
-                        	<button type="button" class="btn btn-dark-03 btn-sm width-6rem px-1" id="bomReject" th:text="Reject"></button>
+                        	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1" id="bomReject" th:text="Reject"></button>
                         	<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
                      	</div>
                       	<div class="float-right">
                         	<button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF'}"
-                               		type="button" class="btn btn-danger btn-sm width-6rem px-1" id="autoReview" th:text="'Auto Review'"></button>
+                               		type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1" id="autoReview" th:text="'Auto Review'"></button>
                          	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
-                                	type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                                	type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
                          	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
-                                	type="button" class="btn btn-dark-03 btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                                	type="button" class="btn btn-lg-red btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
                           	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
-                                	type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                                	type="button" class="btn btn-lg-red btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
                            	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
-                                	type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
+                                	type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
                           	<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
                       	</div>
                 	</div>
