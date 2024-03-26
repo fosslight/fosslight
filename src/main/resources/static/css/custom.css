@@ -422,6 +422,16 @@ tr.ui-row-ltr,
     border: none !important;
 }
 
+.popup .ui-widget.ui-widget-content {
+    height: 250px !important;
+}
+
+.popup .jqGridSet { height: 250px !important; }
+
+.popup .ui-jqgrid .ui-jqgrid-bdiv {
+    height: 250px !important;
+}
+
 .ui-jqgrid .ui-jqgrid-titlebar,
 .ui-jqgrid .ui-jqgrid-hdiv,
 .ui-jqgrid .ui-jqgrid-bdiv {
