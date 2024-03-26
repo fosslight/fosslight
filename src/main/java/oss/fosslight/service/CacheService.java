@@ -16,4 +16,6 @@ public interface CacheService {
 
 	LicenseMaster getLicenseInfo(String licenseName);
 	LicenseMaster getLicenseInfoById(String licenseId);
+	
+	String findIdentificationMaxNvdInfo(String prjId, String referenceDiv);
 }
