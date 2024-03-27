@@ -9,24 +9,26 @@
 				<div class="container-fluid">
 					<div class="card-body">
 						<div class="form-group" style="margin-bottom: 0;">
-							<label class="pl-2" for="inputName" style="margin-bottom: .2rem; font-size: .85rem;" th:text="#{msg.project.check.oss.name}"></label>
+							<label class="pl-1" for="inputName" style="margin-bottom: .2rem; font-size: .85rem;" th:text="#{msg.project.check.oss.name}"></label>
 						</div>
-						<div class="row pl-2" style="width: 100%;">
-							<div class="col-md-12 outerJqGridSet">
+						<div class="row">
+							<div class="jqGridSet" style="overflow: auto; width: 98%; height: 500px;">
             					<table id="ossList"><tr><td></td></tr></table>
+            					<div class="row pl-2 mt-2 float-left">
+        							<button type="button" id="btnChangeOss" class="btn btn-outline-dark btn-sm width-9rem px-2" th:text="'Change OSS Name'"></button>
+        							<button th:if="${sessUserInfo.authority == 'ROLE_ADMIN'}" type="button" id="btnAddNickname" class="btn btn-outline-dark btn-sm width-9rem px-2" style="margin-left: .2rem;" th:text="'Add Nickname - OSS name(now)'"></button>
+        							<button th:if="${sessUserInfo.authority == 'ROLE_ADMIN'}" type="button" id="btnChangeOss" class="btn btn-outline-dark btn-sm width-9rem px-2" style="margin-left: .2rem;" th:text="'Add URL, Nickname based on URL'"></button>
+    							</div>
        						</div>
 						</div>
-						<div class="row pl-2 float-left" style="margin-top: 10px;">
-        					<button type="button" id="btnChangeOss" class="btn btn-outline-dark btn-sm width-9rem px-3" th:text="'Change OSS Name'"></button>
-        					<button th:if="${sessUserInfo.authority == 'ROLE_ADMIN'}" type="button" id="btnAddNickname" class="btn btn-outline-dark btn-sm width-9rem px-3" style="margin-left: .2rem;" th:text="'Add Nickname - OSS name(now)'"></button>
-        					<button th:if="${sessUserInfo.authority == 'ROLE_ADMIN'}" type="button" id="btnChangeOss" class="btn btn-outline-dark btn-sm width-9rem px-3" style="margin-left: .2rem;" th:text="'Add URL, Nickname based on URL'"></button>
-    					</div>
 					</div>
 				</div>
 				
 				<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
 			</section>
 		</div>
+		
+		<th:block th:replace="oss/view/sheetSelectView"></th:block>
 	</div>
 </body>
 </html>
