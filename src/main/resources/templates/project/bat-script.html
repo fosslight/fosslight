@@ -189,7 +189,7 @@ var bat_data = {
 				{name: 'componentId', index: 'componentId', width: 40, align: 'center', key:true},
 				{name: 'ossName', index: 'ossName', width: 250, align: 'left'},
 				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center'},
-				{name: 'downloadLocation', index: 'downloadLocation', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl},
+				{name: 'downloadLocation', index: 'downloadLocation', width: 70, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter},
 				{name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl},
 				{name: 'licenseName', index: 'licenseName', width: 130, align: 'left',formatter: fn_grid_com.displayLicense},
 				{name: 'licenseText', index: 'licenseText', width: 100, align: 'left',formatter: fn_grid_com.displayLicense},
@@ -276,7 +276,7 @@ var bat_data = {
 				{name: 'componentId', index: 'componentId', width: 40, align: 'center', key:true},
 				{name: 'ossName', index: 'ossName', width: 250, align: 'left'},
 				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center'},
-				{name: 'downloadLocation', index: 'downloadLocation', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl},
+				{name: 'downloadLocation', index: 'downloadLocation', width: 70, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter},
 				{name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl},
 				{name: 'licenseName', index: 'licenseName', width: 130, align: 'left',formatter: fn_grid_com.displayLicense},
 				{name: 'licenseText', index: 'licenseText', width: 100, align: 'left',formatter: fn_grid_com.displayLicense},
@@ -758,7 +758,7 @@ var bat_grid_list = {
 										}	
 									}, 
 									
-									{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:false, hidden:true,formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+									{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:false, hidden:true, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, template: searchStringOptions,
 										editoptions: {
 											dataInit:
 												function (e) { 

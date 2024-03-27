@@ -1182,7 +1182,7 @@ var bin_grid = {
 							}
  					}
  				},
-				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:false, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:false, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, template: searchStringOptions,
 					editoptions: {
 						dataInit:
 							function (e) { 

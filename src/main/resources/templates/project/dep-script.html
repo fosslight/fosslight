@@ -1117,7 +1117,7 @@ var dep_grid = {
 							}
  					}
  				},
-				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:false, template: searchStringOptions, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, 
+				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:false, template: searchStringOptions, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter,
  					editoptions: {
 						dataInit: function (e) { 
 							$(e).on("change", function() {

@@ -384,31 +384,31 @@ var list = {
 		
 		var colNameArr = ['ID', 'Project Name (Version)', 'Version', 'Operating System', 'Download', '', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'oss count', 'permission', 'statusPermission'];
 		var colModelArr = [];
-		var colModelObj = {name: 'prjId', index: 'prjId', width: 35, align: 'center', sorttype: 'int'};
+		var colModelObj = {name: 'prjId', index: 'prjId', width: 20, align: 'center', sorttype: 'int'};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjName', index: 'prjName', width: 250, align: 'left', formatter:fn.displayProjectInfo, unformatter:fn.unformatter};
+		colModelObj = {name: 'prjName', index: 'prjName', width: 120, align: 'left', formatter:fn.displayProjectInfo, unformatter:fn.unformatter};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'prjVersion', index: 'prjVersion', width: 50, align: 'left',hidden:true};
+		colModelObj = {name: 'prjVersion', index: 'prjVersion', width: 40, align: 'left',hidden:true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'osType', index: 'osTypeEtc', width: 100, align: 'left', sortable : true/* , formatter:fn.displayOsType */, hidden:true};
+		colModelObj = {name: 'osType', index: 'osTypeEtc', align: 'left', sortable : true/* , formatter:fn.displayOsType */, hidden:true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'download', index: 'download', width: 50, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
+		colModelObj = {name: 'download', index: 'download', width: 30, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 70, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : true};
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 30, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'division', index: 'division', width: 60, align: 'left', sortable : true};
+		colModelObj = {name: 'division', index: 'division', width: 40, align: 'left', sortable : true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'creator', index: 'creator', width: 60, align: 'left'}
+		colModelObj = {name: 'creator', index: 'creator', width: 40, align: 'left'}
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'createdDate', index: 'createdDate', width: 60, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
+		colModelObj = {name: 'createdDate', index: 'createdDate', width: 40, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'ossCount', index: 'ossCount', width: 50, align: 'left',hidden:true};
+		colModelObj = {name: 'ossCount', index: 'ossCount', align: 'left',hidden:true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'permission', index: 'permission', width: 50, hidden:true};
+		colModelObj = {name: 'permission', index: 'permission', hidden:true};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50,hidden:true};
+		colModelObj = {name: 'statusPermission', index: 'statusPermission', hidden:true};
 		colModelArr.push(colModelObj);
 		
 		$("#list").jqGrid({

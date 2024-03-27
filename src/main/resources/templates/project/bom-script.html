@@ -913,7 +913,7 @@ var bom_data = {
 					{name: 'ossName', index: 'ossName', width: 100, align: 'left', template: searchStringOptions},
 					{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'left', template: searchStringOptions},
 					{name: 'licenseName', index: 'licenseName', width: 100, align: 'left', template: searchStringOptions},
-					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions},
+					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, template: searchStringOptions},
 					{name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions},
 					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', hidden:true},
 					{name: 'copyrightText', index: 'copyrightText', width: 170, align: 'left', template: searchStringOptions},

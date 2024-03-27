@@ -2476,7 +2476,7 @@ var src_grid = {
 				{name: 'ossNameExistsYn', index: 'ossNameExistsYn', hidden:true},
 				{name: 'licenseNameExistsYn', index: 'licenseNameExistsYn', hidden:true},
 				{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
-				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', edittype:'text'},
+				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, edittype:'text'},
 				{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:false, template: searchStringOptions, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, 
  					editoptions: {
 						dataInit:

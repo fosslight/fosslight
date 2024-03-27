@@ -54,7 +54,7 @@
                     {name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden: true},
                     {name: 'ossName', index: 'ossName', width: 150, align: 'left', editable: false},
                     {name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable: false},
-                    {name: 'downloadLocation', index: 'downloadLocation', width: 70, align: 'left', editable: false},
+                    {name: 'downloadLocation', index: 'downloadLocation', width: 70, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, align: 'left', editable: false},
                     {
                         name: 'homepage',
                         index: 'homepage',

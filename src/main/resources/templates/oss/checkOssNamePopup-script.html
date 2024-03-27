@@ -356,7 +356,7 @@ var grid_fn = {
 				colModel['width'] = 12;
 			}
 			colModels.push(colModel);
-			colModel = {name: 'downloadLocation', index: 'downloadLocation', width: 90, align: 'left',editable: false, formatter:grid_fn.displayDownloadLocation, sortable:false};
+			colModel = {name: 'downloadLocation', index: 'downloadLocation', width: 90, align: 'left',editable: false, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, sortable:false};
 			colModels.push(colModel);
 			colModel = {name: 'ossName', index: 'ossName', width: 50, align: 'left',editable: false, sortable:false};
 			colModels.push(colModel);
