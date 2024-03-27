@@ -3418,8 +3418,20 @@ function updateSearchCondition(el){
 
     if (formData) {
 		loading.show();
-		
+
+        // name Match (ex. copyrigths -> copyright)
         formData = formData.replace(/copyrights/g, 'copyright');
+
+        // publicYn value change (on/off -> N/Y)
+        var publicYnIndex = formData.indexOf("publicYn=");
+        if (publicYnIndex !== -1) {
+            var publicYnValue = formData.substring(publicYnIndex + 9, formData.indexOf("&", publicYnIndex));
+            if (publicYnValue === "on") {
+                formData = formData.replace(/publicYn=on/, 'publicYn=N');
+            }
+        } else {
+            formData += '&publicYn=Y';
+        }
 
         $.ajax({
             url: "/configuration/updateDefaultSearchCondition",

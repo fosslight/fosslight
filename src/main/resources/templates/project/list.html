@@ -37,7 +37,7 @@
                                              	<a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'" title="Collapse"></a>
                                          	</div>
                                          	<div th:if="${!@CommonFunction.isAdmin()}" class="input-group-append d-flex align-items-center ml-5">
-                                           		<input class="form-check-input save-value" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == null or searchBean?.publicYn == 'N'}" type="checkbox" value="N">
+                                           		<input class="form-check-input save-value" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == null or searchBean?.publicYn == 'N'}" type="checkbox">
                                                 <label class="form-check-label text-blue-gray text-sm" for="checkbox3" th:text="'My Project'"></label>
                                            	</div>
                                         </div>
