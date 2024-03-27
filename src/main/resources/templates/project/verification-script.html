@@ -1375,7 +1375,7 @@
         					}
     					} else {
     						if (cvssScore >= standardScore) {
-            					vulnerability += "<span class=\"badge badge-cherry size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '" + suffix + "/project/security/" + [[${project.prjId}]] + "')\">Need to resolve(" + cvssScore + ")</span>";
+            					vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '" + suffix + "/project/security/" + [[${project.prjId}]] + "')\">Need to resolve(" + cvssScore + ")</span>";
             				} else {
             					if (cvssScore != null && cvssScore != 0) {
             						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '" + suffix + "/project/security/" + [[${project.prjId}]] + "')\">Discovered(" + cvssScore + ")</span>";
