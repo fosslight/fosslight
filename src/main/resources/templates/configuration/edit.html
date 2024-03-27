@@ -19,7 +19,7 @@
                                     <div class="col-12">
                                         <label th:text="|User Name|"></label>
                                         <div class="input-group">
-                                            <input class="form-control" type="text" name="userName" th:value="${userInfo.userName}" >
+                                            <input class="form-control" type="text" name="userName" th:value="${userInfo?.userName}" >
                                         </div>
                                     </div>
                                 </div>
@@ -27,6 +27,7 @@
                                     <div class="col-12">
                                         <label th:text="|Division|"></label>
                                         <select class="select2" id="division" name="division" style="width: 100%;">
+                                        	<option th:value="''" th:text="''"></option>
                                             <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), userInfo.division)}"></th:block>
                                         </select>
                                     </div>
