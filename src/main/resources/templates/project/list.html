@@ -22,7 +22,7 @@
                                         	<div class="row" style="width: 100%;">
                                         		<div class="col-12">
                                         			<div class="input-group">
-                                        				<button type="button" class="badge badge-outline-lg-red width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="|+ Add|"></button>
+                                        				<button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="|+ Add|"></button>
                                                         <input class="save-value" name="defaultSearchType" type="hidden" th:value="PROJECT"/>
                                                 		<input type="search"  class="form-control autoComProjectNm save-value" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}">
                                                 		<div class="input-group-append">
