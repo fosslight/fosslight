@@ -29,10 +29,9 @@
                         <div class="col-md-9 editInfoArea">
                             <div class="card card-secondary submit-form">
                                 <div class="card-header">
-                                    <div class="card-tools">
-                                        <button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
+                                    <div class="card-tools" th:unless="${isReadOnly}">
+                                        <button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Delete" type="button" id="delete"><i class="fas fa-trash customIcon2"></i></button>
+                                        <button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Save" type="button" id="save"><i class="fas fa-save customIcon2"></i></button>
                                     </div>
                                 </div>
                                 <div class="card-body">
@@ -166,10 +165,6 @@
                                         <textarea class="form-control" id="attributionInput" name="attribution" rows="4" th:text="${detail?.attribution}" th:disabled ="${isReadOnly}"></textarea>
                                     </div>
                                 </div>
-                                <div class="card-footer clearfix" th:unless="${isReadOnly}">
-                                	<a class="btn btn-secondary float-left" href="javascript:void(0)" id="delete" th:text="|Delete|"></a>
-                                    <a class="btn btn-teal-01 float-right" href="javascript:void(0)" id="save" th:text="|Save|"></a>
-                              	</div>
                             </div>
                         </div>
                         <div class="col-md-1 editInfoAreaBottom" style="display: none;"></div>
