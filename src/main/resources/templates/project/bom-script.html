@@ -1109,6 +1109,8 @@ var bom_data = {
                         $('#loading_wrap_total').hide();
                     }
                     tableRefresh();
+
+                    $('#bomList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
 				}
 			});
 
@@ -1120,8 +1122,6 @@ var bom_data = {
 					}
 				}	
 			});
-
-			$('#bomList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"800px"});
 		}
 	}
 

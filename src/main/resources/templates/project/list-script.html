@@ -1925,7 +1925,9 @@ var list = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, unformatter: fn.unformatter, sortable : true, title: false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false};
+		colModelObj = {name: 'progress', index: 'progress', width: 120, align: 'center', formatter: fn.displayProgress, unformatter: fn.unformatter, sortable : true, title:false, cellattr: function(rowId, val, rawObject, cm, rdata) {
+                return 'style="min-width: ' + (cm.width + 20) + 'px;"';
+            }};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'download', index: 'download', width: 60, align: 'left', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
 		colModelArr.push(colModelObj);

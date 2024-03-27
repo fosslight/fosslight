@@ -347,6 +347,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout #disp_licenseText {background-color: aliceblue;font-size: .8rem;padding: 1rem;margin-top: 1rem;color: #06063b;height: 200px; overflow: scroll;}
 
 .custom-layout .font-normal {font-weight: normal !important;}
+.custom-layout .text-shadow {text-shadow: 2px 2px 7px gray;}
 
 /* tooltip */
 .tooltip {
