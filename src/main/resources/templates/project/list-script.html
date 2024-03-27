@@ -716,7 +716,7 @@ var fn = {
 				}
 			} else {
 				if (parseFloat(cellvalue) >= standardScore) {
-					display = '<span class="badge badge-cherry size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Need to resolve('+cellvalue+')</span>';	
+					display = '<span class="badge badge-dark-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Need to resolve('+cellvalue+')</span>';
 				} else {
 					if (cvssScore != null && cvssScore != 0) {
 						display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Discovered('+cellvalue+')</span>';

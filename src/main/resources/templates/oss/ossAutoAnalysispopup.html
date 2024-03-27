@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+<th:block th:replace="oss/ossAutoAnalysis-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <div class="custom-layout" style="height: auto">
+			<section class="content">
+				<div class="container-fluid">
+					<div class="row mt-3">
+						<div class="col-12">
+							<div class="jqGridSet">
+								<table id="ossList"><tr><td></td></tr></table>
+								<div th:if="${project.ossAnalysisStatus == 'result'}" id="pager"></div>
+							</div>
+						</div>
+						<div class="row float-left custom-layout p-2">
+							<button type="button" id="btnAnalysis" class="btn btn-yellow-04 btn-sm width-6rem px-1 ml-2" th:onclick="|Ctrl_fn.editAnalysis()|" th:text="'start Analysis'"></button>
+							<button type="button" id="btnRegist" class="btn btn-yellow-04 btn-sm width-4rem px-1 ml-1" th:onclick="|Ctrl_fn.registOss()|" th:text="save"></button>
+						</div>
+					</div>
+				</div>
+				
+				<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+			</section>
+		</div>
+    </div>
+</body>
+</html>

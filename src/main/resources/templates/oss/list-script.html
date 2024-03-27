@@ -363,10 +363,10 @@
                             return obj.records;
                         }
                     },
-                    colNames: ['','ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
+                    colNames: ['', 'ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
                     colModel: [
                         {
-                            name: 'group', width: 20, align: 'center',
+                        	name: 'group', width: 20, align: 'center',
                             cellattr: function (rowId, tv, rawObject, cm, rdata) {
                                 return ' colspan=2'
                             },
@@ -419,8 +419,17 @@
                             name: 'summaryDescription',
                             index: 'summaryDescription',
                             width: 150,
-                            height: 50,
                             align: 'left'
+                            , cellattr: function (rowId, val, rawObject, cm, rdata) {
+                           		return 'title="' + rawObject['summaryDescription'] + '" style="cursor: pointer;"';
+                           	}
+                            , formatter: function (cellvalue, options, rowObject) {
+                            	if (cellvalue != null && "" != cellvalue) {
+                                	return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
+                                } else {
+                                	return "";
+                                }
+                          	}
                         }
                         , {name: 'cveId', index: 'cveId', hidden: true}
                         , {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter: fn.displayVulnerability}
@@ -475,7 +484,7 @@
                                     }
                                 });
 
-                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
                                 .attr("title", oss_lst_data.licenseTypeInformation)
                                 .tooltip({
                                     content: function () {
@@ -561,51 +570,51 @@
                         $('.listghead_0').hide(); // hide basic groupHeader
 
                         /* columns licalization */
-                        var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
-                        var setUpColumnButton = document.getElementById('setUpColumnButton');
+//                         var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
+//                         var setUpColumnButton = document.getElementById('setUpColumnButton');
 
-                        if (!setUpColumnButton) {
-                            var division = 'oss';
-                            var totalColInfos = [
-                                {'ID': 'group'},
-                                {'OSS Type': 'ossType'},
-                                {'OSS Name': 'ossName'},
-                                {'OSS Version': 'ossVersion'},
-                                {'License Name': 'licenseName'},
-                                {'LicenseType': 'licenseType'},
-                                {'Obligation': 'obligation'},
-                                {'DownloadLocation': 'downloadLocation'},
-                                {'Homepage': 'homepage'},
-                                {'Description': 'summaryDescription'},
-                                {'Vulnerability': 'cvssScore'}];
-                            var defaultColNames = ['group', 'ossId', 'ossName', 'ossVersion', 'licenseName', 'obligation']
-                            var savedColNames = [];
+//                         if (!setUpColumnButton) {
+//                             var division = 'oss';
+//                             var totalColInfos = [
+//                                 {'ID': 'group'},
+//                                 {'OSS Type': 'ossType'},
+//                                 {'OSS Name': 'ossName'},
+//                                 {'OSS Version': 'ossVersion'},
+//                                 {'License Name': 'licenseName'},
+//                                 {'LicenseType': 'licenseType'},
+//                                 {'Obligation': 'obligation'},
+//                                 {'DownloadLocation': 'downloadLocation'},
+//                                 {'Homepage': 'homepage'},
+//                                 {'Description': 'description'},
+//                                 {'Vulnerability': 'cveId'}];
+//                             var defaultColNames = ['ossName', 'ossVersion', 'licenseName', 'obligation']
+//                             var savedColNames = [];
 
-                            var dropdownMenuOptions = {
-                                _division: division,
-                                _totalColInfos: totalColInfos,
-                                _defaultColNames: defaultColNames,
-                                _savedColNames: savedColNames
-                            };
+//                             var dropdownMenuOptions = {
+//                                 _division: division,
+//                                 _totalColInfos: totalColInfos,
+//                                 _defaultColNames: defaultColNames,
+//                                 _savedColNames: savedColNames
+//                             };
 
-                            var dropdownArea = document.createElement('div');
-                            dropdownArea.className = 'dropdown';
-                            var newButton = createDropdownButton();
-                            var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+//                             var dropdownArea = document.createElement('div');
+//                             dropdownArea.className = 'dropdown';
+//                             var newButton = createDropdownButton();
+//                             var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
 
-                            dropdownArea.appendChild(newButton);
-                            dropdownArea.appendChild(dropdownMenu);
+//                             dropdownArea.appendChild(newButton);
+//                             dropdownArea.appendChild(dropdownMenu);
 
-                            parentElement.appendChild(dropdownArea);
+//                             parentElement.appendChild(dropdownArea);
 
-                            document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
-                                event.stopPropagation();
-                                var dropdownMenu = document.getElementById("setUpColumnMenu");
-                                dropdownMenu.classList.toggle("show");
-                            });
-                        }
+//                             document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+//                                 event.stopPropagation();
+//                                 var dropdownMenu = document.getElementById("setUpColumnMenu");
+//                                 dropdownMenu.classList.toggle("show");
+//                             });
+//                         }
 
-                        $('[data-toggle="tooltip"]').tooltip({html: true});
+                         	$('[data-toggle="tooltip"]').tooltip({html: true});
                     },
                     // ondblClickRow: function (rowid, iRow, iCol, e) {
                     //     if (iCol != 0) {
@@ -625,6 +634,21 @@
                     //     }
                     // },
                 });
+                
+                if ($("#list_toppager_left").find('button').length == 0) {
+                	var appendIcon = "";
+                    if (isAdmin) {
+                    	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
+                    	appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
+                    	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
+                    	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
+                    	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"oss_lst_fn.deleteOss()()\"><i class=\"far fa-trash-alt\"></i></button>";
+                    }
+                    appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                    appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
+                    
+                    $("#list_toppager_left").append(appendIcon);
+                }
             }
         }
 

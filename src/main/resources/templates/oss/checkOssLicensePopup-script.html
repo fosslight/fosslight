@@ -76,6 +76,7 @@ var Ctrl_fn = {
 						height: 'auto',
 						rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
 						multiselect: true,
+						multiselectWidth: 35,
 						loadComplete: function(data){
 							if(data.total > 0){
 								$("#btnChangeOss").show();
@@ -115,8 +116,6 @@ var Ctrl_fn = {
 						onSelectRow: function(rowid){},
 						gridComplete:function (){}
 				});
-				
-				$('#ossList').closest(".ui-jqgrid-bdiv").children().css({"height":"373px", "overflow-y" : "scroll"});
 			},
 			error : function(){
 				alertify.error([[#{msg.common.valid2}]], 0);
@@ -130,7 +129,7 @@ var Ctrl_fn = {
 		var result = [];
 		var failFlag = false;
 		var idArry = grid_fn.getCheckedRow("CHANGE");
-
+console.log(idArry);
 		if(idArry.length > 0){
 			window.setTimeout(function(){
 				for(var i = 0 ; i < idArry.length ; i++){
@@ -259,11 +258,11 @@ var grid_fn = {
 
 			if(cellvalue != "" && cellvalue != undefined) {
 				if(checkedEvidenceType == "CD") {
-					display = "<div class=\"tcenter\"><a class=\"evidenceIcon clearlydefined\" title=\""+cellvalue+"\" >"+cellvalue+"</a></div>";
+					display = "<span class=\"d-flex d-flex-align\" title=\""+cellvalue+"\" ><i class=\"fas fa-tag customIcon3\"></i></span><span class=\"d-flex d-flex-align\">CD</span>";
 				} else if(checkedEvidenceType == "GH") {
-					display = "<div class=\"tcenter\"><a class=\"evidenceIcon github\" title=\""+cellvalue+"\" >"+cellvalue+"</a></div>";
+					display = "<span class=\"d-flex d-flex-align\" title=\""+cellvalue+"\" ><i class=\"fab fa-github customIcon3\"></i></span><span class=\"d-flex d-flex-align\">GH</span>";
 				} else if(checkedEvidenceType == "DB") {
-					display = "<div class=\"tcenter\"><a class=\"evidenceIcon existdb\" title=\""+cellvalue+"\" >"+cellvalue+"</a></div>";
+					display = "<span class=\"d-flex d-flex-align\" title=\""+cellvalue+"\"><i class=\"fas fa-database customIcon3\"></i></span><span class=\"d-flex d-flex-align\">DB</span>";
 				}
 			}
 
@@ -276,10 +275,9 @@ var grid_fn = {
 			}
 		},
 		getCheckedRow : function(processType){
-//			var seq = processType.toUpperCase() == "CHANGE" ? 8 : 9;
-			var seq = 9;
+			var seq = processType.toUpperCase() == "CHANGE" ? 8 : 9;
 			return $("#ossList").jqGrid ('getGridParam', 'selarrrow').reduce(function(arr, item) {
-				if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() == "Y"){
+				if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() != "Y"){
 					arr.push(item);
 				}
 

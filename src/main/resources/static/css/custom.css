@@ -58,7 +58,7 @@ ul { list-style-type: none; }
 .custom-layout .icon-light-gray:hover { color: #595959; }
 
 .custom-layout .dropdown-item { font-size: .9rem; }
-.custom-layout .dropdown-item:disabled { color: #c1c8cd; }
+.custom-layout .dropdown-item:disabled { color: #c1c8cd !important; }
 /* btn color option */
 .custom-layout .btn-lg-red { background-color: #a50034; font-weight: 500; color: #fff }
 .custom-layout .btn-lg-red:hover {background-color: #7e101b;border-color: #7e101b; }
@@ -312,6 +312,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 /* badge */
 .badge.badge.size-sm { font-size: 80%; padding: .3rem; }
 .badge.badge-cerebral-gray { background-color: #cccccc; color: #fff; }
+.badge.badge-dark-gray {color: #fff;background-color: #343a40;}
 .badge.badge-ivory { background-color: #f5f4f3;}
 .badge.badge-cherry { background-color: #c00000; color: #fff; }
 .badge.badge-yellow { background-color: #ffb400; border-color: #ffb400; color: #fff; }
