@@ -10,9 +10,14 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="card card-outline card-info submit-form">
-                            <div class="card-header">
-                                <div class="card-title">Basic Info</div>
+                        <div class="card card-outline card-dark submit-form">
+                            <div class="card-header d-flex">
+                                <div class="card-title">User Info</div>
+                                <div class="d-flex-align" style="margin-left: auto;">
+                                    <span class="d-flex-align ml-1 px-2" style="cursor: pointer;" id="change" th:onclick="|fn.changePassword()|" titie="Save">
+                                        <i class="fas fa-save customIcon4"></i>
+                                    </span>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="row form-group">
@@ -45,14 +50,16 @@
                                     </div>
                                 </th:block>
                             </div>
-                            <div class="card-footer">
-                                <input type="button" class="btn btn-info float-right right" id="change" value="change" onclick="fn.changePassword()"/>
-                            </div>
                         </div>
                         <form name="ConfigurationForm" id="configurationLocaleForm">
                             <div class="card card-outline card-dark submit-form">
-                                <div class="card-header">
+                                <div class="card-header d-flex">
                                     <div class="card-title">Default Language</div>
+                                    <div class="d-flex-align" style="margin-left: auto;">
+                                        <span class="d-flex-align ml-1 px-2" style="cursor: pointer;" id="saveDefaultLocaleButton" titie="Save">
+                                            <i class="fas fa-save customIcon4"></i>
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="row form-group mb-3">
@@ -66,9 +73,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-footer">
-                                    <input name="save" id="saveDefaultLocaleButton" type="button" value="Save" class="btn btn-lg-gray float-right right" />
-                                </div>
                             </div>
                         </form>
 
@@ -77,8 +81,13 @@
                     <div class="col-md-6">
                         <form name="ConfigurationForm" id="configurationListForm">
                             <div class="card card-outline card-dark submit-form">
-                                <div class="card-header">
+                                <div class="card-header d-flex">
                                     <div class="card-title">Default List</div>
+                                    <div class="d-flex-align" style="margin-left: auto;">
+                                        <span class="d-flex-align ml-1 px-2" style="cursor: pointer;" id="saveDefaultListTabButton"  titie="Save">
+                                            <i class="fas fa-save customIcon4"></i>
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="row form-group">
@@ -91,9 +100,6 @@
                                             </th:block>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="card-footer">
-                                    <input name="save" id="saveDefaultListTabButton" type="button" value="Save" class="btn btn-lg-gray float-right right" />
                                 </div>
                             </div>
                         </form>
