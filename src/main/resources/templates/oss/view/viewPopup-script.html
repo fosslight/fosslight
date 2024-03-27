@@ -25,9 +25,9 @@ $(document).ready(function() {
 				colNames: ['ID','OSS Name (version)','OSS Version', 'Declared License'],
 				colModel: [
 					{name: 'ossId', index: 'ossId', key:true, hidden:true},
-					{name: 'ossNameVerStr', index: 'ossNameVerStr', align: 'left'},
-					{name: 'ossVersion', index: 'ossVersion', width: 100, align: 'left', hidden:true},
-					{name: 'licenseName', index: 'licenseName', width: 300, align: 'left'}
+					{name: 'ossNameVerStr', index: 'ossNameVerStr', width: 40, align: 'left'},
+					{name: 'ossVersion', index: 'ossVersion',  align: 'left', hidden:true},
+					{name: 'licenseName', index: 'licenseName', width: 40, align: 'left'}
 				],
 				onSelectRow: function(id){
 					$.ajax({
@@ -44,8 +44,9 @@ $(document).ready(function() {
 						}
 					});
 				},
-				autowidth: true,
+                autowidth: true,
 				gridview: true,
+                scrollOffset: 0,
 				viewrecords: true,
 				loadonce: true,
 				height: 'auto',

@@ -430,8 +430,8 @@ tr.ui-row-ltr,
 
 .popup .ui-jqgrid .ui-jqgrid-bdiv {
     height: 250px !important;
+    overflow: hidden;
 }
-
 .ui-jqgrid .ui-jqgrid-titlebar,
 .ui-jqgrid .ui-jqgrid-hdiv,
 .ui-jqgrid .ui-jqgrid-bdiv {
