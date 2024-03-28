@@ -12,9 +12,9 @@
 		</div>
 		<div class="row custom-layout">
 			<div class="col-12">
-				<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-yellow-03 btn-sm width-6rem mr-xm px-3 float-left" style="margin-left: 3px;" th:text="Ignore" th:onclick="|fn.commentsIgnore()|"></button>
-				<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.closeAlertifyView()|"></button>
-				<button type="button" class="btn btn-teal-01 btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn.rejectRegist()|"></button>
+				<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-outline-lg-red btn-sm width-6rem mr-xm px-3 float-left" style="margin-left: 3px;" th:text="Ignore" th:onclick="|fn.commentsIgnore()|"></button>
+				<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.closeAlertifyView()|"></button>
+				<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn.rejectRegist()|"></button>
 			</div>
 		</div>
 	</div>
