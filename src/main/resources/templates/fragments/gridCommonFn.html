@@ -72,11 +72,11 @@
                         }
                 });
             },
-            displayDownloadLocation: function (cellvalue, options, rowObject) {
-                var downloadLocation = rowObject["downloadLocation"];
-                var display = downloadLocation.split(",");
-                var str = display.map(link => `<a class='urlLink' target='_blank' href='${link.trim()}' title='${link.trim()}'>${link.trim()}</a>`).join("<br>");
-                return str;
+            displayDownloadlocation: function (cellvalue, options, rowObject) {
+               	var downloadLocation = rowObject["downloadLocation"];
+               	var display = downloadLocation.split(",");
+              	var str = display.map(link => `<a class='urlLink' target='_blank' href='${link.trim()}' title='${link.trim()}'>${link.trim()}</a>`).join("");
+               	return str;
             },
             // oss 정보 가져오기
             griOssIds: function (div, rowid, ossName, ossVersion) {
@@ -254,7 +254,6 @@
                     }
                     url = "<a href=\"" + httpVal + "\" class=\"urlLink\" target=\"_blank\">" + cellvalue + "</a>";
                 }
-
                 return url;
             },
             unDisplayUrl: function (cellvalue, options, rowObject) {
