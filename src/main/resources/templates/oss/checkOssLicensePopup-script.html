@@ -235,14 +235,12 @@ var grid_fn = {
 			}
 			return display;
 		},
-		displayDownloadLocation : function(cellvalue, options, rowObject){
-			var display = "";
-			var downloadLocation = rowObject["downloadLocation"];
-
-			display = downloadLocation.split(",");
-
-			return display.join("<br>");
-		},
+		 displayDownloadlocation: function (cellvalue, options, rowObject) {
+           	var downloadLocation = rowObject["downloadLocation"];
+           	var display = downloadLocation.split(",");
+          	var str = display.map(link => `<a class='urlLink' target='_blank' href='${link.trim()}' title='${link.trim()}'>${link.trim()}</a>`).join("");
+           	return str;
+        },
 		unformatter : function(cellvalue, options, rowObject){
 			return cellvalue;
 		},
