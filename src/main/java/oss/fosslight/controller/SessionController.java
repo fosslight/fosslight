@@ -58,7 +58,7 @@ public class SessionController extends CoTopComponent{
     
 	@GetMapping(value = SESSION.LOGIN, produces = "text/html; charset=utf-8")
 	public String login(HttpServletRequest req, HttpServletResponse res) throws IOException {
-		if (isLogin(jwtTokenProvider)) {
+		if (isLogin()) {
 			res.sendRedirect(req.getContextPath() + "/index");
 		}
 		

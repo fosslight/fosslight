@@ -176,6 +176,10 @@ public class JwtTokenProvider {
 		return token;
 	}
 
+	public boolean validateToken() {
+		return this.validateToken(this.resolveToken(this.getRequest()));
+	}
+	
 	/**
 	 * Validate token.
 	 *

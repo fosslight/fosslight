@@ -88,6 +88,14 @@ public class CoTopComponent {
 		this.appEnv = env;
 	}
 
+	protected static JwtTokenProvider jwtTokenProvider;
+	
+	@SuppressWarnings("static-access")
+	@Autowired
+	public void setJwtTokenProvider(JwtTokenProvider jwtTokenProvider) {
+		this.jwtTokenProvider = jwtTokenProvider;
+	}
+	
     public static Boolean isEmpty(String s) {
 		return StringUtil.isEmptyTrimmed(s);
 	}
@@ -155,7 +163,7 @@ public class CoTopComponent {
     	return result;
     }
     
-    protected static boolean isLogin(JwtTokenProvider jwtTokenProvider) {
+    protected static boolean isLogin() {
 		if (jwtTokenProvider.validateToken()) {
 			return true;
         } else {
