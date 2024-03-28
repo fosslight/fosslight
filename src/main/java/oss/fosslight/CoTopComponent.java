@@ -46,6 +46,7 @@ import com.google.gson.Gson;
 
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.config.AppConstBean;
+import oss.fosslight.config.JwtTokenProvider;
 import oss.fosslight.domain.ComBean;
 import oss.fosslight.domain.T2Authorities;
 import oss.fosslight.domain.T2Users;
@@ -154,17 +155,12 @@ public class CoTopComponent {
     	return result;
     }
     
-    protected static boolean isLogin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-		String name =auth.getName();
-		boolean af = auth.isAuthenticated();
-
-		if (auth != null && !"anonymousUser".equalsIgnoreCase(auth.getName()) && auth.isAuthenticated()) {
-        	return true;
+    protected static boolean isLogin(JwtTokenProvider jwtTokenProvider) {
+		if (jwtTokenProvider.validateToken()) {
+			return true;
+        } else {
+        	return false;
         }
-        
-    	return false;
     }
     
     protected static String encodePassword(String rawPassword) {

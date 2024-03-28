@@ -55,7 +55,7 @@ var Ctrl_fn = {
 						colModel: [
 							{name: 'gridId', index: 'gridId', hidden:true, key:true},
 							{name: 'result', index: 'result', width:20, align: 'center',editable: false, formatter: grid_fn.displayStatus, unformatter: grid_fn.unformatter, sortable:false},
-							{name: 'downloadLocation', index: 'downloadLocation', width: 90, align: 'left',editable: false, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, sortable:false},
+							{name: 'downloadLocation', index: 'downloadLocation', width: 90, align: 'left',editable: false, formatter:grid_fn.displayDownloadLocation, unformatter:fn_grid_com.unformatter, sortable:false},
 							{name: 'ossName', index: 'ossName', width: 50, align: 'left',editable: false, sortable:false},
 							{name: 'ossVersion', index: 'ossVersion', width: 40, align: 'left',editable:false, sortable:false},
 							{name: 'licenseName', index: 'licenseName', width: 50, align: 'left',editable:false, sortable:false},
