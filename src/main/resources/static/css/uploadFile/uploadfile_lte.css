@@ -118,6 +118,10 @@ border: none;
 -webkit-box-shadow: 0 2px 0 0 #13648d;
 box-shadow: 0 2px 0 0 #13151638; /* 231101 hklim */
 vertical-align: middle;
+
+background: transparent;
+border: 1px solid #343a40;
+color: #343a40;
 } /* 161005 km-park */
 
 .ajax-file-upload:hover {
@@ -125,7 +129,12 @@ background: #3396c9;
 -moz-box-shadow: 0 2px 0 0 #15719f;
 -webkit-box-shadow: 0 2px 0 0 #15719f;
 box-shadow: 0 2px 0 0 #15719f;
+
+color: #fff;
+background-color: #343a40;
+border-color: #343a40;
 }
+
 
 .ajax-upload-dragdrop
 {
