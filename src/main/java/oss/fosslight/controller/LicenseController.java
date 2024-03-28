@@ -156,7 +156,7 @@ public class LicenseController extends CoTopComponent{
 				if (!isEmpty(restrictionStr)) licenseMaster.setRestriction(restrictionStr);
 			}
 			
-			return "liense/view";
+			return "license/view";
 		}
 	}
 	

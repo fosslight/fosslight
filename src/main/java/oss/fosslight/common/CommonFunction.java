@@ -101,7 +101,6 @@ import oss.fosslight.domain.UploadFile;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
 import oss.fosslight.service.ProjectService;
-import oss.fosslight.service.SelfCheckService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.FileUtil;
@@ -137,13 +136,7 @@ public class CommonFunction extends CoTopComponent {
 		partnerService = service;
 	}
 	
-	private static SelfCheckService selfCheckService;
-	
-	public static void setSelfCheckService(SelfCheckService service) {
-		selfCheckService = service;
-	}
-	
-    public static String getCoConstDefVal(String nm) {
+	public static String getCoConstDefVal(String nm) {
         try {
             return (String) CoConstDef.class.getField(nm).get(null);
         } catch (Exception e) {
@@ -5059,30 +5052,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 			break;
-			
-		case "selfCheck":
-			Project param2 = new Project();
-			for (int i=0; i<prjIds.length; i++) {
-				userIdList = new ArrayList<>();
-				param2.setPrjId(prjIds[i]);
-				
-				Project bean = selfCheckService.getProjectDetail(param2);
-				userIdList.add(bean.getCreator());
-				
-				if (bean.getWatcherList() != null) {
-					for (Project watcher : bean.getWatcherList()) {
-						if (!isEmpty(watcher.getPrjUserId()) && !userIdList.contains(watcher.getPrjUserId())) userIdList.add(watcher.getPrjUserId());
-					}
-				}
-				
-				if (!isEmpty(userId)) {
-					if (!userIdList.contains(userId)) {
-						notPermissionList.add(prjIds[i]);
-					}
-				} else {
-					notPermissionList = userIdList;
-				}
-			}
 		}
 		
 		Collections.sort(notPermissionList);

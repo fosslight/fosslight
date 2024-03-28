@@ -39,6 +39,7 @@ import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.common.Url.SELF_CHECK;
 import oss.fosslight.domain.CommentsHistory;
 import oss.fosslight.domain.LicenseMaster;
@@ -235,7 +236,6 @@ public class SelfCheckController extends CoTopComponent {
 
 		@SuppressWarnings("unchecked")
 		List<Project> list = (List<Project>) map.get("rows");
-		CommonFunction.setSelfCheckService(selfCheckService);
 		
 		for (Project prj : list) {
 			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {prj.getPrjId()}, "selfCheck");
@@ -812,5 +812,23 @@ public class SelfCheckController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value = SELF_CHECK.CHANGE_MODE, produces = "text/html; charset=utf-8")
+	public String changeMode(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId, @PathVariable String mode) throws Exception {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = selfCheckService.getProjectDetail(project);
+		T2Users user = userService.getLoginUserInfo();
+		if (user != null) project.setPrjEmail(user.getEmail());
+
+		model.addAttribute("project", project);
+		model.addAttribute("mode", mode);
+		
+		if (mode.equals("edit")) {
+			return "selfCheck/fragments/edit :: editFragments";
+		} else {
+			return "selfCheck/fragments/edit :: viewFragments";
+		}
 	}
 }

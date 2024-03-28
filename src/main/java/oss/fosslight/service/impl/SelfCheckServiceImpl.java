@@ -208,6 +208,23 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		// file
 		project.setCsvFile(selfCheckMapper.selectCsvFile(project));
 		
+		List<String> userIdList = new ArrayList<>();
+		userIdList.add(project.getCreator());
+		
+		if (watcherList != null && !watcherList.isEmpty()) {
+			for (Project watcher : watcherList) {
+				if (!isEmpty(watcher.getCreator()) && !userIdList.contains(watcher.getCreator())) userIdList.add(watcher.getCreator());
+			}
+		}
+		
+		if (!CommonFunction.isAdmin() && !userIdList.contains(loginUserName())) {
+			project.setStatusPermission(0);
+		} else {
+			project.setStatusPermission(1);
+		}
+		
+		project.setPermission(1);
+				
 		return project;
 	}
 	

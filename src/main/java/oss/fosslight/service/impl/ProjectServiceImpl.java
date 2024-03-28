@@ -791,6 +791,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (list != null && !list.isEmpty()) {
 				List<String> cvssScoreMaxList = new ArrayList<>();
 				List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
+				Map<String, String> cveIdList = new HashMap<>();
 				
 				for (ProjectIdentification project : list){
 					String _test = project.getOssName().trim() + "_" + project.getOssVersion().trim();
@@ -829,12 +830,23 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						cvssScoreMaxVendorProductList.add(project.getCvssScoreMax3());
 					}
 					
-					String conversionCveInfo = CommonFunction.getConversionCveInfo(project.getReferenceId(), ossInfoMap, project, cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
+					if (cveIdList.containsKey(_test)) {
+						String cveInfo = cveIdList.get(_test);
+						
+						String[] conversionCveData = cveInfo.split("\\@");
 						project.setCvssScore(conversionCveData[3]);
 						project.setCveId(conversionCveData[4]);
 						project.setVulnYn(CoConstDef.FLAG_YES);
+					} else {
+						String conversionCveInfo = CommonFunction.getConversionCveInfo(project.getReferenceId(), ossInfoMap, project, cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
+						if (conversionCveInfo != null) {
+							cveIdList.put(_test, conversionCveInfo);
+							
+							String[] conversionCveData = conversionCveInfo.split("\\@");
+							project.setCvssScore(conversionCveData[3]);
+							project.setCveId(conversionCveData[4]);
+							project.setVulnYn(CoConstDef.FLAG_YES);
+						}
 					}
 					
 					cvssScoreMaxVendorProductList.clear();

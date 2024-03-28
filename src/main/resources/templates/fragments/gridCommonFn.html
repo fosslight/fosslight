@@ -1397,71 +1397,71 @@
                         });
                     }
                 }
-            }
-// 		checkLicenseTextValidation : function(_prjId, _type){
-// 			$.ajax({
-// 				url : '/checkLicenseText/valid',
-// 				cache : false,
-// 				async: false,
-// 				data : JSON.stringify({ "prjId" : _prjId , "regType" : _type}),
-// 				type : 'POST',
-// 				dataType : 'json',
-// 				contentType : 'application/json',
-// 				success : function(resultData){
-// 					if(resultData.isValid){
-// 						if(resultData.returnMsg.toUpperCase() == "COMPLETE"){
-// 							$("#checkLicenseTextFile").show();
-// 							downloadCheckLicenseText = resultData.downloadUrl;
-// 						}else{
-// 							if(_type != "load"){
-// 								fn_grid_com.checkLicenseText(_prjId);
-// 							}
-// 						}
+            },
+		checkLicenseTextValidation : function(_prjId, _type){
+			$.ajax({
+				url : '/checkLicenseText/valid',
+				cache : false,
+				async: false,
+				data : JSON.stringify({ "prjId" : _prjId , "regType" : _type}),
+				type : 'POST',
+				dataType : 'json',
+				contentType : 'application/json',
+				success : function(resultData){
+					if(resultData.isValid){
+						if(resultData.returnMsg.toUpperCase() == "COMPLETE"){
+							$("#checkLicenseTextFile").show();
+							downloadCheckLicenseText = resultData.downloadUrl;
+						}else{
+							if(_type != "load"){
+								fn_grid_com.checkLicenseText(_prjId);
+							}
+						}
 
-// 					}else{
-// 						if(_type != "load"){
-// 							alertify.error(resultData.returnMsg, 0);
-// 						}
-// 						$("#checkLicenseTextFile").hide();
-// 					}
+					}else{
+						if(_type != "load"){
+							alertify.error(resultData.returnMsg, 0);
+						}
+						$("#checkLicenseTextFile").hide();
+					}
 
-// 				},
-// 				error : function(){
-// 					alertify.error([[#{msg.common.valid2}]], 0);
-// 				}
-// 			});
-// 		},
-// 		checkLicenseText : function(_prjId){
-// 			$.ajax({
-// 				url : '/checkLicenseText/start',
-// 				cache : false,
-// 				async: false,
-// 				data : JSON.stringify({ "prjId" : _prjId }),
-// 				type : 'POST',
-// 				dataType : 'json',
-// 				contentType : 'application/json',
-// 				success : function(resultData){
-// 					if(resultData.isValid){
-// 						var _url = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_CHECK_LICENSETEXT_SERVER_INFO'), @CommonFunction.getCoConstDefVal('CD_SERVER_URL'))}]];
-// 						_url += "?pid="+_prjId+"&email="+resultData.email;
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		checkLicenseText : function(_prjId){
+			$.ajax({
+				url : '/checkLicenseText/start',
+				cache : false,
+				async: false,
+				data : JSON.stringify({ "prjId" : _prjId }),
+				type : 'POST',
+				dataType : 'json',
+				contentType : 'application/json',
+				success : function(resultData){
+					if(resultData.isValid){
+						var _url = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_CHECK_LICENSETEXT_SERVER_INFO'), @CommonFunction.getCoConstDefVal('CD_SERVER_URL'))}]];
+						_url += "?pid="+_prjId+"&email="+resultData.email;
 
-// 						if(""+resultData.isProd == "false"){
-// 							_url += "&dev=ok";
-// 						}
+						if(""+resultData.isProd == "false"){
+							_url += "&dev=ok";
+						}
 
-// 						location.href = _url;
-// 						alertify.alert(resultData.returnMsg, function(){});
-// 						createTabInFrame(_prjId+'_Identify', '/project/identification/'+_prjId+'/1');
-// 					}else{
-// 						alertify.error([[#{msg.common.valid2}]], 0);
-// 					}
+						location.href = _url;
+						alertify.alert(resultData.returnMsg, function(){});
+						createTabInFrame(_prjId+'_Identify', '/project/identification/'+_prjId+'/1');
+					}else{
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
 
-// 				},
-// 				error : function(){
-// 					alertify.error([[#{msg.common.valid2}]], 0);
-// 				}
-// 			});
-// 		}
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
         }
 
         var src_fn_com = {
@@ -1586,7 +1586,6 @@
                 }
 
             },
-
         }
     </script>
 </th:block>

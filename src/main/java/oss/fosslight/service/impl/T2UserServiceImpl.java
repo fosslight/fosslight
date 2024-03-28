@@ -766,9 +766,6 @@ public class T2UserServiceImpl implements T2UserService {
 							return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
 						}
 					});
-					for (String[] result : searchResult) {
-						log.info(result[0]);log.info(result[1]);
-					}
 						
 					rtnMap.put("isAuthenticated", true);
 				} else {
