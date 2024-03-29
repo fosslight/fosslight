@@ -825,6 +825,14 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
     width: 88%;
 }
 
+.ui-jqgrid .ui-jqgrid-view .ui-widget-content select {
+    padding: 3px 3px;
+    font-size: .75rem;
+    margin-left: 0;
+    width: 100%;
+    min-width: 40px;
+}
+
 .ui-jqgrid .ui-jqgrid-view input {
     border: .8px solid #ced4da;
     border-radius: 4px;
