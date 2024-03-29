@@ -307,7 +307,7 @@
 
                 if (cellvalue == "Y" && rowObject.ossName && "-" != rowObject.ossName && rowObject.batStringMatchPercentage != "Binary DB matched") {
                     var url = '/download/batGuiReport/' + rowObject.referenceId + '/' + rowObject.batChecksum + '';
-                    display = "<a class='iconReport' href='" + url + "'>" + rowObject.batChecksum + "</a>";
+                    display = "<a class='fas fa-file-contract customIcon' href='" + url + "'></a>";
                 }
 
                 return display;

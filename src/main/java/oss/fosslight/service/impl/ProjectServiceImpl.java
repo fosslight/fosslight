@@ -789,9 +789,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 			
 			if (list != null && !list.isEmpty()) {
-				List<String> cvssScoreMaxList = new ArrayList<>();
-				List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
-				Map<String, String> cveIdList = new HashMap<>();
+				String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
+				List<String> vendorProjectMatchList = new ArrayList<>();
 				
 				for (ProjectIdentification project : list){
 					String _test = project.getOssName().trim() + "_" + project.getOssVersion().trim();
@@ -806,51 +805,21 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					project.setLicenseDiv(licenseDiv);
 					
-					// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
-					if (isEmpty(project.getCveId()) 
-							&& isEmpty(project.getOssVersion()) 
-							&& !isEmpty(project.getCvssScoreMax())
-							&& !("-".equals(project.getOssName()))){ 
-						String[] cvssScoreMax = project.getCvssScoreMax().split("\\@");
-						project.setCvssScore(cvssScoreMax[3]);
-						project.setCveId(cvssScoreMax[4]);
-					}
-					
-					// convert max score
-					if (project.getCvssScoreMax() != null) {
-						cvssScoreMaxList.add(project.getCvssScoreMax());
-					}
 					if (project.getCvssScoreMax1() != null) {
-						cvssScoreMaxVendorProductList.add(project.getCvssScoreMax1());
-					}
-					if (project.getCvssScoreMax2() != null) {
-						cvssScoreMaxList.add(project.getCvssScoreMax2());
-					}
-					if (project.getCvssScoreMax3() != null) {
-						cvssScoreMaxVendorProductList.add(project.getCvssScoreMax3());
-					}
-					
-					if (cveIdList.containsKey(_test)) {
-						String cveInfo = cveIdList.get(_test);
-						
-						String[] conversionCveData = cveInfo.split("\\@");
+						String[] conversionCveData = project.getCvssScoreMax1().split("\\@");
 						project.setCvssScore(conversionCveData[3]);
 						project.setCveId(conversionCveData[4]);
 						project.setVulnYn(CoConstDef.FLAG_YES);
-					} else {
-						String conversionCveInfo = CommonFunction.getConversionCveInfo(project.getReferenceId(), ossInfoMap, project, cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
-						if (conversionCveInfo != null) {
-							cveIdList.put(_test, conversionCveInfo);
-							
-							String[] conversionCveData = conversionCveInfo.split("\\@");
-							project.setCvssScore(conversionCveData[3]);
-							project.setCveId(conversionCveData[4]);
-							project.setVulnYn(CoConstDef.FLAG_YES);
-						}
+						
+						vendorProjectMatchList.add(project.getCvssScoreMax1());
+					} else if (project.getCvssScoreMax3() != null) {
+						String[] conversionCveData = project.getCvssScoreMax3().split("\\@");
+						project.setCvssScore(conversionCveData[3]);
+						project.setCveId(conversionCveData[4]);
+						project.setVulnYn(CoConstDef.FLAG_YES);
+						
+						vendorProjectMatchList.add(project.getCvssScoreMax3());
 					}
-					
-					cvssScoreMaxVendorProductList.clear();
-					cvssScoreMaxList.clear();
 					
 					String comments = "";
 					if (!isEmpty(loadToListComment)) {
@@ -874,6 +843,52 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					if (!isEmpty(bean.getOssId())) {
 						ossParam.addOssIdList(bean.getOssId());
+					}
+					
+					if (vendorProjectMatchList.isEmpty()) {
+						if (bean.getCvssScoreMax() != null) {
+							String[] conversionCveData = bean.getCvssScoreMax().split("\\@");
+							bean.setCvssScore(conversionCveData[3]);
+							bean.setCveId(conversionCveData[4]);
+							bean.setVulnYn(CoConstDef.FLAG_YES);
+						} else if (bean.getCvssScoreMax2() != null) {
+							String[] conversionCveData = bean.getCvssScoreMax2().split("\\@");
+							bean.setCvssScore(conversionCveData[3]);
+							bean.setCveId(conversionCveData[4]);
+							bean.setVulnYn(CoConstDef.FLAG_YES);
+						}
+					} else {
+						if (bean.getCvssScoreMax() != null) {
+							if (vendorProjectMatchList.contains(bean.getCvssScoreMax())) {
+								String conversionCveInfo = CommonFunction.getDeduplicateCveInfo(bean.getReferenceId(), bean.getCvssScoreMax(), ossInfoMap, bean, vendorProjectMatchList, standardScore);
+								if (conversionCveInfo != null) {
+									String[] conversionCveData = conversionCveInfo.split("\\@");
+									bean.setCvssScore(conversionCveData[3]);
+									bean.setCveId(conversionCveData[4]);
+									bean.setVulnYn(CoConstDef.FLAG_YES);
+								}
+							} else {
+								String[] conversionCveData = bean.getCvssScoreMax().split("\\@");
+								bean.setCvssScore(conversionCveData[3]);
+								bean.setCveId(conversionCveData[4]);
+								bean.setVulnYn(CoConstDef.FLAG_YES);
+							}
+						} else if (bean.getCvssScoreMax2() != null) {
+							if (vendorProjectMatchList.contains(bean.getCvssScoreMax2())) {
+								String conversionCveInfo = CommonFunction.getDeduplicateCveInfo(bean.getReferenceId(), bean.getCvssScoreMax2(), ossInfoMap, bean, vendorProjectMatchList, standardScore);
+								if (conversionCveInfo != null) {
+									String[] conversionCveData = conversionCveInfo.split("\\@");
+									bean.setCvssScore(conversionCveData[3]);
+									bean.setCveId(conversionCveData[4]);
+									bean.setVulnYn(CoConstDef.FLAG_YES);
+								}
+							} else {
+								String[] conversionCveData = bean.getCvssScoreMax2().split("\\@");
+								bean.setCvssScore(conversionCveData[3]);
+								bean.setCveId(conversionCveData[4]);
+								bean.setVulnYn(CoConstDef.FLAG_YES);
+							}
+						}
 					}
 				}
 				

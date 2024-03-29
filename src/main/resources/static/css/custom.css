@@ -425,16 +425,16 @@ tr.ui-row-ltr,
 .ui-widget.ui-widget-content {
     border: none !important;
 }
-
+/* 
 .popup .ui-widget.ui-widget-content {
-    height: 250px !important;
+    max-height: 250px !important;
 }
 
-.popup .jqGridSet { height: 250px !important; }
-
-.popup .ui-jqgrid .ui-jqgrid-bdiv {
-    height: 250px !important;
-    overflow: hidden;
+.popup .jqGridSet { max-height: 250px !important; }
+ */
+ .popup .ui-jqgrid .ui-jqgrid-bdiv {
+	max-height: 500px !important;
+	overflow: hidden;
 }
 .ui-jqgrid .ui-jqgrid-titlebar,
 .ui-jqgrid .ui-jqgrid-hdiv,

@@ -141,7 +141,7 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return OSS.LIST_JSP;
+		return "oss/list";
 	}
 	
 	@GetMapping(value=OSS.LIST_AJAX)
