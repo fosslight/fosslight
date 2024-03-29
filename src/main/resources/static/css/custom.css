@@ -452,7 +452,6 @@ tr.ui-row-ltr,
     border: none;
 }
 
-#gbox_bomList .ui-jqgrid-hbox table.ui-jqgrid-htable { table-layout: auto; }
 .ui-jqgrid .ui-th-column {
     background-color: transparent;
     padding: 10px;

@@ -56,6 +56,11 @@ var bom_evt = {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}
 		});
+
+		$(window).resize(function(){
+			bom_fn.bomListHeaderResize();
+		});
+
 		
 		if(ossAnalysisStatus != null && ossAnalysisStatus.toUpperCase() == "SUCCESS" && curIdenStatus != "CONF"){
 			$(".idenAnalysisResult").show();
@@ -870,7 +875,7 @@ var bom_data = {
 					$("#bomList").jqGrid('GridUnload');
 					
 					bom_data.loadBomGrid();
-                    //bom_fn.bomListHeaderResize();
+                    bom_fn.bomListHeaderResize();
 					
 					fn_grid_com.addEtcKeyDownEvent($('#bomList'), bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
 					
