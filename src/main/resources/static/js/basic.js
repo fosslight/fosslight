@@ -879,7 +879,7 @@ function createValidMsgComplex(msgData) {
                     $('textarea[name=' + key + ']').focus().next("span.retxt,div.retxt").html(value).show();
                     $('textarea[name=' + key + ']').addClass("is-invalid");
                 } else if ($('select[name=' + key + ']').length > 0) {
-					if ('osType' == key) {
+					if ('osType' == key || 'licenseType' == key) {
 						$('select[name=' + key + ']').focus().next().next("span.retxt,div.retxt").html(value).show();
 					} else {
 						$('select[name=' + key + ']').focus().next("span.retxt,div.retxt").html(value).show();

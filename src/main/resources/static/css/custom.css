@@ -290,6 +290,14 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .form-group.inner-checkbox .form-check-input { position: absolute; right: 93px; top: 6px; }
 .custom-layout .form-group.inner-checkbox .form-check-label { position: absolute; right: 12px; top: 6px; }
 .lg .select2-container--default .select2-selection--multiple { height: 3rem }
+.custom-layout .form-control.is-invalid + .select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #dc3545 !important;
+    /* padding-right: 2.25rem !important; */
+    background-image: url(data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e) !important;
+    background-repeat: no-repeat;
+    background-position: right calc(.375em + .1875rem) center;
+    background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+}
 
 
 /* comment */
