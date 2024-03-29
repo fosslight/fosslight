@@ -328,7 +328,7 @@ public class LicenseController extends CoTopComponent{
 		lm.setLicenseName(licenseName.trim());
 		
 		lm = licenseService.getLicenseId(lm);
-		map.put("licenseId", lm.getLicenseId());
+		map.put("licenseId", lm != null ? lm.getLicenseId() : "");
 		
 		return makeJsonResponseHeader(map);
 	}

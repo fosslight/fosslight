@@ -2944,8 +2944,6 @@ var grid = {
 				if(isSort){
 					isSort = false;
 				}
-				
-				resizingOuterJqGidSet();
 			},
 			onSelectRow: function(rowid,status,eventObject) {
 			},
@@ -3023,6 +3021,8 @@ var grid = {
 						$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
 					}
 				}
+				
+				tableRefreshGridArea('notEntire');
 			},
 			removeHighLight : true
 

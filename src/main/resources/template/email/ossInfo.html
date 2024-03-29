@@ -39,23 +39,30 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<td style="padding:5px;" th:utext="${oss_basic_info.ossName}"></td>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.ossName}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Nickname</th>
-										<td style="padding:5px;" th:utext="${oss_basic_info.ossNickname}"></td>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.ossNickname}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<td style="padding:5px;" th:utext="${oss_basic_info.ossVersion}">
-											<img th:if="${oss_basic_info.ossType.contains('M')}" src="data:image/png;base64,iVBORw0KG..."/>
-											<img th:if="${oss_basic_info.ossType.contains('D')}" src="data:image/png;base64,iVBORw0KG..."/>
-											<img th:if="${oss_basic_info.ossType.contains('V')}" src="data:image/png;base64,iVBORw0KG..."/>
+										<td style="padding:5px;">
+											<span th:text="${oss_basic_info?.ossVersion}"></span>
+											<span th:if="${oss_basic_info?.ossType.contains('M')}">
+												<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADcSURBVDhPY/z//39v39o7d58zEAdUlCWLi4JZgCygHg1NK4goQXDj+jEgyQThkApQtP3+/evTp7fv3j0DkkA2GheqCAxAjoSD798/11a5QtjNbbuBJDKXlVUYwgYCFNv+/PkJZTEwAC0BIigHVQoIcPqtvyceiKAcDECNIIGDlLQ+NAYawK6Nlw/qezgDDWDXxsnJCww6IAIyoEKoAEUbCws7hAFUzccnDERwbXApCECJN4glEAYuEQhAsY2VlQ1iCZCBSwQCsPuNICA54ygrSZYUB4O0QQWIBwwMAJhcWykW5ke4AAAAAElFTkSuQmCC"/>
+											</span>
+											<span th:if="${oss_basic_info?.ossType.contains('D')}">
+												<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAD6SURBVDhPY/z///+WnpUv7zxlIA6Iq0j7lISzAFlAPYaa+hBRguD89YtAkgnCIRWgaPv1+9fbT++evXsBQUA2UAQqhwpAjoSDz9+/uNaGQjlgsK5qgZSQOBsrG5QPAyi2/fwDNXth4ZTlZbOAjKC2hGfvXmLaid1vwnyCimKycJ1AV0DE4QBnkAAdxsvJDWHDXQEH1AhJZAD0z+fvXyFsdha8QQIHbz+9v//qcWRXGpANDExeTh6IOBygRADc1Pj+HAgDVwSgaAOaurt5NTwAgKZg1QMEKI4EqhDmE5ISkoAgIBurHiAgMyRJzzjKUj6lESBtUAHiAQMDAJyXY/B57xmtAAAAAElFTkSuQmCC"/>
+											</span>
+											<span th:if="${oss_basic_info?.ossType.contains('V')}">
+												<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADZSURBVDhPY/z///+GWY3PH95kIA5IyqsHpNWzAFlAPYE29hBRgmD9kYNAkgnCIRWga/v56/er95+ACMhAZkOlYQBd28ev3/WiSoEIyEBmQ6VhAIttcAYyG8KAA3Rt7GysEAbEeRA2XBAO0LXxc3PunVoDZHgXdgARkAHkAgXBkgiAxTY+bi4oBwyAXMK2AQGaIkw9QIBFG9ydQIDVhUCA3TZRQX4IG8gg1jYgANpwaVk3EGG1CgiwawPaICbIB0RYrQIC7NoIApIzjoS8WmBaA0gbVIB4wMAAAOuvYrotinxoAAAAAElFTkSuQmCC"/>
+											</span>
 										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name (Type)</th>
-										<td style="padding:5px;" th:utext="|${oss_basic_info.licenseName} + ' (' + ${oss_basic_info.licenseType} + ')'|"></td>
+										<td style="padding:5px;" th:text="${oss_basic_info?.licenseName} + ' (' + ${oss_basic_info?.licenseType} + ')'"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Detected License Name</th>
@@ -68,21 +75,21 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
-										<td style="padding:5px;" th:utext="${oss_basic_info.obligation}"></td>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.obligation}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Copyright</th>
-										<td style="padding:5px;" th:utext="${oss_basic_info.copyright}"></td>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.copyright}"></td>
 									</tr>
-									<th:block th:if="${#strings.contains(oss_basic_info.ossType, 'M') or #strings.contains(oss_basic_info.ossType, 'D')}">
+									<th:block th:if="${#strings.contains(oss_basic_info?.ossType, 'M') or #strings.contains(oss_basic_info?.ossType, 'D')}">
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
 											<td>
 												<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 													<tr th:each="ossLicense : ${oss_basic_info.ossLicenses}">
-														<td th:utext="${ossLicense.ossLicenseComb}"></td>
-														<td th:utext="${ossLicense.licenseName}"></td>
-														<td th:utext="${ossLicense.ossCopyright}"></td>
+														<td th:utext="${ossLicense?.ossLicenseComb}"></td>
+														<td th:utext="${ossLicense?.licenseName}"></td>
+														<td th:utext="${ossLicense?.ossCopyright}"></td>
 													</tr>
 												</table>
 											</td>
@@ -91,26 +98,26 @@
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Homepage</th>
 										<td style="padding:5px;">
-											<span th:if="${oss_basic_info.homepage != null and not #strings.isEmpty(oss_basic_info.homepage)}">
-												<a th:href="${oss_basic_info.homepage}" target="_blank" th:utext="${oss_basic_info.homepage}"></a>
+											<span th:if="${oss_basic_info?.homepage != null and not #strings.isEmpty(oss_basic_info?.homepage)}">
+												<a th:href="${oss_basic_info?.homepage}" target="_blank" th:utext="${oss_basic_info?.homepage}"></a>
 											</span>
 										</td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Download Location</th>
-										<td style="padding:5px;" th:utext="${oss_basic_info.downloadLocation}"></td>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.downloadLocation}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Summary Description</th>
-										<td style="padding:5px;" th:utext="${oss_basic_info.summaryDescription}"></td>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.summaryDescription}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Attribution</th>
-										<td style="padding:5px;" th:utext="${oss_basic_info.attribution}"></td>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.attribution}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Created Date / Creator</th>
-										<td style="padding:5px;" th:utext="${oss_basic_info.createdDate} + ' / ' + ${oss_basic_info.creator}"></td>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.createdDate} + ' / ' + ${oss_basic_info?.creator}"></td>
 									</tr>
 								</table>
 								<div th:if="${comment != null and not #strings.isEmpty(comment) and mailType != '19' and mailType != '10' and mailType != '13'}">
@@ -135,13 +142,13 @@
 										</thead>
 										<tbody>
 										<tr th:each="project : ${projectList}">
-											<td style="padding:5px;" th:utext="${project.prjId}"></td>
-											<td style="padding:5px;" th:utext="${project.prjName}"></td>
-											<td style="padding:5px;" th:utext="${project.prjVersion}"></td>
-											<td style="padding:5px;" th:utext="${project.distributionType}"></td>
-											<td style="padding:5px;" th:utext="${project.creator}"></td>
-											<td style="padding:5px;" th:utext="${project.createdDate}"></td>
-											<td style="padding:5px;" th:utext="${project.reviewer}"></td>
+											<td style="padding:5px;" th:utext="${project?.prjId}"></td>
+											<td style="padding:5px;" th:utext="${project?.prjName}"></td>
+											<td style="padding:5px;" th:utext="${project?.prjVersion}"></td>
+											<td style="padding:5px;" th:utext="${project?.distributionType}"></td>
+											<td style="padding:5px;" th:utext="${project?.creator}"></td>
+											<td style="padding:5px;" th:utext="${project?.createdDate}"></td>
+											<td style="padding:5px;" th:utext="${project?.reviewer}"></td>
 										</tr>
 										</tbody>
 									</table>
@@ -157,8 +164,8 @@
 											<td style="padding:5px;background:#f0f0f0;">Declared License</td>
 										</tr>
 										<tr th:each="versionDiffInfo : ${versionDiffInfoList}">
-											<td style="padding:5px;" th:utext="${versionDiffInfo.ossNameInfo}"></td>
-											<td style="padding:5px;" th:utext="${versionDiffInfo.licenseInfo}"></td>
+											<td style="padding:5px;" th:utext="${versionDiffInfo?.ossNameInfo}"></td>
+											<td style="padding:5px;" th:utext="${versionDiffInfo?.licenseInfo}"></td>
 										</tr>
 									</table>
 								</div>
