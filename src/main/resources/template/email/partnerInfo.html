@@ -25,7 +25,7 @@
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
 								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null && contentsTitle != ''}" th:utext="${contentsTitle}"></div>
-								<p style="font-size:12px;" th:if="${contentsSubTitle != null && && contentsSubTitle != ''}" th:utext="${contentsSubTitle}"></p>
+								<p style="font-size:12px;" th:if="${contentsSubTitle != null && contentsSubTitle != ''}" th:utext="${contentsSubTitle}"></p>
 								<div th:if="${comment}">
 									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
 									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
@@ -80,7 +80,7 @@
 									</tr>
 								</table>
 
-								<div th:if="${partner_disclose_oss_info or partner_not_disclose_oss_info}">
+								<div th:if="${partner_disclose_oss_info} or ${partner_not_disclose_oss_info}">
 									<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:text="'« OSS List »'"></h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">
 										<tr>
