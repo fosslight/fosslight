@@ -199,6 +199,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .fileuploader, .custom-layout .multi-fileuploader { max-width: 100%; }
 .custom-layout .uploadSet { max-heigth: 100% !important; }
 
+
 /* loading bar */
 #loading_wrap, #loading_wrap_total{position:fixed; z-index:1001; width:100%; height:100%;}
 #loading_wrap .loadingBlind, #loading_wrap_total .loadingBlind {position:fixed; left:0; top:0; bottom:0; display:block; width:100%; z-index:1002; background:#000;
@@ -405,6 +406,8 @@ tr.ui-row-ltr,
 .ui-jqgrid .ui-jqgrid-resize-mark {
     border: .6px solid #dee2e6;
 }
+
+.ui-jqgrid .ui-jqgrid-resize {height: 100% !important; }
 /*.ui-jqgrid .ui-jqgrid-bdiv {overflow-x: hidden;}*/
 .ui-state-hover,
 .ui-widget-content .ui-state-hover,
