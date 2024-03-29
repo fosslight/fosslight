@@ -42,7 +42,7 @@ var bom_evt = {
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
-	 			alertify.confirm([[#{msg.common.confirm.mergeAndSave}]], function (e) {
+	 			alertify.confirm([[#{msg.common.confirm.bomSave}]], function (e) {
 					if (e) {
 						$("#mergeYn").val("Y");
 						Bom_Save_Flg = false;
@@ -470,7 +470,7 @@ var bom_fn = {
 	analysisValidation : function(){
 		if (com_fn.checkStatus()){
 			if("Y"!= $("#mergeYn").val()){
-				alertify.alert([[#{msg.project.required.merge}]], function(){});
+				alertify.alert([[#{msg.project.required.bomSave}]], function(){});
 
 				return false;
 			}

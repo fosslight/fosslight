@@ -71,7 +71,7 @@ var com_evt = {
 				} else {
 					// 머지 체크
 					if("Y"!= $("#mergeYn").val()){
-						alertify.alert([[#{msg.project.required.merge}]], function(){});
+						alertify.alert([[#{msg.project.required.bomSave}]], function(){});
 						$("#tabMenuBom").trigger("click");
 
 						return false;
@@ -79,7 +79,7 @@ var com_evt = {
 					
 					if (Bom_Save_Flg){
 						if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
-							alertify.alert([[#{msg.project.required.merge}]], function(){});
+							alertify.alert([[#{msg.project.required.bomSave}]], function(){});
 
 							return false;
 						}
@@ -188,7 +188,7 @@ var com_evt = {
 				
 				// 머지 체크
 				if("Y" != $("#mergeYn").val()) {
-					alertify.alert([[#{msg.project.required.merge}]], function(){
+					alertify.alert([[#{msg.project.required.bomSave}]], function(){
 						$("#tabMenuBom").trigger("click");
 					});
 					
@@ -197,7 +197,7 @@ var com_evt = {
 				
 				if (Bom_Save_Flg) {
 					if ($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
-						alertify.alert([[#{msg.project.required.merge}]], function(){
+						alertify.alert([[#{msg.project.required.bomSave}]], function(){
 							$("#tabMenuBom").trigger("click");
 						});
 						
@@ -231,7 +231,7 @@ var com_evt = {
 				
 				// 머지 체크
 				if("N"== $("#mergeYn").val()){
-					alertify.alert([[#{msg.project.required.merge2}]], function(){});
+					alertify.alert([[#{msg.project.required.bomSave2}]], function(){});
 
 					return false;
 				}
@@ -939,7 +939,7 @@ var com_fn = {
 					loading.hide();
 					
 					if("false" == json.isValid) {
-						alertify.alert(json.validMsg == "" ? [[#{msg.project.required.merge2}]] : json.validMsg, function(){});
+						alertify.alert(json.validMsg == "" ? [[#{msg.project.required.bomSave2}]] : json.validMsg, function(){});
 
 						if (depValidMsgData) {
 							gridValidMsgNew(depValidMsgData, "depList");
