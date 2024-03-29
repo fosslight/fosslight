@@ -1961,7 +1961,7 @@ function tableRefreshEditMode() {
 }
 
 function tableRefreshCommentArea (flag, targetId, editMode) {
-	var width = $(".wrapper .contents-area .card-body").width();
+	var width = $(".wrapper .contents-area").width();
 	if ("entire" == flag) {
         if ("Y" == editMode) {
             width = width - 90;
@@ -2001,7 +2001,7 @@ function tableRefreshContentsAreaEdit (target) {
     });
 }
 
-var gridIds = ["list", "list3", "depList", "srcList", "binList", "bomList", "totalList", "fixedList", "notFixedList"];
+var gridIds = ["list", "list3", "depList", "srcList", "binList", "binAndroidList", "bomList", "totalList", "fixedList", "notFixedList"];
 function tableRefreshGridArea () {
 	var width = $(".wrapper").find(".contents-area").width() - 20;
 	

@@ -1204,8 +1204,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 			
 			gridBean.setOssVersion(bean.getOssVersion());
-			gridBean.setDownloadLocation(bean.getDownloadLocation().replaceAll("<[^>]*>", ""));
-			gridBean.setHomepage(bean.getHomepage().replaceAll("<[^>]*>", ""));
+			if (!isEmpty(bean.getDownloadLocation())) gridBean.setDownloadLocation(bean.getDownloadLocation().replaceAll("<[^>]*>", ""));
+			if (!isEmpty(bean.getHomepage())) gridBean.setHomepage(bean.getHomepage().replaceAll("<[^>]*>", ""));
 			gridBean.setFilePath(bean.getFilePath());
 			gridBean.setExcludeYn(bean.getExcludeYn());
 			gridBean.setBinaryName(bean.getBinaryName());
@@ -5096,6 +5096,68 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		SSLContext.setDefault(context);
 	}
 
+	public static String getDeduplicateCveInfo(String referenceId, String cvssScoreMax, Map<String, OssMaster> ossInfoMap, ProjectIdentification identification, List<String> vendorProjectMatchList, String standardScore) {
+		String ossName = identification.getOssName();
+		String refOssName = avoidNull(identification.getRefOssName(), identification.getOssName());
+		String ossVersion = avoidNull(identification.getOssVersion());
+		
+		OssMaster om = new OssMaster();
+		om.setPrjId(referenceId);
+		
+		boolean vendorProductCheckFlag = false;
+		String ossId = null;
+		if (!isEmpty(ossName) && !ossName.equals("-")){
+			OssMaster bean = ossInfoMap.get((avoidNull(refOssName, ossName)+"_"+ossVersion).toUpperCase());
+			if (bean != null) ossId = bean.getOssId();
+		}
+		
+		String[] cvssScoreMaxString = cvssScoreMax.split("\\@");
+		String vendorProductName = cvssScoreMaxString[2] + "-" + cvssScoreMaxString[0];
+		String existenceOssName = (cvssScoreMaxString[2] + "-" + cvssScoreMaxString[0] + "_" + ossVersion).toUpperCase();
+		String product = cvssScoreMaxString[0];
+		Float cvssScore = Float.valueOf(cvssScoreMaxString[3]);
+		
+		om.setOssName(avoidNull(refOssName, ossName));
+		om.setOssVersion(ossVersion);
+		String[] ossNicknames = null;
+		if (!isEmpty(refOssName)) {
+			ossNicknames = ossService.getOssNickNameListByOssName(refOssName);
+		} else {
+			ossNicknames = ossService.getOssNickNameListByOssName(ossName);
+		}
+		if (ossNicknames != null) om.setOssNicknames(ossNicknames);
+		
+		om.setOssName(product);
+		om.setSchOssName(avoidNull(refOssName, ossName));
+		om.setOssVersion(om.getOssVersion().isEmpty() ? "-" : om.getOssVersion());
+		
+		List<String> cveInfoList = ossService.selectVulnInfoForOss(om);
+		List<String> newList = new ArrayList<>();
+		
+		for (String cveInfo : cveInfoList) {
+			if (!cveInfo.equalsIgnoreCase(cvssScoreMax)) newList.add(cveInfo);
+		}
+		
+		if (!newList.isEmpty()) {
+			newList = newList.stream().distinct().collect(Collectors.toList());
+			if (newList.size() > 1) {
+				Collections.sort(newList, new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+							return -1;
+						}else {
+							return 1;
+						}
+					}
+				});
+			}
+			return newList.get(0);
+		} else {
+			return null;
+		}
+	}
+	
 	public static String getConversionCveInfo(String referenceId, Map<String, OssMaster> ossInfoMap, ProjectIdentification identification, List<String> cvssScoreMaxVendorProductList, List<String> cvssScoreMaxList, boolean vulnFixedCheckFlag) {
 		List<String> rtnScoreList = new ArrayList<>();
 		List<String> cvssScoreList = null;

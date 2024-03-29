@@ -35,9 +35,9 @@
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Modified Date'"></th>
 										</tr>
 										<tr th:each="userInfo : ${changed_user_info}">
-											<td th:style="'padding:5px;'" th:text="${userInfo.userId}"></td>
-											<td th:style="'padding:5px;'" th:text="${userInfo.userName}"></td>
-											<td th:style="'padding:5px;'" th:text="${userInfo.modifiedDate}"></td>
+											<td th:style="'padding:5px;'" th:text="${userInfo?.userId}"></td>
+											<td th:style="'padding:5px;'" th:text="${userInfo?.userName}"></td>
+											<td th:style="'padding:5px;'" th:text="${userInfo?.modifiedDate}"></td>
 										</tr>
 									</table>
 								</div>
@@ -51,10 +51,10 @@
 											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Modified Date'"></th>
 										</tr>
 										<tr th:each="userInfo : ${retiree_user_info}">
-											<td th:style="'padding:5px;'" th:text="${userInfo.userId}"></td>
-											<td th:style="'padding:5px;'" th:text="${userInfo.userName}"></td>
-											<td th:style="'padding:5px;'" th:text="${userInfo.useYn}"></td>
-											<td th:style="'padding:5px;'" th:text="${userInfo.modifiedDate}"></td>
+											<td th:style="'padding:5px;'" th:text="${userInfo?.userId}"></td>
+											<td th:style="'padding:5px;'" th:text="${userInfo?.userName}"></td>
+											<td th:style="'padding:5px;'" th:text="${userInfo?.useYn}"></td>
+											<td th:style="'padding:5px;'" th:text="${userInfo?.modifiedDate}"></td>
 										</tr>
 									</table>
 								</div>

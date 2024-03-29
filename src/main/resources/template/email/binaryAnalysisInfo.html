@@ -41,37 +41,37 @@
                                      -->
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Software Name</th>
-										<td style="padding:5px;" th:text="|(${bat_exe_info.batId}) ${bat_exe_info.softwareName}|"></td>
+										<td style="padding:5px;" th:text="|(${bat_exe_info?.batId}) ${bat_exe_info?.softwareName}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Software Version</th>
-										<td style="padding:5px;" th:text="|${bat_exe_info.softwareVersion}|"></td>
+										<td style="padding:5px;" th:text="|${bat_exe_info?.softwareVersion}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">3rd party</th>
-										<td style="padding:5px;" th:text="|${bat_exe_info.partnerName}|"></td>
+										<td style="padding:5px;" th:text="|${bat_exe_info?.partnerName}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Analysis File</th>
-										<td style="padding:5px;" th:text="|${bat_exe_info.binaryFileId}|"></td>
+										<td style="padding:5px;" th:text="|${bat_exe_info?.binaryFileId}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Analysis Status</th>
-										<td style="padding:5px;" th:text="|${bat_exe_info.batStatus}|"></td>
+										<td style="padding:5px;" th:text="|${bat_exe_info?.batStatus}|"></td>
 									</tr>
-									<th:block th:if="${bat_exe_info.batErrorMsg}">
+									<th:block th:if="${bat_exe_info?.batErrorMsg}">
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">Error Message</th>
-											<td style="padding:5px;" th:text="|${bat_exe_info.batErrorMsg}|"></td>
+											<td style="padding:5px;" th:text="|${bat_exe_info?.batErrorMsg}|"></td>
 										</tr>
 									</th:block>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Found Binary Count</th>
-										<td style="padding:5px;" th:text="|${bat_exe_info.batResultCount}|"></td>
+										<td style="padding:5px;" th:text="|${bat_exe_info?.batResultCount}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
-										<td style="padding:5px;" th:text="|${bat_exe_info.creator}|"></td>
+										<td style="padding:5px;" th:text="|${bat_exe_info?.creator}|"></td>
 									</tr>
 								</table>
 								<br />
