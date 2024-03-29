@@ -12,11 +12,19 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FilenameUtils;
@@ -569,8 +577,15 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		int i = originalFileName.lastIndexOf('.'); 
 	    // 마지막 .부터 나머지 문자열을 f에 저장
-		String fileName = originalFileName.substring(0,i);		//input name
-		String fileExt = FilenameUtils.getExtension(originalFileName);
+		String fileName = "";		//input name
+		String fileExt = "";
+		
+		if (i > -1) {
+			fileName = originalFileName.substring(0,i);
+			fileExt = FilenameUtils.getExtension(originalFileName);
+		} else {
+			fileName = originalFileName;
+		}
 		
 		if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
 			fileExt = "tgz.gz";
@@ -594,10 +609,15 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		FileOutputStream fileOS = null;
 		
 		try {
+			ignoreSsl();
 			readChannel = Channels.newChannel(new URL(url.replaceAll("\\s", "%20")).openStream());
 			
 			if (isOrigFile) {
-				fileOS = new FileOutputStream(uploadFilePath+"/"+fileName+"."+fileExt);
+				if (i > -1) {
+					fileOS = new FileOutputStream(uploadFilePath+"/"+fileName+"."+fileExt);
+				} else {
+					fileOS = new FileOutputStream(uploadFilePath+"/"+originalFileName+".so");
+				}
 			} else {
 				fileOS = new FileOutputStream(uploadFilePath+"/"+randomUUID+"."+fileExt);
 			}
@@ -1178,4 +1198,51 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		return newFileId;
 	}
+	
+	private void ignoreSsl() {
+		HostnameVerifier hv = new HostnameVerifier() {
+			public boolean verify(String urlHostName, SSLSession session) {
+	    		return true;
+	    	}
+		};
+		try {
+			trustAllHttpsCertificates();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		HttpsURLConnection.setDefaultHostnameVerifier(hv);
+	}
+
+	private static void trustAllHttpsCertificates() throws Exception {
+        TrustManager[] trustAllCerts = new TrustManager[1];
+        TrustManager tm = new miTM();
+        trustAllCerts[0] = tm;
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    }
+	
+	static class miTM implements TrustManager,X509TrustManager {
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+ 
+        public boolean isServerTrusted(X509Certificate[] certs) {
+            return true;
+        }
+ 
+        public boolean isClientTrusted(X509Certificate[] certs) {
+            return true;
+        }
+ 
+        public void checkServerTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+ 
+        public void checkClientTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+    }
 }

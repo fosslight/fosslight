@@ -1965,8 +1965,7 @@ public class ProjectController extends CoTopComponent {
 			String binAddListDataString = (String) map.get("binAddListData");
 			
 			Type collectionType = new TypeToken<List<T2File>>() {}.getType();
-			List<T2File> delFile = new ArrayList<T2File>(); delFile =
-			(List<T2File>) fromJson(delFileString, collectionType);
+			List<T2File> delFile = new ArrayList<T2File>(); delFile = (List<T2File>) fromJson(delFileString, collectionType);
 
 			Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {
 			}.getType();
