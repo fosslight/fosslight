@@ -237,9 +237,14 @@ var grid_fn = {
 		},
 		 displayDownloadlocation: function (cellvalue, options, rowObject) {
            	var downloadLocation = rowObject["downloadLocation"];
-           	var display = downloadLocation.split(",");
-          	var str = display.map(link => `<a class='urlLink' target='_blank' href='${link.trim()}' title='${link.trim()}'>${link.trim()}</a>`).join("");
-           	return str;
+           	var customDownloadLocation = '';
+           	
+           	if (typeof downloadLocation !== 'undefined' && '' != downloadLocation) {
+           		var display = downloadLocation.split(",");
+           		customDownloadLocation = display.map(link => `<a class='urlLink' target='_blank' href='${link.trim()}' title='${link.trim()}'>${link.trim()}</a>`).join("");
+           	} 
+           	
+           	return customDownloadLocation;
         },
 		unformatter : function(cellvalue, options, rowObject){
 			return cellvalue;

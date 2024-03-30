@@ -74,9 +74,14 @@
             },
             displayDownloadlocation: function (cellvalue, options, rowObject) {
                	var downloadLocation = rowObject["downloadLocation"];
-               	var display = downloadLocation.split(",");
-              	var str = display.map(link => `<a class='urlLink' target='_blank' href='${link.trim()}' title='${link.trim()}'>${link.trim()}</a>`).join("");
-               	return str;
+               	var customDownloadLocation = '';
+               	
+               	if (typeof downloadLocation !== 'undefined' && '' != downloadLocation) {
+               		var display = downloadLocation.split(",");
+               		customDownloadLocation = display.map(link => `<a class='urlLink' target='_blank' href='${link.trim()}' title='${link.trim()}'>${link.trim()}</a>`).join("");
+               	} 
+               	
+               	return customDownloadLocation;
             },
             // oss 정보 가져오기
             griOssIds: function (div, rowid, ossName, ossVersion) {
@@ -281,10 +286,16 @@
             // vulnerability 포메터
             displayVulnerability: function (cellvalue, options, rowObject) {
                 var display = "";
+                var _url = "";
                 var ossName = rowObject.ossName;
                 var ossVersion = rowObject.ossVersion;
+                var project = [[${project}]];
                 
-                var _url = '/vulnerability/vulnpopup?ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion + '&vulnType=';
+                if (project != null) {
+                	_url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=Y&prjId=' + project.prjId + '&ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion + '&vulnType=';
+                } else {
+                	_url = '/vulnerability/vulnpopup?ossName=' + rowObject.ossName + '&ossVersion=' + rowObject.ossVersion + '&vulnType=';
+                }
 
                 if (parseInt(cellvalue) >= 9.0) {
                     display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD2('" + rowObject.ossName + "','" + _url + "')\">CRITICAL</span>";
