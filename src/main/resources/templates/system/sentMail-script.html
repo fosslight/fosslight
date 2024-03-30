@@ -87,6 +87,13 @@ var sentList = {
 			}
 			// row 더블클릭 시 편집모드
 			, ondblClickRow: function(rowid,iRow,iCol,e) {}
+			, gridComplete : function() {
+				$("#list td[aria-describedby=list_errorMsg]").css("text-overflow", "ellipsis");
+				$("#list td[aria-describedby=list_errorMsg]").css("white-space", "nowrap"); 
+				
+				$("#list td[aria-describedby=list_emlTo]").css("text-overflow", "ellipsis");
+				$("#list td[aria-describedby=list_emlCc]").css("text-overflow", "ellipsis");
+			}
 		});
 		
         $("#list").jqGrid('navGrid',"#pager",{edit:false,add:false,del:false,search:false,refresh:false});
