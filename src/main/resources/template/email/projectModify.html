@@ -114,8 +114,7 @@
 									</tr>
 								</table>
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
-									 style="font-size:12px;">
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}" style="font-size:12px;">
 									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
 								</div>
 							</td>
