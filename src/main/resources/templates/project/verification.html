@@ -270,9 +270,9 @@
                                                 <div class="col-md-2">
                                                     <label th:text="'OSS Notice File Format'"></label>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-6 unremovable-first-item-select">
                                                     <select class="select2" multiple="multiple" id="noticeFileFormat" name="noticeFileFormat" style="width: 100%;">
-                                                    	<option value="chkAllowDownloadNoticeHTML" th:text="'Notice HTML'" th:selected="${project.allowDownloadNoticeHTMLYn == 'Y'}"></option>
+                                                    	<option value="chkAllowDownloadNoticeHTML" th:text="'Notice HTML'" selected></option>
                                                         <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
                                                         		value="chkAllowDownloadNoticeText" th:text="'Notice Text'" th:selected="${project.allowDownloadNoticeTextYn == 'Y'}"
                                                         		th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
