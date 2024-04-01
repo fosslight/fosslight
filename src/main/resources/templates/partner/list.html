@@ -160,42 +160,40 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <th:block th:if="${@CommonFunction.isAdmin()}">
-                                        	<div class="row">
-                                        		<div class="col-4">
-                                                	<div class="form-group">
-                                                    	<input type="text" name="ossName" class="form-control autoComOss" placeholder="OSS Name" th:value="${searchBean?.ossName}" />
-                                                	</div>
-                                            	</div>
-                                            	<div class="col-4">
-                                                	<div class="form-group">
-                                                    	<input type="text" name="ossVersion" class="form-control autoComOss" placeholder="OSS Version" th:value="${searchBean?.ossVersion}" />
-                                                	</div>
-                                            	</div>
-                                            	<div class="col-4">
-                                                	<div class="form-group">
-                                                    	<input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
-                                                	</div>
-                                          		</div>
-                                        	</div>
-                                        	<div class="row">
-                                        		<div class="col-4">
-                                                	<div class="form-group">
-                                                		<textarea class="form-control" name="binaryName" placeholder="Binary Name" rows="3" th:utext="${searchBean?.binaryName}"></textarea>
-                                                	</div>
-                                            	</div>
-                                            	<div class="col-4">
-                                                	<div class="form-group">
-                                                    	<textarea class="form-control" name="userComment" placeholder="Comment" rows="3" th:utext="${searchBean?.comment}"></textarea>
-                                                	</div>
-                                            	</div>
-                                            	<div class="col-4">
-                                                	<div class="form-group">
-                                                    	<textarea class="form-control" name="description" placeholder="Description" rows="3" th:utext="${searchBean?.description}"></textarea>
-                                                	</div>
-                                          		</div>
-                                        	</div>
-                                        </th:block>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input type="text" name="ossName" class="form-control autoComOss" placeholder="OSS Name" th:value="${searchBean?.ossName}" />
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input type="text" name="ossVersion" class="form-control autoComOss" placeholder="OSS Version" th:value="${searchBean?.ossVersion}" />
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <input type="text" name="licenseName" class="form-control autoComLicense" placeholder="License Name" th:value="${searchBean?.licenseName}" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <textarea class="form-control" name="binaryName" placeholder="Binary Name" rows="3" th:utext="${searchBean?.binaryName}"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <textarea class="form-control" name="userComment" placeholder="Comment" rows="3" th:utext="${searchBean?.comment}"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <textarea class="form-control" name="description" placeholder="Description" rows="3" th:utext="${searchBean?.description}"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="row">
                                				<div class="col-md-12">
                                					<div class="p-2 text-center">

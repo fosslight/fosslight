@@ -107,43 +107,41 @@
                                                    	</div>
                                                	</div>
                                            	</div>
-											<th:block th:if="${@CommonFunction.isAdmin()}">
-												<div class="more-search" id="moreSearchContent">
-													<div class="row">
-														<div class="col-md-3">
-															<div class="form-group mb-2">
-																<select class="select2" id="creatorSelect" name="creator" style="width: 100%;">
-																	<option value=""></option>
-																	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
-																</select>
-															</div>
+											<div class="more-search" id="moreSearchContent">
+												<div class="row">
+													<div class="col-md-3">
+														<div class="form-group mb-2">
+															<select class="select2" id="creatorSelect" name="creator" style="width: 100%;">
+																<option value=""></option>
+																<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
+															</select>
 														</div>
-														<div class="col-md-3">
-															<div class="form-group mb-2">
-																<input class="form-control" id="createdDate" type="text"/>
-																<input class="form-control" name="cStartDate" type="hidden"/>
-																<input class="form-control" name="cEndDate" type="hidden"/>
-															</div>
+													</div>
+													<div class="col-md-3">
+														<div class="form-group mb-2">
+															<input class="form-control" id="createdDate" type="text"/>
+															<input class="form-control" name="cStartDate" type="hidden"/>
+															<input class="form-control" name="cEndDate" type="hidden"/>
 														</div>
-														<div class="col-md-3">
-															<div class="form-group mb-2">
-																<select class="select2" id="modifierSelect" name="modifier" style="width: 100%;">
-																	<option value=""></option>
-																	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
-																	<option th:value="NONE" th:text="None"></option>
-																</select>
-															</div>
+													</div>
+													<div class="col-md-3">
+														<div class="form-group mb-2">
+															<select class="select2" id="modifierSelect" name="modifier" style="width: 100%;">
+																<option value=""></option>
+																<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
+																<option th:value="NONE" th:text="None"></option>
+															</select>
 														</div>
-														<div class="col-md-3">
-															<div class="form-group mb-2">
-																<input class="form-control" id="modifiedDate" placeholder="Modified Date" type="text"/>
-																<input class="form-control" name="mStartDate" type="hidden" th:value="${searchBean.mStartDate}"/>
-																<input class="form-control" name="mEndDate" type="hidden" th:value="${searchBean.mEndDate}"/>
-															</div>
+													</div>
+													<div class="col-md-3">
+														<div class="form-group mb-2">
+															<input class="form-control" id="modifiedDate" placeholder="Modified Date" type="text"/>
+															<input class="form-control" name="mStartDate" type="hidden" th:value="${searchBean.mStartDate}"/>
+															<input class="form-control" name="mEndDate" type="hidden" th:value="${searchBean.mEndDate}"/>
 														</div>
 													</div>
 												</div>
-											</th:block>
+											</div>
 											<div class="row mt-1 mb-2">
 												<div class="col-12">
 													<div class=" d-flex justify-content-center pt-1">
