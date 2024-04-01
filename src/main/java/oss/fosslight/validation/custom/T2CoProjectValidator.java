@@ -2435,10 +2435,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 			} // end of loop
 			
 			Map<String, List<BinaryData>> checkBinaryInfoMap = new HashMap<>();
-			boolean isAndroid = false;
 			if ((PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE) || PROC_TYPE_IDENTIFICATION_BIN.equals(PROC_TYPE) || PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE)) && !isEmpty(projectId)) {
 				Project projectInfo = projectService.getProjectBasicInfo(projectId);
-				checkBinaryInfoMap = binaryDataService.getBinaryListFromBinaryDB(isAndroid, projectInfo);
+				checkBinaryInfoMap = binaryDataService.getBinaryListFromBinaryDB(PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE), projectInfo);
 			}
 			
 			if(checkBinaryInfoMap != null) {

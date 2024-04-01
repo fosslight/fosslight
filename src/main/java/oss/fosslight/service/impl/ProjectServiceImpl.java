@@ -219,9 +219,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 						}
 						
-						if (getSecurityDataCntByProject(bean)) {
-							checkIfVulnerabilityResolutionIsFixed(bean);
-						}
 						String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(bean.getPrjId(), bean.getReferenceDiv());
 						if (conversionCveInfo != null) {
 							String[] conversionCveData = conversionCveInfo.split("\\@");
@@ -229,6 +226,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							bean.setCveId(conversionCveData[4]);
 							bean.setVulnYn(CoConstDef.FLAG_YES);
 						}
+						
+						if (getSecurityDataCntByProject(bean)) {
+							checkIfVulnerabilityResolutionIsFixed(bean);
+						}
+						
+						bean.setCvssScore(avoidNull(bean.getCvssScore(), CoConstDef.FLAG_NO));
+						bean.setSecCode(avoidNull(bean.getSecCode(), CoConstDef.FLAG_NO));
+						bean.setSecCvssScore(avoidNull(bean.getSecCvssScore(), CoConstDef.FLAG_NO));
 					});
 				}
 			}
@@ -245,35 +250,45 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	private void checkIfVulnerabilityResolutionIsFixed(Project bean) {
-		String secCvssScore = "";
+		String fixedCvssScore = "";
+		String notFixedCvssScore = "";
 		int fixedCheckCnt = 0;
 		List<OssComponents> securityList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
 		
 		if (securityList != null && !securityList.isEmpty()) {
-			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion())).collect(Collectors.toList()).size();
+			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && Float.valueOf(e.getCvssScore()) >= bean.getStandardScore()).collect(Collectors.toList()).size();
 			
 			for (OssComponents oc : securityList) {
 				if (oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
 					fixedCheckCnt++;
 					continue;
+				} else {
+					if (!isEmpty(notFixedCvssScore)) {
+						if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(notFixedCvssScore)) > 0) {
+							notFixedCvssScore = oc.getCvssScore();
+						}
+					} else {
+						notFixedCvssScore = oc.getCvssScore();
+					}
 				}
 				
-				if (isEmpty(secCvssScore)) {
-					secCvssScore = oc.getCvssScore();
-					continue;
-				} else {
-					if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(secCvssScore)) > 0) {
-						secCvssScore = oc.getCvssScore();
+				if (!oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
+					if (isEmpty(fixedCvssScore)) {
+						fixedCvssScore = oc.getCvssScore();
+					} else {
+						if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(fixedCvssScore)) > 0) {
+							fixedCvssScore = oc.getCvssScore();
+						}
 					}
 				}
 			}
 			
-			if (!isEmpty(secCvssScore)) bean.setSecCvssScore(Float.valueOf(secCvssScore));
-			
 			if (fixedCheckCnt == securityListCnt) {
 				bean.setSecCode("Fixed");
+				bean.setCvssScore(fixedCvssScore);
 			} else {
 				bean.setSecCode("notFixed");
+				bean.setCvssScore(notFixedCvssScore);
 			}
 		}
 	}
@@ -364,16 +379,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		if (getSecurityDataCntByProject(project)) {
-			checkIfVulnerabilityResolutionIsFixed(project);
-		}
-
 		String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(project.getPrjId(), project.getReferenceDiv());
 		if (conversionCveInfo != null) {
 			String[] conversionCveData = conversionCveInfo.split("\\@");
 			project.setCvssScore(conversionCveData[3]);
 			project.setCveId(conversionCveData[4]);
 			project.setVulnYn(CoConstDef.FLAG_YES);
+		}
+		
+		if (getSecurityDataCntByProject(project)) {
+			checkIfVulnerabilityResolutionIsFixed(project);
 		}
 		
 		project.setStandardScore(null);

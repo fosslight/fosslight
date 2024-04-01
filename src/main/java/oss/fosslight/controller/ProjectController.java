@@ -4813,12 +4813,7 @@ public class ProjectController extends CoTopComponent {
 		map.put("statusRequestYn", avoidNull(prjBean.getStatusRequestYn(), CoConstDef.FLAG_NO));
 		map.put("cvssScore", avoidNull(prjBean.getCvssScore(), CoConstDef.FLAG_NO));
 		map.put("secCode", avoidNull(prjBean.getSecCode(), CoConstDef.FLAG_NO));
-		Float secCvssScore = prjBean.getSecCvssScore();
-		if (secCvssScore != null) {
-			map.put("secCvssScore", Float.toString(prjBean.getSecCvssScore()));
-		} else {
-			map.put("secCvssScore", CoConstDef.FLAG_NO);
-		}
+		map.put("secCvssScore", avoidNull(prjBean.getSecCvssScore(), CoConstDef.FLAG_NO));
 		
 		return makeJsonResponseHeader(map);
 	}

@@ -775,7 +775,7 @@
                     e.preventDefault();
 
                     var fileNm = $("#readmeFile").val();
-                    var downloadFlag = $(this).hasClass("green");
+                    var downloadFlag = $(this).hasClass("btn-outline-primary");
 
                     if (downloadFlag) {
                         location.href = '/project/verification/downloadFile?prjId=' + [[${project.prjId}]] + '&fileNm=' + fileNm;
@@ -786,7 +786,7 @@
                     e.preventDefault();
 
                     var fileNm = $("#exceptFile").val();
-                    var downloadFlag = $(this).hasClass("green");
+                    var downloadFlag = $(this).hasClass("btn-outline-primary");
 
                     if (downloadFlag) {
                         location.href = '/project/verification/downloadFile?prjId=' + [[${project.prjId}]] + '&fileNm=' + fileNm;
@@ -797,7 +797,7 @@
                     e.preventDefault();
 
                     var fileNm = $("#verifyFile").val();
-                    var downloadFlag = $(this).hasClass("green");
+                    var downloadFlag = $(this).hasClass("btn-outline-primary");
 
                     if (downloadFlag) {
                         location.href = '/project/verification/downloadFile?prjId=' + [[${project.prjId}]] + '&fileNm=' + fileNm;
@@ -2721,21 +2721,21 @@
 
                             if (readmeFileName.length > 0) {
                                 $("#readmeFile").val(readmeFileName);
-                                $("#btnReadme").addClass("green");
+                                $("#btnReadme").addClass("btn-outline-primary");
                             } else {
-                                $("#btnReadme").removeClass("green");
+                                $("#btnReadme").removeClass("btn-outline-primary");
                             }
 
                             if (proprietary.length > 0) {
-                                $("#btnProprietary").addClass("green");
+                                $("#btnProprietary").addClass("btn-outline-primary");
                             } else {
-                                $("#btnProprietary").removeClass("green");
+                                $("#btnProprietary").removeClass("btn-outline-primary");
                             }
 
                             if (verifyCheckList.length > 0) {
-                                $("#btnVerifyFileContent").addClass("green");
+                                $("#btnVerifyFileContent").addClass("btn-outline-primary");
                             } else {
-                                $("#btnVerifyFileContent").removeClass("green");
+                                $("#btnVerifyFileContent").removeClass("btn-outline-primary");
                             }
 
                             $("#deleteFlag").val("N");

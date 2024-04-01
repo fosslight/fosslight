@@ -422,9 +422,11 @@
 									<input type="hidden" id="readmeFile" th:value="${project.readmeFileName}" />
 									<input type="hidden" id="exceptFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_PROPRIETARY')}" />
 									<input type="hidden" id="verifyFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_FILE_LIST')}" />
-                                    <button type="button" class="btn btn-default btn-sm width-6rem" id="btnReadme" th:style="${project.readmeFileName != null} ? 'background-color: #007bff; color: #fff;'" th:text="README"></button>
-                                    <button type="button" class="btn btn-default btn-sm width-6rem" id="btnVerifyFileContent" th:style="${project.verifyFileContent != null} ? 'background-color: #007bff; color: #fff;'" th:text="'File List'"></button>
-                                    <button type="button" class="btn btn-default btn-sm width-6rem" id="btnProprietary" th:style="${project.exceptFileContent != null} ? 'background-color: #007bff; color: #fff;'" th:text="'Banned List'"></button>
+									<span id="verifyBtnSet">
+										<button type="button" th:class="'btn btn-sm width-6rem float-left' +  ${project.readmeFileName == null ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnReadme" th:text="README"></button>
+                                    	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${project.readmeFileName == null ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnVerifyFileContent" th:text="'File List'"></button>
+                                    	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${project.readmeFileName == null ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnProprietary" th:text="'Banned List'"></button>
+									</span>
                                 </div>
                             </div>
                         </div>

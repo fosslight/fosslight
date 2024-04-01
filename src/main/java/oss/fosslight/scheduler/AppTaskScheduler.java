@@ -23,12 +23,12 @@ public class AppTaskScheduler implements SchedulingConfigurer {
 	}
 	
 	@Bean(destroyMethod="shutdown")
-    public Executor taskScheduler() {
+    protected Executor taskScheduler() {
 		return new ThreadPoolTaskScheduler();
     }
 	
 	@Bean
-	public SchedulerWorkerTask schedulerWorkerTask(){
+	protected SchedulerWorkerTask schedulerWorkerTask(){
 		return new SchedulerWorkerTask();
 	}
 }
