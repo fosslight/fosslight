@@ -547,6 +547,11 @@ tr.ui-search-toolbar input  {
 .ui-jqgrid #pager { border-bottom: 1px solid #dee2e6 !important; }
 .ui-jqgrid #list_toppager { border-top: 1px solid #dee2e6 !important; height: 37px !important; padding: 3px 5px !important; }
 */
+.ui-jqgrid #_modelList_toppager { height: 40px !important; }
+.ui-jqgrid #pg__modelList_toppager table td, .ui-jqgrid #_modelList_toppager_left table th { border: none; border-radius: .25rem; }
+.ui-jqgrid #pg__modelList_toppager .ui-pg-button.ui-corner-all.ui-state-hover { background-color: #d3e3fd; }
+.ui-jqgrid #pg__modelList_toppager .ui-separator { display: none;}
+
 .ui-jqgrid div[id $= "toppager"] { overflow: visible; }
 .ui-jqgrid div[id $= "toppager"] td[id $= "toppager_center"] { display: none; }
 .ui-jqgrid div[id $= "toppager"] td[id $= "toppager_right"] { display: none; }
@@ -978,4 +983,4 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .cus-is-invalid {border: 1px solid #dc3545; border-radius: 0.25rem;}
 .text-highlighting {text-shadow: 2px 2px 6px #6b6b6b}
 .pr-7 {padding-right: 5rem !important;}
-.multiTxtSet .form-group .form-control { padding: .375rem 1.75rem .375rem .75rem; }
+.multiTxtSet .form-group .form-control, .multiWebPageSet .form-group .form-control, .detectedLicensesDiv .form-group .form-control { padding: .375rem 1.75rem .375rem .75rem; }
