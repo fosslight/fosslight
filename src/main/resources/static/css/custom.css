@@ -984,3 +984,9 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .text-highlighting {text-shadow: 2px 2px 6px #6b6b6b}
 .pr-7 {padding-right: 5rem !important;}
 .multiTxtSet .form-group .form-control, .multiWebPageSet .form-group .form-control, .detectedLicensesDiv .form-group .form-control { padding: .375rem 1.75rem .375rem .75rem; }
+.unremovable-first-item-select .select2-selection__rendered li[title="Notice HTML"] {
+    opacity: 0.6;
+}
+.unremovable-first-item-select .select2-selection__rendered li[title="Notice HTML"] .select2-selection__choice__remove {
+    display: none;
+}
