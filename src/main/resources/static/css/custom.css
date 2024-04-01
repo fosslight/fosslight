@@ -978,3 +978,4 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .cus-is-invalid {border: 1px solid #dc3545; border-radius: 0.25rem;}
 .text-highlighting {text-shadow: 2px 2px 6px #6b6b6b}
 .pr-7 {padding-right: 5rem !important;}
+.multiTxtSet .form-group .form-control { padding: .375rem 1.75rem .375rem .75rem; }
