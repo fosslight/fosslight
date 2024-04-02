@@ -56,6 +56,8 @@ ul { list-style-type: none; }
 .custom-layout .icon-yellow:hover { color: #c95200; }
 .custom-layout .icon-light-gray { color: #ced4da;}
 .custom-layout .icon-light-gray:hover { color: #595959; }
+.custom-layout .icon-blue { color: #507cff;}
+.custom-layout .icon-blue:hover { color: #0e1b40; }
 
 .custom-layout .dropdown-item { font-size: .9rem; }
 .custom-layout .dropdown-item:disabled { color: #c1c8cd !important; }

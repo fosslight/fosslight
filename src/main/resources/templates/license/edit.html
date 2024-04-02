@@ -48,9 +48,8 @@
 												<label for="licenseNameInput"
 													th:text="#{msg.common.field.licenseName}"></label><span
 													class="text-orange">*</span>
-												<i sec:authorize="hasRole('ROLE_ADMIN')" class="fas fa-info-circle ml-1"
-													id="heplLink_licenseEditInfo" style="color: #fa8258;"
-													data-html="true" data-placement="right"></i>
+												<i sec:authorize="hasRole('ROLE_ADMIN')" class="fas fa-info-circle icon-orange ml-1"
+													id="heplLink_licenseEditInfo" data-html="true" data-placement="right"></i>
 												<input class="form-control autoComLicenseLong" id="licenseNameInput"
 													name="licenseName" th:value="${detail?.licenseName}" type="text"
 													th:disabled="${isReadOnly}" />
