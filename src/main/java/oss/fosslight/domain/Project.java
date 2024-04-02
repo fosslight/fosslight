@@ -356,12 +356,12 @@ public class Project extends ComBean implements Serializable {
 	private int statusPermission;
 	
 	private String secCode;
+	private String secCvssScore;
 	
 	private String vulDocInst;
 	private String vulDocInfo;
 	
 	private Float standardScore;
-	private Float secCvssScore;
 	
 	private String copyWatcherLocation;
 	/** add watcher list. */
@@ -4436,11 +4436,11 @@ public class Project extends ComBean implements Serializable {
 		this.packageVulDocFileInfo = packageVulDocFileInfo;
 	}
 
-	public Float getSecCvssScore() {
+	public String getSecCvssScore() {
 		return secCvssScore;
 	}
 
-	public void setSecCvssScore(Float secCvssScore) {
+	public void setSecCvssScore(String secCvssScore) {
 		this.secCvssScore = secCvssScore;
 	}
 
