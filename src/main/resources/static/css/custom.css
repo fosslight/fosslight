@@ -990,3 +990,4 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .unremovable-first-item-select .select2-selection__rendered li[title="Notice HTML"] .select2-selection__choice__remove {
     display: none;
 }
+.ml-1 {margin-left: .1rem;}

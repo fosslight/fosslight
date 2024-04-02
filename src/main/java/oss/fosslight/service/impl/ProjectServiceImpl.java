@@ -6600,7 +6600,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				List<OssComponents> fixedList = (List<OssComponents>) result.get("fixedList");
 				fixedList = fixedList.stream().filter(e -> e.getOssVersion().isEmpty()
 															|| (e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityPatchLink())))
-															|| (!e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityComments())))
+															|| (!e.getVulnerabilityResolution().equals("Fixed") && !e.getVulnerabilityResolution().equals("Unresolved") && isEmpty(avoidNull(e.getSecurityComments())))
 															|| e.getVulnerabilityResolution().equals("Unresolved")).collect(Collectors.toList());
 				if (!fixedList.isEmpty()) {
 					reqEntryFlag = true;
@@ -6612,7 +6612,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				List<OssComponents> notFixedList = (List<OssComponents>) result.get("notFixedList");
 				notFixedList = notFixedList.stream().filter(e -> isEmpty(avoidNull(e.getOssVersion()))
 															|| (e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityPatchLink())))
-															|| (!e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityComments())))
+															|| (!e.getVulnerabilityResolution().equals("Fixed") && !e.getVulnerabilityResolution().equals("Unresolved") && isEmpty(avoidNull(e.getSecurityComments())))
 															|| e.getVulnerabilityResolution().equals("Unresolved")).collect(Collectors.toList());
 				if (!notFixedList.isEmpty()) {
 					reqEntryFlag = true;
@@ -6622,11 +6622,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		default : 
 			if (result.containsKey("totalList")) {
 				List<OssComponents> totalList = (List<OssComponents>) result.get("totalList");
-				totalList = totalList.stream().filter(e -> e.getOssVersion().isEmpty()
+				List<OssComponents> filteredTotalList = totalList.stream().filter(e -> e.getOssVersion().isEmpty()
 															|| (e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityPatchLink())))
-															|| (!e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityComments())))
+															|| (!e.getVulnerabilityResolution().equals("Fixed") && !e.getVulnerabilityResolution().equals("Unresolved") && isEmpty(avoidNull(e.getSecurityComments())))
 															|| e.getVulnerabilityResolution().equals("Unresolved")).collect(Collectors.toList());
-				if (!totalList.isEmpty()) {
+				if (!filteredTotalList.isEmpty()) {
 					reqEntryFlag = true;
 				}
 			}

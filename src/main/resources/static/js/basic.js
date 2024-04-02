@@ -867,6 +867,11 @@ function createValidMsgComplex(msgData) {
 					$('.distributionSiteDiv').focus().next("span.retxt,div.retxt").html(value).show();
 				}
 				
+				if ('networkServerType' == key) {
+					$('.networkServerTypeDiv').addClass("cus-is-invalid");
+					$('.networkServerTypeDiv').focus().next("span.retxt,div.retxt").html(value).show();
+				}
+				
 				if ('noticeType' == key) {
 					$('.noticeTypeDiv').addClass("cus-is-invalid");
 					$('.noticeTypeDiv').focus().next("span.retxt,div.retxt").html(value).show();

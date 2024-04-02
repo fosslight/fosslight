@@ -244,7 +244,7 @@ var userList = {
 		userList.lastEditRowId = "";
 
 		var colNameArr = ['AD ID', 'E-mail', 'Name', 'Division', 'Registered Date', 'Token', 'Expire Date', 'Token Proc'];	
-		if ("N" == [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG'))}]]) {
+		if ("Y" != [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG'))}]]) {
 			colNameArr.push('password');
 		}
 		colNameArr.push('Use YN');colNameArr.push('Admin');
@@ -257,8 +257,8 @@ var userList = {
 		}
 		if ("Y" != [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_HIDE_EMAIL_FLAG'))}]]) {
 			colModelObj = {name: 'email', index: 'email', width: 200, allign: 'center', hidden: true};
+			colModelArr.push(colModelObj);
 		}
-		colModelArr.push(colModelObj);
 		colModelObj = {name: 'userName', index: 'userName', width: 100, allign: 'center', editable: true};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'division', index: 'division', width: 150, allign: 'right', editable: true, formatter: 'select', edittype:"select",
