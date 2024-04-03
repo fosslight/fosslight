@@ -67,7 +67,7 @@
 									$('.multiTxtSet').empty();
 								}
 
-								let nickHtml 	= 	'<div class="col-md-2" style="margin-top: 5px;">';
+								let nickHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
 								nickHtml 		+= 		'<div class="form-group mb-0">';
 								nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
 								nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
@@ -148,7 +148,7 @@
 								if (index == 0) {
 									$('.multiTxtSet').empty();
 								}
-								let nickHtml 	= 	'<div class="col-md-2" style="margin-top: 5px;">';
+								let nickHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
 								nickHtml 		+= 		'<div class="form-group mb-0">';
 	                            if(isReadOnly == 'true' || isReadOnly) {
 	                                nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'" disabled/>';
@@ -283,7 +283,7 @@
 			
 			//닉네임 인풋 추가
 			$('#nickAdd').on('click', function(){
-				let nickHtml 	= 	'<div class="col-md-2" style="margin-top: 5px;">';
+				let nickHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
 				nickHtml 		+= 		'<div class="form-group mb-0">';
 				nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+$("#input_ossNicknames").val()+'"/>';
 				nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
@@ -1816,7 +1816,7 @@
 				}
 
 				for (var k in json.resultData.addNickArr) {
-					let nickHtml 	= 	'<div class="col-md-2" style="margin-top: 5px;">';
+					let nickHtml 	= 	'<div class="col-md-4" style="margin-top: 5px;">';
 					nickHtml 		+= 		'<div class="form-group mb-0">';
 					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+json.resultData.addNickArr[k]+'"/>';
 					nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
