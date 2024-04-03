@@ -2626,7 +2626,7 @@
 		}
 	},
 	showOssViewPage : function (obj) {
-		var ossName = $(obj).next().val();
+		var ossName = $(obj).next().find('input[name="ossName"]').val();
 		var ossVersion = $(obj).parent().parent().parent().next().find('input').val();
 		fn.showDetailPopup(ossName, ossVersion);
 	},
