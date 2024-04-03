@@ -328,7 +328,7 @@ var bom_fn = {
 	},
 	onNotifyCboxClick : function(rowId){
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
-		var selectedVal = $("#"+id+"_notify").val();
+		var selectedVal = $("#"+id+"_notify").prop("selected", true).val();
 		
 		if(selectedVal) {
 			if(selectedVal == "N") {
@@ -348,7 +348,7 @@ var bom_fn = {
 	},
 	onSourceCboxClick : function(rowId){
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
-		var selectedVal = $("#"+id+"_source").val();
+		var selectedVal = $("#"+id+"_source").prop("selected", true).val();
 		
 		if(selectedVal) {
 			if(selectedVal == "Y") {
@@ -370,44 +370,63 @@ var bom_fn = {
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
 		var adminCheckYn = $("#"+id+"_adminCheck").prop("checked");
 		
-		$("#bomList").jqGrid('setCell', rowId, 'notify', "10");
-		$("#bomList").jqGrid('setCell', rowId, 'source', "10");
-
-		if(adminCheckYn) {
+		if (adminCheckYn && "ROLE_ADMIN" == userRole) {
 			var checkList = ["downloadLocation", "homepage", "copyrightText"];
 			
-			try {
-				var rowData = $("#bomList").getRowData(id);
-				var componentId = rowData["componentId"];
-				Object.keys(rowData).forEach(function(value){
-					if(checkList.includes(value)) {
-						var data = rowData[value];
-						if(value == "downloadLocation" || value == "homepage"){
-							if(data.indexOf("Not the same as property") > -1){
-								data = data.split("Not the same as property")[0];
-							} else if(data.indexOf("The address should be") > -1){
-								data = data.split("The address should be")[0];
-							}
-						} else {
-							if(data.indexOf("<div class") > -1){
-								data = data.split("<div")[0];
-							}
+			var rowData = $("#bomList").getRowData(id);
+			var componentId = rowData["componentId"];
+			
+			$("#bomList").jqGrid('setCell', id, 'notify', "10");
+			$("#bomList").jqGrid('setCell', id, 'source', "10");
+			$("#bomList").jqGrid('setColProp','homepage', {editable: true});
+			$("#bomList").jqGrid('setColProp','copyrightText', {editable: true});
+			$("#bomList").jqGrid('setColProp','downloadLocation', {editable: true});
+			$("#bomList").jqGrid('editRow', id);
+			
+			Object.keys(rowData).forEach(function(value){
+				if(checkList.includes(value)) {
+					var data = rowData[value];
+					if ("downloadLocation" == value){
+						if(data.indexOf("Not the same as property") > -1){
+							data = data.split("Not the same as property")[0];
+						} else if(data.indexOf("The address should be") > -1){
+							data = data.split("The address should be")[0];
 						}
 						
-						data = data.replace(/<[^>]*>?/g, '');
-						$("#bomList").jqGrid("setCell", id, value, data);
+						if (data.includes("http://") || data.includes("https://")) {
+							data = data.replace(/http/g, ",http");
+						}
+						if (data.includes("ftp://")) {
+							data = data.replace(/ftp/g, ",ftp");
+						}
+						if (data.includes("git://")) {
+							data = data.replace(/git/g, ",git");
+						}
+						
+						data = data.substr(1);
+					} else if ("homepage" == value) {
+						if(data.indexOf("Not the same as property") > -1){
+							data = data.split("Not the same as property")[0];
+						} else if(data.indexOf("The address should be") > -1){
+							data = data.split("The address should be")[0];
+						}
+					} else {
+						if(data.indexOf("<div class") > -1){
+							data = data.split("<div")[0];
+						}
 					}
-				});
-			} finally {
-				$("#bomList").jqGrid('setColProp','homepage', {editable: true});
-				$("#bomList").jqGrid('setColProp','copyrightText', {editable: true});
-				$("#bomList").jqGrid('setColProp','downloadLocation', {editable: true});
-				$("#bomList").jqGrid('editRow', id);
-			}
-			
-			$("#"+id+"_adminCheck").val("Y");
+					
+					data = data.replace(/<[^>]*>?/g, '');
+					$("#" + id + "_" + value).val(data);
+				}
+			});
 		} else {
 			$("#bomList").jqGrid('saveRow', id);
+		}
+
+		if (adminCheckYn) {
+			$("#"+id+"_adminCheck").val("Y");
+		} else {
 			$("#"+id+"_adminCheck").val("N");
 		}
 	},
