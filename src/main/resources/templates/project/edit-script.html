@@ -854,7 +854,7 @@
 			target.append(html);
 		},
 		addWatcher : function(uDiv, uId, uEmail) {
-			if($('input[name=prjId]').val() == "" || '${project.copyFlag}' == 'Y') {
+			if ($('input[name=prjId]').val() == "" || 'Y' == [[${project.copyFlag}]]) {
 				return true;
 			}
 			
@@ -884,34 +884,34 @@
 			});
 		},
 		removeWatcher : function(uDiv, uId, obj) {
-			var uEmail = "";
-			if("Email" == uId) {
-				uEmail = uDiv;
-				uId = "";
-				uDiv = "";
-			}
+			if ($('input[name=prjId]').val() == "" || 'Y' == [[${project.copyFlag}]]) {
+				$(obj).parent().remove();
+			} else {
+				var uEmail = "";
+				if("Email" == uId) {
+					uEmail = uDiv;
+					uId = "";
+					uDiv = "";
+				}
 
-			if($('input[name=prjId]').val() == "" || 'Y' == [[${project.copyFlag}]]) {
-				return true;
-			}
-			
-			var data = {"prjId" : $('input[name=prjId]').val() , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
+				var data = {"prjId" : $('input[name=prjId]').val() , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
 
-			$.ajax({
-				url : '/project/removeWatcher',
-				type : 'POST',
-				data : JSON.stringify(data),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function(resultData){
-					if(resultData.isValid == "true") {
-						$(obj).parent().parent().remove();
-						alertify.success([[#{msg.common.success}]]);
-					}
-				},
-				error : fn.onError
-			});
+				$.ajax({
+					url : '/project/removeWatcher',
+					type : 'POST',
+					data : JSON.stringify(data),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(resultData){
+						if(resultData.isValid == "true") {
+							$(obj).parent().parent().remove();
+							alertify.success([[#{msg.common.success}]]);
+						}
+					},
+					error : fn.onError
+				});
+			}
 		},
 		copyWatcher : function(obj) {
 			var prjId = [[${project.prjId}]];

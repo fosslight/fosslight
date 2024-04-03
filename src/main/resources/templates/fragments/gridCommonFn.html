@@ -73,15 +73,26 @@
                 });
             },
             displayDownloadlocation: function (cellvalue, options, rowObject) {
-               	var downloadLocation = rowObject["downloadLocation"];
-               	var customDownloadLocation = '';
-               	
-               	if (typeof downloadLocation !== 'undefined' && '' != downloadLocation) {
-               		var display = downloadLocation.split(",");
-               		customDownloadLocation = display.map(link => `<a class='urlLink' target='_blank' href='${link.trim()}' title='${link.trim()}'>${link.trim()}</a>`).join("");
-               	} 
-               	
-               	return customDownloadLocation;
+            	var downloadLocation = "";
+				
+                if (cellvalue != null) {
+                	if (!cellvalue.includes("[Collectionofstoreddata]")) {
+                		var display = cellvalue.split(",");
+                        for (var i in display) {
+                        	var download = display[i];
+                        	var httpVal = download;
+                        	if (!(download.toLowerCase().startsWith("http://") || download.toLowerCase().startsWith("https://")
+                                    || download.toLowerCase().startsWith("ftp://") || download.toLowerCase().startsWith("git://"))) {
+                        		httpVal = "http://" + download;
+                           	}
+                            downloadLocation += "<a href=\"" + httpVal + "\" class=\"urlLink\" target=\"_blank\">" + download + "</a>";
+                        }
+                	} else {
+                		downloadLocation = cellvalue.replace("[Collectionofstoreddata]", "");
+                	}
+                }
+                
+                return downloadLocation;
             },
             // oss 정보 가져오기
             griOssIds: function (div, rowid, ossName, ossVersion) {
