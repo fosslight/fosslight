@@ -364,27 +364,53 @@
 			
 			//라이센스 삭제
 			$('#delete').on('click', function(){
-				var editorVal = $("#commentCont").summernote('code');
+				var innerHtml 	= 'Are you want to delete the oss?<br><br>';
+               	innerHtml 		+= '<textarea id="deleteOssEditor"></textarea>';
+            	
+               	if (!alertify.delOssDialog){
+					alertify.dialog('delOssDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								setup.focus.element = 0;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
+							}
+						};
+					}, false, 'confirm');
+	        	}
 				
-				if ("" == $("#commentCont").next().find(".note-editable").text()) {
-					alertify.alert([[#{msg.oss.required.deletion}]], function(){});
-					return false;
-				}
-
-				if ("Y" == deactivateFlag) {
-					alertify.alert([[#{msg.oss.required.deactivate.deletion}]], function(){});
-					return false;
-				}
-				
-				alertify.confirm([[#{msg.oss.warn.remove}]], function (e) {
-					if (e) {
+               	alertify.delOssDialog(innerHtml, function (e) {
+               		if (e) {
+               			if ($('#deleteOssEditor').summernote('isEmpty')) {
+    	           			alertify.alert([[#{msg.oss.required.deletion}]], function(){});
+    						return false;
+    					}
+               			
+               			if (deactivateFlag == "Y"){
+        					alertify.alert([[#{msg.oss.required.deactivate.deletion}]], function(){});
+        					return false;
+        				}
+               			
 						loading.show();
 						
-						$('input[name=comment]').val(editorVal);
+						$('input[name=comment]').val($("#deleteOssEditor").summernote('code'));
 						
 						if(validationDataSet()){
 							$("#ossForm").ajaxForm({
-								url :'/oss/validation',
+								url : suffix + '/oss/validation',
 					            type : 'POST',
 					            dataType:"json",
 					            cache : false,
@@ -394,10 +420,12 @@
 						} else {
 							loading.hide();
 						}
-					} else {
-						return false;
-					}
-				});
+               		} else {
+               			return false;
+               		}
+	            });
+	           	
+	           	$("#deleteOssEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			});
 			
 			//라이센스 삭제용 검색
