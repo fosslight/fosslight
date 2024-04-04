@@ -172,11 +172,11 @@
 									</div>
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.summaryDescription}"></label>
-                                        <textarea class="form-control" rows="5" th:text="${summaryDescription}" th:disabled="${isReadOnly}"/></textarea>
+                                        <textarea class="form-control" rows="5" name="summaryDescription" th:text="${summaryDescription}" th:disabled="${isReadOnly}"/></textarea>
                                     </div>
                                     <div class="form-group">
                                         <label th:text="#{msg.common.field.attribution}"></label>
-                                        <textarea class="form-control" rows="5" th:text="${attribution}"  th:disabled="${isReadOnly}"/></textarea>
+                                        <textarea class="form-control" rows="5" name="attribution" th:text="${attribution}"  th:disabled="${isReadOnly}"/></textarea>
                                     </div>
                                     <div class="form-group" th:if="${ossId != null and (projectListFlag != null and projectListFlag)}">
                                     	<label th:text="Project"></label><button type="button" class="btn btn-info btn-xs mx-3 mb-1 px-3 py-0" id="listMore" th:text="'List more'"></button>
