@@ -27,7 +27,7 @@
 								<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
 								<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
 
-								<th:block th:if="${project_basic_info}">
+								<th:block th:if="${project_basic_info != null}">
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 										<col style="width:40%">
 										<col style="width:*">
@@ -37,7 +37,7 @@
 										</tr>
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">Project Name</th>
-											<td style="padding:5px;"><span th:utext="|(${selfcheck_basic_info.prjId}) ${project_basic_info.prjName}|"></span></td>
+											<td style="padding:5px;"><span th:utext="|(${project_basic_info.prjId}) ${project_basic_info.prjName}|"></span></td>
 										</tr>
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">Project Version</th>
@@ -49,7 +49,7 @@
 										</tr>
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type / Network Service Only?</th>
-											<td style="padding:5px;" th:utext="${project_basic_info.distributionType} / ${project_basic_info.networkServerType}"></td>
+											<td style="padding:5px;" th:utext="${project_basic_info.distributionType + ' / ' + project_basic_info.networkServerType}"></td>
 										</tr>
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Site</th>
@@ -71,7 +71,7 @@
 											<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
 											<td style="padding:5px;" th:utext="${project_basic_info.creator}"></td>
 										</tr>
-										<th:block th:if="${project_basic_info.reviewer}">
+										<th:block th:if="${not #strings.isEmpty(project_basic_info.reviewer)}">
 											<tr>
 												<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
 												<td style="padding:5px;" th:utext="${project_basic_info.reviewer}"></td>
@@ -80,7 +80,7 @@
 									</table>
 								</th:block>
 
-								<th:block th:if="${selfcheck_basic_info}">
+								<th:block th:if="${selfcheck_basic_info != null}">
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 										<col style="width:40%">
 										<col style="width:*">
