@@ -1208,7 +1208,7 @@ public class PartnerController extends CoTopComponent{
 			_param2.setPartnerId(partnerMaster.getPartnerId());
 			PartnerMaster orgInfo = partnerService.getPartnerMasterOne(_param2);
 			
-			partnerService.changeStatus(partnerMaster);
+			partnerService.changeStatus(partnerMaster, false);
 			
 			try {
 				if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(partnerMaster.getStatus())) {

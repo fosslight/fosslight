@@ -515,7 +515,7 @@ public class ApiProjectController extends CoTopComponent {
 			
 			if (searchFlag) {
 				if ("Y".equals(mergeSaveFlag)) {
-					apiProjectService.registBom(prjId, mergeSaveFlag);
+					projectService.registBom(prjId, mergeSaveFlag, new ArrayList<>(), new ArrayList<>());
 				}
 				downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 				fileInfo = fileService.selectFileInfo(downloadId);
