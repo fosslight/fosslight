@@ -141,7 +141,7 @@
 				$("#_modelList").jqGrid('clearGridData');
 			});
 			
-			$('#drop').on('click', function(){
+			$('#drop').on ('click', function(){
 				var innerHtml 	= 'Are you to enter a comment when drop?<br><br>';
                 innerHtml 		+= '<textarea id="dropEditor"></textarea>';
 				
@@ -249,6 +249,12 @@
 					var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
 	               	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';
 					
+					// prevent clicking the OK button on Enter
+					let keyCode;
+					$(document).on('keydown', function (event) {
+						keyCode = event.keyCode;
+					});
+					
 	               	if(!alertify.deletePrjDialog){
 						alertify.dialog('deletePrjDialog', function() {
 							return {
@@ -260,7 +266,7 @@
 									}
 									
 									var setup = alertify.confirm().setup();
-									setup.focus.element = -1;
+									setup.focus.element = 0;
 									
 									return setup;
 								},
@@ -274,7 +280,10 @@
 						}, false, 'confirm');
                 	}
 	               	
-	               	alertify.deletePrjDialog(innerHtml, function () {
+	               	alertify.deletePrjDialog(innerHtml, function (e) {
+						// prevent clicking the OK button on Enter
+						if (keyCode == 13) { return false; }
+					
 	               		if ("" == $("#prjDelEditor").summernote('code')){
  							alertify.alert([[#{msg.project.required.comments}]], function(){});
 

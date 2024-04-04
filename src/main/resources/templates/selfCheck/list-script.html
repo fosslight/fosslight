@@ -236,6 +236,12 @@ var fn = {
 				var innerHtml 	= [[#{msg.selfcheck.confirm.remove.project}]] + '<br><br>';
 	           	innerHtml 		+= '<textarea id="delSelfEditor"></textarea>';
 	           	
+	           	// prevent clicking the OK button on Enter
+				let keyCode;
+				$(document).on('keydown', function (event) {
+					keyCode = event.keyCode;
+				});
+				
 	           	if (!alertify.delSelfDialog){
 	    			alertify.dialog('delSelfDialog', function() {
 	    				return {
@@ -262,6 +268,9 @@ var fn = {
 	        	}
 	           	
 	           	alertify.delSelfDialog(innerHtml, function () {
+					// prevent clicking the OK button on Enter
+					if (keyCode == 13) { return false; }
+					
 	           		if ("" == $("#delSelfEditor").summernote('code')){
 						alertify.alert([[#{msg.project.required.comments}]], function(){});
 

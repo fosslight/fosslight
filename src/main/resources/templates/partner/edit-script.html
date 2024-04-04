@@ -1117,6 +1117,12 @@ var fn = {
 			var innerHtml 	= [[#{msg.partner.delete.warning}]];
            	innerHtml 		+= '<textarea id="parDelEditor"></textarea>';
            	
+       		// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+				
            	if(!alertify.deleteParDialog){
 				alertify.dialog('deleteParDialog', function() {
 					return {
@@ -1128,7 +1134,7 @@ var fn = {
 							}
 							
 							var setup = alertify.confirm().setup();
-							setup.focus.element = -1;
+							setup.focus.element = 0;
 							
 							return setup;
 						},
@@ -1143,6 +1149,9 @@ var fn = {
         	}
            	
 			alertify.deleteParDialog(innerHtml, function () {
+				// prevent clicking the OK button on Enter
+				if (keyCode == 13) { return false; }
+					
 				if("" == $("#parDelEditor").summernote('code')) {
 					alertify.alert([[#{msg.project.required.comments}]], function(){});
 

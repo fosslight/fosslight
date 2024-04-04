@@ -225,18 +225,19 @@
                         data: {context: "Do you want to delete the oss ?"}
                     };
                     postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
-                        let eFlag = false;
-                        document.addEventListener('keydown', function(event) {
-                            if (event.keyCode === 13) { eFlag = true; };
-                        }, true);
+                       	// prevent clicking the OK button on Enter
+						let keyCode;
+						$(document).on('keydown', function (event) {
+							keyCode = event.keyCode;
+						});
 
                         alertify.confirm(res, function (e) {
+							// prevent clicking the OK button on Enter
+							if (keyCode == 13) { return false; }
+							
                             const comment = $("#promptPopupEditor").summernote('code');
                             if (e) {
-                                if(eFlag) {
-                                    eFlag = false;
-                                    return false;
-                                } else if ("" == comment) {
+                                if ("" == comment) {
                                     alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {
                                     });
 
@@ -665,7 +666,7 @@
                     	appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
                     	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
                     	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
-                    	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"oss_lst_fn.deleteOss()()\"><i class=\"far fa-trash-alt\"></i></button>";
+                    	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"oss_lst_fn.deleteOss()\"><i class=\"far fa-trash-alt\"></i></button>";
                     }
                     appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
                     appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
