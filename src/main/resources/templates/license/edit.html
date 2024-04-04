@@ -130,10 +130,8 @@
 									<div class="row form-group">
 										<div class="col-12">
 											<label th:text="#{msg.common.field.restriction}"></label>
-											<select class="select2" id="restrictionSelect" multiple="multiple"
-												name="restriction" style="width: 100%;" th:disabled="${isReadOnly}">
-												<option
-													th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+											<select class="select2" id="restrictionSelect" multiple="multiple" name="restriction" style="width: 100%;" th:disabled="${isReadOnly}">
+												<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
 													th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"
 													th:selected="${detail?.restrictionCdNoList != null and #arrays.contains(detail.restrictionCdNoList, code.cdDtlNo)}"
 													th:disabled="${isReadOnly}">

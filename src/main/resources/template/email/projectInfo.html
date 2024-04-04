@@ -79,7 +79,7 @@
 										<td style="padding:5px;" th:utext="${project_basic_info?.reviewer}"></td>
 									</tr>
 								</table>
-								<th:block th:if="${disclosure_oss_info}">
+								<th:block th:if="${disclosure_oss_info != null}">
 									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List to Disclose &raquo;</h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 										<tr>
@@ -95,7 +95,7 @@
 									</table>
 								</th:block>
 
-								<th:block th:if="${bom_oss_info}">
+								<th:block th:if="${bom_oss_info != null}">
 									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List &raquo;</h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 										<tr>
@@ -111,7 +111,7 @@
 									</table>
 								</th:block>
 
-								<th:block th:if="${distribution_info}">
+								<th:block th:if="${distribution_info != null}">
 									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Distribution Information &raquo;</h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 										<tr>
@@ -145,7 +145,7 @@
 									</table>
 								</th:block>
 
-								<th:block th:if="${model_info}">
+								<th:block th:if="${model_info != null}">
 									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Model Information &raquo;</h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 										<tr>
@@ -165,7 +165,7 @@
 									</table>
 								</th:block>
 
-								<th:block th:if="${vulnerability_prj_oss_info}">
+								<th:block th:if="${vulnerability_prj_oss_info != null}">
 									<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:utext="'« Vulnerability Information »'"></h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">
 										<tr>
@@ -180,9 +180,7 @@
 										<tr th:each="vulnerability : ${vulnerability_prj_oss_info}">
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.ossName}"></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.ossVersion}"></td>
-											<td th:style="'padding:5px;'">
-												<a th:href="${@CommonFunction.convertCveIdToLink(vulnerability.cveId)}" th:utext="${vulnerability.cveId}"></a>
-											</td>
+											<td th:style="'padding:5px;'"><a th:href="'https://nvd.nist.gov/vuln/detail/' + ${vulnerability.cveId}" target="_blank" th:text="${vulnerability.cveId}"></a></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.cvssScore}"></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.vulnSummary}"></td>
 											<td th:style="'padding:5px;'" th:utext="${vulnerability.publishedDate}"></td>
@@ -191,7 +189,7 @@
 									</table>
 								</th:block>
 
-								<th:block th:if="${vulnerability_prj_recalc_oss_info}">
+								<th:block th:if="${vulnerability_prj_recalc_oss_info != null}">
 									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Vulnerability Information &raquo;</h2>
 									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 										<tr>
@@ -210,8 +208,8 @@
 											</tr>
 											<tr>
 												<th align="left" style="padding:5px;background:#f0f0f0;">CVE ID</th>
-												<td style="padding:5px;" th:utext="${@CommonFunction.convertCveIdToLink(vulnerability_reCalc.cveId)}"></td>
-												<td style="padding:5px;" th:utext="${@CommonFunction.convertCveIdToLink(vulnerability_reCalc.cveIdTo)}"></td>
+												<td style="padding:5px;"><a th:href="'https://nvd.nist.gov/vuln/detail/' + ${vulnerability_reCalc.cveId}" target="_blank" th:text="${vulnerability_reCalc.cveId}"></a></td>
+												<td style="padding:5px;"><a th:href="'https://nvd.nist.gov/vuln/detail/' + ${vulnerability_reCalc.cveIdTo}" target="_blank" th:text="${vulnerability_reCalc.cveIdTo}"></a></td>
 											</tr>
 											<tr>
 												<th align="left" style="padding:5px;background:#f0f0f0;">Score</th>
