@@ -2150,7 +2150,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				vulnerability.setSidx("cveId");
 				vulnerability.setPageListSize(MAX_RECORD_CNT_LIST);
 				
-				Map<String, Object> vulnerabilityMap =	 vulnerabilityService.getVulnerabilityList(vulnerability, true);
+				Map<String, Object> vulnerabilityMap =	vulnerabilityService.getVulnerabilityList(vulnerability, true);
 				
 				if (isMaximumRowCheck((int) vulnerabilityMap.get("records"))){
 					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityMap.get("rows"));
