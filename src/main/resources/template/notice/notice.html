@@ -34,10 +34,10 @@
 				<strong class="left">Open Source Software Notice</strong>
 				<span class="right"><sup th:text="${noticeTitle}"></sup></span>
 			</h2>
-			<th:block th:if="${editCompanyYn} == 'Y'">
+			<th:block th:if="${editCompanyYn == 'Y'}">
 				<p>This product from <span th:text="${companyNameFull}"></span> contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.</p>
 			</th:block>
-			<th:block th:if="${editCompanyYn} != 'Y'">
+			<th:block th:if="${editCompanyYn != 'Y'}">
 				<p>This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.</p>
 			</th:block>
 
