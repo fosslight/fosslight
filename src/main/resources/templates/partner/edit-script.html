@@ -1452,6 +1452,8 @@ var fn = {
 		$(".ajs-close").trigger("click");
 	},
 	getSheetData : function(){
+		fn.closePop();
+		
 		var sheetNum = [];
 		$('input:checkbox[name="sheetNameSelect"]').each(function(){
 			if($(this).is(':checked')){
