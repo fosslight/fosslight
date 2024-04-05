@@ -346,6 +346,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private String changeFlag;
 	private String addFlag;
 	
+	private List<ProjectIdentification> deduplicatedComponentLicenseList;
+	
 	public String getRedirectLocation() {
 		return redirectLocation;
 	}
@@ -2126,5 +2128,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setAddFlag(String addFlag) {
 		this.addFlag = addFlag;
+	}
+
+	public List<ProjectIdentification> getDeduplicatedComponentLicenseList() {
+		return deduplicatedComponentLicenseList;
+	}
+
+	public void setDeduplicatedComponentLicenseList(List<ProjectIdentification> deduplicatedComponentLicenseList) {
+		this.deduplicatedComponentLicenseList = deduplicatedComponentLicenseList;
 	}
 }
