@@ -826,6 +826,12 @@ public class OssController extends CoTopComponent{
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		commentService.registComment(commentsHistory);
 		
+		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_REGIST);
+		mailBean.setParamOssId(commentsHistory.getReferenceId());
+		mailBean.setComment(commentsHistory.getContents());
+		
+		CoMailManager.getInstance().sendMail(mailBean);	
+		
 		return makeJsonResponseHeader();
 	}
 	

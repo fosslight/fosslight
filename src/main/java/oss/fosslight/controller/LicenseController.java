@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.*;
 import oss.fosslight.common.Url.LICENSE;
+import oss.fosslight.common.Url.OSS;
 import oss.fosslight.domain.*;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.HistoryService;
@@ -288,6 +289,21 @@ public class LicenseController extends CoTopComponent{
 		}
 		
 		return makeJsonResponseHeader(result);
+	}
+	
+	
+	@PostMapping(value =LICENSE.SEND_COMMENT)
+	public @ResponseBody ResponseEntity<Object> sendComment(@ModelAttribute CommentsHistory commentsHistory,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		commentService.registComment(commentsHistory);
+		
+		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST);
+		mailBean.setParamLicenseId(commentsHistory.getReferenceId());
+		mailBean.setComment(commentsHistory.getContents());
+		
+		CoMailManager.getInstance().sendMail(mailBean);	
+		
+		return makeJsonResponseHeader();
 	}
 	
 	@GetMapping(value=LICENSE.LICENSE_TEXT)

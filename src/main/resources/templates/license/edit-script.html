@@ -243,7 +243,7 @@
 				var param = {referenceId : lic_edit_data.detail.licenseId, referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE')}]], contents : replaceWithLink(editorVal), mailSendType : type};
 				
 				$.ajax({
-					url : '/project/sendComment',
+					url : '/license/sendComment',
 					type : 'POST',
 					dataType : 'json',
 					cache : false,

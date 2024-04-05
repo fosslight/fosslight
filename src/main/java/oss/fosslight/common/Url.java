@@ -86,6 +86,7 @@ public final class Url {
 		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
+		public static final String SEND_COMMENT = PATH + "/sendComment";
 		public static final String DELETE_COMMENT = PATH + "/deleteComment";
 		
 		public static final String LICENSE_TEXT = PATH + "/getLicenseText";

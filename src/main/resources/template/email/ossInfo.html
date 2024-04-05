@@ -49,13 +49,13 @@
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
 										<td style="padding:5px;">
 											<span th:text="${oss_basic_info?.ossVersion}"></span>
-											<span th:if="${oss_basic_info?.ossType.contains('M')}">
+											<span th:if="${oss_basic_info != null and oss_basic_info.ossType != null and oss_basic_info.ossType.contains('M')}">
 												<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADcSURBVDhPY/z//39v39o7d58zEAdUlCWLi4JZgCygHg1NK4goQXDj+jEgyQThkApQtP3+/evTp7fv3j0DkkA2GheqCAxAjoSD798/11a5QtjNbbuBJDKXlVUYwgYCFNv+/PkJZTEwAC0BIigHVQoIcPqtvyceiKAcDECNIIGDlLQ+NAYawK6Nlw/qezgDDWDXxsnJCww6IAIyoEKoAEUbCws7hAFUzccnDERwbXApCECJN4glEAYuEQhAsY2VlQ1iCZCBSwQCsPuNICA54ygrSZYUB4O0QQWIBwwMAJhcWykW5ke4AAAAAElFTkSuQmCC"/>
 											</span>
-											<span th:if="${oss_basic_info?.ossType.contains('D')}">
+											<span th:if="${oss_basic_info != null and oss_basic_info.ossType != null and oss_basic_info.ossType.contains('D')}">
 												<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAD6SURBVDhPY/z///+WnpUv7zxlIA6Iq0j7lISzAFlAPYaa+hBRguD89YtAkgnCIRWgaPv1+9fbT++evXsBQUA2UAQqhwpAjoSDz9+/uNaGQjlgsK5qgZSQOBsrG5QPAyi2/fwDNXth4ZTlZbOAjKC2hGfvXmLaid1vwnyCimKycJ1AV0DE4QBnkAAdxsvJDWHDXQEH1AhJZAD0z+fvXyFsdha8QQIHbz+9v//qcWRXGpANDExeTh6IOBygRADc1Pj+HAgDVwSgaAOaurt5NTwAgKZg1QMEKI4EqhDmE5ISkoAgIBurHiAgMyRJzzjKUj6lESBtUAHiAQMDAJyXY/B57xmtAAAAAElFTkSuQmCC"/>
 											</span>
-											<span th:if="${oss_basic_info?.ossType.contains('V')}">
+												<span th:if="${oss_basic_info != null and oss_basic_info.ossType != null and oss_basic_info.ossType.contains('V')}">
 												<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADZSURBVDhPY/z///+GWY3PH95kIA5IyqsHpNWzAFlAPYE29hBRgmD9kYNAkgnCIRWga/v56/er95+ACMhAZkOlYQBd28ev3/WiSoEIyEBmQ6VhAIttcAYyG8KAA3Rt7GysEAbEeRA2XBAO0LXxc3PunVoDZHgXdgARkAHkAgXBkgiAxTY+bi4oBwyAXMK2AQGaIkw9QIBFG9ydQIDVhUCA3TZRQX4IG8gg1jYgANpwaVk3EGG1CgiwawPaICbIB0RYrQIC7NoIApIzjoS8WmBaA0gbVIB4wMAAAOuvYrotinxoAAAAAElFTkSuQmCC"/>
 											</span>
 										</td>
@@ -67,7 +67,7 @@
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Detected License Name</th>
 										<td style="padding:5px;">
-											<span th:each="detectedLicense, iterStat : ${oss_basic_info.detectedLicenses}">
+											<span th:each="detectedLicense, iterStat : ${oss_basic_info?.detectedLicenses}">
 												<span th:utext="${detectedLicense}"></span>
 												<span th:if="${iterStat.last == false}">, </span>
 											</span>
@@ -81,7 +81,7 @@
 										<th align="left" style="padding:5px;background:#f0f0f0;">Copyright</th>
 										<td style="padding:5px;" th:utext="${oss_basic_info?.copyright}"></td>
 									</tr>
-									<th:block th:if="${#strings.contains(oss_basic_info?.ossType, 'M') or #strings.contains(oss_basic_info?.ossType, 'D')}">
+									<th:block th:if="${oss_basic_info != null and (#strings.contains(oss_basic_info?.ossType, 'M') or #strings.contains(oss_basic_info?.ossType, 'D'))}">
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
 											<td>
