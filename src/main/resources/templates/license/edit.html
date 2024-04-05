@@ -9,13 +9,13 @@
 			<!-- Content Header (Page header) -->
 			<section class="content-header">
 				<div class="container-fluid">
-					<div class="row">
+					<div class="row" th:if="${detail?.licenseId != null}">
 						<div class="col-sm-9 text-left mt-2"></div>
 						<div class="col-sm-3 float-right mt-1">
-							<div class="float-right" th:if="${detail?.licenseId != null}">
-								<button class="btn btn-block btn-outline-secondary btn-sm width-7rem px-1 ml-1"
-									th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments"></i>
-									Comment</button>
+							<div class="float-right">
+								<button class="btn btn-block btn-outline-secondary btn-sm width-7rem px-1 ml-1" th:onclick="|fn_comment.activateCommentArea()|">
+									<i class="fas fa-comments"></i>Comment
+								</button>
 							</div>
 						</div>
 					</div>
@@ -28,17 +28,18 @@
 					<input name="restriction" type="hidden" />
 
 					<div class="row">
-						<div class="col-md-1 editInfoAreaTop" style="display: none;"></div>
-						<div class="col-md-9 editInfoArea">
+						<div class="col-md-1 editInfoAreaTop" th:style="${detail != null} ? 'display: none;'"></div>
+						<div th:class="${detail != null} ? 'col-md-9 editInfoArea' : 'col-md-10 editInfoArea'">
 							<div class="card card-secondary submit-form">
 								<div class="card-header">
-									<div class="card-tools" th:unless="${isReadOnly}">
-										<button class="btn btn-tool text-white" data-toggle="tooltip"
-											data-placement="right" title="Delete" type="button" id="delete"><i
-												class="fas fa-trash customIcon2"></i></button>
-										<button class="btn btn-tool text-white" data-toggle="tooltip"
-											data-placement="right" title="Save" type="button" id="save"><i
-												class="fas fa-save customIcon2"></i></button>
+									<h3 class="card-title" th:text="'License Information'"></h3>
+									<div class="card-tools">
+										<button th:if="${detail != null}" class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Delete" type="button" id="delete">
+											<i class="fas fa-trash customIcon2"></i>
+										</button>
+										<button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Save" type="button" id="save">
+											<i class="fas fa-save customIcon2"></i>
+										</button>
 									</div>
 								</div>
 								<div class="card-body">
@@ -218,8 +219,8 @@
 								</div>
 							</div>
 						</div>
-						<div class="col-md-1 editInfoAreaBottom" style="display: none;"></div>
-						<div class="col-md-3 editInfoCommentArea">
+						<div class="col-md-1 editInfoAreaBottom" th:style="${detail != null} ? 'display: none;'"></div>
+						<div class="col-md-3 editInfoCommentArea" th:style="${detail == null} ? 'display: none;'">
 							<div class="card card-lg-red" style="position:sticky; top:10px;">
 								<div class="card-header">
 									<h3 class="card-title" th:text="Comment"></h3>

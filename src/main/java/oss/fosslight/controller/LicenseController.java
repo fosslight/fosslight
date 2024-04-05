@@ -295,11 +295,11 @@ public class LicenseController extends CoTopComponent{
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		commentService.registComment(commentsHistory);
 		
-//		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST);
-//		mailBean.setParamLicenseId(commentsHistory.getReferenceId());
-//		mailBean.setComment(commentsHistory.getContents());
-//		
-//		CoMailManager.getInstance().sendMail(mailBean);
+		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT);
+		mailBean.setParamLicenseId(commentsHistory.getReferenceId());
+		mailBean.setComment(commentsHistory.getContents());
+		
+		CoMailManager.getInstance().sendMail(mailBean);
 		
 		return makeJsonResponseHeader();
 	}

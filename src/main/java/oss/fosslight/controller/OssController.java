@@ -263,6 +263,13 @@ public class OssController extends CoTopComponent{
 			List<String> downloadLocationList = new ArrayList<>();
 			downloadLocationList.add(avoidNull(bean.getDownloadLocation()));
 			model.addAttribute("downloadLocationList", toJson(downloadLocationList));
+		} else {
+			// 신규 등록시에도 ossNickList 은 필수(empty array를 설정)
+			List<String> nickList = new ArrayList<>();
+			model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
+			
+			List<String> downloadLocationList = new ArrayList<>();
+			model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 		}
 		
 		return "oss/edit";
@@ -826,11 +833,11 @@ public class OssController extends CoTopComponent{
 			HttpServletRequest req, HttpServletResponse res, Model model) {
 		commentService.registComment(commentsHistory);
 		
-//		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_REGIST);
-//		mailBean.setParamOssId(commentsHistory.getReferenceId());
-//		mailBean.setComment(commentsHistory.getContents());
-//		
-//		CoMailManager.getInstance().sendMail(mailBean);
+		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT);
+		mailBean.setParamOssId(commentsHistory.getReferenceId());
+		mailBean.setComment(commentsHistory.getContents());
+		
+		CoMailManager.getInstance().sendMail(mailBean);
 		
 		return makeJsonResponseHeader();
 	}
