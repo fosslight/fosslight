@@ -505,6 +505,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_OSS_DELETE = "19";
 	
 	public static final String CD_MAIL_TYPE_OSS_MODIFIED_COMMENT = "130";
+	public static final String CD_MAIL_TYPE_OSS_ADDED_COMMENT = "131";
+	
 	/** Mail Type [FOSSLight] OSS bas been deactivated */
 	public static final String CD_MAIL_TYPE_OSS_DEACTIVATED = "813";
 	public static final String CD_MAIL_TYPE_OSS_ACTIVATED = "814";
@@ -516,6 +518,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_LICENSE_UPDATE_TYPE = "22";
 	public static final String CD_MAIL_TYPE_LICENSE_RENAME = "23";
 	public static final String CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT = "230";
+	public static final String CD_MAIL_TYPE_LICENSE_ADDED_COMMENT = "231";
 	
 	/** Mail Type [FOSSLight] Open source license has been removed */
 	public static final String CD_MAIL_TYPE_LICENSE_DELETE = "29";

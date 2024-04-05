@@ -5229,12 +5229,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			String key = bean.getOssName() + "|" + bean.getOssVersion() + "|" + bean.getLicenseName();
 			String licenseName = "";
 			
+			List<String> duplicateCheckList = new ArrayList<>();
+			List<ProjectIdentification> deduplicateComponentLicenseList = new ArrayList<>();
+			
 			if (binaryMergeData.containsKey(bean.getBinaryName())) { // binaryPath 기준으로 merge
 				_list = binaryMergeData.get(bean.getBinaryName());
 				_oldKey = binaryOssKeyMap.get(bean.getBinaryName());
 				
 				if (_list != null) {
 					for (ProjectIdentification license : bean.getComponentLicenseList()) {
+						if (!duplicateCheckList.contains(license.getLicenseName())) {
+							duplicateCheckList.add(license.getLicenseName());
+							deduplicateComponentLicenseList.add(license);
+						}
+						
 						LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 						license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
 						license.setAttribution(avoidNull(licenseBean.getAttribution()));
@@ -5252,6 +5260,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() +"_"+ avoidNull(bean.getOssVersion())).toUpperCase());
 					bean.setAttribution(avoidNull(ossBean.getAttribution()));
 					bean.setLicenseName(licenseName);
+					bean.setDeduplicatedComponentLicenseList(deduplicateComponentLicenseList);
 					
 					_list.add(bean);
 					
@@ -5261,6 +5270,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			} else {
 				for (ProjectIdentification license : bean.getComponentLicenseList()) {
+					if (!duplicateCheckList.contains(license.getLicenseName())) {
+						duplicateCheckList.add(license.getLicenseName());
+						deduplicateComponentLicenseList.add(license);
+					}
+					
 					LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
 					license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
 					license.setAttribution(avoidNull(licenseBean.getAttribution()));
@@ -5278,8 +5292,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() +"_"+ avoidNull(bean.getOssVersion())).toUpperCase());
 				
 				bean.setAttribution(ossBean != null ? avoidNull(ossBean.getAttribution())  : "");
-				
 				bean.setLicenseName(licenseName);
+				bean.setDeduplicatedComponentLicenseList(deduplicateComponentLicenseList);
 				
 				_list.add(bean);
 				

@@ -26,9 +26,9 @@
 							<td style="padding:40px;">
 								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle}" th:utext="${contentsTitle}"></div>
 								<p style="font-size:12px;" th:if="${contentsSubTitle}" th:utext="${contentsSubTitle}"></p>
-								<th:block th:if="${comment != null and comment != '' and (mailType == '19' or mailType == '10' or mailType == '13')}">
-									<h2 style="margin:0; padding:25px 10px 0; font-size:16px;">Comment</h2>
-									<div style="padding:10px; font-size:12px;" th:utext="${comment}"></div>
+								<th:block th:if="${comment != null and comment != '' and (mailType == '19' or mailType == '10' or mailType == '13' or mailType == '131')}">
+									<h2 style="margin:0; padding:25px 10px 0; font-size:14px;">Comment</h2>
+									<p style="padding:10px; font-size:12px;" th:utext="${comment}"></p>
 								</th:block>
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<col style="width:40%">
@@ -120,9 +120,9 @@
 										<td style="padding:5px;" th:utext="${oss_basic_info?.createdDate} + ' / ' + ${oss_basic_info?.creator}"></td>
 									</tr>
 								</table>
-								<div th:if="${comment != null and not #strings.isEmpty(comment) and mailType != '19' and mailType != '10' and mailType != '13'}">
-									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
+								<div th:if="${comment != null and comment != '' and mailType == '19' and mailType == '10' and mailType == '13' and mailType == '131'}">
+									<h2 style="margin:0;padding:25px 10px 0;font-size:14px;">Comment</h2>
+									<p style="padding:10px;font-size:12px;" th:utext="${comment}"></p>
 								</div>
 
 								<div th:if="${projectList != null and not #lists.isEmpty(projectList)}">
