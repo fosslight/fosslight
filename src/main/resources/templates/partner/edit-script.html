@@ -1520,6 +1520,10 @@ var fn = {
 				
 					if ("false" == data.isValid) {
 						if (data.validMsg) {
+							$('#ossFileId').val(ossFileObj.registSeq);
+							fn.makeFileTag(ossFileObj, 'ossFile');
+							ossFileObj = undefined;
+							
 							alertify.alert(data.validMsg, function(){});
 						} else {
 							alertify.error([[#{msg.common.valid2}]], 0);
