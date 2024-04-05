@@ -175,6 +175,12 @@ var com_evt = {
 				var innerHtml 	= 'Are you sure you want to reject?<br><br>';
                	innerHtml 		+= '<textarea id="bomRejectEditor"></textarea>';
 				
+             	// prevent clicking the OK button on Enter
+				let keyCode;
+				$(document).on('keydown', function (event) {
+					keyCode = event.keyCode;
+				});
+               	
                	if (typeof alertify.bomRejectDialog === 'undefined') {
 					alertify.dialog('bomRejectDialog', function() {
 						return {
@@ -187,7 +193,7 @@ var com_evt = {
 								
 								var setup = alertify.confirm().setup();
 								
-								setup.focus.element = 1;
+								setup.focus.element = 0;
 								
 								return setup;
 							},
@@ -201,18 +207,24 @@ var com_evt = {
 					}, false, 'confirm');
             	}
                	
-               	alertify.bomRejectDialog(innerHtml, function () {
-					var comment = $($("#bomRejectEditor").summernote('code')).text();
-               		comment = comment.trim();
-					
-					if ("" == comment) {
-						alertify.alert([[#{msg.project.required.comments}]], function(){});
+               	alertify.bomRejectDialog(innerHtml, function (e) {
+               		// prevent clicking the OK button on Enter
+					if (keyCode == 13) { return false; }
+               		
+               		if (e) {
+               			var editorVal = $("#bomRejectEditor").summernote('code');
+    					
+               			if ("" == $(editorVal).text().trim()) {
+    						alertify.alert([[#{msg.project.required.comments}]], function(){});
 
-						return false;
-					} else {
-						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : $("#bomRejectEditor").summernote('code')};
-						com_fn.checkSave(data, "PROG");
-					}
+    						return false;
+    					} else {
+    						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : $("#bomRejectEditor").summernote('code')};
+    						com_fn.checkSave(data, "PROG");
+    					}
+               		} else {
+               			return false;
+               		}
 				});
 				
 				$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
