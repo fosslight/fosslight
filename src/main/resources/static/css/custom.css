@@ -460,6 +460,11 @@ tr.ui-row-ltr,
     height: auto !important;
 }
 
+#chartRawDataSet .ui-jqgrid .ui-jqgrid-sdiv .ui-jqgrid-hbox .ui-jqgrid-ftable tr td {
+    padding: 12px !important;
+    background-color: #959ba14a !important;  
+}
+
 .ui-jqgrid .ui-jqgrid-hbox table.ui-jqgrid-htable {
     background-color: #f9faff;
     border: none;
