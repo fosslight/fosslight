@@ -189,7 +189,6 @@ public class StatisticsController extends CoTopComponent{
 			model.addAttribute("chartType", chartType);
 		}
 		
-		return STATISTICS.STATISTICS_POPUP_JSP;
+		return "statistics/view/statisticsPopup";
 	}
-	
 }
