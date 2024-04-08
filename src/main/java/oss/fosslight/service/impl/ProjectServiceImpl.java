@@ -6697,4 +6697,63 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	public List<OssComponents> getDependenciesDataList(Project project) {
 		return projectMapper.getDependenciesDataList(project);
 	}
+
+	@Override
+	public void setNoticeFileFormat(Project project, List<String> noticeFileFormatList) {
+		if (noticeFileFormatList.contains("chkAllowDownloadNoticeHTML")) {
+			project.setAllowDownloadNoticeHTMLYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadNoticeHTMLYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadNoticeText")) {
+			project.setAllowDownloadNoticeTextYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadNoticeTextYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSimpleHTML")) {
+			project.setAllowDownloadSimpleHTMLYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSimpleHTMLYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSimpleText")) {
+			project.setAllowDownloadSimpleTextYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSimpleTextYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXSheet")) {
+			project.setAllowDownloadSPDXSheetYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXSheetYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXRdf")) {
+			project.setAllowDownloadSPDXRdfYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXRdfYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXTag")) {
+			project.setAllowDownloadSPDXTagYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXTagYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXJson")) {
+			project.setAllowDownloadSPDXJsonYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXJsonYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXYaml")) {
+			project.setAllowDownloadSPDXYamlYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXYamlYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadCDXJson")) {
+			project.setAllowDownloadCDXJsonYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadCDXJsonYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadCDXXml")) {
+			project.setAllowDownloadCDXXmlYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadCDXXmlYn(CoConstDef.FLAG_NO);
+		}
+	}
 }

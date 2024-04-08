@@ -211,6 +211,8 @@ public interface ProjectService extends HistoryConfig{
 	public List<OssComponents> getDependenciesDataList(Project project);
 
 	void registDepOss(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, Project project);
+
+	public void setNoticeFileFormat(Project project, List<String> noticeFileFormatList);
 }
 
 
