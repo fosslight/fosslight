@@ -19,6 +19,8 @@
     var isReadOnly = [[${isReadOnly}]] || null;
     var downloadLocationList = [[${downloadLocationList}]];
     var ossNickList = [[${ossNickList}]];
+    var isSaveButtonClicked = false;
+      
 	//데이터 객체
 	var data = {
 		detail : [[${detail}]],
@@ -898,7 +900,7 @@
 				$("div.retxt._licenseChoice_"+rowid).remove();
 				// 현재 로우와 라스트 로우가 다를시
 				showLicenseText();
-				if(rowid && rowid!==lastsel){
+				if(rowid && rowid!==lastsel || isSaveButtonClicked){
 					_licenseChoice.jqGrid('saveRow',lastsel);
 					
 					// license 존재 여부 체크
@@ -1209,6 +1211,8 @@
 		//라이센스 묶음 텍스트 출력
 		createMultiLicenseText();
 		lastsel=-1;
+		
+		isSaveButtonClicked = false;
 	}
 
 	function getLicenseGroup(groups){
@@ -2567,6 +2571,8 @@
 			return _param;
 		},
 		save : function() {
+			isSaveButtonClicked = true;
+			
 			if(fn.checkValid()){
 				// 폼 에러 메세지 숨기기
 				$("span.retxt").hide();
