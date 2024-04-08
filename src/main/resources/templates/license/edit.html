@@ -158,16 +158,12 @@
 									<div class="row form-group">
 										<div class="col-md-12">
 											<div class="row multiTxtSet">
-												<div class="col-md-4"
-													th:each="licenseNickname : ${detail?.licenseNicknames}"
-													th:if="${!#strings.isEmpty(licenseNickname)}">
+												<div class="col-md-4" th:each="licenseNickname : ${detail?.licenseNicknames}" th:if="${!#strings.isEmpty(licenseNickname)}">
 													<div class="form-group mb-0">
-														<input class="form-control" type="type" name="licenseNicknames"
-															th:value="${licenseNickname}" th:disabled="${isReadOnly}" />
-														<button th:if="${@CommonFunction.isAdmin()}" type="button"
-															class="btn btn-tool xbox"
-															th:onclick="|fn.removeTag(this)|"><i
-																class="fas fa-times"></i></button>
+														<input class="form-control" type="type" name="licenseNicknames" th:value="${licenseNickname}" th:disabled="${isReadOnly}" />
+														<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-tool xbox" th:onclick="|fn.removeTag(this)|">
+															<i class="fas fa-times"></i>
+														</button>
 														<span class="retxt text-danger text-sm"></span>
 													</div>
 												</div>
@@ -177,23 +173,18 @@
 									<div class="form-group tag-form" name="append-stag-form">
 										<label th:text="#{msg.common.field.licenseWebsite}"></label>
 										<div class="input-group" th:unless="${isReadOnly}">
-											<input class="form-control" id="input_webpages" type="text"
-												placeholder="http://">
+											<input class="form-control" id="input_webpages" type="text" placeholder="http://">
 											<div class="input-group-append">
-												<button class="btn btn-default" id="webpageAdd" type="button"
-													th:text="Add"></button>
+												<button class="btn btn-default" id="webpageAdd" type="button" th:text="Add"></button>
 											</div>
 										</div>
 									</div>
 									<div class="row form-group">
 										<div class="col-12 multiWebPageSet">
-											<div class="input-group card-tools" th:each="webpage : ${detail?.webpages}"
-												th:if="${!#strings.isEmpty(webpage)}">
-												<input class="form-control" name="webpages" th:value="${webpage}"
-													type="type" placeholder="http://" />
-												<button th:if="${@CommonFunction.isAdmin()}" type="button"
-													class="btn btn-tool" th:onclick="|fn.removeTag(this)|"><i
-														class="fas fa-times"></i></button>
+											<div class="input-group card-tools" th:each="webpage : ${detail?.webpages}" th:if="${!#strings.isEmpty(webpage)}">
+												<input class="form-control" name="webpages" th:value="${webpage}" type="text" placeholder="http://" />
+												<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-tool xbox" th:onclick="|fn.removeTag2(this)|">
+													<i class="fas fa-times"></i></button>
 												<span class="urltxt text-danger text-sm"></span>
 											</div>
 										</div>
