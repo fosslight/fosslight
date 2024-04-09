@@ -1699,7 +1699,7 @@
 	function deleteOssByOne(){
 		var ossId = $('input[name=ossId]').val();
 		var ossName = $('input[name=ossName]').val();
-		var editorVal = $('#commentCont').next().find(".note-editable").html();
+		var editorVal = $("#deleteOssEditor").summernote('code');
 
 		var sendData = {
 				ossId:ossId,
