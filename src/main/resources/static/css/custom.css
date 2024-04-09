@@ -1,5 +1,5 @@
 html { height: auto !important;}
-ul { list-style-type: none; }
+.custom-layout ul { list-style-type: none; }
 
 /* font awesome size custom fa-1x < ( custome size ) < fa-2x */
 .custom-layout .fa-1-1x { font-size: 1.1em }
@@ -305,6 +305,9 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 
 /* comment */
 .custom-layout .user-block .username { margin-left: 0;}
+/* summernote  */
+.note-editor.note-frame ul { list-style-type: unset; }
+.note-editor.note-frame .tooltip { top: 0 !important ; left: 0 !important ; }
 /* content-header */
 .custom-layout .content-header { padding: .5rem .5rem; }
 .custom-layout .content-header span.description-text { font-weight: bold; color: #999;}
