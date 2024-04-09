@@ -41,8 +41,123 @@
 								<td style="padding:5px;" th:utext="${before?.licenseName}"></td>
 								<td style="padding:5px;" th:utext="${after?.licenseName}"></td>
 							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">License Type</th>
+								<td style="padding:5px;" th:utext="${before?.licenseType}"></td>
+								<td style="padding:5px;" th:utext="${after?.licenseType}"></td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Restriction</th>
+								<td style="padding:5px;">
+									<div th:each="licenseRestriction : ${before?.arrRestriction}" th:utext="${licenseRestriction}"></div>
+								</td>
+								<td style="padding:5px;">
+									<div th:each="licenseRestriction : ${after?.arrRestriction}" th:utext="${licenseRestriction}"></div>
+								</td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
+									<td style="padding:5px;" th:utext="${before?.obligation}"></td>
+								<td style="padding:5px;" th:utext="${after?.obligation}"></td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">SPDX Short Identifier</th>
+								<td style="padding:5px;" th:utext="${before?.shortIdentifier}"></td>
+								<td style="padding:5px;" th:utext="${after?.shortIdentifier}"></td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Nickname</th>
+								<td style="padding:5px;">
+									<div th:each="nickName : ${before?.licenseNicknames}" th:utext="${nickName}"></div>
+								</td>
+								<td style="padding:5px;">
+									<div th:each="nickName : ${after?.licenseNicknames}" th:utext="${nickName}"></div>
+								</td>
+							</tr>
+							
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Web site for the license</th>
+								<!-- TODO MAIL-SERVICE -->
+								<!-- hk-cho : http 프로토콜이 넘어오지 않을 경우, 상대경로로 지정되는 오류가 있어서 validate 필요 -->
+								<td style="padding:5px;">
+									<th:block th:if="${before?.webpageLinkFormat}" th:utext="${before?.webpageLinkFormat}"></th:block>
+								</td>
+								<td style="padding:5px;">
+									<th:block th:if="${before?.webpageLinkFormat}" th:utext="${before?.webpageLinkFormat}"></th:block>
+								</td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">User Guide</th>
+								<td style="padding:5px;" th:utext="${before?.description}"></td>
+								<td style="padding:5px;" th:utext="${after?.description}"></td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">License Text</th>
+								<td style="padding:5px;" th:utext="${before?.licenseText}"></td>
+								<td style="padding:5px;" th:utext="${after?.licenseText}"></td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Attribution</th>
+								<td style="padding:5px;" th:utext="${before?.attribution}"></td>
+								<td style="padding:5px;" th:utext="${after?.attribution}"></td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Last Modified Date / Last Modifier</th>
+								<td style="padding:5px;" th:utext="|${before?.modifiedDate} / ${before?.modifier}|"></td>
+								<td style="padding:5px;" th:utext="|${after?.modifiedDate} / ${after?.modifier}|"></td>
+							</tr>
 							<!-- Add other rows as needed -->
 						</table>
+						
+						<th:block th:if="${ossList != null}">
+							<br />
+							<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS list with changed license type &raquo;</h2>
+							<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+								<tr>
+									<th style="padding:5px;background:#f0f0f0;">ID</th>
+									<th style="padding:5px;background:#f0f0f0;">OSS Name(Version)</th>
+									<th style="padding:5px;background:#f0f0f0;">License</th>
+									<th style="padding:5px;background:#f0f0f0;">License Type(before)</th>
+									<th style="padding:5px;background:#f0f0f0;">License Type(after)</th>
+									<th style="padding:5px;background:#f0f0f0;">Obligation(before)</th>
+									<th style="padding:5px;background:#f0f0f0;">Obligation(after)</th>
+								</tr>
+								<tr th:each="ossInfo: ${ossList}">
+									<td style="padding:5px;" th:utext="${ossInfo?.ossId}"></td>
+									<td style="padding:5px;" th:utext="${ossInfo?.ossName}"></td>
+									<td style="padding:5px;" th:utext="${ossInfo?.licenseName}"></td>
+									<td style="padding:5px;" th:utext="${ossInfo?.orgLicenseType}"></td>
+									<td style="padding:5px;" th:utext="${ossInfo?.licenseType}"></td>
+									<th style="padding:5px;" th:utext="${ossInfo?.orgObligationType}"></th>
+									<th style="padding:5px;" th:utext="${ossInfo?.obligation}"></th>
+								</tr>
+							</table>
+						</th:block>
+						
+						<th:block th:if="${projectList != null}">
+							<br />
+							<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Project List &raquo;</h2>
+							<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+								<tr>
+									<th style="padding:5px;background:#f0f0f0;">ID</th>
+									<th style="padding:5px;background:#f0f0f0;">Project Name</th>
+									<th style="padding:5px;background:#f0f0f0;">Project Version</th>
+									<th style="padding:5px;background:#f0f0f0;">Distribution Type</th>
+									<th style="padding:5px;background:#f0f0f0;">Creator</th>
+									<th style="padding:5px;background:#f0f0f0;">Created Date</th>
+									<th style="padding:5px;background:#f0f0f0;">Reviewer</th>
+								</tr>
+								<tr th:each="project: ${projectList}">
+									<td style="padding:5px;" th:utext="${project?.prjId}"></td>
+									<td style="padding:5px;" th:utext="${project?.prjName}"></td>
+									<td style="padding:5px;" th:utext="${project?.prjVersion}"></td>
+									<td style="padding:5px;" th:utext="${project?.distributionType}"></td>
+									<td style="padding:5px;" th:utext="${project?.creator}"></td>
+									<td style="padding:5px;" th:utext="${project?.createdDate}"></td>
+									<td style="padding:5px;" th:utext="${project?.reviewer}"></td>
+								</tr>
+							</table>
+						</th:block>
 
 						<!-- Add other content as needed -->
 
