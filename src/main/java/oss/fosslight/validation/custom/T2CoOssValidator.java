@@ -745,7 +745,11 @@ public class T2CoOssValidator extends T2CoValidator {
 			// homepage
 			basicKey = "HOMEPAGE";
 			gridKey = StringUtil.convertToCamelCase(basicKey);
-			errCd = checkBasicError(basicKey, gridKey, analysisBean.getHomepage().trim(), true);
+			
+			String homepage = analysisBean.getHomepage();
+			if (!isEmpty(homepage)) homepage = homepage.trim();
+			
+			errCd = checkBasicError(basicKey, gridKey, homepage, true);
 			
 			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
@@ -757,7 +761,7 @@ public class T2CoOssValidator extends T2CoValidator {
 					param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(analysisBean.getOssName().trim().toUpperCase()));
 				}
 				
-				param.setHomepage(analysisBean.getHomepage().trim());
+				param.setHomepage(homepage);
 				Map<String, Object> paramMap = ossService.checkExistsOssHomepage(param);
 				List<OssMaster> list = (List<OssMaster>) paramMap.get("homepage");
 				
