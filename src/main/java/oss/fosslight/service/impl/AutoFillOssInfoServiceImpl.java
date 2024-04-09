@@ -27,6 +27,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -378,13 +382,15 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return sortedValue;
     }
 	
+	@SuppressWarnings("unchecked")
 	private String requestClearlyDefinedLicenseApi(String requestUri) {
-		String checkedLicense;
+		String checkedLicense = "";
 		try {
-			Mono<Object> mono = requestClearlyDefinedLicense(requestUri);
-			Map<String, Object> ossInfo = (Map<String, Object>) mono.block();
-			Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
-			checkedLicense = licenseInfo.get("declared");
+			Map<String, Object> ossInfo = requestClearlyDefinedLicense(requestUri);
+			if (ossInfo != null && ossInfo.containsKey("licensed")) {
+				Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
+				checkedLicense = licenseInfo.get("declared");
+			}
 		} catch (Exception e) {
 			log.error("Clearly Defined -> " + requestUri + " : " + e.getMessage());
 			checkedLicense = "NONE";
@@ -439,7 +445,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		Map<String, Object> res = new HashMap<>();
 
 		try {
-			res = (Map<String, Object>) requestClearlyDefinedLicense("https://api.clearlydefined.io/").block();
+			res = requestClearlyDefinedLicense("https://api.clearlydefined.io/");
 		} catch(HttpServerErrorException e) {
 			String message = "ClearlyDefined ";
 			if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
@@ -451,7 +457,12 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				throw new HttpServerErrorException(e.getStatusCode(), message);
 			}
 		}
-		return res.get("status").equals("OK");
+		
+		if (res != null) {
+			return res.get("status").equals("OK");
+		} else {
+			return false;
+		}
 	}
 
 	private String combineOssLicenses(List<ProjectIdentification> prjOssMasters, String currentLicense) {
@@ -513,30 +524,44 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			.flatMap(response -> response.bodyToMono(Object.class));
 	}
 
-	@Override
-	public ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations) {
-		return Flux.fromIterable(locations)
-				.parallel()
-				.runOn(Schedulers.elastic())
-				.flatMap(this::requestClearlyDefinedLicense);
-	}
+//	@Override
+//	public ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations) {
+//		return Flux.fromIterable(locations)
+//				.parallel()
+//				.runOn(Schedulers.elastic())
+//				.flatMap(this::requestClearlyDefinedLicense);
+//	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Mono<Object> requestClearlyDefinedLicense(String location) {
-		return webClient.get()
-				.uri(location)
-                .exchange()
-				.flatMap(response -> {
-					HttpStatus statusCode = response.statusCode();
-					if (statusCode.is4xxClientError()) {
-						return Mono.error(new HttpServerErrorException(statusCode));
-					}else if (statusCode.is5xxServerError()) {
-						return Mono.error(new HttpServerErrorException(statusCode));
-					}
-					return Mono.just(response);
-				})
-				.retry (1)
-				.flatMap(response -> response.bodyToMono(Object.class));
+	public Map<String, Object> requestClearlyDefinedLicense(String location) {
+		String responseString = webClient.get().uri(location).exchange()
+			    				.flatMap(response -> {
+			    					HttpStatus statusCode = response.statusCode();
+			    					if (statusCode.is4xxClientError()) {
+			    						return Mono.error(new HttpServerErrorException(statusCode));
+			    					} else if (statusCode.is5xxServerError()) {
+			    						return Mono.error(new HttpServerErrorException(statusCode));
+			    					}
+			    					return Mono.just(response);
+			    				})
+			    				.block()
+			    				.bodyToMono(String.class)
+			    				.retry(1)
+			    				.block();
+		
+		Map<String, Object> returnMap = null;
+		ObjectMapper mapper = new ObjectMapper();
+        
+		try {
+			returnMap = mapper.readValue(responseString, Map.class);
+		} catch (JsonMappingException e) {
+			log.error(e.getMessage(), e);
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return returnMap;
 	}
 
 	@Transactional

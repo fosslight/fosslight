@@ -21,6 +21,6 @@ public interface AutoFillOssInfoService {
 	ParallelFlux<Object> getGithubLicenses(List<String> locations);
 	Mono<Object> requestGithubLicense(String location);
 
-	ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations);
-	Mono<Object> requestClearlyDefinedLicense(String location);
+//	ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations);
+	Map<String, Object> requestClearlyDefinedLicense(String location);
 }
