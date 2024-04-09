@@ -1167,6 +1167,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			bean.setLicenseName(CommonFunction.makeLicenseExpression(CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssLicenses()));
 			bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, bean.getLicenseType()));
 			bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, bean.getObligationType()));
+			bean.setMergeStr("");
 			mergeMap.put(avoidNull(bean.getOssVersion(), "N/A").toUpperCase(), bean);
 		}
 		
