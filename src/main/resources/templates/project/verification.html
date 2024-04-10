@@ -143,7 +143,7 @@
                                                 </div>
                                                 <div th:if="${(project.verificationStatus == null or project.verificationStatus == 'PROG' or (@CommonFunction.isAdmin() and project.verificationStatus == 'REV' )) and project.viewOnlyFlag eq 'N'}" class="row mt-3">
                                                     <div class="col-7 offset-md-2 text-lg-gray">
-                                                    	<p th:id="fileUplWarnMessage_+${i}" class="text-smaller" th:text="'* The maximum file size for uploading is 5GB.'"></p>
+                                                    	<p th:id="fileUplWarnMessage_+${i}" class="text-smaller" th:text="'* ' + #{msg.project.packaging.upload.fileSize}"></p>
                                                     </div>
                                                 </div>
                                         	</div>
