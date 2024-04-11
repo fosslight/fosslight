@@ -157,10 +157,10 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		}
 		
 		for (LicenseMaster bean : licenseWebPageList) {
-			String webpage = bean.getWebpage();
-			if (!isEmpty(webpage)) {
-				webpage = webpage.trim();
-				if (!webPage.contains(webpage)) webPage.add(webpage);
+			String webpageString = bean.getWebpage();
+			if (!isEmpty(webpageString)) {
+				webpageString = webpageString.trim();
+				if (!webPage.contains(webpageString)) webPage.add(webpageString);
 			}
 		}
 
