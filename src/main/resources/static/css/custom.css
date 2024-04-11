@@ -1003,3 +1003,4 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .ml-1 {margin-left: .1rem;}
 .text-overflow-space {text-overflow: ellipsis; white-space: nowrap !important;}
 .description p {margin-bottom: 0px;}
+#_ossListDiv::-webkit-scrollbar{display: none;}
