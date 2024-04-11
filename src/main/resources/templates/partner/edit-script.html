@@ -836,7 +836,10 @@ var fn = {
 			}
 
 			if(data.validMsg != ''){
+				alertify.error([[#{msg.common.valid}]], 0);
 				fn.partnerGridValidMsg(data.resultData);
+				
+				return;
 			}
 			
 			// 폼 메세지

@@ -5430,29 +5430,36 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		Map<String, String> customInfoMsg = new HashMap<>();
 		
 		if (result.containsKey("infoData")) {
+			Map<String, String> validDataMap = (Map<String, String>) result.get("validData");
+			Map<String, String> diffDataMap = (Map<String, String>) result.get("diffData");
 			Map<String, String> infoDataMap = (Map<String, String>) result.get("infoData");
-			if (result.containsKey("validData")) {
-				Map<String, String> validDataMap = (Map<String, String>) result.get("validData");
+			
+			if (validDataMap != null) {
 				for (String key : infoDataMap.keySet()) {
 					if (key.startsWith("binaryName")) {
 						customInfoMsg.put(key, infoDataMap.get(key));
 						continue;
 					}
-					if (!validDataMap.containsKey(key)) {
+					if (!customInfoMsg.containsKey(key) && !validDataMap.containsKey(key)) {
 						customInfoMsg.put(key, infoDataMap.get(key));
 					}
 				}
-			} else {
-				customInfoMsg.putAll(infoDataMap);
 			}
 			
-			if (result.containsKey("diffData")) {
-				Map<String, String> diffDataMap = (Map<String, String>) result.get("diffData");
+			if (diffDataMap != null) {
 				for (String key : infoDataMap.keySet()) {
+					if (!customInfoMsg.containsKey(key) && key.startsWith("binaryName")) {
+						customInfoMsg.put(key, infoDataMap.get(key));
+						continue;
+					}
 					if (!customInfoMsg.containsKey(key) && !diffDataMap.containsKey(key)) {
 						customInfoMsg.put(key, infoDataMap.get(key));
 					}
 				}
+			}
+			
+			if (validDataMap != null && diffDataMap != null) {
+				customInfoMsg.putAll(infoDataMap);
 			}
 		}
 		

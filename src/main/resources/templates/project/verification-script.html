@@ -204,7 +204,7 @@
                 } else {
                     $("input[name=withoutVerifyYn]").val("N");
                 }
-
+/*
                 if ($("[name='fileSeq_1']").val()) {
                     $("#fileUplWarnMessage_1").hide();
                 } else {
@@ -222,7 +222,7 @@
                 } else {
                     $("#fileUplWarnMessage_3").show();
                 }
-
+*/
                 fn.appendEditVisible($("#append"));
                 fn.initNotice();
 
@@ -302,7 +302,7 @@
                                 $('input[name=fileSeq_2]').val(item[0].registSeq);
                                 $('.ajax-file-upload-statusbar').fadeOut('slow');
                                 $('.ajax-file-upload-statusbar').remove();
-                                $("#fileUplWarnMessage_2").hide();
+                                // $("#fileUplWarnMessage_2").hide();
                             });
 
                             $('.verifyFile_2').hide();
@@ -343,7 +343,7 @@
                                 $('input[name=fileSeq_3]').val(item[0].registSeq);
                                 $('.ajax-file-upload-statusbar').fadeOut('slow');
                                 $('.ajax-file-upload-statusbar').remove();
-                                $("#fileUplWarnMessage_3").hide();
+                                // $("#fileUplWarnMessage_3").hide();
                             });
 
                             $('.verifyFile_3').hide();
@@ -831,7 +831,7 @@
                                     $('input[name=fileSeq_1]').val(item[0].registSeq);
                                     $('.ajax-file-upload-statusbar').fadeOut('slow');
                                     $('.ajax-file-upload-statusbar').remove();
-                                    $("#fileUplWarnMessage_1").hide();
+                                    // $("#fileUplWarnMessage_1").hide();
                                 });
 
                                 $('.verifyFile_1').hide();
@@ -872,7 +872,7 @@
                                     $('input[name=fileSeq_2]').val(item[0].registSeq);
                                     $('.ajax-file-upload-statusbar').fadeOut('slow');
                                     $('.ajax-file-upload-statusbar').remove();
-                                    $("#fileUplWarnMessage_2").hide();
+                                    // $("#fileUplWarnMessage_2").hide();
                                 });
 
                                 $('.verifyFile_2').hide();
@@ -914,7 +914,7 @@
                                     $('input[name=fileSeq_3]').val(item[0].registSeq);
                                     $('.ajax-file-upload-statusbar').fadeOut('slow');
                                     $('.ajax-file-upload-statusbar').remove();
-                                    $("#fileUplWarnMessage_3").hide();
+                                    // $("#fileUplWarnMessage_3").hide();
                                 });
 
                                 $('.verifyFile_3').hide();
@@ -1163,7 +1163,7 @@
 
                         $(".multiSet > div:eq(1)").hide();
                         $('.verifyFile_1').hide();
-                        $("#fileUplWarnMessage_1").hide();
+                        // $("#fileUplWarnMessage_1").hide();
                         $(".uploadList_2 > ul > li > span > .smallDelete").trigger("click");
                     }
                 });
@@ -1182,7 +1182,7 @@
                         $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
                         $(".multiSet > div:eq(2)").hide();
                         $('.verifyFile_2').hide();
-                        $("#fileUplWarnMessage_2").hide();
+                        // $("#fileUplWarnMessage_2").hide();
 
                         $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
                     }
@@ -1424,7 +1424,7 @@
                 // file이 지워지고 실제로 save를 하지 않은 시점부터도 readme, proprietary, Path or File을 hide 시킴.
                 $("#verifyBtnSet").hide();
                 $("#verifyFlag").val("N");
-                $("#fileUplWarnMessage_" + i).show();
+                // $("#fileUplWarnMessage_" + i).show();
 
                 $(".uploadList_" + i).empty();
                 $("#registFileDiv_" + i).css("display", "flex");
@@ -2542,7 +2542,7 @@
                         $('input[name=fileSeq_' + targetSeq + ']').val(item.registSeq);
                         $('.ajax-file-upload-statusbar').fadeOut('slow');
                         $('.ajax-file-upload-statusbar').remove();
-                        $('#fileUplWarnMessage_' + targetSeq).hide();
+                        // $('#fileUplWarnMessage_' + targetSeq).hide();
 
                         $('.verifyFile_' + targetSeq).hide();
                         $("#uploadAdd_" + targetSeq).show();

@@ -491,12 +491,12 @@ var total = {
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true},
 				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
-				{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false},
-				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable:false},
-				{name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false},
-				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false},
-				{name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false},
-				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", editoptions:{
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
 						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
 						, dataEvents:[{type:'change',
 							fn: function(e){
@@ -614,12 +614,12 @@ var fixed = {
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true},
 				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
-				{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false},
-				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable:false},
-				{name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false},
-				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false},
-				{name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false},
-				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", editoptions:{
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
 						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
 						, dataEvents:[{type:'change',
 							fn: function(e){
@@ -738,12 +738,12 @@ var notFixed = {
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true},
 				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
-				{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false},
-				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable:false},
-				{name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false},
-				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false},
-				{name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false},
-				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", editoptions:{
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
 						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
 						, dataEvents:[{type:'change',
 							fn: function(e){
