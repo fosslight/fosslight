@@ -2257,7 +2257,7 @@
 			height: 'auto',
 			loadComplete: function(id){
 				$('#_ossMergeCheckList').jqGrid("setRowData",[[${ossId}]], false, {'background-color' : '#ada9a9'});
-                $("#_ossMergeCheckList").jqGrid("setGridWidth", 560, true);
+                $("#_ossMergeCheckList").jqGrid("setGridWidth", $("#_ossMergeCheckListContainer").innerWidth(), true);
 			},
 			onSelectRow: function(id){
 			},
