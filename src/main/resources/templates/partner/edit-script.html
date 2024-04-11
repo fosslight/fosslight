@@ -1150,9 +1150,14 @@ var fn = {
            	
 			alertify.deleteParDialog(innerHtml, function () {
 				// prevent clicking the OK button on Enter
-				if (keyCode == 13) { return false; }
-					
-				if("" == $("#parDelEditor").summernote('code')) {
+				if (typeof keyCode !== 'undefined' && keyCode == 13) {
+					keyCode = undefined;
+					return false;
+				}
+				
+				var editorVal = $("#parDelEditor").summernote('code');
+				
+				if ("" == $(editorVal).text().trim()) {
 					alertify.alert([[#{msg.project.required.comments}]], function(){});
 
 					return false;

@@ -233,11 +233,14 @@
 
                         alertify.confirm(res, function (e) {
 							// prevent clicking the OK button on Enter
-							if (keyCode == 13) { return false; }
+							if (typeof keyCode !== 'undefined' && keyCode == 13) {
+								keyCode = undefined;
+								return false;
+							}
 							
-                            const comment = $("#promptPopupEditor").summernote('code');
+							var comment = $("#promptPopupEditor").summernote('code');
                             if (e) {
-                                if ("" == comment) {
+                            	if ("" == $(comment).text().trim()){
                                     alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {
                                     });
 

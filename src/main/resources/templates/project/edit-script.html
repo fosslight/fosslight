@@ -282,9 +282,14 @@
 	               	
 	               	alertify.deletePrjDialog(innerHtml, function (e) {
 						// prevent clicking the OK button on Enter
-						if (keyCode == 13) { return false; }
-					
-	               		if ("" == $("#prjDelEditor").summernote('code')){
+						if (typeof keyCode !== 'undefined' && keyCode == 13) {
+							keyCode = undefined;
+							return false;
+						}
+						
+						var editorVal = $("#prjDelEditor").summernote('code');
+						
+	               		if ("" == $(editorVal).text().trim()){
  							alertify.alert([[#{msg.project.required.comments}]], function(){});
 
 							return false;
