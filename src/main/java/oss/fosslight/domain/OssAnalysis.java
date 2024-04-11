@@ -26,8 +26,8 @@ public class OssAnalysis extends ComBean implements Serializable {
 		this.ossNickname = ossNickname;
 		this.licenseName = licenseName;
 		this.ossCopyright = ossCopyright;
-		this.downloadLocation = downloadLocation;
-		this.homepage = homepage;
+		this.downloadLocation = avoidNull(downloadLocation);
+		this.homepage = avoidNull(homepage);
 		this.summaryDescription = summaryDescription;
 		this.comment = comment;
 		this.result = result;
