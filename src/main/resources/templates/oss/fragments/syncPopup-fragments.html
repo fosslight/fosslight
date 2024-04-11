@@ -1,57 +1,51 @@
+<th:block th:fragment="syncPopupFragment">
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<th:block th:fragment="syncPopupFragment">
-    <div class="custom-layout">
-        <div class="row p-3" id="wrap" style="padding-top: 10px;">
+<body class="hold-transition sidebar-mini">
+    <div class="custom-layout p-2">
+        <div class="row pb-3" id="wrap">
             <div class="col-12">
                 <div class="statisticsLayout">
                     <input name="syncRefOssId" type="hidden"/>
                     <input name="ossIds" type="hidden"/>
                     <input name="initCheck" type="hidden" value=0/>
-                    <div class="grdSetSyncPopup">
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="jqgridSet grdItemSyncPopup first">
-                                    <table id="_ossList">
-                                        <tr>
-                                            <td></td>
-                                        </tr>
-                                    </table>
-                                </div>
+                    <div class="row">
+                    	<div class="col-lg-6">
+                        	<div class="jqgridSet ossSyncPopup">
+                            	<table id="_ossList"><tr><td></td></tr></table>
                             </div>
-                            <div class="col-6">
-                                <div class="grdItemSyncPopup">
-                                    <span><h6 class="text-bold text-blue-gray">Synchronize OSS Attributes</h6></span>
-                                    <div id="ossDetailInfo"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                      	</div>
+                       	<div class="col-lg-6 mt-2">
+                          	<div class="grdItemSyncPopup">
+                              	<span><h6 class="text-bold text-blue-gray">Synchronize OSS Attributes</h6></span>
+                           		<div id="ossDetailInfo"></div>
+                         	</div>
+                      	</div>
+                  	</div>
                 </div>
             </div>
         </div>
-        <div class="row px-3">
+        <div class="row">
             <div class="col-12">
                 <div class="syncPopupEditor">
                     <textarea class="form-control" id="syncOssEditor" rows="5"></textarea>
                 </div>
             </div>
         </div>
-        <div class="row p-3">
-            <div class="col-12">
-                <input class="btn btn-outline-dark btn-sm px-3" onclick="sync_popup_fn.syncClose();" type="button" value="Cancel"/>
-                <input class="btn btn-dark btn-sm float-right px-3" onclick="sync_popup_fn.syncSave();" type="button" value="OK"/>
-            </div>
+        <div class="row float-right">
+            <button class="btn btn-outline-dark btn-sm px-3 mr-1" th:onclick="|sync_popup_fn.syncClose()|" type="button" th:text="Cancel"></button>
+            <button class="btn btn-dark btn-sm px-3 mr-2" th:onclick="|sync_popup_fn.syncSave()|" type="button" th:text="OK"></button>
         </div>
         <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
     </div>
     <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
     <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
-    <script>
+    <script th:inline="javascript">
         let syncRefOssId = [[ ${ossInfo.ossId} ]];
 
         $(document).ready(function () {
-            let _ossName = '[[ ${ossInfo.ossName} ]]';
+            let _ossName = [[ ${ossInfo.ossName} ]];
+            
             _ossName = _ossName.split("&#034;").join("\"").split("&#039;").join("\'");
             const param = {ossName: _ossName}
 
@@ -102,11 +96,12 @@
                     height: '350px',
                     scroll: true,
                     multiselect: true,
-                    // rowNum: ${ct:getConstDef("DISP_PAGENATION_MAX")},
+                    multiselectWidth: 30,
+                    rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
                     sortname: 'ossVersion',
                     sortorder: 'desc',
                     loadComplete: function (data) {
-                        let standardVersion = '[[ ${ossInfo.ossVersion}]]';
+                        let standardVersion = [[${ossInfo.ossVersion}]];
                         let ossVersionCheckRowId = "";
 
                         if (data.records > 0) {
@@ -183,7 +178,7 @@
 
                                 $("input[name=initCheck]").val(9);
                             }, function () {
-                                alertify.error(String('[[ #{msg.common.valid2} ]]'), 0);
+                                alertify.error([[ #{msg.common.valid2} ]], 0);
                             })
                         }
                     }
@@ -191,7 +186,7 @@
             });
 
             $("#syncOssEditor").summernote({
-                height: 100
+                height: 150
             });
         });
 
@@ -231,23 +226,23 @@
                         postAjaxData(param, "/oss/ossSyncUpdate", "json", function (data) {
                             // $(".loading").hide();
                             if (data.isValid == 'true') {
-                                alertify.alert(String('[[ #{msg.common.success} ]]'), function () {
+                                alertify.alert([[ #{msg.common.success} ]], function () {
                                     self.close();
                                     callDeleteTabInFrame("oss-edit_" +syncRefOssId);
                                     callReloadTabInframe("/oss/list", "oss-list");
                                 });
                             } else {
-                                alertify.alert(String('[[ #{msg.common.valid2} ]]'), 0);
+                                alertify.alert([[ #{msg.common.valid2} ]], 0);
                                 self.close();
                             }
                         }, function () {
-                            alertify.alert(String('[[ #{msg.common.valid2} ]]'), function () {});
+                            alertify.alert([[ #{msg.common.valid2} ]], function () {});
                         })
                     } else {
-                        alertify.alert(String('[[ #{msg.oss.select.synchronize} ]]'), function () {});
+                        alertify.alert([[ #{msg.oss.select.synchronize} ]], function () {});
                     }
                 } else {
-                    alertify.alert(String('[[ #{msg.oss.select.project} ]]'), function () {});
+                    alertify.alert([[ #{msg.oss.select.project} ]], function () {});
                 }
             },
             syncClose : function(){
@@ -255,8 +250,13 @@
             }
         }
     </script>
+</body>
+</html>
 </th:block>
 <th:block th:fragment="syncDetailViewFragment">
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body class="hold-transition sidebar-mini">
     <div class="tbws1">
         <table class="dCase">
             <colgroup>
@@ -403,5 +403,6 @@
 <!--            </div>-->
 <!--        </div>-->
 <!--    </div>-->
-</th:block>
+</body>
 </html>
+</th:block>
