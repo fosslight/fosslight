@@ -1004,3 +1004,4 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .text-overflow-space {text-overflow: ellipsis; white-space: nowrap !important;}
 .description p {margin-bottom: 0px;}
 #_ossListDiv::-webkit-scrollbar{display: none;}
+#_ossListDiv .ui-jqgrid-bdiv::-webkit-scrollbar{display: none;}
