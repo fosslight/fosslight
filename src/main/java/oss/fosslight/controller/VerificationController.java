@@ -235,8 +235,8 @@ public class VerificationController extends CoTopComponent {
 			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());
 			model.addAttribute("vulDocFile", file);
 		}
-		model.addAttribute("verify", toJson(verificationService.getVerificationOne(project)));
-		model.addAttribute("ossList", toJson(list));
+		model.addAttribute("verify", verificationService.getVerificationOne(project));
+		model.addAttribute("ossList", list);
 		model.addAttribute("files", files);
 		model.addAttribute("initDiv", initDiv);
 		

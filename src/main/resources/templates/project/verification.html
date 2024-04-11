@@ -143,7 +143,7 @@
                                                 </div>
                                                 <div th:if="${(project.verificationStatus == null or project.verificationStatus == 'PROG' or (@CommonFunction.isAdmin() and project.verificationStatus == 'REV' )) and project.viewOnlyFlag eq 'N'}" class="row mt-3">
                                                     <div class="col-7 offset-md-2 text-lg-gray">
-                                                    	<p th:id="fileUplWarnMessage_+${i}" class="text-smaller" th:text="'* The maximum file size for uploading is 5GB.'"></p>
+                                                    	<p th:id="fileUplWarnMessage_+${i}" class="text-smaller" th:text="'* ' + #{msg.project.packaging.upload.fileSize}"></p>
                                                     </div>
                                                 </div>
                                         	</div>
@@ -423,9 +423,9 @@
 									<input type="hidden" id="exceptFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_PROPRIETARY')}" />
 									<input type="hidden" id="verifyFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_FILE_LIST')}" />
 									<span id="verifyBtnSet">
-										<button type="button" th:class="'btn btn-sm width-6rem float-left' +  ${project.readmeFileName == null ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnReadme" th:text="README"></button>
-                                    	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${project.readmeFileName == null ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnVerifyFileContent" th:text="'File List'"></button>
-                                    	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${project.readmeFileName == null ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnProprietary" th:text="'Banned List'"></button>
+										<button type="button" th:class="'btn btn-sm width-6rem float-left' +  ${#strings.isEmpty(project.readmeFileName) ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnReadme" th:text="README"></button>
+                                    	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${#strings.isEmpty(project.verifyFileContent) ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnVerifyFileContent" th:text="'File List'"></button>
+                                    	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${#strings.isEmpty(project.exceptFileContent) ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnProprietary" th:text="'Banned List'"></button>
 									</span>
                                 </div>
                             </div>

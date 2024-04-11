@@ -109,11 +109,11 @@
 								<td style="padding:5px;" th:utext="${after.copyright}"></td>
 							</tr>
 
-							<th:block th:if="${before.ossType.contains('M') or before.ossType.contains('D') or after.ossType.contains('M') or after.ossType.contains('D')}">
+							<th:block th:if="${before?.ossType != null or after?.ossType != null}">
 								<tr>
 									<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
 									<td>
-										<div th:if="${before.ossType.contains('M') || before.ossType.contains('D')}">
+										<div th:if="${before?.ossType != null and (before.ossType.contains('M') || before.ossType.contains('D'))}">
 											<table border="1" cellpadding="0" cellspacing="3"
 												   style="font-size:12px;border-color:#ddd;" width="100%">
 												<tr th:each="ossLicense : ${before.ossLicenses}">
@@ -125,7 +125,7 @@
 										</div>
 									</td>
 									<td>
-										<div th:if="${after.ossType.contains('M') || after.ossType.contains('D')}">
+										<div th:if="${after?.ossType != null and (after.ossType.contains('M') || after.ossType.contains('D'))}">
 											<table border="1" cellpadding="0" cellspacing="3"
 												   style="font-size:12px;border-color:#ddd;" width="100%">
 												<tr th:each="ossLicense : ${after.ossLicenses}">

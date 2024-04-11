@@ -209,7 +209,10 @@ var com_evt = {
                	
                	alertify.bomRejectDialog(innerHtml, function (e) {
                		// prevent clicking the OK button on Enter
-					if (keyCode == 13) { return false; }
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
                		
                		if (e) {
                			var editorVal = $("#bomRejectEditor").summernote('code');
