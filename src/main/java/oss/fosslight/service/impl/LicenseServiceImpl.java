@@ -152,8 +152,16 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		
 		List<LicenseMaster> licenseWebPageList = licenseMapper.selectLicenseWebPageList(licenseMaster);
 		List<String> webPage = new ArrayList<>();
+		if (!isEmpty(licenseMaster.getWebpage())) {
+			webPage.add(licenseMaster.getWebpage().trim());
+		}
+		
 		for (LicenseMaster bean : licenseWebPageList) {
-			webPage.add(bean.getWebpage());
+			String webpage = bean.getWebpage();
+			if (!isEmpty(webpage)) {
+				webpage = webpage.trim();
+				if (!webPage.contains(webpage)) webPage.add(webpage);
+			}
 		}
 
 		// 일반 user 화면 일 경우 restriction을 full name으로 화면 출력
