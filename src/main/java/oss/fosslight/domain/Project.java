@@ -694,6 +694,9 @@ public class Project extends ComBean implements Serializable {
 	private String userRole;
 	
 	private String reuseKeyword;
+	private String reuseRefPrjId1;
+	private String reuseRefPrjId2;
+	private String reuseRefPrjId3;
 	
 	private String ossAnalysisStatus;
 	
@@ -4450,5 +4453,29 @@ public class Project extends ComBean implements Serializable {
 
 	public void setRefPartnerName(String refPartnerName) {
 		this.refPartnerName = refPartnerName;
+	}
+
+	public String getReuseRefPrjId1() {
+		return reuseRefPrjId1;
+	}
+
+	public void setReuseRefPrjId1(String reuseRefPrjId1) {
+		this.reuseRefPrjId1 = reuseRefPrjId1;
+	}
+
+	public String getReuseRefPrjId2() {
+		return reuseRefPrjId2;
+	}
+
+	public void setReuseRefPrjId2(String reuseRefPrjId2) {
+		this.reuseRefPrjId2 = reuseRefPrjId2;
+	}
+
+	public String getReuseRefPrjId3() {
+		return reuseRefPrjId3;
+	}
+
+	public void setReuseRefPrjId3(String reuseRefPrjId3) {
+		this.reuseRefPrjId3 = reuseRefPrjId3;
 	}
 }
