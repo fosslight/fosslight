@@ -679,6 +679,11 @@ public class PartnerController extends CoTopComponent{
 			
 			// send invate mail
 			if (isNew) {
+				CoMail mail = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTNER_CREATED);
+				mail.setParamPartnerId(prjId);
+				mail.setParamUserId(partnerMaster.getLoginUserName());
+				CoMailManager.getInstance().sendMail(mail);
+				
 				List<String> partnerInvateWatcherList = partnerService.getInvateWatcherList(prjId);
 				
 				if (partnerInvateWatcherList != null && !partnerInvateWatcherList.isEmpty()) {

@@ -1042,6 +1042,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PARTER_SELF_REJECT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED:
+    		case CoConstDef.CD_MAIL_TYPE_PARTNER_CREATED:
     		case CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PARTER_DELETED:
@@ -1142,6 +1143,7 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PARTER_DELETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(bean.getMsgType())
+    						|| CoConstDef.CD_MAIL_TYPE_PARTNER_CREATED.equals(bean.getMsgType())
     						) {
         				if (!isEmpty(partnerInfo.getReviewer())) {
         					toList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{partnerInfo.getReviewer()})));
