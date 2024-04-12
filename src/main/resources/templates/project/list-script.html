@@ -990,12 +990,18 @@ var fn = {
 										},
 										callback: function(closeEvent) {
 											alertify.confirm().callback.call(this, closeEvent);
+										},
+									    hooks: {
+									    	onshow: function() {
+									        	this.elements.dialog.style.maxWidth = 'none';
+									          	this.elements.dialog.style.width = '650px';
+									        }
 										}
 									};
 								}, false, 'confirm');
 		                	}
 							
-							alertify.changeStatus(res).set('title', 'Change Status').set('resizable', true).resizeTo('650', '610');
+							alertify.changeStatus().set('title', 'Change Status').setContent(res).show();
 							fn.showChangeStatus();
 						}
 					},
