@@ -1350,7 +1350,7 @@ public class ProjectController extends CoTopComponent {
 				prjBean.setPrjId(project.getPrjId());
 				prjBean.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
 				try {
-					Map<String, Object> resultMap = projectService.updateProjectStatus(project);
+					Map<String, Object> resultMap = projectService.updateProjectStatus(project, false);
 					updateProjectNotification(project, resultMap);
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
@@ -1362,7 +1362,7 @@ public class ProjectController extends CoTopComponent {
 					prjBean.setIgnoreBinaryDbFlag(CoConstDef.FLAG_NO);
 					
 					try {
-						Map<String, Object> resultMap = projectService.updateProjectStatus(prjBean);
+						Map<String, Object> resultMap = projectService.updateProjectStatus(prjBean, true);
 						updateProjectNotification(prjBean, resultMap);
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
@@ -1434,7 +1434,7 @@ public class ProjectController extends CoTopComponent {
 				project.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
 				
 				try {
-					Map<String, Object> resultMap = projectService.updateProjectStatus(project);
+					Map<String, Object> resultMap = projectService.updateProjectStatus(project, false);
 					resultMap.put("userComment", "");
 					updateProjectNotification(project, resultMap);
 				} catch (Exception e) {
@@ -1485,7 +1485,7 @@ public class ProjectController extends CoTopComponent {
 				project.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
 				
 				try {
-					Map<String, Object> resultMap = projectService.updateProjectStatus(project);
+					Map<String, Object> resultMap = projectService.updateProjectStatus(project, false);
 					resultMap.put("userComment", "");
 					updateProjectNotification(project, resultMap);
 				} catch (Exception e) {
@@ -1504,7 +1504,7 @@ public class ProjectController extends CoTopComponent {
 			project.setIgnoreBinaryDbFlag(CoConstDef.FLAG_NO);
 			
 			try {
-				Map<String, Object> resultMap = projectService.updateProjectStatus(project);
+				Map<String, Object> resultMap = projectService.updateProjectStatus(project, true);
 				resultMap.put("userComment", "");
 				updateProjectNotification(project, resultMap);
 			} catch (Exception e) {
@@ -1610,7 +1610,7 @@ public class ProjectController extends CoTopComponent {
 			prjInfo.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
 			
 			try {
-				Map<String, Object> resultMap = projectService.updateProjectStatus(prjInfo);
+				Map<String, Object> resultMap = projectService.updateProjectStatus(prjInfo, false);
 				resultMap.put("userComment", "");
 				updateProjectNotification(prjInfo, resultMap);
 			} catch (Exception e) {
@@ -2936,7 +2936,7 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		try {
-			 resultMap = projectService.updateProjectStatus(project);
+			 resultMap = projectService.updateProjectStatus(project, false);
 			 
 			 if (resultMap.containsKey("androidMessage")) {
 				 return makeJsonResponseHeader(false, getMessage("msg.project.android.valid"));

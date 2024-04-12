@@ -3154,7 +3154,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@Transactional
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
-	public Map<String, Object> updateProjectStatus(Project project) throws Exception {
+	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm) throws Exception {
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		String commentDiv = isEmpty(project.getReferenceDiv()) ? CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS
@@ -3295,7 +3295,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			project.setModifier(project.getLoginUserName());
-			updateProjectIdentificationConfirm(project);
+			updateProjectIdentificationConfirm(project, isCopyConfirm);
 			
 			// network server 이면서 notice 생성 대상이 없을 경우
 			if ( hasNotificationOss
@@ -3505,7 +3505,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void updateProjectIdentificationConfirm(Project project) {
+	public void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm) {
 		Map<String, Object> map = null;
 		ProjectIdentification param = new ProjectIdentification();
 		param.setReferenceId(project.getPrjId());
@@ -3652,6 +3652,37 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						
 						if (oldPackageInfoMap.containsKey(key)) {
 							newBean.setFilePath(oldPackageInfoMap.get(key).getFilePath());
+							projectMapper.updateFilePath(newBean);
+						}
+					}
+				}
+			}
+			
+			if (isCopyConfirm) {
+				Project paramBean = new Project();
+				paramBean.setPrjId(project.getCopyPrjId());
+				
+				Map<String, OssComponents> copiedPackageInfoMap = new HashMap<>();
+				List<OssComponents> copiedPackagingList = verificationService.getVerifyOssList(paramBean);
+				
+				if (copiedPackagingList != null && !copiedPackagingList.isEmpty()) {
+					for (OssComponents copyBean : copiedPackagingList) {
+						if (!isEmpty(copyBean.getFilePath())) {
+							String key = copyBean.getReferenceDiv() + "|" + copyBean.getOssId() + "|" + copyBean.getLicenseName();
+							
+							copiedPackageInfoMap.put(key, copyBean);
+						}
+					}
+				}
+				
+				List<OssComponents> afterPackagingList = verificationService.getVerifyOssList(project);
+				
+				if (afterPackagingList != null && !afterPackagingList.isEmpty()) {
+					for (OssComponents newBean : afterPackagingList) {
+						String key = newBean.getReferenceDiv() + "|" + newBean.getOssId() + "|" + newBean.getLicenseName();
+						
+						if (copiedPackageInfoMap.containsKey(key)) {
+							newBean.setFilePath(copiedPackageInfoMap.get(key).getFilePath());
 							projectMapper.updateFilePath(newBean);
 						}
 					}
