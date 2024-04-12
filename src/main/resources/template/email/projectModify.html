@@ -106,10 +106,10 @@
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Watcher</th>
 										<td style="padding:5px;">
-											<span th:each="watcherInfo : ${before.watcherListInfo}" th:utext="${watcherInfo}"></span><br />
+											<div th:each="watcherInfo : ${before.watcherListInfo}" th:utext="${watcherInfo}"></div>
 										</td>
 										<td style="padding:5px;">
-											<span th:each="watcherInfo : ${after.watcherListInfo}" th:utext="${watcherInfo}"></span><br />
+											<div th:each="watcherInfo : ${after.watcherListInfo}" th:utext="${watcherInfo}"></div>
 										</td>
 									</tr>
 								</table>
