@@ -97,9 +97,6 @@ public class VerificationController extends CoTopComponent {
 //		comHisBean.setReferenceId(projectMaster.getPrjId());
 //		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
 		
-		//프로젝트 정보
-		model.addAttribute("project", projectMaster);
-		
 		OssNotice _noticeInfo = projectService.setCheckNotice(projectMaster);
 		
 		if (_noticeInfo != null) {
@@ -144,17 +141,23 @@ public class VerificationController extends CoTopComponent {
 		File packageFile3 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3());
 		
 		if (packageFile != null) {
+			if (!isEmpty(packageFile.getRefPrjId())) projectMaster.setReuseRefPrjId1(packageFile.getRefPrjId());
 			existsFileFlag = true;
 		}
 		if (packageFile2 != null) {
+			if (!isEmpty(packageFile2.getRefPrjId())) projectMaster.setReuseRefPrjId2(packageFile2.getRefPrjId());
 			existsFileFlag = true;
 		}
 		if (packageFile3 != null) {
+			if (!isEmpty(packageFile3.getRefPrjId())) projectMaster.setReuseRefPrjId3(packageFile3.getRefPrjId());
 			existsFileFlag = true;
 		}
 		files.add(packageFile);
 		files.add(packageFile2);
 		files.add(packageFile3);
+		
+		//프로젝트 정보
+		model.addAttribute("project", projectMaster);
 		
 		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
 			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());

@@ -1,8 +1,8 @@
 <th:block th:if="${#strings.equals(code, 'status')}">
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
-<body>
-	<div class="row">
+<body class="hold-transition sidebar-mini">
+	<div class="row custom-layout">
 		<div class="col-sm-12">
 			<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
 				<input type="hidden" id="projectStatus" th:value="${status.projectStatus}"/>
@@ -33,7 +33,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="row">
+<!-- 			<div class="row">
 					<div class="col-12">
 						<div class="form-group">
 							<div class="custom-control custom-radio" id="CSDelete">
@@ -42,7 +42,7 @@
 							</div>
 						</div>
 					</div>
-				</div>
+				</div> -->
 				<div class="row" th:if="${@CommonFunction.isAdmin()}">
 					<div class="col-12">
 						<div class="form-group">
@@ -72,10 +72,10 @@
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="row float-right custom-layout">
-		<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|fn.closeAlertify()|"></button>
-		<button type="button" class="btn btn-dark btn-sm width-6rem px-3" th:text="OK" th:onclick=|fn.changeStatusProc()|></button>
+		<div class="col-sm-12">
+			<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 ml-1 float-right" th:text="Cancel" th:onclick="|fn.closeAlertify()|"></button>
+			<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right" th:text="OK" th:onclick=|fn.changeStatusProc()|></button>
+		</div>
 	</div>
 	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
 </body>
