@@ -967,6 +967,7 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .fw-4 {font-weight: 400 !important;}
 .fw-6 {font-weight: 600 !important;}
 .h-3-8 {height: 3.8rem;}
+.d-flex-view {justify-content: center; align-items: center; display: flex; margin-bottom: 1rem;}
 .d-flex-align {display: inline-flex; align-items: center; justify-content: center;}
 .d-flex-align-left {display: inline-flex; align-items: center; justify-content: left;}
 .d-flex-align-right {display: inline-flex; align-items: center; justify-content: right;}
