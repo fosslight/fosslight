@@ -215,6 +215,7 @@ public class OssController extends CoTopComponent{
 		if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NEWOSS_DEFAULT_DATA, null)) != null) {
 			OssMaster bean = (OssMaster) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NEWOSS_DEFAULT_DATA, null), true);
 			
+			model.addAttribute("detail", bean);
 			model.addAttribute("ossName", avoidNull(bean.getOssName()));
 			model.addAttribute("ossVersion", avoidNull(bean.getOssVersion()));
 			model.addAttribute("downloadLocation", avoidNull(bean.getDownloadLocation()));
@@ -258,11 +259,11 @@ public class OssController extends CoTopComponent{
 			// nick name 체크
 			// oss name으로 nickname이 존재할 경우 초기 표시되어야함
 			// 표시되지 않은 상태에서 save시 기존 nickname이 모두 삭제됨
-			model.addAttribute("ossNickList", toJson(ossService.getOssNickNameListByOssName(bean.getOssName())));
+			model.addAttribute("ossNickList", ossService.getOssNickNameListByOssName(bean.getOssName()));
 			
 			List<String> downloadLocationList = new ArrayList<>();
 			downloadLocationList.add(avoidNull(bean.getDownloadLocation()));
-			model.addAttribute("downloadLocationList", toJson(downloadLocationList));
+			model.addAttribute("downloadLocationList", downloadLocationList);
 		} else {
 			// 신규 등록시에도 ossNickList 은 필수(empty array를 설정)
 			List<String> nickList = new ArrayList<>();
