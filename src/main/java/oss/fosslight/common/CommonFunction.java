@@ -2233,6 +2233,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	public static String lineReplaceToBR(String s) {
 		return avoidNull(s).replaceAll("\r\n", "<br>").replaceAll("\r", "<br>").replaceAll("\n", "<br>");
 	}
+	
+	public static String pReplaceToBR(String s) {
+		return avoidNull(s).replaceAll("<p>", "").replaceAll("</p>", "<br>");
+	}
 
 	public static String brReplaceToLine(String s) {
 		return avoidNull(s).replaceAll("\r\n", "\n").replaceAll("<br>", "\n").replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("<br \\>", "\n").replaceAll("<br\\>", "\n");
