@@ -2237,6 +2237,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	public static String pReplaceToBR(String s) {
 		return avoidNull(s).replaceAll("<p>", "").replaceAll("</p>", "<br>");
 	}
+	
+	public static String addBlankTargetToLink(String s) {
+		return avoidNull(s).replaceAll("(<a\\s+(?!.*?\\btarget=)[^>]*)(>)", "$1target=\"_blank\"$2");
+	}
 
 	public static String brReplaceToLine(String s) {
 		return avoidNull(s).replaceAll("\r\n", "\n").replaceAll("<br>", "\n").replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("<br \\>", "\n").replaceAll("<br\\>", "\n");

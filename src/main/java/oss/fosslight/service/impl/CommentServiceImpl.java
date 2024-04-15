@@ -17,6 +17,7 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.CommentsHistory;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.util.StringUtil;
@@ -53,6 +54,8 @@ public class CommentServiceImpl implements CommentService {
 		boolean isNew = StringUtil.isEmpty(bean.getCommId());
 		
 		if (!StringUtil.isEmpty(bean.getContents()) || !StringUtil.isEmpty(bean.getStatus())){
+			String updatedContents = CommonFunction.addBlankTargetToLink(bean.getContents());
+			bean.setContents(updatedContents);
 			commentMapper.registComment(bean);
 		}
 		
