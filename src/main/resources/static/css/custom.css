@@ -616,8 +616,6 @@ html .ui-button.ui-state-disabled:active {
 }
 
 /* jqdialog */
-.ui-jqdialog-content .EditTable { font-size: .8rem }
-
 #innerJqTable { width: 100%; border-collapse: collapse; }
 #innerJqTable th { background-color: #f2f2f2; border: 1px solid #ccc; padding: 10px; text-align: center; }
 #innerJqTable td { border: 1px solid #ccc; text-align: center; }
@@ -904,6 +902,112 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
 
 .required {position:relative;}
 .required .retxt {display:none;padding-top:2px;font-size:13px;color:red !important;}
+
+/* ui-widget CSS custome */
+.ui-jqdialog-titlebar.ui-widget-header {
+    background-color: #e0e1e2 !important; 
+    color: #495057; 
+    padding: 0.5rem 1rem;
+    text-shadow: none; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+    font-size: 1rem;
+    border: none;
+}
+.ui-widget-content.ui-jqdialog {
+    color: #495057;
+    font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+}
+.ui-widget-content.ui-jqdialog .ui-widget-content {
+    background-color: #fff; 
+    color: #495057; 
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .075); 
+}
+.ui-widget-content.ui-jqdialog .ui-state-default {
+    background-color: #e9ecef;
+    color: #212529;
+}
+.ui-widget-content.ui-jqdialog .ui-state-default:hover,
+.ui-widget-content.ui-jqdialog .ui-state-default:focus {
+    background-color: #dee2e6;
+    color: #212529;
+}
+.ui-widget .ui-state-active,
+.ui-widget .ui-state-highlight {
+    background-color: #ffc107;
+    color: #212529;
+}
+.ui-jqdialog .ui-state-error {
+    background: #dc3545;
+    color: #fff;
+    padding: .35rem !important;
+}
+.ui-jqdialog .ui-state-disabled {
+    opacity: .65;
+    background-image: none;
+    background-color: #e9ecef;
+}
+.ui-widget-content.ui-jqdialog .ui-state-error {background-color: #dc3545;color: #fff;}
+.ui-widget-content.ui-jqdialog .ui-state-disabled {
+    opacity: .65;
+    background-image: none; 
+    background-color: #e9ecef;
+}
+.ui-widget-content.ui-jqdialog select,
+.ui-widget-content.ui-jqdialog input[type="text"] {
+    padding: .375rem .75rem; 
+    font-size: 1rem; 
+    line-height: 1.5; 
+    color: #212529; 
+    background-color: #fff; 
+    border: 1px solid #ced4da; 
+    border-radius: .25rem;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .075); 
+}
+.ui-widget-content.ui-jqdialog select:focus,
+.ui-widget-content.ui-jqdialog input[type="text"]:focus { border-color: #86b7fe;  outline: 0; }
+.ui-widget-content.ui-jqdialog .fm-button {
+    color: #495057 !important;
+    background: #e9ecef !important;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+.ui-widget-content.ui-jqdialog .fm-button-icon-left .ui-icon { display: none !important; }
+.ui-widget-content.ui-jqdialog .fm-button:hover { background-color: #d6d8db !important; }
+.ui-widget-content.ui-jqdialog .CaptionTD {
+    font-weight: bold !important;
+    color: #495057 !important; 
+    padding: .375rem .75rem !important;
+    font-size: .875rem !important;
+    display: inline-block !important;
+    margin-bottom: .5rem !important; 
+    vertical-align: top !important;
+}
+
+.ui-widget-content.ui-jqdialog .close {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .5;
+}
+.ui-widget-content.ui-jqdialog .form-check-input { position: absolute !important;margin-top: .3rem;margin-left: -1.25rem;}
+.ui-widget-content.ui-jqdialog  a { color: #007bff !important;}
+.jq-dialog__editor .modal-backdrop { z-index: auto !important;}
 
 /* commonIframe table custome */
 .custom-layout .tbws1 {border:.8px solid #ced4da;}
