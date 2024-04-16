@@ -236,6 +236,7 @@ public class OssController extends CoTopComponent{
 					if (master != null) {
 						String shortIDentifier = isEmpty(master.getShortIdentifier()) ? master.getLicenseName() : master.getShortIdentifier();
 						result.setLicenseId(master.getLicenseId());
+						result.setLicenseType(master.getLicenseType());
 						result.setLicenseName(master.getLicenseName());
 						result.setLicenseNameEx(shortIDentifier);
 						result.setObligation(master.getObligation());
@@ -251,7 +252,7 @@ public class OssController extends CoTopComponent{
 				}
 				
 				map.put("rows", licenseList);
-				model.addAttribute("list", toJson(map));
+				model.addAttribute("list", map);
 			}
 			
 			model.addAttribute("copyright", avoidNull(bean.getCopyright()));
