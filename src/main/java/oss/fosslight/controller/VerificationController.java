@@ -230,10 +230,28 @@ public class VerificationController extends CoTopComponent {
 			}
 		}
 		
+		boolean existsFileFlag = false;
 		List<File> files = new ArrayList<File>();
-		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId()));
-		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2()));
-		files.add(verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3()));
+		File packageFile = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId());
+		File packageFile2 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2());
+		File packageFile3 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3());
+		
+		if (packageFile != null) {
+			if (!isEmpty(packageFile.getRefPrjId())) projectMaster.setReuseRefPrjId1(packageFile.getRefPrjId());
+			existsFileFlag = true;
+		}
+		if (packageFile2 != null) {
+			if (!isEmpty(packageFile2.getRefPrjId())) projectMaster.setReuseRefPrjId2(packageFile2.getRefPrjId());
+			existsFileFlag = true;
+		}
+		if (packageFile3 != null) {
+			if (!isEmpty(packageFile3.getRefPrjId())) projectMaster.setReuseRefPrjId3(packageFile3.getRefPrjId());
+			existsFileFlag = true;
+		}
+		files.add(packageFile);
+		files.add(packageFile2);
+		files.add(packageFile3);
+		
 		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
 			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());
 			model.addAttribute("vulDocFile", file);
@@ -242,7 +260,7 @@ public class VerificationController extends CoTopComponent {
 		model.addAttribute("ossList", list);
 		model.addAttribute("files", files);
 		model.addAttribute("initDiv", initDiv);
-		
+		model.addAttribute("existsFileFlag", existsFileFlag);
 		model.addAttribute("userGuideLicenseList", userGuideLicenseList);
 		model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
 		
