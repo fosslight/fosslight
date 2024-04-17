@@ -369,7 +369,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .text-shadow {text-shadow: 2px 2px 7px gray;}
 
 /* tooltip */
-/*.tooltip {
+#gridHeaderTooltip.tooltip {
     top: 35px !important;
     left: -10px !important;
     font-size: .85rem;
@@ -377,11 +377,12 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 }
 /*.tooltip .bs-tooltip-right {
     top: 0px !important;
-*/}
+}
+*/
 .tooltip.show { opacity: 1; }
 .tooltip .arrow { display: none; }
 .tooltip .tooltip-inner {
-    max-width: 800px;
+    max-width: 40vw;
     padding: .25rem .5rem;
     color: #fff;
     text-align: left;

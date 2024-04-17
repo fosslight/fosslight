@@ -377,7 +377,10 @@
                                 content: function () {
                                     return $(this).prop('title');
                                 }
-                            });
+                            }).on('inserted.bs.tooltip', function() {
+						        var tooltipId = 'gridHeaderTooltip';
+						        $('.tooltip').attr('id', tooltipId);
+						    });
                             data.existTooltip = true;
 
                             // $('.urlLink').click(function(event) {

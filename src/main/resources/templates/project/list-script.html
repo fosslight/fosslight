@@ -2053,7 +2053,10 @@ var list = {
                         content: function () {
                             return $(this).prop('title');
                         }
-                    });
+                    }).on('inserted.bs.tooltip', function() {
+					    var tooltipId = 'gridHeaderTooltip';
+						$('.tooltip').attr('id', tooltipId);
+					});
 
                     gridTooltip.existTooltip = true;
                 }
