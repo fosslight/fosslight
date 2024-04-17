@@ -258,7 +258,7 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
     color: #999
 }
 
-#select2-noticeFileFormat-results .select-default-set .select2-results__option[aria-disabled="true"] {
+#select2-noticeFileFormat-results .select2-results__option[aria-disabled="true"] {
 	color: #212529 !important;
     background-color: #dee2e6 !important;
 }
@@ -369,15 +369,15 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
 .custom-layout .text-shadow {text-shadow: 2px 2px 7px gray;}
 
 /* tooltip */
-.tooltip {
+/*.tooltip {
     top: 35px !important;
     left: -10px !important;
     font-size: .85rem;
     position: absolute;
 }
-.tooltip .bs-tooltip-right {
+/*.tooltip .bs-tooltip-right {
     top: 0px !important;
-}
+*/}
 .tooltip.show { opacity: 1; }
 .tooltip .arrow { display: none; }
 .tooltip .tooltip-inner {
