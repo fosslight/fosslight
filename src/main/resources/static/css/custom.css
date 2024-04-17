@@ -258,6 +258,11 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
     color: #999
 }
 
+#select2-noticeFileFormat-results .select-default-set .select2-results__option[aria-disabled="true"] {
+	color: #212529 !important;
+    background-color: #dee2e6 !important;
+}
+
 .custom-layout .card.search-form a { cursor: pointer; }
 .custom-layout .card.search-form a:hover { color: #007bff }
 .custom-layout .search-form .card-header {padding: .7rem 1.25rem;}
