@@ -117,7 +117,7 @@ $(document).ready(function () {
 
     /* Create new tab function */
     $(function newTab() {
-        //initTab();
+        // initTab();
         var $tabs = $('#nav-tabs').tabs();
 
         $('.add-tab').click(function (e) {
@@ -184,8 +184,36 @@ $(document).ready(function () {
 
             return false;
         });
+        
+        initTab();
     });
+	
+	function initTab(){
+		var query = window.location.search;
+		var param = new URLSearchParams(query);
+		var id = param.get("id");
+		var prjFlag = param.get("project");
+		var viewFlag = param.get("view");
+		
+		if (id != null && prjFlag != null) {
+			if ("false" == viewFlag) {
+				createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
+			} else {
+				createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/view/" + id : "/partner/view/" + id);
+			}
+		} else {
+//			var _defaultTabStr = $("#defaultTabAnchorArr").val()||"";
 
+//			$.each(_defaultTabStr.split(","), function(idx, val){
+//				var _gnbHref = $("#header > div > div.gnb a[href$='"+val+"']");
+//
+//				if(_gnbHref && _gnbHref.length == 1) {
+//					$("#header > div > div.gnb a[href$='"+val+"']").trigger("click");
+//				}
+//			});
+		}
+	}
+	
 	/* Delete tab function */
     $(document).on('click', '.ui-icon-close', function (event) {
         viewRefresh();
