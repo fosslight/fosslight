@@ -84,7 +84,7 @@ var list = {
 			loadonce:false,
 			height: 'auto',
 			loadComplete: function() {
-				tableRefreshNew("list");
+				tableRefresh();
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				var rowData = $("#list").jqGrid('getRowData',rowid);
