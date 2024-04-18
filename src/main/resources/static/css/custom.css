@@ -176,8 +176,7 @@ html { height: auto !important;}
     font-size: 1rem;
 }
 a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:hover { background-color: #7e101b!important; }
-.card-lg-red table a {color: #212529;}
-
+.custom-layout .comment-card-body a:hover, .commentBack a:hover {color:#007bff !important; text-decoration: underline !important; }
 .content-wrapper.custom-layout { font-size: 1rem;}
 .custom-layout hr { margin-top: 0; margin-bottom: 0;}
 .custom-layout .login-box form a {color:#007bff !important; }
