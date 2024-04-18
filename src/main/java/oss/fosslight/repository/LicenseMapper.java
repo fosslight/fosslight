@@ -70,7 +70,4 @@ public interface LicenseMapper {
 	Set<String> getLicenseNickNames();
 	LicenseMaster getLicenseInfoWithName(String licenseName);
 	LicenseMaster getLicenseInfoWithId(String licenseId);
-
-	void updateLicenseMasterForRestriction(LicenseMaster licenseMaster);
-
 }

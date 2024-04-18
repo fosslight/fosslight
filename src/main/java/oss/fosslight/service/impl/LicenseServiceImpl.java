@@ -733,24 +733,4 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		resMap.put("licenseId", result);
 		return resMap;
 	}
-
-	@Override
-	public void deleteLicenseMasterForRestriction(LicenseMaster licenseMaster) {
-		List<LicenseMaster> delRestrictionLicenseList = licenseMapper.selectLicenseList(licenseMaster);
-		if (delRestrictionLicenseList != null && !delRestrictionLicenseList.isEmpty()) {
-			List<String> delRestrictionList = Arrays.asList(licenseMaster.getArrRestriction());
-			for (LicenseMaster lm : delRestrictionLicenseList) {
-				String restrictions = lm.getRestriction();
-				String customRestriction = "";
-				for (String restriction : restrictions.split(",")) {
-					if (!delRestrictionList.contains(restriction)) {
-						customRestriction += restriction + ",";
-					}
-				}
-				if (!customRestriction.isEmpty()) customRestriction = customRestriction.substring(0, customRestriction.length()-1);
-				lm.setRestriction(customRestriction);
-				licenseMapper.updateLicenseMasterForRestriction(lm);
-			}
-		}
-	}
 }

@@ -134,27 +134,6 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 			}
 		}
 
-		List<String> delRestrictionList = null;
-		if (CoConstDef.CD_LICENSE_RESTRICTION.equals(cdNo)) {
-			T2CodeDtl param = new T2CodeDtl();
-			param.setCdNo(cdNo);
-			List<T2CodeDtl> codeDetailList = codeMapper.selectCodeDetailList(param);
-			
-			if (codeDetailList != null && !codeDetailList.isEmpty()) {
-				delRestrictionList = codeDetailList
-						.stream()
-						.filter(e -> 
-								dtlList
-									.stream()
-									.filter(a ->
-											(a.getCdDtlNo() + "|" + a.getCdDtlNm()).equalsIgnoreCase(e.getCdDtlNo() + "|" + e.getCdDtlNm())
-											).collect(Collectors.toList()).size() == 0
-									).map(b -> b.getCdDtlNo())
-						.collect(Collectors.toList());
-									
-			}
-		}
-		
 		if (isExternalServiceCodeNo(cdNo) && hasGithubTokenCodeDtl(dtlList)) {
 			// 1. 기존 github token값 보관
 			T2CodeDtl githubTokenDtl = codeMapper.getCodeDetail(cdNo, CoConstDef.CD_DTL_GITHUB_TOKEN);
@@ -184,13 +163,6 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 			for (T2CodeDtl vo : dtlList) {
 				codeMapper.insertCodeDetail(vo);
 			}
-		}
-		
-		// delete license restriction information
-		if (delRestrictionList != null && !delRestrictionList.isEmpty()) {
-			LicenseMaster licenseMaster = new LicenseMaster();
-			licenseMaster.setArrRestriction(delRestrictionList.toArray(new String[delRestrictionList.size()]));
-			licenseService.deleteLicenseMasterForRestriction(licenseMaster);
 		}
 	}
 
