@@ -3818,6 +3818,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		ossMaster.setOssNameTemp(null);
 		if (convertFlag) ossMaster.setOssNicknames(nicknameList);
 		
+		if (ossMaster.getOssVersion().equals("-")) {
+			ossMaster.setOssVersion("");
+		}
+		
 		return convertList;
 	}
 
