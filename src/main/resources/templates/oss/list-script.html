@@ -316,24 +316,34 @@
             	var display = "";
             	var url = "/oss/edit/" + rowObject['ossId'];
                 var ossNickname = rowObject['ossNickname'];
+				
+                if ("N" == linkFlag){
+                	if(ossNickname != null && ossNickname.length > 0) {
+                        if (ossNickname.indexOf('|') !== -1) {
+                            let ossNicknameArray = ossNickname.split('|');
 
-                if(ossNickname != null && ossNickname.length > 0) {
-                    if (ossNickname.indexOf('|') !== -1) {
-                        let ossNicknameArray = ossNickname.split('|');
-
-                        let str;
-                        if (ossNicknameArray.length <= 5) {
-                            str = ossNicknameArray.join('<br />');
-                        } else {
-                            str = ossNicknameArray.slice(0, 5).join('<br />') + '<br />...'
-                             /*   '<br /><i class=\'fas fa-ellipsis-h\'></i>';*/
+                            let str;
+                            if (ossNicknameArray.length <= 5) {
+                                str = ossNicknameArray.join('<br />');
+                            } else {
+                                str = ossNicknameArray.slice(0, 5).join('<br />') + '<br />...'
+                                 /*   '<br /><i class=\'fas fa-ellipsis-h\'></i>';*/
+                            }
+                            ossNickname = str;
                         }
-                        ossNickname = str;
+                        display += "<a class=\"d-inline-block\" style=\"cursor: pointer;\" data-toggle=\"tooltip\" data-html=\"true\" data-placement=\"right\" title=\"" + ossNickname + "\">[Nick]</a>"
+                        display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block ml-1\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
+                    } else {
+                        display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
                     }
-                    display += "<a class=\"d-inline-block\" style=\"cursor: pointer;\" data-toggle=\"tooltip\" data-html=\"true\" data-placement=\"right\" title=\"" + ossNickname + "\">[Nick]</a>"
-                    display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block ml-1\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
                 } else {
-                    display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
+                	var url = '';
+    				if ([[${@CommonFunction.isAdmin()}]]){
+    					url = '/oss/edit/'+rowObject['ossId'];
+    				} else {
+    					url = '/oss/view/'+rowObject['ossId'];
+    				}
+    				display = "<a href='" + url + "' class='urlLink' target='_blank'>" + cellvalue + "</a>";
                 }
             	 
                 return display;

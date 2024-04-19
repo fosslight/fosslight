@@ -273,50 +273,60 @@ public class VerificationController extends CoTopComponent {
 			HttpServletResponse res, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/registFile");
 		
-		//파일 등록
-		List<UploadFile> list = new ArrayList<UploadFile>();
+		String permission = StringUtil.isEmpty(req.getParameter("permission")) ? null : req.getParameter("permission");
 		ArrayList<Object> resultList = new ArrayList<Object>();
-		String fileId = StringUtil.isEmpty(req.getParameter("fileId")) ? null : req.getParameter("fileId");
-		String prjId = req.getParameter("prjId");
-		String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
-
-		Map<String, MultipartFile> fileMap = req.getFileMap();
-		String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
-		String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
 		
-		//파일 등록
-		if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1 ) {
-			file.setCreator(loginUserName());
+		if (permission.equals("1")) {
+			//파일 등록
+			List<UploadFile> list = new ArrayList<UploadFile>();
+			
+			String fileId = StringUtil.isEmpty(req.getParameter("fileId")) ? null : req.getParameter("fileId");
+			String prjId = req.getParameter("prjId");
+			String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
 
-			//파일 확장자 체크
-			String codeExp = !fileSeq.equals("4") ? codeMapper.getCodeDetail("120", "16").getCdDtlExp() : codeMapper.getCodeDetail("120", "40").getCdDtlExp();
-			String[] exts = codeExp.split(",");
-			boolean fileExtCheck = false;
-			for (String s : exts) {
-				if (s.equals(fileExtension)) {
-					fileExtCheck = true;
+			Map<String, MultipartFile> fileMap = req.getFileMap();
+			String fileExtension = StringUtils.getFilenameExtension(fileMap.get("myfile").getOriginalFilename());
+			String fileSeq = StringUtil.isEmpty(req.getParameter("fileSeq")) ? null : req.getParameter("fileSeq");
+			
+			//파일 등록
+			if (req.getContentType() != null && req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1 ) {
+				file.setCreator(loginUserName());
+
+				//파일 확장자 체크
+				String codeExp = !fileSeq.equals("4") ? codeMapper.getCodeDetail("120", "16").getCdDtlExp() : codeMapper.getCodeDetail("120", "40").getCdDtlExp();
+				String[] exts = codeExp.split(",");
+				boolean fileExtCheck = false;
+				for (String s : exts) {
+					if (s.equals(fileExtension)) {
+						fileExtCheck = true;
+					}
 				}
-			}
 
-			if(!fileExtCheck) {
-				resultList.add("UNSUPPORTED_FILE");
-				String msg = getMessage("msg.project.packaging.upload.fileextension" , new String[]{codeExp});
-				resultList.add(msg);
-				return toJson(resultList);
-			}
+				if(!fileExtCheck) {
+					resultList.add("UNSUPPORTED_FILE");
+					String msg = getMessage("msg.project.packaging.upload.fileextension" , new String[]{codeExp});
+					resultList.add(msg);
+					return toJson(resultList);
+				}
 
-			list = fileService.uploadFile(req, file, null, fileId, true, filePath);
+				list = fileService.uploadFile(req, file, null, fileId, true, filePath);
+			}
+			
+			//결과값 resultList에 담기
+			resultList.add(list);
+			
+			// 20210625_fileUpload 시 projectMaster table save_START
+			String registFileId = list.get(0).getRegistSeq();
+			verificationService.setUploadFileSave(prjId, fileSeq, registFileId);
+			// 20210625_fileUpload 시 projectMaster table save_END
+			
+			return toJson(resultList);
+		} else {
+			resultList.add("NOT_PERMISSION");
+			String msg = getMessage("msg.project.check.division.permissions" , new String[]{"file upload"});
+			resultList.add(msg);
+			return toJson(resultList);
 		}
-		
-		//결과값 resultList에 담기
-		resultList.add(list);
-		
-		// 20210625_fileUpload 시 projectMaster table save_START
-		String registFileId = list.get(0).getRegistSeq();
-		verificationService.setUploadFileSave(prjId, fileSeq, registFileId);
-		// 20210625_fileUpload 시 projectMaster table save_END
-		
-		return toJson(resultList);
 	}
 	
 	@PostMapping(value=VERIFICATION.UPLOAD_VERIFICATION,  produces = {

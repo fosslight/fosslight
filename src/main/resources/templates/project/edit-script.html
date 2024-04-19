@@ -1840,7 +1840,7 @@
 				var copyUrl = "";
 				var protocol = window.location.protocol;
 				var host =  window.location.host;
-				copyUrl = protocol + "//" + host + "/project/view/" + [[${project.prjId}]];
+				copyUrl = protocol + "//" + host + "/project/shareUrl/" + [[${project.prjId}]];
 				
 				var locale = [[${#locale}]];
 				if (locale) copyUrl += "?lang=" + locale;

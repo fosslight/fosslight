@@ -1465,8 +1465,10 @@ public class CoMailManager extends CoTopComponent {
 								|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
-
-								)
+								|| CoConstDef.CD_MAIL_TYPE_OSS_RENAME.equals(bean.getMsgType())
+								|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
+								|| CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT.equals(bean.getMsgType())
+							)
 						)
 				{
 					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
@@ -1492,8 +1494,10 @@ public class CoMailManager extends CoTopComponent {
 							|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED.equals(bean.getMsgType())
-
-							)
+							|| CoConstDef.CD_MAIL_TYPE_OSS_RENAME.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_OSS_MODIFIED_COMMENT.equals(bean.getMsgType())
+							|| CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT.equals(bean.getMsgType())
+						)
 					)
 			{
 				String _s = "OSS-" + avoidNull(bean.getParamOssId());
@@ -1591,7 +1595,7 @@ public class CoMailManager extends CoTopComponent {
 						_s += " (" + project.getPrjVersion() +")";
 					}
 					
-					String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/view/" + bean.getParamPrjId();
+					String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + bean.getParamPrjId();
 					_s = "<a href='"+url+"' target='_blank'>" + _s + "</a>";
 				}
 				
@@ -1669,7 +1673,7 @@ public class CoMailManager extends CoTopComponent {
 						_s += " (" + partnerInfo.getSoftwareName() +")";
 					}
 					
-					String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/view/" + bean.getParamPartnerId();
+					String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/partner/shareUrl/" + bean.getParamPartnerId();
 					_s = "<a href='" + url + "' target='_blank'>" + _s + "</a>";
 				}
 				

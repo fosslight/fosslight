@@ -354,6 +354,42 @@ public class PartnerController extends CoTopComponent{
 		return "partner/view";
 	}
 	
+	@GetMapping(value=PARTNER.SHARE_URL, produces = "text/html; charset=utf-8")
+	public void shareUrl(@PathVariable String partnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		
+		try {
+			partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+			
+			CommonFunction.setPartnerService(partnerService);
+			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+			if (permissionCheckList != null) {
+				if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+						&& !CommonFunction.isAdmin() 
+						&& !permissionCheckList.contains(loginUserName())) {
+					partnerMaster.setPermission(0);
+					partnerMaster.setStatusPermission(0);
+				} else {
+					if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+						partnerMaster.setStatusPermission(0);
+					} else {
+						partnerMaster.setStatusPermission(1);
+					}
+					partnerMaster.setPermission(1);
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		if (CoConstDef.FLAG_NO.equals(partnerMaster.getViewOnlyFlag()) && partnerMaster.getStatusPermission() == 1) {
+			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&project=false&view=false");
+		} else {
+			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&project=false&view=true");
+		}
+	}
+	
 	@GetMapping(value=PARTNER.LIST_AJAX)
 	public @ResponseBody ResponseEntity<Object> listAjax(
 			PartnerMaster partnerMaster

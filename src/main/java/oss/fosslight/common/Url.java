@@ -394,6 +394,8 @@ public final class Url {
 		public static final String AUTO_REVIEW = PATH + "/autoReview/{startNow}";
 		public static final String AUTO_REVIEW_STATUS = PATH + "/autoReviewStatus";
 		public static final String AUTO_REVIEW_STOP = PATH + "/autoReviewStop";
+		
+		public static final String SHARE_URL = PATH + "/shareUrl/{prjId}";
 	}
 	
 	public static final class VERIFICATION {
@@ -528,6 +530,8 @@ public final class Url {
 		public static final String UPDATE_DESCRIPTION = PATH + "/updateDescription";
 		
 		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
+		
+		public static final String SHARE_URL = PATH + "/shareUrl/{partnerId}";
 	}
 	
 	public static final class USER {

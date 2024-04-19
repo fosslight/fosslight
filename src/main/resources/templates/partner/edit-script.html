@@ -2054,7 +2054,7 @@ var fn = {
 		var copyUrl = "";
 		var protocol = window.location.protocol;
 		var host =  window.location.host;
-		copyUrl = protocol + "//" + host + "/partner/view/" + partnerData.partnerId||"";
+		copyUrl = protocol + "//" + host + "/partner/shareUrl/" + partnerData.partnerId||"";
 
 		var langSelect = $('.userLang > select option:selected', window.parent.document)[0];
 		langSelect = $(langSelect).val();

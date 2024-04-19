@@ -365,8 +365,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the string
 	 */
-	@RequestMapping(value = { PROJECT.EDIT_ID }, method = { RequestMethod.GET,
-			RequestMethod.POST }, produces = "text/html; charset=utf-8")
+	@RequestMapping(value = { PROJECT.EDIT_ID }, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
 	public String edit(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setPrjId(prjId);
@@ -416,7 +415,7 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	@RequestMapping(value = { PROJECT.VIEW_ID }, method = { RequestMethod.GET, RequestMethod.POST }, produces = "text/html; charset=utf-8")
-	public String view(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
+	public String view(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) throws IOException {
 		Project project = new Project();
 		project.setPrjId(prjId);
 		
@@ -429,7 +428,7 @@ public class ProjectController extends CoTopComponent {
 				comHisBean.setReferenceId(prjId);
 				
 				project.setUserComment(commentService.getUserComment(comHisBean));
-
+				
 				model.addAttribute("project", project);
 				model.addAttribute("detail", toJson(project));
 				model.addAttribute("distributionFlag", CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES));
@@ -5194,5 +5193,23 @@ public class ProjectController extends CoTopComponent {
 		
 		resMap = projectService.checkSelectDownloadFile(project);
 		return makeJsonResponseHeader(resMap);
+	}
+	
+	@GetMapping(value = PROJECT.SHARE_URL)
+	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId) throws IOException {
+		Project project = new Project();
+		project.setPrjId(prjId);
+		
+		try {
+			project = projectService.getProjectDetail(project);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		if (CoConstDef.FLAG_NO.equals(project.getViewOnlyFlag()) && project.getStatusPermission() == 1) {
+			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&project=true&view=false");
+		} else {
+			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&project=true&view=true");
+		}
 	}
 }
