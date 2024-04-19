@@ -1060,6 +1060,7 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .binary {background-color: #c56272 !important;}
 .select2-selection__rendered {color: #212529 !important;}
 .viewTextArea {white-space: pre-line;}
+.viewTextArea a { display: block; color: #0070c0 !important; text-decoration: underline !important; }
 .vertical-align-middle {vertical-align: middle !important;}
 .card-body.comment-card-body {-ms-overflow-style: none; scrollbar-width: none;}
 .card-body.comment-card-body::-webkit-scrollbar {display: none;}
