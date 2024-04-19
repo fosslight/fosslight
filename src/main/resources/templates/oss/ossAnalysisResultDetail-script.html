@@ -120,7 +120,7 @@ var Ctrl_fn = {
 		
 		selectData.detectedLicense.split(",").forEach(function(licenseName){
 			if ('' != licenseName) {
-				let detectedLicenseHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
+				let detectedLicenseHtml 	= 	'<div class="col-lg-2" style="margin-top: 5px;">';
 				detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
 				detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+licenseName+'" readonly/>';
 				detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';

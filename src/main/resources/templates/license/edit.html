@@ -158,7 +158,7 @@
 									<div class="row form-group">
 										<div class="col-md-12">
 											<div class="row multiTxtSet">
-												<div class="col-md-4" th:each="licenseNickname : ${detail?.licenseNicknames}" th:if="${!#strings.isEmpty(licenseNickname)}">
+												<div class="col-lg-4" th:each="licenseNickname : ${detail?.licenseNicknames}" th:if="${!#strings.isEmpty(licenseNickname)}">
 													<div class="form-group mb-0">
 														<input class="form-control" type="type" name="licenseNicknames" th:value="${licenseNickname}" th:disabled="${isReadOnly}" />
 														<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-tool xbox" th:onclick="|fn.removeTag(this)|">
