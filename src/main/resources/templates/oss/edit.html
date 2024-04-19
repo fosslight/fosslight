@@ -73,7 +73,7 @@
 									</div>
 
 									<div class="row form-group">
-										<div class="col-md-6">
+										<div class="col-lg-6">
 											<label th:text="#{msg.common.field.nickname}"></label>
 											<div class="input-group" th:unless="${isReadOnly}">
 												<input class="form-control" id="input_ossNicknames" th:onblur="|fn.checkNickName(this)|" type="text">
@@ -128,7 +128,7 @@
 										</div>
 									</div>
                                     <div class="row form-group" name="append-stag-form">
-                                    	<div class="col-md-6">
+                                    	<div class="col-lg-6">
                                     		<label th:text="#{msg.common.field.detectedLicense}"></label>
                                         	<div class="input-group" th:unless="${isReadOnly}">
                                         		<input class="form-control autoComOssLicense" id="input_detectedLicense" type="text"/>
@@ -143,7 +143,7 @@
                                     </div>
 
                                     <div class="row form-group">
-                                    	<div class="col-md-6">
+                                    	<div class="col-lg-6">
                                     		<label th:text="#{msg.common.field.downloadLocation}"></label>
                                         	<div class="input-group" th:unless="${isReadOnly}">
                                         		<input class="form-control" id="input_downloadLocations" type="text"/>
@@ -157,7 +157,7 @@
 										</div>
                                     </div>
                                     <div class="row form-group">
-                                    	<div class="col-md-6">
+                                    	<div class="col-lg-6">
                                     		<label th:text="#{msg.common.field.homepage}"></label>
                                         	<input class="form-control" name="homepage" th:value="${detail?.homepage}" placeholder="http://" type="text" th:disabled="${isReadOnly}"/>
                                     	</div>

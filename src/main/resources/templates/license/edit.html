@@ -142,7 +142,7 @@
 										<span class="col-12 retxt text-danger text-sm"></span>
 									</div>
 									<div class="row">
-										<div class="col-md-6">
+										<div class="col-lg-6">
 											<div class="form-group tag-form">
 												<label th:text="#{msg.common.field.nickname}"></label>
 												<div class="input-group" th:unless="${isReadOnly}">
@@ -181,7 +181,7 @@
 									</div>
 									<div class="row form-group">
 										<div class="col-12 multiWebPageSet">
-											<div class="input-group card-tools" th:each="webpage : ${detail?.webpages}" th:if="${!#strings.isEmpty(webpage)}">
+											<div class="input-group card-tools mb-1" th:each="webpage : ${detail?.webpages}" th:if="${!#strings.isEmpty(webpage)}">
 												<input class="form-control" name="webpages" th:value="${webpage}" type="text" placeholder="http://" />
 												<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-tool xbox" th:onclick="|fn.removeTag2(this)|">
 													<i class="fas fa-times"></i></button>
