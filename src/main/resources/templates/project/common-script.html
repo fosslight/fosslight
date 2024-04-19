@@ -208,27 +208,36 @@ var com_evt = {
             	}
                	
                	alertify.bomRejectDialog(innerHtml, function (e) {
-               		// prevent clicking the OK button on Enter
+					// prevent clicking the OK button on Enter
 					if (typeof keyCode !== 'undefined' && keyCode == 13) {
 						keyCode = undefined;
 						return false;
+					} else if (typeof keyCode !== 'undefined' && keyCode == 27) {
+						alert("esc");
+						keyCode = undefined;
+						return false;
 					}
-               		
-               		if (e) {
-               			var editorVal = $("#bomRejectEditor").summernote('code');
-    					
-               			if ("" == $(editorVal).text().trim()) {
-    						alertify.alert([[#{msg.project.required.comments}]], function(){});
 
-    						return false;
-    					} else {
-    						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : $("#bomRejectEditor").summernote('code')};
-    						com_fn.checkSave(data, "PROG");
-    					}
-               		} else {
-               			return false;
-               		}
-				});
+					if (e) {
+						var editorVal = $("#bomRejectEditor").summernote('code');
+
+						if ("" == $(editorVal).text().trim()) {
+							alertify.alert([[#{msg.project.required.comments}]], function () { });
+
+							return false;
+						} else {
+							var data = {"prjId": [[${project.prjId}]], "identificationStatus": "PROG", "userComment": $("#bomRejectEditor").summernote('code')};
+							com_fn.checkSave(data, "PROG");
+						}
+					} else {
+						return false;
+					}
+				}, function () {
+					if (keyCode == 27) {
+						keyCode = undefined;
+						return false
+					};
+				}).set({esc: false});
 				
 				$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			} else {

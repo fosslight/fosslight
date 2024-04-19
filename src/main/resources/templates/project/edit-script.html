@@ -286,17 +286,22 @@
 							keyCode = undefined;
 							return false;
 						}
-						
+
 						var editorVal = $("#prjDelEditor").summernote('code');
-						
-	               		if ("" == $(editorVal).text().trim()){
- 							alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+						if ("" == $(editorVal).text().trim()) {
+							alertify.alert([[#{msg.project.required.comments}]], function () { });
 
 							return false;
- 						} else {
+						} else {
 							fn.deleteSubmit();
 						}
-                    });
+					}, function () {
+						if (keyCode == 27) {
+							keyCode = undefined;
+							return false
+						};
+					}).set({esc: false});
 	               	
 	               	$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 				}
