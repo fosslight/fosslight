@@ -2406,8 +2406,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		if (!isEmpty(distributionSiteUrl) && !(distributionSiteUrl.startsWith("http://") || distributionSiteUrl.startsWith("https://") || distributionSiteUrl.startsWith("ftp://"))) {
 			distributionSiteUrl = "http://" + distributionSiteUrl;
 		}
+		
+		String noticeTitle = CommonFunction.getNoticeFileName(prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType());
+		String noticeFileName = noticeTitle.split(".txt")[0];
+		
 		model.put("noticeType", noticeType);
-		model.put("noticeTitle", CommonFunction.getNoticeFileName(prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType()));
+		model.put("noticeTitle", noticeTitle);
+		model.put("noticeFileName", noticeFileName);
 		model.put("companyNameFull", companyNameFull);
 		model.put("distributionSiteUrl", distributionSiteUrl);
 		model.put("email", email);
