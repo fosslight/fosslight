@@ -1106,3 +1106,4 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 #_ossListDiv::-webkit-scrollbar{display: none;}
 #_ossListDiv .ui-jqgrid-bdiv::-webkit-scrollbar{display: none;}
 .ossSyncPopup .ui-jqgrid-bdiv {max-height: 435px;}
+.custom-select-disabled {color: #6c757d; background-color: #e9ecef; border: 0;}
