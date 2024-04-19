@@ -296,12 +296,7 @@
 						} else {
 							fn.deleteSubmit();
 						}
-					}, function () {
-						if (keyCode == 27) {
-							keyCode = undefined;
-							return false
-						};
-					}).set({esc: false});
+					});
 	               	
 	               	$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 				}

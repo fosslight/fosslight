@@ -236,11 +236,6 @@
 							if (typeof keyCode !== 'undefined' && keyCode == 13) {
 								keyCode = undefined;
 								return false;
-								// prevnet clicking the ESC when open modal
-							} else if  (typeof keyCode !== 'undefined' && keyCode == 27) {
-								alert("esc");
-								keyCode = undefined;
-								return false;
 							} 
 							
 							var comment = $("#promptPopupEditor").summernote('code');

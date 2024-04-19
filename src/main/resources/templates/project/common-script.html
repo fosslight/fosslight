@@ -212,11 +212,7 @@ var com_evt = {
 					if (typeof keyCode !== 'undefined' && keyCode == 13) {
 						keyCode = undefined;
 						return false;
-					} else if (typeof keyCode !== 'undefined' && keyCode == 27) {
-						alert("esc");
-						keyCode = undefined;
-						return false;
-					}
+					} 
 
 					if (e) {
 						var editorVal = $("#bomRejectEditor").summernote('code');
@@ -232,12 +228,7 @@ var com_evt = {
 					} else {
 						return false;
 					}
-				}, function () {
-					if (keyCode == 27) {
-						keyCode = undefined;
-						return false
-					};
-				}).set({esc: false});
+				});
 				
 				$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			} else {
