@@ -37,7 +37,7 @@
 										</tr>
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">Project Name</th>
-											<td style="padding:5px;"><span th:utext="|(${project_basic_info.prjId}) ${project_basic_info.prjName}|"></span></td>
+											<td style="padding:5px;"><span th:utext="${project_basic_info.prjName}"></span></td>
 										</tr>
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">Project Version</th>
@@ -90,7 +90,7 @@
 										</tr>
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">Self-Check Project Name</th>
-											<td style="padding:5px;"><span th:utext="|(${selfcheck_basic_info.prjId}) ${selfcheck_basic_info.prjName}|"></span></td>
+											<td style="padding:5px;"><span th:utext="${selfcheck_basic_info.prjName}"></span></td>
 										</tr>
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">Self-Check Project Version</th>
