@@ -4837,7 +4837,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				groupColumn = info.getOssName() + "-" + info.getOssVersion();
 			}
 			
-			if ("-".equals(groupColumn)) {
+			if ("-".equals(info.getOssName())) {
 				if ("NA".equals(info.getLicenseType())) {
 					ossNameEmptyFlag = true;
 				}
