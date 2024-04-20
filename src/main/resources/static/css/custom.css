@@ -16,7 +16,7 @@ html { height: auto !important;}
 .custom-layout .sidebar.index {height: 80%}
 .custom-layout .sidebar-dark-primary .nav-sidebar
 > .nav-item > .nav-link.active { background-color: #a50034;}
-.custom-layout .sidebar.copyright { color: #FFFFFF; position: absolute; bottom: 0;width: 100%; font-size: .9rem; height: 100px;}
+.custom-layout .sidebar.copyright { color: #FFFFFF; position: absolute; bottom: 0;width: 100%; font-size: .9rem; height: 140px;}
 .custom-layout .main-sidebar .brand-link .brand-image { margin-left: 0; }
 .custom-layout table thead th { background-color: #f9f9f9; }
 .custom-layout table thead input {box-sizing: border-box;}
