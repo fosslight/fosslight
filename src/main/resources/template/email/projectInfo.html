@@ -25,7 +25,7 @@
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
 								<div th:if="${contentsTitle != null && contentsTitle != ''}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
-								<p th:if="${contentsSubTitle != null && contentsSubTitle != ''}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+								<p th:if="${mailType != '38' && contentsSubTitle != null && contentsSubTitle != ''}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
 								<div th:if="${comment != null && comment != '' and (mailType == '51' or mailType == '50' or mailType == '40' or mailType == '41' or mailType == '68' or mailType == '38' or mailType == '33' or mailType == '46' or mailType == '100')}">
 									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
 									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
