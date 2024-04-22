@@ -108,7 +108,7 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-2">
+                                            <div class="col-md-4">
                                                 <div class="form-group mb-2">
                                                     <select class="select2 save-value" name="networkServerType" id="networkServerTypeSelect"
                                                             style="width: 100%;">
@@ -118,17 +118,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                          	<div class="col-md-2">
-                                                <div class="form-group mb-2">
-                                                    <select class="form-control select2 save-value" style="width: 100%;" id="priority" name="priority">
-                                                    	<option th:value="''"></option>
-                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
-                                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.priority != null and option.cdDtlNo == searchBean?.priority}"></option>
-                                                       	</th:block>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
+                                             <div class="col-md-4">
                                                 <div class="form-group mb-2">
                                                     <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
                                                         <select class="form-control select2 save-value" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
@@ -140,18 +130,16 @@
                                                     </th:block>
                                                 </div>
                                             </div>
-                                          <div class="col-md-4">
+                                          	<div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="select2 save-value" name="noticeType" id="noticeTypeSelect"
-                                                            style="width: 100%;">
-                                                        <option></option>
-														<th:block th:each="code, status : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_NOTICE_TYPE'))}">
-															<option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
-														</th:block>
+                                                    <select class="form-control select2 save-value" style="width: 100%;" id="priority" name="priority">
+                                                    	<option th:value="''"></option>
+                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.priority != null and option.cdDtlNo == searchBean?.priority}"></option>
+                                                       	</th:block>
                                                     </select>
                                                 </div>
                                             </div>
-                                            
                                         </div>
                                         <div class="row">
                                         	<div class="col-4">
@@ -203,13 +191,29 @@
                                               		<textarea class="form-control" name="userComment" th:placeholder="|Comment|" rows="3" th:utext="${searchBean?.userComment}"></textarea>
                                             	</div>
                                          	</div>
-                                         <th:block th:if="${partnerFlag}">
-                                      		<div class="col-md-4">
-                                            	<div class="form-group mb-2">
-                                            		<input type="search" name="refPartnerName" class="form-control" th:placeholder="|3rd Party Name|" th:value="${searchBean?.refPartnerName}">
-                                            	</div>
-                                        	</div>
-                                      	</th:block>
+										<th:block th:if="${partnerFlag}">
+											<div class="col-md-4">
+												<div class="row">
+													<div class="col-md-12">
+														<div class="form-group mb-2">
+															<input type="search" name="refPartnerName" class="form-control" th:placeholder="|3rd Party Name|"
+																th:value="${searchBean?.refPartnerName}">
+														</div>
+													</div>
+													<div class="col-md-12">
+														<div class="form-group mb-2">
+															<select class="select2 save-value" name="noticeType" id="noticeTypeSelect" style="width: 100%;">
+																<option></option>
+																<th:block
+																	th:each="code, status : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_NOTICE_TYPE'))}">
+																	<option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+																</th:block>
+															</select>
+														</div>
+													</div>
+												</div>
+											</div>
+										</th:block>
                                     	</div>
                                    		<div class="row">
                                				<div class="col-md-12">
