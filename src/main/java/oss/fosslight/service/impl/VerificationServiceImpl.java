@@ -2408,7 +2408,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 		
 		String noticeTitle = CommonFunction.getNoticeFileName(prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType());
-		String noticeFileName = noticeTitle.split(".txt")[0];
+		String noticeFileName = "";
+		if (noticeTitle.endsWith(".txt")) {
+			noticeFileName = noticeTitle.substring(0, noticeTitle.length()-4);
+		} else {
+			noticeFileName = noticeTitle;
+		}
 		
 		model.put("noticeType", noticeType);
 		model.put("noticeTitle", noticeTitle);
