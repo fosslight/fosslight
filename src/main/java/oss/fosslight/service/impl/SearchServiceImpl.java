@@ -124,8 +124,6 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 							break;
 						case "publicYn" : project.setPublicYn(value);
 							break;
-						case "noticeType" : project.setNoticeType(value);
-							break;
 						default : break;
 					}
 				}

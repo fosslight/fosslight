@@ -144,9 +144,9 @@
                                                 <div class="form-group mb-2">
                                                     <select class="select2 save-value" name="noticeType" id="noticeTypeSelect"
                                                             style="width: 100%;">
-                                                        <option value="${searchBean?.noticeType}"></option>
+                                                        <option></option>
 														<th:block th:each="code, status : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_NOTICE_TYPE'))}">
-															<option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}" th:selected="${searchBean?.noticeType != null and code.cdDtlNo == searchBean?.noticeType}"></option>
+															<option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
 														</th:block>
                                                     </select>
                                                 </div>
