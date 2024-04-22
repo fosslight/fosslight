@@ -2014,7 +2014,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		binaryEmList = doc.select("div.file-list");
 		
 		for (Element em : binaryEmList) {
-			String _fileStr = (em.html()).replaceAll("<br>", "\n").replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("\r\n", "\n");
+			String _fileStr = (em.html()).replaceAll("<br>", "\n").replaceAll("<br />", "\n").replaceAll("<br/>", "\n").replaceAll("\r\n", "\n").replaceAll("<span>", "").replaceAll("</span>", "");
 			
 			for (String s : _fileStr.split("\n", -1)) {
 				if (isEmpty(s)) {
