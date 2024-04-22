@@ -155,6 +155,7 @@
 					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER  = USER_ID), T1.MODIFIER) AS MODIFIER
 					, T1.MODIFIED_DATE
 			FROM PROJECT_MASTER T1
+			LEFT JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
 	    WHERE T1.USE_YN = 'Y'
 			<if test="@oss.fosslight.util.StringUtil@equals('10', code)">
 			AND T1.IDENTIFICATION_SUB_STATUS_PARTNER = 'Y'
@@ -211,6 +212,9 @@
 		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
 				AND T1.DISTRIBUTION_TYPE = #{distributionType}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeType)">
+				AND T2.NOTICE_TYPE = #{noticeType}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schStartDate)">
 				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{schStartDate}
@@ -473,6 +477,9 @@
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 				AND T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%')) 
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeType)">
+				AND T5.NOTICE_TYPE = #{noticeType}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
 				<if test='reviewer.equals("N/A")'>

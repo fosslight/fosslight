@@ -108,13 +108,23 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-2">
                                                 <div class="form-group mb-2">
                                                     <select class="select2 save-value" name="networkServerType" id="networkServerTypeSelect"
                                                             style="width: 100%;">
                                                         <option value=""></option>
                                                         <option value="Y" th:selected="${#strings.equals(searchBean.networkServerType, 'Y')}" th:text="|Yes|"></option>
                                                         <option value="N" th:selected="${#strings.equals(searchBean.networkServerType, 'N')}" th:text="|No|"></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                          	<div class="col-md-2">
+                                                <div class="form-group mb-2">
+                                                    <select class="form-control select2 save-value" style="width: 100%;" id="priority" name="priority">
+                                                    	<option th:value="''"></option>
+                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.priority != null and option.cdDtlNo == searchBean?.priority}"></option>
+                                                       	</th:block>
                                                     </select>
                                                 </div>
                                             </div>
@@ -130,16 +140,18 @@
                                                     </th:block>
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                          <div class="col-md-4">
                                                 <div class="form-group mb-2">
-                                                    <select class="form-control select2 save-value" style="width: 100%;" id="priority" name="priority">
-                                                    	<option th:value="''"></option>
-                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
-                                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.priority != null and option.cdDtlNo == searchBean?.priority}"></option>
-                                                       	</th:block>
+                                                    <select class="select2 save-value" name="noticeType" id="noticeTypeSelect"
+                                                            style="width: 100%;">
+                                                        <option value="${searchBean?.noticeType}"></option>
+														<th:block th:each="code, status : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_NOTICE_TYPE'))}">
+															<option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}" th:selected="${searchBean?.noticeType != null and code.cdDtlNo == searchBean?.noticeType}"></option>
+														</th:block>
                                                     </select>
                                                 </div>
                                             </div>
+                                            
                                         </div>
                                         <div class="row">
                                         	<div class="col-4">
