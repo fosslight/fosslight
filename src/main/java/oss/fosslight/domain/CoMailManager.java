@@ -1548,7 +1548,7 @@ public class CoMailManager extends CoTopComponent {
 							|| CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE_TYPE.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())
 							|| CoConstDef.CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT.equals(bean.getMsgType())
-					)) {
+							|| CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(bean.getMsgType()))) {
 				String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
 				linkUrl += "/license/edit/" + bean.getParamLicenseId();
 				_s = "<a href='" + linkUrl + "' target='_blank'>" + _s + "</a>";
