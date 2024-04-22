@@ -189,6 +189,15 @@
 											</div>
 										</div>
 									</div>
+									<th:block
+										th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_NOTICE_INTERNAL_URL')) == 'Y'}">
+										<div class="form-group">
+											<label th:text="#{msg.common.field.internalURL}"></label>
+											<div class="input-group">
+												<a href="${licenseInfo.internalUrl}" target="_blank" th:text="${licenseInfo.internalUrl}"></a>
+											</div>
+										</div>									
+									</th:block>
 									<div class="form-group">
 										<label for="licenseUserGuide" th:text="#{msg.common.field.userGuide}"></label>
 										<textarea class="form-control" id="licenseUserGuide" name="description" rows="4"
