@@ -163,7 +163,7 @@ public class NvdDataService {
 		try {
 			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_META_REST_URL, 1, 0);
 			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
-				rtnMap = nvdMetaDataApiJob(NVD_META_REST_URL, 2000, rtnMap);
+				rtnMap = nvdMetaDataApiJob(NVD_META_REST_URL, 500, rtnMap);
 				if (!(boolean) rtnMap.get("connectionFlag")) {
 					log.info("nvd meta api connection error");
 					return "91";
@@ -598,7 +598,7 @@ public class NvdDataService {
 			List<Map<String, Object>> cpeMatchDataList = new ArrayList<>();
 			List<Map<String, Object>> cpeMatchNamesDataList = new ArrayList<>();
 			
-			for (int i=0; i < totalResults; i+=2000) {if (i > totalResults) break;
+			for (int i=0; i < totalResults; i+=500) {if (i > totalResults) break;
 				log.info("nvdMetaMatch index : " + i + " / " + "totalResults : " + totalResults);
 				for (int j=0; j<5; j++) {
 					responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, i, j);
