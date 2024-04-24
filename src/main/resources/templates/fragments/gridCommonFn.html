@@ -1433,6 +1433,10 @@
 						if (resultData.returnMsg.toUpperCase() == "COMPLETE") {
 							$("#checkLicenseTextFile").show();
 							downloadCheckLicenseText = resultData.downloadUrl;
+							
+							if(_type != "load"){
+								fn_grid_com.checkLicenseText(_prjId);
+							}
 						} else {
 							if(_type != "load"){
 								fn_grid_com.checkLicenseText(_prjId);
