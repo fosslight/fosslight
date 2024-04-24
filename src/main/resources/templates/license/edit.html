@@ -46,24 +46,16 @@
 									<div class="row">
 										<div class="col-md-6">
 											<div class="form-group">
-												<label for="licenseNameInput"
-													th:text="#{msg.common.field.licenseName}"></label><span
-													class="text-orange">*</span>
-												<i sec:authorize="hasRole('ROLE_ADMIN')" class="fas fa-info-circle fa-lg icon-orange ml-1"
-													id="heplLink_licenseEditInfo" data-html="true" data-placement="right"></i>
-												<input class="form-control autoComLicenseLong" id="licenseNameInput"
-													name="licenseName" th:value="${detail?.licenseName}" type="text"
-													th:disabled="${isReadOnly}" />
+												<label for="licenseNameInput" th:text="#{msg.common.field.licenseName}"></label><span class="text-orange">*</span>
+												<i sec:authorize="hasRole('ROLE_ADMIN')" class="fas fa-info-circle fa-lg icon-orange ml-1" id="heplLink_licenseEditInfo" data-html="true" data-placement="right"></i>
+												<input class="form-control autoComLicenseLong" id="licenseNameInput" name="licenseName" th:value="${detail?.licenseName}" type="text" th:disabled="${isReadOnly}" />
 												<span class="retxt text-danger text-sm"></span>
 											</div>
 										</div>
 										<div class="col-md-6">
 											<div class="form-group">
-												<label for="shortIdentifierInput"
-													th:text="#{msg.common.field.SPDX}"></label>
-												<input type="text" class="form-control" id="shortIdentifierInput"
-													name="shortIdentifier" th:value="${detail?.shortIdentifier}"
-													th:disabled="${isReadOnly}">
+												<label for="shortIdentifierInput" th:text="#{msg.common.field.SPDX}"></label>
+												<input type="text" class="form-control" id="shortIdentifierInput" name="shortIdentifier" th:value="${detail?.shortIdentifier}" th:disabled="${isReadOnly}">
 												<span class="retxt text-danger text-sm"></span>
 											</div>
 										</div>
@@ -72,23 +64,17 @@
 										<div class="col-md-6">
 											<div class="row form-group">
 												<div class="col-12">
-													<label for="licenseTypeSelect"
-														th:text="#{msg.common.field.licenseType}"></label><span
-														class="text-orange">*</span>
-													<select class="select2 form-control" id="licenseType"
-														name="licenseType" style="width: 100%;"
-														th:disabled="${isReadOnly}">
+													<label for="licenseTypeSelect" th:text="#{msg.common.field.licenseType}"></label><span class="text-orange">*</span>
+													<select class="select2 form-control" id="licenseType" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
 														<option value="" disabled selected> </option>
-														<th:block
-															th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+														<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
 															<option th:selected="${code.cdDtlNo == detail?.licenseType}"
 																th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}">
 															</option>
 														</th:block>
 													</select>
-														<span class="col-12 retxt text-danger text-sm"></span>
+													<span class="col-12 retxt text-danger text-sm"></span>
 												</div>
-											
 											</div>
 										</div>
 										<div class="col-md-6">
@@ -100,26 +86,14 @@
 													<div class="row">
 														<div class="col-md-12 ml-3 mt-2">
 															<div class="icheck-primary d-inline mx-3">
-																<input id="obligationNotificationYn"
-																	class="oblicationChk"
-																	name="obligationNotificationYn"
-																	th:checked="${detail?.obligationNotificationYn == 'Y'}"
-																	type="checkbox" value="Y"
-																	th:disabled="${isReadOnly}">
-																<label class="text-lg-gray"
-																	for="obligationNotificationYn"
-																	th:text="Notice"></label>
+																<input id="obligationNotificationYn" class="oblicationChk" name="obligationNotificationYn" th:checked="${detail?.obligationNotificationYn == 'Y'}"
+																	type="checkbox" value="Y" th:disabled="${isReadOnly}">
+																<label class="text-lg-gray" for="obligationNotificationYn" th:text="Notice"></label>
 															</div>
 															<div class="icheck-primary d-inline  mx-3">
-																<input id="obligationDisclosingSrcYn"
-																	class="oblicationChk"
-																	name="obligationDisclosingSrcYn"
-																	th:checked="${detail?.obligationDisclosingSrcYn == 'Y'}"
-																	type="checkbox" value="Y"
-																	th:disabled="${isReadOnly}">
-																<label class="text-lg-gray"
-																	for="obligationDisclosingSrcYn"
-																	th:text="'Source Code'"></label>
+																<input id="obligationDisclosingSrcYn" class="oblicationChk" name="obligationDisclosingSrcYn" type="checkbox" value="Y"
+																	th:checked="${detail?.obligationDisclosingSrcYn == 'Y'}" th:disabled="${isReadOnly}">
+																<label class="text-lg-gray" for="obligationDisclosingSrcYn" th:text="'Source Code'"></label>
 															</div>
 														</div>
 													</div>
@@ -148,8 +122,7 @@
 												<div class="input-group" th:unless="${isReadOnly}">
 													<input type="text" class="form-control" id="input_licenseNicknames">
 													<div class="input-group-append">
-														<button class="btn btn-default" id="licenseNicknames"
-															name="addTagButton" type="button" th:text="Add"></button>
+														<button class="btn btn-default" id="licenseNicknames" name="addTagButton" type="button" th:text="Add"></button>
 													</div>
 												</div>
 											</div>
@@ -193,7 +166,7 @@
 										<div class="form-group">
 											<label th:text="#{msg.common.field.internalURL}"></label>
 											<div class="input-group">
-												<a th:href="${licenseInfo.internalUrl}" target="_blank" th:text="${licenseInfo.internalUrl}"></a>
+												<a class="ml-1" th:href="${licenseInfo.internalUrl}" target="_blank" th:text="${licenseInfo.internalUrl}"></a>
 											</div>
 										</div>
 									</th:block>
