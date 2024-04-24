@@ -866,9 +866,12 @@ public final class Url {
 			/** API Project BOM Tab Export JSON*/
 			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON	    = "/prj_bom_export_json";
 
+			/** API Project Security Tab Export JSON (LGE Only)*/
+			public static final String FOSSLIGHT_API_PROJECT_Security_EXPORT_JSON	    = "/prj_security_export_json";
+
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/prj_bom_compare";
-			
+
 			/** API Project Add Watcher */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
 			
