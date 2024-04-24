@@ -163,7 +163,7 @@
 										</div>
 									</div>
 									<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_NOTICE_INTERNAL_URL')) == 'Y'}">
-										<div class="form-group">
+										<div th:if="${licenseInfo?.internalUrl != null}" class="form-group">
 											<label th:text="#{msg.common.field.internalURL}"></label>
 											<div class="input-group">
 												<a class="ml-1" th:href="${licenseInfo.internalUrl}" target="_blank" th:text="${licenseInfo.internalUrl}"></a>
