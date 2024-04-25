@@ -3233,7 +3233,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (validMap != null) {
 			for (String key : validMap.keySet()) {
 				if (key.toUpperCase().startsWith("OSSNAME") 
-						&& (validMap.get(key).equals(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG")) 
+						&& (validMap.get(key).equals(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG"))
+								|| validMap.get(key).equals(ruleMap.get("OSS_NAME.DEACTIVATED.MSG"))
 								|| validMap.get(key).equals(ruleMap.get("OSS_NAME.REQUIRED.MSG")))) {
 					resultData.addAll((List<ProjectIdentification>) componentData
 																	.stream()
