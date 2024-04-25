@@ -67,13 +67,13 @@
 												<th th:text="#{msg.common.field.licenseWebsite}"></th>
 												<td>
 													<th:block th:if="${#lists.size(detail?.webpages) > 0}" th:each="webpage, status : ${detail?.webpages}">
-														<a href="${webpage}" class="urlLink" target="_blank" th:text="${webpage}"></a>
+														<a th:href="${webpage}" class="urlLink" target="_blank" th:text="${webpage}"></a>
 														<th:block th:if="${status.count != status.size}">
 															<br>
 														</th:block>
 													</th:block>
 													<th:block th:if="${#lists.size(detail?.webpages) == 0 and detail?.webpage != null}">
-														<a href="${detail?.webpage}" class="urlLink" target="_blank" th:text="${detail?.webpage}"></a>
+														<a th:href="${detail?.webpage}" class="urlLink" target="_blank" th:text="${detail?.webpage}"></a>
 													</th:block>
 												</td>
 											</tr>
