@@ -1233,7 +1233,7 @@
     	</if>
   		AND OSS_NAME=#{ossName} 
   		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
-  			AND OSS_VERSION=#{ossVersion}
+  			AND REPLACE(HEX(OSS_VERSION), 'E2808B', '') = HEX(#{ossVersion})
   		</if>
   		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
   			AND (OSS_VERSION = '' OR OSS_VERSION IS NULL)
