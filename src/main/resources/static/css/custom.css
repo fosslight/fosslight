@@ -742,6 +742,11 @@ div.jqcloud span.w1 { color: #feb24c; }
     width: 100%;
 }
 
+.ui-jqgrid tr.jqgrow td {
+	overflow: hidden;
+	white-space: nowrap;
+}
+
 .ui-jqgrid tr.jqgrow td .btnCLight {
     background-color: #999;
     color: #fff;
