@@ -3132,6 +3132,18 @@ public class CoMailManager extends CoTopComponent {
 			}
 			bean.setRestriction(restrictionStr);
 			
+			bean.setCreator(avoidNull((String) dataMap.get("CREATOR")));
+			if (!isEmpty(bean.getCreator())) {
+				T2Users userParam = new T2Users();
+				userParam.setUserId(bean.getCreator());
+    			T2Users userInfo = userMapper.getUser(userParam);
+    			bean.setCreatorName(makeUserNameFormatWithDivision(userInfo));
+			}
+			bean.setCreatedDate(avoidNull((String) dataMap.get("CREATED_DATE")));
+			if (!isEmpty(bean.getCreatedDate())) {
+				bean.setCreatedDate(DateUtil.dateFormatConvert(bean.getCreatedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
+			}
+			
 			break;
 		}
 		return bean;

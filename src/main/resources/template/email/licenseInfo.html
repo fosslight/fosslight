@@ -71,7 +71,9 @@
 													</tr>
 													<tr>
 														<th align="left" style="padding:5px;background:#f0f0f0;">Web site for the license</th>
-														<td style="padding:5px;" th:utext="${license_basic_info?.webpage}"></td>
+														<td style="padding:5px;">
+															<a th:if="${license_basic_info?.webpage != null}" th:href="${license_basic_info.webpage}" th:text="${license_basic_info.webpage}"></a>
+														</td>
 													</tr>
 													<tr>
 														<th align="left" style="padding:5px;background:#f0f0f0;">User Guide</th>
@@ -87,12 +89,11 @@
 													</tr>
 													<tr>
 														<th align="left" style="padding:5px;background:#f0f0f0;">Created Date / Creator</th>
-														<td style="padding:5px;" th:utext="|${modifiedDate} / ${modifierNm}|"></td>
+														<td style="padding:5px;" th:utext="|${license_basic_info?.createdDate} / ${license_basic_info?.creatorName}|"></td>
 													</tr>
 												</table>
 												<div style="margin:20px 0;border:1px dashed #666;"></div>
-												<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
-													 style="font-size:12px;">
+												<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}" style="font-size:12px;">
 													* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
 												</div>
 											</td>
