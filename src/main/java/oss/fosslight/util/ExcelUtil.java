@@ -900,6 +900,7 @@ public class ExcelUtil extends CoTopComponent {
 					case "FILE NAME OR PATH":
 					case "SOURCE NAME OR PATH":
 					case "MANIFEST FILE":
+					case "PURL":
 						if (pathOrFileCol > -1) {
 							dupColList.add(value);
 						}
@@ -1007,6 +1008,7 @@ public class ExcelUtil extends CoTopComponent {
 						
 						spdxIdentifierCol = colIdx;
 					case "DEPENDENCIES":
+					case "DEPENDS ON":
 						if (dependenciesCol > -1) {
 							dupColList.add(value);
 						}
