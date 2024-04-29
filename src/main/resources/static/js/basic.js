@@ -2743,9 +2743,9 @@ function findAndReplace(match) {
     var host = window.location.host;
     var url = protocol + "//" + host;
     if (prj.test(match)) {
-        url += "/project/view/" + id;
+        url += "/project/shareUrl/" + id;
     } else if (third.test(match)) {
-        url += "/partner/view/" + id;
+        url += "/partner/shareUrl/" + id;
     }
     return "<a href=" + url + " class='urlLink2' target='_blank' onclick='window.open(this.href)'>" + match + "</a>";
 }
