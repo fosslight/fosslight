@@ -253,6 +253,22 @@ a.bg-lg-red:focus, a.bg-lg-red:hover, button.bg-lg-red:focus, button.bg-lg-red:h
     color: #999;
     line-height: 28px
 }
+
+.custom-layout .select2-container--default .select2-selection--multiple .select2-selection__placeholder {
+    color: #cccccc;
+}
+
+.custom-layout .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #cccccc;
+}
+
+input::placeholder {color: #cccccc !important;}
+input::-webkit-input-placeholder {color: #cccccc !important;}
+input:-ms-input-placeholder {color: #cccccc !important;}
+textarea::placeholder {color: #cccccc !important;}
+textarea::-webkit-input-placeholder {color: #cccccc !important;}
+textarea:-ms-input-placeholder {color: #cccccc !important;}
+
 .custom-layout .select2-search__field::placeholder {
     color: #999
 }
