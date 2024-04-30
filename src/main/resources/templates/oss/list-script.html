@@ -231,40 +231,58 @@
 							keyCode = event.keyCode;
 						});
 
-                        alertify.confirm(res, function (e) {
-							// prevent clicking the OK button on Enter
-							if (typeof keyCode !== 'undefined' && keyCode == 13) {
-								keyCode = undefined;
-								return false;
-							} 
+						if (!alertify.deleteOssListDialog){
+							alertify.dialog('deleteOssListDialog', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.focus.element = 0;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '650px';
+								        }
+									}
+								};
+							}, false, 'confirm');
+	                	}
+						
+						alertify.deleteOssListDialog()
+							.set('onok', function(e){
+								// prevent clicking the OK button on Enter
+								if (typeof keyCode !== 'undefined' && keyCode == 13) {
+									keyCode = undefined;
+									return false;
+								}
 							
-							var comment = $("#promptPopupEditor").summernote('code');
-                            if (e) {
-                            	if ("" == $(comment).text().trim()){
-                                    alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {
-                                    });
+								var comment = $("#promptPopupEditor").summernote('code');
+	                            if (e) {
+	                            	if ("" == $(comment).text().trim()){
+	                                    alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {
+	                                    });
 
-                                    return false;
-                                } else {
-                                    oss_lst_fn.multiDelAjax(deleteIds, comment);
-                                }
-                            } else {
-                                return false;
-                            }
-                        });
-                    }, null, function () {
-                        $("#promptPopupEditor").summernote({
-                            height: 150,
-                            callbacks: {
-                                onInit: function () {
-                                    var content = $(this).summernote('code');
-                                    if (content === '<p><br></p>') {
-                                        $(this).summernote('code', '');
-                                    }
-                                }
-                            }
-                        });
-                    })
+	                                    return false;
+	                                } else {
+	                                	oss_lst_fn.multiDelAjax(deleteIds, comment);
+	                                }
+	                            } else {
+	                                return false;
+	                            }
+							})
+							.set('onshow', function(event){
+								$("#promptPopupEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+							})
+							.setContent(res).show();
+                    }, null, function () {});
                 } else {
                     alertify.alert([[#{msg.oss.select.ossTable}]], function () {});
                 }
@@ -351,6 +369,122 @@
         const oss_lst_grid = {
             oldRowNum: 20,
             load: function () {
+            	var colNameArr = ['', 'ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
+            	if (isAdmin) {
+            		colNameArr.push("Creator");
+            		colNameArr.push("Created<br>Date");
+            		colNameArr.push("Modifier");
+            		colNameArr.push("Modified<br>Date");
+            	}
+            	colNameArr.push("groupKey");
+            	
+            	var colModelArr = [
+                    {
+                    	name: 'group', width: 20, align: 'center',
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' colspan=2'
+                        },
+                        formatter: function myFormatter(cellvalue, options, rowObject) {
+                            return rowObject.ossId;
+                        }
+                    }
+                    , {
+                        name: 'ossId', index: 'ossId', width: 80, align: 'center',
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' style="display:none;"';
+                        }
+                    }
+                    , {
+                        name: 'ossType',
+                        index: 'ossType',
+                        width: 70,
+                        align: 'center',
+                        sortable: false,
+                        formatter: fn_grid_com.ossTypeFormat
+                    }
+                    , {
+                        name: 'ossName',
+                        index: 'ossName',
+                        width: 200,
+                        align: 'left',
+                        formatter: oss_lst_fn.ossNameLinkFormat
+                    }
+                    , {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
+                    , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}
+                    , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
+                    , {name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false}
+                    , {
+                        name: 'downloadLocation',
+                        index: 'downloadLocation',
+                        width: 150,
+                        align: 'left',
+                        formatter: 'link',
+                        formatoptions: {target: '_blank'}
+                    }
+                    , {
+                        name: 'homepage',
+                        index: 'homepage',
+                        width: 65,
+                        align: 'left',
+                        formatter: 'link',
+                        formatoptions: {target: '_blank'}
+                    }
+                    , {
+                        name: 'summaryDescription',
+                        index: 'summaryDescription',
+                        width: 150,
+                        align: 'left'
+                        , cellattr: function (rowId, val, rawObject, cm, rdata) {
+                       		return 'title="' + rawObject['summaryDescription'] + '" style="cursor: pointer;"';
+                       	}
+                        , formatter: function (cellvalue, options, rowObject) {
+                        	if (cellvalue != null && "" != cellvalue) {
+                            	return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
+                            } else {
+                            	return "";
+                            }
+                      	}
+                    }
+                    , {name: 'cveId', index: 'cveId', hidden: true}
+                    , {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter: fn.displayVulnerability}
+                ];
+            	
+            	if (isAdmin) {
+            		var colModelObj = {name: 'creator', index: 'creator', width: 80, align: 'center'};
+            		colModelArr.push(colModelObj);
+            		colModelObj = {name: 'createdDate', index: 'createdDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
+            		colModelArr.push(colModelObj);
+            		colModelObj = {name: 'modifier', index: 'modifier', width: 80, align: 'center'};
+            		colModelArr.push(colModelObj);
+            		colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
+            		colModelArr.push(colModelObj);
+            	}
+            	
+            	var colModelObj = {
+                        name: 'groupKey', index: 'groupKey', hidden: true
+                        , cellattr: function (rowId, val, rawObject, cm, rdata) {
+                            var result;
+                            var isGroup = false;
+
+                            if (groupBuffer == val) {
+                                isGroup = true;
+                            } else {
+                                isGroup = false;
+                            }
+
+                            groupBuffer = val;
+
+                            if (isGroup) {
+                                result = 'isgroup="true"';
+                            } else {
+                                result = 'isgroup="false"';
+                            }
+
+                            return result;
+                        }
+                    };
+        		colModelArr.push(colModelObj);
+            	
                 $("#list").jqGrid({
                     url: "/oss/listAjax",
                     datatype: 'json',
@@ -377,100 +511,8 @@
                             return obj.records;
                         }
                     },
-                    colNames: ['', 'ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility', 'groupKey'],
-                    colModel: [
-                        {
-                        	name: 'group', width: 20, align: 'center',
-                            cellattr: function (rowId, tv, rawObject, cm, rdata) {
-                                return ' colspan=2'
-                            },
-                            formatter: function myFormatter(cellvalue, options, rowObject) {
-                                return rowObject.ossId;
-                            }
-                        }
-                        , {
-                            name: 'ossId', index: 'ossId', width: 80, align: 'center',
-                            cellattr: function (rowId, tv, rawObject, cm, rdata) {
-                                return ' style="display:none;"';
-                            }
-                        }
-                        , {
-                            name: 'ossType',
-                            index: 'ossType',
-                            width: 70,
-                            align: 'center',
-                            sortable: false,
-                            formatter: fn_grid_com.ossTypeFormat
-                        }
-                        , {
-                            name: 'ossName',
-                            index: 'ossName',
-                            width: 200,
-                            align: 'left',
-                            formatter: oss_lst_fn.ossNameLinkFormat
-                        }
-                        , {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
-                        , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}
-                        , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
-                        , {name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false}
-                        , {
-                            name: 'downloadLocation',
-                            index: 'downloadLocation',
-                            width: 150,
-                            align: 'left',
-                            formatter: 'link',
-                            formatoptions: {target: '_blank'}
-                        }
-                        , {
-                            name: 'homepage',
-                            index: 'homepage',
-                            width: 65,
-                            align: 'left',
-                            formatter: 'link',
-                            formatoptions: {target: '_blank'}
-                        }
-                        , {
-                            name: 'summaryDescription',
-                            index: 'summaryDescription',
-                            width: 150,
-                            align: 'left'
-                            , cellattr: function (rowId, val, rawObject, cm, rdata) {
-                           		return 'title="' + rawObject['summaryDescription'] + '" style="cursor: pointer;"';
-                           	}
-                            , formatter: function (cellvalue, options, rowObject) {
-                            	if (cellvalue != null && "" != cellvalue) {
-                                	return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
-                                } else {
-                                	return "";
-                                }
-                          	}
-                        }
-                        , {name: 'cveId', index: 'cveId', hidden: true}
-                        , {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter: fn.displayVulnerability}
-                        , {
-                            name: 'groupKey', index: 'groupKey', hidden: true
-                            , cellattr: function (rowId, val, rawObject, cm, rdata) {
-                                var result;
-                                var isGroup = false;
-
-                                if (groupBuffer == val) {
-                                    isGroup = true;
-                                } else {
-                                    isGroup = false;
-                                }
-
-                                groupBuffer = val;
-
-                                if (isGroup) {
-                                    result = 'isgroup="true"';
-                                } else {
-                                    result = 'isgroup="false"';
-                                }
-
-                                return result;
-                            }
-                        }
-                    ],
+                    colNames: colNameArr,
+                    colModel: colModelArr,
                     rowNum: 20,
                     rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
                     rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]]),

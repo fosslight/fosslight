@@ -399,6 +399,10 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			upFile.setFileName(phyFileNm);
 			upFile.setIndexNum(indexNum);
 			upFile.setRegistFileId(fileId);
+			if (!isEmpty(registFile.getActualFileNm())) {
+				upFile.setActualFilename(registFile.getActualFileNm());
+				registFile.setActualFileNm(null);
+			}
 			
 			try {
 				upFile.setContentType(mFile.getContentType());

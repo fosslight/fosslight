@@ -46,24 +46,16 @@
 									<div class="row">
 										<div class="col-md-6">
 											<div class="form-group">
-												<label for="licenseNameInput"
-													th:text="#{msg.common.field.licenseName}"></label><span
-													class="text-orange">*</span>
-												<i sec:authorize="hasRole('ROLE_ADMIN')" class="fas fa-info-circle fa-lg icon-orange ml-1"
-													id="heplLink_licenseEditInfo" data-html="true" data-placement="right"></i>
-												<input class="form-control autoComLicenseLong" id="licenseNameInput"
-													name="licenseName" th:value="${detail?.licenseName}" type="text"
-													th:disabled="${isReadOnly}" />
+												<label for="licenseNameInput" th:text="#{msg.common.field.licenseName}"></label><span class="text-orange">*</span>
+												<i sec:authorize="hasRole('ROLE_ADMIN')" class="fas fa-info-circle fa-lg icon-orange ml-1" id="heplLink_licenseEditInfo" data-html="true" data-placement="right"></i>
+												<input class="form-control autoComLicenseLong" id="licenseNameInput" name="licenseName" th:value="${detail?.licenseName}" type="text" th:disabled="${isReadOnly}" />
 												<span class="retxt text-danger text-sm"></span>
 											</div>
 										</div>
 										<div class="col-md-6">
 											<div class="form-group">
-												<label for="shortIdentifierInput"
-													th:text="#{msg.common.field.SPDX}"></label>
-												<input type="text" class="form-control" id="shortIdentifierInput"
-													name="shortIdentifier" th:value="${detail?.shortIdentifier}"
-													th:disabled="${isReadOnly}">
+												<label for="shortIdentifierInput" th:text="#{msg.common.field.SPDX}"></label>
+												<input type="text" class="form-control" id="shortIdentifierInput" name="shortIdentifier" th:value="${detail?.shortIdentifier}" th:disabled="${isReadOnly}">
 												<span class="retxt text-danger text-sm"></span>
 											</div>
 										</div>
@@ -72,23 +64,17 @@
 										<div class="col-md-6">
 											<div class="row form-group">
 												<div class="col-12">
-													<label for="licenseTypeSelect"
-														th:text="#{msg.common.field.licenseType}"></label><span
-														class="text-orange">*</span>
-													<select class="select2 form-control" id="licenseType"
-														name="licenseType" style="width: 100%;"
-														th:disabled="${isReadOnly}">
+													<label for="licenseTypeSelect" th:text="#{msg.common.field.licenseType}"></label><span class="text-orange">*</span>
+													<select class="select2 form-control" id="licenseType" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
 														<option value="" disabled selected> </option>
-														<th:block
-															th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+														<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
 															<option th:selected="${code.cdDtlNo == detail?.licenseType}"
 																th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}">
 															</option>
 														</th:block>
 													</select>
-														<span class="col-12 retxt text-danger text-sm"></span>
+													<span class="col-12 retxt text-danger text-sm"></span>
 												</div>
-											
 											</div>
 										</div>
 										<div class="col-md-6">
@@ -100,26 +86,14 @@
 													<div class="row">
 														<div class="col-md-12 ml-3 mt-2">
 															<div class="icheck-primary d-inline mx-3">
-																<input id="obligationNotificationYn"
-																	class="oblicationChk"
-																	name="obligationNotificationYn"
-																	th:checked="${detail?.obligationNotificationYn == 'Y'}"
-																	type="checkbox" value="Y"
-																	th:disabled="${isReadOnly}">
-																<label class="text-lg-gray"
-																	for="obligationNotificationYn"
-																	th:text="Notice"></label>
+																<input id="obligationNotificationYn" class="oblicationChk" name="obligationNotificationYn" th:checked="${detail?.obligationNotificationYn == 'Y'}"
+																	type="checkbox" value="Y" th:disabled="${isReadOnly}">
+																<label class="text-lg-gray" for="obligationNotificationYn" th:text="Notice"></label>
 															</div>
 															<div class="icheck-primary d-inline  mx-3">
-																<input id="obligationDisclosingSrcYn"
-																	class="oblicationChk"
-																	name="obligationDisclosingSrcYn"
-																	th:checked="${detail?.obligationDisclosingSrcYn == 'Y'}"
-																	type="checkbox" value="Y"
-																	th:disabled="${isReadOnly}">
-																<label class="text-lg-gray"
-																	for="obligationDisclosingSrcYn"
-																	th:text="'Source Code'"></label>
+																<input id="obligationDisclosingSrcYn" class="oblicationChk" name="obligationDisclosingSrcYn" type="checkbox" value="Y"
+																	th:checked="${detail?.obligationDisclosingSrcYn == 'Y'}" th:disabled="${isReadOnly}">
+																<label class="text-lg-gray" for="obligationDisclosingSrcYn" th:text="'Source Code'"></label>
 															</div>
 														</div>
 													</div>
@@ -148,8 +122,7 @@
 												<div class="input-group" th:unless="${isReadOnly}">
 													<input type="text" class="form-control" id="input_licenseNicknames">
 													<div class="input-group-append">
-														<button class="btn btn-default" id="licenseNicknames"
-															name="addTagButton" type="button" th:text="Add"></button>
+														<button class="btn btn-default" id="licenseNicknames" name="addTagButton" type="button" th:text="Add"></button>
 													</div>
 												</div>
 											</div>
@@ -189,32 +162,26 @@
 											</div>
 										</div>
 									</div>
-									<th:block
-										th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_NOTICE_INTERNAL_URL')) == 'Y'}">
-										<div class="form-group">
+									<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_NOTICE_INTERNAL_URL')) == 'Y'}">
+										<div th:if="${licenseInfo?.internalUrl != null}" class="form-group">
 											<label th:text="#{msg.common.field.internalURL}"></label>
 											<div class="input-group">
-												<a href="${licenseInfo.internalUrl}" target="_blank" th:text="${licenseInfo.internalUrl}"></a>
+												<a class="ml-1" th:href="${licenseInfo.internalUrl}" target="_blank" th:text="${licenseInfo.internalUrl}"></a>
 											</div>
-										</div>									
+										</div>
 									</th:block>
 									<div class="form-group">
 										<label for="licenseUserGuide" th:text="#{msg.common.field.userGuide}"></label>
-										<textarea class="form-control" id="licenseUserGuide" name="description" rows="4"
-											th:text="${detail?.description}" th:disabled="${isReadOnly}"></textarea>
+										<textarea class="form-control" id="licenseUserGuide" name="description" rows="4" th:text="${detail?.description}" th:disabled="${isReadOnly}"></textarea>
 									</div>
 									<div class="form-group">
-										<label for="licenseTextInput"
-											th:text="#{msg.common.field.licenseText}"></label><span
-											class="text-orange">*</span>
-										<textarea class="form-control" id="licenseTextInput" name="licenseText" rows="4"
-											th:text="${detail?.licenseText}" th:disabled="${isReadOnly}"></textarea>
+										<label for="licenseTextInput" th:text="#{msg.common.field.licenseText}"></label><span class="text-orange">*</span>
+										<textarea class="form-control" id="licenseTextInput" name="licenseText" rows="4" th:text="${detail?.licenseText}" th:disabled="${isReadOnly}"></textarea>
 										<span class="retxt text-danger text-sm"></span>
 									</div>
 									<div class="form-group">
 										<label for="attributionInput" th:text="#{msg.common.field.attribution}"></label>
-										<textarea class="form-control" id="attributionInput" name="attribution" rows="4"
-											th:text="${detail?.attribution}" th:disabled="${isReadOnly}"></textarea>
+										<textarea class="form-control" id="attributionInput" name="attribution" rows="4" th:text="${detail?.attribution}" th:disabled="${isReadOnly}"></textarea>
 									</div>
 								</div>
 							</div>
@@ -225,14 +192,9 @@
 								<div class="card-header">
 									<h3 class="card-title" th:text="Comment"></h3>
 									<div class="card-tools">
-										<button type="button" class="btn btn-tool text-white commentBtn"><i
-												class="fas fa-plus-circle"></i></button>
-										<button type="button" class="btn btn-tool text-white"
-											th:onclick="|fn_comment.showCommentHistory()|"><i
-												class="fas fa-external-link-alt"></i></button>
-										<button type="button" class="btn btn-tool text-white"
-											th:onclick="|fn_comment.activateCommentArea()|"><i
-												class="fas fa-times"></i></button>
+										<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
+										<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
+										<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
 									</div>
 								</div>
 								<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">

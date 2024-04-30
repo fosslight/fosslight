@@ -908,6 +908,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			// oss name 또는 version이 변경된 경우만 vulnerability recheck 대상으로 업데이트 한다.
 			boolean vulnRecheck = false;
+			OssMaster beforeOssInfo = null;
 			
 			// 변경전 oss name에 해당하는 oss_id 목록을 찾는다.
 			if (!isNew) {
@@ -927,10 +928,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							if (ossIdCnt == 1) {
 								ossMapper.deleteOssNickname(_orgBean);
 							}
+							
+							List<OssMaster> filteredBeforeOssInfoList = beforeOssNameList.stream().filter(e -> !e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList());
+							if (filteredBeforeOssInfoList != null) beforeOssInfo = filteredBeforeOssInfoList.get(0);
 						}
 					}
 				}
-
 			}
 			
 			if (vulnRecheck) {
@@ -1097,6 +1100,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			// Version Flag Setting
 			updateLicenseDivDetail(ossMaster);
+			if (beforeOssInfo != null) {
+				updateLicenseDivDetail(beforeOssInfo);
+			}
 			
 			// download location이 여러건일 경우를 대비해 table을 별도로 관리함.
 			registOssDownloadLocation(ossMaster);
@@ -3233,7 +3239,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (validMap != null) {
 			for (String key : validMap.keySet()) {
 				if (key.toUpperCase().startsWith("OSSNAME") 
-						&& (validMap.get(key).equals(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG")) 
+						&& (validMap.get(key).equals(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG"))
+								|| validMap.get(key).equals(ruleMap.get("OSS_NAME.DEACTIVATED.MSG"))
 								|| validMap.get(key).equals(ruleMap.get("OSS_NAME.REQUIRED.MSG")))) {
 					resultData.addAll((List<ProjectIdentification>) componentData
 																	.stream()

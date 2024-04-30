@@ -1429,18 +1429,22 @@
 				dataType : 'json',
 				contentType : 'application/json',
 				success : function(resultData){
-					if(resultData.isValid){
-						if(resultData.returnMsg.toUpperCase() == "COMPLETE"){
+					if (resultData.isValid) {
+						if (resultData.returnMsg.toUpperCase() == "COMPLETE") {
 							$("#checkLicenseTextFile").show();
 							downloadCheckLicenseText = resultData.downloadUrl;
-						}else{
+							
+							if(_type != "load"){
+								fn_grid_com.checkLicenseText(_prjId);
+							}
+						} else {
 							if(_type != "load"){
 								fn_grid_com.checkLicenseText(_prjId);
 							}
 						}
 
-					}else{
-						if(_type != "load"){
+					} else {
+						if (_type != "load") {
 							alertify.error(resultData.returnMsg, 0);
 						}
 						$("#checkLicenseTextFile").hide();
@@ -1462,7 +1466,7 @@
 				dataType : 'json',
 				contentType : 'application/json',
 				success : function(resultData){
-					if(resultData.isValid){
+					if (resultData.isValid) {
 						var _url = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_CHECK_LICENSETEXT_SERVER_INFO'), @CommonFunction.getCoConstDefVal('CD_SERVER_URL'))}]];
 						_url += "?pid="+_prjId+"&email="+resultData.email;
 
@@ -1471,12 +1475,13 @@
 						}
 
 						location.href = _url;
-						alertify.alert(resultData.returnMsg, function(){});
-						createTabInFrame(_prjId+'_Identify', '/project/identification/'+_prjId+'/1');
-					}else{
+						alertify.alert(resultData.returnMsg, function(){
+							deleteTabInFrame('lge/project/identification/'+_prjId+'/4');
+							createTabInFrame(_prjId+'_Identify', 'lge/project/identification/'+_prjId+'/4');
+						});
+					} else{
 						alertify.error([[#{msg.common.valid2}]], 0);
 					}
-
 				},
 				error : function(){
 					alertify.error([[#{msg.common.valid2}]], 0);
@@ -1606,7 +1611,7 @@
                     _popup = window.open('/selfCheck/licensepopup?licenseName=' + licenseName, "licenseViewPopup_" + licenseName, "width=900, height=700, toolbar=no, location=no, left=100, top=100");
                 }
 
-            },
+            }
         }
     </script>
 </th:block>

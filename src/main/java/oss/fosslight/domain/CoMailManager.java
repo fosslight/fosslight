@@ -2171,11 +2171,8 @@ public class CoMailManager extends CoTopComponent {
 				List<String> _beforeList = new ArrayList<>();
 				if (before.getModelList().size() > 0){
 					distributeTargetString = before.getDistributeTarget();
-					if (distributeTargetString.equals("opensource.lge.com")) {
-						before.setDistributeTarget(CoConstDef.CD_DTL_DISTRIBUTE_LGE);
-					} else {
-						before.setDistributeTarget(CoConstDef.CD_DTL_DISTRIBUTE_SKS);
-					}
+					before.setDistributeTarget(CoConstDef.CD_DTL_DISTRIBUTE_LGE);
+					
 					for (int i=0; i < before.getModelList().size(); i++){
 						String categoryName = CommonFunction.makeCategoryFormat(before.getDistributeTarget(),before.getModelList().get(i).getCategory());
 						String before_str = categoryName+"/"+before.getModelList().get(i).getModelName()+"/"+before.getModelList().get(i).getReleaseDate();
@@ -2187,11 +2184,8 @@ public class CoMailManager extends CoTopComponent {
 				List<String> _afterList = new ArrayList<>();
 				if (after.getModelList().size() > 0){
 					distributeTargetString = after.getDistributeTarget();
-					if (distributeTargetString.equals("opensource.lge.com")) {
-						after.setDistributeTarget(CoConstDef.CD_DTL_DISTRIBUTE_LGE);
-					} else {
-						after.setDistributeTarget(CoConstDef.CD_DTL_DISTRIBUTE_SKS);
-					}
+					after.setDistributeTarget(CoConstDef.CD_DTL_DISTRIBUTE_LGE);
+					
 					for (int i=0; i < after.getModelList().size(); i++){
 						String categoryName = CommonFunction.makeCategoryFormat(after.getDistributeTarget(),after.getModelList().get(i).getCategory());
 						String after_str = categoryName+"/"+after.getModelList().get(i).getModelName()+"/"+after.getModelList().get(i).getReleaseDate();
@@ -3131,6 +3125,18 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 			bean.setRestriction(restrictionStr);
+			
+			bean.setCreator(avoidNull((String) dataMap.get("CREATOR")));
+			if (!isEmpty(bean.getCreator())) {
+				T2Users userParam = new T2Users();
+				userParam.setUserId(bean.getCreator());
+    			T2Users userInfo = userMapper.getUser(userParam);
+    			bean.setCreatorName(makeUserNameFormatWithDivision(userInfo));
+			}
+			bean.setCreatedDate(avoidNull((String) dataMap.get("CREATED_DATE")));
+			if (!isEmpty(bean.getCreatedDate())) {
+				bean.setCreatedDate(DateUtil.dateFormatConvert(bean.getCreatedDate(), DateUtil.TIMESTAMP_PATTERN, DateUtil.DATE_PATTERN_DASH));
+			}
 			
 			break;
 		}

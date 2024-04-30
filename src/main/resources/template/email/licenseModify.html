@@ -80,10 +80,10 @@
 								<!-- TODO MAIL-SERVICE -->
 								<!-- hk-cho : http 프로토콜이 넘어오지 않을 경우, 상대경로로 지정되는 오류가 있어서 validate 필요 -->
 								<td style="padding:5px;">
-									<th:block th:if="${before?.webpageLinkFormat}" th:utext="${before?.webpageLinkFormat}"></th:block>
+									<span th:if="${before?.webpageLinkFormat != null}" th:utext="${before?.webpageLinkFormat}"></span>
 								</td>
 								<td style="padding:5px;">
-									<th:block th:if="${after?.webpageLinkFormat}" th:utext="${after?.webpageLinkFormat}"></th:block>
+									<span th:if="${after?.webpageLinkFormat != null}" th:utext="${after?.webpageLinkFormat}"></span>
 								</td>
 							</tr>
 							<tr>

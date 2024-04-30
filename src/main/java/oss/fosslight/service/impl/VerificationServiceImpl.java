@@ -186,7 +186,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					prjParam.setStatusVerifyYn(CoConstDef.FLAG_NO);
 				}			
 				
-				List<T2File> deleteFileList = new ArrayList<>();
+				List<T2File> deletePhysicalFileList = new ArrayList<>();
 				
 				// packaging File comment
 				try {
@@ -205,7 +205,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							fileInfo.setFileSeq(fileId);
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
-							deleteFileList.add(fileInfo);
+							
+							oss.fosslight.domain.File packageFile = verificationMapper.selectVerificationFile(fileId);
+							if (packageFile != null && CoConstDef.FLAG_NO.equals(packageFile.getReuseFlag())) {
+								deletePhysicalFileList.add(fileInfo);
+							}
 						}
 						
 						if (!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
@@ -237,10 +241,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				verificationMapper.updatePackageFile(prjParam);
 				
 				// delete physical file
-				for (T2File delFile : deleteFileList){
-					if (verificationMapper.selectVerificationFile(delFile.getFileSeq()) == null) {
-						fileService.deletePhysicalFile(delFile, "VERIFY");
-					}
+				for (T2File delFile : deletePhysicalFileList){
+					fileService.deletePhysicalFile(delFile, "VERIFY");
 				}
 				
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
@@ -2408,7 +2410,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		}
 		
 		String noticeTitle = CommonFunction.getNoticeFileName(prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType());
-		String noticeFileName = noticeTitle.split(".txt")[0];
+		String noticeFileName = "";
+		if (noticeTitle.endsWith(".txt")) {
+			noticeFileName = noticeTitle.substring(0, noticeTitle.length()-4);
+		} else {
+			noticeFileName = noticeTitle;
+		}
 		
 		model.put("noticeType", noticeType);
 		model.put("noticeTitle", noticeTitle);
