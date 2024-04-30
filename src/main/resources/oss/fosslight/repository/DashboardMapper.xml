@@ -122,8 +122,14 @@
 		</if>
 		) RESULT
 		WHERE 1 = 1
-
-		ORDER BY MODIFIED_DATE DESC
+		<choose>
+			<when test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+				ORDER BY CASE WHEN STATUS = #{status} THEN 0 ELSE 1 END, MODIFIED_DATE DESC
+			</when>
+			<otherwise> 
+				ORDER BY MODIFIED_DATE DESC
+			</otherwise>
+		</choose>
     </select>
     
     <select id="selectDashboardJobsTotalCount" parameterType="hashMap" resultType="int">

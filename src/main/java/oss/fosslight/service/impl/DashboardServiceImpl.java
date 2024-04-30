@@ -41,6 +41,12 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
         paramMap.put("projectFlag", CommonFunction.getProperty("menu.project.use.flag"));
         paramMap.put("partnerFlag", CommonFunction.getProperty("menu.partner.use.flag"));
         
+        if ("Progress".equals(project.getIdentificationStatus())) {
+            paramMap.put("status", "PROG");
+        } else if ("Review".equals(project.getIdentificationStatus())){
+            paramMap.put("status", "REV");
+        }
+        
         int records = dashboardMapper.selectDashboardJobsTotalCount(paramMap);
         
         project.setTotListSize(records);
@@ -48,7 +54,7 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
         map.put("page", project.getCurPage());
         map.put("total", project.getTotBlockSize());
         map.put("records", records);
-        
+ 
         List<Project> list = dashboardMapper.selectDashboardJobsList(paramMap);
         
         if (list != null) {
