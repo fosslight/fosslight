@@ -3134,17 +3134,13 @@ function changeURL(url) {
 }
 
 $(window).load(function () {
-    // resizingJqGidSet();
-    // resizingInnerJqGidSet();
-    // resizingOuterJqGidSet();
-    // /* 브라우저 창 크기에 따라 jqGrid Width 자동 조절 */
-    $(window)
-        .bind("resize", function () {
-            resizingJqGidSet();
-            resizingInnerJqGidSet();
-            resizingOuterJqGidSet();
-        })
-        .trigger("resize");
+	const multiGridPage = $(".wrapper .custom-layout.multi-grid-page");
+	
+	if(multiGridPage.length > 0) {
+		adjustMultiPageGridSize();
+	} else {
+		adjustPageGridSize();
+	}
 });
 
 function resizingJqGidSet() {
@@ -3620,8 +3616,6 @@ function saveColumnLocalization() {
             }
         }
     });
-
-    resizingJqGidSet();
 }
 
 function createButtonArea() {
@@ -3663,3 +3657,130 @@ function initPromise(event) {
         });
     });
 }
+
+/**
+ * Resize the sizes of single grids -> main view
+ */
+function adjustPageGridSize() {
+	const jqGridSetElement = document.querySelector(".custom-layout .jqGridSet");
+
+	if (jqGridSetElement) {
+		optimizeGridSizeAdjustmentPage();
+		const resizeObserver = new ResizeObserver(entries => {
+			for (const entry of entries) {
+				const targetWidth = entry.contentRect.width;
+				optimizeGridSizeAdjustmentPage();
+			}
+		});
+
+		resizeObserver.observe(jqGridSetElement);
+	}
+}
+
+function optimizeGridSizeAdjustmentPage() {
+	const jqgridMinSetWidth = 150;
+	let jqGridSetElement = $('.custom-layout .jqGridSet');
+	let jqgridSetWidth = jqGridSetElement.width();
+
+	let jqGridSetElementId = jqGridSetElement.find('table').attr("id");
+	if (!jqGridSetElementId) {
+		 const jqgridId = jqGridSetElement.find('.ui-jqgrid').attr("id");
+	    if (jqgridId != null || jqgridId != undefined) {
+	        jqGridSetElementId = jqgridId.match(/gbox_(.*)/)[1];
+	    }
+	} 
+	
+	if(jqgridSetWidth < jqgridMinSetWidth) {
+		return false;
+	}
+		console.log("jqgridSetWidth", jqGridSetElementId);
+	console.log("jqgridSetWidth", jqgridSetWidth);
+	$("#" + jqGridSetElementId).jqGrid('setGridWidth', jqgridSetWidth);
+}
+
+
+/**
+ * Resize the sizes of multiple grids -> idenfication
+ */
+function adjustMultiPageGridSize() {
+	optimizeGridSizeAdjustmentMultiPage()
+	
+	const resizeObserver = new ResizeObserver(entries => {
+		for (const entry of entries) {
+			const targetWidth = entry.contentRect.width;
+			optimizeGridSizeAdjustmentMultiPage();
+		}
+	});
+
+	resizeObserver.observe(document.querySelector(".topper-content .card-tabs"));
+}
+
+function optimizeGridSizeAdjustmentMultiPage() {
+    const jqgridMinSetWidth = 150;
+    let jqgridSetWidth;
+    let jqGridSetElement;
+
+    // 1. Adjust the width of main-sized grids like party / src / bin / bom ... list.
+    $('.container-fluid .bottom-component .grid-area').each(function() {
+        if (window.getComputedStyle(this).getPropertyValue('display') !== 'none') {
+            jqGridSetElement = $(this).find('.jqGridSet');   
+            jqgridSetWidth = jqGridSetElement.width();
+        }
+    });
+    
+    if(jqgridSetWidth < jqgridMinSetWidth) {
+		return false;
+	}
+	
+    let jqGridSetElementId = jqGridSetElement.find('table').attr("id");
+    if (jqGridSetElementId == null || jqGridSetElementId == undefined) {
+        jqGridSetElementId = jqGridSetElement.find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1];
+    }
+    
+  
+    $("#" + jqGridSetElementId).jqGrid('setGridWidth', jqgridSetWidth);
+
+    // 2. Adjust the height of main-sized grids like party / src / bin / bom ... list when .topper-content exists.
+    const topperContent = $(".topper-content");
+    if (topperContent.length > 0) {
+		const defaultHeight = 500;
+        const windowHeight = $(window).height();
+        const topperContentHeight = topperContent.outerHeight();
+        const gridMaxHeight = windowHeight - topperContentHeight - 340;
+
+        const gridElement = $("#" + jqGridSetElementId).closest(".ui-jqgrid-bdiv").children(":first");
+        const currentHeight = gridElement.height();
+        
+        if(gridMaxHeight < defaultHeight) { 
+			gridElement.css({"gridMinHeight": defaultHeight + "px"});
+		} else if ($("#" + jqGridSetElementId).height() > gridMaxHeight) {
+            gridElement.css({"height": gridMaxHeight + "px"});
+        } 
+    }
+    
+    
+
+    // 3. Adjust the width of small-sized grids like Search / Detail / loaded list when .topper-content exists.
+    if (topperContent.length > 0) {
+        let innerJqgirdSetElement = $(".tab-pane.active .card-body");
+        let innerJqgirdSetWidth = innerJqgirdSetElement.width() - 22;
+
+        let innerJqGridsIds = [];
+        innerJqgirdSetElement.find('table').each(function() {
+            innerJqGridsIds.push($(this).attr("id"));
+        });
+
+        if (innerJqGridsIds.length == 0) {
+            innerJqgirdSetElement.find('table').each(function() {
+                innerJqGridsIds.push($(this).find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1]);
+            });
+        }
+
+        if (innerJqGridsIds.length > 0) {
+            innerJqGridsIds.forEach(function(ids) {
+                $("#" + ids).jqGrid('setGridWidth', innerJqgirdSetWidth);
+            });
+        }
+    }
+}
+

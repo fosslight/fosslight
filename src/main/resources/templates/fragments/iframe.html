@@ -25,9 +25,13 @@
             <h2 class="display-4">Tab is loading <i class="fa fa-sync fa-spin"></i></h2>
           </div>
         </div>
+        
+        
+        
       </div>
     </div>
   <script>
+	
     /* scroll the navi item to the left whenever navi item is created */
     var observer = new MutationObserver(function(mutationsList) {
       var navLinks = document.querySelectorAll('.nav-link');
@@ -60,17 +64,6 @@
       }
     }
 
-    /* resize the width of jqgrid when iframe is activated */
-    var observer = new MutationObserver(function(mutationsList, observer) {
-      for(var mutation of mutationsList) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'class' && $(mutation.target).hasClass('active')) {
-          resizingJqGidSet();
-        }
-      }
-    });
-    var targetNode = document.getElementsByClassName('tab-content')[0]; // tab-content 클래스를 감시 대상으로 설정
-    var config = { attributes: true, subtree: true };
-    observer.observe(targetNode, config);
   </script>
 </th:block>
 </html>
