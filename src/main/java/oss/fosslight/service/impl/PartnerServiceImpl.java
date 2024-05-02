@@ -121,9 +121,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 					bean.setCveId(conversionCveData[4]);
 					bean.setVulnYn(CoConstDef.FLAG_YES);
 				}
-			});			
+			});
 		}
-
 		
 		map.put("page", partnerMaster.getCurPage());
 		map.put("total", partnerMaster.getTotBlockSize());

@@ -402,15 +402,17 @@ public class ProjectController extends CoTopComponent {
 			
 			return "project/view";
 		} else {
-			if (!permissionFlag) {
+			if (!CommonFunction.isAdmin() && !permissionFlag) {
 				List<T2Users> userList = userService.selectAllUsers();
 				
 				if (userList != null) {
 					model.addAttribute("userWithDivisionList", userList);
 				}
+				
+				return "project/view";
+			} else {
+				return "project/edit";
 			}
-			
-			return "project/edit";
 		}
 	}
 	

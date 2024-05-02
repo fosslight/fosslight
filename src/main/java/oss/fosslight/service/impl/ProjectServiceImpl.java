@@ -364,7 +364,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {project.getPrjId()}, "project");
 		if (permissionCheckList != null) {
-			if (project.getPublicYn().equals(CoConstDef.FLAG_NO)
+			if (avoidNull(project.getPublicYn()).equals(CoConstDef.FLAG_NO)
 					&& !CommonFunction.isAdmin() 
 					&& !permissionCheckList.contains(loginUserName())) {
 				project.setPermission(0);
