@@ -5045,7 +5045,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				userIdList.add(bean.getCreator());
 				if (bean.getPartnerWatcher() != null) {
-					for (String watcher : bean.getPartnerWatcher().stream().map(e -> e.getUserId()).collect(Collectors.toList())) {
+					for (String watcher : bean.getPartnerWatcher().stream().map(e -> e.getParUserId()).collect(Collectors.toList())) {
 						if (!isEmpty(watcher)) userIdList.add(watcher);
 					}
 				}

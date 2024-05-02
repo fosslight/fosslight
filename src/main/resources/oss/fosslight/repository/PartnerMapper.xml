@@ -22,7 +22,7 @@
 				LEFT JOIN OSS_COMPONENTS_LICENSE t5  ON t4.COMPONENT_ID = t5.COMPONENT_ID
 	   		WHERE
 				t1.USE_YN = 'Y'
-				<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 					AND (t1.CREATOR = #{loginUserName} 
 						OR EXISTS (
 						SELECT 1
@@ -35,7 +35,7 @@
                 		OR t1.PUBLIC_YN = 'Y'
            		 	</if>
                 	)
-				</if>
+				</if> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 					AND t1.PARTNER_ID = #{partnerId}
 				</if>
@@ -170,7 +170,7 @@
 				  LEFT JOIN T2_FILE t10 ON t10.FILE_SEQ = t1.BINARY_FILE_ID
 			   ) A		
 		 WHERE A.USE_YN = 'Y'
-		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!-- 	<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 			AND (A.CREATOR_ID = #{loginUserName} 
 					OR EXISTS (
 					SELECT 1
@@ -183,7 +183,7 @@
                 	OR A.PUBLIC_YN = 'Y'
            		</if>
         	)
-		</if>
+		</if> -->
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 		   AND A.PARTNER_ID = #{partnerId}
 		</if>

@@ -218,13 +218,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		}
 		
 		if (!CommonFunction.isAdmin() && !userIdList.contains(loginUserName())) {
+			project.setPermission(0);
 			project.setStatusPermission(0);
 		} else {
+			project.setPermission(1);
 			project.setStatusPermission(1);
 		}
 		
-		project.setPermission(1);
-				
 		return project;
 	}
 	

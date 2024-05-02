@@ -390,6 +390,7 @@ public class PartnerController extends CoTopComponent{
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@GetMapping(value=PARTNER.LIST_AJAX)
 	public @ResponseBody ResponseEntity<Object> listAjax(
 			PartnerMaster partnerMaster
@@ -423,10 +424,8 @@ public class PartnerController extends CoTopComponent{
 		}
 		
 		Map<String, Object> map = null;
-		try{
+		try {
 			map = partnerService.getPartnerMasterList(partnerMaster);
-			
-			@SuppressWarnings("unchecked")
 			List<PartnerMaster> list = (List<PartnerMaster>) map.get("rows");
 			CommonFunction.setPartnerService(partnerService);
 			

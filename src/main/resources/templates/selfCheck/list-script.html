@@ -205,12 +205,17 @@ var fn = {
 		if (prjVersion != ''){
 			prjName += ' (' + prjVersion + ')';
 		}
+		var permission = rowObject.permission == 1;
 		
-		var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+options.rowId+"')\">" + prjName + "</span>";
+		var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+options.rowId+"', "+permission+")\">" + prjName + "</span>";
 	   	return display;
 	},
-	mvEditTab : function (prjId) {
-		createTabInFrame(prjId+'_selfCheck', '/selfCheck/edit/'+prjId);
+	mvEditTab : function (prjId, permission) {
+//		if (permission) {
+			createTabInFrame(prjId+'_selfCheck', '/selfCheck/edit/'+prjId);
+//		} else {
+//			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'self-check')}]], function(){});
+//		}
 	},
 	deleteSelfCheck : function () {
 		var selfIds = new Array();

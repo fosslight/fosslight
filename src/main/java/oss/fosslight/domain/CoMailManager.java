@@ -2775,6 +2775,32 @@ public class CoMailManager extends CoTopComponent {
 			if (list == null) {
 				list = new ArrayList<>();
 			}
+			
+			String customCveId = "";
+			String cveId = (String) dataMap.get("CVE_ID");
+			if (!isEmpty(cveId)) {
+				if (cveId.contains("->")) {
+					String[] splitCveIds = cveId.split("\\->");
+					int idx = 1;
+					for (String splitCveId : splitCveIds) {
+						String trimCveId = splitCveId.trim();
+						if (trimCveId.equalsIgnoreCase("NONE")) {
+							customCveId += "NONE"; 
+						} else {
+							customCveId += "<a href='https://nvd.nist.gov/vuln/detail/" + splitCveId.trim() + "' target='_blank'>" + splitCveId.trim() + "</a>";
+						}
+						if (idx < splitCveIds.length) customCveId += " -> ";
+						idx++;
+					}
+				} else {
+					if (!cveId.equalsIgnoreCase("NONE")) {
+						customCveId = "<a href='https://nvd.nist.gov/vuln/detail/" + cveId.trim() + "' target='_blank'>" + cveId.trim() + "</a>";
+					} else {
+						customCveId = cveId;
+					}
+				}
+			}
+			
 			bean = new OssMaster();
 			
 			if (dataMap.containsKey("PRJ_ID")) {
@@ -2787,7 +2813,7 @@ public class CoMailManager extends CoTopComponent {
 			bean.setOssId((String) dataMap.get("OSS_ID"));
 			bean.setOssName((String) dataMap.get("OSS_NAME"));
 			bean.setOssVersion((String) dataMap.get("OSS_VERSION"));
-			bean.setCveId((String) dataMap.get("CVE_ID"));
+			bean.setCveId(customCveId);
 			bean.setCvssScore(String.valueOf(dataMap.get("CVSS_SCORE")));
 			bean.setVulnSummary((String) dataMap.get("VULN_SUMMARY"));
 			bean.setPublishedDate((String) dataMap.get("PUBL_DATE"));
