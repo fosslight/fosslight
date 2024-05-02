@@ -45,6 +45,8 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
             paramMap.put("status", "PROG");
         } else if ("Review".equals(project.getIdentificationStatus())){
             paramMap.put("status", "REV");
+        } else if ("Final Review".equals(project.getIdentificationStatus())){
+            paramMap.put("status", "FREV");
         }
         
         int records = dashboardMapper.selectDashboardJobsTotalCount(paramMap);
@@ -93,7 +95,7 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
         param.put("loginUserName", loginUserName());
         param.put("loginUserRole", loginUserRole());
         param.put("referenceDivList", referenceDivList);
-        
+          
         if (moreYn) {
         	map.put("records", dashboardMapper.selectDashboardCommentsTotalCount(param));
         	map.put("rows", dashboardMapper.selectDashboardCommentsList(param));

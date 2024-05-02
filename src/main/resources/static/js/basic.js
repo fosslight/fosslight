@@ -3693,11 +3693,26 @@ function optimizeGridSizeAdjustmentPage() {
 	if(jqgridSetWidth < jqgridMinSetWidth) {
 		return false;
 	}
-		console.log("jqgridSetWidth", jqGridSetElementId);
-	console.log("jqgridSetWidth", jqgridSetWidth);
-	$("#" + jqGridSetElementId).jqGrid('setGridWidth', jqgridSetWidth);
-}
 
+	$("#" + jqGridSetElementId).jqGrid('setGridWidth', jqgridSetWidth);
+	
+	 const topperContent = $(".topper-content");
+    if (topperContent.length > 0) {
+		const defaultHeight = 500;
+        const windowHeight = $(window).height();
+        const topperContentHeight = topperContent.outerHeight();
+        const gridMaxHeight = windowHeight - topperContentHeight - 340;
+
+        const gridElement = $("#" + jqGridSetElementId).closest(".ui-jqgrid-bdiv").children(":first");
+        const currentHeight = gridElement.height();
+        
+        if(gridMaxHeight < defaultHeight) { 
+			gridElement.css({"gridMinHeight": defaultHeight + "px"});
+		} else if ($("#" + jqGridSetElementId).height() > gridMaxHeight) {
+            gridElement.css({"height": gridMaxHeight + "px"});
+        } 
+    }
+}
 
 /**
  * Resize the sizes of multiple grids -> idenfication
@@ -3736,7 +3751,6 @@ function optimizeGridSizeAdjustmentMultiPage() {
     if (jqGridSetElementId == null || jqGridSetElementId == undefined) {
         jqGridSetElementId = jqGridSetElement.find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1];
     }
-    
   
     $("#" + jqGridSetElementId).jqGrid('setGridWidth', jqgridSetWidth);
 
@@ -3757,9 +3771,7 @@ function optimizeGridSizeAdjustmentMultiPage() {
             gridElement.css({"height": gridMaxHeight + "px"});
         } 
     }
-    
-    
-
+   
     // 3. Adjust the width of small-sized grids like Search / Detail / loaded list when .topper-content exists.
     if (topperContent.length > 0) {
         let innerJqgirdSetElement = $(".tab-pane.active .card-body");
