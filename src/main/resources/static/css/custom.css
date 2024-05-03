@@ -705,8 +705,18 @@ html .grid-sm .ui-button.ui-state-disabled:active {
 .custom-layout.dash-board .small-box.bg-warning:hover {
   background-color: #e0a800 !important; 
 }
+.custom-layout.dash-board .dataTables_wrapper .top { display: ruby-text !important; }
+.custom-layout.dash-board .dataTables_wrapper .top .dataTables_paginate { float: right; }
+.custom-layout.dash-board .dataTables_wrapper .dataTables_filter { margin-top: .2rem }
+.custom-layout.dash-board .dataTable tbody td {
+    border-bottom-width: 0;
+    white-space: nowrap;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
 
-/* jqcloud colors */
+/* jqcloud colors */ 
 div.jqcloud { color: #800026; }
 div.jqcloud span {
     text-orientation: upright !important;

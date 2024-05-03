@@ -63,7 +63,8 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
 			// 코드변환처리
 			for (Project bean : list) {
 				bean.setStatus( CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, bean.getStatus()));
-				
+				String androidFlag = CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(avoidNull(bean.getNoticeType())) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO;
+				bean.setAndroidFlag(androidFlag);
 				// Project priority 
 				bean.setPriority(CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, bean.getPriority()));
 			}
