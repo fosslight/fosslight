@@ -2177,6 +2177,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(comments)">
 			, COMMENTS
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
+			, REF_OSS_NAME
+			</if>
 			)
 			VALUES
 			(
@@ -2216,6 +2219,9 @@
 			, #{adminCheckYn}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(comments)">
 			, #{comments}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
+			, #{refOssName}
 			</if>
 			)
 	</insert>
@@ -5484,6 +5490,7 @@
 			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.ATTRIBUTION) AS ATTRIBUTION
 			, T2.FILE_PATH
 			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.LICENSE_TYPE) AS LICENSE_TYPE
+			, T2.REF_OSS_NAME
 		FROM PROJECT_MASTER T1 
 			INNER JOIN OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '13' AND T2.EXCLUDE_YN = 'N' AND T2.OSS_NAME = '-'
 			INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
