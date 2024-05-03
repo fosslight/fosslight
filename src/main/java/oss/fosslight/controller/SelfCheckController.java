@@ -246,6 +246,9 @@ public class SelfCheckController extends CoTopComponent {
 					prj.setStatusPermission(1);
 				}
 				prj.setPermission(1);
+			} else {
+				prj.setPermission(0);
+				prj.setStatusPermission(0);
 			}
 		}
 		

@@ -358,7 +358,7 @@
             displayProjectName: function (cellvalue, options, rowObject) {
             	var prjName = cellvalue;
             	var prjVersion = rowObject.prjVersion;
-            	if ("" != prjVersion) prjName += " (ver. " + prjVersion + ")";
+            	if ("" != prjVersion) prjName += " (" + prjVersion + ")";
             	
             	var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+rowObject["prjId"]+"')\">" + prjName + "</span>";
                 return display;

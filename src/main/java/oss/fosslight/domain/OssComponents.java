@@ -117,6 +117,7 @@ public class OssComponents extends ComBean implements Serializable {
 	private String cvssScoreTo;
 	
 	private String dependencies;
+	private String refOssName;
 	
 	public String getPublDate() {
 		return publDate;
@@ -710,5 +711,13 @@ public class OssComponents extends ComBean implements Serializable {
 
 	public void setDependencies(String dependencies) {
 		this.dependencies = dependencies;
+	}
+
+	public String getRefOssName() {
+		return refOssName;
+	}
+
+	public void setRefOssName(String refOssName) {
+		this.refOssName = refOssName;
 	}
 }
