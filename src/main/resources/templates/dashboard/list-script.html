@@ -131,7 +131,6 @@
                         		autoWidth : false,
                         		responsive : true,
                         		lengthChange : true,
-                        		lengthMenu : [ 10, 30, 50 ],
                         		ordering : true,
                         		data : data.rows,
                         		columns : [ {
@@ -422,47 +421,7 @@
     				}
             	});
         	},
-        	editComments : function (_commId, _prjId, _referenceDiv, successCallbackParam) {
-        		$.ajax({
-        			url : '/comment/getEditPopup',
-    				type : 'POST',
-    				data : {'commId' : _commId},
-    				dataType : 'html',
-    				cache : false,
-    				success : function(res){
-    					if(!alertify.editComments){
-    						alertify.dialog('editComments', function() {
-    							return {
-    								setup: function() {
-    									var settings = alertify.confirm().settings;
-    									
-    									for (var prop in settings) {
-    										this.settings[prop] = settings[prop];
-    									}
-    									
-    									var setup = alertify.confirm().setup();
-    									setup.buttons = [];
-    									setup.focus.element = 1;
-    									
-    									return setup;
-    								},
-    							    hooks: {
-    							    	onshow: function() {
-    							        	this.elements.dialog.style.maxWidth = 'none';
-    							          	this.elements.dialog.style.width = '750px';
-    							        }
-    								}
-    							};
-    						}, false, 'alert');
-                    	}
-    					
-    					alertify.editComments(res).set('title', 'Edit Comments');
-    					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_prjId+", "+successCallbackParam+")");
-    					$(".row.custom-layout").attr("style", "margin-top: 10px")
-    					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
-    				}
-        		});
-        	},
+
         	updateComments : function (_commId, _referenceId, _referenceDiv, successCallbackParam) {
         		var param = {commId : _commId, contents : replaceWithLink($("#commentEdit").summernote('code')), referenceDiv: _referenceDiv, referenceId: _referenceId};
         		

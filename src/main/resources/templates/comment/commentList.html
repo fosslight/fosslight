@@ -25,7 +25,7 @@
 							<th:block th:if="${comment.creator == comment.loginUserName}">
 								<span style="margin-left: auto;">
                						<span class="p-1 pointer"><i class="fas fa-pencil-alt" th:onclick="fn_comment.editComments([[${comment.commId}]], [[${comment.referenceDiv}]], [[${comment.referenceId}]])"></i></span>
-               						<span class="p-1 pointer" th:onclick="fn_comment.deleteComments([[${comment.commId}]])"><i class="far fa-trash-alt"></i></span>
+               						<span class="p-1 pointer" th:onclick="fn_comment.deleteComments([[${comment.commId}]], [[${comment.referenceDiv}]], [[${comment.referenceId}]])"><i class="far fa-trash-alt"></i></span>
          						</span>
 							</th:block>
 							</div>
