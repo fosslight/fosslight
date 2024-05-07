@@ -4843,9 +4843,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 			if (groupColumn.equals(info.getOssName() + "-" + info.getOssVersion()) // 같은 groupColumn이면 데이터를 쌓음
-					&& !("-".equals(info.getOssName()) 
-					&& !"NA".equals(info.getLicenseType()))
-					&& !ossNameEmptyFlag) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
+					&& (!("-".equals(info.getOssName()) && !"NA".equals(info.getLicenseType())) || ossNameEmptyFlag)) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
 				tempData.add(info);
 			} else { // 다른 grouping
 				setMergeData(tempData, resultGridData);
