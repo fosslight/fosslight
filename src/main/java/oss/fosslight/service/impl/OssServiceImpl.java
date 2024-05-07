@@ -713,18 +713,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	private void ossNameMerge(OssMaster ossMaster, String changedOssName, String beforeOssName) {
 		String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-				"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
-				"	<tbody>\r\n" +
-				"		<tr>\r\n" +
-				"		    <th>OSS Name(OSS Version) (Written before)</th>\r\n" +
-				"                    <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
-				"		</tr>\r\n" +
-				"                <tr>\r\n" +
-				"                    <td style=\"text-align:center;\">"+ beforeOssName + " (" + avoidNull(ossMaster.getOssVersion(), "N/A") + ") </td>\r\n" +
-				"                    <td style=\"text-align:center;\">"+ changedOssName + " (" + avoidNull(ossMaster.getMergeOssVersion(), "N/A") + ") </td>\r\n" +
-				"                </tr>\r\n" +
-				"	</tbody>\r\n" +
-				"</table>";
+				"<div class=\"table-responsive\">\r\n" +
+				"	<table class=\"table comment-inner-table\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
+				"		<tbody>\r\n" +
+				"			<tr>\r\n" +
+				"		    	<th>OSS Name(OSS Version) (Written before)</th>\r\n" +
+				"               <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
+				"			</tr>\r\n" +
+				"           <tr>\r\n" +
+				"               <td style=\"text-align:center;\">"+ beforeOssName + " (" + avoidNull(ossMaster.getOssVersion(), "N/A") + ") </td>\r\n" +
+				"               <td style=\"text-align:center;\">"+ changedOssName + " (" + avoidNull(ossMaster.getMergeOssVersion(), "N/A") + ") </td>\r\n" +
+				"          	</tr>\r\n" +
+				"		</tbody>\r\n" +
+				"	</table>" +
+				"</div>";
 
 		// 3rdParty == 'CONF'
 		List<PartnerMaster> confirmPartnerList = ossMapper.getOssNameMergePartnerList(ossMaster);
@@ -3666,18 +3668,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						
 						try {
 							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-									"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
-									"	<tbody>\r\n" +
-									"		<tr>\r\n" +
-									"		    <th>OSS Name(OSS Version)</th>\r\n" +
-									"                    <th>OSS Name(OSS Version)</th>\r\n" +
-									"		</tr>\r\n" +
-									"                <tr>\r\n" +
-									"                    <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") +") </td>\r\n" +
-									"                    <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") +") </td>\r\n" +
-									"                </tr>\r\n" +
-									"	</tbody>\r\n" +
-									"</table>";
+									"<div class=\"table-responsive\">\r\n" +
+									"	<table class=\"table comment-inner-table\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
+									"		<tbody>\r\n" +
+									"			<tr>\r\n" +
+									"		    	<th>OSS Name(OSS Version) (Written before)</th>\r\n" +
+									"               <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
+									"			</tr>\r\n" +
+									"           <tr>\r\n" +
+									"                <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"                <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"           </tr>\r\n" +
+									"		</tbody>\r\n" +
+									"	</table>" +
+									"</div>";
 							
 							// partner Comment Regist
 							CommentsHistory historyBean = new CommentsHistory();
@@ -3717,18 +3721,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						
 						try {
 							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-									"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
-									"	<tbody>\r\n" +
-									"		<tr>\r\n" +
-									"		    <th>OSS Name(OSS Version) (Written before)</th>\r\n" +
-									"                    <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
-									"		</tr>\r\n" +
-									"                <tr>\r\n" +
-									"                    <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
-									"                    <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
-									"                </tr>\r\n" +
-									"	</tbody>\r\n" +
-									"</table>";
+									"<div class=\"table-responsive\">\r\n" +
+									"	<table class=\"table comment-inner-table\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
+									"		<tbody>\r\n" +
+									"			<tr>\r\n" +
+									"		    	<th>OSS Name(OSS Version) (Written before)</th>\r\n" +
+									"               <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
+									"			</tr>\r\n" +
+									"           <tr>\r\n" +
+									"                <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"                <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"           </tr>\r\n" +
+									"		</tbody>\r\n" +
+									"	</table>" +
+									"</div>";
 							
 							// Project > Identification comment regist
 							CommentsHistory historyBean = new CommentsHistory();

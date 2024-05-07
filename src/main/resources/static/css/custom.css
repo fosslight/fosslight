@@ -718,6 +718,19 @@ html .grid-sm .ui-button.ui-state-disabled:active {
     text-overflow: ellipsis;
     max-width: 100px;
 }
+.custom-layout .table-responsive .comment-inner-table {
+	font-size: .75rem !important;
+}
+
+.custom-layout .table-responsive .comment-inner-table td, .table th {
+	border:  1px solid #999 !important;
+}
+
+.custom-layout .table-responsive .comment-inner-table td {
+    max-width: 200px;
+    word-break: break-all;
+    text-align: center;
+}
 
 /* jqcloud colors */ 
 div.jqcloud { color: #800026; }
