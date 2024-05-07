@@ -381,10 +381,10 @@ public class VerificationController extends CoTopComponent {
 			
 			resMap = result.get(0);
 			
+			Map<String, Object> fileCountsMap = new HashMap<>();
+			List<String> verifyValidChkList = new ArrayList<>();
+			
 			if (fileSeqs.size() > 1){
-				Map<String, Object> fileCountsMap = new HashMap<>();
-				List<String> verifyValidChkList = new ArrayList<>();
-				
 				for (Map<String, Object> resultMap : result) {
 					if (resultMap.containsKey("fileCounts")) {
 						Map<String, Object> fileCountMap = (Map<String, Object>) resultMap.get("fileCounts");
@@ -410,12 +410,23 @@ public class VerificationController extends CoTopComponent {
 				}
 				
 				verifyValidChkList = verifyValidChkList.stream().distinct().collect(Collectors.toList());
+			} else {
+				fileCountsMap = (Map<String, Object>) resMap.get("fileCounts");
 				
-				resMap.put("verifyValid", verifyValidChkList);
-				resMap.put("fileCounts", fileCountsMap);
+				if (resMap.containsKey("verifyValid")) {
+					List<String> verifyValidList = (List<String>) resMap.get("verifyValid");
+					for (String verifyValid : verifyValidList) {
+						if (!fileCountsMap.containsKey(verifyValid)) {
+							verifyValidChkList.add(verifyValid);
+						}
+					}
+				}
 			}
 			
-			verificationService.updateVerifyFileCount((ArrayList<String>) resMap.get("verifyValid"));
+			resMap.put("verifyValid", verifyValidChkList);
+			resMap.put("fileCounts", fileCountsMap);
+			
+			verificationService.updateVerifyFileCountReset((ArrayList<String>) resMap.get("verifyValid"));
 			verificationService.updateVerifyFileCount((HashMap<String,Object>) resMap.get("fileCounts"));
 		} catch (Exception e) {
 			log.error("failed to verify project id:" + prjId, e);
