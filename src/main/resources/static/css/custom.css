@@ -705,6 +705,9 @@ html .grid-sm .ui-button.ui-state-disabled:active {
 .custom-layout.dash-board .small-box.bg-warning:hover {
   background-color: #e0a800 !important; 
 }
+.custom-layout.dash-board .small-box.bg-purple:hover {
+  background-color: #4d1f7d !important; 
+}
 .custom-layout.dash-board .dataTables_wrapper .top { display: ruby-text !important; }
 .custom-layout.dash-board .dataTables_wrapper .top .dataTables_paginate { float: right; }
 .custom-layout.dash-board .dataTables_wrapper .dataTables_filter { margin-top: .2rem }
