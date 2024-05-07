@@ -61,23 +61,17 @@
 			T1.USE_YN = 'Y'
 			AND (IFNULL(T1.DROP_YN, '') <![CDATA[<>]]> 'Y')
 			AND (IFNULL(T1.COMPLETE_YN, '') <![CDATA[<>]]> 'Y'  OR T1.STATUS_REQUEST_YN = 'Y')
-	       	 <choose>
-	            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
-				AND (
-					T1.CREATOR = #{loginUserName}
-					OR EXISTS (
-						SELECT 1
-						FROM PROJECT_WATCHER A1
-						WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
-					)
+			AND (
+				T1.CREATOR = #{loginUserName}
+				OR EXISTS (
+					SELECT 1
+					FROM PROJECT_WATCHER A1
+					WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
 				)
-	            </when>
-	            <otherwise>
-				AND (
-					T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
-				)
-	            </otherwise>
-	        </choose>
+				<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+					OR T1.REVIEWER = #{loginUserName}
+				</if>
+			)
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('Y', projectFlag) and @oss.fosslight.util.StringUtil@equals('Y', partnerFlag)">
 			UNION ALL	
@@ -102,47 +96,28 @@
 				T1.USE_YN = 'Y'
 				AND T1.STATUS <![CDATA[<>]]> 'CONF'
 		</if>
-		<choose>
-            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 			AND (
 				T1.CREATOR = #{loginUserName}
 				OR EXISTS (
 					SELECT 1 
 					FROM PARTNER_WATCHER A1
-						<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
 					WHERE A1.PARTNER_ID = T1.PARTNER_ID AND A1.USER_ID = #{loginUserName}
 				)
+				<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+					OR T1.REVIEWER = #{loginUserName}
+				</if>
 			)
-            </when>
-            <otherwise>
-			AND (
-				T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
-			)
-            </otherwise>
-        </choose>
 		) RESULT
 		WHERE 1 = 1
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
-					AND (
-						T1.CREATOR = #{loginUserName} 
-						OR EXISTS (
-						SELECT 1
-						  FROM PROJECT_WATCHER A1
-					     WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
-						)
-					)
-				</if>
-			</if>
-					AND RESULT.STATUS IN ('PROG', 'REV', 'FREV')
-			<choose>
-				<when test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
-					ORDER BY CASE WHEN STATUS = #{status} THEN 0 ELSE 1 END, MODIFIED_DATE DESC
-				</when>
-				<otherwise> 
-					ORDER BY MODIFIED_DATE DESC
-				</otherwise>
-			</choose>
+		AND RESULT.STATUS IN ('PROG', 'REV', 'FREV')
+		<choose>
+			<when test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+				ORDER BY CASE WHEN RESULT.STATUS = #{status} THEN 0 ELSE 1 END, RESULT.MODIFIED_DATE DESC
+			</when>
+			<otherwise> 
+				ORDER BY RESULT.MODIFIED_DATE DESC
+			</otherwise>
+		</choose>
     </select>
     
     <select id="selectDashboardJobsTotalCount" parameterType="hashMap" resultType="int">
@@ -157,24 +132,17 @@
 				T1.USE_YN = 'Y'
 				AND (IFNULL(T1.DROP_YN, '') <![CDATA[<>]]> 'Y')
 				AND (IFNULL(T1.COMPLETE_YN, '') <![CDATA[<>]]> 'Y' OR T1.STATUS_REQUEST_YN = 'Y')
-		       	 <choose>
-		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
-					AND (
-						T1.CREATOR = #{loginUserName}
-						OR EXISTS (
-							SELECT 1 
-							FROM PROJECT_WATCHER A1
-								<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
-							WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
-						)
+		       	AND (
+					T1.CREATOR = #{loginUserName}
+					OR EXISTS (
+						SELECT 1 
+						FROM PROJECT_WATCHER A1
+						WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
 					)
-		            </when>
-		            <otherwise>
-					AND (
-						T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
-					)
-		            </otherwise>
-		        </choose>
+				<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+					OR T1.REVIEWER = #{loginUserName}
+				</if>
+				)
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('Y', projectFlag) and @oss.fosslight.util.StringUtil@equals('Y', partnerFlag)">
 			UNION ALL
@@ -188,24 +156,17 @@
 			WHERE
 				T1.USE_YN = 'Y'
 				AND T1.STATUS <![CDATA[<>]]> 'CONF'
-		       	 <choose>
-		            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
-					AND (
-						T1.CREATOR = #{loginUserName}
-						OR EXISTS (
-							SELECT 1 
-							FROM PARTNER_WATCHER A1
-								<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
-							WHERE A1.PARTNER_ID = T1.PARTNER_ID AND A1.USER_ID = #{loginUserName}
-						)
+		       	AND (
+					T1.CREATOR = #{loginUserName}
+					OR EXISTS (
+						SELECT 1 
+						FROM PARTNER_WATCHER A1
+						WHERE A1.PARTNER_ID = T1.PARTNER_ID AND A1.USER_ID = #{loginUserName}
 					)
-		            </when>
-		            <otherwise>
-					AND (
-						T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
-					)
-		            </otherwise>
-		        </choose>
+				<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+					OR T1.REVIEWER = #{loginUserName}
+				</if>
+				)
 		</if>
 		) RESULT
 		WHERE 1 = 1
@@ -646,23 +607,17 @@
 			WHERE T1.USE_YN = 'Y'
 			AND (IFNULL(T1.DROP_YN, '') <![CDATA[<>]]> 'Y')
 			AND (IFNULL(T1.COMPLETE_YN, '') <![CDATA[<>]]> 'Y'  OR T1.STATUS_REQUEST_YN = 'Y')
-	       	 <choose>
-	            <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
-				AND (
-					T1.CREATOR = #{loginUserName}
-					OR EXISTS (
-						SELECT 1
-						FROM PROJECT_WATCHER A1
-						WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
-					)
+			AND (
+				T1.CREATOR = #{loginUserName}
+				OR EXISTS (
+					SELECT 1
+					FROM PROJECT_WATCHER A1
+					WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
 				)
-	            </when>
-	            <otherwise>
-				AND (
-					T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
-				)
-	            </otherwise>
-	        </choose>
+			<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+				OR T1.REVIEWER = #{loginUserName}
+			</if>
+			)
 	        </if>
 	        <if test="@oss.fosslight.util.StringUtil@equals('Y', projectFlag) and @oss.fosslight.util.StringUtil@equals('Y', partnerFlag)">
 				UNION ALL	
@@ -675,39 +630,20 @@
 				WHERE
 					T1.USE_YN = 'Y'
 					AND T1.STATUS <![CDATA[<>]]> 'CONF'
-			</if>
-			<choose>
-	           <when test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 					AND (
 						T1.CREATOR = #{loginUserName}
 						OR EXISTS (
 							SELECT 1 
 							FROM PARTNER_WATCHER A1
-								<!-- INNER JOIN T2_USERS A2 ON A1.DIVISION = A2.DIVISION AND A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName} -->
 							WHERE A1.PARTNER_ID = T1.PARTNER_ID AND A1.USER_ID = #{loginUserName}
 						)
+					<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+						OR T1.REVIEWER = #{loginUserName}
+					</if>
 					)
-	           </when>
-	           <otherwise>
-					AND (
-						T1.REVIEWER = #{loginUserName} OR IFNULL(T1.REVIEWER, '') = ''
-					)
-	           </otherwise>
-	       </choose>
-				) RESULT
-				WHERE 1 = 1
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
-					AND (
-						T1.CREATOR = #{loginUserName} 
-						OR EXISTS (
-						SELECT 1
-						  FROM PROJECT_WATCHER A1
-					     WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
-						)
-					)
-				</if>
 			</if>
+			) RESULT
+			WHERE 1 = 1
 			AND RESULT.STATUS IN ('PROG', 'REV', 'FREV')
 			GROUP BY RESULT.STATUS
 	</select>
