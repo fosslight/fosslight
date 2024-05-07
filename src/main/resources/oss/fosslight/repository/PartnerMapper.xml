@@ -22,6 +22,21 @@
 				LEFT JOIN OSS_COMPONENTS_LICENSE t5  ON t4.COMPONENT_ID = t5.COMPONENT_ID
 	   		WHERE
 				t1.USE_YN = 'Y'
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
+					AND (
+						t1.CREATOR = #{loginUserName}	
+						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+							OR t1.REVIEWER = #{loginUserName}	
+						</if>
+							OR EXISTS (
+							SELECT 1
+							  FROM PARTNER_WATCHER A1
+						     WHERE A1.PARTNER_ID = t1.PARTNER_ID 
+						     AND A1.USER_ID = #{loginUserName}
+						     OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}))
+							)
+						)
+				</if>
 <!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 					AND (t1.CREATOR = #{loginUserName} 
 						OR EXISTS (
@@ -170,6 +185,21 @@
 				  LEFT JOIN T2_FILE t10 ON t10.FILE_SEQ = t1.BINARY_FILE_ID
 			   ) A		
 		 WHERE A.USE_YN = 'Y'
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
+			AND (
+				A.CREATOR_ID = #{loginUserName}	
+				<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+					OR A.REVIEWER = #{loginUserName}	
+				</if>
+					OR EXISTS (
+					SELECT 1
+					  FROM PARTNER_WATCHER A1
+				     WHERE A1.PARTNER_ID = A.PARTNER_ID 
+				     AND A1.USER_ID = #{loginUserName}
+				     OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}))
+					)
+				)
+		</if>
 <!-- 	<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 			AND (A.CREATOR_ID = #{loginUserName} 
 					OR EXISTS (

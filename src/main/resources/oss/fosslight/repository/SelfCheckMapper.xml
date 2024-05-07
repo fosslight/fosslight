@@ -97,18 +97,22 @@
 					)
 				)
 			</if> -->
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)"> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
-						T1.CREATOR = #{loginUserName} 
+						T1.CREATOR = #{loginUserName}	
+						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+							OR T1.REVIEWER = #{loginUserName}	
+						</if>
 						OR EXISTS (
 						SELECT 1
 						  FROM PRE_PROJECT_WATCHER A1
-					     WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
+					     INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+					     WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName})))
 						)
 					)
 				</if>
-			</if>
+<!-- 			</if> -->
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
 			</if>
@@ -187,18 +191,22 @@
 					)
 				)
 			</if> -->
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)"> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
-						T1.CREATOR = #{loginUserName} 
+						T1.CREATOR = #{loginUserName}	
+						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+							OR T1.REVIEWER = #{loginUserName}	
+						</if>
 						OR EXISTS (
 						SELECT 1
 						  FROM PRE_PROJECT_WATCHER A1
-					     WHERE A1.PRJ_ID = T1.PRJ_ID AND A1.USER_ID = #{loginUserName}
+					     INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{loginUserName}
+					     WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{loginUserName} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName})))
 						)
 					)
 				</if>
-			</if>
+<!-- 			</if> -->
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
 			</if>
