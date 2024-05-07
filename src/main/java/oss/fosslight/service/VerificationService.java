@@ -72,7 +72,7 @@ public interface VerificationService {
 	
 	void updateVerifyFileCount(HashMap<String,Object> fileCounts);
 	
-	void updateVerifyFileCount(ArrayList<String> fileCounts);
+	void updateVerifyFileCountReset(ArrayList<String> fileCounts);
 	
 	boolean getChangedPackageFile(String prjId, List<String> fileSeqs);
 	

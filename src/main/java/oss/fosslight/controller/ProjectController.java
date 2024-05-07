@@ -1574,7 +1574,7 @@ public class ProjectController extends CoTopComponent {
 						resMap.put("fileCounts", verifyResult.get(verifyResult.size()-1).get("fileCounts"));
 					}
 					
-					verificationService.updateVerifyFileCount((ArrayList<String>) resMap.get("verifyValid"));
+					verificationService.updateVerifyFileCountReset((ArrayList<String>) resMap.get("verifyValid"));
 					verificationService.updateVerifyFileCount((HashMap<String,Object>) resMap.get("fileCounts"));
 				} catch(Exception e) {
 					log.error(e.getMessage(), e);

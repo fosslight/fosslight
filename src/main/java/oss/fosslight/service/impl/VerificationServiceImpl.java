@@ -1232,7 +1232,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 	
 	@Override
-	public void updateVerifyFileCount(ArrayList<String> fileCounts) {
+	public void updateVerifyFileCountReset(ArrayList<String> fileCounts) {
 		for (String componentId : fileCounts){
 			OssComponents param = new OssComponents();
 			param.setComponentId(componentId);
