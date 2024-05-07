@@ -100,10 +100,7 @@
 <!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)"> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
-						T1.CREATOR = #{loginUserName}	
-						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
-							OR T1.REVIEWER = #{loginUserName}	
-						</if>
+						T1.CREATOR = #{loginUserName}
 						OR EXISTS (
 						SELECT 1
 						  FROM PRE_PROJECT_WATCHER A1
@@ -195,9 +192,6 @@
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
 						T1.CREATOR = #{loginUserName}	
-						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
-							OR T1.REVIEWER = #{loginUserName}	
-						</if>
 						OR EXISTS (
 						SELECT 1
 						  FROM PRE_PROJECT_WATCHER A1
