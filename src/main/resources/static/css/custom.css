@@ -722,7 +722,7 @@ html .grid-sm .ui-button.ui-state-disabled:active {
 	font-size: .75rem !important;
 }
 
-.table-responsive .comment-inner-table td, .table th {
+.table-responsive .comment-inner-table td, .table-responsive .comment-inner-table th {
 	border:  1px solid #999 !important;
 }
 
