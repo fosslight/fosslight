@@ -136,10 +136,10 @@
 										</tr>
 										<tr>
 											<th align="left" style="padding:5px;background:#f0f0f0;">OSS Package</th>
-											<td th:if="${distribution_info.packageFileId != '' || distribution_info.packageFileId2 != '' || distribution_info.packageFileId3 != ''}" style="padding:5px;">
-												<p th:utext="${distribution_info.packageFileId}" style="margin:0"></p>
-												<p th:utext="${distribution_info.packageFileId2}" style="margin:0"></p>
-												<p th:utext="${distribution_info.packageFileId3}" style="margin:0"></p>
+											<td style="padding:5px;">
+												<p th:if="${distribution_info.packageFileId != null && distribution_info.packageFileId != ''}" th:utext="${distribution_info.packageFileId}" style="margin:0"></p>
+												<p th:if="${distribution_info.packageFileId2 != null && distribution_info.packageFileId2 != ''}" th:utext="${distribution_info.packageFileId2}" style="margin:0"></p>
+												<p th:if="${distribution_info.packageFileId3 != null && distribution_info.packageFileId3 != ''}" th:utext="${distribution_info.packageFileId3}" style="margin:0"></p>
 											</td>
 										</tr>
 									</table>
