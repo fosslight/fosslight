@@ -64,7 +64,7 @@ public class OssAnalysis extends ComBean implements Serializable {
 	private String ossId;
 
 	public String getHomepage() {
-		return homepage;
+		return avoidNull(homepage);
 	}
 
 	public void setHomepage(String homepage) {
@@ -72,7 +72,7 @@ public class OssAnalysis extends ComBean implements Serializable {
 	}
 
 	public String getDownloadLocation() {
-		return downloadLocation;
+		return avoidNull(downloadLocation);
 	}
 
 	public void setDownloadLocation(String downloadLocation) {
