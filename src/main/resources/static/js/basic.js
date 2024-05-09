@@ -3382,6 +3382,28 @@ function callAutoCompleteFnc(value) {
 		} else {
 			autoCompleteTags = autoComplete.projectIdConfTags;
 		}
+	} else if ("autoComCreatorDivision" == value) {
+		if (autoComplete.creatorDivisionTag.length == 0) {
+			commonAjax.getCreatorDivisionTags().success(function (data, status, headers, config) {
+                if (data != null) {
+                    var tag = "";
+                    data.forEach(function (obj) {
+                        if (obj != null) {
+                            tag = {
+                                value: obj.userName,
+                                label: obj.userName,
+                                division: obj.division,
+                                id: obj.userId
+                            }
+
+                            autoCompleteTags.push(tag);
+                        }
+                    });
+                }
+            });
+		} else {
+			autoCompleteTags = autoComplete.creatorDivisionTag;
+		}
 	}
 	
 	$(target).autocomplete({
