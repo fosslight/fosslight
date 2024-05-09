@@ -799,6 +799,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			case "BINARY NAME OR SOURCE PATH" :
 				warningMsgCode = "(B) ";
 				break;
+			case "BINARYNOTICE":
+				warningMsgCode = "(N) ";
+				break;
 			default :
 				break;
 		}
