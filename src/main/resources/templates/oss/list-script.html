@@ -93,7 +93,7 @@
                 		var multiSelect = ["ossTypeSearch"];
                 		var textarea = ["copyrights", "summaryDescription"];
                 		
-                		for (key in localStorageSearchConditions) {
+                		Object.keys(localStorageSearchConditions).forEach(function(key) {
                 			if (input.includes(key)) {
                 				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
                 				if ("cStartDate" == key) {
@@ -119,7 +119,7 @@
                 			} else if (textarea.includes(key)) {
                 				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
                 			}
-                		}
+                		});
                 	}
                 } else {
                 	cStartDate = [[${searchBean.cStartDate}]];

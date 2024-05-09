@@ -90,7 +90,7 @@ var evt = {
         	} else {
         		var input = ["prjName", "publicYn", "prjId", "ossName", "schStartDate", "schEndDate", "licenseName", "creator"];
         		
-        		for (key in localStorageSearchConditions) {
+        		Object.keys(localStorageSearchConditions).forEach(function(key) {
         			if (input.includes(key)) {
         				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
         				if ("schStartDate" == key) {
@@ -103,7 +103,7 @@ var evt = {
         					}
         				}
         			}
-        		}
+        		});
         	}
 		} else {
 			startDate = String([[${searchBean?.schStartDate}]]);
