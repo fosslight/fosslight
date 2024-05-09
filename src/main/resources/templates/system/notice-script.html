@@ -245,6 +245,7 @@ var noticeList = {
 			, rowList: rowList
 			, autowidth: true
 			, pager: '#pager'
+			, toppager: true
 			, gridview: true
 			, sortable: function (permutation) {}
 			, sortname: 'seq'
@@ -256,7 +257,7 @@ var noticeList = {
 			, loadComplete: function(data) {}
 		});
 		
-        $("#list").jqGrid('navGrid', "#pager", {edit:true, add:true, del:true, search:false, refresh:false}, updateDialogEdit, updateDialogAdd, updateDialogDel);
+        $("#list").jqGrid('navGrid', "#list_toppager", {edit:true, add:true, del:true, search:false, refresh:false}, updateDialogEdit, updateDialogAdd, updateDialogDel);
 	}		
 };
 </script>

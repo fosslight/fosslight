@@ -130,6 +130,7 @@
 				, rowList: rowList
   				, autowidth: true
 				, pager: '#pager'
+				, toppager: true
 				, gridview: true
 				, sortable: function (permutation) {}
 				, sortname: 'id'
@@ -141,7 +142,7 @@
 				, loadComplete: function(data) {}
 			});
 			
-            $("#list").jqGrid('navGrid', "#pager", {edit:true, add:false, del:false, search:false, refresh:false}, updateDialogEdit);
+            $("#list").jqGrid('navGrid', "#list_toppager", {edit:true, add:false, del:false, search:false, refresh:false}, updateDialogEdit);
 		}		
 	};
 </script>

@@ -50,7 +50,9 @@
                 /* created date & modified date event */
                 let cStartDate = [[${searchBean.cStartDate}]];
                 let cEndDate = [[${searchBean.cEndDate}]];
-
+                let mStartDate = [[${searchBean.mStartDate}]];
+                let mEndDate = [[${searchBean.mEndDate}]];
+                
                 $("#createdDate").daterangepicker({
                     autoUpdateInput: false
                 }).on('apply.daterangepicker', function (ev, picker) {
@@ -65,17 +67,6 @@
                     $('#createdDate').attr('placeholder', 'Created Date');
                	});
 
-                if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
-                	var cStartDateFormat = cStartDate.substr(4,2) + "/" + cStartDate.substr(6,2) + "/" + cStartDate.substr(0,4);
-                	var cEndDateFormat = cEndDate.substr(4,2) + "/" + cEndDate.substr(6,2) + "/" + cEndDate.substr(0,4);
-                    $('#createdDate').val(cStartDateFormat + ' - ' + cEndDateFormat);
-                } else {
-                    $('#createdDate').attr('placeholder', 'Created Date');
-                }
-
-                let mStartDate = [[${searchBean.mStartDate}]];
-                let mEndDate = [[${searchBean.mEndDate}]];
-
                 $("#modifiedDate").daterangepicker({
                     autoUpdateInput: false
                 }).on('apply.daterangepicker', function (ev, picker) {
@@ -89,6 +80,61 @@
                     $("input[name='mEndDate']").val("");
                     $('#modifiedDate').attr('placeholder', 'Modified Date');
                	});
+                
+                if (typeof localStorage.ossSearchConditions !== "undefined") {
+                	var localStorageSearchConditions = JSON.parse(localStorage.ossSearchConditions);
+                	
+                	if (Date.now() > localStorageSearchConditions.expire) {
+                		localStorage.removeItem("ossSearchConditions");
+                	} else {
+                		var input = ["ossName", "licenseName", "homepage", "cvssScore", "cStartDate", "cEndDate", "mStartDate", "mEndDate"];
+                		var checkbox = ["ossNameAllSearchFlag", "licenseNameAllSearchFlag", "homepageAllSearchFlag", "deactivateFlag"];
+                		var singleSelect = ["creator", "modifier", "licenseType"];
+                		var multiSelect = ["ossTypeSearch"];
+                		var textarea = ["copyrights", "summaryDescription"];
+                		
+                		for (key in localStorageSearchConditions) {
+                			if (input.includes(key)) {
+                				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+                				if ("cStartDate" == key) {
+                					cStartDate = localStorageSearchConditions[key];
+                				} else if ("cEndDate" == key) {
+                					cEndDate = localStorageSearchConditions[key];
+                				} else if ("mStartDate" == key) {
+                					mStartDate = localStorageSearchConditions[key];
+                				} else if ("mEndDate" == key) {
+                					mEndDate = localStorageSearchConditions[key];
+                				}
+                			} else if (checkbox.includes(key)) {
+                				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+                				if ("Y" == localStorageSearchConditions[key]) $("#" + key).prop("checked", true);
+                			} else if (singleSelect.includes(key)) {
+                				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+                			} else if (multiSelect.includes(key)) {
+                				var ossType = localStorageSearchConditions[key];
+                				if ("" != ossType) {
+                					ossType = ossType.split("");
+                					$("select[name='"+key+"']").val(ossType).trigger('change');
+                				}
+                			} else if (textarea.includes(key)) {
+                				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+                			}
+                		}
+                	}
+                } else {
+                	cStartDate = [[${searchBean.cStartDate}]];
+                    cEndDate = [[${searchBean.cEndDate}]];
+                    mStartDate = [[${searchBean.mStartDate}]];
+                    mEndDate = [[${searchBean.mEndDate}]];
+                }
+                
+                if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
+                	var cStartDateFormat = cStartDate.substr(4,2) + "/" + cStartDate.substr(6,2) + "/" + cStartDate.substr(0,4);
+                	var cEndDateFormat = cEndDate.substr(4,2) + "/" + cEndDate.substr(6,2) + "/" + cEndDate.substr(0,4);
+                    $('#createdDate').val(cStartDateFormat + ' - ' + cEndDateFormat);
+                } else {
+                    $('#createdDate').attr('placeholder', 'Created Date');
+                }
                 
                 if ((mStartDate != null && "" != mStartDate) && (mEndDate != null && "" != mEndDate)) {
                 	var mStartDateFormat = mStartDate.substr(4,2) + "/" + mStartDate.substr(6,2) + "/" + mStartDate.substr(0,4);
@@ -125,6 +171,11 @@
 
                     const postData = oss_lst_fn.serializeObjectHelper();
                     postData.ignoreSearchFlag = "N";
+                    
+                    var localStorageData = oss_lst_fn.serializeObjectHelper();
+                    localStorageData.expire = Date.now() + 300000;
+                    localStorage.setItem("ossSearchConditions", JSON.stringify(localStorageData));                    
+                    
                     $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
                 });
 
@@ -132,20 +183,20 @@
                     calValidation(this, e);
                 });
 
-                $("#ossNameAllSearchFlag").on("change", function (e) {
-                    $("[name='ossNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                $("#ossNameAllSearchFlag").on("click", function (e) {
+                    $("input[name='ossNameAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
                 });
 
-                $("#licenseNameAllSearchFlag").on("change", function (e) {
-                    $("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                $("#licenseNameAllSearchFlag").on("click", function (e) {
+                    $("input[name='licenseNameAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
                 });
 
-                $("#homepageAllSearchFlag").on("change", function (e) {
-                    $("[name='homepageAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                $("#homepageAllSearchFlag").on("click", function (e) {
+                    $("input[name='homepageAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
                 });
 
-                $("#deactivateFlag").on("change", function () {
-                    $("[name='deactivateFlag']").val($(this).prop("checked") ? "Y" : "N");
+                $("#deactivateFlag").on("click", function () {
+                    $("input[name='deactivateFlag']").val($(this).is(":checked") ? "Y" : "N");
                 });
 
                 $("#cvssScoreInput").on("input", function () {
@@ -194,14 +245,14 @@
         const oss_lst_fn = {
             serializeObjectHelper: function () {
                 var postData = $('#ossSearch').serializeObject();
-
+                
                 if (postData.ossTypeSearch != null) {
                     postData.ossTypeSearch = JSON.stringify(postData.ossTypeSearch);
                     postData.ossTypeSearch = postData.ossTypeSearch.replace(/\"|\[|\]|\,/gi, "");
                 } else {
                     postData.ossTypeSearch = "";
                 }
-
+				
                 return postData;
             },
             deleteOss: function () {

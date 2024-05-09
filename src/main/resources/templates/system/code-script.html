@@ -412,6 +412,7 @@ var codeList = {
 				, rowList: rowList
 				, autowidth: true
 				, pager: '#pager'
+				, toppager: true
 				, gridview: true
 				, sortable: function (permutation) {
 				}
@@ -448,7 +449,7 @@ var codeList = {
 					codeList.lastEditRowId = rowid;
 				}
 			});
-            $("#list").jqGrid('navGrid',"#pager",{edit:true,add:true,del:true,search:false,refresh:false},updateDialogEdit, updateDialogAdd,updateDialogDel);
+            $("#list").jqGrid('navGrid',"#list_toppager",{edit:true,add:true,del:true,search:false,refresh:false},updateDialogEdit, updateDialogAdd,updateDialogDel);
 		}
 };
 

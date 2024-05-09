@@ -473,9 +473,9 @@ var evt = {
 			}
 			
 			var _email = adId + "@" + domain;
-			var regEmail = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+			var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
 
-			if (!regEmail.test(_email)) {
+			if (regEmail.test(_email) == false) {
 				$("#adId").focus();
 				return alertify.error([[#{invalid.email.error}]], 0);
 			}

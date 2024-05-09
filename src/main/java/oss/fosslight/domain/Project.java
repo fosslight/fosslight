@@ -29,9 +29,9 @@ public class Project extends ComBean implements Serializable {
 				+ ", completeYn=" + completeYn + ", reviewer=" + reviewer + ", useYn=" + useYn + ", prjIds="
 				+ Arrays.toString(prjIds) + ", category=" + category + ", subcategory=" + subcategory + ", modelName="
 				+ modelName + ", releaseDate=" + releaseDate + ", prjDivision=" + prjDivision + ", prjDivisionName="
-				+ prjDivisionName + ", prjUserId=" + prjUserId + ", prjUserName=" + prjUserName + ", watchers="
-				+ Arrays.toString(watchers) + ", watcherList=" + watcherList + ", modelList=" + modelList + ", copy="
-				+ copy + ", oldId=" + oldId + ", lastModifiedTime=" + lastModifiedTime + ", distributeTarget="
+				+ prjDivisionName + ", prjUserId=" + prjUserId + ", prjUserName=" + prjUserName + ", prjEmail=" + prjEmail 
+				+ ", watchers=" + Arrays.toString(watchers) + ", watcherList=" + watcherList + ", modelList=" + modelList 
+				+ ", copy=" + copy + ", oldId=" + oldId + ", lastModifiedTime=" + lastModifiedTime + ", distributeTarget="
 				+ distributeTarget + ", destributionStatus=" + destributionStatus + ", distributeMasterCategory="
 				+ distributeMasterCategory + ", distributeName=" + distributeName + ", distributeSoftwareType="
 				+ distributeSoftwareType + ", distributeDeployYn=" + distributeDeployYn + ", distributeDeployTime="
