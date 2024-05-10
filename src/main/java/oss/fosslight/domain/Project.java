@@ -426,6 +426,10 @@ public class Project extends ComBean implements Serializable {
 	private String packageFileId3; // 오픈소스 파일ID
 	private String packageVulDocFileId;
 	
+	private String packageFileType1; // 오픈소스 파일type
+	private String packageFileType2; // 오픈소스 파일type
+	private String packageFileType3; // 오픈소스 파일type
+	
 	/** The notice file. */
 	private List<T2File> noticeFile; // 라이센스 파일객체
 
@@ -4477,5 +4481,29 @@ public class Project extends ComBean implements Serializable {
 
 	public void setReuseRefPrjId3(String reuseRefPrjId3) {
 		this.reuseRefPrjId3 = reuseRefPrjId3;
+	}
+	
+	public String getPackageFileType1() {
+		return packageFileType1;
+	}
+
+	public void setPackageFileType1(String packageFileType1) {
+		this.packageFileType1 = packageFileType1;
+	}
+
+	public String getPackageFileType2() {
+		return packageFileType2;
+	}
+
+	public void setPackageFileType2(String packageFileType2) {
+		this.packageFileType2 = packageFileType2;
+	}
+
+	public String getPackageFileType3() {
+		return packageFileType3;
+	}
+
+	public void setPackageFileType3(String packageFileType3) {
+		this.packageFileType3 = packageFileType3;
 	}
 }

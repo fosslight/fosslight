@@ -145,6 +145,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 			List<String> gridFilePaths =	(List<String>)map.get("gridFilePaths");
 			List<String> fileSeqs =	(List<String>) map.get("fileSeqs");
+			List<String> fileTypeSeqs =	(List<String>) map.get("fileTypeSeqs");
 			String prjId = (String) map.get("prjId");
 			String deleteFlag = (String) map.get("deleteFlag");
 			String verifyFlag = (String) map.get("statusVerifyYn");
@@ -181,6 +182,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				prjParam.setPackageFileId(newPackagingFileIdList.get(0));
 				prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
 				prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
+				
+				ArrayList<String> newPackagingFileTypeList = new ArrayList<String>();
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 0 ? fileTypeSeqs.get(0) : null);
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 1 ? fileTypeSeqs.get(1) : null);
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 2 ? fileTypeSeqs.get(2) : null);
+				prjParam.setPackageFileType1(newPackagingFileTypeList.get(0));
+				prjParam.setPackageFileType2(newPackagingFileTypeList.get(1));
+				prjParam.setPackageFileType3(newPackagingFileTypeList.get(2));
 				
 				if (deleteFiles.equals(CoConstDef.FLAG_YES)){
 					prjParam.setStatusVerifyYn(CoConstDef.FLAG_NO);
