@@ -3700,6 +3700,8 @@ function adjustPageGridSize() {
 }
 
 function optimizeGridSizeAdjustmentPage() {
+	
+	// 1. Adjust the width of main-sized grids
 	const jqgridMinSetWidth = 150;
 	let jqGridSetElement = $('.custom-layout .jqGridSet');
 	let jqgridSetWidth = jqGridSetElement.width();
@@ -3715,10 +3717,11 @@ function optimizeGridSizeAdjustmentPage() {
 	if(jqgridSetWidth < jqgridMinSetWidth) {
 		return false;
 	}
-
 	$("#" + jqGridSetElementId).jqGrid('setGridWidth', jqgridSetWidth);
 	
-	 const topperContent = $(".topper-content");
+	
+	// 2. Adjust the height of the element corresponding to 'topper-content' if it is defined
+	const topperContent = $(".topper-content");
     if (topperContent.length > 0) {
 		const defaultHeight = 500;
         const windowHeight = $(window).height();
@@ -3733,6 +3736,30 @@ function optimizeGridSizeAdjustmentPage() {
 		} else if ($("#" + jqGridSetElementId).height() > gridMaxHeight) {
             gridElement.css({"height": gridMaxHeight + "px"});
         } 
+    }
+    
+    // 2. Adjust the width of inner gird if it exists -> size of the inner grid is x 0.6 that of the tab-pane (verification.html)
+     let innerJqgirdSetElement = $(".tab-pane.active .card-body");
+     if (innerJqgirdSetElement.length > 0) {
+        let innerJqgirdSetWidth = innerJqgirdSetElement.width()*0.6;
+		console.log(innerJqgirdSetWidth);
+		
+        let innerJqGridsIds = [];
+        innerJqgirdSetElement.find('table').each(function() {
+            innerJqGridsIds.push($(this).attr("id"));
+        });
+
+        if (innerJqGridsIds.length == 0) {
+            innerJqgirdSetElement.find('table').each(function() {
+                innerJqGridsIds.push($(this).find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1]);
+            });
+        }
+
+        if (innerJqGridsIds.length > 0) {
+            innerJqGridsIds.forEach(function(ids) {
+                $("#" + ids).jqGrid('setGridWidth', innerJqgirdSetWidth);
+            });
+        }
     }
 }
 
@@ -3788,7 +3815,7 @@ function optimizeGridSizeAdjustmentMultiPage() {
         const currentHeight = gridElement.height();
         
         if(gridMaxHeight < defaultHeight) { 
-			gridElement.css({"gridMinHeight": defaultHeight + "px"});
+			gridElement.css({"height": defaultHeight + "px"});
 		} else if ($("#" + jqGridSetElementId).height() > gridMaxHeight) {
             gridElement.css({"height": gridMaxHeight + "px"});
         } 
