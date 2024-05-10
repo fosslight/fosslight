@@ -67,6 +67,8 @@ html { height: auto !important;}
 .custom-layout .icon-light-gray:hover { color: #595959; }
 .custom-layout .icon-blue { color: #507cff;}
 .custom-layout .icon-blue:hover { color: #0e1b40; }
+.custom-layout .icon-green { color: #28a745; }
+.custom-layout .icon-green:hover { color: #1e7e34 ; } 
 
 .custom-layout .dropdown-item { font-size: .9rem; }
 .custom-layout .dropdown-item:disabled { color: #c1c8cd !important; }
@@ -145,6 +147,7 @@ html { height: auto !important;}
 .custom-layout .bg-timber-wolf { background-color: #dbd7d23b; }
 .custom-layout .bg-light-black { background-color: #343a4021; }
 .custom-layout .bg-ivory { background-color: #f5f4f3; }
+.custom-layout .bg-light-red { background-color: #ffd6d6; color: #dc3545 }
 .custom-layout .bg-light-gray { background-color: #999; }
 .custom-layout .bg-grayish-blue { background-color: #6c757d; }
 .custom-layout .bg-blue-gray { background-color: #596d82; }
