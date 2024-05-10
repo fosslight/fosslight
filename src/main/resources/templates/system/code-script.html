@@ -483,6 +483,7 @@ var codeDetailList = {
 				autoencode: true,
 					autowidth: true,
 				pager: '#pager2',
+				toppager: true,
 	   			rowNum: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_MAX')}]],
 				gridview: true,
 				sortable: function (permutation) {
@@ -508,7 +509,7 @@ var codeDetailList = {
                 }
 			});
 			
-			$("#list2").jqGrid('navGrid',"#pager2",{edit:false,add:true,del:false,search:false,refresh:false,addtext:'Add Detail'
+			$("#list2").jqGrid('navGrid',"#list2_toppager",{edit:false,add:true,del:false,search:false,refresh:false,addtext:'Add Detail'
 				, addfunc: function (rowid) {
 					fn.addRow('codeDtl');
 				}
