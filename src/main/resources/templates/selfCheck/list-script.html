@@ -38,13 +38,6 @@ var gridTooltip = {
 //OSS 쪽에서 프로젝트 검색을 위한 데이터
 var evt = {
 	init : function(){
-		refreshParam = $('#projectSearch').serializeObject();
-		if($('#checkbox3').is(':checked')) {
-			refreshParam.publicYn = 'N';
-		} else {
-			refreshParam.publicYn = 'Y';
-		}
-		
 		$('select[name=distributionType]').val('${searchBean.distributionType}').trigger('change');
 		$('select[name=prjDivision]').val('${searchBean.prjDivision}').trigger('change');
 		
@@ -54,24 +47,28 @@ var evt = {
 			var exPostdata = $("#list").jqGrid('getGridParam','postData');
 			exPostdata.ossId = ''; 
 			var postData=$('#projectSearch').serializeObject();
-			if($('#checkbox3').is(':checked')) {
+			if ($('#checkbox3').is(':checked')) {
 				postData.publicYn = 'N';
 			} else {
 				postData.publicYn = 'Y';
 			}
+			
+			var localStorageData=$('#projectSearch').serializeObject();
+			if ($('#checkbox3').is(':checked')) {
+				localStorageData.publicYn = 'N';
+			} else {
+				localStorageData.publicYn = 'Y';
+			}
+			localStorageData.expire = Date.now() + 300000;
+            localStorage.setItem("selfCheckSearchConditions", JSON.stringify(localStorageData));
+			
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 		});
 
-        var startDate = String([[${searchBean?.schStartDate}]]);
-        var endDate = String([[${searchBean?.schEndDate}]]);
+        var startDate;
+        var endDate;
 
-        if (startDate && startDate != 'null' && endDate && endDate != 'null') {
-            var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
-            var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
-            $("#schDateRange").val(formattedStartDate + ' - ' + formattedEndDate);
-        }
-		
-		$("#schDateRange").daterangepicker({
+        $("#schDateRange").daterangepicker({
             autoUpdateInput: false
         }).on('apply.daterangepicker', function(ev, picker) {
 		    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
@@ -84,6 +81,47 @@ var evt = {
 		    $("input[name='schEndDate']").val("");
 		    $('#schDateRange').attr('placeholder', 'Created Date');
 		});
+		
+		if (typeof localStorage.selfCheckSearchConditions !== "undefined") {
+        	var localStorageSearchConditions = JSON.parse(localStorage.selfCheckSearchConditions);
+        	
+        	if (Date.now() > localStorageSearchConditions.expire) {
+        		localStorage.removeItem("selfCheckSearchConditions");
+        	} else {
+        		var input = ["prjName", "publicYn", "prjId", "ossName", "schStartDate", "schEndDate", "licenseName", "creator"];
+        		
+        		Object.keys(localStorageSearchConditions).forEach(function(key) {
+        			if (input.includes(key)) {
+        				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+        				if ("schStartDate" == key) {
+        					startDate = localStorageSearchConditions[key];
+        				} else if ("schEndDate" == key) {
+        					endDate = localStorageSearchConditions[key];
+        				} else if ("publicYn" == key) {
+        					if ("" == localStorageSearchConditions[key] || "N" == localStorageSearchConditions[key]) {
+        						$("#checkbox3").prop("checked", true);
+        					}
+        				}
+        			}
+        		});
+        	}
+		} else {
+			startDate = String([[${searchBean?.schStartDate}]]);
+			endDate = String([[${searchBean?.schEndDate}]]);
+		}
+		
+		if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+            var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            $("#schDateRange").val(formattedStartDate + ' - ' + formattedEndDate);
+        }
+		
+		refreshParam = $('#projectSearch').serializeObject();
+		if($('#checkbox3').is(':checked')) {
+			refreshParam.publicYn = 'N';
+		} else {
+			refreshParam.publicYn = 'Y';
+		}
 	}
 }
 

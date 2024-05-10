@@ -118,6 +118,7 @@ var binaryDataHistoryList = {
 				, rowList: rowList
 				, autowidth: true
 				, pager: '#pager'
+				, toppager: true
 				, gridview: true
 				, sortable: function (permutation) {}
 				, sortname: 'actionId'
@@ -139,6 +140,12 @@ var binaryDataHistoryList = {
 				
 			});
             $("#list").jqGrid('navGrid',"#pager",{edit:false,add:false,del:false,search:false,refresh:false});
+            
+            if ($("#list_toppager_left").find('button').length == 0) {
+            	var appendIcon = "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                $("#list_toppager_left").append(appendIcon);
+            }
+            
     		$("#list").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 		}
 }

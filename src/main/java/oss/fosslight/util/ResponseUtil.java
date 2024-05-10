@@ -151,4 +151,9 @@ public class ResponseUtil {
 		result.setCode(CommonResponse.SUCCESS.getCode());
 		result.setMsg(CommonResponse.SUCCESS.getMsg());
 	}
+
+	public static void setDefaultLocalStorage(HttpServletResponse response) throws IOException {
+		response.setContentType("text/html; charset=UTF-8");
+		response.getWriter().printf("<script>localStorage.clear();</script>");
+	}
 }

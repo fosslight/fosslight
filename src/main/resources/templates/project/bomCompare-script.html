@@ -92,11 +92,17 @@ var setGrid = {
 			, height : 'auto'
 			, sortorder : 'desc'
 			, pager : '#pager'
+			, toppager: true
 			, rowNum : 15
 			, rowList : [15, 30, 50]
 			, loadonce : true // reload 여부, true 로 설정하면 한번만 데이터를 받아오고 그 다음부터는 데이터를 받아오지 않는다
 			, viewrecords : true
 		});
+		
+		if ($("#list_toppager_left").find('button').length == 0) {
+        	var appendIcon = "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+            $("#list_toppager_left").append(appendIcon);
+        }
 	}
 };
 

@@ -84,6 +84,7 @@ public class SessionController extends CoTopComponent{
 			}
 		*/
 		
+		ResponseUtil.setDefaultLocalStorage(res);
 		return "session/login";
 	}
 	
@@ -162,6 +163,7 @@ public class SessionController extends CoTopComponent{
 
 	@GetMapping(value = SESSION.LOGIN_EXPIRED, produces = "text/html; charset=utf-8")
 	public void loginExpired(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		ResponseUtil.setDefaultLocalStorage(res);
 		res.sendRedirect(req.getContextPath() + "/index");
 	}
 	

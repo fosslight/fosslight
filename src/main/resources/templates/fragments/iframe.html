@@ -64,6 +64,22 @@
       }
     }
 
+    $("#navbarNav").on("click", ".btn-iframe-close", function() {
+    	var tabNm = $(this).next().text();
+    	if ("Project" == tabNm) {
+    		localStorage.removeItem("projectSearchConditions");
+    	} else if ("Open Source" == tabNm) {
+    		localStorage.removeItem("ossSearchConditions");
+    	} else if ("License" == tabNm) {
+    		localStorage.removeItem("licenseSearchConditions");
+    	} else if ("3rd Party" == tabNm) {
+    		localStorage.removeItem("partnerSearchConditions");
+    	} else if ("Self-Check" == tabNm) {
+    		localStorage.removeItem("selfCheckSearchConditions");
+    	} else if ("BAT" == tabNm) {
+    		localStorage.removeItem("batSearchConditions");
+    	}
+    });
   </script>
 </th:block>
 </html>

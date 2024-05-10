@@ -2962,6 +2962,11 @@ public class CoMailManager extends CoTopComponent {
 		
 		if (mailComponentDataMap != null && (mailComponentDataMap.containsKey("mainData") || mailComponentDataMap.containsKey("rows") )) {
 			projectList = (List<ProjectIdentification>) mailComponentDataMap.get(mailComponentDataMap.containsKey("mainData") ? "mainData" : "rows");
+			
+			if (CoConstDef.CD_MAIL_COMPONENT_PROJECT_BOMOSSINFO.equals(component)) {
+				projectList = projectService.setMergeGridData(projectList);
+			}
+			
 			for (ProjectIdentification prjBean : projectList) {
 				// exclude 제외
 				if (CoConstDef.FLAG_YES.equals(prjBean.getExcludeYn())) {
