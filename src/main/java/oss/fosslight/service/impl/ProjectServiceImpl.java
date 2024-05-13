@@ -256,6 +256,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<OssComponents> securityList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
 		
 		if (securityList != null && !securityList.isEmpty()) {
+			int emptyVersionCnt = securityList.stream().filter(e -> isEmpty(e.getOssVersion())).collect(Collectors.toList()).size();
 			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && Float.valueOf(e.getCvssScore()) >= bean.getStandardScore()).collect(Collectors.toList()).size();
 			
 			for (OssComponents oc : securityList) {
@@ -283,12 +284,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 			
-			if (fixedCheckCnt == securityListCnt) {
-				bean.setSecCode("Fixed");
-				bean.setCvssScore(fixedCvssScore);
-			} else {
+			if (emptyVersionCnt == securityList.size()) {
 				bean.setSecCode("notFixed");
 				bean.setCvssScore(notFixedCvssScore);
+			} else {
+				if (fixedCheckCnt == securityListCnt) {
+					bean.setSecCode("Fixed");
+					bean.setCvssScore(fixedCvssScore);
+				} else {
+					bean.setSecCode("notFixed");
+					bean.setCvssScore(notFixedCvssScore);
+				}
 			}
 		}
 	}
