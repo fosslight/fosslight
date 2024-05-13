@@ -927,7 +927,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 
 			
 			if (insertOssComponentLicenseList != null && insertOssComponentLicenseList.size() > 0) {
-				query = "INSERT INTO PRE_OSS_COMPONENTS_LICENSE (COMPONENT_ID, COMPONENT_LICENSE_IDX, LICENSE_ID, LICENSE_NAME, COPYRIGHT_TEXT, EXCLUDE_YN) VALUES (?,?,?,?,?,'N');";
+				query = "INSERT INTO PRE_OSS_COMPONENTS_LICENSE (COMPONENT_ID, COMPONENT_LICENSE_IDX, LICENSE_ID, LICENSE_NAME, COPYRIGHT_TEXT, EXCLUDE_YN) VALUES (?,?,?,?,?,?);";
 				stmt3 = conn.prepareStatement(query);
 				
 				idx = 1;
@@ -937,6 +937,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					stmt3.setString(3, item.getLicenseId());
 					stmt3.setString(4, item.getLicenseName());
 					stmt3.setString(5, item.getCopyrightText());
+					stmt3.setString(6, item.getExcludeYn());
 					stmt3.addBatch();
 					stmt3.clearParameters();
 					
