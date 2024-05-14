@@ -5486,6 +5486,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			copiedBean.setOssId(bean.getOssId());
 			copiedBean.setOssName(bean.getOssName());
 			copiedBean.setOssVersion(bean.getOssVersion());
+			copiedBean.setOssType(bean.getOssType());
 			copiedBean.setLicenseName(bean.getLicenseName());
 			copiedBean.setOssLicenses(bean.getOssLicenses());
 			copiedBean.setDetectedLicenses(bean.getDetectedLicenses());
@@ -5494,6 +5495,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			copiedBean.setDownloadLocation(bean.getDownloadLocation());
 			copiedBean.setDownloadLocations(bean.getDownloadLocations());
 			copiedBean.setHomepage(bean.getHomepage());
+			copiedBean.setObligation(bean.getObligation());
 			
 			if (!isEmpty(bean.getLicenseDiv())) {
 				copiedBean.setMultiLicenseFlag(bean.getLicenseDiv());
@@ -5505,7 +5507,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 			
 			if (!isEmpty(bean.getObligationType())) {
-				copiedBean.setObligation(bean.getObligationType());
+				copiedBean.setObligationType(bean.getObligationType());
 			}
 			
 			if (!isEmpty(bean.getModifiedDate())) {

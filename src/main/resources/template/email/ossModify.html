@@ -58,7 +58,7 @@
                                 <th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
                                 <td style="padding:5px;">
                                     <span th:utext="${before.ossVersion}"></span>
-                                    <span th:if="${before.ossVersion != '' && before.ossType != ''}">
+                                    <th:block th:if="${before?.ossVersion != '' && before?.ossType != '' && before?.ossType != null}">
 										<span th:if="${before.ossType.contains('M')}">
 											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADcSURBVDhPY/z//39v39o7d58zEAdUlCWLi4JZgCygHg1NK4goQXDj+jEgyQThkApQtP3+/evTp7fv3j0DkkA2GheqCAxAjoSD798/11a5QtjNbbuBJDKXlVUYwgYCFNv+/PkJZTEwAC0BIigHVQoIcPqtvyceiKAcDECNIIGDlLQ+NAYawK6Nlw/qezgDDWDXxsnJCww6IAIyoEKoAEUbCws7hAFUzccnDERwbXApCECJN4glEAYuEQhAsY2VlQ1iCZCBSwQCsPuNICA54ygrSZYUB4O0QQWIBwwMAJhcWykW5ke4AAAAAElFTkSuQmCC"/>
 										</span>
@@ -68,11 +68,11 @@
 										<span th:if="${before.ossType.contains('V')}">
 											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADZSURBVDhPY/z///+GWY3PH95kIA5IyqsHpNWzAFlAPYE29hBRgmD9kYNAkgnCIRWga/v56/er95+ACMhAZkOlYQBd28ev3/WiSoEIyEBmQ6VhAIttcAYyG8KAA3Rt7GysEAbEeRA2XBAO0LXxc3PunVoDZHgXdgARkAHkAgXBkgiAxTY+bi4oBwyAXMK2AQGaIkw9QIBFG9ydQIDVhUCA3TZRQX4IG8gg1jYgANpwaVk3EGG1CgiwawPaICbIB0RYrQIC7NoIApIzjoS8WmBaA0gbVIB4wMAAAOuvYrotinxoAAAAAElFTkSuQmCC"/>
 										</span>
-									</span>
+									</th:block>
                                 </td>
                                 <td style="padding:5px;">
                                     <span th:utext="${after.ossVersion}"></span>
-                                    <span th:if="${after.ossVersion != '' && after.ossType != ''}">
+                                    <th:block th:if="${after?.ossVersion != '' && after?.ossType != '' && after?.ossType != null}">
 										<span th:if="${after.ossType.contains('M')}">
 											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADcSURBVDhPY/z//39v39o7d58zEAdUlCWLi4JZgCygHg1NK4goQXDj+jEgyQThkApQtP3+/evTp7fv3j0DkkA2GheqCAxAjoSD798/11a5QtjNbbuBJDKXlVUYwgYCFNv+/PkJZTEwAC0BIigHVQoIcPqtvyceiKAcDECNIIGDlLQ+NAYawK6Nlw/qezgDDWDXxsnJCww6IAIyoEKoAEUbCws7hAFUzccnDERwbXApCECJN4glEAYuEQhAsY2VlQ1iCZCBSwQCsPuNICA54ygrSZYUB4O0QQWIBwwMAJhcWykW5ke4AAAAAElFTkSuQmCC"/>
 										</span>
@@ -82,7 +82,7 @@
 										<span th:if="${after.ossType.contains('V')}">
 											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADZSURBVDhPY/z///+GWY3PH95kIA5IyqsHpNWzAFlAPYE29hBRgmD9kYNAkgnCIRWga/v56/er95+ACMhAZkOlYQBd28ev3/WiSoEIyEBmQ6VhAIttcAYyG8KAA3Rt7GysEAbEeRA2XBAO0LXxc3PunVoDZHgXdgARkAHkAgXBkgiAxTY+bi4oBwyAXMK2AQGaIkw9QIBFG9ydQIDVhUCA3TZRQX4IG8gg1jYgANpwaVk3EGG1CgiwawPaICbIB0RYrQIC7NoIApIzjoS8WmBaA0gbVIB4wMAAAOuvYrotinxoAAAAAElFTkSuQmCC"/>
 										</span>
-									</span>
+									</th:block>
                                 </td>
                             </tr>
 							<tr>
@@ -164,9 +164,7 @@
 								<td style="padding:5px;" th:utext="${after.attribution}"></td>
                             </tr>
                             <tr>
-                                <th align="left" style="padding:5px;background:#f0f0f0;">Last Modified Date / Last
-                                    Modifier
-                                </th>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Last Modified Date / Last Modifier</th>
 								<td style="padding:5px;" th:utext="|${before.modifiedDate} / ${before.modifier}|"></td>
 								<td style="padding:5px;" th:utext="|${after.modifiedDate} / ${after.modifier}|"></td>
                             </tr>

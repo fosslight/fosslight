@@ -785,7 +785,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			convertDataMap.put("modifierNm", makeUserNameFormat(loginUserName()));
 			convertDataMap.put("ossBeforeNm", makeOssNameFormat(ossMasterBefore));
 			convertDataMap.put("ossAftereNm", makeOssNameFormat(ossMasterAfter));
-			convertDataMap.put("templateURL", "/template/comment/ossRenamed.html");
+			convertDataMap.put("templateURL", "/comment/ossRenamed.html");
 			
 			return CommonFunction.VelocityTemplateToString(convertDataMap);
 		}
