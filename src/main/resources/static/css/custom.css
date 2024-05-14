@@ -1142,7 +1142,7 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .is-warning {border-color: #007bff !important;}
 .custom-is-invalid {border-color: #dc3545 !important;}
 .useCustomNotice {color:#FF0000;}
-.note-editable {background-color: #fff;}
+.note-editable {background-color: #fff !important;}
 .pointer {cursor: pointer; font-size: .75rem;}
 .source {background-color: #9a58b5 !important;}  
 .binary {background-color: #c56272 !important;}

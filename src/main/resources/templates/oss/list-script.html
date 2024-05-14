@@ -115,6 +115,9 @@
                 				if ("" != ossType) {
                 					ossType = ossType.split("");
                 					$("select[name='"+key+"']").val(ossType).trigger('change');
+                				} else {
+                					$("select[name='"+key+"']").val(ossType).trigger('change');
+                					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
                 				}
                 			} else if (textarea.includes(key)) {
                 				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
@@ -174,7 +177,7 @@
                     
                     var localStorageData = oss_lst_fn.serializeObjectHelper();
                     localStorageData.expire = Date.now() + 300000;
-                    localStorage.setItem("ossSearchConditions", JSON.stringify(localStorageData));                    
+                    localStorage.setItem("ossSearchConditions", JSON.stringify(localStorageData));
                     
                     $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
                 });
