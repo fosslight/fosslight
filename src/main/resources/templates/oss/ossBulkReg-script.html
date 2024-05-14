@@ -361,7 +361,7 @@ const IdentificationGridDataExtractor = {
         if(this.isFromProjectIdentification()) {
             $.ajax({
                 contentType: 'application/json',
-                url: `/project/identificationGrid/\${referenceId}/\${referenceDiv}?referenceId=\${referenceId}&merge=N`,
+                url: "/project/identificationGrid/" + referenceId + "/" + referenceDiv + "?referenceId=" + referenceId + "&merge=N",
                 dataType: "json",
                 success: (data) => {
                     if (data.validData) {
