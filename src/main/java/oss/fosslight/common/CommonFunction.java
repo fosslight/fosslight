@@ -5442,7 +5442,17 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			Map<String, String> diffDataMap = (Map<String, String>) result.get("diffData");
 			Map<String, String> infoDataMap = (Map<String, String>) result.get("infoData");
 			
-			if (validDataMap != null) {
+			if (validDataMap != null && diffDataMap != null) {
+				for (String key : infoDataMap.keySet()) {
+					if (key.startsWith("binaryName")) {
+						customInfoMsg.put(key, infoDataMap.get(key));
+						continue;
+					}
+					if (!customInfoMsg.containsKey(key) && !validDataMap.containsKey(key) && !diffDataMap.containsKey(key)) {
+						customInfoMsg.put(key, infoDataMap.get(key));
+					}
+				}
+			} else if (validDataMap != null) {
 				for (String key : infoDataMap.keySet()) {
 					if (key.startsWith("binaryName")) {
 						customInfoMsg.put(key, infoDataMap.get(key));
@@ -5452,9 +5462,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						customInfoMsg.put(key, infoDataMap.get(key));
 					}
 				}
-			}
-			
-			if (diffDataMap != null) {
+			} else if (diffDataMap != null) {
 				for (String key : infoDataMap.keySet()) {
 					if (!customInfoMsg.containsKey(key) && key.startsWith("binaryName")) {
 						customInfoMsg.put(key, infoDataMap.get(key));
@@ -5464,10 +5472,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						customInfoMsg.put(key, infoDataMap.get(key));
 					}
 				}
-			}
-			
-			if (validDataMap != null && diffDataMap != null) {
-				customInfoMsg.putAll(infoDataMap);
 			}
 		}
 		
