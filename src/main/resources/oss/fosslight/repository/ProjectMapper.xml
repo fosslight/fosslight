@@ -320,7 +320,7 @@
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
-				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO ='200' AND S.USE_YN ='Y' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
+				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO = '200' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
 				AND
@@ -580,7 +580,7 @@
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
-				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO ='200' AND S.USE_YN ='Y' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
+				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO ='200' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
 				AND
