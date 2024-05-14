@@ -3742,7 +3742,6 @@ function optimizeGridSizeAdjustmentPage() {
      let innerJqgirdSetElement = $(".tab-pane.active .card-body");
      if (innerJqgirdSetElement.length > 0) {
         let innerJqgirdSetWidth = innerJqgirdSetElement.width()*0.6;
-		console.log(innerJqgirdSetWidth);
 		
         let innerJqGridsIds = [];
         innerJqgirdSetElement.find('table').each(function() {
