@@ -994,6 +994,9 @@ var commonAjax = {
     getProjectVersionTags: function (data) {
         return fnBasicAjaxData(data, "/project/autoCompleteVersionAjax");
     },
+    getProjectDivisionTags: function (data) {
+        return fnBasicAjaxData(data, "/project/autoCompleteDivisionAjax");
+    },
     getProjectModelTags: function (data) {
         return fnBasicAjaxData(data, "/project/autoCompleteModelAjax");
     },
@@ -1086,6 +1089,7 @@ var autoComplete = {
     projectNameConfTags: [],
     projectIdConfTags: [],
     projectVersionTags: [],
+    projectDivisionTags: [],
     projectModelTags: [],
     //partner
     partyNameTags: [],
@@ -1196,6 +1200,19 @@ var autoComplete = {
                     data.forEach(function (obj) {
                         if (obj != null) {
                             autoComplete.projectVersionTags.push(obj.prjVersion);
+                          
+                        }
+                    })
+                }
+            });
+        }
+        
+        if ($('.autoComProjectDivision').length > 0) {
+            commonAjax.getProjectDivisionTags().success(function (data, status, headers, config) {
+                if (data != null) {
+                    data.forEach(function (obj) {
+                        if (obj != null) {
+                            autoComplete.projectDivisionTags.push(obj.prjDivision);
                         }
                     })
                 }
@@ -1543,6 +1560,22 @@ var autoComplete = {
                     $(this).autocomplete("search");
                 }
             });
+            
+		$(".autoComProjectDivision").autocomplete({
+			source: autoComplete.projectDivisionTags,
+			minLength: 0,
+			open: function() {
+				$(this).attr('state', 'open');
+			},
+			close: function() {
+				$(this).attr('state', 'closed');
+			}
+		})
+			.focus(function() {
+				if ($(this).attr('state') != 'open') {
+					$(this).autocomplete("search");
+				}
+			});
 
         $(".autoComProjectModel").autocomplete({
             source: autoComplete.projectModelTags, minLength: 3, open: function () {

@@ -92,6 +92,8 @@ public interface ProjectService extends HistoryConfig{
 	
 	List<Project> getProjectVersionList(Project project);
 
+	List<Project> getProjectDivisionList(Project project);
+
 	void updateSubStatus(Project project);
 
 	List<UploadFile> selectAndroidFileDetail(Project project);
@@ -213,6 +215,7 @@ public interface ProjectService extends HistoryConfig{
 	void registDepOss(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, Project project);
 
 	public void setNoticeFileFormat(Project project, List<String> noticeFileFormatList);
+
 }
 
 

@@ -269,6 +269,7 @@ public final class Url {
 		
 		public static final String AUTOCOMPLETE_AJAX = PATH + "/autoCompleteAjax";
 		public static final String AUTOCOMPLETE_VERSION_AJAX = PATH + "/autoCompleteVersionAjax";
+		public static final String AUTOCOMPLETE_DIVISION_AJAX = PATH + "/autoCompleteDivisionAjax";
 		public static final String AUTOCOMPLETE_MODEL_AJAX = PATH + "/autoCompleteModelAjax";
 		public static final String AUTOCOMPLETE_ID_AJAX = PATH + "/autoCompleteIdAjax";
 		

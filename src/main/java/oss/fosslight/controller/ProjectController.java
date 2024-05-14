@@ -229,6 +229,22 @@ public class ProjectController extends CoTopComponent {
 	}
 	
 	/**
+	 * Auto complete Division ajax.
+	 *
+	 * @param project the project
+	 * @param req the req
+	 * @param res the res
+	 * @param model the model
+	 * @return the response entity
+	 */
+	@GetMapping(value = PROJECT.AUTOCOMPLETE_DIVISION_AJAX)
+	public @ResponseBody ResponseEntity<Object> autoCompleteDivisonAjax(Project project, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		project.setCreator(CommonFunction.isAdmin() ? "ADMIN" : loginUserName());
+
+		return makeJsonResponseHeader(projectService.getProjectDivisionList(project));
+	}
+	/**
 	 * Auto complete model ajax.
 	 *
 	 * @param project the project

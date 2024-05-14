@@ -177,6 +177,8 @@ public interface ProjectMapper {
 	
 	List<Project> getProjectVersionList(Project project);
 
+	List<Project> getProjectDivisionList(Project project);
+	
 	void registPackageFileId(Project project);
 	
 	void updatePartnerOssList(OssComponents bean);

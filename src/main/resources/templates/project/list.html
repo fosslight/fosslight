@@ -73,14 +73,10 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="form-group mb-2">
-                                                    <select class="form-control select2 save-value" id="division" name="prjDivision" style="width: 100%">
-                                                    	<option th:value="''"></option>
-                                                    	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
-                                                    		<option th:value="${option.cdDtlNo}" th:text="${option?.cdDtlNm}"
-                                                                    th:selected="${searchBean?.prjDivision != null and option.cdDtlNo == searchBean?.prjDivision}"></option>
-                                                    	</th:block>
-                                                    </select>
+												<div class="form-group mb-2">
+                                                	<div class="input-group">
+                                                    	<input type="text" class="form-control autoComProjectDivision save-value" placeholder="Divsion" name="prjDivision" th:value="${searchBean?.prjDivision}" />
+                                                	</div>
                                                 </div>
                                             </div>
                                         </div>

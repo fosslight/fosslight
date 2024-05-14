@@ -320,7 +320,7 @@
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
-				AND A.DIVISION = #{prjDivision}
+				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO ='200' AND S.USE_YN ='Y' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
 				AND
@@ -580,7 +580,7 @@
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
-				AND ( A.DIVISION = #{prjDivision} )
+				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO ='200' AND S.USE_YN ='Y' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
 				AND
@@ -1425,6 +1425,25 @@
 		</if>
 	</select>
 	
+	<select id="getProjectDivisionList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
+	/* getProjectDIvisionList : PROJECT DIVISION AUTO COMPLETE */
+		SELECT DISTINCT T2.CD_DTL_NM AS PRJ_DIVISION
+		  FROM T2_USERS T1
+			   LEFT JOIN (SELECT * FROM T2_CODE_DTL S WHERE S.CD_NO = '200' AND S.USE_YN = 'Y') T2 ON T1.DIVISION = T2.CD_DTL_NO
+		 WHERE T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@equals('ADMIN', creator)">
+			AND (
+				T1.CREATOR = #{creator} 
+					OR EXISTS (
+					SELECT A1.PRJ_ID 
+					  FROM PROJECT_WATCHER A1 
+					 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{creator} -->
+					 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{creator} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{creator}) ))
+				)
+			)
+		</if>
+	</select>
+	
 	<select id="getProjectModelNameList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
 	/* getProjectModelNameList : PROJECT MODEL AUTO COMPLETE */
 		SELECT DISTINCT MODEL_NAME
@@ -2039,7 +2058,7 @@
 		                          AND MODEL_NAME LIKE CONCAT('%',#{modelName},'%'))
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
-				AND ( A.DIVISION = #{prjDivision} )
+				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO ='200' AND S.USE_YN ='Y' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
 				AND

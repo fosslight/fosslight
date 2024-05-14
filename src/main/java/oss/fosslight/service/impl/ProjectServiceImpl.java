@@ -4197,6 +4197,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	@Override
+	public List<Project> getProjectDivisionList(Project project) {
+		return projectMapper.getProjectDivisionList(project);
+	}
+	
+	@Override
 	public Map<String, Object> applySrcAndroidModel(List<ProjectIdentification> reportData, List<String> noticeBinaryList) throws IOException {
 		Map<String, Object> resultMap = new HashMap<>();
 		Map<String, String> validMap = new HashMap<>();
