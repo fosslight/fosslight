@@ -1439,11 +1439,13 @@ public class CoMailManager extends CoTopComponent {
 		if (title.indexOf("${OSS Name}") > -1) {
 			String _s = "";
 			OssMaster ossInfo = null;
+			boolean isMailBodySubjectFlag = false;
 
 			// rename인 경우
 			// oss name = after oss
 			// before oss name = before oss
 			if (CoConstDef.CD_MAIL_TYPE_OSS_RENAME.equals(bean.getMsgType())) {
+				isMailBodySubjectFlag = true;
 				ossInfo = (OssMaster) bean.getCompareDataAfter();
 			}
 			else if (!isEmpty(bean.getParamOssId())) {
@@ -1456,7 +1458,7 @@ public class CoMailManager extends CoTopComponent {
 				}
 				_s += ossInfo.getOssName();
 				// Admin에게만 발송되는 oss 관련 메일의 경우 바로가기 link 형식으로 발송
-				if (isMailBodySubject 
+				if (isMailBodySubject || isMailBodySubjectFlag
 						&& (
 								CoConstDef.CD_MAIL_TYPE_OSS_REGIST.equals(bean.getMsgType()) 
 								|| CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(bean.getMsgType())

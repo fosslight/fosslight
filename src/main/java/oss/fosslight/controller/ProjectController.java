@@ -1673,10 +1673,11 @@ public class ProjectController extends CoTopComponent {
 			}
 			
 			try {
+				String packagingFileComment = verificationService.changePackageFileNameCombine(ossNotice.getPrjId());;
 				CommentsHistory commHisBean = new CommentsHistory();
 				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
 				commHisBean.setReferenceId(project.getPrjId());
-				commHisBean.setContents("");
+				commHisBean.setContents(packagingFileComment);
 				commHisBean.setStatus(CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM));
 				
 				commentService.registComment(commHisBean);
@@ -1706,8 +1707,6 @@ public class ProjectController extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
-				
-				verificationService.changePackageFileNameDistributeFormat(ossNotice.getPrjId());
 			}
 		}
 		
@@ -1907,6 +1906,9 @@ public class ProjectController extends CoTopComponent {
 		
 		Project project = new Project();
 		
+		// 서브그리드
+		projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
+		
 		if (CoConstDef.FLAG_NO.equals(identificationSubStatusPartner)) {
 			project.setPrjId(prjId);
 			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
@@ -1914,40 +1916,36 @@ public class ProjectController extends CoTopComponent {
 			
 			// 상태값 변경
 			projectService.updateSubStatus(project);
-		} else {
-			// 서브그리드
-			projectService.registComponentsThird(prjId, identificationSubStatusPartner, ossComponents, thirdPartyList);
-			
-			try {
-				if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-						CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) != null) {
-					String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-							CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
-					
-					if (!isEmpty(changedLicenseName)) {
-						CommentsHistory commentHisBean = new CommentsHistory();
-						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-						commentHisBean.setReferenceId(prjId);
-						commentHisBean.setExpansion1("3rd party");
-						commentHisBean.setContents(changedLicenseName);
-						commentService.registComment(commentHisBean, false);
-					}
+		}
+		
+		try {
+			if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) != null) {
+				String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+				CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER), true);
+							
+				if (!isEmpty(changedLicenseName)) {
+					CommentsHistory commentHisBean = new CommentsHistory();
+					commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+					commentHisBean.setReferenceId(prjId);
+					commentHisBean.setExpansion1("3rd party");
+					commentHisBean.setContents(changedLicenseName);
+					commentService.registComment(commentHisBean, false);
 				}
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
 			}
-			
-			try {
-				project.setPrjId(prjId);
-				History h = new History();
-				h = projectService.work(project);
-				h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
-				project = (Project) h.gethData();
-				h.sethEtc(project.etcStr());
-				historyService.storeData(h);
-			} catch (Exception e) {
-				log.error(e.getMessage());
-			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+					
+		try {
+			project.setPrjId(prjId);
+			History h = new History();
+			h = projectService.work(project);
+			h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
+			project = (Project) h.gethData();
+			h.sethEtc(project.etcStr());
+			historyService.storeData(h);
+		} catch (Exception e) {
+			log.error(e.getMessage());
 		}
 
 		return makeJsonResponseHeader(true, "success", projectService.getProjectDetail(project).getIdentificationStatus());

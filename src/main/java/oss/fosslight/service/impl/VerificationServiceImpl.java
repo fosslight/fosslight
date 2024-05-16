@@ -1651,7 +1651,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			packageFileInfo = fileMapper.getFileInfo(packageFileInfo);
 			
 			if (packageFileInfo != null) {
-				String orgFileName = packageFileInfo.getOrigNm();
 				// Packaging > Confirm시 Packaging 파일명 변경 건
 				String paramSeq = (packageFileIds.size() > 1 ? Integer.toString(fileSeq++) : ""); 
 				String chgFileName = getPackageFileName(prjBean.getPrjName(), prjBean.getPrjVersion(), packageFileInfo.getOrigNm(), paramSeq);
@@ -1659,14 +1658,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				packageFileInfo.setOrigNm(chgFileName);
 				
 				fileMapper.upateOrgFileName(packageFileInfo);
-				
-				// 이력을 남긴다.
-				CommentsHistory commHisBean = new CommentsHistory();
-				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-				commHisBean.setReferenceId(prjId);
-				commHisBean.setContents("Changed File Name (\""+orgFileName+"\") to \""+chgFileName+"\"  ");
-				
-				commentService.registComment(commHisBean);
 			}
 		}
 	}
