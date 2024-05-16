@@ -333,7 +333,7 @@ public class T2UserServiceImpl implements T2UserService {
 		for (int i = 0;i<vo.size();i++) {
 			vo.get(i).setModifier(vo.get(i).getUserId());
 			vo.get(i).setPassword("");
-			if (vo.get(i).getDivision().trim().equals("")){
+			if (vo.get(i).getDivision() != null && "".equals(vo.get(i).getDivision().trim())){
 				vo.get(i).setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
 			}
 			
