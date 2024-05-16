@@ -32,7 +32,9 @@
 											</div>
 											<div class="col-md-3 pl-3 d-flex justify-content-start">
 												<div class="input-group-append d-flex align-items-center">
-													<a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'" title="Collapse"></a>
+													<a class="text-blue-gray text-center" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
+														+ Advanced Search <span class="optionSelected text-lg-red text-xs" style="display: none;"><br>option selected</span>
+													</a>
 												</div>
 												<div class="input-group-append d-flex align-items-center ml-5">
 													<input class="form-check-input save-value" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == null or searchBean?.publicYn == 'N'}" type="checkbox">

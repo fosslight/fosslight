@@ -57,11 +57,6 @@
                         var title = data.noticeList[i].title;
                         var notice = data.noticeList[i].notice;
 
-
-                        console.log(seq);
-                        console.log(title);
-                        console.log(notice);
-
                         if (getCookie("noticeYn_" + seq) != "N") {
                             addPopup(title, notice, seq);
                         }

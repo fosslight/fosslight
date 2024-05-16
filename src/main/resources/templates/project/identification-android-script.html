@@ -13,7 +13,7 @@ $(document).ready(function () {
 	activeTab = "binAndroidDiv";
 	
 	$("[id^=tabMenu]").on("click", function() {
-		var tabId = $(this).attr("id");console.log(tabId);
+		var tabId = $(this).attr("id");
 		tabId = tabId.replace("tabMenu", "");
 		
 		let firstChar = tabId[0];

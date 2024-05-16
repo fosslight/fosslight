@@ -1265,6 +1265,13 @@ public class ProjectController extends CoTopComponent {
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
 					}
+				} else if (CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED.equals(mailType)){
+					String initMessage = "Project Created (by Copy)";
+					CommentsHistory commHisBean = new CommentsHistory();
+					commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+					commHisBean.setReferenceId(project.getPrjId());
+					commHisBean.setContents(initMessage);
+					commentService.registComment(commHisBean);
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);

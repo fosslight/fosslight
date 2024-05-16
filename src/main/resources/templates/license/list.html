@@ -113,7 +113,7 @@
 														<div class="form-group mb-2">
 															<select class="select2" id="creatorSelect" name="creator" style="width: 100%;">
 																<option value=""></option>
-																<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
+																<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.creator)}"></th:block>
 															</select>
 														</div>
 													</div>
@@ -128,7 +128,7 @@
 														<div class="form-group mb-2">
 															<select class="select2" id="modifierSelect" name="modifier" style="width: 100%;">
 																<option value=""></option>
-																<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
+																<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.modifier)}"></th:block>
 																<option th:value="NONE" th:text="None"></option>
 															</select>
 														</div>

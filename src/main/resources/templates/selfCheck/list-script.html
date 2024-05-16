@@ -41,6 +41,84 @@ var evt = {
 		$('select[name=distributionType]').val('${searchBean.distributionType}').trigger('change');
 		$('select[name=prjDivision]').val('${searchBean.prjDivision}').trigger('change');
 		
+		var startDate;
+        var endDate;
+
+        $("#schDateRange").daterangepicker({
+            autoUpdateInput: false
+        }).on('apply.daterangepicker', function(ev, picker) {
+		    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+		    $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+		    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+		})
+		.on('cancel.daterangepicker', function(ev, picker) {
+			$("#schDateRange").val("");
+			$("input[name='schStartDate']").val("");
+		    $("input[name='schEndDate']").val("");
+		    $('#schDateRange').attr('placeholder', 'Created Date');
+		});
+		
+        var input = ["prjName", "publicYn", "prjId", "ossName", "schStartDate", "schEndDate", "licenseName", "creator"];
+        var optionSelectedFlag = false;
+		
+        if (typeof localStorage.selfCheckSearchConditions !== "undefined") {
+        	var localStorageSearchConditions = JSON.parse(localStorage.selfCheckSearchConditions);
+        	
+        	if (Date.now() > localStorageSearchConditions.expire) {
+        		localStorage.removeItem("selfCheckSearchConditions");
+        	} else {
+        		Object.keys(localStorageSearchConditions).forEach(function(key) {
+        			if (input.includes(key)) {
+        				var searchValue = localStorageSearchConditions[key];
+        				$("input[name='"+key+"']").val(searchValue);
+        				
+        				if ("prjName" != key && "publicYn" != key && "" != searchValue) optionSelectedFlag = true;
+        				if ("schStartDate" == key) {
+        					startDate = localStorageSearchConditions[key];
+        				} else if ("schEndDate" == key) {
+        					endDate = localStorageSearchConditions[key];
+        				} else if ("publicYn" == key) {
+        					if ("" == localStorageSearchConditions[key] || "N" == localStorageSearchConditions[key]) {
+        						$("#checkbox3").prop("checked", true);
+        					}
+        				}
+        			}
+        		});
+        	}
+		} else {
+			for (var i in input) {
+				if ("prjName" != input[i] && "publicYn" != input[i]) {
+					var inputValue = $("input[name='"+input[i]+"']").val();
+					if ("" != inputValue) {
+						optionSelectedFlag = true;
+						break;
+					}
+				}
+			}
+			
+			startDate = String([[${searchBean?.schStartDate}]]);
+			endDate = String([[${searchBean?.schEndDate}]]);
+		}
+		
+        if (optionSelectedFlag) {
+			$(".optionSelected").show();
+		} else {
+			$(".optionSelected").hide();
+		}
+        
+		if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+            var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            $("#schDateRange").val(formattedStartDate + ' - ' + formattedEndDate);
+        }
+		
+		refreshParam = $('#projectSearch').serializeObject();
+		if($('#checkbox3').is(':checked')) {
+			refreshParam.publicYn = 'N';
+		} else {
+			refreshParam.publicYn = 'Y';
+		}
+		
 		$('#search').on('click',function(e){
 			e.preventDefault();
 			
@@ -62,66 +140,21 @@ var evt = {
 			localStorageData.expire = Date.now() + 300000;
             localStorage.setItem("selfCheckSearchConditions", JSON.stringify(localStorageData));
 			
+            optionSelectedFlag = false;
+            Object.keys(localStorageData).forEach(function(key) {
+    			if (input.includes(key)) {
+    				if ("prjName" != key && "publicYn" != key && "" != localStorageData[key]) optionSelectedFlag = true;
+    			}
+    		});
+            
+            if (optionSelectedFlag) {
+    			$(".optionSelected").show();
+    		} else {
+    			$(".optionSelected").hide();
+    		}
+            
 			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
 		});
-
-        var startDate;
-        var endDate;
-
-        $("#schDateRange").daterangepicker({
-            autoUpdateInput: false
-        }).on('apply.daterangepicker', function(ev, picker) {
-		    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
-		    $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
-		    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-		})
-		.on('cancel.daterangepicker', function(ev, picker) {
-			$("#schDateRange").val("");
-			$("input[name='schStartDate']").val("");
-		    $("input[name='schEndDate']").val("");
-		    $('#schDateRange').attr('placeholder', 'Created Date');
-		});
-		
-		if (typeof localStorage.selfCheckSearchConditions !== "undefined") {
-        	var localStorageSearchConditions = JSON.parse(localStorage.selfCheckSearchConditions);
-        	
-        	if (Date.now() > localStorageSearchConditions.expire) {
-        		localStorage.removeItem("selfCheckSearchConditions");
-        	} else {
-        		var input = ["prjName", "publicYn", "prjId", "ossName", "schStartDate", "schEndDate", "licenseName", "creator"];
-        		
-        		Object.keys(localStorageSearchConditions).forEach(function(key) {
-        			if (input.includes(key)) {
-        				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
-        				if ("schStartDate" == key) {
-        					startDate = localStorageSearchConditions[key];
-        				} else if ("schEndDate" == key) {
-        					endDate = localStorageSearchConditions[key];
-        				} else if ("publicYn" == key) {
-        					if ("" == localStorageSearchConditions[key] || "N" == localStorageSearchConditions[key]) {
-        						$("#checkbox3").prop("checked", true);
-        					}
-        				}
-        			}
-        		});
-        	}
-		} else {
-			startDate = String([[${searchBean?.schStartDate}]]);
-			endDate = String([[${searchBean?.schEndDate}]]);
-		}
-		
-		if (startDate && startDate != 'null' && endDate && endDate != 'null') {
-            var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
-            var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
-            $("#schDateRange").val(formattedStartDate + ' - ' + formattedEndDate);
-        }
-		
-		refreshParam = $('#projectSearch').serializeObject();
-		if($('#checkbox3').is(':checked')) {
-			refreshParam.publicYn = 'N';
-		} else {
-			refreshParam.publicYn = 'Y';
-		}
 	}
 }
 

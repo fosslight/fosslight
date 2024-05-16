@@ -417,6 +417,10 @@ function receiveMessage(event) {
                 changeURL(data.link);
 
                 break;
+          	case 'create_condition':
+				createTab_condition(data.tabData[0], data.tabData[1])
+				
+				break;
         }
     }
 }
@@ -437,6 +441,23 @@ function createTabInFrame(tabNm, tabLk) {
 
     parent.postMessage(JSON.stringify(data), "*");
 
+}
+
+function customCreateTabInFrame(tabNm, tabLk) {
+    var tabData = [tabNm, tabLk];
+    var data = {
+        tabData: tabData,
+        action: 'create_condition'
+    }
+
+    parent.postMessage(JSON.stringify(data), "*");
+
+}
+
+function createTab_condition(tabNm, tabLk) {
+	if ("project" == tabNm) {
+		$('.project').get(0).click();
+	}
 }
 
 function createTabInFrameWithCondition(tabNm, tabLk, sesKey, sesVal) {
@@ -1488,7 +1509,7 @@ var autoComplete = {
         };
 
         $(".autoComOss").autocomplete({
-            source: autoComplete.ossTags, minLength: 3, open: function () {
+            source: autoComplete.ossTags, minLength: 0, open: function () {
                 $(this).attr('state', 'open');
             }, close: function () {
                 $(this).attr('state', 'closed');

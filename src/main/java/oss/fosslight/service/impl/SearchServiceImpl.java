@@ -124,6 +124,20 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 							break;
 						case "publicYn" : project.setPublicYn(value);
 							break;
+						case "schBinaryName" : project.setSchBinaryName(value);
+							break;
+						case "ossName" : project.setOssName(value);
+							break;
+						case "ossVersion" : project.setOssVersion(value);
+							break;
+						case "comment" : project.setComment(value);
+							break;
+						case "userComment" : project.setUserComment(value);
+							break;
+						case "licenseName" : project.setLicenseName(value);
+							break;
+						case "refPartnerName" : project.setRefPartnerName(value);
+							break;
 						default : break;
 					}
 				}
@@ -160,6 +174,18 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 						case "status" : partner.setStatus(value);
 							break;
 						case "publicYn" : partner.setPublicYn(value);
+							break;
+						case "ossName" : partner.setOssName(value);
+							break;
+						case "ossVersion" : partner.setOssVersion(value);
+							break;
+						case "licenseName" : partner.setLicenseName(value);
+							break;
+						case "binaryName" : partner.setBinaryName(value);
+							break;
+						case "userComment" : partner.setUserComment(value);
+							break;
+						case "description" : partner.setDescription(value);
 							break;
 						default : break;
 					}

@@ -421,7 +421,6 @@
           this.cleanMessages();
           return this.requestMessages()
                   .then(response => {
-                    console.log(response)
                     this.setValidData(response);
                     this.setMessagesToCurPage();
                   });

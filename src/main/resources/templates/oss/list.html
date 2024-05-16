@@ -41,7 +41,9 @@
                                         </div>
                                         <div class="col-md-3 pl-3 d-flex justify-content-start">
                                             <div class="input-group-append d-flex align-items-center">
-                                            	<a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'" title="Collapse"></a>
+                                            	<a class="text-blue-gray text-center" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
+                                            		+ Advanced Search <span class="optionSelected text-lg-red text-xs" style="display: none;"><br>option selected</span>
+                                            	</a>
                                            	</div>
                                         </div>
                                         <div class="col-md-2 pr-3">
@@ -112,38 +114,38 @@
                                    	<div class="row mb-2">
                                      	<div class="col-md-3">
                                            	<div class="form-group mb-2">
-                                              	<select class="select2" id="creatorSelect" name="creator" style="width: 100%;">
+                                              	<select class="select2 save-value" id="creatorSelect" name="creator" style="width: 100%;">
                                                  	<option value=""></option>
-                                                  	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
-                                                   	<option th:text="None" th:value="NONE"></option>
+                                                  	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.creator)}"></th:block>
+                                                   	<option th:text="None" th:value="NONE" th:selected="${searchBean?.modifier == 'NONE'}"></option>
                                              	</select>
                                           	</div>
                                      	</div>
                                       	<div class="col-md-3">
                                           	<div class="form-group mb-2">
                                                	<input class="form-control" id="createdDate" type="text"/>
-                                              	<input class="form-control" name="cStartDate" type="hidden"/>
-                                              	<input class="form-control" name="cEndDate" type="hidden"/>
+                                              	<input class="form-control save-value" name="cStartDate" type="hidden" th:value="${searchBean?.cStartDate}"/>
+                                              	<input class="form-control save-value" name="cEndDate" type="hidden" th:value="${searchBean?.cEndDate}"/>
                                            	</div>
                                        	</div>
                                       	<div class="col-md-3">
                                           	<div class="form-group mb-2">
-                                              	<select class="select2" id="modifierSelect" name="modifier" style="width: 100%;">
+                                              	<select class="select2 save-value" id="modifierSelect" name="modifier" style="width: 100%;">
                                                 	<option value=""></option>
-                                                  	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN')}"></th:block>
-                                                   	<option th:text="None" th:value="NONE"></option>
+                                                  	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.modifier)}"></th:block>
+                                                   	<option th:text="None" th:value="NONE" th:selected="${searchBean?.modifier == 'NONE'}"></option>
                                              	</select>
                                         	</div>
                                     	</div>
                                        	<div class="col-md-3">
                                           	<div class="form-group mb-2">
                                              	<input class="form-control" id="modifiedDate" placeholder="Modified Date" type="text"/>
-                                              	<input class="form-control" name="mStartDate" th:value="${searchBean.mStartDate}" type="hidden"/>
-                                              	<input class="form-control" name="mEndDate" th:value="${searchBean.mEndDate}" type="hidden"/>
+                                              	<input class="form-control save-value" name="mStartDate" th:value="${searchBean?.mStartDate}" type="hidden"/>
+                                              	<input class="form-control save-value" name="mEndDate" th:value="${searchBean?.mEndDate}" type="hidden"/>
                                           	</div>
                                        	</div>
                                        	<div class="col-md-3">
-                                     		<select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
+                                     		<select class="select2 save-value" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
                                              	<option value=""></option>
                                                	<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
                                                 	<option th:text="${code.cdDtlNm}"
@@ -154,12 +156,14 @@
                                    		</div>
                                      	<div class="col-md-3">
                                      		<div class="form-group mb-2">
-                                            	<select class="select2 save-value" multiple="multiple" name="ossTypeSearch" id="ossTypeSearchSelect" style="width: 100%;">
-                                                	<option th:text="None" th:value="N"></option>
-                                                    <option th:text="Multi" th:value="M"></option>
-                                                    <option th:text="Dual" th:value="D"></option>
-                                                    <option th:text="V-Diff" th:value="V"></option>
-                                               	</select>
+                                     			<th:block th:with="ossTypeSearch=${#strings.arraySplit(searchBean.ossTypeSearch, ',')}">
+                                            		<select class="select2 save-value" multiple="multiple" name="ossTypeSearch" id="ossTypeSearchSelect" style="width: 100%;">
+                                                		<option th:text="None" th:value="N" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'N')}"></option>
+                                                    	<option th:text="Multi" th:value="M" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'M')}"></option>
+                                                    	<option th:text="Dual" th:value="D" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'D')}"></option>
+                                                    	<option th:text="V-Diff" th:value="V" th:selected="${ossTypeSearch != null and #arrays.contains(ossTypeSearch, 'V')}"></option>
+                                               		</select>
+                                               	</th:block>
                                             </div>
                                       	</div>
                                  	</div>

@@ -2133,9 +2133,7 @@ var src_fn = {
 	displayVulnerability : function(cellvalue, options, rowObject) {
 		var display = "";
 
-        console.log(cellvalue)
-
-		if(cellvalue) {
+        if(cellvalue) {
 			if(parseInt(cellvalue) >= 9.0 ) {
 				display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">CRITICAL</span>";
 			} else if(parseInt(cellvalue) >= 7.0 ) {

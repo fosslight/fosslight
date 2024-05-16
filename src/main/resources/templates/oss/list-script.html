@@ -81,21 +81,25 @@
                     $('#modifiedDate').attr('placeholder', 'Modified Date');
                	});
                 
+                var input = ["ossName", "licenseName", "homepage", "cvssScore", "cStartDate", "cEndDate", "mStartDate", "mEndDate"];
+        		var checkbox = ["ossNameAllSearchFlag", "licenseNameAllSearchFlag", "homepageAllSearchFlag", "deactivateFlag"];
+        		var singleSelect = ["creator", "modifier", "licenseType"];
+        		var multiSelect = ["ossTypeSearch"];
+        		var textarea = ["copyrights", "summaryDescription"];
+                
+        		var optionSelectedFlag = false;
                 if (typeof localStorage.ossSearchConditions !== "undefined") {
                 	var localStorageSearchConditions = JSON.parse(localStorage.ossSearchConditions);
                 	
                 	if (Date.now() > localStorageSearchConditions.expire) {
                 		localStorage.removeItem("ossSearchConditions");
                 	} else {
-                		var input = ["ossName", "licenseName", "homepage", "cvssScore", "cStartDate", "cEndDate", "mStartDate", "mEndDate"];
-                		var checkbox = ["ossNameAllSearchFlag", "licenseNameAllSearchFlag", "homepageAllSearchFlag", "deactivateFlag"];
-                		var singleSelect = ["creator", "modifier", "licenseType"];
-                		var multiSelect = ["ossTypeSearch"];
-                		var textarea = ["copyrights", "summaryDescription"];
-                		
                 		Object.keys(localStorageSearchConditions).forEach(function(key) {
                 			if (input.includes(key)) {
                 				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+                				if ("ossName" != key && "" != localStorageSearchConditions[key]) {
+                					optionSelectedFlag = true;
+                				}
                 				if ("cStartDate" == key) {
                 					cStartDate = localStorageSearchConditions[key];
                 				} else if ("cEndDate" == key) {
@@ -108,11 +112,14 @@
                 			} else if (checkbox.includes(key)) {
                 				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
                 				if ("Y" == localStorageSearchConditions[key]) $("#" + key).prop("checked", true);
+                				if ("ossNameAllSearchFlag" != key && "" != localStorageSearchConditions[key]) optionSelectedFlag = true;
                 			} else if (singleSelect.includes(key)) {
                 				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+                				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
                 			} else if (multiSelect.includes(key)) {
                 				var ossType = localStorageSearchConditions[key];
                 				if ("" != ossType) {
+                					optionSelectedFlag = true;
                 					ossType = ossType.split("");
                 					$("select[name='"+key+"']").val(ossType).trigger('change');
                 				} else {
@@ -121,15 +128,68 @@
                 				}
                 			} else if (textarea.includes(key)) {
                 				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+                				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
                 			}
                 		});
                 	}
                 } else {
+                	for (var i in input) {
+        				if ("ossName" != input[i]) {
+        					var inputValue = $("input[name='"+input[i]+"']").val();
+        					if ("" != inputValue) {
+        						optionSelectedFlag = true;
+        						break;
+        					}
+        				}
+        			}
+                	
+                	if (!optionSelectedFlag) {
+        				for (var i in checkbox) {
+        					if ("ossNameAllSearchFlag" != checkbox[i]) {
+            					if ("Y" == $("input[name='"+ checkbox[i] +"']").val()) {
+            						optionSelectedFlag = true;
+            						break;
+            					}
+        					}
+        				}
+        			}
+                	
+                	if (!optionSelectedFlag) {
+        				for (var i in singleSelect) {
+        					var selectedValue = $("select[name='"+singleSelect[i]+"'] option:selected").val();
+        					if ("" != selectedValue) {
+        						optionSelectedFlag = true;
+        						break;
+        					}
+        				}
+        			}
+        			
+        			if (!optionSelectedFlag) {
+        				var multiSelectedValue = $("select[name='ossTypeSearch']").select2("val");
+        				if (multiSelectedValue != null) optionSelectedFlag = true;
+        			}
+        			
+        			if (!optionSelectedFlag) {
+        				for (var i in textarea) {
+        					var textareaValue = $("textarea[name='"+textarea[i]+"']").val();
+        					if ("" != textareaValue) {
+        						optionSelectedFlag = true;
+        						break;
+        					}
+        				}
+        			}
+                	
                 	cStartDate = [[${searchBean.cStartDate}]];
                     cEndDate = [[${searchBean.cEndDate}]];
                     mStartDate = [[${searchBean.mStartDate}]];
                     mEndDate = [[${searchBean.mEndDate}]];
                 }
+                
+                if (optionSelectedFlag) {
+        			$(".optionSelected").show();
+        		} else {
+        			$(".optionSelected").hide();
+        		}
                 
                 if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
                 	var cStartDateFormat = cStartDate.substr(4,2) + "/" + cStartDate.substr(6,2) + "/" + cStartDate.substr(0,4);
@@ -178,6 +238,27 @@
                     var localStorageData = oss_lst_fn.serializeObjectHelper();
                     localStorageData.expire = Date.now() + 300000;
                     localStorage.setItem("ossSearchConditions", JSON.stringify(localStorageData));
+                    
+                    optionSelectedFlag = false;
+                    Object.keys(localStorageData).forEach(function(key) {
+            			if (input.includes(key)) {
+            				if ("ossName" != key && "" != localStorageData[key]) optionSelectedFlag = true;
+            			} else if (checkbox.includes(key)) {
+            				if ("ossNameAllSearchFlag" != key && "Y" == localStorageData[key]) optionSelectedFlag = true;
+            			} else if (singleSelect.includes(key)) {
+            				if ("" != localStorageData[key]) optionSelectedFlag = true;
+            			} else if (multiSelect.includes(key)) {
+            				if ("" != localStorageData[key]) optionSelectedFlag = true;
+            			} else if (textarea.includes(key)) {
+            				if ("" != localStorageData[key]) optionSelectedFlag = true;
+            			}
+            		});
+                    
+                    if (optionSelectedFlag) {
+            			$(".optionSelected").show();
+            		} else {
+            			$(".optionSelected").hide();
+            		}
                     
                     $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
                 });

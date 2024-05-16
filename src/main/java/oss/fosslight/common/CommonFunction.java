@@ -341,7 +341,7 @@ public class CommonFunction extends CoTopComponent {
 		return gbuilder.create();
 	}
 	
-	public static String genOptionUsers(String authority) {
+	public static String genOptionUsers(String authority, String userid) {
 		List<T2Users> users = t2UserService.getAuthorityUsers(authority);
 		
         StringBuffer stringbuffer = new StringBuffer();
@@ -349,6 +349,9 @@ public class CommonFunction extends CoTopComponent {
         for (int k = users.size(), j = 0; j < k; j++) {
             T2Users user = users.get(j);
             stringbuffer.append("    <option value='").append(user.getUserId()).append('\'');
+            if (user.getUserId().equalsIgnoreCase(userid)) {
+            	stringbuffer.append(" selected");
+            }
             stringbuffer.append(">").append(user.getUserName()).append("</option>\n");
         }
 

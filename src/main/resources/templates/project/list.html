@@ -34,7 +34,9 @@
                                    		</div>
                                         <div class="col-md-3 pl-3 d-flex justify-content-start">
                                             <div class="input-group-append d-flex align-items-center">
-                                             	<a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'" title="Collapse"></a>
+                                             	<a class="text-blue-gray text-center" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
+                                             		+ Advanced Search <span class="optionSelected text-lg-red text-xs" style="display: none;"><br>option selected</span>
+                                             	</a>
                                          	</div>
                                          	<div class="input-group-append d-flex align-items-center ml-5">
                                            		<input class="form-check-input save-value" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == null or searchBean?.publicYn == 'N'}" type="checkbox">
@@ -167,42 +169,41 @@
                                        	<div class="row">
                                        		<div class="col-md-4">
                                        			<div class="form-group mb-2">
-                                               		<input type="type" name="schBinaryName" class="form-control" th:placeholder="|Binary Name|" th:value="${searchBean?.schBinaryName}">
+                                               		<input type="type" name="schBinaryName" class="form-control save-value" th:placeholder="|Binary Name|" th:value="${searchBean?.schBinaryName}">
                                             	</div>
                                        		</div>
                                        		<div class="col-md-4">
                                            		<div class="form-group mb-2">
-                                              		<input type="type" name="ossName" class="form-control autoComOss" th:placeholder="|OSS Name|" th:value="${searchBean?.ossName}">
+                                              		<input type="type" name="ossName" class="form-control autoComOss save-value" th:placeholder="|OSS Name|" th:value="${searchBean?.ossName}">
                                           		</div>
                                         	</div>
                                        		<div class="col-md-4">
                                           		<div class="form-group mb-2">
-                                               		<input type="type" name="ossVersion" class="form-control autoComOssVersion" th:placeholder="|OSS Version|" th:value="${searchBean?.ossVersion}">
+                                               		<input type="type" name="ossVersion" class="form-control autoComOssVersion save-value" th:placeholder="|OSS Version|" th:value="${searchBean?.ossVersion}">
                                             	</div>
                                         	</div>
                                     	</div>
                                     	<div class="row">
                                        		<div class="col-md-4">
                                             	<div class="form-group mb-2">
-                                                 	<textarea class="form-control" name="comment" th:placeholder="|Additional Information|" rows="3" th:utext="${searchBean?.comment}"></textarea>
+                                                 	<textarea class="form-control save-value" name="comment" th:placeholder="|Additional Information|" rows="3" th:utext="${searchBean?.comment}"></textarea>
                                             	</div>
                                           	</div>
                                        		<div class="col-md-4">
                                           		<div class="form-group mb-2">
-                                              		<textarea class="form-control" name="userComment" th:placeholder="|Comment|" rows="3" th:utext="${searchBean?.userComment}"></textarea>
+                                              		<textarea class="form-control save-value" name="userComment" th:placeholder="|Comment|" rows="3" th:utext="${searchBean?.userComment}"></textarea>
                                             	</div>
                                          	</div>
 											<div class="col-md-4">
 												<div class="row">
 													<div class="col-md-12">
 														<div class="form-group mb-2">
-                                               				<input type="type" name="licenseName" class="form-control autoComLicense" th:placeholder="|License Name|" th:value="${searchBean?.licenseName}">
+                                               				<input type="type" name="licenseName" class="form-control autoComLicense save-value" th:placeholder="|License Name|" th:value="${searchBean?.licenseName}">
                                                			</div>
 													</div>
 													<div th:if="${partnerFlag}" class="col-md-12">
 														<div class="form-group mb-2">
-															<input type="search" name="refPartnerName" class="form-control" th:placeholder="|3rd Party Name|"
-																th:value="${searchBean?.refPartnerName}">
+															<input type="search" name="refPartnerName" class="form-control save-value" th:placeholder="|3rd Party Name|" th:value="${searchBean?.refPartnerName}">
 														</div>
 													</div>
 												</div>
