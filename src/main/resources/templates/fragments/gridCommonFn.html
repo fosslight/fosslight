@@ -1059,7 +1059,7 @@
                                         success: function (data) {
                                             if (data.isValid == 'true') {
                                                 if (data.validMsg && data.validMsg != "") {
-                                                    _popupOss = window.open('/oss/copy/' + data.validMsg + '?ossVersion=' + row['ossVersion'], '', 'width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
+                                                    _popupOss = window.open('/oss/copy/' + data.validMsg + '?ossVersion=' + fn_grid_com.replaceGetParamChar(row['ossVersion']), '', 'width=1100, height=700, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
 
                                                     if (!_popupOss || _popupOss.closed || typeof _popupOss.closed == 'undefined') {
                                                         alertify.alert([[#{msg.common.window.allowpopup}]], function () {
