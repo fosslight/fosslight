@@ -1673,10 +1673,11 @@ public class ProjectController extends CoTopComponent {
 			}
 			
 			try {
+				String packagingFileComment = verificationService.changePackageFileNameCombine(ossNotice.getPrjId());;
 				CommentsHistory commHisBean = new CommentsHistory();
 				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
 				commHisBean.setReferenceId(project.getPrjId());
-				commHisBean.setContents("");
+				commHisBean.setContents(packagingFileComment);
 				commHisBean.setStatus(CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM));
 				
 				commentService.registComment(commHisBean);
@@ -1706,8 +1707,6 @@ public class ProjectController extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
-				
-				verificationService.changePackageFileNameDistributeFormat(ossNotice.getPrjId());
 			}
 		}
 		
