@@ -34,13 +34,13 @@
 				<strong class="left">Open Source Software Notice</strong>
 				<span class="right"><sup th:text="${noticeTitle}"></sup></span>
 			</h2>
-			<th:block th:if="${editCompanyYn == 'Y'}">
+			<th:block th:if="${editNoticeYn == 'Y' && editCompanyYn == 'Y'}">
 				<p>This product from <span th:text="${companyNameFull}"></span> contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.</p>
 			</th:block>
-			<th:block th:if="${editCompanyYn != 'Y'}">
+			<th:block th:if="${editNoticeYn == 'N' || (editNoticeYn == 'Y' && editCompanyYn == 'N')}">
 				<p>This product contains the open source software detailed below. Please refer to the indicated open source licenses (as are included following this notice) for the terms and conditions of their use.</p>
 			</th:block>
-
+			
 			<th:block th:if="${disclosureObligationSize != 0}">
 				<div style="padding:10px;max-width:800px;">
 					<table class="gridtable" width="100%" aria-label="Open source lists under Copyleft license.">
@@ -74,46 +74,48 @@
 						</th:block>
 					</table>
 				</div>
-				<p>
-					<th:block th:if="${editCompanyYn == 'Y' && editDistributionSiteUrlYn == 'Y'}">
-						The source code for the above may be obtained free of charge from <span th:text="${companyNameFull}"></span> at
-						<a th:href="${distributionSiteUrl}" target="_blank" rel="noreferrer noopener">
-							<span th:text="${distributionSiteUrl}"></span>
-						</a>
-					</th:block>
-					<th:block th:if="${editCompanyYn == 'N' && editDistributionSiteUrlYn == 'Y'}">
-						The source code for the above may be obtained free of charge from
-						<a th:href="${distributionSiteUrl}" target="_blank" rel="noreferrer noopener">
-							<span th:text="${distributionSiteUrl}"></span>
-						</a>
-					</th:block>
-					<th:block th:if="${editDistributionSiteUrlYn == 'N'}"></th:block>
-					<th:block th:if="${editDistributionSiteUrlYn == 'Y' && editEmailYn == 'Y'}">
-						<th:block th:if="${editCompanyYn == 'Y'}">
-							<span th:text="${companyNameFull}"></span>
+				<th:block th:if="${editNoticeYn == 'Y'}">
+					<p>
+						<th:block th:if="${editCompanyYn == 'Y' && editDistributionSiteUrlYn == 'Y'}">
+							The source code for the above may be obtained free of charge from <span th:text="${companyNameFull}"></span> at
+							<a th:href="${distributionSiteUrl}" target="_blank" rel="noreferrer noopener">
+								<span th:text="${distributionSiteUrl}"></span>
+							</a>
 						</th:block>
-						<th:block th:if="${editCompanyYn == 'N'}">We</th:block>
-						will also provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to <span th:text="${email}"></span>. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.
-					</th:block>
-					<th:block th:if="${editDistributionSiteUrlYn == 'N' && editEmailYn == 'Y'}">
-						<th:block th:if="${editCompanyYn == 'Y'}">
-							<span th:text="${companyNameFull}"></span>
+						<th:block th:if="${editCompanyYn == 'N' && editDistributionSiteUrlYn == 'Y'}">
+							The source code for the above may be obtained free of charge from
+							<a th:href="${distributionSiteUrl}" target="_blank" rel="noreferrer noopener">
+								<span th:text="${distributionSiteUrl}"></span>
+							</a>
 						</th:block>
-						<th:block th:if="${editCompanyYn == 'N'}">We</th:block>
-						will provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to <span th:text="${email}"></span>. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.
-					</th:block>
-					<th:block th:if="${editEmailYn == 'N'}"></th:block>
-					<br>
-				</p>
+						<th:block th:if="${editDistributionSiteUrlYn == 'N'}"></th:block>
+						<th:block th:if="${editDistributionSiteUrlYn == 'Y' && editEmailYn == 'Y'}">
+							<th:block th:if="${editCompanyYn == 'Y'}">
+								<span th:text="${companyNameFull}"></span>
+							</th:block>
+							<th:block th:if="${editCompanyYn == 'N'}">We</th:block>
+							will also provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to <span th:text="${email}"></span>. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.
+						</th:block>
+						<th:block th:if="${editDistributionSiteUrlYn == 'N' && editEmailYn == 'Y'}">
+							<th:block th:if="${editCompanyYn == 'Y'}">
+								<span th:text="${companyNameFull}"></span>
+							</th:block>
+							<th:block th:if="${editCompanyYn == 'N'}">We</th:block>
+							will provide open source code to you on CD-ROM for a charge covering the cost of performing such distribution (such as the cost of media, shipping, and handling) upon email request to <span th:text="${email}"></span>. This offer is valid to anyone in receipt of this information for a period of three years after our last shipment of this product.
+						</th:block>
+						<th:block th:if="${editEmailYn == 'N'}"></th:block>
+						<br>
+					</p>
+				</th:block>
 			</th:block>
 
 			<th:block th:if="${noticeObligationSize != 0}">
 				<br>
 				<p>Please be informed that
-					<th:block th:if="${editCompanyYn == 'Y'}">
+					<th:block th:if="${editNoticeYn == 'Y' && editCompanyYn == 'Y'}">
 						<span th:text="${companyNameFull}"></span>
 					</th:block>
-					<th:block th:if="${editCompanyYn == 'N'}">this</th:block>
+					<th:block th:if="${editNoticeYn == 'N' || (editNoticeYn == 'Y' && editCompanyYn == 'N')}">this</th:block>
 					product may contain open source software listed in the tables below.
 				</p>
 				<div style="padding:10px;max-width:800px;">
@@ -204,7 +206,7 @@
 				</ul>
 			</th:block>
 
-			<th:block th:if="${editAppendedYn == 'Y'}">
+			<th:block th:if="${editNoticeYn == 'Y' && editAppendedYn == 'Y'}">
 				<p class="bdTop" th:utext="${appended}"></p>
 			</th:block>
 		</div>
