@@ -24,7 +24,13 @@
                                         			<div class="input-group">
                                         				<button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="|+ Add|"></button>
                                                         <input class="save-value" name="defaultSearchType" type="hidden" th:value="PROJECT"/>
-                                                		<input type="search"  class="form-control autoComProjectNm save-value" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}">
+                                                		<input type="text" class="form-control autoComProjectNm save-value" style="border-right: 0px solid #fff;" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}">
+                                                		<div class="input-group-append">
+                                                			<span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
+                                                				<input class="form-check-input save-value" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == null or searchBean?.publicYn == 'N'}" type="checkbox">
+                                                				<label class="form-check-label text-blue-gray text-sm" for="checkbox3" th:text="'My Project'"></label>
+                                                			</span>
+                                                		</div>
                                                 		<div class="input-group-append">
                                                     		<button id="search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
                                                 		</div>
@@ -35,13 +41,9 @@
                                         <div class="col-md-3 pl-3 d-flex justify-content-start">
                                             <div class="input-group-append d-flex align-items-center">
                                              	<a class="text-blue-gray text-center" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
-                                             		+ Advanced Search <span class="optionSelected text-lg-red text-xs" style="display: none;"><br>option selected</span>
+                                             		<span class="row" th:text="'+ Advanced Search'"></span><span class="row ml-3 text-lg-red text-xs optionSelected" style="display: none;" th:text="'option selected'"></span>
                                              	</a>
                                          	</div>
-                                         	<div class="input-group-append d-flex align-items-center ml-5">
-                                           		<input class="form-check-input save-value" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == null or searchBean?.publicYn == 'N'}" type="checkbox">
-                                                <label class="form-check-label text-blue-gray text-sm" for="checkbox3" th:text="'My Project'"></label>
-                                           	</div>
                                         </div>
                                         <div class="col-md-2 pr-3">
                                             <div class="helpLink f-left dropdown float-right mt-1">
