@@ -3210,6 +3210,7 @@
 					, REF_DIV
 					, PRE_OBLIGATION_TYPE
 					, ADMIN_CHECK_YN
+					, REF_OSS_NAME
 					)
 			SELECT
 					#{referenceId}
@@ -3252,6 +3253,7 @@
 					, REFERENCE_DIV
 					, PRE_OBLIGATION_TYPE
 					, ADMIN_CHECK_YN
+					, REF_OSS_NAME
 			FROM OSS_COMPONENTS
 			WHERE COMPONENT_ID = #{refComponentId}
 	</insert>

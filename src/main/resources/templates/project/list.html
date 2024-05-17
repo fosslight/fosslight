@@ -122,7 +122,6 @@
                                                 <div class="form-group mb-2">
                                                     <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
                                                         <select class="form-control select2 save-value" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
-                                                            <option th:value="''"></option>
                                                             <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}">
                                                             	<option th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}" th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}"></option>
                                                             </th:block>
