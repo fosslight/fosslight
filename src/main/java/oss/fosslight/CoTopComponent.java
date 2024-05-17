@@ -29,11 +29,11 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -59,11 +59,22 @@ import oss.fosslight.validation.custom.T2CoAdminValidator;
 public class CoTopComponent {
 	
 	protected static WebApplicationContext applicationContext;
+	protected static ResourceLoader resourceLoader;
 	
 	/* Separation by log type_20210802 */
 	protected static final Logger scheduler_log = LoggerFactory.getLogger("SCHEDULER_LOG");
 	protected static final Logger oss_history_log = LoggerFactory.getLogger("OSS_HISTORY_LOG");
 	protected static final Logger oss_auto_analysis_log = LoggerFactory.getLogger("OSS_AUTO_ANALYSIS_LOG");
+	
+	@SuppressWarnings("static-access")
+	@Autowired
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
+	
+	protected static ResourceLoader getResourceLoader() {
+		return resourceLoader;
+	}
 	
 	@SuppressWarnings("static-access")
 	@Autowired
@@ -250,7 +261,7 @@ public class CoTopComponent {
 		
 		responseHeaders.set("Content-Type", MediaType.APPLICATION_JSON_VALUE + "; charset=utf-8");
 		
-		return new ResponseEntity<Object>(resultMap, responseHeaders, HttpStatus.OK); 
+		return new ResponseEntity<>(resultMap, responseHeaders, HttpStatus.OK); 
 	}
 	
 	protected static Map<String, Object> getGridPagerMap(ComBean vo) {

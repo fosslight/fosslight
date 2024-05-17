@@ -8,12 +8,17 @@ package oss.fosslight.service.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +39,8 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.itextpdf.kernel.pdf.canvas.parser.clipper.Paths;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -1249,4 +1256,46 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
             return;
         }
     }
+
+	@Override
+	public T2File uploadSingleFile(MultipartFile mFile, String fileId, String fileGubn, Path descFilePath, boolean useRandomFileName) {
+		T2File fileInfo = null;
+		if(mFile != null && !mFile.isEmpty()) {
+			try {
+				fileInfo = new T2File();
+				fileInfo.setCreator(loginUserName());
+				fileInfo.setGubn(fileGubn);
+				fileInfo.setOrigNm(mFile.getOriginalFilename());
+				fileInfo.setExt(FilenameUtils.getExtension(fileInfo.getOrigNm()));
+				fileInfo.setLogiNm(fileInfo.getOrigNm());
+				fileInfo.setLogiPath(descFilePath.toString());
+				fileInfo.setContentType(mFile.getContentType());
+				fileInfo.setSize(Long.toString(mFile.getSize()));
+				if(useRandomFileName) {
+					fileInfo.setLogiNm(MessageFormat.format("{0}.{1}", UUID.randomUUID(), fileInfo.getExt()));
+				}
+
+				descFilePath.toFile().mkdirs();
+				
+				Path destinationFile = descFilePath.resolve(fileInfo.getLogiNm());
+				try (InputStream inputStream = mFile.getInputStream()) {
+					Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+				}
+				
+				if(isEmpty(fileId)) {
+					fileId = fileMapper.getFileId();
+				}
+				fileInfo.setFileId(fileId);
+				fileMapper.insertFile(fileInfo);
+			} catch (IOException e) {
+				log.error("Failed upload file {}, {}", loginUserName(), mFile.getOriginalFilename());
+				log.error(e.getMessage(), e);
+				return null;
+			}
+
+		} else {
+			log.warn("MultipartFile is empty");
+		}
+		return fileInfo;
+	}
 }

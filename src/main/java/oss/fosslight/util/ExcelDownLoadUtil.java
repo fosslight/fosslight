@@ -95,7 +95,6 @@ import oss.fosslight.repository.OssMapper;
 import oss.fosslight.repository.SelfCheckMapper;
 import oss.fosslight.service.BinaryDataHistoryService;
 import oss.fosslight.service.CacheService;
-import oss.fosslight.service.ComplianceService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.LicenseService;
 import oss.fosslight.service.OssService;
@@ -125,7 +124,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	private static VerificationService 			verificationService 	= getWebappContext().getBean(VerificationService.class);
 	private static BinaryDataHistoryService 	binaryDataHistoryService 	= getWebappContext().getBean(BinaryDataHistoryService.class);
 	private static VulnerabilityService 		vulnerabilityService 	= getWebappContext().getBean(VulnerabilityService.class);
-	private static ComplianceService 			complianceService = getWebappContext().getBean(ComplianceService.class);
+//	private static ComplianceService 			complianceService = getWebappContext().getBean(ComplianceService.class);
 	private static StatisticsService 			statisticsService = getWebappContext().getBean(StatisticsService.class);
 	private static ProjectService 				prjService	= getWebappContext().getBean(ProjectService.class);
 	private static CacheService					cacheService	= getWebappContext().getBean(CacheService.class);
@@ -2115,38 +2114,38 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 				
 				break;
-			case "modelStatus":
-				Type 			ProjectModelType = new TypeToken<Project>(){}.getType();
-				Project 		ProjectModel	 = (Project) fromJson(dataStr, ProjectModelType);
-				
-				if (!isEmpty(ProjectModel.getModelName())){
-					String[] modelNames = ProjectModel.getModelName().split(",");
-					String[] productGroups = ProjectModel.getProductGroup().split(",");
-					List<String> modelListInfo = new ArrayList<String>();
-					List<String> productGroupListInfo = new ArrayList<String>();
-					
-					for (String modelName : modelNames){
-						modelListInfo.add(modelName);
-					}
-					
-					for (String productGroup : productGroups){
-						productGroupListInfo.add(productGroup);
-					}
-					
-					ProjectModel.setModelListInfo(modelListInfo);
-					ProjectModel.setProductGroups(productGroupListInfo);
-					ProjectModel.setPageListSize(MAX_RECORD_CNT_LIST);
-					
-					Map<String, Object> map = complianceService.getModelList(ProjectModel);
-					
-					if (isMaximumRowCheck((int) map.get("records"))){
-						downloadId	= getModelStatusExcelId((List<Project>) map.get("rows"), ProjectModel);
-					}
-				} else {
-					downloadId	= getModelStatusExcelId(null, null);
-				}
-				
-				break;
+//			case "modelStatus":
+//				Type 			ProjectModelType = new TypeToken<Project>(){}.getType();
+//				Project 		ProjectModel	 = (Project) fromJson(dataStr, ProjectModelType);
+//				
+//				if (!isEmpty(ProjectModel.getModelName())){
+//					String[] modelNames = ProjectModel.getModelName().split(",");
+//					String[] productGroups = ProjectModel.getProductGroup().split(",");
+//					List<String> modelListInfo = new ArrayList<String>();
+//					List<String> productGroupListInfo = new ArrayList<String>();
+//					
+//					for (String modelName : modelNames){
+//						modelListInfo.add(modelName);
+//					}
+//					
+//					for (String productGroup : productGroups){
+//						productGroupListInfo.add(productGroup);
+//					}
+//					
+//					ProjectModel.setModelListInfo(modelListInfo);
+//					ProjectModel.setProductGroups(productGroupListInfo);
+//					ProjectModel.setPageListSize(MAX_RECORD_CNT_LIST);
+//					
+//					Map<String, Object> map = complianceService.getModelList(ProjectModel);
+//					
+//					if (isMaximumRowCheck((int) map.get("records"))){
+//						downloadId	= getModelStatusExcelId((List<Project>) map.get("rows"), ProjectModel);
+//					}
+//				} else {
+//					downloadId	= getModelStatusExcelId(null, null);
+//				}
+//				
+//				break;
 			case "vulnerability" :		//vulnerability 2018-07-26 choye 추가 
 				Type vulnerabilityType = new TypeToken<Vulnerability>(){}.getType();
 				Vulnerability vulnerability = (Vulnerability) fromJson(dataStr, vulnerabilityType);
