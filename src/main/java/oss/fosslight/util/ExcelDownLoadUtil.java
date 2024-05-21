@@ -1490,132 +1490,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return makeExcelFileId(wb,"PartnerList");
 	}
 	
-	private static String getModelStatusExcelId(List<Project> project, Project fileData) throws Exception{
-		Workbook wb = null;
-		Sheet sheet = null;
-		FileInputStream inFile=null;
-
-		try {
-			inFile= new FileInputStream(new File(downloadpath+"/complianceStatus.xlsx"));
-			
-			wb = new XSSFWorkbook(inFile);
-				
-			if (fileData != null){
-				sheet = wb.getSheetAt(0);
-				
-				int idx = 1;
-				List<String[]> rows = new ArrayList<>();
-				int modelListLength = fileData.getModelListInfo().size();
-				int productGroupsLength = fileData.getProductGroups().size();
-				List<String> productGroups = fileData.getProductGroups();
-				List<String> modelInfo = fileData.getModelListInfo();
-				
-				int length = productGroupsLength > modelListLength ? productGroupsLength : modelListLength;
-				
-				for (int i = 0 ; i < length ; i++){
-					List<String> params = new ArrayList<>();
-					
-					// main 정보
-					params.add(Integer.toString(idx++)); // No
-					params.add(productGroupsLength > 0 && productGroupsLength > i ? productGroups.get(i) : ""); // Product Group
-					params.add(modelListLength > 0 && modelListLength > i ? modelInfo.get(i) : ""); // Model(Software) Name
-					
-					rows.add(params.toArray(new String[params.size()]));
-				}
-				
-				//시트 만들기
-				makeSheet2(sheet, rows);
-			}
-			
-			if (project != null && !project.isEmpty()) {
-				sheet = wb.getSheetAt(1);
-				
-				int idx = 1;
-				List<String[]> rows = new ArrayList<>();
-				
-				for (Project bean : project) {
-					List<String> params = new ArrayList<>();
-					
-					// main 정보
-					params.add(Integer.toString(idx++)); 		// No
-					params.add(bean.getModelName()); 	 		// Model(Software) Name
-					params.add(bean.getPrjId()); 		 		// Project ID
-					params.add(bean.getStatus()); 	 	 		// Status
-					params.add(bean.getDistributionType()); 	// Distribution Type
-					params.add(bean.getDestributionStatus()); 	// Distribution Status
-					String distributionDate = avoidNull(bean.getDistributeDeployTime(), "");
-					params.add(isEmpty(bean.getPrjId()) ? "" : CommonFunction.formatDate(distributionDate)); // Distribute Time
-					params.add(isEmpty(bean.getPrjId()) ? CoConstDef.FLAG_NO : CoConstDef.FLAG_YES); // Result
-					params.add(""); 					 		// Comment
-					
-					rows.add(params.toArray(new String[params.size()]));
-				}
-				
-				//시트 만들기
-				makeSheet(sheet, rows);
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e2) {
-				}
-			}
-		}
-		
-		return makeExcelFileId(wb,"Model Status");
-	}
-	
-	private static String getPartnerModelExcelId(List<PartnerMaster> ossList) throws Exception{
-		Workbook wb = null;
-		Sheet sheet = null;
-		FileInputStream inFile=null;
-
-		
-		try {
-			inFile= new FileInputStream(new File(downloadpath+"/complianceStatus.xlsx"));
-			wb = new XSSFWorkbook(inFile);
-			sheet = wb.getSheetAt(2);
-			if (ossList != null && !ossList.isEmpty()) {
-				int idx = 1;
-				List<String[]> rows = new ArrayList<>();
-				
-				for (PartnerMaster bean : ossList) {
-					List<String> params = new ArrayList<>();
-					
-					// main 정보
-					params.add(Integer.toString(idx++)); // No
-					params.add(bean.getPartnerId()); // 3rd Party ID
-					params.add(CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, bean.getStatus())); // Status
-					params.add(bean.getPartnerName()); // 3rd Party Name
-					params.add(bean.getSoftwareName()); // software Name
-					params.add(bean.getSoftwareVersion()); // software Version
-					params.add(bean.getPrjId()); // Used Project ID
-					params.add(CommonFunction.formatDate(bean.getCreatedDate())); // Created Date
-					params.add(""); // Comment
-					
-					rows.add(params.toArray(new String[params.size()]));
-				}
-				
-				//시트 만들기
-				makeSheet(sheet, rows);
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e2) {
-				}
-			}
-		}
-		
-		return makeExcelFileId(wb,"3rd Party List");
-	}
-	
 	/**
 	 * 
 	 * @param batList
@@ -2090,30 +1964,30 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				downloadId	= getPartnerExcelId((List<PartnerMaster>) partnerList.get("rows"));
 				
 				break;
-			case "3rdModel" :		//3rd Party List
-				Type 				partnerModelType = new TypeToken<PartnerMaster>(){}.getType();
-				PartnerMaster 		partnerModel	  = (PartnerMaster) fromJson(dataStr, partnerModelType);
-	
-				if (partnerModel.getStatus() != null) {
-					String statuses = partnerModel.getStatus();
-					
-					if (!isEmpty(statuses)) {
-						String[] arrStatuses = statuses.split(",");
-						partnerModel.setArrStatuses(arrStatuses);
-					}
-				}
-				
-				partnerModel.setStartIndex(0);
-				partnerModel.setPageListSize(MAX_RECORD_CNT);
-				partnerModel.setModelFlag(CoConstDef.FLAG_YES);
-				
-				Map<String, Object> partnerModelList =	 partnerService.getPartnerStatusList(partnerModel);
-				
-				if (isMaximumRowCheck((int) partnerModelList.get("records"))){
-					downloadId	= getPartnerModelExcelId((List<PartnerMaster>) partnerModelList.get("rows"));
-				}
-				
-				break;
+//			case "3rdModel" :		//3rd Party List
+//				Type 				partnerModelType = new TypeToken<PartnerMaster>(){}.getType();
+//				PartnerMaster 		partnerModel	  = (PartnerMaster) fromJson(dataStr, partnerModelType);
+//	
+//				if (partnerModel.getStatus() != null) {
+//					String statuses = partnerModel.getStatus();
+//					
+//					if (!isEmpty(statuses)) {
+//						String[] arrStatuses = statuses.split(",");
+//						partnerModel.setArrStatuses(arrStatuses);
+//					}
+//				}
+//				
+//				partnerModel.setStartIndex(0);
+//				partnerModel.setPageListSize(MAX_RECORD_CNT);
+//				partnerModel.setModelFlag(CoConstDef.FLAG_YES);
+//				
+//				Map<String, Object> partnerModelList =	 partnerService.getPartnerStatusList(partnerModel);
+//				
+//				if (isMaximumRowCheck((int) partnerModelList.get("records"))){
+//					downloadId	= getPartnerModelExcelId((List<PartnerMaster>) partnerModelList.get("rows"));
+//				}
+//				
+//				break;
 //			case "modelStatus":
 //				Type 			ProjectModelType = new TypeToken<Project>(){}.getType();
 //				Project 		ProjectModel	 = (Project) fromJson(dataStr, ProjectModelType);
