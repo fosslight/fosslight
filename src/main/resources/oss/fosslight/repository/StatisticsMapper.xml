@@ -23,7 +23,7 @@
 			 INNER JOIN T2_AUTHORITIES AUTH
 			    ON USR.USER_ID = AUTH.USER_ID 
 			   AND AUTH.AUTHORITY='ROLE_ADMIN' 
-			   AND USR.USER_ID NOT IN ('oscAdmin', 'sungwon.yun')
+			   AND USR.USER_ID NOT IN ('sungwon.yun')
 			   AND USR.USE_YN = 'Y'
 		 </if>
 		 <if test="@oss.fosslight.util.StringUtil@equals('DST', categoryType)">
@@ -40,7 +40,7 @@
 		 INNER JOIN T2_AUTHORITIES AUTH
 		    ON USR.USER_ID = AUTH.USER_ID 
 		   AND AUTH.AUTHORITY='ROLE_ADMIN' 
-		   AND (USR.USER_ID IN ('oscAdmin', 'sungwon.yun')
+		   AND (USR.USER_ID IN ('sungwon.yun')
 		   		OR USR.USE_YN = 'N')
 	</select>
 	<select id="getDivisionalProjectChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">

@@ -44,6 +44,7 @@ import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.cyclonedx.BomGeneratorFactory;
 import org.cyclonedx.CycloneDxSchema;
+import org.cyclonedx.exception.GeneratorException;
 import org.cyclonedx.model.Bom;
 import org.cyclonedx.model.Component;
 import org.cyclonedx.model.Dependency;
@@ -1304,8 +1305,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Map<String, String> expandInfo = projectExpandInfo.get(param.getPrjId());
 				String nvdMaxScore = "";
 				
-				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), null);
-				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(param.getPrjId(), null);
+				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), param.getReferenceDiv());
+				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(param.getPrjId(), param.getReferenceDiv());
 				
 				
 				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
@@ -1948,6 +1949,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				Type 				projectType = new TypeToken<Project>(){}.getType();
 				Project 			project 	= (Project) fromJson(dataStr, projectType);
+				
+				List<String> watcherList = new ArrayList<>();
+				String[] watchers = project.getWatchers();
+				for (String watcher : watchers) {
+					if (!isEmpty(watcher)) watcherList.add(watcher);
+				}
+				project.setWatchers(watcherList.toArray(new String[watcherList.size()]));
+				
 				project.setStartIndex(0);
 				project.setPageListSize(MAX_RECORD_CNT);
 				project.setExcelDownloadFlag(CoConstDef.FLAG_YES);
@@ -2075,6 +2084,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						partner.setArrStatuses(arrStatuses);
 					}
 				}
+				
+				List<String> partnerWatcherList = new ArrayList<>();
+				String[] partnerWatchers = partner.getWatchers();
+				for (String partnerWatcher : partnerWatchers) {
+					if (!isEmpty(partnerWatcher)) partnerWatcherList.add(partnerWatcher);
+				}
+				partner.setWatchers(partnerWatcherList.toArray(new String[partnerWatcherList.size()]));
 				
 				partner.setStartIndex(0);
 				partner.setPageListSize(MAX_RECORD_CNT);
@@ -4709,37 +4725,73 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			String beforePrjId = map.get("beforePrjId").toString();
 			String afterPrjId = map.get("afterPrjId").toString();			
 			
+			Project beforePrjInfo = projectService.getProjectBasicInfo(beforePrjId);
+			String beforeReferenceDiv = "";
+			
 			ProjectIdentification beforeIdentification = new ProjectIdentification();
-			beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 			beforeIdentification.setReferenceId(beforePrjId);
-			beforeIdentification.setMerge("N");
+			
+			if(!beforePrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				beforeIdentification.setMerge("N");
+			} else {
+				beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
+				beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			}
+			
+			Project afterPrjInfo = projectService.getProjectBasicInfo(afterPrjId);
+			String afterReferenceDiv = "";
 			
 			ProjectIdentification AfterIdentification = new ProjectIdentification();
-			AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 			AfterIdentification.setReferenceId(afterPrjId);
-			AfterIdentification.setMerge("N");
+			
+			if(!afterPrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				AfterIdentification.setMerge("N");
+			} else {
+				afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
+				AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+			}
 			
 			Map<String, Object> beforeBom = new HashMap<String, Object>();
 			Map<String, Object> afterBom = new HashMap<String, Object>();
+			List<ProjectIdentification> beforeBomList = null;
+			List<ProjectIdentification> afterBomList = null;
 			
-			try {
-				beforeBom = projectController.getOssComponentDataInfo(beforeIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
+			beforeBom = projectController.getOssComponentDataInfo(beforeIdentification, beforeReferenceDiv);
+			if (beforeReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+				if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
+				} else {
+					beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
+				}
+			} else {
+				if (!beforeBom.containsKey("mainData") || (List<ProjectIdentification>) beforeBom.get("mainData") == null) {
+				} else {
+					beforeBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) beforeBom.get("mainData"));
+				}
 			}
 			
-			try {
-				afterBom = projectController.getOssComponentDataInfo(AfterIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
+			afterBom = projectController.getOssComponentDataInfo(AfterIdentification, afterReferenceDiv);
+			if (afterReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+				if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
+				} else {
+					afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
+				}
+			} else {
+				if (!afterBom.containsKey("mainData") || (List<ProjectIdentification>) afterBom.get("mainData") == null) {
+				} else {
+					afterBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) afterBom.get("mainData"));
+				}
 			}
 			
-			if ((List<ProjectIdentification>) beforeBom.get("rows") == null || (List<ProjectIdentification>) afterBom.get("rows") == null) {// before, after값 중 하나라도 null이 있으면 비교 불가함. 
+			
+			if (beforeBomList == null || afterBomList == null) {// before, after값 중 하나라도 null이 있으면 비교 불가함. 
 				throw new Exception(); 
 			}
 			
-			String flag = "excel";
-			List<Map<String, String>> bomCompareListExcel = prjService.getBomCompare((List<ProjectIdentification>) beforeBom.get("rows"), (List<ProjectIdentification>) afterBom.get("rows"), flag);
+			List<Map<String, String>> bomCompareListExcel = prjService.getBomCompare(beforeBomList, afterBomList, "excel");
 			
 			try {
 				inFile= new FileInputStream(new File(downloadpath + "/BOM_Compare.xlsx")); 
@@ -4891,10 +4943,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if (type.toUpperCase().endsWith("JSON")) {
 				fw.write(BomGeneratorFactory.createJson(CycloneDxSchema.Version.VERSION_14, bom).toJsonString());
 			} else {
-				fw.write(String.valueOf(BomGeneratorFactory.createXml(CycloneDxSchema.Version.VERSION_14, bom)));
+				fw.write(BomGeneratorFactory.createXml(CycloneDxSchema.Version.VERSION_14, bom).toXmlString());
 			}
 			fileId = fileService.registFileDownload(excelFilePath, fileName + ext, logiFileName);
-		} catch (IOException e) {
+		} catch (IOException | GeneratorException e) {
 			log.error(e.getMessage(), e);
 		} finally {
 			if (fw != null) {
@@ -5130,8 +5182,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		bom.setComponents(componentList);
-		bom.setDependencies(dependencyList);
-		bom.setVulnerabilities(vulnerablityList);
+		if (!dependencyList.isEmpty()) bom.setDependencies(dependencyList);
+		if (!vulnerablityList.isEmpty()) bom.setVulnerabilities(vulnerablityList);
 	
 		return bom;
 	}

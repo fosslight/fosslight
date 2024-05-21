@@ -47,9 +47,49 @@ var com_evt = {
 					}
 				} else {
 					if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
-						alertify.alert('<spring:message code="msg.project.validation.error" />');
+						var customKeys = [];
+						var keys = Object.keys(bomValidMsgData);
+						var unconfirmedLicenseCnt = 0;
 						
-						return false;
+						keys.forEach(function(obj){
+							var warningMsg = bomValidMsgData[obj];
+							if ("Unconfirmed license" == warningMsg) {
+								unconfirmedLicenseCnt++;
+								return false;
+							}
+							
+							if (obj.indexOf(".") > -1) {
+								var key = obj.split(".")[1];
+								if (!customKeys.includes(key)) customKeys.push(key);
+							}
+						});
+						
+						if (unconfirmedLicenseCnt > 0) {
+							alertify.alert('<spring:message code="msg.project.validation.error" />');
+							
+							return false;
+						}
+						
+						var adminCheckList = $("#bomList").jqGrid('getGridParam','data').filter(function(element, index) {
+							var adminCheckYn = element.adminCheckYn;
+							return "Y" == adminCheckYn;
+						});
+						
+						if (adminCheckList.length > 0) {
+							var includeIds = adminCheckList.filter(function(cur) {
+								return customKeys.includes(cur.componentId);
+							});
+			
+							if (includeIds.length != customKeys.length) {
+								alertify.alert('<spring:message code="msg.project.validation.error" />');
+				
+								return false;
+							}
+						} else {
+							alertify.alert('<spring:message code="msg.project.validation.error" />');
+			
+							return false;
+						}
 					}
 				}
 				
@@ -68,7 +108,7 @@ var com_evt = {
 					com_fn.checkSave(data, "CONF");	
 				} else {		 		
 					// 머지 체크
-					if("Y"!= $("#mergeYn").val()){
+ 					if("Y"!= $("#mergeYn").val()){
 						alertify.alert('<spring:message code="msg.project.required.merge" />', function(){});
 						com_fn.fnTabChange($(".tabMenu a:eq(5)"));	
 
@@ -92,7 +132,7 @@ var com_evt = {
 	 					if($("#ignoreBinaryDbFlag")) {
 							data = {"prjId" : '${project.prjId}', "identificationStatus" : "CONF", "userComment" : replaceWithLink(CKEDITOR.instances['editor'].getData()), "ignoreBinaryDbFlag" : $("#ignoreBinaryDbFlag").val()};
 						}
-
+ 
 						loading.show();
 						$.ajax({
 							url :'<c:url value="/project/verification/reviewReportAjax?prjId=${project.prjId}"/>',
@@ -108,7 +148,7 @@ var com_evt = {
 							}
 						});
 
-	 					com_fn.checkSave(data, "CONF");	
+	 					com_fn.checkSave(data, "CONF");
 					} else {
 						alertify.alert('<spring:message code="msg.project.check.save" />', function(){});
 					}				
@@ -410,7 +450,6 @@ var com_fn = {
 		var btn_Analysis = $(".idenAnalysis");
 		var btn_Analysis_Result = $(".idenAnalysisResult");
 		var btn_check = $(".btnCheck");
-		var btn_supplement_Notice = $(".supplementNotice");
 		
 		if(role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
 			switch(status){
@@ -438,7 +477,7 @@ var com_fn = {
 				case "CONF":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
-					btn_Analysis_Result.hide(); btn_supplement_Notice.hide();
+					btn_Analysis_Result.hide();
 					btn_check.hide();
 
 					break;
@@ -472,7 +511,7 @@ var com_fn = {
 				case "CONF":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();
-					btn_Analysis_Result.hide(); btn_supplement_Notice.hide();
+					btn_Analysis_Result.hide();
 					btn_check.hide();
 
 					break;

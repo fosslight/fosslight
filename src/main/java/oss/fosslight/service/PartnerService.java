@@ -31,7 +31,7 @@ public interface PartnerService extends HistoryConfig{
 
 	public List<T2Users> getUserList(T2Users t2Users);
 
-	public void changeStatus(PartnerMaster partnerMaster);
+	public void changeStatus(PartnerMaster partnerMaster, boolean isCoReviewer);
 
 	public List<PartnerMaster> getPartnerSwNmList(PartnerMaster partnerMaster);
 
@@ -56,6 +56,8 @@ public interface PartnerService extends HistoryConfig{
 	public boolean existsWatcher(PartnerMaster project);
 	
 	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster);
+	
+	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster, boolean coReview);
 	
 	public Map<String, Object> getFilterdList(Map<String, Object> paramMap);
 

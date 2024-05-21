@@ -120,6 +120,8 @@ input.btnCLight {height:20px;padding-bottom:1px;line-height:auto;}
 .btnSet.confirm span {background-position:left -32px;}
 .btnSet.review span {background-position:left -62px;}
 .btnSet.reject span {background-position:left -150px;}
+.btnSet.autoReview span {background-position:left -62px;}
+.btnSet.autoReview.ing span {display:block;padding:0 0 0 18px;background: url("../images/img_timer.png") no-repeat left -2px;}
 /**/
 .smallDelete {display:inline-block;width:9px;height:9px;line-height:1000%;font-size:0 !important;overflow:hidden;cursor:pointer;border:0;background: url("../images/bg_btn.png") no-repeat left -90px;}
 .errorMsgDel {display:inline-block;width:25px;height:25px;line-height:1000%;font-size:0 !important;overflow:hidden;cursor:pointer;border:0;background: url("../images/bg_btn.png") no-repeat right -90px;position:absolute;top:5px;left:94%;}

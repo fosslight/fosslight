@@ -27,5 +27,10 @@ public interface ApiOssMapper {
 
 	List<HashMap<String, Object>> getOssInfoAllWithNick();
 
-	List<HashMap<String, Object>> getOssAllNickNameList(); 
+	List<HashMap<String, Object>> getOssAllNickNameList();
+
+	List<String> getDownloadLocationListByOssName(String ossName);
+
+	List<String> getHomepageListByOssName(String ossName);
+
 }

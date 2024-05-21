@@ -54,6 +54,8 @@ public interface T2UserService extends UserDetailsService {
 	public T2Users checkApiUserAuth(String _token);
 	
 	public T2Users checkApiUserAuthAndSetSession(String _token);
+
+	public T2Users changeSession(String userId);
 	
 	public boolean procToken(T2Users vo);
 	

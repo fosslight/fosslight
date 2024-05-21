@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
-<script type="text/javascript" src="https://code.highcharts.com/highcharts.src.js"></script>
+<script src="<c:url value="/js/highcharts.js"/>"></script>
 
 <script type="text/javascript">
 var divisionList = new Array();

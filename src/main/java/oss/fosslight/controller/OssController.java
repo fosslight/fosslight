@@ -1530,7 +1530,8 @@ public class OssController extends CoTopComponent{
 			Model model,
 			@PathVariable String targetName) {
 		Map<String, Object> resMap = new HashMap<>();
-		Map<String, Object> map = null;
+		resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
+		/*Map<String, Object> map = null;
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		
 		switch(targetName.toUpperCase()) {
@@ -1588,7 +1589,7 @@ public class OssController extends CoTopComponent{
 			}
 			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
 					.collect(Collectors.toList()));
-		}
+		}*/
 		
 		return makeJsonResponseHeader(resMap);
 	}
@@ -1723,7 +1724,7 @@ public class OssController extends CoTopComponent{
 			downloadId = ExcelDownLoadUtil.getExcelDownloadId("autoAnalysis", ossBean.getPrjId(), RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
 			
 			if (!isEmpty(downloadId)) {
-				result = ossService.startAnalysis(ossBean.getPrjId(), downloadId);
+				result = ossService.startAnalysis(ossBean.getPrjId(), downloadId, null);
 				return makeJsonResponseHeader(result);
 			}
 			

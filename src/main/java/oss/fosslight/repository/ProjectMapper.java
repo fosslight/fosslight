@@ -380,6 +380,8 @@ public interface ProjectMapper {
 	void copySecurityDataForProject(Project project);
 	
 	List<OssComponents> checkSelectDownloadFile(Project project);
+	
+	List<ProjectIdentification> checkSelectDownloadFileForBOM(Project project);
 
 	List<OssComponents> getDependenciesDataList(Project project);
 

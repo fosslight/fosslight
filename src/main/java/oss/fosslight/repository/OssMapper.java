@@ -197,6 +197,8 @@ public interface OssMapper {
 	
 	void deleteOssAnalysisList(@Param("prjId") String prjId);
 	
+	void deleteOssAnalysis(@Param("prjId") String prjId);
+	
 	int insertOssAnalysisList(OssMaster bean);
 	
 	int updateOssAnalysisList(OssMaster bean);
@@ -204,8 +206,12 @@ public interface OssMapper {
 	List<OssAnalysis> selectOssAnalysisList(OssMaster bean);
 	
 	void setOssAnalysisStatus(OssMaster bean);
+
+	String getOssAnalysisStatus(@Param("prjId") String prjId);
 	
 	OssAnalysis getNewestOssInfo(OssAnalysis bean);
+
+	OssAnalysis getNewestOssInfo2(OssAnalysis bean);
 	
 	List<OssMaster> getNewestOssInfoByOssMaster(OssMaster bean);
 	

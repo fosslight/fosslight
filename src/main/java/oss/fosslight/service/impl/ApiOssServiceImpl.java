@@ -5,24 +5,24 @@
 
 package oss.fosslight.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.ApiOssMapper;
-import oss.fosslight.service.ApiOssService;
+import oss.fosslight.service.*;
 import oss.fosslight.util.StringUtil;
 
+import java.util.*;
+import java.util.stream.Collectors;
+@Slf4j
 @Service
-public class ApiOssServiceImpl implements ApiOssService {
+public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService{
 	/** The api oss mapper. */
 	@Autowired ApiOssMapper apiOssMapper;
+	@Autowired OssService ossService;
+	@Autowired HistoryService historyService;
 
 	@Override
 	public List<Map<String, Object>> getOssInfo(Map<String, Object> paramMap) {
@@ -45,7 +45,6 @@ public class ApiOssServiceImpl implements ApiOssService {
 		return apiOssMapper.getLicenseInfo(licenseName);
 	}
 	
-	
 	public String[] getOssNickNameListByOssName(String ossName) {
 		List<String> nickList = null;
 		if (!StringUtil.isEmpty(ossName)) {
@@ -60,5 +59,4 @@ public class ApiOssServiceImpl implements ApiOssService {
 		nickList = (nickList != null ? nickList : Collections.emptyList());
 		return nickList.toArray(new String[nickList.size()]);
 	}
-	
 }
