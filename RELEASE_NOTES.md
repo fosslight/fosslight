@@ -6,6 +6,23 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+# [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
+### New
+* Add 'sheetNames' parameter in oss report upload APIs
+  - /api/v1/oss_report_bin
+  - /api/v1/oss_report_dep
+  - /api/v1/oss_report_src
+  - /api/v1/oss_report_selfcheck
+
+### Changed
+* Modify uploaded packaging file size from 4GB to 5GB
+* Update CheckOSSName Button UI as disabled in DEP tab because it cannot be used in DEP tab
+* Notice Text Format was changed to include open source homapage link
+* Change Distribution Type Names
+* Some Mapper was changed:
+  * Apply DEPENDENCIES and REF_OSS_NAME in mapper for component copy
+  * Change DEPENDENCIES Column data type as text in DB
+
 # [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-11-23)
 ### New
 * Added new API that can add a watcher in project, 3rd party, self-check. (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add)
