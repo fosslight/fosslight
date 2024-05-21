@@ -146,8 +146,14 @@ var Ctrl_fn = {
 					cleanErrMsg("ossList", rowId);
 					
 					var rowdata = target.getRowData(rowId);
-					rowdata["checkName"] = rowdata["checkName"].split("redirect")[0];
-					rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig,"");
+ 					rowdata["checkName"] = rowdata["checkName"].split("redirect")[0];
+ 					if (rowdata["checkName"].indexOf("<div") > -1) {
+						var checkName = rowdata["checkName"];
+						var divHtml = checkName.substr(checkName.indexOf("<div"), checkName.indexOf("</div>"));
+						checkName = checkName.replace(divHtml, "");
+						rowdata["checkName"] = checkName;
+					}
+ 					rowdata["checkName"] = rowdata["checkName"].replace(/(<([^>]+)>)/ig,"");
 					rowdata["componentIdList"] = rowdata["componentIdList"].split(",");
 					
 					if ('identification' == targetName) {
@@ -161,7 +167,7 @@ var Ctrl_fn = {
 						rowdata["refPrjId"] = commentId;
 						rowdata["referenceDiv"] = referenceDiv;
 					}
-										
+					
 					$.ajax({
 						url : '/oss/saveOssCheckName/' + targetName,
 						type : 'POST',
