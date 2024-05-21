@@ -4273,8 +4273,8 @@ public class ProjectController extends CoTopComponent {
 					file.setCreator(loginUserName());
 					list = fileService.uploadNoticeXMLFile(req, file, fileId, prjId);
 				}
-				prj.setSrcAndroidNoticeFileId(list.get(0).getRegistFileId());
-				prj.setSrcAndroidNoticeXmlId(list.get(1).getRegistFileId());
+				prj.setSrcAndroidNoticeXmlId(list.get(0).getRegistFileId());
+				prj.setSrcAndroidNoticeFileId(list.get(1).getRegistFileId());
 
 				resultList.add(list);
 				resultList.add(fileType);
