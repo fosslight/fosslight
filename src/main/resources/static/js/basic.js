@@ -3495,7 +3495,6 @@ function resetForm(el) {
 
         $(this).find('.select2').each(function () {
             var $select = $(this);
-            $select.find('option:selected').remove();
             $select.val(null).trigger('change');
         })
     });
