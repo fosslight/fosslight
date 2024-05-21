@@ -6,6 +6,23 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+# [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
+### New
+* oss report API 들에 'sheetNames' parameter가 추가
+  - /api/v1/oss_report_bin
+  - /api/v1/oss_report_dep
+  - /api/v1/oss_report_src
+  - /api/v1/oss_report_selfcheck
+
+### Changed
+* 패키징 파일 업로드 가능 사이즈가 4GB에서 5GB로 변경
+* DEP탭에서는 CheckOSSName 버튼을 사용할 수 없으므로, 버튼 UI disabled 처리
+* Notice 파일의 Text Format에 open source homapage link 추가
+* Distribution Type 이름 변경
+* Mapper 값 변경:
+  * Component 복사 시, DEPENDENCIES와 REF_OSS_NAME 추가
+  * DEPENDENCIES Column의 data type을 text 로 변경
+
 ## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-11-23)
 
 ### New
