@@ -361,6 +361,7 @@ public class PartnerController extends CoTopComponent{
 		
 		try {
 			partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+			partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
 			
 			CommonFunction.setPartnerService(partnerService);
 			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
