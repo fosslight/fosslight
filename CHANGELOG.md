@@ -33,7 +33,6 @@
 - Bug fix where SPDX export failed because 'exclude' data was included @FOSSLight-dev (#1042)
 - Bug fix where CycloneDX file is not generated due to empty dependency info @FOSSLight-dev (#1042)
 
-
 ---
 
 ## v1.6.2 (19/12/2023)
