@@ -200,11 +200,11 @@
 										<th:block th:each="vulnerability_reCalc: ${vulnerability_prj_recalc_oss_info}">
 											<tr>
 												<th align="left" style="padding:5px;background:#f0f0f0;">OSS Name</th>
-												<td style="padding:5px;" colspan="2" th:block="${vulnerability_reCalc.ossName}"></td>
+												<td style="padding:5px;" colspan="2" th:text="${vulnerability_reCalc.ossName}"></td>
 											</tr>
 											<tr>
 												<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
-												<td style="padding:5px;" colspan="2" th:block="${vulnerability_reCalc.ossVersion}"></td>
+												<td style="padding:5px;" colspan="2" th:text="${vulnerability_reCalc.ossVersion}"></td>
 											</tr>
 											<tr>
 												<th align="left" style="padding:5px;background:#f0f0f0;">CVE ID</th>
