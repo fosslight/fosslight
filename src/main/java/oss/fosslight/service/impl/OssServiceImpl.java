@@ -293,16 +293,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public Map<String, Object> getOssPopupList(OssMaster ossMaster) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		
-		ossMaster.setOssName(CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssName());
-		
-		int records = ossMapper.selectOssPopupTotalCount(ossMaster);
-		ossMaster.setTotListSize(records);
-		List<OssMaster> list = ossMapper.selectOssPopupList(ossMaster);
-		
-		map.put("page", ossMaster.getCurPage());
-		map.put("total", ossMaster.getTotBlockSize());
-		map.put("records", records);
-		map.put("rows", list);
+		if (!isEmpty(ossMaster.getOssId()) && CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()) != null) {
+			ossMaster.setOssName(CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssName());
+			
+			int records = ossMapper.selectOssPopupTotalCount(ossMaster);
+			ossMaster.setTotListSize(records);
+			List<OssMaster> list = ossMapper.selectOssPopupList(ossMaster);
+			
+			map.put("page", ossMaster.getCurPage());
+			map.put("total", ossMaster.getTotBlockSize());
+			map.put("records", records);
+			map.put("rows", list);
+		}
 		
 		return map;
 	}

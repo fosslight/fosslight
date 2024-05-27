@@ -170,9 +170,9 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		String errMsg = "";
 		List<OssComponents> reportData = new ArrayList<OssComponents>();
 		List<String> errMsgList = new ArrayList<>();
-		
+		Map<String, String> emptyErrMsg = new HashMap<>();
 		try {
-			if (!ExcelUtil.readReport(readType, true, sheet, ufile.getRegistSeq(), reportData, errMsgList, exactMatchFlag)) {
+			if (!ExcelUtil.readReport(readType, true, sheet, ufile.getRegistSeq(), reportData, errMsgList, emptyErrMsg, exactMatchFlag)) {
 				for (String s : errMsgList) { // error 처리
 					if (isEmpty(s)) {
 						continue;

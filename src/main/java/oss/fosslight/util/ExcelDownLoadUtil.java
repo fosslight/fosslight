@@ -704,9 +704,17 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					Font font = WorkbookFactory.create(true).createFont();
 					
 					if (isSelfCheck) {
-						makeSheetAddWarningMsg(sheet, rows, startIdx, false, font);
+						makeSheetAddWarningMsg(type, sheet, rows, startIdx, false, font);
 					} else {
-						makeSheetAddWarningMsg(sheet, rows, startIdx, true, font);
+						makeSheetAddWarningMsg(type, sheet, rows, startIdx, true, font);
+					}
+					
+					if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
+						sheet.setColumnHidden(11, true);
+						sheet.setColumnHidden(12, true);
+					} else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
+						sheet.setColumnHidden(16, true);
+						sheet.setColumnHidden(17, true);
 					}
 				} catch (IOException e) {
 					log.error(e.getMessage(), e);
@@ -905,13 +913,17 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 	}
 	
-	private static void makeSheetAddWarningMsg(Sheet sheet, List<String[]> rows, int templateRowNum, boolean useLastCellComment, Font font) {
+	private static void makeSheetAddWarningMsg(String type, Sheet sheet, List<String[]> rows, int templateRowNum, boolean useLastCellComment, Font font) {
 		int startRow= 1;
 		int startCol = 0;
 		int endCol = 0;
 		if (rows.isEmpty()){
 		}else{
-			endCol = rows.get(0).length-1;
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
+				endCol = rows.get(0).length-3;
+			} else {
+				endCol = rows.get(0).length-1;
+			}
 		}
 		int shiftRowNum = rows.size();
 		

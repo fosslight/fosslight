@@ -204,11 +204,11 @@
 					)
 				</if>
 <!-- 			</if> -->
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
+<!-- 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
-			</if>
+			</if> -->
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
-				AND T1.PRJ_NAME LIKE CONCAT('%', REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%') 
+				AND (T1.PRJ_NAME LIKE CONCAT('%', REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%') OR T1.PRJ_ID = #{prjName}) 
 		 	</if>	
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
 				AND T1.PRJ_VERSION LIKE CONCAT(REGEXP_REPLACE(#{prjVersion}, '_', '\\\\_'),'%')
@@ -385,6 +385,7 @@
 					, CASE WHEN T1.VERIFICATION_STATUS = 'CONF' THEN IFNULL(T1.NOTICE_FILE_ID, '') ELSE '' END AS NOTICE_FILE_ID
 					, CASE WHEN T1.IDENTIFICATION_STATUS = 'CONF' THEN IFNULL(T1.REVIEW_REPORT_FILE_ID, '') ELSE '' END AS REVIEW_REPORT_FILE_ID
 					, T1.REVIEWER
+					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.REVIEWER  = USER_ID), T1.REVIEWER) AS REVIEWER_NAME
 					, T1.DIVISION
 					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR  = USER_ID), T1.CREATOR) AS CREATOR
 					, T1.CREATED_DATE
@@ -463,11 +464,11 @@
 					)
 				</if>
 <!-- 			</if> -->
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
+<!-- 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
-			</if>
+			</if> -->
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
-				AND T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%') 
+				AND (T1.PRJ_ID = #{prjName} OR T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%'))
 		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
 				AND T1.PRJ_VERSION LIKE CONCAT(REGEXP_REPLACE(#{prjVersion}, '_', '\\\\_'),'%')
@@ -2829,6 +2830,9 @@
 			, BAR.GUIREPORT_FLAG
 		</if>
 			, M.REF_OSS_NAME
+		<if test="@oss.fosslight.util.StringUtil@equals('14', referenceDiv) or @oss.fosslight.util.StringUtil@equals('15', referenceDiv)">
+			, M.TLSH, M.CHECK_SUM
+		</if>
 	   FROM OSS_COMPONENTS M
 	   LEFT OUTER JOIN OSS_MASTER L1 
 		       ON M.OSS_NAME = L1.OSS_NAME
@@ -3405,6 +3409,12 @@
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 						, REF_OSS_NAME
 						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(tlsh)">
+						, TLSH
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
+						, CHECK_SUM
+						</if>
 					)
 			VALUES
 					(
@@ -3468,6 +3478,12 @@
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 						, #{refOssName}
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(tlsh)">
+						, #{tlsh}
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
+						, #{checkSum}
 						</if>
 					)
 	</insert>

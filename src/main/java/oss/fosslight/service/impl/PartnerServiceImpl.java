@@ -113,6 +113,20 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		List<PartnerMaster> list = partnerMapper.selectPartnerList(partnerMaster);
 		
 		if (list != null) {
+			boolean isNumberic = false;
+			if (!isEmpty(partnerMaster.getPartnerName())) {
+				isNumberic = partnerMaster.getPartnerName().chars().allMatch(Character::isDigit);
+			}
+			if (isNumberic) {
+				List<PartnerMaster> filteredList = list.stream().filter(e -> e.getPartnerId().equalsIgnoreCase(partnerMaster.getPartnerName())).collect(Collectors.toList());
+				if (filteredList != null && !filteredList.isEmpty()) {
+					List<PartnerMaster> sortedList = new ArrayList<>();
+					sortedList.addAll(filteredList);
+					sortedList.addAll(list.stream().filter(e -> !e.getPartnerId().equalsIgnoreCase(partnerMaster.getPartnerName())).collect(Collectors.toList()));
+					list = sortedList;
+				}
+			}
+			
 			list.forEach(bean -> {
 				String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
 				if (conversionCveInfo != null) {

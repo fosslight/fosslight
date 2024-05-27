@@ -346,6 +346,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private String changeFlag;
 	private String addFlag;
 	
+	private String tlsh;
+	private String checkSum;
+	
 	private List<ProjectIdentification> deduplicatedComponentLicenseList;
 	
 	public String getRedirectLocation() {
@@ -2136,5 +2139,21 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setDeduplicatedComponentLicenseList(List<ProjectIdentification> deduplicatedComponentLicenseList) {
 		this.deduplicatedComponentLicenseList = deduplicatedComponentLicenseList;
+	}
+
+	public String getTlsh() {
+		return tlsh;
+	}
+
+	public void setTlsh(String tlsh) {
+		this.tlsh = tlsh;
+	}
+
+	public String getCheckSum() {
+		return checkSum;
+	}
+
+	public void setCheckSum(String checkSum) {
+		this.checkSum = checkSum;
 	}
 }
