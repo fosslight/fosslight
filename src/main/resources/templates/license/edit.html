@@ -64,8 +64,8 @@
 										<div class="col-md-6">
 											<div class="row form-group">
 												<div class="col-12">
-													<label for="licenseTypeSelect" th:text="#{msg.common.field.licenseType}"></label><span class="text-orange">*</span>
-													<select class="select2 form-control" id="licenseType" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
+													<label for="licenseType" th:text="#{msg.common.field.licenseType}"></label><span class="text-orange">*</span>
+													<select class="form-control select2" id="licenseType" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
 														<option value="" disabled selected> </option>
 														<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
 															<option th:selected="${code.cdDtlNo == detail?.licenseType}"

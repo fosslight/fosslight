@@ -5,27 +5,37 @@
 <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
     <div class="wrapper">
-        <div class="content-wrapper custom-layout" style="height: auto">
+		<div class="custom-layout ml-2 mr-2" style="height: auto">
             <section class="content-header">
-                <div class="container-fluid"></div><!-- /.container-fluid -->
+				<div class="container-fluid">
+					<div th:if="${detail?.ossId != null}" class="row">
+						<div class="col-sm-9 text-left mt-2"></div>
+						<div class="col-sm-3 float-right mt-1">
+							<div class="float-right">
+								<button class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
+							</div>
+						</div>
+					</div>
+				</div><!-- /.container-fluid -->
             </section>
             <!-- Main content -->
             <section class="content">
                     <div class="row">
-                        <div class="col-md-9">
+						<div class="col-md-1 editInfoAreaTop" th:style="${detail?.ossId != null} ? 'display: none;'"></div>
+						<div th:class="${detail?.ossId != null} ? 'col-md-9 editInfoArea' : 'col-md-10 editInfoArea'">
                             <div class="card card-secondary submit-form">
-                                <div class="card-header">
-                                    <h3 class="card-title text-white"></h3>
-                                    <div class="card-tools" th:unless="${isReadOnly}">
-                                        <button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Sync" type="button" id="sync"><i class="fas fa-sync"></i></button>
-										<button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Copy" type="button" id="copy"><i class="fas fa-copy"></i></button>
-										<button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Delete" type="button" id="delete"><i class="fas fa-trash"></i></button>
-										<button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Save" type="button" id="save"><i class="fas fa-save"></i></button>
-                                    </div>
-                                </div>
+								<div class="card-header">
+									<h3 class="card-title text-white" th:text="'Open Source Information'"></h3>
+									<div class="card-tools">
+										<button th:if="${detail?.ossId != null}" class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Sync" type="button" id="sync"><i class="fas fa-sync customIcon2"></i></button>
+										<button th:if="${detail?.ossId != null}" class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Copy" type="button" id="copy"><i class="fas fa-copy customIcon2"></i></button>
+										<button th:if="${detail?.ossId != null}" class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Delete" type="button" id="delete"><i class="fas fa-trash customIcon2"></i></button>
+										<button class="btn btn-tool text-white" data-toggle="tooltip" data-placement="right" title="Save" type="button" id="save"><i class="fas fa-save customIcon2"></i></button>
+									</div>
+								</div>
                                 <form id="ossForm" name="ossForm">
                     			<input type="hidden" name="ossLicensesJson"/>
-                    			<input type="hidden" name="ossId"/>
+								<input type="hidden" name="ossId" th:value="${ossId}"/>
                     			<input type="hidden" name="licenseType" id="licenseType"/>
                     			<input type="hidden" name="obligationType" id="obligationType"/>
                     			<input type="hidden" name="comment"/>
@@ -38,11 +48,11 @@
                     			<input type="hidden" name="ossCopyFlag" th:value="N" />
                                 <div class="card-body">
                                     <div class="row form-group">
-                                    	<div class="col-md-6">
+										<div class="col-lg-6">
 											<div class="row">
 												<div class="col-md-12 required">
 													<label th:text="#{msg.common.field.OSS.name}"></label><span class="text-orange">*</span>
-													<i class="fas fa-info-circle ml-1 ossI" title="detail Info" style="color: #007bff; cursor: pointer;" th:onclick="|fn.showOssViewPage(this)|"></i>
+													<i class="fas fa-info-circle fa-lg ml-1 ossI icon-blue" title="detail Info" style="cursor: pointer;" th:onclick="|fn.showOssViewPage(this)|"></i>
 													<button th:if="${detail?.ossId != null}" type="button" class="btn btn-outline-lg-red btn-sm width-5rem px-1 mb-1 float-right" id="rename" th:text="Rename"></button>
 													<div class="input-group">
 														<input class="form-control autoComOss" name="ossName" th:value="${detail?.ossName}" type="text" th:style="${detail?.ossId != null} ? 'border-right: 0px solid #fff;' : ''"/>
@@ -59,7 +69,7 @@
 												</div>
 											</div>
 										</div>
-										<div class="col-md-6">
+										<div class="col-lg-6">
 											<div class="row">
 												<div class="col-md-12">
 													<label for="ossVersion" th:text="#{msg.common.field.OSS.version}"></label>
@@ -88,7 +98,7 @@
 									</div>
 
                                     <div class="row form-group">
-                                        <div class="col-md-2">
+										<div class="col-lg-2">
                                             <label th:text="#{msg.common.field.OSS.type}"></label>
                                         </div>
                                         <div class="col-10" id="ossTypeDiv"></div>
@@ -98,7 +108,7 @@
                                     </div>
                                     <div class="form-group required">
                                         <label th:text="#{msg.common.field.declaredLicense}"></label><span class="text-orange">*</span>
-                                        <input type="button" class="btn btn-info btn-xs mx-3 mb-1 px-3 py-0" id="btnShowLicenseText" value="Show license text">
+										<!--                                   	<input type="button" class="btn btn-info btn-xs mx-3 mb-1 px-3 py-0" id="btnShowLicenseText" value="Show license text"> -->
                                         <input type="hidden" name="licenseDiv" />
                                         <div class="licenseMulti">
                                        		<div class="mark"></div>
@@ -110,7 +120,7 @@
                                         <div id="disp_licenseText" style="display: none;"></div>
                                     </div>
 									<div class="row">
-										<div class="col-md-6">
+										<div class="col-lg-6">
 											<div class="form-group row">
 												<div class="col-md-4">
 													<label th:text="#{msg.common.field.licenseType}"></label>
@@ -118,7 +128,7 @@
 												<div id="ltDiv" class="col-md-1"></div>
 											</div>
 										</div>
-										<div class="col-md-6">
+										<div class="col-lg-6">
 											<div class="form-group row">
 												<div class="col-md-4">
 													<label th:text="#{msg.common.field.obligation}"></label>
@@ -163,7 +173,6 @@
                                     	</div>
                                         <div class="col-md-12 required">
                                         	<span class="urltxt"></span>
-                                        	<span class="retxt"></span>
                                     	</div>
                                     </div>
 									<div class="form-group">
@@ -192,30 +201,28 @@
                                     </div>
                                     <div class="form-group" th:if="${ossId != null && vulnInfoList != null}">
                                     	<label th:text="#{msg.common.field.vulnerability}"></label>
-                                    	<div class="jqGridSet mt-1 mt5">
-                                            <table id="_vulnInfoList" style="border-collapse: initial;"><tr><td></td></tr></table>
-                                        </div>
+										<span th:if="${vulnListMore != null}" class="btn-lg-light-gray btn-xm width-3rem ml-2 pl-2 pr-2 pointer" th:text="'+More'" th:onclick="|fn.vulnListMore()|"></span>
+										<div class="jqGridSet mt-1 mt5">
+											<table id="_vulnInfoList" style="border-collapse: initial;"><tr><td></td></tr></table>
+										</div>
                                     </div>
-                                    <div class="form-group" th:unless="${isReadOnly}">
+<!--                                    <div class="form-group" th:unless="${isReadOnly}">
                                     	<label for="inputName" th:text="#{msg.common.field.comment}"></label>
                                     	<textarea class="form-control" id="commentCont" name='commentInput' rows="3" style="height: 800px"></textarea>
-                                  	</div>
+                                  	</div>-->
                                 </div>
                                 </form>
-<!--                                <div class="card-footer clearfix" th:unless="${isReadOnly}">-->
-<!--                                	<button th:if="${ossId != null}" type="button" class="btn btn-secondary float-left" id="delete" th:text="Delete"></button>-->
-<!--                                	<button type="button" class="btn btn-teal-01 float-right mx-1" id="save" th:text="Save"></button>-->
-<!--                                   	<button th:if="${ossId != null}" type="button" class="btn btn-default float-right mx-1" id="copy" th:text="Copy"></button>-->
-<!--                                   	<button th:if="${ossId != null}" type="button" class="btn btn-default float-right mx-1" id="sync" th:text="Sync"></button>-->
-<!--                              	</div>-->
                             </div>
                         </div>
-                        <div class="col-md-3 commentList" th:unless="${isReadOnly}" th:if="${ossId != null}">
+						<div class="col-md-1 editInfoAreaBottom" th:style="${detail?.ossId != null} ? 'display: none;'"></div>
+						<div class="col-md-3 editInfoCommentArea commentList" th:style="${detail?.ossId == null} ? 'display: none;'">
 							<div class="card card-lg-red" style="position:sticky; top:10px;">
                             	<div class="card-header">
                                 	<h3 class="card-title" th:text="Comment"></h3>
                                     <div class="card-tools">
-                                    	<button class="btn btn-tool text-white" data-card-widget="collapse" title="Collapse" type="button"><i class="fas fa-minus"></i></button>
+										<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
+										<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
+										<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
                                   	</div>
                               	</div>
                                 <div class="card-body pt-0" style="padding-bottom: 0;">

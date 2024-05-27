@@ -3,202 +3,189 @@
 <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
 <th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
 <th:block th:replace="license/list-script :: script"></th:block>
-	<body class="hold-transition sidebar-mini" style="height: 100%;">
-        <div class="wrapper">
-            <div class="content-wrapper custom-layout">
-            	<section class="content-header"></section>
-                <section class="content">
-                	<div class="container-fluid">
-                    	<form id="licenseSearch" name="licenseSearch">
-                    	<input name="act" type="hidden" value="search"/>
-                           	<div class="row">
-                               	<div class="col-md-12">
-                                   	<div class="card card-dark card-outline collapsed-card search-form mb-3">
-                                       	<div class="card-header" style="border-bottom: none;">
-                                           	<div class="row">
-                                               	<div class="col-md-7 d-flex">
-													<div class="form-check width-8rem p-2 pl-3 mr-2" style="margin-left: 0.3rem">
-														<input class="save-value" name="defaultSearchType" type="hidden" th:value="LICENSE"/>
-														<input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y'} ? 'checked'" type="checkbox" value="Y">
-														<label class="form-check-label text-blue-gray" for="licenseNameAllSearchFlag" style="font-weight: normal;" th:text="'Exact Match'"></label>
-														<input class="save-value" type="hidden" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" />
-													</div>
-													<div class="w-100">
-														<div class="input-group">
-															<button type="button" class="btn btn-lg-red btn-sm width-4rem text-smaller fw-4 mr-xm" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="|+ Add|"></button>
-															<input class="form-control autoComLicense save-value" name="licenseName" placeholder="Licence Name" th:value="${searchBean.licenseName}" type="search">
-															<div class="input-group-append">
-																<button class="btn btn-default" id="search" type="submit"><i class="fa fa-search"></i></button>
-															</div>
-														</div>
-													</div>
-                                               	</div>
-												<div class="col-md-5 pl-3">
-													<div class="row">
-														<div class="col-sm-7 d-flex justify-content-start">
-															<div class="input-group-append d-flex align-items-center">
-																<a class="text-blue-gray" data-card-widget="collapse"
-																   style="font-size: 1rem;" th:text="'+ Advanced Search'"
-																   title="Collapse"></a>
-															</div>
-														</div>
-														<div class="col-sm-5">
-															<div class="helpLink f-left dropdown float-right mt-1">
-																<a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
-																<div class="dropdown-menu mt-0">
-																	<a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('License_List_Main')|">How to use FossLight Hub</a>
-																</div>
-															</div>
-														</div>
-													</div>
-												</div>
-                                           	</div>
-                                       	</div>
-                                       	<div class="card-body py-1">
-                                           	<div class="row">
-                                               	<div class="col-md-4">
-                                                   	<div class="form-group mb-2">
-														<select class="select2 save-value" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
-															<option value=""></option>
-															<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
-																<option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
-															</th:block>
-														</select>
-                                                   	</div>
-                                               	</div>
-                                               	<div class="col-md-4">
-                                                   	<div class="form-group mb-2">
-														<select class="select2 save-value" id="obligationTypeSelect" name="obligationType" style="width: 100%; color: gray;">
-															<option value=""></option>
-															<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}">
-																<option th:selected="${#strings.equals(code.cdDtlNo, searchBean?.obligationType)}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
-															</th:block>
-														</select>
-                                                   	</div>
-                                               	</div>
-                                               	<div class="col-md-4">
-                                                   	<div class="form-group mb-2">
-                                                   		<input type="text" class="form-control save-value" name="webpage" placeholder="Website" th:value="${searchBean.webpage}">
-                                                   	</div>
-                                               	</div>
-                                           	</div>
-											<div class="row">
-												<div class="col-md-12">
-													<div class="form-group mb-2">
-														<select class="select2 save-value" id="restrictionSelect" multiple="multiple"  name="restrictions" style="width: 100%;">
-															<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
-																	th:text="${code.cdDtlNm}"
-																	th:value="${code.cdDtlNo}"
-																	th:selected="${searchBean?.restrictions != null and #arrays.contains(searchBean.restrictions, code.cdDtlNo)}">
-															</option>
-														</select>
-													</div>
-												</div>
-											</div>
-                                           	<div class="row">
-                                               	<div class="col-md-6">
-                                                   	<div class="form-group mb-2">
-                                                   		<textarea class="form-control save-value" name="licenseText" placeholder="License Text" rows="3" th:text="${searchBean?.licenseText}"></textarea>
-                                                   	</div>
-                                               	</div>
-                                               	<div class="col-md-6">
-                                                   	<div class="form-group mb-2">
-                                                   		<textarea class="form-control save-value" name="description" placeholder="User Guide" rows="3" th:text="${searchBean?.description}"></textarea>
-                                                   	</div>
-                                               	</div>
-                                           	</div>
-											<div class="more-search" id="moreSearchContent">
-												<div class="row">
-													<div class="col-md-3">
-														<div class="form-group mb-2">
-															<select class="select2" id="creatorSelect" name="creator" style="width: 100%;">
-																<option value=""></option>
-																<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.creator)}"></th:block>
-															</select>
-														</div>
-													</div>
-													<div class="col-md-3">
-														<div class="form-group mb-2">
-															<input class="form-control" id="createdDate" type="text"/>
-															<input class="form-control" name="cStartDate" type="hidden"/>
-															<input class="form-control" name="cEndDate" type="hidden"/>
-														</div>
-													</div>
-													<div class="col-md-3">
-														<div class="form-group mb-2">
-															<select class="select2" id="modifierSelect" name="modifier" style="width: 100%;">
-																<option value=""></option>
-																<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.modifier)}"></th:block>
-																<option th:value="NONE" th:text="None"></option>
-															</select>
-														</div>
-													</div>
-													<div class="col-md-3">
-														<div class="form-group mb-2">
-															<input class="form-control" id="modifiedDate" placeholder="Modified Date" type="text"/>
-															<input class="form-control" name="mStartDate" type="hidden" th:value="${searchBean.mStartDate}"/>
-															<input class="form-control" name="mEndDate" type="hidden" th:value="${searchBean.mEndDate}"/>
-														</div>
-													</div>
-												</div>
-											</div>
-											<div class="row mt-1 mb-2">
+<body class="hold-transition sidebar-mini" style="height: 100%;">
+<div class="wrapper">
+	<div class="custom-layout">
+		<section class="content-header"></section>
+		<section class="content">
+			<div class="container-fluid">
+				<form id="licenseSearch" name="licenseSearch">
+					<input name="act" type="hidden" value="search"/>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="card card-dark card-outline collapsed-card search-form mb-3">
+								<div class="card-header" style="border-bottom: none;">
+									<div class="row">
+										<div class="col-md-7 d-flex">
+											<div class="row" style="width: 100%;">
 												<div class="col-12">
-													<div class=" d-flex justify-content-center pt-1">
-														<span class="mx-1">
-															<button class="btn btn-ivory btn-sm btn-icon px-3"
-																	data-placement="right"
-																	data-toggle="tooltip" th:onclick="|updateSearchCondition('licenseSearch')|"
-																	title="Save Search"
-																	type="button">
-															<!--                                                            <span class="material-symbols-outlined">download</span>-->
-															<i class="fa fa-download mr-3"></i>save condition
-														</button>
-														</span>
-														<span class="mx-1">
-															<button class="btn btn-light-red btn-sm btn-icon px-3"
-																	data-placement="right"
-																	data-toggle="tooltip" th:onclick="|resetForm('licenseSearch')|"
-																	title="Reset"
-																	type="button">
-															<!--   <span class="material-symbols-outlined">restart_alt</span>-->
-															<i class="fa fa-undo mr-3"></i>reset
-														</button>
-														</span>
+													<div class="input-group">
+														<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_License', '/license/edit')|" th:text="|+ Add|"></button>
+														<input class="form-control autoComLicense save-value" style="border-right: 0px solid #fff;" name="licenseName" placeholder="License Name" th:value="${searchBean.licenseName}" type="text"/>
+														<div class="input-group-append">
+                                                    			<span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
+                                                    				<input class="save-value" name="defaultSearchType" type="hidden" th:value="LICENSE"/>
+                                                    				<input class="form-check-input" id="licenseNameAllSearchFlag" th:checked="${searchBean.licenseNameAllSearchFlag == 'Y'}" type="checkbox">
+                                                					<label class="form-check-label text-blue-gray text-sm" for="licenseNameAllSearchFlag" th:text="'Exact Match'"></label>
+                                                					<input class="save-value" name="licenseNameAllSearchFlag" th:value="${searchBean.licenseNameAllSearchFlag}" type="hidden"/>
+                                                    			</span>
+														</div>
+														<div class="input-group-append">
+															<button class="btn btn-default" id="search" type="submit"><i class="fa fa-search"></i></button>
+														</div>
 													</div>
 												</div>
 											</div>
-                                       	</div>
-                                  	</div>
-                               	</div>
-                           	</div>
-                   		</form>
-                        <div class="row px-1">
-                        	<div class="col-md-6"></div>
-                            <div class="col-md-6">
-                            	<div class="row float-right nav-item">
-									<th:block th:if="${@CommonFunction.isAdmin()}">
-                                		<button class="btn btn-danger btn-sm width-10rem mr-xm px-3" type="button" th:text="'Bulk Registration'" th:onclick="|callCreateTabInFrame('BulkReg_License', '/license/licenseBulkReg', 'license-bulkReg', true)|"></button>
-									</th:block>
-									<button class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" type="button" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
-									<th:block th:if="${@CommonFunction.isAdmin()}">
-										<button type="button" class="btn btn-danger btn-sm width-6rem mr-xm px-3 btn-transition-page"
-												th:onclick="|callCreateTabInFrame('New_License', '/license/edit', 'license-edit', true)|" th:text="Add"></button>
-									</th:block>
-                                </div>
-                            </div>
-                     	</div>
-                        <div class="row">
-                	    	<div class="col-12 mt-3">
-                            	<div class="col-sm-12 jqGridSet" id="licenseGrid">
-                                	<table id="list"><tr><td></td></tr></table>
-                                   	<div id="pager"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-            	</section>
-            </div>
-        </div>
-    </body>
+										</div>
+										<div class="col-md-3 pl-3 d-flex justify-content-start">
+											<div class="input-group-append d-flex align-items-center">
+												<a class="text-blue-gray text-center" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
+													<span class="row" th:text="'+ Advanced Search'"></span><span class="row ml-3 text-lg-red text-xs optionSelected" style="display: none;" th:text="'option selected'"></span>
+												</a>
+											</div>
+										</div>
+										<div class="col-md-2 pr-3">
+											<div class="helpLink f-left dropdown float-right mt-1">
+												<a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+												<div class="dropdown-menu mt-0">
+													<a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('License_List_Main')|">How to use FossLight Hub</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="card-body py-1">
+									<div class="row">
+										<div class="col-md-3">
+											<div class="form-group mb-2">
+												<select class="select2 save-value" id="licenseTypeSelect" name="licenseType" style="width: 100%; color: gray;">
+													<option value=""></option>
+													<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+														<option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}" th:selected="${#strings.equals(code.cdDtlNo, searchBean?.licenseType)}"></option>
+													</th:block>
+												</select>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="form-group mb-2">
+												<select class="select2 save-value" id="obligationTypeSelect" name="obligationType" style="width: 100%; color: gray;">
+													<option value=""></option>
+													<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}">
+														<option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}" th:selected="${code.cdDtlNo == searchBean?.obligationType}"></option>
+													</th:block>
+													<option value="NONE" th:text="None"></option>
+												</select>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="form-group mb-2">
+												<input type="text" class="form-control save-value" name="webpage" placeholder="Website" th:value="${searchBean.webpage}">
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-10">
+											<div class="form-group mb-2">
+												<select class="select2 save-value" id="restrictionSelect" multiple="multiple"  name="restrictions" style="width: 100%;">
+													<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+															th:text="${code.cdDtlNm}"
+															th:value="${code.cdDtlNo}"
+															th:selected="${searchBean?.restrictions != null and #arrays.contains(searchBean.restrictions, code.cdDtlNo)}">
+													</option>
+												</select>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-5">
+											<div class="form-group mb-2">
+												<textarea class="form-control save-value" name="licenseText" placeholder="License Text" rows="3" th:utext="${searchBean?.licenseText}"></textarea>
+											</div>
+										</div>
+										<div class="col-md-5">
+											<div class="form-group mb-2">
+												<textarea class="form-control save-value" name="description" placeholder="User Guide" rows="3" th:utext="${searchBean?.description}"></textarea>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-3">
+											<div class="form-group mb-2">
+												<select class="select2 save-value" id="creatorSelect" name="creator" style="width: 100%;">
+													<option value=""></option>
+													<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.creator)}"></th:block>
+												</select>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="form-group mb-2">
+												<input class="form-control" id="createdDate" type="text"/>
+												<input class="form-control save-value" name="cStartDate" type="hidden"/>
+												<input class="form-control save-value" name="cEndDate" type="hidden"/>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="form-group mb-2">
+												<select class="select2 save-value" id="modifierSelect" name="modifier" style="width: 100%;">
+													<option value=""></option>
+													<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.modifier)}"></th:block>
+													<option th:value="NONE" th:text="None" th:selected="${searchBean?.modifier == 'NONE'}"></option>
+												</select>
+											</div>
+										</div>
+										<div class="col-md-3">
+											<div class="form-group mb-2">
+												<input class="form-control" id="modifiedDate" placeholder="Modified Date" type="text"/>
+												<input class="form-control save-value" name="mStartDate" type="hidden" th:value="${searchBean.mStartDate}"/>
+												<input class="form-control save-value" name="mEndDate" type="hidden" th:value="${searchBean.mEndDate}"/>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12">
+											<div class="p-2 text-center">
+												<button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('licenseSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+													<i class="fa fa-download mr-xm"></i> save conditions
+												</button>
+												<button class="btn btn-ivory btn-sm btn-icon ml-2" th:onclick="|resetForm('licenseSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+													<i class="fa fa-undo mr-xm"></i> reset
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="row px-1">
+					<div class="col-md-6"></div>
+					<div class="col-md-6">
+						<!--                           	<div class="row float-right nav-item">
+                                                            <th:block th:if="${@CommonFunction.isAdmin()}">
+                                                                <button class="btn btn-danger btn-sm width-10rem mr-xm px-3" type="button" th:text="'Bulk Registration'" th:onclick="|callCreateTabInFrame('BulkReg_License', '/license/licenseBulkReg', 'license-bulkReg', true)|"></button>
+                                                            </th:block>
+                                                            <button class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" type="button" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                                                            <th:block th:if="${@CommonFunction.isAdmin()}">
+                                                                <button type="button" class="btn btn-danger btn-sm width-6rem mr-xm px-3 btn-transition-page"
+                                                                        th:onclick="|callCreateTabInFrame('New_License', '/license/edit', 'license-edit', true)|" th:text="Add"></button>
+                                                            </th:block>
+                                                        </div> -->
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12 mt-3">
+						<div class="col-sm-12 jqGridSet" id="licenseGrid">
+							<table id="list"><tr><td></td></tr></table>
+							<div id="pager"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+		</section>
+	</div>
+</div>
+</body>
 </html>

@@ -8,79 +8,91 @@
         <section class="content-header"></section>
         <section class="content">
             <div class="container-fluid">
-            	<div class="row">
-            		<div class="col-12">
-            			<div class="row" id="progressView">
-                            <div class="col-2">
-                                <div class="small-box bg-success size-reduced">
-                                    <div class="inner"></div>
-                                    <div class="icon">
-                                        <i class="ion ion-stats-bars"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-2">
-                                <div class="small-box bg-warning size-reduced">
-                                    <div class="inner"></div>
-                                    <div class="icon">
-                                        <i class="ion ion-stats-bars"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-            		</div>
-            	</div>
-            	
-            	<div class="row">
-                	<div class="col-md-12">
-                		<div class="card">
-                			<div class="card-header">
-                         		<h3 class="card-title" th:text="'Job List'"></h3>
-                           		<div class="card-tools">
-                            		<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
-                          		</div>
-                       		</div>
-                       		<div class="card-body">
-                       			<div class="row">
-                       				<div class="col-md-8">
-                        				<div class="card">
-                            				<div class="card-body" style="height: 30rem;">
-                                            <table class="table table-bordered table-hover dataTable dtr-inline" id="jobListTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="text-center" th:text="ID"></th>
-                                                        <th class="text-center" th:text="Name"></th>
-                                                        <th class="text-center" th:text="Status"></th>
-                                                        <th class="text-center" th:text="Stage"></th>
-                                                        <th class="text-center" th:text="Creator"></th>
-                                                        <th class="text-center" th:text="Reviewer"></th>
-                                                    </tr>
-                                                </thead>
-                                            </table>
-                                        </div>
-                        				</div>
-                    				</div>
-                    				<div class="col-md-4">
-                        				<div class="card">
-                        					<div class="card-header">
-                                				<h3 class="card-title" th:text="Comment"></h3>
-                            				</div>
-                            				<div class="card-body comment-card-body pt-0" scroll=auto style="height: 27rem; overflow-x:hidden">
-                                				<div class="row">
-                                    				<div class="col-md-12">
-                                        				<table class="table" id="dashboardCommentsTable">
-                                            				<tbody id="dashboardComments"></tbody>
-                                        				</table>
-                                    				</div>
-                                				</div>
-                            				</div>
-                        				</div>
-                    				</div>
-                       			</div>
-                       		</div>
-                		</div>
-                	</div>
-                </div>
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card">
+							<div class="card-header">
+								<h3 class="card-title" th:text="'Job List'"></h3>
+								<div class="card-tools">
+									<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="row">
+									<div class="col-lg-8">
+										<div class="row" id="progressView">
+											<div class="col-md-2">
+												<div class="small-box bg-success">
+													<div class="inner height-6r"></div>
+													<div class="icon">
+														<i class="ion ion-stats-bars"></i>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-2">
+												<div class="small-box bg-warning text-white">
+													<div class="inner height-6r"></div>
+													<div class="icon">
+														<i class="ion ion-stats-bars"></i>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-2">
+												<div class="small-box bg-purple text-white">
+													<div class="inner height-6r"></div>
+													<div class="icon">
+														<i class="ion ion-stats-bars"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-lg-8">
+										<div class="card">
+											<div class="card-body">
+												<table class="table table-bordered table-hover dataTable dtr-inline" id="jobListTable">
+													<thead>
+													<tr>
+														<th class="text-center" th:text="ID"></th>
+														<th class="text-center" th:text="Name"></th>
+														<th class="text-center" th:text="Status"></th>
+														<th class="text-center" th:text="Stage"></th>
+														<th class="text-center" th:text="Creator"></th>
+														<th class="text-center" th:text="Reviewer"></th>
+													</tr>
+													</thead>
+												</table>
+											</div>
+										</div>
+									</div>
+									<div class="col-lg-4">
+										<div class="card card-lg-red">
+											<div class="card-header">
+												<h3 class="card-title" th:text="Comment"></h3>
+											</div>
+											<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;max-height:30.8rem; overflow-y: auto;">
+												<div clas="row">
+													<div clas="col-md-12" id="commentList">
+														<div class="card-body">
+															<div class="row">
+																<div class="col-md-12">
+																	<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
                 
                 <div class="row">
                 	<div class="col-md-12">
@@ -94,20 +106,16 @@
                        		<div class="card-body">
                        			<div class="row">
                        				<div class="col-md-5">
-                        				<div class="card">
-                            				<div class="card-body table-responsive p-0" scroll=auto style="height: 30rem; overflow-x:hidden">
-                                				<table class="table table-head-fixed text-nowrap">
-                                    				<thead>
-                                    					<tr>
-                                       						<th class="text-center" th:text="'Sent Date'"></th>
-                                        					<th class="text-center" th:text="Subject"></th>
-                                    					</tr>
-                                    				</thead>
-                                    				<tbody id="discoveredSndMail">
-                                    				</tbody>
-                                				</table>
-                            				</div>
-                        				</div>
+										<table class="table table-head-fixed text-nowrap">
+											<thead>
+											<tr>
+												<th class="text-center" th:text="'Sent Date'"></th>
+												<th class="text-center" th:text="Subject"></th>
+											</tr>
+											</thead>
+											<tbody id="discoveredSndMail">
+											</tbody>
+										</table>
                     				</div>
                     				<div class="col-md-7">
                         				<div class="card">

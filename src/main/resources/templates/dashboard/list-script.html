@@ -3,56 +3,67 @@
 <th:block th:fragment="contentScript">
 <script th:inline="javascript" src="https://code.highcharts.com/highcharts.src.js"></script>
     <script th:inline="javascript">
+        var dataTable;
+
         $(function () {
         	if ([[${projectFlag}]] || [[${partnerFlag}]]) {
         		// progress List
         		list.progProjectCnt();
-        		
+
         		// Job List
         		list.getJobsList();
         	}
-        	
+
         	// Discovered Mail List
         	list.getDiscoveredMailList();
-        	
+
         	// NVD Dashboard
         	list.getNvdDashboardList();
-        	
+
         	// Last 20 Scored Vulnerability
         	list.getLastScoredVulnerability();
-        	
+
         	// OSS & License related
         	chart_fn.mostUsedOssChartOpen();
         	chart_fn.mostUsedLicenseChartOpen();
-        	
+
         	common_fn.bindEvent();
+
+            $(".small-box").on("click", function () {
+                var status = $(this).find(".inner p").text().trim();
+                list.getSortedByStatusJobsList(status);
+            });
         });
-        
+
         let _rowPrjId;
         let _rowPrjDivision;
         let _referenceDiv;
-        
+
         $(document).on('click', '#jobListTable > tbody > tr', function(event) {
-        	var rowData = $("#jobListTable").DataTable().row($(this)).data();
-        	_rowPrjId = rowData.prjId;
-        	_rowPrjDivision = rowData.prjDivision;
-			var param = {"prjId" : rowData.prjId, "prjDivision" : rowData.prjDivision};
+        	var rowData = $("#jobListTable").DataTable().row($(this)).data();
+            _referenceDiv = rowData.prjDivision.toLowerCase();
+            _rowPrjId = rowData.prjId;
+
+            var param = {"referenceDiv": _referenceDiv, "referenceId" : _rowPrjId};
 			fn_comment.getCommentsList(param);
+
+            $(this).css("background-color", "#f0f0f0");
+            $('#jobListTable > tbody > tr').not(this).css("background-color", "");
         });
-        
+
         $(document).on("click", "[name ='commentModifyBtn']", function (e){
         	e.preventDefault();
         	_referenceDiv = $(this).nextAll('input').val();
         	var successCallbackParam = {"prjId" : _rowPrjId, "prjDivision" : _rowPrjDivision};
         	fn_comment.editComments($(this).attr("data-commId"), _rowPrjId, _referenceDiv, successCallbackParam);
         });
-        
+
         $(document).on("click", "[name ='commentDeleteBtn']", function (e){
         	e.preventDefault();
         	var successCallbackParam = {"prjId" : _rowPrjId, "prjDivision" : _rowPrjDivision};
         	fn_comment.deleteComments($(this).attr("data-commId"), successCallbackParam);
         });
-        
+
         var list = {
       	  	progProjectCnt : function() {
                	$.ajax({
@@ -61,61 +72,196 @@
            			dataType : 'json',
            			cache : false,
            			success : function(data){
-           				var cntList = new Array();
-           				cntList = data;
-           				
-           				var hTag;
-           				var pTag;
-           				
-           				if (cntList.length > 0) {
-           					for (var i in cntList) {
-           						var status = cntList[i].status;
-           						var cnt = cntList[i].statusCnt;
-           						switch (status) {
-           							case "PROG" :
-           								hTag = document.createElement("h3");
-           								pTag = document.createElement("p");
-           								hTag.innerText = cnt;
-           								pTag.innerText = "Progress";
-           								
-           								$("#progressView .bg-success .inner").empty();
-           								$("#progressView .bg-success .inner").append(hTag);
-           								$("#progressView .bg-success .inner").append(pTag);
-           								break;
-           							case "REV" :
-           								hTag = document.createElement("h3");
-           		    					pTag = document.createElement("p");
-           								hTag.innerText = cnt;
-           								pTag.innerText = "Review";
-           								
-           								$("#progressView .bg-warning .inner").empty();
-           								$("#progressView .bg-warning .inner").append(hTag);
-           								$("#progressView .bg-warning .inner").append(pTag);
-           								break;
-           						}
-           					}
-           				} else {
-           					hTag = document.createElement("h3");
-            				pTag = document.createElement("p");
-        					hTag.innerText = "0";
-        					pTag.innerText = "Progress";
-        					
-        					$("#progressView .bg-success .inner").empty();
-        					$("#progressView .bg-success .inner").append(hTag);
-        					$("#progressView .bg-success .inner").append(pTag);
-        					
-        					hTag = document.createElement("h3");
-        					pTag = document.createElement("p");
-        					hTag.innerText = "0";
-        					pTag.innerText = "Review";
-        					
-        					$("#progressView .bg-warning .inner").empty();
-        					$("#progressView .bg-warning .inner").append(hTag);
-        					$("#progressView .bg-warning .inner").append(pTag);
-           				}
-           			}
-               	});
+                        var progressCnt = 0;
+                        var reviewCnt = 0;
+                        var finalReviewCnt = 0;
+                        var cntList = data;
+
+                        if (cntList.length > 0) {
+                            for (var i in cntList) {
+                                var status = cntList[i].status;
+                                var cnt = cntList[i].statusCnt;
+
+                                switch (status) {
+                                    case "PROG":
+                                        progressCnt = cnt;
+                                        break;
+                                    case "REV":
+                                        reviewCnt = cnt;
+                                        break;
+                                    case "FREV":
+                                        finalReviewCnt = cnt;
+                                        break;
+                                }
+                            }
+                        }
+
+                        var $progressView = $("#progressView");
+
+                        var $progressInner = $progressView.find(".bg-success .inner");
+                        $progressInner.empty();
+                        $progressInner.append("<h3>" + progressCnt + "</h3>");
+                        $progressInner.append("<p>Progress</p>");
+
+                        var $reviewInner = $progressView.find(".bg-warning .inner");
+                        $reviewInner.empty();
+                        $reviewInner.append("<h3>" + reviewCnt + "</h3>");
+                        $reviewInner.append("<p>Review</p>");
+
+                        var $finalReviewInner = $progressView.find(".bg-purple .inner");
+                        $finalReviewInner.empty();
+                        $finalReviewInner.append("<h3>" + finalReviewCnt + "</h3>");
+                        $finalReviewInner.append("<p>Final Review</p>");
+                    }
+                });
+            },
+            initJobsList : function (data) {
+                dataTable = $('#jobListTable').DataTable({
+                    paging : true,
+                    searching : true,
+                    info : true,
+                    autoWidth : true,
+                    responsive : true,
+                    lengthChange : true,
+                    order: [],
+                    ordering : true,
+                    destroy: true,
+                    data : data.rows,
+                    scrollCollapse: true,
+                    scrollY: '350px',
+                    dom: '<"top"f><"top"ip>rt<"bottom"><"clear">',
+                    columns : [ {
+                        data : "prjDivisionId",
+                        render: function (data, type, row, meta) {
+                            var retnDisplay = "";
+
+                            var retnDisplay = (row.prjDivision).toLowerCase() + "-" + row.prjId;
+                            return retnDisplay
+                        }
+                    }, {
+                        data: "prjName",
+                        render: function (data, type, row, meta) {
+                            var retnDisplay = "";
+
+                            if (row.prjDivision === "PRJ") {
+                                retnDisplay = '<span class="urlLink" style="cursor: pointer;" onclick="createTabInFrame(' + row.prjId + '+\'_Project\', \'/project/edit/\'+' + row.prjId + ')">' + data + '</a>';
+                            } else if (row.prjDivision === "3RD") {
+                                retnDisplay = '<span class="urlLink" style="cursor: pointer;" onclick="createTabInFrame(' + row.prjId + '+\'_3rdParty\', \'/partner/edit/\'+' + row.prjId + ')">' + data + '</a>';
+                            }
+                            return retnDisplay;
+                        }
+                    }, {
+                        data : "status",
+                        render : function(data){
+                            var rtnDisplay = "";
+                            switch(data) {
+                                case "Progress" :
+                                    rtnDisplay = '<span class="text-success">' + data + '</span>';
+                                    break;
+                                case "Request" :
+                                    rtnDisplay = '<span class="text-pink">' + data + '</span>';
+                                    break;
+                                case "Review" :
+                                    rtnDisplay = '<span class="text-yellow">' + data + '</span>';
+                                    break;
+                                case "Final Review" :
+                                    rtnDisplay = '<span class="text-purple">' + data + '</span>';
+                                    break;
+                                case "Complete" :
+                                    rtnDisplay = '<span class="text-dark-blue">' + data + '</span>';
+                                    break;
+                                case "Drop" :
+                                    rtnDisplay = '<span class="text-gray">' + data + '</span>';
+                                    break;
+                            }
+                            return rtnDisplay;
+                        }
+                    }, {
+                        data : "stage",
+                        render: function (data, type, row, meta) {
+                            var rtnDisplay = "";
+
+                            if (row.prjDivision == "PRJ" && (row.status == "Progress" || row.status == "Review")) {
+                                rtnDisplay = data;
+
+                                var initDiv;
+
+                                if(row.androidFlag == 'Y') {
+                                    initDiv = 4;
+                                } else {
+                                    initDiv = 0;
+                                }
+
+                                switch (data) {
+                                    case "I":
+                                        rtnDisplay = `<span class="badge ${row.status === 'Progress' ? 'btn-success hover-success-btn' : 'badge-yellow hover-yellow-btn'} size-sm width-6rem d-flex-align fs-77p" onclick="createTabInFrame('${row.prjId}_Identify', '/project/identification/${row.prjId}/${initDiv}')" style="cursor: pointer;">Identification</span>`;
+                                        break;
+                                    case "P":
+                                        rtnDisplay = `<span class="badge ${row.status === 'Progress' ? 'btn-success hover-success-btn' : 'badge-yellow hover-yellow-btn'} size-sm width-6rem d-flex-align fs-77p" onclick="createTabInFrame('${row.prjId}_Packaging', '/project/verification/${row.prjId}')" style="cursor: pointer;">Packaging</span>`;
+                                        break;
+                                }
+                            }
+
+                            return rtnDisplay;
+                        }
+                    }, {
+                        data : "creator"
+                    }, {
+                        data : "reviewerName"
+                    } ],
+                    columnDefs : [
+                        {
+                            targets : [0],
+                            className : "text-center",
+                            width: "12%"
+                        },
+                        {
+                            targets : [1],
+                            className : "text-center",
+                            width: "23%"
+                        },
+                        {
+                            targets : [2],
+                            className : "text-center",
+                            width: "7%"
+                        },
+                        {
+                            targets : [3],
+                            className : "text-center",
+                            width: "8%"
+                        },
+                        {
+                            targets : [4],
+                            className : "text-center",
+                            width: "15%"
+                        },
+                        {
+                            targets : [5],
+                            className : "text-center",
+                            width: "15%"
+                        }
+                    ]
+                });
+
+                if (data.records > 0) {
+                    $('#jobListTable > tbody > tr:first').trigger('click');
+                } else {
+
+                }
            	},
+            getSortedByStatusJobsList :  function(status) {
+                $.ajax({
+                    url : '/dashboard/jobsListAjax',
+                    type : 'GET',
+                    dataType : 'json',
+                    data: {"identificationStatus" : status},
+                    cache : false,
+                    success : function(data){
+                        $("#jobListTable > tbody").remove();
+                        list.initJobsList(data);
+                    }
+                });
+            },
             getJobsList : function() {
                	$.ajax({
         			url : '/dashboard/jobsListAjax',
@@ -123,85 +269,7 @@
         			dataType : 'json',
         			cache : false,
         			success : function(data){
-        				if (data.records > 0) {
-        					$('#jobListTable').DataTable({
-                        		paging : true,
-                        		searching : true,
-                        		info : true,
-                        		autoWidth : false,
-                        		responsive : true,
-                        		lengthChange : true,
-                        		ordering : true,
-                        		data : data.rows,
-                        		columns : [ {
-                        				data : "prjDivisionId"
-                        			}, {
-                        		  		data : "prjName"
-                        			}, {
-                        		 		data : "status",
-                        				render : function(data){
-                        					var rtnDisplay = "";
-                        					switch(data) {
-                        						case "Progress" :
-                        							rtnDisplay = '<span class="badge badge-success">' + data + '</span>';
-                        							break;
-                        						case "Request" :
-                        							rtnDisplay = '<span class="badge badge-pink">' + data + '</span>';
-                        							break;
-                        						case "Review" :
-                        							rtnDisplay = '<span class="badge badge-orange">' + data + '</span>';
-                        							break;
-                        						case "Complete" :
-                        							rtnDisplay = '<span class="badge badge-info">' + data + '</span>';
-                        							break;
-                        					}
-                        					return rtnDisplay;
-                        				}
-                        			}, {
-                        		 		data : "stage",
-                        				render : function(data){
-        	           						var rtnDisplay = "";
-        	           						switch(data) {
-        	           							case "I" :
-        	           								rtnDisplay = '<span class="badge badge-outline-orange">Identification</span>';
-        	           								break;
-        	           							case "P" :
-        	           								rtnDisplay = '<span class="badge badge-outline-green">Packaging</span>';
-        	           								break;
-        	           						}
-        	           						return rtnDisplay;
-        	           					}
-                        			}, {
-                        				data : "creator"
-                        			}, {
-                        				data : "reviewerName"
-                        			} ],
-                        		columnDefs : [
-            	            		{
-            	            			targets : [0],
-            	            			className : "text-center"
-            	            		},
-            	            		{
-            	            			targets : [2],
-            	            			className : "text-center"
-            	            		},
-            	            		{
-            	            			targets : [3],
-            	            			className : "text-center"
-            	            		},
-            	            		{
-            	            			targets : [4],
-            	            			className : "text-center"
-            	            		},
-            	            		{
-            	            			targets : [5],
-            	            			className : "text-center"
-            	            		}
-            	            	]
-            	            });
-        					
-        					$('#jobListTable > tbody > tr:first').trigger('click');
-        				}
+                        list.initJobsList(data);
         			}
                 });
           	},
@@ -226,7 +294,7 @@
         			cache : false,
         			success : function(res){
         				$("#nvdDashboardArea").html(res);
-        				
+
         				let donutDatas = [];
         				$(".severityCnt").each(function(index) {
         					let donutData = {};
@@ -242,7 +310,7 @@
         					}
         					donutDatas.push(donutData);
         				});
-        				
+
         				$.plot('#severityChart', donutDatas, {
     		                series: {
     		                    pie: {
@@ -286,7 +354,7 @@
            		params["pieSize"] = $("#mostUsedOssChartPieSize").val();
            		params["chartType"] = "OSS";
            		params["isRawData"] = "N";
-           		
+
            		$.ajax({
            			url : '/statistics/mostUsedChart',
            			type : 'GET',
@@ -306,11 +374,11 @@
            					chartData.push(result);
           					idx++;
           				}
-           					
+
            				obj["chartId"] = 'mostUsedOssChart';
            				obj["chartData"] = chartData;
-           					
-           				getPieChart(obj);
+
+                        getPieChart(obj);
        				},
        				error: function(data){
         				alertify.error([[#{msg.common.valid2}]], 0);
@@ -325,7 +393,7 @@
         		params["pieSize"] = $("#mostUsedLicenseChartPieSize").val();
         		params["chartType"] = "LICENSE";
         		params["isRawData"] = "N";
-        		
+
         		$.ajax({
         			url : '/statistics/mostUsedChart',
         			type : 'GET',
@@ -346,10 +414,10 @@
         					chartData.push(result);
         					idx++;
         				}
-        				
+
         				obj["chartId"] = 'mostUsedLicenseChart';
         				obj["chartData"] = chartData;
-        					
+
         				getPieChart(obj);
         			},
         			error: function(data){
@@ -358,7 +426,7 @@
         		});
         	}
         }
-        
+
         var common_fn = {
         	bindEvent : function(){
         		$("#mostUsedOssChartPieSize").on("change", function(){
@@ -387,45 +455,75 @@
         		});
         	}
         }
-        
+
+        let commentsParam;
+
         var fn_comment = {
         	getCommentsList : function(param) {
+                commentsParam = param;
+
                	$.ajax({
-        			url : '/dashboard/commentsListAjax',
-        			type : 'POST',
+                    url : '/comment/getCusCommentList',
+                    type: "GET",
         			dataType : 'html',
-        			data : JSON.stringify(param),
+                    data : param,
         			cache : false,
         			contentType : 'application/json',
         			success : function(res){
-        				$("#dashboardComments").html(res);
+                        $("#commentList").html(res);
         			}
                	});
           	},
-        	getMoreCommentsList : function(prjId, prjDivision, obj) {
-        		var param = {
-        			"prjId" : prjId,
-        			"prjDivision" : prjDivision,
-        			"moreYn" : "Y"
-        		};
-        		
-        		$.ajax({
-    				url : '/dashboard/commentsListAjax',
-    				type : 'POST',
-    				data : JSON.stringify(param),
-    				dataType : 'html',
-    				cache : false,
-    				contentType : 'application/json',
-    				success : function(res){
-    					$("#dashboardComments").html(res);
-    				}
-            	});
-        	},
+            getMoreCommentsList : function() {
+                commentsParam["moreFlag"] = "Y";
+                fn_comment.getCommentsList(commentsParam);
+            },
+            editComments : function (_commId, _referenceDiv, _prjId) {
+                commentsParam.commId = _commId;
 
+                $.ajax({
+                    url : '/comment/getEditPopup',
+                    type : 'POST',
+                    data : {'commId' : _commId},
+                    dataType : 'html',
+                    cache : false,
+                    success : function(res){
+                        if(!alertify.editComments){
+                            alertify.dialog('editComments', function() {
+                                return {
+                                    setup: function() {
+                                        var settings = alertify.confirm().settings;
+
+                                        for (var prop in settings) {
+                                            this.settings[prop] = settings[prop];
+                                        }
+
+                                        var setup = alertify.confirm().setup();
+                                        setup.buttons = [];
+                                        setup.focus.element = 1;
+
+                                        return setup;
+                                    },
+                                    hooks: {
+                                        onshow: function() {
+                                            this.elements.dialog.style.maxWidth = 'none';
+                                            this.elements.dialog.style.width = '750px';
+                                        }
+                                    }
+                                };
+                            }, false, 'alert');
+                        }
+
+                        alertify.editComments(res).set('title', 'Edit Comments');
+                        $(".row.custom-layout").attr("style", "margin-top: 10px")
+                        $("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
+                    }
+                });
+            },
         	updateComments : function (_commId, _referenceId, _referenceDiv, successCallbackParam) {
-        		var param = {commId : _commId, contents : replaceWithLink($("#commentEdit").summernote('code')), referenceDiv: _referenceDiv, referenceId: _referenceId};
-        		
-        		$.ajax({
+                var param = {commId : commentsParam.commId, contents : replaceWithLink($("#commentEdit").summernote('code')), referenceDiv: commentsParam.referenceDiv, referenceId: commentsParam.referenceId};
+
+                $.ajax({
                 	url : '/comment/updateComment',
                     type : 'POST',
                     dataType : 'json',
@@ -433,14 +531,31 @@
                     data : param,
                     success : function(json){
                         alertify.success([[#{msg.common.success}]]);
-            			fn_comment.getCommentsList(successCallbackParam);
+                        $(".ajs-close").trigger("click");
+                        fn_comment.getCommentsList(commentsParam);
                     },
                     error : function(){
                         alertify.error([[#{msg.common.valid2}]], 0);
                     }
                 });
         	},
-        	deleteComments : function (_commId, successCallbackParam) {
+            deleteComments : function (_commId, _referenceDiv, _referenceId) {
+                switch (_referenceDiv) {
+                    case '19':
+                    case '10':
+                    case '12':
+                    case '14':
+                        _referenceDiv = 'prj';
+                        break;
+                    case '20':
+                        _referenceDiv = '3rd';
+                        break;
+                }
+
+                var successCallbackParam = {
+                    referenceDiv: _referenceDiv,
+                    referenceId: _referenceId
+                };
         		alertify.confirm([[#{msg.oss.confirm.delete.comment}]], function (e) {
             		if (e) {
             			$.ajax({
@@ -454,7 +569,8 @@
             	                fn_commemt.getCommentList(successCallbackParam);
             	            },
             	            error : function(){
-            	                alertify.error([[#{msg.common.valid2}]], 0);
+                                $(".ajs-close").trigger("click");
+                                fn_comment.getCommentsList(successCallbackParam);
             	            }
             	        });
             		} else {

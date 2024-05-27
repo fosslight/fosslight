@@ -189,27 +189,23 @@ var fn = {
 		}
 	},
 	resetPassword : function(rowId){
-		if ('Y' == [[${adminLockFlag}]] && rowId == 'admin') {
-			alert("Changing admin information is blocked.");
-			return false;
-		}
-			$.ajax({
-				type: 'POST',
-				url: '/system/user/changePassword',
-				data: JSON.stringify({'userId': rowId}),
-				contentType : 'application/json',
-		        success: function(json){
-		        	loading.hide();
-					if(json.resCd == '10'){
-						alertify.alert('Change the password to be the same as ID.', function(){}); 
-					}else{
-						alertify.error([[#{msg.common.valid2}]], 0);
-					}
-			    },
-	            error : function(data, status){
-	    			alertify.error([[#{msg.common.valid2}]], 0);
-	    	    }
-			});
+        $.ajax({
+            type: 'POST',
+            url: '/system/user/changePassword',
+            data: JSON.stringify({'userId': rowId}),
+            contentType : 'application/json',
+            success: function(json){
+                loading.hide();
+                if(json.resCd == '10'){
+                    alertify.alert('Change the password to be the same as ID.', function(){});
+                }else{
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                }
+            },
+            error : function(data, status){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
 	}
 };
 
@@ -230,6 +226,7 @@ var ajax = {
 			},
 		}).success(function (data, status, headers, config) {
 			$("#list").jqGrid().trigger('reloadGrid');
+            alertify.success([[#{msg.common.success}]]);
 		}).error(function (data, status, headers, config) {});
 	}
 };
@@ -243,21 +240,29 @@ var userList = {
 		userList.modifyRowId = [];
 		userList.lastEditRowId = "";
 
-		var colNameArr = ['AD ID', 'E-mail', 'Name', 'Division', 'Registered Date', 'Token', 'Expire Date', 'Token Proc'];	
-		if ("Y" != [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG'))}]]) {
-			colNameArr.push('password');
-		}
-		colNameArr.push('Use YN');colNameArr.push('Admin');
+        var colNameArr = [];
+        colNameArr.push('AD ID');
+        if ("Y" != [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_HIDE_EMAIL_FLAG'))}]]) {
+            colNameArr.push('E-mail');
+        }
+        colNameArr.push('Name');
+        colNameArr.push('Division');
+        colNameArr.push('Registered Date');
+        colNameArr.push('Token');
+        colNameArr.push('Expire Date');
+        colNameArr.push('Token Proc');
+        if ("N" == [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG'))}]]) {
+            colNameArr.push('password');
+        }
+        colNameArr.push('Use YN');
+        colNameArr.push('Admin');
 		
 		var colModelArr = [];
 		var colModelObj = {name: 'userId', index: 'userId', width: 150, allign: 'center'};
 		colModelArr.push(colModelObj);
-		if ("Y" == [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_HIDE_EMAIL_FLAG'))}]]) {
-			colModelObj = {name: 'email', index: 'email', width: 200, allign: 'center'};
-		}
 		if ("Y" != [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_HIDE_EMAIL_FLAG'))}]]) {
-			colModelObj = {name: 'email', index: 'email', width: 200, allign: 'center', hidden: true};
-			colModelArr.push(colModelObj);
+            colModelObj = {name: 'email', index: 'email', width: 200, allign: 'center'};
+            colModelArr.push(colModelObj);
 		}
 		colModelObj = {name: 'userName', index: 'userName', width: 100, allign: 'center', editable: true};
 		colModelArr.push(colModelObj);
@@ -337,7 +342,6 @@ var userList = {
 			, loadComplete:function(data) {
 				// id(key값)의 max값을 lastIdNo에 설정
 				userList.lastIdNo = fn.getMaxIdNo();
-				tableRefresh();
 			}
 		})
 	}

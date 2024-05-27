@@ -296,9 +296,16 @@
 	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
 	  			  	 , IF(
-				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = #{user}
-				  </foreach>
+					<choose>
+						<when test="noneUser != null and noneUser.size() > 0">
+							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+								STAT.CATEGORY = #{user}
+							</foreach>
+						</when>
+						<otherwise>
+							1 = 0
+						</otherwise>
+					</choose>
 				     , COUNT(1), 0) AS CATEGORY#{categorySize}
 				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
@@ -358,9 +365,16 @@
 	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
 	  			     , IF(
-				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = #{user}
-				  </foreach>
+					<choose>
+						<when test="noneUser != null and noneUser.size() > 0">
+							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+								STAT.CATEGORY = #{user}
+							</foreach>
+						</when>
+						<otherwise>
+							1 = 0
+						</otherwise>
+					</choose>
 				     , COUNT(1), 0) AS CATEGORY#{categorySize}
 				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB

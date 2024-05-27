@@ -36,18 +36,22 @@ import static oss.fosslight.common.CoConstDef.*;
 
 @Controller
 @Slf4j
-public class LicenseController extends CoTopComponent{
-	@Autowired LicenseService licenseService;
-	@Autowired HistoryService historyService;
-	@Autowired CommentService commentService;
-	@Autowired SearchService searchService;
-	
+public class LicenseController extends CoTopComponent {
+	@Autowired
+	LicenseService licenseService;
+	@Autowired
+	HistoryService historyService;
+	@Autowired
+	CommentService commentService;
+	@Autowired
+	SearchService searchService;
+
 	private final String SESSION_KEY_SEARCH = "SESSION_KEY_LICENSE_LIST";
-	
-	@GetMapping(value=LICENSE.LIST)
-	public String list(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+
+	@GetMapping(value = LICENSE.LIST)
+	public String list(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
 		LicenseMaster searchBean = null;
-		
+
 		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
 			deleteSession(SESSION_KEY_SEARCH);
 			searchBean = searchService.getLicenseSearchFilter(loginUserName());
@@ -57,34 +61,34 @@ public class LicenseController extends CoTopComponent{
 		} else if (getSessionObject(SESSION_KEY_SEARCH) != null) {
 			searchBean = (LicenseMaster) getSessionObject(SESSION_KEY_SEARCH);
 		}
-		
+
 		if (getSessionObject("defaultLoadYn") != null) {
 			model.addAttribute("defaultLoadYn", CoConstDef.FLAG_YES);
-			
+
 			deleteSession("defaultLoadYn");
 		}
-		
+
 		model.addAttribute("searchBean", searchBean);
-		
+
 		return "license/list";
 	}
-	
-	@GetMapping(value=LICENSE.LIST_AJAX)
+
+	@GetMapping(value = LICENSE.LIST_AJAX)
 	public @ResponseBody ResponseEntity<Object> listAjax(
 			LicenseMaster licenseMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
-		
+			, Model model) {
+
 		if ("Y".equals(req.getParameter("ignoreSearchFlag"))) {
 			return makeJsonResponseHeader(new HashMap<String, Object>());
 		}
-		
+
 		int page = Integer.parseInt(req.getParameter("page"));
 		int rows = Integer.parseInt(req.getParameter("rows"));
 		String sidx = req.getParameter("sidx");
 		String sord = req.getParameter("sord");
-		
+
 		licenseMaster.setCurPage(page);
 		licenseMaster.setPageListSize(rows);
 		licenseMaster.setSortField(sidx);
@@ -96,35 +100,35 @@ public class LicenseController extends CoTopComponent{
 		} else if (getSessionObject(SESSION_KEY_SEARCH) != null) {
 			licenseMaster = (LicenseMaster) getSessionObject(SESSION_KEY_SEARCH);
 		}
-		
+
 		Map<String, Object> map = null;
-		
+
 		try {
 			if (isEmpty(licenseMaster.getLicenseNameAllSearchFlag())) {
 				licenseMaster.setLicenseNameAllSearchFlag(CoConstDef.FLAG_NO);
 			}
-			
+
 			licenseMaster.setTotListSize(licenseService.selectLicenseMasterTotalCount(licenseMaster));
 			map = licenseService.getLicenseMasterList(licenseMaster);
 
-		} catch(Exception e) {
+		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
 		CustomXssFilter.licenseMasterFilter((List<LicenseMaster>) map.get("rows"));
 		return makeJsonResponseHeader(map);
 	}
-	
-	@GetMapping(value=LICENSE.EDIT)
-	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+
+	@GetMapping(value = LICENSE.EDIT)
+	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
 		return "license/edit";
 	}
-	
-	@GetMapping(value=LICENSE.EDIT_ID)
-	public String edit(@PathVariable String licenseId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+
+	@GetMapping(value = LICENSE.EDIT_ID)
+	public String edit(@PathVariable String licenseId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
 		LicenseMaster licenseMaster = new LicenseMaster(licenseId);
 		licenseMaster = licenseService.getLicenseMasterOne(licenseMaster);
 		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
-		
+
 		if (licenseMaster != null) {
 			licenseMaster.setDomain(CommonFunction.getDomain(req));
 			licenseMaster.setInternalUrl(CommonFunction.makeLicenseInternalUrl(licenseMaster, distributionFlag));
@@ -135,9 +139,9 @@ public class LicenseController extends CoTopComponent{
 			}
 			model.addAttribute("licenseInfo", licenseMaster);
 		}
-		
+
 		model.addAttribute("detail", licenseMaster);
-		
+
 		if ("ROLE_ADMIN".equals(loginUserRole())) {
 			return "license/edit";
 		} else {
@@ -146,7 +150,7 @@ public class LicenseController extends CoTopComponent{
 				String restrictionStr = "";
 				for (String restriction : restrictionList) {
 					if (isEmpty(restriction)) continue;
-					
+
 					if (!isEmpty(restrictionStr)) {
 						restrictionStr += ", ";
 					}
@@ -154,118 +158,118 @@ public class LicenseController extends CoTopComponent{
 				}
 				if (!isEmpty(restrictionStr)) licenseMaster.setRestriction(restrictionStr);
 			}
-			
+
 			return "license/view";
 		}
 	}
-	
-	@PostMapping(value=LICENSE.VALIDATION)
+
+	@PostMapping(value = LICENSE.VALIDATION)
 	public @ResponseBody ResponseEntity<Object> validation(
 			@ModelAttribute LicenseMaster licenseMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
+			, Model model) {
 		// validation check
 		T2CoLicenseValidator lv = new T2CoLicenseValidator();
 		T2CoValidationResult vResult = lv.validateRequest(req);
 
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
 	}
-	
-	@PostMapping(value=LICENSE.DEL_AJAX)
+
+	@PostMapping(value = LICENSE.DEL_AJAX)
 	public @ResponseBody ResponseEntity<Object> delAjax(
 			@ModelAttribute LicenseMaster licenseMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
+			, Model model) {
 		T2CoLicenseValidator lv = new T2CoLicenseValidator();
 		lv.setProcType(lv.PROC_TYPE_DELETE);
 		lv.setAppendix("licenseId", licenseMaster.getLicenseId());
 		T2CoValidationResult vr = lv.validate(new HashMap<>());
-		
+
 		if (!vr.isValid()) {
 			return makeJsonResponseHeader(false, vr.getValidMessage("LICENSE_NAME"));
 		}
-		
-		LicenseMaster beforeBean =  licenseService.getLicenseMasterOne(licenseMaster);
-		
+
+		LicenseMaster beforeBean = licenseService.getLicenseMasterOne(licenseMaster);
+
 		try {
 			History h = licenseService.work(licenseMaster);
 			h.sethAction(CoConstDef.ACTION_CODE_DELETE);
 			historyService.storeData(h);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
 		try {
 			CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_LICENSE_DELETE);
 			mailBean.setParamLicenseId(licenseMaster.getLicenseId());
 			mailBean.setComment(licenseMaster.getComment());
-			
+
 			CoMailManager.getInstance().sendMail(mailBean);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		
+
 		licenseService.deleteLicenseMaster(licenseMaster);
-		
+
 		putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag 
 		CoCodeManager.getInstance().refreshLicenseInfo();
-		
+
 		try {
 			boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
-			
+
 			licenseService.deleteDistributeLicense(beforeBean, distributionFlag);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		
+
 		return makeJsonResponseHeader();
 	}
 
-	@PostMapping(value=LICENSE.SAVE_AJAX)
+	@PostMapping(value = LICENSE.SAVE_AJAX)
 	public @ResponseBody ResponseEntity<Object> saveAjax(
 			@ModelAttribute LicenseMaster licenseMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
+			, Model model) {
 
 		//License Save
 		Map<String, Object> resMap = licenseService.saveLicense(licenseMaster);
 
 		return makeJsonResponseHeader(resMap);
 	}
-	
-	@PostMapping(value=LICENSE.DELETE_COMMENT)
+
+	@PostMapping(value = LICENSE.DELETE_COMMENT)
 	public @ResponseBody ResponseEntity<Object> deleteComment(
 			@ModelAttribute CommentsHistory commentsHistory
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
+			, Model model) {
 		T2CoValidationResult vResult = null;
-		try{
+		try {
 			//validation check
-			 vResult = validate(req);	
-		}catch(Exception e){
+			vResult = validate(req);
+		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
-		
-		if (!vResult.isValid()){
+
+		if (!vResult.isValid()) {
 			return makeJsonResponseHeader(vResult.getValidMessageMap());
 		}
-		try{
+		try {
 			commentService.deleteComment(commentsHistory);
-		} catch (Exception e){
+		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
-		
+
 		return makeJsonResponseHeader(vResult.getValidMessageMap());
 	}
-	
-	@PostMapping(value=LICENSE.SAVE_COMMENT)
+
+	@PostMapping(value = LICENSE.SAVE_COMMENT)
 	public @ResponseBody ResponseEntity<Object> saveComment(@ModelAttribute CommentsHistory commentsHistory,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+															HttpServletRequest req, HttpServletResponse res, Model model) {
 		T2CoValidationResult vResult = null;
-		
+
 		try {
 			// validation check
 			vResult = validate(req);
@@ -276,78 +280,80 @@ public class LicenseController extends CoTopComponent{
 		if (!vResult.isValid()) {
 			return makeJsonResponseHeader(vResult.getValidMessageMap());
 		}
-		
+
 		CommentsHistory result = null;
-		
+
 		try {
 
 			result = commentService.registComment(commentsHistory);
 		} catch (Exception e) {
 			log.error(e.getMessage());
 		}
-		
+
 		return makeJsonResponseHeader(result);
 	}
-	
-	
-	@PostMapping(value =LICENSE.SEND_COMMENT)
+
+
+	@PostMapping(value = LICENSE.SEND_COMMENT)
 	public @ResponseBody ResponseEntity<Object> sendComment(@ModelAttribute CommentsHistory commentsHistory,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
+															HttpServletRequest req, HttpServletResponse res, Model model) {
 		commentService.registComment(commentsHistory);
-		
+
 		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT);
 		mailBean.setParamLicenseId(commentsHistory.getReferenceId());
 		mailBean.setComment(commentsHistory.getContents());
-		
+
 		CoMailManager.getInstance().sendMail(mailBean);
-		
+
 		return makeJsonResponseHeader();
 	}
-	
-	@GetMapping(value=LICENSE.LICENSE_TEXT)
+
+	@GetMapping(value = LICENSE.LICENSE_TEXT)
 	public @ResponseBody ResponseEntity<Object> getLicenseText(
 			LicenseMaster licenseMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
-		try{
+			, Model model) {
+		try {
 			if (!isEmpty(licenseMaster.getLicenseName()) && CoCodeManager.LICENSE_INFO_UPPER.containsKey(licenseMaster.getLicenseName().trim().toUpperCase())) {
 				return makeJsonResponseHeader(true, CommonFunction.lineReplaceToBR(avoidNull(CoCodeManager.LICENSE_INFO_UPPER.get(licenseMaster.getLicenseName().trim().toUpperCase()).getLicenseText())));
 			}
-		}catch(Exception e){
+		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		
+
 		return makeJsonResponseHeader(false, null);
 	}
-	
-	@GetMapping(value=LICENSE.AUTOCOMPLETE_AJAX)
+
+	@GetMapping(value = LICENSE.AUTOCOMPLETE_AJAX)
 	public @ResponseBody ResponseEntity<Object> autoCompleteAjax(
 			LicenseMaster licenseMaster
 			, HttpServletRequest req
 			, HttpServletResponse res
-			, Model model){
-		
+			, Model model) {
+
 		List<LicenseMaster> list = licenseService.getLicenseNameList();
 		CustomXssFilter.licenseMasterFilter(list);
 		return makeJsonResponseHeader(list);
-	}	
-	
-	@PostMapping(value=LICENSE.LICENSE_ID)
-	public @ResponseBody ResponseEntity<Object> getLicenseId(HttpServletRequest req, HttpServletResponse res, 
-			@RequestParam(value="licenseName", required=true)String licenseName) {
+	}
+
+	@PostMapping(value = LICENSE.LICENSE_ID)
+	public @ResponseBody ResponseEntity<Object> getLicenseId(HttpServletRequest req, HttpServletResponse res,
+															 @RequestParam(value = "licenseName", required = true) String licenseName) {
 		Map<String, String> map = new HashMap<String, String>();
-		
+
 		LicenseMaster lm = new LicenseMaster();
 		lm.setLicenseName(licenseName.trim());
-		
+
 		lm = licenseService.getLicenseId(lm);
 		map.put("licenseId", lm != null ? lm.getLicenseId() : "");
-		
+
 		return makeJsonResponseHeader(map);
 	}
 
-	/**LicenseBulkReg UI*/
+	/**
+	 * LicenseBulkReg UI
+	 */
 	@GetMapping(value = LICENSE.LICENSE_BULK_REG, produces = "text/html; charset=utf-8")
 	public String LicenseBulkRegPage(HttpServletRequest req, HttpServletResponse res, Model model) {
 
@@ -356,7 +362,7 @@ public class LicenseController extends CoTopComponent{
 
 	/**
 	 * LicenseBulkReg Save Post
-	 * */
+	 */
 	@PostMapping(value = Url.LICENSE.BULK_REG_AJAX)
 	public @ResponseBody
 	ResponseEntity<Object> saveAjaxJson(
@@ -474,7 +480,7 @@ public class LicenseController extends CoTopComponent{
 				licenseDataMap = licenseService.getLicenseDataMap(license.getGridId(), false, "X (SPDX sames with LicenseName.)");
 				licenseDataMapList.add(licenseDataMap);
 				continue;
-			} else if(!license.getShortIdentifier().equals("")) {
+			} else if (!license.getShortIdentifier().equals("")) {
 				LicenseMaster licenseForCheckSPDX = new LicenseMaster(license.getLicenseId());
 				licenseForCheckSPDX.setLicenseName(license.getShortIdentifier());
 				LicenseMaster resultBySPDX = licenseService.checkExistsLicense(licenseForCheckSPDX);
@@ -549,10 +555,10 @@ public class LicenseController extends CoTopComponent{
 
 	/**
 	 * Validate Bulk Reg
-	 * */
-	@PostMapping(value=Url.LICENSE.BULK_VALIDATION)
+	 */
+	@PostMapping(value = Url.LICENSE.BULK_VALIDATION)
 	public @ResponseBody ResponseEntity<Object> bulkValidation(
-			@RequestBody List<LicenseMaster> licenseMasters){
+			@RequestBody List<LicenseMaster> licenseMasters) {
 		Map<String, Object> resMap = new HashMap<>();
 
 		T2CoLicenseValidator validator = new T2CoLicenseValidator();
@@ -564,7 +570,9 @@ public class LicenseController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 
-	/**LicenseBulkReg Upload Post*/
+	/**
+	 * LicenseBulkReg Upload Post
+	 */
 	@ResponseBody
 	@PostMapping(value = Url.LICENSE.CSV_FILE)
 	public ResponseEntity<Object> csvFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
@@ -603,5 +611,76 @@ public class LicenseController extends CoTopComponent{
 		resMap.put("res", true);
 		resMap.put("value", licenseWithStatusList);
 		return makeJsonResponseHeader(resMap);
+	}
+
+	@PostMapping(value=LICENSE.MULTI_DEL_AJAX)
+	public @ResponseBody ResponseEntity<Object> multiDelAjax(
+			@ModelAttribute LicenseMaster licenseMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		StringBuilder validMessageBuilder = new StringBuilder();
+
+		for (String licenseId : licenseMaster.getLicenseIds()) {
+			LicenseMaster param = new LicenseMaster();
+			param.setLicenseId(licenseId);
+			LicenseMaster beforeBean =  licenseService.getLicenseMasterOne(param);
+
+			T2CoLicenseValidator lv = new T2CoLicenseValidator();
+			lv.setProcType(lv.PROC_TYPE_MULTY_DELETE);
+			lv.setAppendix("licenseId", licenseId);
+			lv.setAppendix("licenseName", beforeBean.getLicenseName());
+			T2CoValidationResult vr = lv.validate(new HashMap<>());
+
+			if (!vr.isValid()) {
+				if (validMessageBuilder.length() > 0) {
+					validMessageBuilder.append("<hr />");
+				}
+
+				validMessageBuilder.append("<p class='text-bold'>").append(beforeBean.getLicenseName()).append("</p>")
+						.append(vr.getValidMessage("LICENSE_NAME"));
+
+				continue;
+			}
+
+			try {
+				History h = licenseService.work(beforeBean);
+				h.sethAction(CoConstDef.ACTION_CODE_DELETE);
+				historyService.storeData(h);
+				//mailService.sendMail(h);
+			} catch(Exception e) {
+				log.error(e.getMessage(), e);
+				continue;
+			}
+			try {
+				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_LICENSE_DELETE);
+				mailBean.setParamLicenseId(param.getLicenseId());
+				mailBean.setComment(licenseMaster.getComment());
+				CoMailManager.getInstance().sendMail(mailBean);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				continue;
+			}
+
+			licenseService.deleteLicenseMaster(beforeBean);
+			putSessionObject("defaultLoadYn", true); // 화면 로드 시 default로 리스트 조회 여부 flag
+			CoCodeManager.getInstance().refreshLicenseInfo();
+
+			try {
+				boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+
+				licenseService.deleteDistributeLicense(beforeBean, distributionFlag);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				continue;
+			}
+		}
+
+		String validMessage = validMessageBuilder.toString();
+		if(!StringUtil.isEmpty(validMessage)) {
+			return makeJsonResponseHeader(false, validMessage);
+		}
+
+		return makeJsonResponseHeader();
 	}
 }

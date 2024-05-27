@@ -195,38 +195,36 @@ var fn = {
 		var request = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REQUEST'))}]];
 		var review = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_REVIEW'))}]];
 		var finalReview = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_FINAL_REVIEW'))}]];
-		
+
 		var projectStatus = rowObject.status;
-		
+
 		var identificationStatus = rowObject.identificationStatus;
 		var verificationStatus = rowObject.verificationStatus;
-		var statusRequestYn = rowObject.statusRequestYn;
-		var destributionStatus = rowObject.destributionStatus;
 		
 		var display = '<div class="row ml-2 width-14rem">';
 		// identification
 		switch(identificationStatus){
 			case "":
 				if (projectStatus == dropStatus){
-					display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Identification</span>';
-				} else {
-					if("Y" == rowObject.androidFlag) {
-						display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
-					} else {
-						display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
-					}
-				}
+                    display += '<span type=\"button\" class="badge badge-outline-gray-white size-sm width-6rem d-flex-align fs-77p">Identification</span>';
+                } else {
+                    if("Y" == rowObject.androidFlag) {
+                        display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
+                    } else {
+                        display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                    }
+                }
 				break;
 			case "N/A":
-				display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Identification</span>';
+                display += '<span type=\"button\" class="badge badge-outline-gray-white size-sm width-6rem d-flex-align fs-77p">Identification</span>';
 				break;
 			default:
 				if (projectStatus == dropStatus){
-					if ("Confirm" == identificationStatus) {
-						display += '<span class="badge badge-gray size-sm width-6rem">Identification</span>';
-					} else {
-						display += '<span class="badge badge-outline-gray-white size-sm width-6rem">Identification</span>';
-					}
+                    if ("Confirm" == identificationStatus) {
+                        display += '<span type=\"button\" class="badge badge-gray size-sm width-6rem d-flex-align fs-77p">Identification</span>';
+                    } else {
+                        display += '<span type=\"button\" class="badge badge-outline-gray-white size-sm width-6rem d-flex-align fs-77p">Identification</span>';
+                    }
 				} else if (projectStatus == finalReview) {
 					display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
 				} else {
@@ -241,17 +239,17 @@ var fn = {
 							display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
 						}
 					} else {
-						if ("Confirm" == identificationStatus) {
-							display += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
-						} else {
-							if (projectStatus == progress) {
-								display += "<span class='badge badge-success hover-success-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
-							} else if (projectStatus == request) {
-								display += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
-							} else if (review == projectStatus) {
-								display += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem' style='cursor:pointer;' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
-							}
-						}
+                        if ("Confirm" == identificationStatus) {
+                            display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                        } else {
+                            if (projectStatus == progress) {
+                                display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                            } else if (projectStatus == request) {
+                                display += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                            } else if (review == projectStatus) {
+                                display += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                            }
+                        }
 					}
 				}
 				
@@ -420,105 +418,6 @@ var fn = {
 		display += '</div>';
 		
         return display;
-	},
-	// Grid identification cell display
-	displayIdentification : function(cellvalue, options, rowObject){
-//			206 CONF	Confirm
-//			206 NA		N/A
-//			206 PROG	Progress
-//			206 REQ		Request
-//			206 REV		Review
-		var display = "";
-		var hasOss = false;
-		var projectStatus = "*${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}";
-		var partnerFlag = "*${partnerFlag}";
-		
-		switch(cellvalue){
-			case "":
-				if(rowObject.status == projectStatus){
-					display = "<div class=\"tcenter\">Drop</div>";
-				} else {
-					if("Y" == rowObject.androidFlag) {
-						display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Start</a></div>";
-					} else {
-						display = "<div class=\"tcenter\"><a class='btnPG wauto' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Start</a></div>";
-					}
-				}
-				
-				break;
-			case "N/A":
-				display = "<div class=\"tcenter\">"+cellvalue+"</div>";
-									
-				break;
-			default:
-				if(rowObject.status == projectStatus && cellvalue != "Confirm"){
-					display = "<span class=\" indentStep\">Drop</span>&nbsp;";
-				} else {
-					display = "<span class=\" indentStep\">"+cellvalue+"</span>&nbsp;";
-				}
-
-				if("Y" != rowObject.androidFlag) {
-					// 버튼 생성 3rd, SRC, BAT
-					// 2018-08-28 choye 수정
-					if ("true" == partnerFlag) {
-						if(rowObject.identificationSubStatusPartner =="Y" ) {
-							display += "<a class='btnPG on3rd' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>"; hasOss = true;
-						} else if(rowObject.identificationSubStatusPartner == "N") {
-							display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>";
-						} else {
-							display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">3rd</a>";
-						}
-					}
-					
-					if("Y" == rowObject.identificationSubStatusDep) {
-                        display += "<a class='btnPG onDep' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>"; hasOss = true;
-                    } else if ("N" == rowObject.identificationSubStatusDep) {
-                        display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>";
-                    } else {
-                        display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",1,"+rowObject.permission+")\">DEP</a>";
-                    }
-					
-					// 2018-08-28 choye 수정
-					if(rowObject.identificationSubStatusSrc =="Y" ) {
-						display += "<a class='btnPG onSrc' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>"; hasOss = true;
-					} else if(rowObject.identificationSubStatusSrc == "N") {
-						display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>";
-					} else {
-						display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",2,"+rowObject.permission+")\">SRC</a>";
-					}
-
-					// 2018-08-28 choye 수정
-					if(rowObject.identificationSubStatusBin =="Y" ) {
-						display += "<a class='btnPG onBin' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>"; hasOss = true;
-					} else if(rowObject.identificationSubStatusBin == "N") {
-						display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>";
-					} else {
-						display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",3,"+rowObject.permission+")\">BIN</a>";
-					}
-
-					if(rowObject.identificationSubStatusBom == 0) {
-						display += "<a class='btnPG off' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BOM</a>";
-					} else {
-						display += "<a class='btnPG' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">BOM</a>";
-					}
-				} else if("Y" == rowObject.androidFlag) {
-					if(rowObject.identificationSubStatusAndroid =="Y" ) {
-						display += "<a class='btnPG wAnd onAnd' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
-					} else if(rowObject.identificationSubStatusAndroid == "N") {
-						display += "<a class='btnPG wAnd off' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
-					} else {
-						display += "<a class='btnPG wAnd' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">"+rowObject.noticeTypeEtc+"</a>";
-					}
-				}
-				
-				if(rowObject.identificationSubStatusBat =="Y" ) {
-					display += "<a class='btnPG onBat' onclick=\"fn.mvIdentification("+options.rowId+",6,"+rowObject.permission+")\">BAT</a>";
-				}
-				
-				break;
-		}
-		
-		return display;
 	},
 	// Grid veritification cell display
 	displayVerification : function(cellvalue, options, rowObject){
@@ -696,41 +595,39 @@ var fn = {
 		
 		var display = "";
 		var secCode = "";
-		
-		if (typeof rowObject.secCode !== "undefined") {
-			secCode = rowObject.secCode;
-		}
-		
-		if (typeof rowObject.secCvssScore !== "undefined") {
-			if ("Fixed" != secCode) {
-				cellvalue = rowObject.secCvssScore;
-			}
-		}
+
+        var cvssScore = rowObject.cvssScore;
+        var secCode = rowObject.secCode;
+        var secCvssScore = rowObject.secCvssScore;
+
+        if ("N" != secCvssScore && "Fixed" != secCode) {
+            cvssScore = secCvssScore;
+        }
 		
 		if ("" != secCode) {
 			if ("Fixed" == secCode) {
-				if (cellvalue != null && cellvalue != 0) {
-					display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Resolved('+cellvalue+')</span>';
-				} else {
-					display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Resolved(N/A)</span>';
-				}
+                if ("N" != cvssScore) {
+                    display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Resolved('+cvssScore+')</span>';
+                } else {
+                    display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Resolved(N/A)</span>';
+                }
 			} else {
-				if (parseFloat(cellvalue) >= standardScore) {
-					display = '<span class="badge badge-dark-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Need to resolve('+cellvalue+')</span>';
-				} else {
-					if (cvssScore != null && cvssScore != 0) {
-						display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Discovered('+cellvalue+')</span>';
-					} else {
-						display = '<span class="badge badge-cerebral-gray size-sm width-9rem pointer" onclick="fn.mvSecurityTab('+ rowObject.prjId +')">Discovered(N/A)</span>';
-					}
-				}
+                if ("0" != cvssScore && "N" != cvssScore) {
+                    if (cvssScore - standardScore >= 0) {
+                        display = '<span type="button" class="badge badge-dark-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Need to resolve('+cvssScore+')</span>';
+                    } else {
+                        display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Discovered('+cvssScore+')</span>';
+                    }
+                } else {
+                    display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Discovered(N/A)</span>';
+                }
 			}
 		} else {
-			if (cellvalue != null && cellvalue != 0) {
-				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cellvalue+')</span>';
-			} else {
-				display = '<span class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
-			}
+            if ("0" != cvssScore && "N" != cvssScore) {
+                display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cvssScore+')</span>';
+            } else {
+                display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
+            }
 		}
 		
 		return display;
@@ -740,12 +637,12 @@ var fn = {
 		
 		if(rowObject.identificationSubStatusBom != 0 || "Y" == rowObject.androidFlag) {
 			if ('Fixed' == rowObject.secCode) {
-				display = "<span class=\"badge badge-blue hover-blue-btn size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">Fixed</spen>";
-			} else if ('NotFixed' == rowObject.secCode) { 
-				display = "<span class=\"badge badge-blue hover-blue-btn size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
+                display = "<span class=\"badge badge-blue hover-blue-btn size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +", " + rowObject.permission + ")\">Fixed</spen>";
+			} else if ('NotFixed' == rowObject.secCode) {
+                display = "<span class=\"badge badge-blue hover-blue-btn size-sm width-6rem\" style=\"cursor:pointer;\" onclick=\"fn.mvSecurityTab("+ rowObject.prjId +", " + rowObject.permission + ")\">SEC</spen>";
 			} else {
-				display = "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem\" style=\"cursor:pointer;\" th:title=#{msg.project.security.tab.disabled} onclick=\"fn.mvSecurityTab("+ rowObject.prjId +")\">SEC</spen>";
-			}
+                display = "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem\" style=\"cursor:pointer;\" th:title=#{msg.project.security.tab.disabled} onclick=\"fn.mvSecurityTab("+ rowObject.prjId +", " + rowObject.permission + ")\">SEC</spen>";
+            }
 		} 
 		
 		return display;
