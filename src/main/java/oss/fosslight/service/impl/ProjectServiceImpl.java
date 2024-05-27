@@ -164,6 +164,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				list = projectMapper.selectProjectList(project);
 				
 				if (list != null) {
+					boolean isNumberic = false;
+					if (!isEmpty(project.getPrjName())) {
+						isNumberic = project.getPrjName().chars().allMatch(Character::isDigit);
+					}
+					if (isNumberic) {
+						List<Project> filteredList = list.stream().filter(e -> e.getPrjId().equalsIgnoreCase(project.getPrjName())).collect(Collectors.toList());
+						if (filteredList != null && !filteredList.isEmpty()) {
+							List<Project> sortedList = new ArrayList<>();
+							sortedList.addAll(filteredList);
+							sortedList.addAll(list.stream().filter(e -> !e.getPrjId().equalsIgnoreCase(project.getPrjName())).collect(Collectors.toList()));
+							list = sortedList;
+						}
+					}
+					
 					ProjectIdentification identification = new ProjectIdentification();
 					identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 					identification.setMerge(CoConstDef.FLAG_NO);

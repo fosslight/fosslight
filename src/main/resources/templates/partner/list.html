@@ -22,15 +22,12 @@
                                             <div class="row" style="width: 100%;">
                                                 <div class="col-12">
                                                     <div class="input-group">
-                                                        <input class="save-value" name="defaultSearchType" th:value="THIRD_PARTY"
-                                                               type="hidden"/>
-                                                        <input class="form-control autoComParty save-value" name="partnerName"
-                                                               placeholder="Partner Name"
-                                                               th:value="${searchBean?.partnerName}"
-                                                               type="search">
+                                                        <input class="save-value" name="defaultSearchType" th:value="THIRD_PARTY" type="hidden"/>
+                                                        <input class="form-control autoComParty save-value" name="partnerName" placeholder="Partner ID or Partner Name" th:value="${searchBean?.partnerName}" type="search">
                                                         <div class="input-group-append">
-                                                            <button class="btn btn-default" id="search" type="submit"><i
-                                                                    class="fa fa-search"></i></button>
+                                                            <button class="btn btn-default" id="search" type="submit">
+                                                            	<i class="fa fa-search"></i>
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -40,20 +37,14 @@
                                             <div class="row">
                                                 <div class="col-sm-7 d-flex justify-content-start">
                                                     <div class="input-group-append d-flex align-items-center">
-                                                        <a class="text-blue-gray" data-card-widget="collapse"
-                                                           style="font-size: 1rem;" th:text="'+ Advanced Search'"
-                                                           title="Collapse"></a>
+                                                        <a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'" title="Collapse"></a>
                                                     </div>
                                                 </div>
                                                 <div class="col-sm-5">
                                                     <div class="helpLink f-left dropdown float-right mt-1">
-                                                        <a aria-expanded="false" aria-haspopup="true"
-                                                           class="help-link dropdown-toggle" data-toggle="dropdown" href="#"
-                                                           role="button">Help</a>
+                                                        <a aria-expanded="false" aria-haspopup="true" class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button">Help</a>
                                                         <div class="dropdown-menu mt-0">
-                                                            <a class="dropdown-item" href="#"
-                                                               th:onclick="|openHelpGuideLink('Party_List_Main')|">How
-                                                                to use FossLight Hub</a>
+                                                            <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Party_List_Main')|">How to use FossLight Hub</a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -64,13 +55,11 @@
                                 <div class="card-body py-1">
                                     <form action="enhanced-results.html">
                                         <div class="row">
-                                            <div class="col-4">
+                                            <!-- <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control save-value" id="partnerId" name="partnerId"
-                                                           placeholder="Partner ID" th:value="${searchBean?.partnerId}"
-                                                           type="text">
+                                                    <input class="form-control save-value" id="partnerId" name="partnerId" placeholder="Partner ID" th:value="${searchBean?.partnerId}" type="text">
                                                 </div>
-                                            </div>
+                                            </div> -->
                                             <div class="col-4">
                                                 <div class="form-group">
                                                     <div class="input-group" style="width: 100%;">
@@ -79,39 +68,29 @@
                                                                 <i class="far fa-calendar-alt"></i>
                                                             </span>
                                                         </div>
-                                                        <input class="form-control" id="schDateRange" placeholder="Date range"
-                                                               type="text">
-                                                        <input class="save-value" id="createdDate1" name="createdDate1"
-                                                               th:value="${searchBean?.createdDate1}" type="hidden"/>
-                                                        <input class="save-value" id="createdDate2" name="createdDate2"
-                                                               th:value="${searchBean?.createdDate2}" type="hidden"/>
+                                                        <input class="form-control" id="schDateRange" placeholder="Date range" type="text">
+                                                        <input class="save-value" id="createdDate1" name="createdDate1" th:value="${searchBean?.createdDate1}" type="hidden"/>
+                                                        <input class="save-value" id="createdDate2" name="createdDate2" th:value="${searchBean?.createdDate2}" type="hidden"/>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control save-value" name="softwareName"
-                                                           placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}"
-                                                           type="text"/>
+                                                    <input class="form-control save-value" name="softwareName" placeholder="3rd Party Software Name" th:value="${searchBean?.softwareName}" type="text"/>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control save-value" name="softwareVersion"
-                                                           placeholder="3rd Party Software Version"
-                                                           th:value="${searchBean?.softwareVersion}"
-                                                           type="text"/>
+                                                    <input class="form-control save-value" name="softwareVersion" placeholder="3rd Party Software Version" th:value="${searchBean?.softwareVersion}" type="text"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <select class="form-control select2 save-value" id="division"
-                                                            name="division" style="width: 100%;">
+                                                    <select class="form-control select2 save-value" id="division" name="division" style="width: 100%;">
                                                         <option value=""></option>
-                                                        <th:block
-                                                                th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
                                                             <option th:selected="${#strings.equals(option.cdDtlNo, searchBean?.division)}"
                                                                     th:text="${option?.cdDtlNm}"
                                                                     th:value="${option.cdDtlNo}"></option>

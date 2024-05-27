@@ -1235,6 +1235,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				gridBean.setDependencies(bean.getDependencies());
 			}
 			
+			if (!isEmpty(bean.getCheckSum())) {
+				gridBean.setCheckSum(bean.getCheckSum());
+			}
+			
+			if (!isEmpty(bean.getTlsh())) {
+				gridBean.setTlsh(bean.getTlsh());
+			}
+			
 			// license 
 			int licenseIdx = 1;
 			if (bean.getOssComponentsLicense() != null) {
@@ -5548,6 +5556,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 	
 	public static String getCustomMessage(String msgCode, String contents) {
-		return getMessage(msgCode, new String[]{contents});
+		return getCustomMessage(msgCode, contents, false);
+	}
+	
+	public static String getCustomMessage(String msgCode, String contents, boolean msgPropertyFlag) {
+		if (msgPropertyFlag) {
+			return getMessage(msgCode, new String[]{getMessage(contents)});
+		} else {
+			return getMessage(msgCode, new String[]{contents});
+		}
 	}
 }
