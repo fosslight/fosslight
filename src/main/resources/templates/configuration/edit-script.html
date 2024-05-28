@@ -209,14 +209,14 @@
             var params = {};
             var password = $("#password").val();
             var userName = $('input[name="userName"]').val();
-            var division = $.trim($('select[name="division"] option:selected').val());
-            var confirmMsg = "";
-            if(division === [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
-                confirmMsg = [[#{msg.configuration.confirm.save}]];
-            } else {
-                confirmMsg = [[#{msg.common.confirm.save}]];
+            var division = $("#division").val();
+            
+            if (division == null){
+                alertify.alert([[#{msg.configuration.notice.devision}]], function(){});
+                return false;
             }
-            alertify.confirm(confirmMsg, function (e) {
+            
+            alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
                 if (e) {
                     $.ajax({
                         type: 'POST',
@@ -226,7 +226,7 @@
                         success: function (data) {
                             if("true" != data.isValid) {
                                 if(data.validMsg) {
-                                    alertify.alert(data.validMsg);
+                                    alertify.alert(data.validMsg, function(){});
                                 } else {
                                     alertify.error([[#{msg.common.valid2}]], 0);
                                 }
