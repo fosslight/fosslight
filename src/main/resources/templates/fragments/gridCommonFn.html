@@ -1518,13 +1518,11 @@
             	     	async : false,
             	      	contentType : 'application/json',
             	      	success : function(data){
-            	      		var btn_review = $(".btnSet.autoReview");
+            	      		var btn_review = $("i.fa-clock");
             	           	if("false" == data.isValid && "running" == data.validMsg) {
-            	              	btn_review.addClass("ing");
+                                btn_review.show();
             	           	} else {
-            	              	if (btn_review.hasClass("ing") == true) {
-            	               		btn_review.removeClass("ing");
-            	           		}
+                                btn_review.hide();
             	         	}
             	      	},
             	    	error : function(){
@@ -1565,6 +1563,18 @@
             	 	} else {
             	      	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/false';
             	  	}
+
+                    if(prjId.startsWith("3rd_")){
+                        var partId = prjId.replace('3rd_','');
+                        reloadTabInframe('/partner/list');
+                        deleteTabInFrame("/partner/edit/" + partId);
+                        createTabInFrame(partId + '_3rdParty', "/partner/edit/" + partId);
+                    } else {
+                        reloadTabInframe("/project/list");
+                        deleteTabInFrame([[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
+                        createTabInFrame(prjId+'_Identify', [[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
+                    }
+
             	  	$.ajax({
             	      	type : 'POST',
             	      	url : url,
