@@ -17,8 +17,7 @@
 	var commentsParam = {referenceId : [[${ossId}]], referenceDiv : 'oss'};
     var ossId = [[${ossId}]] || null;
     var isReadOnly = [[${isReadOnly}]] || null;
-    var downloadLocationList = [[${downloadLocationList}]];
-    var ossNickList = [[${ossNickList}]];
+    var userRole = [[${#authentication.authorities[0].authority}]];
     var isSaveButtonClicked = false;
       
 	//데이터 객체
@@ -34,6 +33,8 @@
 		init : function(){
 			if (data.list == null) {
 				data.list = new Array();
+            }
+            if (typeof data.list.rows === "undefined") {
 				data.list.rows = new Array();
 			}
 			commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
@@ -43,14 +44,23 @@
 			data.cloneDownloadLocation = $('.multiDownloadLocationSet').clone().html();
 			data.cloneDetectLicense = $('.multiDetectedLicenseSet').clone().html();
 			deactivateFlag = (data.detail&&data.detail.deactivateFlag)||"N";
-			//데이터 초기화(컨트롤러에서 가져온 데이터)
-			if (data.detail) {
+
+            if (typeof data.list.rows !== "undefined" && data.list.rows.length == 1) {
+                if (data.list.rows[0].licenseName.indexOf(",") == -1){
+                    $("input[name=licenseId]").val(data.list.rows[0].licenseId);
+                }
+            }
+
+            //데이터 초기화(컨트롤러에서 가져온 데이터)
+            if (data.detail != null && data.detail.ossId != null) {
 				data.syncData(data.detail, false);
 			} else {//신규 등록이나 카피일때
 				if (data.copyData) {
 					data.syncData(data.copyData, true);
 				} else {
-					if (data.list != null && data.list.rows.length > 1) {
+                    $('.ossI').hide();
+
+                    if (data.list != null && typeof data.list.rows !== "undefined" && data.list.rows.length > 1) {
 						$('input[type=radio]:last').trigger('click');
 					} else {
 						$('input[type=radio]:first').trigger('click');
@@ -69,16 +79,16 @@
 									$('.multiTxtSet').empty();
 								}
 
-								let nickHtml 	= 	'<div class="col-lg-4" style="margin-top: 5px;">';
+                                let nickHtml 	= 	'<div class="col-lg-4 mt-1 pl-0">';
 								nickHtml 		+= 		'<div class="form-group mb-0">';
 								nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
 								nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
 								nickHtml 		+=		'</div>';
 								nickHtml 		+=		'<span class="retxt"></span>';
 								nickHtml 		+= 	'</div>';
-								
-								$('.multiTxtSet').append(nickHtml);
-							}
+
+                                $('.multiTxtSet').append(nickHtml);
+                            }
 						});
 					}
 					
@@ -111,8 +121,6 @@
 			
 			$('textarea[name=ossCopyright]').height(240);
 
-            $('[data-toggle="tooltip"]').tooltip({html: true});
-
             $('.btnCancel').click(function () {
                $('.pop').hide();
             });
@@ -128,6 +136,18 @@
                     }
                 }
             });
+
+            $(document).keydown(function (e) {
+                if (e.keyCode == 13) {
+                    var activeInput = $('.form-control:focus');
+                    if (activeInput.length > 0) {
+                        var submitButton = activeInput.closest('.input-group').find('[type="button"]');
+                        if (submitButton.length > 0) {
+                            submitButton.click();
+                        }
+                    }
+                }
+            })
 		},
 		syncData : function(syncData, copyFlag){
 			$.each(syncData, function(k, v){
@@ -243,7 +263,7 @@
 						}
 						
 						if (v.toUpperCase().indexOf('D') > -1) {
-							colOssType += '<span class="badge badge-pink mr-1 text-sm">Dual</span>';
+                            colOssType += '<span class="badge badge-purple mr-1 text-sm">Dual</span>';
 						}
 						
 						if (v.toUpperCase().indexOf('V') > -1) {
@@ -319,6 +339,9 @@
 			//Download Location Input 추가
 			$('#downloadLocationAdd').on('click', function(){
 				var downloadLocation = $("#input_downloadLocations").val();
+                if (downloadLocation.endsWith("/")) {
+                    downloadLocation = downloadLocation.slice(0, -1);
+                }
 				
 				let downloadLocationHtml 	= 	'<div class="col-lg-4" style="margin-top: 5px;">';
 				downloadLocationHtml 		+= 		'<div class="form-group mb-0">';
@@ -368,7 +391,13 @@
 			$('#delete').on('click', function(){
 				var innerHtml 	= 'Are you want to delete the oss?<br><br>';
                	innerHtml 		+= '<textarea id="deleteOssEditor"></textarea>';
-            	
+
+                // prevent clicking the OK button on Enter
+                let keyCode;
+                $(document).on('keydown', function (event) {
+                    keyCode = event.keyCode;
+                });
+
                	if (!alertify.delOssDialog){
 					alertify.dialog('delOssDialog', function() {
 						return {
@@ -393,41 +422,42 @@
 						};
 					}, false, 'confirm');
 	        	}
-				
-               	alertify.delOssDialog(innerHtml, function (e) {
-               		if (e) {
-               			if ($('#deleteOssEditor').summernote('isEmpty')) {
-    	           			alertify.alert([[#{msg.oss.required.deletion}]], function(){});
-    						return false;
-    					}
-               			
-               			if (deactivateFlag == "Y"){
-        					alertify.alert([[#{msg.oss.required.deactivate.deletion}]], function(){});
-        					return false;
-        				}
-               			
-						loading.show();
-						
-						$('input[name=comment]').val($("#deleteOssEditor").summernote('code'));
-						
-						if(validationDataSet()){
-							$("#ossForm").ajaxForm({
-								url : suffix + '/oss/validation',
-					            type : 'POST',
-					            dataType:"json",
-					            cache : false,
-						        success : onDeleteValidSuccess,
-					            error : onError
-						    }).submit();
-						} else {
-							loading.hide();
-						}
-               		} else {
-               			return false;
-               		}
-	            });
-	           	
-	           	$("#deleteOssEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+
+                alertify.delOssDialog()
+                    .set('onok', function(event){
+                        // prevent clicking the OK button on Enter
+                        if (typeof keyCode !== 'undefined' && keyCode == 13) {
+                            keyCode = undefined;
+                            return false;
+                        }
+
+                        var editorVal = $("#deleteOssEditor").summernote('code');
+                        if ("" == $(editorVal).text().trim()){
+                            alertify.alert([[#{msg.oss.required.deletion}]], function(){});
+                            return false;
+                        }
+
+                        loading.show();
+
+                        $('input[name=comment]').val($("#deleteOssEditor").summernote('code'));
+
+                        if (validationDataSet()) {
+                            $("#ossForm").ajaxForm({
+                                url : '/oss/validation',
+                                type : 'POST',
+                                dataType:"json",
+                                cache : false,
+                                success : onDeleteValidSuccess,
+                                error : onError
+                            }).submit();
+                        } else {
+                            loading.hide();
+                        }
+                    })
+                    .set('onshow', function(event){
+                        $("#deleteOssEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                    })
+                    .setContent(innerHtml).show();
 			});
 			
 			//라이센스 삭제용 검색
@@ -461,8 +491,9 @@
 		 				//2. 기존 Oss 의 Name 과 Nickname을 현재 선택한 Oss의 Nickname 에 병합
 		 				//3. 기존의 Oss 삭제
 
-						var editorVal = ""; // summernote 데이터로 변경해야함
-	 					var sendData = {
+                        var editorVal = $("#deleteOssEditor").summernote('code');
+
+                        var sendData = {
 	 						ossId:[[${ossId}]],
 	 						newOssId:newOssId,
 	 						comment:editorVal
@@ -501,7 +532,7 @@
 			
 			$("#mergeOssSubmit").on('click', function(){
 
-                var editorVal = ""; // summernote 데이터로 변경해야함
+                var editorVal = $("#deleteOssEditor").summernote('code');
 				var sendData = {
 					ossId : [[${ossId}]],
 					newOssId : tempNewOssId,
@@ -519,7 +550,7 @@
 						if(json.resCd == '10'){
 							alertify.alert([[#{msg.common.success}]],function(){
 								deleteTabInFrame('/oss/edit/'+ossId);
-								reloadTabInframe('/oss/list"/>');
+                                reloadTabInframe('/oss/list');
 								$('.mergeOssCheckPop').hide();
 								$('#blind_wrap').hide();
 							});
@@ -535,25 +566,29 @@
 			
 			//프로젝트 리스트 더보기
 			$('#listMore').on('click',function(){
-				createTabInFrame('Project List', '/project/list');
+                var projectSearchConditions = {"prjName" : "", "publicYn" : "Y", "prjId" : "", "schStartDate" : "", "schEndDate" : "", "creator" : "", "reviewer" : "", "watchers" : [""], "modelName" : "", "schBinaryName" : "",
+                    "ossName" : $("input[name='ossName']").val(), "ossVersion" : $("input[name='ossVersion']").val(), "licenseName" : "", "refPartnerName" : "", "prjDivision" : "","networkServerType" : "", "priority" : "",
+                    "distributionType" : "", "noticeType" : "", "statuses" : "", "comment" : "", "userComment" : ""}
+                projectSearchConditions.expire = Date.now() + 300000;
+                localStorage.setItem("projectSearchConditions", JSON.stringify(projectSearchConditions));
+                customCreateTabInFrame("project", "/project/list");
 			});
 
 			//프로젝트 리스트 더보기
 			$('#listMore3rd').on('click',function(){
-				createTabInFrame('3rd Party List', '/partner/list');
+                createTabInFrameWithCondition('3rd Party List', '/partner/list', 'OSSLISTMORE', $("input[name=ossId]").val());
 			});
-			
-			if ([[${ossId}]] == null) { // OSS 신규등록 시 URL 링크 중복 체크
-				$(".multiDownloadLocationSet > div > div > input[name='downloadLocations']").each(function(idx, cur){
-					$(cur).trigger("blur");
-				});
-				
-				$('input[name=homepage]').blur(function(){
-					fn.homepageDuplication(this);
-				});
-			}
-			
-			$("[name='ossName']").on("blur", function(e){
+
+            $(".multiDownloadLocationSet > div > div > input[name='downloadLocations']").each(function(idx, cur){
+                $(cur).trigger("blur");
+            });
+
+            $('input[name=homepage]').blur(function(){
+                fn.homepageDuplication(this);
+            });
+
+
+            $("[name='ossName']").on("blur", function(e){
 				fn.urlDuplicationAll();
 			});
 
@@ -596,15 +631,15 @@
 											var _encUrl = "ossName="+fn.replaceGetParamChar(encodeURIComponent(ossName))+"&ossVersion="+fn.replaceGetParamChar(ossVersion)+"&ossId="+ossId;
 
 											if(_popup == null || _popup.closed){
-												_popup = window.open("/oss/osssyncpopup?"+_encUrl, "ossSyncViewPopup_"+ossName, "width=1000, height=700, toolbar=no, location=no, left=100, top=100");
+                                                _popup = window.open("/oss/osssyncpopup?"+_encUrl, "ossSyncViewPopup_"+ossName, "width=1000, height=600, toolbar=no, location=no, left=100, top=100");
 
 												if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
 													alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
 												}
 											} else {
 												_popup.close();
-												_popup = window.open("/oss/osssyncpopup?"+_encUrl, "ossSyncViewPopup_"+ossName, "width=1000, height=700, toolbar=no, location=no, left=100, top=100");
-											}
+                                                _popup = window.open("/oss/osssyncpopup?"+_encUrl, "ossSyncViewPopup_"+ossName, "width=1000, height=600, toolbar=no, location=no, left=100, top=100");
+                                            }
 										}
 									},
 									error : function(){
@@ -768,10 +803,9 @@
 		
 		evt.init();
 		data.init();
-		
-		if ($('input[name=ossId]').val()) {
-			fn_comment.getCommentList(commentsParam);
-		}
+
+        commentsParam["height"] = $(window).height() - 120;
+        fn_comment.getCommentList(commentsParam);
 		
 		$("#btnShowLicenseText").click(function() {
 			if($(this).val() == "Show license text") {
@@ -840,52 +874,31 @@
 		}
 		
 		// 라이센스 그리드
-        var colModelArr = [];
-        var colModelObj = {name:'no', index: 'ossLicenseIdx', width:30, hidden:true};
-        colModelArr.push(colModelObj);
-        colModelObj = {name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true};
-        colModelArr.push(colModelObj);
-        if (isReadOnly == 'true' || isReadOnly) {
-            colModelObj = {name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false};
-            colModelArr.push(colModelObj);
-            colModelObj = {name:'licenseNameEx',index:'licenseNameEx', width:150};
-            colModelArr.push(colModelObj);
-            colModelObj = {name:'ossCopyright',index:'ossCopyright', width:250};
-            colModelArr.push(colModelObj);
-        } else {
-            colModelObj = {name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:changeLicenseType}]}};
-            colModelArr.push(colModelObj);
-            colModelObj = {name:'licenseNameEx',index:'licenseNameEx', width:150, editable:true, editoptions: {
-                    dataInit: function (elem) {
-                        $(elem).focus(function () {
-                            setCustomAutoComplete('multi');
-                        })
+        var _licenseChoice = $('#_licenseChoice');
+        _licenseChoice.jqGrid({
+            datatype: 'local',
+            data:list,
+            colNames:['','','','License', 'Copyright', '','','','','license Type', 'obligationChecks'],
+            colModel:[
+                {name:'no', index: 'ossLicenseIdx', width:30, hidden:true},
+                {name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true},
+                {name:'ossLicenseComb',index:'ossLicenseComb', width:70, align:"center", sortable:false, editable:true, edittype:"select", editoptions:{value:"AND:AND;OR:OR", dataEvents:[{type:'change', fn:changeLicenseType}]}},
+                {name:'licenseNameEx',index:'licenseNameEx', width:150, editable:true, editoptions: {
+                        dataInit: function (elem) {
+                            $(elem).focus(function () {
+                                setCustomAutoComplete('multi');
+                            })
+                        }
                     }
-                }
-            };
-            colModelArr.push(colModelObj);
-            colModelObj = {name:'ossCopyright',index:'ossCopyright', width:250, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}};
-            colModelArr.push(colModelObj);
-        }
-        colModelObj = {name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons};
-        colModelArr.push(colModelObj);
-        colModelObj = {name:'licenseName',index:'licenseName', width:50, hidden:true};
-        colModelArr.push(colModelObj);
-        colModelObj = {name:'licenseId',index:'licenseId', width:50, hidden:true};
-        colModelArr.push(colModelObj);
-        colModelObj = {name:'licenseNameEx',index:'licenseNameOrg', width:50,hidden:true};
-        colModelArr.push(colModelObj);
-        colModelObj = {name:'licenseType',index:'licenseType', width:50,hidden:true};
-        colModelArr.push(colModelObj);
-        colModelObj = {name:'obligationChecks',index:'obligationChecks', width:50,hidden:true};
-        colModelArr.push(colModelObj);
-
-		var _licenseChoice = $('#_licenseChoice');
-		_licenseChoice.jqGrid({
-			datatype: 'local',
-			data:list,
-			colNames:['','','','License', 'Copyright', '','','','','license Type', 'obligationChecks'],
-			colModel: colModelArr,
+                },
+                {name:'ossCopyright',index:'ossCopyright', width:250, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}},
+                {name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons},
+                {name:'licenseName',index:'licenseName', width:50, hidden:true},
+                {name:'licenseId',index:'licenseId', width:50, hidden:true},
+                {name:'licenseNameEx',index:'licenseNameOrg', width:50,hidden:true},
+                {name:'licenseType',index:'licenseType', width:50,hidden:true},
+                {name:'obligationChecks',index:'obligationChecks', width:50,hidden:true}
+            ],
             autoencode: true,
             editurl:'clientArray',
             pager: '#_licenseChoicePager',
@@ -940,6 +953,7 @@
 					$('#obDiv').html('');
 					$(obligationHtml).appendTo('#obDiv');
 
+                    isSaveButtonClicked = false;
 				}
 			},
 			afterInsertRow:function(rowid, rowdata, rowelem){
@@ -1087,8 +1101,8 @@
 				}
 			});
 		}
-		
-		if ('' != [[${ossId}]]) {
+
+        if ([[${ossId}]] != null) {
 			// oss 그리드
 			$('#_ossSelectList').jqGrid({
 				url:"/oss/ossPopupList/" + [[${ossId}]],
@@ -1211,8 +1225,7 @@
 		//라이센스 묶음 텍스트 출력
 		createMultiLicenseText();
 		lastsel=-1;
-		
-		isSaveButtonClicked = false;
+
 	}
 
 	function getLicenseGroup(groups){
@@ -1408,11 +1421,25 @@
 			'Proprietary Free' 	: 4,
 			'Proprietary' 		: 5
 		};
+        var constant2 = {
+            'PMS' 	: 1,
+            'WCP' 	: 2,
+            'CP'  	: 3,
+            'NA' 	: 4,
+            'PF' 	: 5
+        };
 		group.forEach(function(item,index,ref){
 			if(max < constant[item.licenseType]){
 				max = constant[item.licenseType];
 			}
 		});
+        if (max == 0) {
+            group.forEach(function(item,index,ref){
+                if(max < constant2[item.licenseType]){
+                    max = constant2[item.licenseType];
+                }
+            });
+        }
 		return max;
 	}
 	/*
@@ -1820,7 +1847,7 @@
 				}
 
 				for (var k in json.resultData.addNickArr) {
-					let nickHtml 	= 	'<div class="col-lg-4" style="margin-top: 5px;">';
+                    let nickHtml 	= 	'<div class="col-lg-4 mt-2">';
 					nickHtml 		+= 		'<div class="form-group mb-0">';
 					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+json.resultData.addNickArr[k]+'"/>';
 					nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
@@ -1896,22 +1923,24 @@
 						var height = 0;
 						let vDiffDiv = document.createElement('div');
 						vDiffDiv.id = 'vDiffDiv';
-						let h1 = document.createElement('h1');
-						h1.innerHTML = [[#{msg.oss.confirm.ossVersion}]];
-						vDiffDiv.appendChild(h1);
+                        let h6 = document.createElement('h6');
+                        h6.innerHTML = [[#{msg.oss.confirm.ossVersion}]];
+                        vDiffDiv.appendChild(h6);
 						vDiffDiv.appendChild(document.createElement('br'));
 						height += 30;
+
+                        let div = document.createElement("div");
+                        $(div).addClass("card-body table-responsive p-0");
 						
 						let table = document.createElement('table');
-						table.style.width = '100%';
-						$(table).css('border-collapse','collapse');
+                        $(table).addClass("table table-hover text-nowrap");
 						let thead = document.createElement('thead');
 						let tbody = document.createElement('tbody');
 						
 						let row_1 = document.createElement('tr');
 						$(row_1).css('background-color','#a39d9b');
-						row_1.style.height = "30";
-						height += 30;
+                        row_1.style.height = "45";
+                        height += 45;
 						
 						let heading_1 = document.createElement('th');
 						heading_1.style.border = '1px solid #444444';
@@ -1936,8 +1965,8 @@
 							var declaredLicense = checkList[j].split("|")[1];
 							
 							let row_2 = document.createElement('tr');
-							row_2.style.height = "30";
-							height += 30;
+                            row_2.style.height = "45";
+                            height += 45;
 							
 							let row_2_data_1 = document.createElement('td');
 							row_2_data_1.style.border = '1px solid #444444';
@@ -1953,7 +1982,8 @@
 						}
 						
 						table.appendChild(tbody);
-						vDiffDiv.appendChild(table);
+                        div.append(table);
+                        vDiffDiv.appendChild(div);
 						
 						height = (height + 160) < 750 ? (height + 160) : 750;
 						
@@ -2073,13 +2103,35 @@
 			}
 		}		
 	};
-	
-	//저장함수
+
+    function checkOssVersionDiff(){
+        var ovDiff_flag = "";
+        var postData = {'ossId' : [[${ossId}]], 'ossName' : $('input[name=ossName]').val()};
+
+        $.ajax({
+            url : '"/oss/checkOssVersionDiff',
+            type : 'POST',
+            data : JSON.stringify(postData),
+            dataType : 'json',
+            cache : false,
+            async : false,
+            contentType : 'application/json',
+            success : function(json){
+                ovDiff_flag = json.vFlag;
+            },
+            error : function(){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+
+        return ovDiff_flag;
+    }
+
+    //저장함수
 	function onRegist(){
 		loading.show();
 		saveRow();
-		var editorVal = $('#commentCont').next().find(".note-editable").html();
-		$('input[name=comment]').val(replaceWithLink(editorVal));
+
 		$("#ossForm").ajaxForm({
 			url :'/oss/saveAjax',
             type : 'POST',
@@ -2099,8 +2151,15 @@
 					// 현재 창이 팝업인 경우
 					self.opener = null;self.close();
 				} else {
-					deleteTabInFrame('/oss/edit/'+json.ossId);
-					reloadTabInframe('/oss/list');
+                    if (ossId != null) {
+                        deleteTabInFrame('/oss/edit/'+json.ossId);
+                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
+                    } else {
+                        deleteTabInFrame('/oss/edit/');
+                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
+                    }
+
+                    reloadTabInframe('/oss/list');
 				}
 			});
 		}else{
@@ -2226,7 +2285,7 @@
 		$('.mergeOssCheckPop').show();
 ;
 		$('#_ossMergeCheckList').jqGrid({
-			url: `/oss/ossMergeCheckList/${ossId}/${newOssId}`,
+            url: '/oss/ossMergeCheckList/' + [[${ossId}]] + '/' + newOssId,
 			datatype: 'json',
 			jsonReader:{
 				repeatitems: false,
@@ -2279,6 +2338,9 @@
 
 
 	var fn_comment = {
+        callbackFunction : function () {
+            fn_comment.getCommentList(commentsParam);
+        },
     	getCommentList : function(param){
     		if (data.copyData) {
         	} else {
@@ -2289,6 +2351,9 @@
                 	cache : false,
                 	data : param,
                 	success : function(res){
+                        if (typeof param.height !== undefined) {
+                            $(".comment-card-body").attr("style", "max-height:" + param.height + "px; overflow-y: auto;");
+                        }
                 		$("#commentList").empty();
 						$("#commentList").html(res);
                 	},
@@ -2329,26 +2394,27 @@
 						    	hooks: {
 						    		onshow: function() {
 						        		this.elements.dialog.style.maxWidth = 'none';
-						          		this.elements.dialog.style.width = '750px';
+                                        this.elements.dialog.style.width = '700px';
 						        	}
 								}
 							};
-						}, false, 'alert');
+                        }, false, 'confirm');
             		}
 				
 					alertify.editComments(res).set('title', 'Edit Comments');
 					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
-					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
+					$("#commentEdit").summernote({minHeight: 180, maxHeight: 800, lang: "ko-KR"});
 				}
     		});
 		},
 		updateComments : function (_commId, _referenceDiv, _referenceId) {
-			if ("" == $("#commentEdit").next().find(".note-editable").text()) {
+            var summernoteVal = $("#commentEdit").summernote('code');
+            if ("" == summernoteVal) {
 				alertify.alert("Please enter a comment", function(){});
 				return false;
 			} else {
-				var param = {commId : _commId, contents : replaceWithLink($("#commentEdit").summernote('code')), referenceDiv: _referenceDiv, referenceId: _referenceId};
-					$.ajax({
+                var param = {commId : _commId, contents : replaceWithLink(summernoteVal), referenceDiv: _referenceDiv, referenceId: _referenceId};
+                $.ajax({
 					url : '/comment/updateComment',
 					type : 'POST',
 					dataType : 'json',
@@ -2390,7 +2456,36 @@
 		},
 		closeAlertifyView : function () {
 			fn.closeAlertifyView();
-		}
+		},
+        activateCommentArea : function () {
+            var commentRow = $("#commentList .card-body").length;
+
+            // change tab area
+            if (!$(".editInfoCommentArea").is(":visible")) {
+                $(".editInfoAreaTop").hide();
+                $(".editInfoAreaBottom").hide();
+                $(".editInfoArea").removeClass("col-md-10");
+                $(".editInfoArea").addClass("col-lg-9");
+
+                fn_comment.getCommentList(commentsParam);
+                $(".editInfoCommentArea").show();
+
+                resizingJqGidSet();
+            } else {
+                $(".editInfoAreaTop").show();
+                $(".editInfoArea").removeClass("col-lg-9");
+                $(".editInfoArea").addClass("col-md-10");
+                $(".editInfoAreaBottom").show();
+                $(".editInfoCommentArea").hide();
+                resizingJqGidSet();
+            }
+        },
+        showCommentHistory : function () {
+            fn_comment.activateCommentArea();
+
+            var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}]];
+            openCommentHistory('/comment/popup/oss/' + _rDiv + '/' + [[${ossId}]]);
+        }
 	}
 
 	var fn = {
@@ -2570,9 +2665,21 @@
 			_param = _param.replace(/\+/g,"%2B"); 
 			return _param;
 		},
+        gridSaveMode: function (targetstr) {
+            var target = $("#" + targetstr);
+
+            var mArr = [];
+            mArr = target.jqGrid('getDataIDs');
+
+            for (var m in mArr) {
+                target.jqGrid('saveRow', mArr[m]);
+            }
+        },
 		save : function() {
 			isSaveButtonClicked = true;
-			
+
+            fn.gridSaveMode('_licenseChoice');
+
 			if(fn.checkValid()){
 				// 폼 에러 메세지 숨기기
 				$("span.retxt").hide();
@@ -2660,7 +2767,7 @@
 		}
 	},
 	showOssViewPage : function (obj) {
-		var ossName = $(obj).next().find('input[name="ossName"]').val();
+        var ossName = $(obj).parent().find('input[name="ossName"]').val();
 		var ossVersion = $(obj).parent().parent().parent().next().find('input').val();
 		fn.showDetailPopup(ossName, ossVersion);
 	},
@@ -2731,7 +2838,142 @@
 	},
 	closeAlertifyView : function() {
 		$(".ajs-close").trigger("click");
-	}
+	},
+    handleUserCommentPopupOpen : function () {
+        // 코멘트 팝업
+        const param = {
+            "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS_USER')}]],
+            "referenceId" : [[${ossId}]]
+        }
+
+        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+                if (!alertify.editDialog){
+                    alertify.dialog('editDialog', function() {
+                        return {
+                            setup: function() {
+                                var settings = alertify.confirm().settings;
+
+                                for (var prop in settings) {
+                                    this.settings[prop] = settings[prop];
+                                }
+
+                                var setup = alertify.confirm().setup();
+                                setup.buttons = [];
+                                setup.focus.element = 0;
+
+                                return setup;
+                            },
+                            hooks: {
+                                onshow: function() {
+                                    this.elements.dialog.style.maxWidth = 'none';
+                                    this.elements.dialog.style.width = '700px';
+                                }
+                            }
+                        };
+                    }, false, 'confirm');
+                }
+
+                alertify.editDialog(res);
+            },
+            null,
+            function () {
+                $("#modifiedCommentInPjtEditor").summernote({
+                    height: 180,
+                    callbacks: {
+                        onInit: function () {
+                            $(this).summernote('code', $("#userContents").val());
+                        }
+                    }
+                });
+            });
+    },
+    sendEditor: function (type) {
+        //코멘트 저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        if (!editorVal || editorVal == "") {
+            alertify.alert([[#{msg.project.enter.comment}]], function () {
+            });
+            return false;
+        }
+
+        var param = {referenceId: [[${ossId}]], referenceDiv: [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}]], contents: editorVal, mailSendType: type};
+
+        $.ajax({
+            url: '/oss/sendComment',
+            type: 'POST',
+            dataType: 'json',
+            cache: false,
+            data: param,
+            success: function (json) {
+                if (json.isValid == 'false') {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    alertify.success([[#{msg.project.sent.comments.success}]]);
+                    $("#modifiedCommentInPjtEditor").summernote('code', '');
+                    $("#userContents").val('');
+                    fn.closeAlertifyView();
+                    fn_comment.getCommentList(commentsParam);
+
+                    if (_popupComment == null || _popupComment.closed) {
+                    } else {
+                        _popupComment.callbackFunction();
+                    }
+                }
+            },
+            error: function () {
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+    saveEditor: function () {
+        //코멘트 임시저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        var param = {
+            referenceId: [[${ossId}]]
+            , referenceDiv: [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS_USER')}]]
+            , contents: editorVal
+        };
+
+        $.ajax({
+            url: "/oss/saveComment",
+            type: "POST",
+            dataType: "json",
+            cache: false,
+            data: param,
+            success: function (json) {
+                if (json.isValid == 'false') {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    alertify.success([[#{msg.common.success}]]);
+                }
+                $("#userContents").val(editorVal);
+                fn.closeAlertifyView();
+            },
+            error: function () {
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+    vulnListMore : function() {
+        var product = $("input[name=ossName]").val();
+        var version = $("input[name=ossVersion]").val() == "" ? "-" : $("input[name=ossVersion]").val();
+        var url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=N&ossName=' + product + '&ossVersion=' + version;
+
+        var _popup = null;
+
+        if(_popup == null || _popup.closed){
+            _popup = window.open(url, "vulnListMorePopup", "width=950, height=600, toolbar=no, location=no, left=100, top=100");
+
+            if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+                alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+            }
+        } else {
+            _popup.close();
+            _popup = window.open(url, "vulnListMorePopup", "width=950, height=600, toolbar=no, location=no, left=100, top=100");
+        }
+    }
 }
 </script>
 </th:block>

@@ -62,8 +62,10 @@
                 });
 
                 /* created date & modified date event */
-                let cStartDate = [[${searchBean.cStartDate}]];
-                let cEndDate = [[${searchBean.cEndDate}]];
+                let cStartDate;
+                let cEndDate;
+                let mStartDate;
+                let mEndDate;
 
                 $("#createdDate").daterangepicker({
                     autoUpdateInput: false
@@ -72,23 +74,12 @@
                     $("input[name='cEndDate']").val(picker.endDate.format('YYYYMMDD'));
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
-                .on('cancel.daterangepicker', function (ev, picker) {
-                	$(this).val("");
-                  	$("input[name='cStartDate']").val("");
-                  	$("input[name='cEndDate']").val("");
-                  	$('#createdDate').attr('placeholder', 'Created Date');
-               	});
-
-                if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
-                	var cStartDateFormat = cStartDate.substr(4,2) + "/" + cStartDate.substr(6,2) + "/" + cStartDate.substr(0,4);
-                	var cEndDateFormat = cEndDate.substr(4,2) + "/" + cEndDate.substr(6,2) + "/" + cEndDate.substr(0,4);
-                    $('#createdDate').val(cStartDateFormat + ' - ' + cEndDateFormat);
-                } else {
-                    $('#createdDate').attr('placeholder', 'Created Date');
-                }
-
-                let mStartDate = [[${searchBean.mStartDate}]];
-                let mEndDate = [[${searchBean.mEndDate}]];
+                    .on('cancel.daterangepicker', function (ev, picker) {
+                        $(this).val("");
+                        $("input[name='cStartDate']").val("");
+                        $("input[name='cEndDate']").val("");
+                        $('#createdDate').attr('placeholder', 'Created Date');
+                    });
 
                 $("#modifiedDate").daterangepicker({
                     autoUpdateInput: false
@@ -97,22 +88,125 @@
                     $("input[name='mEndDate']").val(picker.endDate.format('YYYYMMDD'));
                     $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
                 })
-             	.on('cancel.daterangepicker', function (ev, picker) {
-             		$(this).val("");
-                 	$("input[name='mStartDate']").val("");
-                   	$("input[name='mEndDate']").val("");
-                   	$('#modifiedDate').attr('placeholder', 'Modified Date');
-               	});
+                    .on('cancel.daterangepicker', function (ev, picker) {
+                        $(this).val("");
+                        $("input[name='mStartDate']").val("");
+                        $("input[name='mEndDate']").val("");
+                        $('#modifiedDate').attr('placeholder', 'Modified Date');
+                    });
+
+                var input = ["licenseName", "webpage", "cStartDate", "cEndDate", "mStartDate", "mEndDate", "licenseNameAllSearchFlag"];
+                var singleSelect = ["licenseType", "obligationType", "creator", "modifier"];
+                var multiSelect = ["restrictions"];
+                var textarea = ["licenseText", "description"];
+
+                var optionSelectedFlag = false;
+                if (typeof localStorage.licenseSearchConditions !== "undefined") {
+                    var localStorageSearchConditions = JSON.parse(localStorage.licenseSearchConditions);
+
+                    if (Date.now() > localStorageSearchConditions.expire) {
+                        localStorage.removeItem("licenseSearchConditions");
+                    } else {
+                        Object.keys(localStorageSearchConditions).forEach(function(key) {
+                            if (input.includes(key)) {
+                                $("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+                                if ("licenseName" != key && "licenseNameAllSearchFlag" != key && "" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                                if ("cStartDate" == key) {
+                                    cStartDate = localStorageSearchConditions[key];
+                                } else if ("cEndDate" == key) {
+                                    cEndDate = localStorageSearchConditions[key];
+                                } else if ("mStartDate" == key) {
+                                    mStartDate = localStorageSearchConditions[key];
+                                } else if ("mEndDate" == key) {
+                                    mEndDate = localStorageSearchConditions[key];
+                                } else if ("licenseNameAllSearchFlag" == key) {
+                                    if ("Y" == localStorageSearchConditions[key]) $("#" + key).prop("checked", true);
+                                }
+                            } else if (singleSelect.includes(key)) {
+                                $("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+                                if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                            } else if (multiSelect.includes(key)) {
+                                var restrictions = localStorageSearchConditions[key];
+                                if ("" != restrictions) {
+                                    optionSelectedFlag = true;
+                                    restrictions = restrictions.split(",");
+                                    $("select[name='"+key+"']").val(restrictions).trigger('change');
+                                } else {
+                                    $("select[name='"+key+"']").val(restrictions).trigger('change');
+                                    $("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
+                                }
+                            } else if (textarea.includes(key)) {
+                                $("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+                                if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                            }
+                        });
+                    }
+                } else {
+                    for (var i in input) {
+                        if ("licenseName" != input[i] && "licenseNameAllSearchFlag" != input[i]) {
+                            var inputValue = $("input[name='"+input[i]+"']").val();
+                            if ("" != inputValue) {
+                                optionSelectedFlag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!optionSelectedFlag) {
+                        for (var i in singleSelect) {
+                            var selectedValue = $("select[name='"+singleSelect[i]+"'] option:selected").val();
+                            if ("" != selectedValue) {
+                                optionSelectedFlag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!optionSelectedFlag) {
+                        var multiSelectedValue = $("select[name='restrictions']").select2("val");
+                        if (multiSelectedValue != null) optionSelectedFlag = true;
+                    }
+
+                    if (!optionSelectedFlag) {
+                        for (var i in textarea) {
+                            var textareaValue = $("textarea[name='"+textarea[i]+"']").val();
+                            if ("" != textareaValue) {
+                                optionSelectedFlag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    cStartDate = [[${searchBean.cStartDate}]];
+                    cEndDate = [[${searchBean.cEndDate}]];
+                    mStartDate = [[${searchBean.mStartDate}]];
+                    mEndDate = [[${searchBean.mEndDate}]];
+                }
+
+                if (optionSelectedFlag) {
+                    $(".optionSelected").show();
+                } else {
+                    $(".optionSelected").hide();
+                }
+
+                if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
+                    var cStartDateFormat = cStartDate.substr(4,2) + "/" + cStartDate.substr(6,2) + "/" + cStartDate.substr(0,4);
+                    var cEndDateFormat = cEndDate.substr(4,2) + "/" + cEndDate.substr(6,2) + "/" + cEndDate.substr(0,4);
+                    $('#createdDate').val(cStartDateFormat + ' - ' + cEndDateFormat);
+                } else {
+                    $('#createdDate').attr('placeholder', 'Created Date');
+                }
 
                 if ((mStartDate != null && "" != mStartDate) && (mEndDate != null && "" != mEndDate)) {
-                	var mStartDateFormat = mStartDate.substr(4,2) + "/" + mStartDate.substr(6,2) + "/" + mStartDate.substr(0,4);
-                	var mEndDateFormat = mEndDate.substr(4,2) + "/" + mEndDate.substr(6,2) + "/" + mEndDate.substr(0,4);
+                    var mStartDateFormat = mStartDate.substr(4,2) + "/" + mStartDate.substr(6,2) + "/" + mStartDate.substr(0,4);
+                    var mEndDateFormat = mEndDate.substr(4,2) + "/" + mEndDate.substr(6,2) + "/" + mEndDate.substr(0,4);
                     $('#modifiedDate').val(mStartDateFormat + ' - ' + mEndDateFormat);
                 } else {
                     $('#modifiedDate').attr('placeholder', 'Modified Date');
                 }
 
                 initParam = fn.setGridParam();
+
                 var defaultSearchFlag = [[${searchBean.defaultSearchFlag}]];
 
                 if (defaultSearchFlag != 'N') {
@@ -123,6 +217,31 @@
                     e.preventDefault();
                     var postData = fn.setGridParam();
                     postData.ignoreSearchFlag = "N";
+
+                    var localStorageData = fn.setGridParam();
+                    localStorageData.ignoreSearchFlag = "N";
+                    localStorageData.expire = Date.now() + 300000;
+                    localStorage.setItem("licenseSearchConditions", JSON.stringify(localStorageData));
+
+                    optionSelectedFlag = false;
+                    Object.keys(localStorageData).forEach(function(key) {
+                        if (input.includes(key)) {
+                            if ("licenseName" != key && "licenseNameAllSearchFlag" != key && "" != localStorageData[key]) optionSelectedFlag = true;
+                        } else if (singleSelect.includes(key)) {
+                            if ("" != localStorageData[key]) optionSelectedFlag = true;
+                        } else if (multiSelect.includes(key)) {
+                            if ("" != localStorageData[key]) optionSelectedFlag = true;
+                        } else if (textarea.includes(key)) {
+                            if ("" != localStorageData[key]) optionSelectedFlag = true;
+                        }
+                    });
+
+                    if (optionSelectedFlag) {
+                        $(".optionSelected").show();
+                    } else {
+                        $(".optionSelected").hide();
+                    }
+
                     $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
                 });
 
@@ -133,8 +252,6 @@
                 $("#licenseNameAllSearchFlag").on("change", function (e) {
                     $("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
                 });
-
-
             }
         };
 
@@ -248,6 +365,115 @@
                 } else {
                     alertify.error([[#{msg.common.valid2}]], 0);
                 }
+            },
+            deleteLicense : function () {
+                var ids = $("#list").jqGrid("getGridParam", "selarrrow");
+
+                if (ids.length > 0) {
+                    var innerHtml 	= [[#{msg.license.confirm.delete}]] + '<br><br>';
+                    innerHtml 		+= '<textarea id="deleteLicenseEditor"></textarea>';
+
+                    // prevent clicking the OK button on Enter
+                    let keyCode;
+                    $(document).on('keydown', function (event) {
+                        keyCode = event.keyCode;
+                    });
+
+                    if (!alertify.deleteLicenseDialog){
+                        alertify.dialog('deleteLicenseDialog', function() {
+                            return {
+                                setup: function() {
+                                    var settings = alertify.confirm().settings;
+
+                                    for (var prop in settings) {
+                                        this.settings[prop] = settings[prop];
+                                    }
+
+                                    var setup = alertify.confirm().setup();
+                                    setup.focus.element = 0;
+
+                                    return setup;
+                                },
+                                hooks: {
+                                    onshow: function() {
+                                        this.elements.dialog.style.maxWidth = 'none';
+                                        this.elements.dialog.style.width = '650px';
+                                    }
+                                }
+                            };
+                        }, false, 'confirm');
+                    }
+
+                    alertify.deleteLicenseDialog()
+                        .set('onok', function(e){
+                            // prevent clicking the OK button on Enter
+                            if (typeof keyCode !== 'undefined' && keyCode == 13) {
+                                keyCode = undefined;
+                                return false;
+                            }
+
+                            if (e) {
+                                var editorVal = $("#deleteLicenseEditor").summernote('code');
+                                if ("" == $(editorVal).text().trim()){
+                                    alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+                                    return false;
+                                } else {
+                                    fn.deleteSubmit(ids);
+                                }
+                            } else {
+                                return false;
+                            }
+                        })
+                        .set('onshow', function(e){
+                            $("#deleteLicenseEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        })
+                        .setContent(innerHtml).show();
+                } else {
+                    alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+                    return false;
+                }
+            },
+            deleteSubmit : function (ids) {
+                loading.show();
+
+                var summernoteVal = replaceWithLink($("#deleteLicenseEditor").summernote('code'));
+                var params = {
+                    licenseIds : ids,
+                    comment : summernoteVal
+                }
+
+                $.ajax({
+                    url: '/license/multiDelAjax',
+                    type: "POST",
+                    dataType: 'json',
+                    cache: false,
+                    data: params,
+                    success: function (data) {
+                        loading.hide();
+
+                        if ("false" == data.isValid) {
+                            if(data.validMsg) {
+                                alertify.alert(data.validMsg, function(e){
+                                    reloadTabInframe('/license/list');
+                                });
+                            } else {
+                                alertify.error([[#{msg.common.valid2}]], 0);
+                            }
+                        } else {
+                            alertify.alert([[#{msg.common.success}]] ,function(e){
+                                reloadTabInframe('/license/list');
+                            });
+                        }
+                    },
+                    error: function (data) {
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+            },
+            onMoreLicenseDisplay : async function(licenseName) {
+                localStorage.setItem("ossSearchConditions", JSON.stringify({ "licenseName": licenseName }));
+                await callCreateTabInFrame("Open Source", "/oss/list", 'oss-list', true);
             }
         };
 
@@ -268,12 +494,15 @@
                 var colModelObj = {name: 'licenseId', index: 'licenseId', width: 40, align: 'center', sorttype: 'int'};
                 colModelArr.push(colModelObj);
                 colModelObj = {
-                    name: 'licenseName',
-                    index: 'licenseName',
-                    width: 160,
-                    align: 'left',
-                    formatter: fn.displayLicenseName,
-                    unformat: fn_grid_com.unformatter,
+                    name: 'licenseName', index: 'licenseName', width: 160, align: 'left'
+                        , formatter: function(cellvalue, options, rowObject){
+                            var display = "";
+
+                            var _frameId = options.rowId + "_License";
+                            var _frameTarget = "/license/edit/" + options.rowId;
+                            display = "<a class='urlLink' href=\"javascript:;\" onclick=\"createTabInFrame('"+_frameId+"','"+_frameTarget+"')\" >" + cellvalue + "</a>";
+                            return display;
+                        }
                 };
                 colModelArr.push(colModelObj);
                 colModelObj = {name: 'shortIdentifier', index: 'shortIdentifier', width: 50, align: 'left', hidden: true};
@@ -295,17 +524,22 @@
                 colModelArr.push(colModelObj);
                 colModelObj = {name: 'webpage', index: 'webpage', width: 80, align: 'left', formatter: 'link'};
                 colModelArr.push(colModelObj);
-                colModelObj = {name: 'description', index: 'description', width: 100, align: 'left',
-                    cellattr: function (rowId, val, rawObject, cm, rdata) {
+                colModelObj = {
+                    name: 'description'
+                    , index: 'description'
+                    , width: 100
+                    , align: 'left'
+                    , cellattr: function (rowId, val, rawObject, cm, rdata) {
                         return 'title="' + rawObject['description'] + '" style="cursor: pointer;"';
-                    },
-                    formatter: function (cellvalue, options, rowObject) {
-                    	if (cellvalue != null && "" != cellvalue) {
-                    		return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
-                    	} else {
-                    		return "";
-                    	}
-                    }};
+                    }
+                    , formatter: function (cellvalue, options, rowObject) {
+                        if (cellvalue != null && "" != cellvalue) {
+                            return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
+                        } else {
+                            return "";
+                        }
+                    }
+                };
                 colModelArr.push(colModelObj);
                 if ([[${@CommonFunction.isAdmin()}]]) {
                     colModelObj = {name: 'creator', index: 'creator', width: 40, align: 'center'};
@@ -324,7 +558,7 @@
                     colModelObj = {
                         name: 'modifiedDate',
                         index: 'modifiedDate',
-                        width: 40,
+                        width: 45,
                         align: 'center',
                         formatter: 'date',
                         formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}
@@ -367,8 +601,8 @@
                     sortorder: 'desc',
                     loadonce: false,
                     height: 'auto',
-                    //utoScroll: true, // 가로 스크롤 자동 활성화
-                    // shrinkToFit:false,  // width를 자동설정 해주는 기능
+                    multiselect : true,
+                    multiselectWidth: 35,
                     gridComplete: function () {
 
                         if (!data.existTooltip) {
@@ -382,57 +616,6 @@
 						        $('.tooltip').attr('id', tooltipId);
 						    });
                             data.existTooltip = true;
-
-                            // $('.urlLink').click(function(event) {
-                            //     event.preventDefault();
-                            //     var href = $(this).attr('href');
-                            //     if (!/^https?:\/\//i.test(href)) {
-                            //         href = 'http://' + href;
-                            //     }
-                            //     window.open(href, '_blank');
-                            // });
-// 					$.ajax({
-// 						type: 'GET',
-// 						url: '/system/processGuide/getProcessGuide',
-// 						data: {"id":"License_List_License_Type"},
-// 						success : function(data){
-// 							if(data.processGuide){
-// 								var contents = data.processGuide.contents;
-
-// 								if(contents && contents.trim()) {
-// 									$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_licenseType"))
-// 									.attr("title", contents).tooltip({
-// 										content: function () {
-// 											return $(this).prop('title');
-// 										}
-// 									});
-
-// 								}
-// 							}
-// 						}
-// 					});
-
-// 					// Restriction 툴팁 추가
-// 					$.ajax({
-// 						type: 'GET',
-// 						url: '/system/processGuide/getProcessGuide',
-// 						data: {"id":"License_List_Restriction"},
-// 						success : function(data){
-// 							if(data.processGuide){
-// 								var contents = data.processGuide.contents;
-
-// 								if(contents && contents.trim()) {
-// 									$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_restriction"))
-// 									.attr("title", contents).tooltip({
-// 										content: function () {
-// 											return $(this).prop('title');
-// 										}
-// 									});
-
-// 								}
-// 							}
-// 						}
-// 					});
                         }
                     },
                     loadComplete: function (result) {
@@ -454,8 +637,22 @@
                             }
                         }
 
+                        if ($("#list_toppager_left").find('button').length == 0) {
+                            var appendIcon = "";
+                            if ([[${@CommonFunction.isAdmin()}]]) {
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
+                                appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
+                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_License', '/license/edit')\">Add License</span>";
+                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_License', '/license/licenseBulkReg')\">Bulk Registration</span></div>";
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deleteLicense()\"><i class=\"far fa-trash-alt\"></i></button>";
+                            }
+                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+
+                            $("#list_toppager_left").append(appendIcon);
+                        }
+
                         /* columns licalization */
-                        var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
+                        var parentElement = document.querySelector('#list_toppager_left');
                         var setUpColumnButton = document.getElementById('setUpColumnButton');
 
                         if (!setUpColumnButton) {
@@ -500,14 +697,12 @@
                                 dropdownMenu.classList.toggle("show");
                             });
                         }
+
+                        adjustPageGridSize();
                     },
                     onSelectRow: function (id) {
                         $('#' + id + 'description').width(130).height(140);
-                    },
-                    // ondblClickRow: function (rowid, iRow, iCol, e) {
-                    //     var rowData = $("#list").jqGrid('getRowData', rowid);
-                    //     callCreateTabInFrame(rowData['licenseId'] + '_License', '/license/edit/' + rowData['licenseId'], 'license-edit_' + rowData['licenseId'], true);
-                    // }
+                    }
                 });
             }
         };

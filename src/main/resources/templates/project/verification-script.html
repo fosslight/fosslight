@@ -1428,7 +1428,8 @@
 
                 $(".uploadList_" + i).empty();
                 $("#registFileDiv_" + i).css("display", "flex");
-
+                $("select[name='selectOption_"+i+"'] option:eq(0)").prop("selected", true);
+                
                 deleteFileList.push(i);
             },
             onRegistSuccess: function (json, status) {

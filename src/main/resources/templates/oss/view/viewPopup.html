@@ -5,18 +5,14 @@
 <body class="hold-transition sidebar-mini">
 <!-- Site wrapper -->
 <div class="wrapper">
-    <div class="custom-layout" style="height: auto">
+    <div class="custom-layout" style="height: auto;">
         <section class="content">
             <div class="container-fluid">
                 <div class="row mt-3">
                     <div class="col-12">
                         <div class="card-body" style="background-color: #f5f4f3;">
-                            <div class="jqGridSet popup" id="_ossListDiv" style="overflow: auto; max-height: 500px;">
-                                <table id="_ossList">
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                </table>
+                            <div class="jqGridSet" id="_ossListDiv" style="overflow-y: auto; max-height: 500px;">
+                                <table id="_ossList"><tr><td></td></tr></table>
                             </div>
                         </div>
                     </div>
@@ -26,7 +22,7 @@
                     </div>
                 </div>
                 <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
-			</div>
+            </div>
         </section>
     </div>
 </div>

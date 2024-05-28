@@ -1,185 +1,193 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <script th:inline="javascript">
-function showLicenseText(target) {
-	var obj = $("#license_"+target);
-	
-	if (obj.css("display") != "none"){
-		obj.hide();
-	} else {
-		$(".classLicenseText").hide();
-		obj.show();
+	function showLicenseText(target) {
+		var obj = $("#license_"+target);
+
+		if (obj.css("display") != "none"){
+			obj.hide();
+		} else {
+			$(".classLicenseText").hide();
+			obj.show();
+		}
 	}
-}
 </script>
 <body class="hold-transition sidebar-mini">
-    <!-- Site wrapper -->
-    <div class="wrapper">
-        <div class="custom-layout" style="height: auto">
-			<section class="content">
-				<div class="container-fluid">
-					<div class="row mt-3">
-						<div class="col-12">
-							<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
-								<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.OSS.name}"></label>
-										</div>
-										<div class="col-9" th:with="ossIdParam='OSS_'+${ossInfo.ossId}">
-											<a th:href="@{'/oss/edit/' + ${ossInfo.ossId}}" target="_blank" class="text-smaller urlLink" th:onclick="window.open(this.href, [[${ossIdParam}]],'width=1100, height=900, toolbar=no, location=no, left=-2000, top=0'); return false;">[[${ossInfo.ossName}]]</a>
-										</div>
+<!-- Site wrapper -->
+<div class="wrapper">
+	<div class="custom-layout" style="height: auto">
+		<section class="content">
+			<div class="container-fluid">
+				<div class="row mt-3">
+					<div class="col-12">
+						<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
+							<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.OSS.name}"></label>
 									</div>
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.OSS.version}"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" th:text="${ossInfo.ossVersion}"></span>
-										</div>
+									<div class="col-9" th:with="ossIdParam='OSS_'+${ossInfo.ossId}">
+										<a th:href="@{'/oss/edit/' + ${ossInfo.ossId}}" target="_blank" class="text-smaller urlLink" th:onclick="window.open(this.href, [[${ossIdParam}]],'width=1100, height=900, toolbar=no, location=no, left=-2000, top=0'); return false;">[[${ossInfo.ossName}]]</a>
 									</div>
 								</div>
-								<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.nickname}"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" th:utext="${ossInfo.ossNickname}"></span>
-										</div>
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.OSS.version}"></label>
 									</div>
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.OSS.type}"></label>
-										</div>
+									<div class="col-9">
+										<span class="text-smaller" th:text="${ossInfo.ossVersion}"></span>
 									</div>
 								</div>
-								<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.declaredLicense}"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" style="display: inline-flex;" th:utext="${ossInfo.licenseName}"></span>
-										</div>
-										<div class="col-3"></div>
-										<div class="col-9">
-											<th:block th:each="license : ${ossInfo.ossLicenses}">
-												<span th:id="'license_' + ${license.licenseId}" style="display: none;" class="text-smaller" th:utext="${license.ossLicenseText}"></span>
+							</div>
+							<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.nickname}"></label>
+									</div>
+									<div class="col-9">
+										<span class="text-smaller" th:utext="${ossInfo.ossNickname}"></span>
+									</div>
+								</div>
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.OSS.type}"></label>
+									</div>
+								</div>
+							</div>
+							<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.declaredLicense}"></label>
+									</div>
+									<div class="col-9">
+										<span class="text-smaller" style="display: inline-flex;" th:utext="${ossInfo.licenseName}"></span>
+									</div>
+									<div class="col-3"></div>
+									<div class="col-9">
+										<th:block th:each="license : ${ossInfo.ossLicenses}">
+											<span th:id="'license_' + ${license.licenseId}" style="display: none;" class="text-smaller" th:utext="${license.ossLicenseText}"></span>
+										</th:block>
+									</div>
+								</div>
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.detectedLicense}"></label>
+									</div>
+									<div class="col-9">
+										<span class="text-smaller" th:utext="${ossInfo.detectedLicense}"></span>
+									</div>
+								</div>
+							</div>
+							<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.licenseType}"></label>
+									</div>
+									<div class="col-9">
+										<span class="text-smaller" th:utext="${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'), ossInfo.licenseType)}"></span>
+									</div>
+								</div>
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.obligation}"></label>
+									</div>
+									<div class="col-9">
+										<th:block th:if="${@CommonFunction.getCoConstDefVal('CD_DTL_OBLIGATION_NOTICE') == ossInfo.obligationType}">
+											<i class="far fa-file-alt fa-1-5x mr-2" style="font-size: 1.2em;" title="Notice"></i>
+										</th:block>
+										<th:block th:if="${@CommonFunction.getCoConstDefVal('CD_DTL_OBLIGATION_DISCLOSURE') == ossInfo.obligationType}">
+											<i class="far fa-file-alt fa-1-5x mr-2" style="font-size: 1.2em;" title="Notice"></i><i class="far fa-file-code fa-1-5x" style="font-size: 1.2em;" title="Source Code"></i>
+										</th:block>
+									</div>
+								</div>
+							</div>
+							<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
+									</div>
+									<div class="col-9">
+										<th:block th:if="${ossInfo.downloadLocationGroup == null and ossInfo.downloadLocation != null}">
+											<a th:href="${ossInfo.downloadLocation}" class="urlLink text-smaller" target="_blank" th:utext="${ossInfo.downloadLocation}"></a>
+										</th:block>
+										<th:block th:if="${ossInfo.downloadLocationGroup != null}">
+											<th:block th:each="downloadLocation : ${#strings.arraySplit(ossInfo.downloadLocationGroup, ',')}">
+												<a th:href="${downloadLocation}" class="urlLink text-smaller" target="_blank" th:utext="${downloadLocation}"></a>
 											</th:block>
-										</div>
-									</div>
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.detectedLicense}"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" th:utext="${ossInfo.detectedLicense}"></span>
-										</div>
+										</th:block>
 									</div>
 								</div>
-								<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.licenseType}"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" th:utext="${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'), ossInfo.licenseType)}"></span>
-										</div>
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.homepage}"></label>
 									</div>
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.obligation}"></label>
-										</div>
-										<div class="col-9">
-											<th:block th:if="${@CommonFunction.getCoConstDefVal('CD_DTL_OBLIGATION_NOTICE') == ossInfo.obligationType}">
-												<i class="far fa-file-alt fa-1-3x mr-2" style="font-size: 1em;" title="Notice"></i>
-											</th:block>
-											<th:block th:if="${@CommonFunction.getCoConstDefVal('CD_DTL_OBLIGATION_DISCLOSURE') == ossInfo.obligationType}">
-												<i class="far fa-file-alt fa-1-3x mr-2" style="font-size: 1em;" title="Notice"></i><i class="far fa-file-code fa-1-3x" style="font-size: 1em;" title="Source Code"></i>
-											</th:block>
-										</div>
+									<div class="col-9">
+										<th:block th:if="${ossInfo.homepage != null}">
+											<a th:href="${ossInfo.homepage}" class="urlLink text-smaller" target="_blank" th:utext="${ossInfo.homepage}"></a>
+										</th:block>
 									</div>
 								</div>
-								<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
-										</div>
-										<div class="col-9">
-											<th:block th:if="${ossInfo.downloadLocationGroup == null and ossInfo.downloadLocation != null}">
-												<a th:href="${ossInfo.downloadLocation}" class="urlLink text-smaller" target="_blank" th:utext="${ossInfo.downloadLocation}"></a>
-											</th:block>
-											<th:block th:if="${ossInfo.downloadLocationGroup != null}">
-												<th:block th:each="downloadLocation : ${#strings.arraySplit(ossInfo.downloadLocationGroup, ',')}">
-													<a th:href="${downloadLocation}" class="urlLink text-smaller" target="_blank" th:utext="${downloadLocation}"></a>
-												</th:block>
-											</th:block>
-										</div>
+							</div>
+							<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.Copyright}"></label>
 									</div>
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.homepage}"></label>
-										</div>
-										<div class="col-9">
-											<th:block th:if="${ossInfo.homepage != null}">
-												<a th:href="${ossInfo.homepage}" class="urlLink text-smaller" target="_blank" th:utext="${ossInfo.homepage}"></a>
-											</th:block>
-										</div>
+									<div class="col-9">
+										<span class="text-smaller" th:utext="${ossInfo.copyright}"></span>
 									</div>
 								</div>
-								<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.Copyright}"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" th:utext="${ossInfo.copyright}"></span>
-										</div>
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.summaryDescription}"></label>
 									</div>
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.summaryDescription}"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" th:utext="${ossInfo.summaryDescription}"></span>
-										</div>
+									<div class="col-9">
+										<span class="text-smaller" th:utext="${ossInfo.summaryDescription}"></span>
 									</div>
 								</div>
-								<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.attribution}"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" th:utext="${ossInfo.attribution}"></span>
-										</div>
+							</div>
+							<div class="row col-12 form-group" style="border-bottom: solid 1px #DDDDDD;">
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.attribution}"></label>
+									</div>
+									<div class="col-9">
+										<span class="text-smaller" th:utext="${ossInfo.attribution}"></span>
 									</div>
 								</div>
-								<div class="row col-12 form-group">
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="#{msg.common.field.creator}"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" style="font-size: .75rem;" th:utext="${ossInfo.creator}"></span>
-										</div>
+							</div>
+							<div class="row col-12 form-group" th:style="${@CommonFunction.isAdmin() and commentList != null ? 'border-bottom: solid 1px #DDDDDD;' : ''}">
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="#{msg.common.field.creator}"></label>
 									</div>
-									<div class="col-6 row">
-										<div class="col-3">
-											<label class="text-smaller" th:text="Modifier"></label>
-										</div>
-										<div class="col-9">
-											<span class="text-smaller" th:utext="${ossInfo.modifier}"></span>
-										</div>
+									<div class="col-9">
+										<span class="text-smaller" style="font-size: .75rem;" th:utext="${ossInfo.creator}"></span>
 									</div>
+								</div>
+								<div class="col-6 row">
+									<div class="col-3">
+										<label class="text-smaller" th:text="Modifier"></label>
+									</div>
+									<div class="col-9">
+										<span class="text-smaller" th:utext="${ossInfo.modifier}"></span>
+									</div>
+								</div>
+							</div>
+							<div sec:authorize="hasRole('ROLE_ADMIN')" th:if="${commentList != null}" class="row col-12 form-group">
+								<label class="text-smaller" th:text="Comment"></label>
+								<div class="col-12">
+									<th:block th:each="comment : ${commentList}">
+											<span th:utext="${comment.contents}">
+										</block>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-			</section>
-		</div>
-    </div>
+			</div>
+		</section>
+	</div>
+</div>
 </body>
 </html>

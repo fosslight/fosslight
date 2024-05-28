@@ -2785,6 +2785,7 @@ var searchDateOptions = {searchoptions: {sopt: ['eq', 'lt', 'le', 'gt', 'ge']}};
 
 
 function replaceWithLink(text) {
+    console.log(text);
     return text.replace(LINKREGEXP, findAndReplace);
 }
 
@@ -3566,7 +3567,7 @@ function createDropdownButton() {
     newButton.setAttribute('data-toggle', 'dropdown');
     newButton.setAttribute('id', 'setUpColumnButton');
     newButton.setAttribute('aria-expanded', 'false');
-    newButton.innerHTML = '<i class="fas fa-lg fa-cog"></i>';
+    newButton.innerHTML = '<i class="fas fa-cog"></i>';
     return newButton;
 }
 

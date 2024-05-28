@@ -4004,9 +4004,10 @@ public class ProjectController extends CoTopComponent {
 			String errMsg = "";
 			List<OssComponents> reportData = new ArrayList<OssComponents>();
 			List<String> errMsgList = new ArrayList<>();
+			Map<String, String> emptyErrMsg = new HashMap<>();
 			try {
 				if (!ExcelUtil.readReport(readType, true, sheetList.toArray(new String[sheetList.size()]), fileSeq,
-						reportData, errMsgList)) {
+						reportData, errMsgList, emptyErrMsg)) {
 					// error 처리
 					for (String s : errMsgList) {
 						if (isEmpty(s)) {
@@ -4032,6 +4033,10 @@ public class ProjectController extends CoTopComponent {
 					errMsg += "<br/>";
 				}
 				errMsg += s;
+			}
+			
+			if (isEmpty(errMsg) && !emptyErrMsg.isEmpty()) {
+				errMsg = emptyErrMsg.get("emptyErrMsg");
 			}
 			
 			Map<String, Object> resultMap = CommonFunction.makeGridDataFromReport(ossComponents, ossComponentsLicense, null, reportData, fileSeq, readType);

@@ -11,14 +11,14 @@
 							<th:block th:if="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '19' or comment.referenceDiv == '20' or comment.referenceDiv == '60'}">
 								<span th:if="${comment.referenceDiv != '20'}" class="pt-1 pl-2 hashtag" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${comment.referenceDiv != '20' and not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
 								<th:block th:if="${not #strings.isEmpty(comment.status)}">
-									<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'"></span>
+									<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'}"></span>
 									<span th:unless="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#' + #strings.toLowerCase(comment.status)}"></span>
 								</th:block>							
 							</th:block>
 							<th:block th:unless="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '20' or comment.referenceDiv == '30' or comment.referenceDiv == '40' or comment.referenceDiv == '60' }">
 								<span class="pt-1 pl-2 hashtag" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
 								<th:block th:if="${not #strings.isEmpty(comment.status)}">
-									<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'"></span>
+									<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'}"></span>
 									<span th:unless="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#' + #strings.toLowerCase(comment.status)}"></span>
 								</th:block>
 							</th:block>
