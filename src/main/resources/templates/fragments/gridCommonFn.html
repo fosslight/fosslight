@@ -1560,20 +1560,19 @@
             	  	var url;
             		if (startNow == true) {
             	    	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/true';
+                        if(prjId.startsWith("3rd_")){
+                            var partId = prjId.replace('3rd_','');
+                            reloadTabInframe('/partner/list');
+                            deleteTabInFrame("/partner/edit/" + partId);
+                            createTabInFrame(partId + '_3rdParty', "/partner/edit/" + partId);
+                        } else {
+                            reloadTabInframe("/project/list");
+                            deleteTabInFrame([[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
+                            createTabInFrame(prjId+'_Identify', [[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
+                        }
             	 	} else {
             	      	url = [[${@environment.getProperty('fosslight.suffix')}]] + '/project/autoReview/false';
             	  	}
-
-                    if(prjId.startsWith("3rd_")){
-                        var partId = prjId.replace('3rd_','');
-                        reloadTabInframe('/partner/list');
-                        deleteTabInFrame("/partner/edit/" + partId);
-                        createTabInFrame(partId + '_3rdParty', "/partner/edit/" + partId);
-                    } else {
-                        reloadTabInframe("/project/list");
-                        deleteTabInFrame([[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
-                        createTabInFrame(prjId+'_Identify', [[${@environment.getProperty('fosslight.suffix')}]] + '/project/identification/'+prjId+'/5');
-                    }
 
             	  	$.ajax({
             	      	type : 'POST',
