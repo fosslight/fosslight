@@ -389,11 +389,7 @@ public class VerificationController extends CoTopComponent {
 					if (resultMap.containsKey("fileCounts")) {
 						Map<String, Object> fileCountMap = (Map<String, Object>) resultMap.get("fileCounts");
 						for (String key : fileCountMap.keySet()) {
-							if (fileCountsMap.containsKey(key)) {
-								fileCountsMap.replace(key, fileCountMap.get(key));
-							} else {
-								fileCountsMap.put(key, fileCountMap.get(key));
-							}
+							fileCountsMap.put(key, fileCountMap.get(key));
 						}
 					}
 				}
@@ -423,11 +419,11 @@ public class VerificationController extends CoTopComponent {
 				}
 			}
 			
+			verificationService.updateVerifyFileCount(fileCountsMap);
+			verificationService.updateVerifyFileCountReset(verifyValidChkList);
+			
 			resMap.put("verifyValid", verifyValidChkList);
 			resMap.put("fileCounts", fileCountsMap);
-			
-			verificationService.updateVerifyFileCountReset((ArrayList<String>) resMap.get("verifyValid"));
-			verificationService.updateVerifyFileCount((HashMap<String,Object>) resMap.get("fileCounts"));
 		} catch (Exception e) {
 			log.error("failed to verify project id:" + prjId, e);
 			
