@@ -61,6 +61,9 @@ public class Project extends ComBean implements Serializable {
 	/** The prj name. */
 	private String prjName;
 	
+	/** The prj id name. */
+	private String prjIdName;
+	
 	/** The prj version. */
 	private String prjVersion;
 	
@@ -4505,5 +4508,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setPackageFileType3(String packageFileType3) {
 		this.packageFileType3 = packageFileType3;
+	}
+
+	public String getPrjIdName() {
+		return prjIdName;
+	}
+
+	public void setPrjIdName(String prjIdName) {
+		this.prjIdName = prjIdName;
 	}
 }
