@@ -334,8 +334,31 @@ public class PartnerController extends CoTopComponent{
 				partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
 				partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
 				
+				CommonFunction.setPartnerService(partnerService);
+				List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+				if (permissionCheckList != null) {
+					if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+							&& !CommonFunction.isAdmin() 
+							&& !permissionCheckList.contains(loginUserName())) {
+						partnerMaster.setPermission(0);
+						partnerMaster.setStatusPermission(0);
+					} else {
+						if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+							partnerMaster.setStatusPermission(0);
+						} else {
+							partnerMaster.setStatusPermission(1);
+						}
+						partnerMaster.setPermission(1);
+					}
+				}
+				
+				List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
+				
+				if (prjList.size() > 0) {
+					model.addAttribute("prjList", prjList);
+				}
+				
 				model.addAttribute("detail", partnerMaster);
-				model.addAttribute("detailJson", toJson(partnerMaster));
 				model.addAttribute("confirmationFile", confirmationFile);
 				model.addAttribute("ossFile", ossFile);
 				model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
