@@ -1230,7 +1230,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 
 	@Override
-	public void updateVerifyFileCount(HashMap<String,Object> fileCounts) {
+	public void updateVerifyFileCount(Map<String,Object> fileCounts) {
 		for (String componentId : fileCounts.keySet()){
 			OssComponents param = new OssComponents();
 			param.setComponentId(componentId);
@@ -1241,7 +1241,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 	
 	@Override
-	public void updateVerifyFileCountReset(ArrayList<String> fileCounts) {
+	public void updateVerifyFileCountReset(List<String> fileCounts) {
 		for (String componentId : fileCounts){
 			OssComponents param = new OssComponents();
 			param.setComponentId(componentId);

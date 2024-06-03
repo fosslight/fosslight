@@ -24,7 +24,7 @@
                                         			<div class="input-group">
                                         				<button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="|+ Add|"></button>
                                                         <input class="save-value" name="defaultSearchType" type="hidden" th:value="PROJECT"/>
-                                                		<input type="text" class="form-control autoComProjectNm save-value" style="border-right: 0px solid #fff;" name="prjName" placeholder="Project ID or Name" th:value="${searchBean?.prjName}">
+                                                		<input type="text" class="form-control autoComProjectNm save-value" style="border-right: 0px solid #fff;" name="prjIdName" placeholder="Project ID or Name" th:value="${searchBean?.prjIdName}">
                                                 		<div class="input-group-append">
                                                 			<span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
                                                 				<input class="form-check-input save-value" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == null or searchBean?.publicYn == 'N'}" type="checkbox">

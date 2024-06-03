@@ -204,12 +204,15 @@
 					)
 				</if>
 <!-- 			</if> -->
-<!-- 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
+ 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
-			</if> -->
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
-				AND (T1.PRJ_NAME LIKE CONCAT('%', REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%') OR T1.PRJ_ID = #{prjName}) 
-		 	</if>	
+				AND T1.PRJ_NAME LIKE CONCAT('%', REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%')
+		 	</if>
+		 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdName)">
+				AND (T1.PRJ_ID = #{prjIdName} OR T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjIdName}, '_', '\\\\_'),'%'))
+		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
 				AND T1.PRJ_VERSION LIKE CONCAT(REGEXP_REPLACE(#{prjVersion}, '_', '\\\\_'),'%')
 		 	</if>
@@ -464,11 +467,14 @@
 					)
 				</if>
 <!-- 			</if> -->
-<!-- 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
+ 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
-			</if> -->
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
-				AND (T1.PRJ_ID = #{prjName} OR T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%'))
+				AND T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%')
+		 	</if>
+		 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdName)">
+				AND (T1.PRJ_ID = #{prjIdName} OR T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjIdName}, '_', '\\\\_'),'%'))
 		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
 				AND T1.PRJ_VERSION LIKE CONCAT(REGEXP_REPLACE(#{prjVersion}, '_', '\\\\_'),'%')
