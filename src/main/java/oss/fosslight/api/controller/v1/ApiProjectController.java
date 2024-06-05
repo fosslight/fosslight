@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -1786,4 +1787,234 @@ public class ApiProjectController extends CoTopComponent {
 		
 		return responseService.getFailResult(errorCode, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
 	}
+	
+
+	@ApiOperation(value = "Load Searched Project Oss to Src", notes = "Project > Identification > SRC")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
+	@GetMapping(value = { Url.API.FOSSLIGHT_API_OSS_LOAD_SRC })
+	public CommonResult ossLoadSrc(@RequestHeader String _token,
+			@ApiParam(value = "Project ID", required = true) @RequestParam(required = true) String targetPrjId,
+			@ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name") @RequestParam(required = false) String searchCondition,
+			@ApiParam(value = "Project ID to Load", required = false) @RequestParam(required = false) String prjIdToLoad,
+			@ApiParam(value = "Project Name to Load", required = false) @RequestParam(required = false) String prjNameToLoad,
+			@ApiParam(value = "Project Version to Load", required = false) @RequestParam(required = false) String prjVersionToLoad,
+			@ApiParam(value ="Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
+
+		log.error("/api/v1/oss_load_src called:" + targetPrjId);
+
+		T2Users userInfo = userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		String msgCode = CoConstDef.CD_OPEN_API_MESSAGE;
+		String errorMsgCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE; 
+		
+		try {
+			Map<String, Object> paramMap = new HashMap<>();
+
+			if(!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
+				return responseService.getFailResult(errorMsgCode, "targetPrjId is not in the correct format");
+			}
+			
+			if(!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
+				return responseService.getFailResult(errorMsgCode, "prjIdToLoad is not in the correct format");
+			}
+			
+			paramMap.put("targetPrjId", targetPrjId);
+			paramMap.put("resetFlag", CoConstDef.FLAG_YES.equals(StringUtils.isEmpty(resetFlag) ? "Y" : resetFlag));
+
+			switch (searchCondition) {
+			    case "id":
+			        // Check if project ID is entered
+			        if (StringUtils.isEmpty(prjIdToLoad)) {
+			            return responseService.getFailResult(errorMsgCode, "the prjIdToLoad is missing");
+			        }
+
+			        // Check for duplication of targetPrjId with prjIdToLoad
+			        if (targetPrjId.equals(prjIdToLoad)) {
+			        	return responseService.getFailResult(errorMsgCode, "Please enter other prjIdToLoad that is different from targetPrjId");
+			        }
+			        paramMap.put("prjIdToLoad", prjIdToLoad);
+			        break;
+
+			    case "name":
+			        // Check if project name is entered
+			        if (StringUtils.isEmpty(prjNameToLoad)) {
+			        	return responseService.getFailResult(errorMsgCode, "the prjNameToLoad is missing");
+			        }
+
+			        paramMap.put("prjNameToLoad", prjNameToLoad);
+			        paramMap.put("prjVersionToLoad", prjVersionToLoad);
+			        break;
+
+			    default:
+			        break;
+			}
+
+			resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+
+			// Check if resultMap contains a "msg" key and return failure result if it does
+			if (errorMsgCode.equals(resultMap.get("code"))) {
+			    return responseService.getFailResult(errorMsgCode, (String) resultMap.get("msg"));
+			}
+
+			return responseService.getSingleResult(resultMap);
+			
+		} catch (Exception e) {
+			return responseService.getFailResult(errorMsgCode, CoCodeManager.getCodeString(msgCode, errorMsgCode));
+		}
+	}
+
+	@ApiOperation(value = "Load Searched Project Oss to Bin", notes = "Project > Identification > BIN")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
+	@GetMapping(value = { Url.API.FOSSLIGHT_API_OSS_LOAD_BIN })
+	public CommonResult ossLoadBin(@RequestHeader String _token,
+			@ApiParam(value = "Project ID", required = true) @RequestParam(required = true) String targetPrjId,
+			@ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name") @RequestParam(required = false) String searchCondition,
+			@ApiParam(value = "Project ID to Load", required = false) @RequestParam(required = false) String prjIdToLoad,
+			@ApiParam(value = "Project Name to Load", required = false) @RequestParam(required = false) String prjNameToLoad,
+			@ApiParam(value = "Project Version to Load", required = false) @RequestParam(required = false) String prjVersionToLoad,
+			@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
+
+		log.error("/api/v1/oss_load_bin called:" + targetPrjId);
+
+		T2Users userInfo = userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		String msgCode = CoConstDef.CD_OPEN_API_MESSAGE;
+		String errorMsgCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE; 
+		
+		try {
+			Map<String, Object> paramMap = new HashMap<>();
+			
+			if(!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
+				return responseService.getFailResult(errorMsgCode, "targetPrjId is not in the correct format");
+			}
+			
+			if(!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
+				return responseService.getFailResult(errorMsgCode, "prjIdToLoad is not in the correct format");
+			}
+
+			paramMap.put("targetPrjId", targetPrjId);
+			paramMap.put("resetFlag", CoConstDef.FLAG_YES.equals(StringUtils.isEmpty(resetFlag) ? "Y" : resetFlag));
+
+			switch (searchCondition) {
+				case "id":
+			        // Check if project ID is entered
+					if (StringUtils.isEmpty(prjIdToLoad)) {
+			            return responseService.getFailResult(errorMsgCode, "the prjIdToLoad is missing");
+			        }
+	
+			        // Check for duplication of targetPrjId with prjIdToLoad
+			        if (targetPrjId.equals(prjIdToLoad)) {
+			        	return responseService.getFailResult(errorMsgCode, "Please enter other prjIdToLoad that is different from targetPrjId");
+			        }
+			        paramMap.put("prjIdToLoad", prjIdToLoad);
+			        break;
+	
+			    case "name":
+			        // Check if project name is entered
+			        if (StringUtils.isEmpty(prjNameToLoad)) {
+			        	return responseService.getFailResult(errorMsgCode, "the prjNameToLoad is missing");
+			        }
+
+			        paramMap.put("prjNameToLoad", prjNameToLoad);
+			        paramMap.put("prjVersionToLoad", prjVersionToLoad);
+			        break;
+
+			    default:
+			        break;
+			}
+
+			resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+
+			// Check if resultMap contains a "msg" key and return failure result if it does
+			if (errorMsgCode.equals(resultMap.get("code"))) {
+			    return responseService.getFailResult(errorMsgCode, (String) resultMap.get("msg"));
+			}
+
+			return responseService.getSingleResult(resultMap);
+			
+		} catch (Exception e) {
+			return responseService.getFailResult(errorMsgCode, CoCodeManager.getCodeString(msgCode, errorMsgCode));
+		}
+	}
+
+	@ApiOperation(value = "Load Searched Project Oss to Dep", notes = "Project > Identification > DEP")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
+	@GetMapping(value = { Url.API.FOSSLIGHT_API_OSS_LOAD_DEP })
+	public CommonResult ossLoadDep(@RequestHeader String _token,
+			@ApiParam(value = "Project ID", required = true) @RequestParam(required = true) String targetPrjId,
+			@ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name") @RequestParam(required = false) String searchCondition,
+			@ApiParam(value = "Project ID to Load", required = false) @RequestParam(required = false) String prjIdToLoad,
+			@ApiParam(value = "Project Name to Load", required = false) @RequestParam(required = false) String prjNameToLoad,
+			@ApiParam(value = "Project Version to Load", required = false) @RequestParam(required = false) String prjVersionToLoad,
+			@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
+
+		log.error("/api/v1/oss_load_dep called:" + targetPrjId);
+
+		T2Users userInfo = userService.checkApiUserAuth(_token);
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		String msgCode = CoConstDef.CD_OPEN_API_MESSAGE;
+		String errorMsgCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE; 
+		
+		try {
+			Map<String, Object> paramMap = new HashMap<>();
+
+			if(!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
+				return responseService.getFailResult(errorMsgCode, "targetPrjId is not in the correct format");
+			}
+			
+			if(!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
+				return responseService.getFailResult(errorMsgCode, "prjIdToLoad is not in the correct format");
+			}
+		
+			paramMap.put("targetPrjId", targetPrjId);
+			paramMap.put("resetFlag", CoConstDef.FLAG_YES.equals(StringUtils.isEmpty(resetFlag) ? "Y" : resetFlag));
+
+			switch (searchCondition) {
+			    case "id":
+			        // Check if project ID is entered
+			        if (StringUtils.isEmpty(prjIdToLoad)) {
+			            return responseService.getFailResult(errorMsgCode, "the prjIdToLoad is missing");
+			        }
+	
+			        // Check for duplication of targetPrjId with prjIdToLoad
+			        if (targetPrjId.equals(prjIdToLoad)) {
+			        	return responseService.getFailResult(errorMsgCode, "Please enter other prjIdToLoad that is different from targetPrjId");
+			        }
+			        paramMap.put("prjIdToLoad", prjIdToLoad);
+			        break;
+	
+			    case "name":
+			        // Check if project name is entered
+			        if (StringUtils.isEmpty(prjNameToLoad)) {
+			        	return responseService.getFailResult(errorMsgCode, "the prjNameToLoad is missing");
+			        }
+	
+			        paramMap.put("prjNameToLoad", prjNameToLoad);
+			        paramMap.put("prjVersionToLoad", prjVersionToLoad);
+			        break;
+
+			    default:
+			        break;
+			}
+
+			resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+
+			// Check if resultMap contains a "msg" key and return failure result if it does
+			if (errorMsgCode.equals(resultMap.get("code"))) {
+			    return responseService.getFailResult(errorMsgCode, (String) resultMap.get("msg"));
+			}
+
+			return responseService.getSingleResult(resultMap);
+			
+		} catch (Exception e) {
+			return responseService.getFailResult(errorMsgCode, CoCodeManager.getCodeString(msgCode, errorMsgCode));
+		}
+	}
+
 }

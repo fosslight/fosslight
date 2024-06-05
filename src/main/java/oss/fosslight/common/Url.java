@@ -917,6 +917,12 @@ public final class Url {
 		/** CODE */
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/code_search";
+			
+			public static final String FOSSLIGHT_API_OSS_LOAD_SRC 				= "/oss_load_src";
+
+			public static final String FOSSLIGHT_API_OSS_LOAD_BIN 				= "/oss_load_bin";
+
+			public static final String FOSSLIGHT_API_OSS_LOAD_DEP 				= "/oss_load_dep";
 	}
 
 	public static final class SEARCH {

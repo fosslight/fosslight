@@ -87,4 +87,7 @@ public interface ApiProjectService {
 	public Map<String, Object> getProjectBasicInfo(String prjId);
 	
 	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, String comment, String tabGubn, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx);
+
+	public Map<String, Object> registProjectOssComponent(Map<String, Object> param, String referenceDiv);
+
 }

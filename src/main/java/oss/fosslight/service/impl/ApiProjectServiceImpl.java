@@ -3297,4 +3297,144 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		return rtnMap;
 	}
+
+	@Override
+	public Map<String, Object> registProjectOssComponent(Map<String, Object> param, String referenceDiv) {
+		Map<String, Object> responseMap = new HashMap<String, Object>();
+		
+		String targetPrjId = (String) param.getOrDefault("targetPrjId", null);
+		String prjIdToLoad = (String) param.getOrDefault("prjIdToLoad", null);
+		String prjNameToLoad = (String) param.getOrDefault("prjNameToLoad", null);
+		String prjVersionToLoad = (String) param.getOrDefault("prjVersionToLoad", null);
+		boolean resetFlag = Boolean.TRUE.equals(param.get("resetFlag"));
+
+		// check the existence of target Project by targetId
+		Project targetProjectParam = new Project();
+		targetProjectParam.setPrjId(targetPrjId);
+		targetProjectParam.setReferenceDiv(referenceDiv);
+		
+		List<String> targetIds = apiProjectMapper.selectDuplicatedProject2(targetProjectParam);
+		
+		if (targetIds.isEmpty()) {
+			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+			responseMap.put("msg", "Target project does not exist");
+			return responseMap;
+		}
+
+		// Check the existence of the project to load
+		Project registProjectParam = new Project();
+		registProjectParam.setPrjId(prjIdToLoad);
+		registProjectParam.setPrjName(prjNameToLoad);
+		registProjectParam.setPrjVersion(prjVersionToLoad);
+		registProjectParam.setReferenceDiv(referenceDiv);
+		registProjectParam.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
+
+		List<String> projectToLoadIds = apiProjectMapper.selectDuplicatedProject2(registProjectParam);
+
+		if (projectToLoadIds.isEmpty()) {
+			responseMap.put("code", "605");
+		    responseMap.put("msg", "Project to load is already loaded");
+		    return responseMap;
+		} 
+
+		if (projectToLoadIds.size() > 1) {
+			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+		    responseMap.put("msg", "Project to load exceeds 1");
+		    return responseMap;
+		}
+
+		// If prjIdToLoad is empty, set it to the first found project ID
+		if (StringUtils.isEmpty(prjIdToLoad)) {
+		    prjIdToLoad = projectToLoadIds.get(0);
+		    registProjectParam.setPrjId(prjIdToLoad);
+		}
+		
+		// Check for duplication in the loaded list and load to project
+		if (!resetFlag) {
+		    List<Project> loadedList = projectMapper.selectAddList(targetProjectParam);
+		    
+		    for (Project project : loadedList) {		       
+		        if (project.getReferenceId().equals(prjIdToLoad)) {
+		        	responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+		        	responseMap.put("msg", "Project to load is already loaded");
+		            return responseMap;
+		        }
+		    }
+		}
+
+		targetProjectParam.setReferenceId(targetPrjId);
+		int ossComponentIdx = projectMapper.selectOssComponentMaxIdx(targetProjectParam);
+
+		if (resetFlag) {
+			ossComponentIdx = 1;
+			
+		    // Set parameters to delete OSS components of the target project
+		    ProjectIdentification projectIdParam = new ProjectIdentification();
+		    projectIdParam.setReferenceId(targetPrjId);
+		    projectIdParam.setReferenceDiv(referenceDiv);
+
+		    List<OssComponents> componentList = projectMapper.selectComponentId(projectIdParam);
+		    List<String> deleteComponentIds = new ArrayList<>();
+
+		    // Delete licenses of OSS components and collect component IDs
+		    for (OssComponents component : componentList) {
+		        projectMapper.deleteOssComponentsLicense(component);
+		        deleteComponentIds.add(component.getComponentId());
+		    }
+
+		    // Use the collected component IDs to delete the OSS components of the target project
+		    if (!deleteComponentIds.isEmpty()) {
+		        OssComponents deleteParam = new OssComponents();
+		        deleteParam.setReferenceDiv(referenceDiv);
+		        deleteParam.setReferenceId(targetPrjId);
+		        deleteParam.setOssComponentsIdList(deleteComponentIds);
+
+		        projectMapper.deleteOssComponentsWithIds2(deleteParam);
+		    }
+		}
+
+		Project registOssComponentParam = new Project();
+		registOssComponentParam.setReferenceId(prjIdToLoad);
+		registOssComponentParam.setReferenceDiv(referenceDiv);
+		
+		List<ProjectIdentification> components = apiProjectMapper.selectOssComponentsList(registOssComponentParam);
+		List<OssComponentsLicense> licenses;
+
+		if (components.size() == 0) {
+			Project projectSubStatus = new Project();
+			projectSubStatus.setPrjId(targetPrjId);
+			projectSubStatus.setModifier(projectSubStatus.getLoginUserName());
+			projectSubStatus.setReferenceDiv(referenceDiv);
+			projectMapper.updateProjectMaster(projectSubStatus);
+		}
+
+		for (ProjectIdentification bean : components) {
+			bean.setReferenceId(targetPrjId);
+			bean.setReportFileId(null);
+			licenses = projectMapper.selectOssComponentsLicenseList(bean);
+			bean.setComponentIdx(String.valueOf(ossComponentIdx++));
+			projectMapper.insertOssComponents(bean);
+
+			for (OssComponentsLicense licenseBean : licenses) {
+				licenseBean.setComponentId(bean.getComponentId());
+				projectMapper.insertOssComponentsLicense(licenseBean);
+			}
+		}
+		
+		// Insert the project information list to load
+		Project addProjectParam = new Project();
+		addProjectParam.setPrjId(targetPrjId);
+		addProjectParam.setReferenceId(prjIdToLoad);
+		addProjectParam.setReferenceDiv(referenceDiv);
+		addProjectParam.setComponentCount(Integer.toString(components.size()));
+
+		if (resetFlag) {
+		    projectService.existsAddList(targetProjectParam);
+		}
+
+		projectService.insertAddList(Collections.singletonList(addProjectParam));
+
+	    return responseMap;
+	}
+	
 }
