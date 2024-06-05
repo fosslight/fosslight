@@ -626,6 +626,8 @@ public final class Url {
 		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
 		
 		public static final String CHANGE_MODE = PATH + "/changeMode/{prjId}/{mode}";
+		
+		public static final String SHARE_URL = PATH + "/shareUrl/{prjId}";
 	}
 	
 	public static final class COMPLIANCE {
