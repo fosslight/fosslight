@@ -862,8 +862,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (!isEmpty(project.getComments())) {
 							comments += " " + project.getComments();
 						}
+					} else {
+						if (!isEmpty(project.getComments())) comments += " " + project.getComments();
 					}
-					if (!isEmpty(project.getComments())) comments += " " + project.getComments();
+					
 					if (!isEmpty(comments)) project.setComments(comments);
 					
 					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) project.setDependencies(avoidNull(project.getDependencies()));
@@ -6217,7 +6219,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						
 						oc.setVulnerabilityResolution("Unresolved");
 						
-						if (bean != null) {
+						if (bean != null && !isEmpty(bean.getVulnerabilityResolution())) {
 							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
 						}
 						
