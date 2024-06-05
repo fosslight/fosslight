@@ -160,6 +160,9 @@
 			<if test="@oss.fosslight.util.StringUtil@equals('10', code)">
 			AND T1.IDENTIFICATION_SUB_STATUS_PARTNER = 'Y'
 			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('16', code)">
+			AND T1.IDENTIFICATION_SUB_STATUS_DEP = 'Y'
+			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('11', code)">
 			AND T1.IDENTIFICATION_SUB_STATUS_SRC= 'Y'
 			</if>
@@ -420,6 +423,9 @@
 	    WHERE T1.USE_YN = 'Y'
 			<if test="@oss.fosslight.util.StringUtil@equals('10', code)">
 			AND T1.IDENTIFICATION_SUB_STATUS_PARTNER = 'Y'
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('16', code)">
+			AND T1.IDENTIFICATION_SUB_STATUS_DEP = 'Y'
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('11', code)">
 			AND T1.IDENTIFICATION_SUB_STATUS_SRC= 'Y'
