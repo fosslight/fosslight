@@ -990,6 +990,37 @@
 		 WHERE T1.USE_YN = 'Y'
 		   AND T1.PRJ_ID = #{prjId}
 	</select>
+
+	<select id="selectDuplicatedProject2"  parameterType="oss.fosslight.domain.Project" resultType="String">
+		SELECT 
+			PRJ_ID 
+		FROM 
+			PROJECT_MASTER 
+		WHERE USE_YN ='Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(identificationStatus)">
+			AND IDENTIFICATION_STATUS = #{identificationStatus}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
+			AND PRJ_ID = #{prjId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+			AND PRJ_NAME = #{prjName} 
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
+			AND PRJ_VERSION = #{prjVersion}
+		</if>
+	</select>
+
+	<select id="selectOssComponentsList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.ProjectIdentification">
+		SELECT
+			*
+		FROM
+			OSS_COMPONENTS
+		WHERE
+			REFERENCE_ID = #{referenceId}
+			AND REFERENCE_DIV = #{referenceDiv}
+		ORDER BY COMPONENT_ID
+	</select>
 	
 	<update id="updateIdentifcationProgress" parameterType="hashMap">
 		UPDATE PROJECT_MASTER SET IDENTIFICATION_STATUS = #{identificationStatus} WHERE PRJ_ID = #{prjId}
@@ -1233,4 +1264,6 @@
 		WHERE
 			PRJ_ID = #{prjId}
 	</update>
+	
+	
 </mapper>
