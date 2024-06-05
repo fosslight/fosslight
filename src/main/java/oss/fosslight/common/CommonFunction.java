@@ -5483,6 +5483,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						customInfoMsg.put(key, infoDataMap.get(key));
 					}
 				}
+			} else {
+				customInfoMsg.putAll(infoDataMap);
 			}
 		}
 		

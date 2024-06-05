@@ -919,11 +919,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		int endCol = 0;
 		if (rows.isEmpty()){
 		}else{
-			if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
-				endCol = rows.get(0).length-3;
-			} else {
-				endCol = rows.get(0).length-1;
-			}
+			endCol = rows.get(0).length-1;
 		}
 		int shiftRowNum = rows.size();
 		
