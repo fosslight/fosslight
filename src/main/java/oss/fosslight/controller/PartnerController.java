@@ -408,9 +408,9 @@ public class PartnerController extends CoTopComponent{
 		}
 		
 		if (CoConstDef.FLAG_NO.equals(partnerMaster.getViewOnlyFlag()) && partnerMaster.getStatusPermission() == 1) {
-			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&project=false&view=false");
+			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=false");
 		} else {
-			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&project=false&view=true");
+			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=true");
 		}
 	}
 	

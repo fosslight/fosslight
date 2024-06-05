@@ -5235,9 +5235,9 @@ public class ProjectController extends CoTopComponent {
 		}
 		
 		if (CoConstDef.FLAG_NO.equals(project.getViewOnlyFlag()) && project.getStatusPermission() == 1) {
-			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&project=true&view=false");
+			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&menu=prj&view=false");
 		} else {
-			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&project=true&view=true");
+			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&menu=prj&view=true");
 		}
 	}
 }

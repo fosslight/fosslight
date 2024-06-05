@@ -834,4 +834,9 @@ public class SelfCheckController extends CoTopComponent {
 			return "selfCheck/fragments/edit :: viewFragments";
 		}
 	}
+	
+	@GetMapping(value = SELF_CHECK.SHARE_URL)
+	public void shareUrl(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String prjId) throws IOException {
+		res.sendRedirect(req.getContextPath() + "/index?id=" + prjId + "&menu=self&view=true");
+	}
 }

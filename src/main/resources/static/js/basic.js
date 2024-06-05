@@ -185,7 +185,7 @@ $(document).ready(function () {
             return false;
         });
         
-        initTab();
+        //initTab();
     });
 	
 	function initTab(){

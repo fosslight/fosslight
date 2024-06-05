@@ -253,9 +253,23 @@
   		var query = window.location.search;
   	   	var param = new URLSearchParams(query);
   	   	var id = param.get("id");
-  	   	var prjFlag = param.get("project");
-  	   	if (id != null && prjFlag != null) {
-  	    	createTabNew(prjFlag == 'true' ? id + "_Project" : id + "_3rdParty", prjFlag == 'true' ? "/project/edit/" + id : "/partner/edit/" + id);
+  	   	var menu = param.get("menu");
+  	   	var viewFlag = param.get("view");
+  	   	
+  	   	if (id != null && menu != null) {
+  	    	var page = (viewFlag == "false") ? "edit" : "view";
+			
+			switch(menu) {
+			    case 'prj':
+			    	createTabNew(id + "_Project", "/project/" + page + "/" + id);			        
+			        break;
+			    case 'par':
+			       	createTabNew(id + "_3rdParty", "/partner/" + page + "/" + id);	
+			        break;
+			    case 'self':
+			        createTabNew(id + "_selfCheck", "/selfCheck/" + page + "/" + id);
+			        break;
+			}
   	   	} else {
           var _defaultTabStr = $("#defaultTabAnchorArr").val() || "";
           var _sidebar = $("#sidebar").find(".nav-link");
