@@ -165,8 +165,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				if (list != null) {
 					boolean isNumberic = false;
-					if (!isEmpty(project.getPrjName())) {
-						isNumberic = project.getPrjName().chars().allMatch(Character::isDigit);
+					if (!isEmpty(project.getPrjIdName())) {
+						isNumberic = project.getPrjIdName().chars().allMatch(Character::isDigit);
 					}
 					if (isNumberic) {
 						List<Project> filteredList = list.stream().filter(e -> e.getPrjId().equalsIgnoreCase(project.getPrjName())).collect(Collectors.toList());
