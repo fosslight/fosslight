@@ -3,7 +3,7 @@
 <th:block th:fragment="sidebarFragment">
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a class="brand-link">
+    <a class="brand-link" style="cursor: pointer;" th:onclick="|fn.showSiteInfo()|">
       <img th:src="@{/images/logo_s.png}" alt="FOSSLight hub Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light" th:text="'FOSSLight'"></span>
     </a>
@@ -66,7 +66,7 @@
             </a>
           </li>
           <li class="nav-item" th:if="${projectFlag}">
-            <a th:href="@{/project/list}" class="nav-link">
+            <a th:href="@{/project/list}" class="nav-link project">
               <i class="nav-icon fas fa-list"></i>
               	<p th:text="'Project'"></p>
             </a>
@@ -128,7 +128,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a th:href="@{/configuration/edit}" class="nav-link userSetting">
+            <a th:href="@{/configuration/edit}" class="nav-link userSettings">
               <i class="nav-icon fas fa-user-cog"></i>
 	          	<p th:text="'User Settings'"></p>
             </a>
@@ -206,10 +206,10 @@
       <!-- /.sidebar-menu -->
     </div>
     <!-- /.sidebar -->
-    <div class="sidebar copyright p-3">
+<!--<div class="sidebar copyright p-3">
       Copyright &copy; 2021 LG Electronics.<br />
       All rights reserved.
-    </div>
+    </div> -->
   </aside>
   	<script th:inline="javascript">
   	var _initTabs = new Array();
@@ -246,7 +246,43 @@
   	  	},
   	  	moveToUserSetting : function() {
   	  		$('.userSettings').get(0).click();
-  	  	}
+  	  	},
+  	  showSiteInfo : function () {
+			var innerHtml = "<div class=\"d-flex d-flex-align\"><img src=\"/images/logo_s.png\" alt=\"FOSSLight Logo\" class=\"brand-image img-circle elevation-3\" style=\"width: 80px;\"></div>";
+			innerHtml += "<br><div class=\"brand-text d-flex d-flex-align\"><strong>FOSSLIGHT</strong></div>";
+//			innerHtml += "<div class=\"brand-text d-flex d-flex-align\">osc-team@lge.com</div>";
+			innerHtml += "<br><span class=\"ml-3\"><strong>Version " + [[${@CommonFunction.getProperty('project.version')}]] + "</strong></span>";
+			innerHtml += "<br><span class=\"ml-3\">Copyright © 2021 LG Electronics.</span>";
+			innerHtml += "<br><span class=\"ml-3\">All Rights Reserved. <span class=\"text-orange\">PRIVACY LEGAL</span></span>";
+			
+			
+			if (!alertify.siteShowInfoDialog){
+				alertify.dialog('siteShowInfoDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.alert().settings;
+						
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+						
+							var setup = alertify.alert().setup();
+							setup.buttons = [];
+						
+							return setup;
+						},
+						hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '350px';
+					        }
+						}
+					};
+				}, false, 'alert');
+      	}
+			
+			alertify.siteShowInfoDialog().set('title', 'FOSSLight Info').setContent(innerHtml).show();
+		}
   	}
   	
   	function initTab() {
@@ -297,26 +333,17 @@
 
               /* the last default tab gives an open event when the sidebar is clicked */
               if (index === _defaultTabs.length - 1) {
-                $.each(_sidebar, function(idx, val){
-                  var _href = $(this).attr("href");
-                  if ("#" != _href && !_href.startsWith("/system")) {
-                    if (tabUrl.indexOf(_href) != -1) {
-                      $(this).trigger("click");
-                    }
-                  }
-                });
-              }
+                	$.each(_sidebar, function(idx, val){
+                  		var _href = $(this).attr("href");
+                  		if ("#" != _href && !_href.startsWith("/system")) {
+                    		if (tabUrl.indexOf(_href) != -1) {
+                      			$(this).trigger("click");
+                    		}
+                  		}
+                	});
+              	}
             });
           }
-
-          // $.each(_sidebar, function(idx, val){
-          // 		var _href = $(this).attr("href");
-          // 		if ("#" != _href && !_href.startsWith("/system")) {
-          // 			if (_defaultTabStr.indexOf(_href) != -1) {
-          // 				_initTabs.push($(this));
-          // 			}
-          // 		}
-          // 	});
   		}
   	}
   	</script>

@@ -224,30 +224,6 @@ var config_evt = {
 			$(this).parent(".checkSet").next(".detailArea").fadeToggle(300);
 		});
 		
-		$("#save").on("click", function(){
-			var data = config_fn.makeParams();
-			
-			$.ajax({
-				url : '/system/configuration/saveAjax',
-				type : 'POST',
-				data : JSON.stringify({config : data}),
-				dataType : 'json',
-				cache : false,
-				contentType : 'application/json',
-				success: function(data){
-					if(data.resCd == "10"){
-						alertify.success([[#{msg.common.success}]]);
-						location.reload();
-					} else if(data.resCd == "00") {
-						alertify.error([[#{msg.common.valid2}]], 0);
-					}
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			})
-		});
-
 		$("#urlAdd").on("click", function(){
 			var childLength = $("#config925 > .detailArea > dl > dd").length;
 			var childId = ((childLength || 0) + 1) * 10; 
@@ -258,6 +234,33 @@ var config_evt = {
 			$("#config925 > .detailArea > dl > dd").last().remove()
 		});
 	}
+}
+
+function save() {
+	loading.show();
+	
+	var data = config_fn.makeParams();
+	
+	$.ajax({
+		url : '/system/configuration/saveAjax',
+		type : 'POST',
+		data : JSON.stringify({config : data}),
+		dataType : 'json',
+		cache : false,
+		contentType : 'application/json',
+		success: function(data){
+			loading.hide();
+			
+			if(data.resCd == "10"){
+				alertify.success([[#{msg.common.success}]]);
+			} else if(data.resCd == "00") {
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		},
+		error: function(data){
+			alertify.error([[#{msg.common.valid2}]], 0);
+		}
+	});
 }
 //]]>
 </script>

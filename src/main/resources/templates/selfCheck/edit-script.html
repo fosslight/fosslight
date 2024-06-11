@@ -10,12 +10,12 @@
 /*jslint browser: true, nomen: true */
 var lastsel;
 var codeData;
-var userRole = [[${sessUserInfo.authority}]];
+var userRole = [[${#authentication.authorities[0].authority}]];
 var arr = new Array();
 var ossNames = [];
 var objs = [];
 var licenseNames = [];
-var isSort = false;[[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstDefVal('CD_SAMPLE_FILE'))}]];
+var isSort = false;
 var _popupCheckOssName = null;
 var _popupCheckOssLicense = null;
 var saveFlag = false;
@@ -24,6 +24,7 @@ var divisionUseFlag = true;
 var projectPermission = [[${projectPermission}]];
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var viewFlag = [[${viewFlag}]];
+var isNewFlag = false;
 var _uploadFileObj;
 
 $(document).ready(function() {
@@ -43,6 +44,8 @@ $(document).ready(function() {
 	if ([[${project.prjId}]] != null) {
 		src_evt.init();
 		notice_evt.init();
+	} else {
+		isNewFlag = true;
 	}
 
 	if ($("#listKind > option").length == 1){
@@ -76,6 +79,9 @@ var fn_self ={
 				success : function(detailResult){
 					$("#divViewMode").html(replaceWithLink(detailResult));
 					$("#divViewMode").show();
+					
+					if ([[${project.statusPermission}]] == 0) $("#editBtn").hide();
+					
 					if ("N" == projectPermission) {
 						var viewModeButtons = $("#divViewMode input[type=button]");
 						$.each(viewModeButtons, function(index, obj){
@@ -86,6 +92,7 @@ var fn_self ={
 						});
 					}
 					$("#divEditMode").hide();
+					$("#divEditSaveBtn").hide();
 					if (viewFlag != null) $("#editBtn").hide();
 				},
 				error : function(request,status,error){
@@ -98,6 +105,7 @@ var fn_self ={
 		} else {
 			$("#divViewMode").hide();
 			$("#divEditMode").show();
+			$("#divEditSaveBtn").show();
 			
 			$("#commentTextArea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			$("#commentTextArea").summernote('code', $("#commentTextArea").val());
@@ -110,6 +118,9 @@ var evt = {
 	init : function(){
 		// 저장
 		$("#save").click(function(){
+			$("div.retxt").hide();
+			$("input").removeClass("is-invalid");
+			
 			alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
 				if (e) {
 					var prjName = $("[name='prjName']").val();
@@ -118,6 +129,8 @@ var evt = {
 						$(".prjName").hide();
 						fn.saveSubmit();
 					} else {
+						$("#prjName").after(makeErrMsg("This field is required."));
+						$("#prjName").addClass("is-invalid");
 						$(".prjName").show();
 					}
 				} else {
@@ -273,6 +286,162 @@ var evt = {
 };
 
 var fn = {
+	checkStatus : function () {
+		var checked = $("#companyName").prop("checked");
+		$("#editCompanyYn").val(checked ? "Y" : "N");
+			
+		checked = $("#ossDistributionSite").prop("checked");
+		$("#editDistributionSiteUrlYn").val(checked ? "Y" : "N");
+			
+		checked = $("#email").prop("checked");
+		$("#editEmailYn").val(checked ? "Y" : "N");
+	},
+	csvUploadFile : function () {
+		var accept1 = '';
+		var fileAccept1 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept1) {
+			if ('12' == fileAccept1[i].cdDtlNo) {
+				accept1 = fileAccept1[i].cdDtlExp;
+			}
+		}
+		
+		//파일업로드
+		$('#srcCsvFile').uploadFile({
+			url:'/project/csvFile',
+			multiple:false,
+			dragDrop:true,
+			fileName:'myfile',
+			allowedTypes:accept1,
+			sequential:true,
+			sequentialCount:1,
+			dynamicFormData: function() {
+				var data ={ "registFileId" :$('#srcCsvFileId').val(), "tabNm" : "SELF"}
+				return data;
+			},
+			onSuccess:function(files,data,xhr,pd) {
+				var result = jQuery.parseJSON(data);
+				
+				if(result[1] == null){
+					alertify.error([[#{msg.common.valid}]], 0);
+					
+					$('.ajax-file-upload-statusbar').fadeOut('slow');
+					$('.ajax-file-upload-statusbar').remove();
+				} else {
+					if (result[0] == "FILE_SIZE_LIMIT_OVER") {
+						alertify.alert(result[1], function(){
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						});
+					} else if (result[2] == "CSV_FILE") {
+						src_fn.getCsvData(result[0][0].registSeq);
+
+						$('#binCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						src_fn.makeFileTag(result[0][0]);
+					} else if (result[2] == "EXCEL_FILE") {
+						if(result[1].length != 0){
+							for (var i = 0; i < result[1].length; i++){
+								var num = i+1;
+								
+								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input"';
+								sheetTr += '<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+								$("#sheetBody").append(sheetTr);
+							}
+							
+							$('#sheetApply').attr('onclick', 'src_fn.getSheetData('+result[0][0].registSeq+')');
+						}
+						
+						if(!alertify.selectSheet){
+							alertify.dialog('selectSheet', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons = [];
+										setup.focus.element = 0;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '365px';
+								        }
+									}
+								};
+							}, false, 'alert');
+	                	}
+						
+						alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
+						$("#sheetBody").empty();
+						
+						$('#srcCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+						
+						_uploadFileObj = result[0][0];
+					} else if (result[2] == "SPDX_SPREADSHEET_FILE") {
+						src_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
+
+						$('#srcCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						src_fn.makeFileTag(result[0][0]);
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
+			}
+		});
+	},
+	save : function () {
+		src_fn.saveAjax();
+	},
+	reset : function () {
+		alertify.confirm([[#{msg.common.delete.recordsAndFiles}]], function (e) {
+			if (e) {
+				$("#srcList").jqGrid('clearGridData');
+				
+				var csvFiles = $("input[name=uploadCsvFile]").length;
+				//배열에 값 주입
+				for (var i=0; i<csvFiles; i++){                          
+					var fileSeq = $("input[name=uploadCsvFile]").eq(i).val();
+					var object = {fileSeq : fileSeq};
+					src_evt.csvDelFileSeq.push(object);
+				}
+				
+				$(".csvFileArea").empty();
+				
+				com_fn.exitRow("srcList");
+				// 메인, 서브 그리드 세이브 모드
+				fn_grid_com.totalGridSaveMode('srcList');
+				// 닉네임 체크
+				src_fn.saveMakeData(true);
+			} else {
+				return false;
+			}
+		});
+	},
+	delete : function () {
+		alertify.confirm([[#{msg.selfcheck.confirm.remove.project}]], function (e) {
+			if (e) {
+				fn.deleteSubmit();
+			} else {
+				return false;
+			}
+		});
+	},
 	// 그리드 삭제 버튼
 	setDelBtn : function(cellvalue, options, rowObject){
 		return "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"fn.exeDelete('"+options.rowId+"')\" />";
@@ -284,7 +453,18 @@ var fn = {
 	// 저장
 	saveSubmit : function(){
 		var editorVal = $("#editor").summernote('code');
-		$('input[name=comment]').val(replaceWithLink(editorVal));
+		if ("" != $(editorVal).text().trim()) {
+			$('input[name=comment]').val(replaceWithLink(editorVal));
+		} else {
+			$('input[name=comment]').val("");
+		}
+		
+		if (isNewFlag) {
+			var watchers = $("input[name=watchers]");
+			$.each(watchers, function(index, obj){
+				$("#projectForm").append(obj);
+			});
+		}
 		
 		$("#projectForm").ajaxForm({
 			url : '/selfCheck/saveAjax',
@@ -321,10 +501,12 @@ var fn = {
 			alertify.alert([[#{msg.common.success}]], function(){
 				reloadTabInframe('/selfCheck/list');
 
-				if(prjId == '') {
+				if (prjId == '') {
 					deleteTabInFrame('/selfCheck/edit');
+					createTabInFrame(json.resultData.prjId+'_selfCheck', '/selfCheck/edit/'+json.resultData.prjId);
 				} else {
 					fn_self.modeChange(prjId, 'v');
+					com_fn.changeMode("view", false);
 				}
 			});	
 		}
@@ -385,7 +567,7 @@ var fn = {
 				},
 				hooks: {
 			    	onshow: function() {
-			          	this.elements.content.style.height = '200px';
+			          	this.elements.content.style.height = '220px';
 			        }
 				}
 			}});
@@ -432,7 +614,7 @@ var fn = {
 							}
 							
 							var setup = alertify.alert().setup();
-							setup.focus.element = 1;
+							setup.focus.element = 0;
 							
 							return setup;
 						},
@@ -918,7 +1100,16 @@ var fn = {
 				btn_Save.show();
 				fn.defaultNotice(checked, "init");	
 			} else { // 일반 사용자 일 경우
-				switch(curIdenStatus){
+				if ([[${project.statusPermission}]] > 0 || [[${project.prjId}]] == null) {
+					btn_Save.show();
+					fn.defaultNotice(checked, "init");
+				} else {
+					btn_Save.hide();
+					$("[name='btnEditOssNotice']").attr("disabled", true)
+					fn.defaultNotice(false, "init");
+				}
+				
+/* 				switch(curIdenStatus){
 					case "":
 					case "PROG":
 						btn_Save.show();
@@ -931,7 +1122,7 @@ var fn = {
 						fn.defaultNotice(false, "init");
 
 						break;
-				}
+				} */
 			}
 			
 			if(editNoticeYn == "Y") {
@@ -960,7 +1151,12 @@ var fn = {
 			}
 		}, 1);
 	},
-	bulkEdit : function(){
+	bulkEdit : function(permission){
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		}
+		
     	var gridList = $("#srcList");
         var targetGird = "srcList";
 
@@ -1002,7 +1198,6 @@ var fn = {
             return false;
         }
 	},
-
     changeSelectOption : function(target){
         var name = $(target).attr("name");
         var value = $("[name='"+name+"']:checked").val()
@@ -1061,9 +1256,9 @@ var fn = {
         }
         $(exportListId).menu();
     },
-    selectDownloadFile : function() {
-        var targetFileId = event.target.id;
-        var parentId = $("#" + targetFileId).closest("div").attr("id")
+    selectDownloadFile : function(targetFileId) {
+    	loadingIden.show();
+    	
         // download file
         if (targetFileId === "report_sub") {
         	src_fn.downloadExcel();
@@ -1076,12 +1271,10 @@ var fn = {
                 else if (targetFileId === "YAML_sub") fn.downloadSpdxYaml();
                 else if (targetFileId === "YAML") fn.downloadYaml();
         	} else {
+        		loadingIden.hide();
         		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
         	}
         }
-        
-        // hide list
-        $("#" + parentId).hide();
     },
     checkSelectDownloadFile : function() {
     	var checkEmptyFlag = false;
@@ -1417,133 +1610,7 @@ var src_evt = {
 		
 		var srcList = $("#srcList");
 		
-		// 그리드 리셋 버튼
-		$("#srcResetUp").click(function(e){
- 			e.preventDefault();
- 			
-			alertify.confirm([[#{msg.common.confirm.reset}]], function (e) {
-				if (e) {
-					$("#srcList").jqGrid('clearGridData');
-				} else {
-					return false;
-				}
-			});
-		});
-		
-		// 그리드 저장 버튼
-		$("#srcSaveUp").click(function(e){
-			e.preventDefault();
-			
-			src_fn.saveAjax();
-		});
-		
-		var accept1 = '';
-		var fileAccept1 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
-		for (var i in fileAccept1) {
-			if ('12' == fileAccept1[i].cdDtlNo) {
-				accept1 = fileAccept1[i].cdDtlExp;
-			}
-		}
-		
-		//파일업로드
-		$('#srcCsvFile').uploadFile({
-			url:'/project/csvFile',
-			multiple:false,
-			dragDrop:true,
-			fileName:'myfile',
-			allowedTypes:accept1,
-			sequential:true,
-			sequentialCount:1,
-			dynamicFormData: function() {
-				var data ={ "registFileId" :$('#srcCsvFileId').val(), "tabNm" : "SELF"}
-				return data;
-			},
-			onSuccess:function(files,data,xhr,pd) {
-				var result = jQuery.parseJSON(data);
-				
-				if(result[1] == null){
-					alertify.error([[#{msg.common.valid}]], 0);
-					
-					$('.ajax-file-upload-statusbar').fadeOut('slow');
-					$('.ajax-file-upload-statusbar').remove();
-				} else {
-					if (result[0] == "FILE_SIZE_LIMIT_OVER") {
-						alertify.alert(result[1], function(){
-							$('.ajax-file-upload-statusbar').fadeOut('slow');
-							$('.ajax-file-upload-statusbar').remove();
-						});
-					} else if (result[2] == "CSV_FILE") {
-						src_fn.getCsvData(result[0][0].registSeq);
-
-						$('#binCsvFileId').val(result[0][0].registFileId);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-
-						src_fn.makeFileTag(result[0][0]);
-					} else if (result[2] == "EXCEL_FILE") {
-						if(result[1].length != 0){
-							for (var i = 0; i < result[1].length; i++){
-								var num = i+1;
-								
-								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input"';
-								sheetTr += '<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
-								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
-								$("#sheetBody").append(sheetTr);
-							}
-							
-							$('#sheetApply').attr('onclick', 'src_fn.getSheetData('+result[0][0].registSeq+')');
-						}
-						
-						if(!alertify.selectSheet){
-							alertify.dialog('selectSheet', function() {
-								return {
-									setup: function() {
-										var settings = alertify.confirm().settings;
-										
-										for (var prop in settings) {
-											this.settings[prop] = settings[prop];
-										}
-										
-										var setup = alertify.confirm().setup();
-										setup.buttons = [];
-										setup.focus.element = 1;
-										
-										return setup;
-									},
-								    hooks: {
-								    	onshow: function() {
-								        	this.elements.dialog.style.maxWidth = 'none';
-								          	this.elements.dialog.style.width = '365px';
-								        }
-									}
-								};
-							}, false, 'alert');
-	                	}
-						
-						alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
-						$("#sheetBody").empty();
-						
-						$('#srcCsvFileId').val(result[0][0].registFileId);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-						
-						_uploadFileObj = result[0][0];
-					} else if (result[2] == "SPDX_SPREADSHEET_FILE") {
-						src_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
-
-						$('#srcCsvFileId').val(result[0][0].registFileId);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-
-						src_fn.makeFileTag(result[0][0]);
-					} else {
-						alertify.error([[#{msg.common.valid}]], 0);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-					}
-				}
-			}
-		});
+		fn.csvUploadFile();
 		
 		// ossNames auto complete
 		fn_grid_com.griOssNames().success(function(data, status, headers, config){
@@ -1626,7 +1693,7 @@ var src_fn = {
 		});
 	},
 	// 저장 데이터 만들기
-	saveMakeData : function(){
+	saveMakeData : function(resetFlag){
 		cleanErrMsg("srcList");
 		
 		var target = $("#srcList");
@@ -1646,8 +1713,12 @@ var src_fn = {
 		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
 				   , "identificationSubStatusSrc" : identificationSubStatusSrc, "mainData" : JSON.stringify(mainData)};
 
-		// 닉네임 체크
-		src_fn.nickNameValid(mainData, finalData);
+		if (!resetFlag) {
+			// 닉네임 체크
+			src_fn.nickNameValid(mainData, finalData);
+		} else {
+			src_fn.exeSave(finalData);
+		}
 	},
 	// 저장
 	exeSave : function(finalData){
@@ -1665,6 +1736,14 @@ var src_fn = {
 					srcValidMsgData = data.resultData;
 					
 					alertify.error([[#{msg.common.valid}]], 0);
+					
+					if (data.validMsg) {
+						alertify.alert(data.validMsg, function(){});
+					}
+					
+					if (srcValidMsgData) {
+						gridValidMsgNew(srcValidMsgData, "srcList");
+					}
 				} else {
 					if("10" == data.resCd){
 						src_fn.getSrcGridData();
@@ -1673,6 +1752,7 @@ var src_fn = {
 						reloadTabInframe('/selfCheck/list');
 						
 						saveFlag = true;
+						com_fn.changeMode("view", false);
 						
 						alertify.success([[#{msg.common.success}]]);
 					} else {
@@ -1688,6 +1768,7 @@ var src_fn = {
 	// 닉네임 팝업 띄우기
 	makeNickNamePopup : function(obj, finalData) {
 		if(obj.validMsg && obj.validMsg.length != 0) {
+			loading.hide();
 			alertify.confirm(obj.validMsg, function () {
 				src_fn.exeSave(finalData);
 			});
@@ -1718,7 +1799,7 @@ var src_fn = {
 	makeFileTag : function(obj){
 		var appendHtml = '<br>'+obj.createdDate;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
-		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
+		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" name="uploadCsvFile" value="'+obj.registSeq+'"/>';
 		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="src_fn.deleteCsv(this, \'1\')">X</span>'+appendHtml+'</li>';
 		$('.csvFileArea').append(uploadFileTag);
 	},
@@ -1740,7 +1821,9 @@ var src_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
-				if("false" == data.isValid) {
+				loadingIden.hide();
+				
+				if ("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
 					window.location = '/exceldownload/getFile?id='+data.validMsg;
@@ -1754,7 +1837,7 @@ var src_fn = {
 	closePop : function(){
 		src_fn.cancelFileDel();
 		
-		$('.sheetSelectPop').hide();
+		src_fn.closeAlertifyView();
 	},
 	closeAndroidPop : function(){
 		$('.ossSelectPop').hide();
@@ -1965,9 +2048,9 @@ var src_fn = {
 			
 			display = "<i class=\"fas fa-question-circle\" style=\"font-size: 1.2rem; cursor: pointer;\" title=\"Obligation is unclear\"></i>";
 		} else if (obligationType == 10){
-			display = "<i class=\"far fa-file-code hover-icon fa-1-3x mr-1\" title=\"OSS Notice\"></i>";
+			display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
 		} else if (obligationType == 11) {
-			display = "<i class=\"far fa-file-code hover-icon fa-1-3x mr-1\" title=\"OSS Notice\"></i><i class=\"far fa-file-pdf hover-icon fa-1-3x mr-1\" title=\"SourceCode\"></i>";
+			display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i><i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\"></i>";
 		}
 		
 		return display;
@@ -2175,8 +2258,6 @@ var src_fn = {
 
 			return false;
 		}
-		
-		
 	},
 	CheckOssLicenseViewPage : function() {
 		if(saveFlag) {
@@ -2607,7 +2688,7 @@ var src_grid = {
 			cellsubmit : 'clientArray',
 			ignoreCase: true,
 			multiselect: true,
-            multiselectWidth: 30,
+            multiselectWidth: 35,
 		    onSortCol: function (index, columnIndex, sortOrder) {
 		    	isSort = true;
 		    },
@@ -2665,6 +2746,42 @@ var src_grid = {
 				if(isSort){
 					isSort = false;
 				}
+				
+				// append button event
+                if ($("#srcList_toppager_left").find('button').length == 0) {
+                	var permission = [[${detail?.permission}]] == 1;
+                	
+                    var appendBtn = "";
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('srcList', "+permission+")\">";
+                    if (permission) {
+                    	appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                    } else {
+                    	appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                    }
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('srcList', 'main', "+permission+")\">";
+					if (permission) {
+						appendBtn += "<i class=\"far fa-trash-alt\"></i></button>";
+                    } else {
+                    	appendBtn += "<i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
+                    }
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"fn.bulkEdit("+permission+")\">";
+					if (permission) {
+						appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                    } else {
+                    	appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                    }
+                    appendBtn += "<button type=\"button\" id=\"topDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+                    appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"topDropdown\">";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('Spreadsheet_sub')\">SPDX (Spreadsheet)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('RDF_sub')\">SPDX (RDF)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('TAG_sub')\">SPDX (TAG)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('JSON_sub')\">SPDX ((JSON))</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML_sub')\">SPDX ((YAML))</span></div>";
+
+                    $("#srcList_toppager_left").append(appendBtn);
+                }
 			},
 			beforeSelectRow: function(rowid, e) {
 				var $self = $(this), iCol, cm,
@@ -2741,11 +2858,11 @@ var src_grid = {
 			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () {
 				updateGridRowCount('srcList', 'srcListPager');
 			}});
-			srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
-													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);}
-													  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
-													  , cloneToTop:true
-			});
+//			srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
+// 													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);}
+// 													  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
+// 													  , cloneToTop:true
+// 			});
 		}
 		
 		$('#srcList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
@@ -2764,8 +2881,63 @@ var gridTooltip = {
 };
 
 var com_fn = {
+	changeMode : function(mode, resetFlag) {
+		var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+		var tabDiv = targetId.split("-")[1];
+		
+		if ("selfCheck" == tabDiv) {
+			$.ajax({
+	            url: "/selfCheck/changeMode/" + [[${project.prjId}]] + "/" + mode,
+	            type: 'POST',
+	            dataType: 'html',
+	            cache: false,
+	            success: function (data) {
+	            	$("#" + targetId).empty();
+					$("#" + targetId).html(data);
+					
+					if ("edit" == mode) fn.csvUploadFile();
+					if ($(".csvFileArea").find("li").length > 0) {
+						$(".uploadCsvFileArea").show();
+					} else {
+						$(".uploadCsvFileArea").hide();
+					}
+	            }
+			});
+		}
+	},
+	gridAddFunc : function (targetId, permission) {
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		}
+		
+		var grid = $("#" + targetId);
+		saveFlag = false;
+		fn_grid_com.rowAddNew(targetId, grid, "main", null, com_fn.getLicenseName);
+	},
+	gridDelFunc : function (targetId, target, permission) {
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		}
+		
+		var grid = $("#" + targetId);
+		var selarrrow = grid.jqGrid("getGridParam", "selarrrow");
+		
+		if (selarrrow.length > 0) {
+			fn_grid_com.rowDelNew(grid, target);
+		} else {
+			alertify.confirm([[#{msg.common.confirm.delete.all}]], function (e) {
+				if (e) {
+					fn_grid_com.rowDelAll(grid, target);
+				} else {
+					return false;
+				}
+			});
+		}
+	},
 	tabInit : function(){
-		var initDiv = '${initDiv}';
+		var initDiv = [[${initDiv}]];
 		var tabContent = $(".tabContent");
 		var tabMenuA = $(".tabMenu a");
 		

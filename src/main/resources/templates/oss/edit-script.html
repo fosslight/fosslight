@@ -1818,7 +1818,7 @@
 						$('input[name=ossNicknames]').addClass("is-invalid");
 					} else {
 						if($('input[name='+key+']').length > 0) {
-							$('input[name='+key+']').parent().next("div").find("span.retxt").html(value).show();
+							$('input[name='+key+']').parent().parent().next("div").find("span.retxt").html(value).show();
 							$('input[name='+key+']').addClass("is-invalid");
 						} else if($('textarea[name='+key+']').length > 0) {
 							$('textarea[name='+key+']').next("span.retxt").html(value).show();
@@ -2736,34 +2736,79 @@
 					return false;
 				}
 
-				var editorVal = $('#commentCont').summernote('code');
-				var localDeactivateFlag = $("[name='deactivateFlag']").val();
-
-				if (editorVal == "") {
-					if (deactivateFlag == "N" 
-						&& localDeactivateFlag == "Y"){ // deactivate Flag checked
-						alertify.alert([[#{msg.oss.required.deactivate}]], function(){});
+				// prevent clicking the OK button on Enter
+				let keyCode;
+				$(document).on('keydown', function (event) {
+					keyCode = event.keyCode;
+				});
+               	
+               	if (typeof alertify.ossSaveDialog === 'undefined') {
+					alertify.dialog('ossSaveDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								setup.focus.element = 0;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
+							}
+						};
+					}, false, 'confirm');
+            	}
+				
+				var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
+           		innerHtml 		+= '<br><textarea id="ossSaveEditor"></textarea>';
+				
+           		alertify.ossSaveDialog()
+           		.set('onok', function(e) {
+           			// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
 						return false;
 					}
+           			
+           			if (e) {
+           				var editorVal = $("#ossSaveEditor").summernote('code');
+           				if ("" != $(editorVal).text().trim()) {
+							$("input[name='comment']").val(editorVal);
+						} else {
+							var localDeactivateFlag = $("[name='deactivateFlag']").val();
+							if (deactivateFlag == "N" && localDeactivateFlag == "Y"){ // deactivate Flag checked
+								alertify.alert([[#{msg.oss.required.deactivate}]], function(){});
+								return false;
+							}
 
-					if (deactivateFlag == "Y" 
-						&& localDeactivateFlag == "N"){ // deactivate Flag unchecked
-						alertify.alert([[#{msg.oss.required.activate}]], function(){});
-						return false;
-					}
-				}
-			
-			alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
-				if (e) {
-					// 세이브 전 그리드 처리
-					$('#_licenseChoice').jqGrid('saveRow',lastsel);
-					
-					// 최종 세이브 호출
-					registSubmit();
-				} else {
-					return false;
-				}
-			});
+							if (deactivateFlag == "Y" && localDeactivateFlag == "N"){ // deactivate Flag unchecked
+								alertify.alert([[#{msg.oss.required.activate}]], function(){});
+								return false;
+							}
+						}
+           				
+           				// 세이브 전 그리드 처리
+    					$('#_licenseChoice').jqGrid('saveRow',lastsel);
+    					
+    					// 최종 세이브 호출
+    					registSubmit();
+           			} else {
+           				return false;
+           			}
+           		})
+           		.set('onshow', function(e){
+           			$("#ossSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           		})
+           		.set('title', 'Save').setContent(innerHtml)
+				.show();
 		}
 	},
 	showOssViewPage : function (obj) {

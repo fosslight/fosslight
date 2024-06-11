@@ -9,9 +9,9 @@
         let groupBuffer = '';
         let totalRow = 0;
         let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) }]];
-        var linkFlag = [[ ${searchBean.linkFlag}]];
-
-        $(window).load(function () {
+        let linkFlag = [[ ${searchBean.linkFlag}]];
+        
+        $(document).ready(function () {
             oss_lst_evt.init();
         });
 
@@ -485,12 +485,7 @@
                         display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
                     }
                 } else {
-                	var url = '';
-    				if ([[${@CommonFunction.isAdmin()}]]){
-    					url = '/oss/edit/'+rowObject['ossId'];
-    				} else {
-    					url = '/oss/view/'+rowObject['ossId'];
-    				}
+                	var url = '/oss/edit/'+rowObject['ossId'];
     				display = "<a href='" + url + "' class='urlLink' target='_blank'>" + cellvalue + "</a>";
                 }
             	 

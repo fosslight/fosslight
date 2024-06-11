@@ -4,7 +4,7 @@
 <script th:inline="javascript">
 	var lastsel;
 	var codeData;
-	var userRole = [[${sessUserInfo.authority}]];
+	var userRole = [[${#authentication.authorities[0].authority}]];
 	var arr = new Array();
 	var isChangeModelInfo = true;
 	var isCheckT = false;
@@ -27,7 +27,6 @@
 		'use strict';
 		data.init();
 		evt.init();
-		$('.select2').select2();
 		
 		if ("" != [[${project.prjId}]] && 'Y' != [[${project.copyFlag}]]) {
 			$("input[name=creatorNm]").val([[${project.prjUserName}]]);
@@ -43,7 +42,6 @@
 		if (!isChangeModelInfo || "false" == isChangeModelInfo) {
 			$("#tr_distribute > td > span.fileex_back").hide();
 			$("#allDelete").hide();
-			$("#unabledChangeModelTxt").show();
 		}
 		
 		showHelpLink("Project_List_BasicInfo_Distribution_type", "helpLink_distributionType");
@@ -61,8 +59,12 @@
 			$("#allDelete").hide();
 		}
 
-		if ("Y" != copyFlag) {
-			fn.displayProjectInfo();
+		if ("Y" == copyFlag) {
+			$(".moveTab").hide();
+		} else {
+			if ([[${project.prjId}]] != null) {
+				fn.displayProjectInfo();
+			}
 		}
 		
 		// If packaging step equals confirmed, OSS Notice not editable
@@ -79,13 +81,18 @@
 			$("[name='noticeType']").attr("disabled", true);
 			$("#noticeTypeEtc").attr("disabled", true);
 		}
-
-		fn.displayProjectInfo();
 	});
 	
 	// 이벤트
 	var evt = {
 		init : function(){
+			$("#priority").select2({placeholder: "", allowClear: true});
+			$("#osType").select2({placeholder: "", allowClear: true});
+			$("#distributionType").select2({placeholder: "", allowClear: true});
+			$("#prjDivision").select2({placeholder: "Select Division", allowClear: true});
+			$("#prjUserId").select2({placeholder: "Select User", allowClear: true});
+			$("#listKind").select2({placeholder: "Select List", allowClear: true});
+			
             var categoryCd = [[${@CommonFunction.getCoConstDefVal("CD_MODEL_TYPE")}]];
 			getCategoryCodeJson(categoryCd);
 			modelList.load();
@@ -145,6 +152,12 @@
 				var innerHtml 	= 'Are you to enter a comment when drop?<br><br>';
                 innerHtml 		+= '<textarea id="dropEditor"></textarea>';
 				
+             	// prevent clicking the OK button on Enter
+				let keyCode;
+				$(document).on('keydown', function (event) {
+					keyCode = event.keyCode;
+				});
+                
                 if(!alertify.dropDialog){
 					alertify.dialog('dropDialog', function() {
 						return {
@@ -164,7 +177,7 @@
 									}
 								}
 								setup.buttons = customButtons;
-								setup.focus.element = 1;
+								setup.focus.element = 0;
 								
 								return setup;
 							},
@@ -178,44 +191,58 @@
 					}, false, 'confirm');
             	}
 				
-                alertify.dropDialog(innerHtml, function () {
-                	var comment = $("#dropEditor").summernote('code');
-    				if ("" == comment) {
-    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
-    				} else {
-    					if (distributionStatus == "PROC") {
-    						var comment = [[#{msg.project.distribution.loading}]];
-    						
-    						alertify.error(comment, 0);
+                alertify.dropDialog()
+                	.set('onok', function(e) {
+                		// prevent clicking the OK button on Enter
+						if (typeof keyCode !== 'undefined' && keyCode == 13) {
+							keyCode = undefined;
+							return false;
+						}
+                		
+						if (e) {
+							var editorVal = $("#dropEditor").summernote('code');
+							if ("" == $(editorVal).text().trim()){
+		    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
+		    				} else {
+		    					if (distributionStatus == "PROC") {
+		    						var comment = [[#{msg.project.distribution.loading}]];
+		    						
+		    						alertify.error(comment, 0);
 
-    						return false;
-    					} else if (distributionStatus == "RSV") {
-    						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
+		    						return false;
+		    					} else if (distributionStatus == "RSV") {
+		    						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
 
-    						alertify.confirm(dropMessage, function (e) {
-    							if (e) {
-    								fn.cancelDistributeReserve();
-    							} else {
-    								return false;
-    							}
-    						});
-    					} else if (distributionStatus == "DONE") {
-    						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
+		    						alertify.confirm(dropMessage, function (e) {
+		    							if (e) {
+		    								fn.cancelDistributeReserve();
+		    							} else {
+		    								return false;
+		    							}
+		    						});
+		    					} else if (distributionStatus == "DONE") {
+		    						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
 
-    						alertify.confirm(dropMessage, function (e) {
-    							if (e) {
-    								fn.deleteWithOSDD();
-    							} else {
-    								return false;
-    							}
-    						});
-    					} else {
-    						fn.exeProjectDrop(true);
-    					}
-    				}
-                });
-                
-                $("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+		    						alertify.confirm(dropMessage, function (e) {
+		    							if (e) {
+		    								fn.deleteWithOSDD();
+		    							} else {
+		    								return false;
+		    							}
+		    						});
+		    					} else {
+		    						fn.exeProjectDrop(true);
+		    					}
+		    				}
+						} else {
+							return false;
+						}
+                	})
+                	.set('onshow', function(e){
+                		$("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+               		})
+               		.setContent(innerHtml)
+					.show();
 			});
 			
 			$("#popCopyConfirmSave").click(function(){
@@ -280,7 +307,8 @@
 						}, false, 'confirm');
                 	}
 	               	
-	               	alertify.deletePrjDialog(innerHtml, function (e) {
+	               	alertify.deletePrjDialog()
+					.set('onok', function(event){
 						// prevent clicking the OK button on Enter
 						if (typeof keyCode !== 'undefined' && keyCode == 13) {
 							keyCode = undefined;
@@ -296,9 +324,11 @@
 						} else {
 							fn.deleteSubmit();
 						}
-					});
-	               	
-	               	$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+					})
+					.set('onshow', function(event){
+						$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+					})
+					.setContent(innerHtml).show();
 				}
 			});
 			// 직접입력
@@ -369,7 +399,6 @@
 			});
 			
 			// email 왓쳐 추가
-			/*<![CDATA[*/
 			$("#addEmail").click(function() {
 				/* AD ID 정보 */
 				var adId = $("#adId").val();
@@ -414,33 +443,10 @@
 				
 				$("#adId").val('');
 				$("#domain").val([[${@CommonFunction.getCoConstDefVal("CD_DTL_DEFAULT_DOMAIN")}]]).trigger('change');
+				$("select[name=prjDomain] option:eq(0)").prop("selected", true);
+				$("select[name=prjDomain]").next().find("#select2-prjDomain-container").text("Select Domain");
 			});
 			/*]]>*/
-			
-			$("#identificationTab").click(function(){
-				var prjId = $('input[name=prjId]').val();
-				createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
-			});
-			
-			$("#packagingTab").click(function(){
-				var prjId = $('input[name=prjId]').val();
-				createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
-			});
-			
-			$("#distributionTab, #distributionTabModel").click(function(){
-				var prjId = $('input[name=prjId]').val();
-				createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
-			});
-			
-			$("#editTab").click(function(){
-				var prjId = $('input[name=prjId]').val();
-				createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
-			});
-			
-			$("#securityTab").click(function(){
-				var prjId = $('input[name=prjId]').val();
-				createTabInFrame(prjId+'_Security', '/project/security/'+prjId);
-			});
 			
 			commonAjax.getCreatorDivisionTags().success(function(data, status, headers, config){
 				data.forEach(function(obj,index){
@@ -486,7 +492,7 @@
 						cache : false,
 						contentType : 'application/json',
 						success: function(data){
-							if(false == [[${@CommonFunction.isAdmin()}]] && data.info.creator != "admin") {
+							if(false == [[${@CommonFunction.isAdmin()}]] && data.info.creator == [[${#authentication.name}]]) {
 								fn.requestToOpenPop(null);
 							} else {
 								fn.requestToOpenPop(data.info);
@@ -539,24 +545,45 @@
 		}
 	};
 	
+	var displayInfo;
+	
 	var fn = {
+		getProjectStatus : function () {
+			$.ajax({
+				url : "/project/getProjectStatus",
+				type : 'POST',
+				data : JSON.stringify({"prjId" : [[${project.prjId}]]}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success : function(data){
+					displayInfo = data;
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
 		displayProjectInfo : function() {
-				var display = "";
+			fn.getProjectStatus();
+			
+			var display = "";
+			
+			var pNm = [[${project.prjName}]];
+			var pVer = [[${project.prjVersion}]];
+			if ("" != pVer && pVer != null) pNm += " (" + pVer + ")";
+			
+			var prjName = "<span class=\"description-percentage text-dark-gray\">";
+			prjName += "<a class=\"text-dark-gray text-bold hover-line urlLink goToEditLink text-shadow\" style=\"cursor: pointer;\" onclick=\"fn.mvEditTab(" + [[${project.prjId}]] + ")\" title=\"" + pNm + "\">" + pNm + "</a></span>";
+			display += prjName;
 				
-				var pNm = [[${project.prjName}]];
-				var pVer = [[${project.prjVersion}]];
-				if ("" != pVer && pVer != null) pNm += " (v" + pVer + ")";
+			// status
+			var status = "<span class=\"ml-2\"> | </span>";
+			var projectStatus = [[${project.status}]];
+			var customStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), project.status)}]];
 				
-				var prjName = "<span class=\"description-percentage text-dark-gray\">";
-				prjName += "<a class=\"text-dark-gray text-bold hover-line urlLink goToEditLink text-shadow\" style=\"cursor: pointer;\" onclick=\"fn.mvEditTab(" + [[${project.prjId}]] + ")\" title=\"" + pNm + "\">" + pNm + "</a></span>";
-				display += prjName;
-				
-				// status
-				var status = "<span class=\"ml-2\"> | </span>";
-				var projectStatus = [[${project.status}]];
-				var customStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), project.status)}]];
-				
-				switch(projectStatus){
+			switch(projectStatus){
 				case 'REQ':
 					status += "<span class=\"text-pink text-bold ml-2\">" + customStatus + "</span>";
 
@@ -581,274 +608,239 @@
 					status += "<span class=\"text-success text-bold ml-2\">" + customStatus + "</span>";
 
 					break;
-				}
-				display += status;
+			}
+			display += status;
 				
-				// osc progress
-				var identificationStatus = [[${project.identificationStatus}]];
-				identificationStatus = identificationStatus||"";
-				var verificationStatus = [[${project.verificationStatus}]];
-				verificationStatus = verificationStatus||"";
-				var destributionStatus = [[${project.destributionStatus}]];
-				destributionStatus = destributionStatus||"";
-				var statusRequestYn = [[${project.statusRequestYn}]];
-				statusRequestYn = statusRequestYn||"";
-				
-				var oscProgress = "<span class=\"ml-2\"> | </span>";
-				if ("" != identificationStatus) {
-					if ("DROP" == projectStatus) {
-						if ("CONF" == identificationStatus) {
-							oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Identification</span>';
-						} else {
-							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Identification</span>';
-						}
-					} else if ("FREV" == projectStatus) {
-						oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-						if ("Y" == [[${project.androidFlag}]]) {
-							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
-						} else {
-							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
-						}
+			// osc progress
+			var identificationStatus = [[${project.identificationStatus}]];
+			identificationStatus = identificationStatus||"";
+			var verificationStatus = [[${project.verificationStatus}]];
+			verificationStatus = verificationStatus||"";
+			var statusRequestYn = [[${project.statusRequestYn}]];
+			statusRequestYn = statusRequestYn||"";
+			
+			var oscProgress = "<span class=\"ml-2\"> | </span>";
+			if ("" != identificationStatus) {
+				if ("DROP" == projectStatus) {
+					if ("CONF" == identificationStatus) {
+						oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Identification</span>';
 					} else {
-						var initDiv = "";
-						if ("Y" == [[${project.androidFlag}]]) {
-							initDiv = "4";
-						} else {
-							initDiv = "5";
-						}
-						
-						if ("CONF" == identificationStatus) {
-							oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
-						} else if ("PROG" == projectStatus) {
-							oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
-						} else if ("REQ" == projectStatus) {
-							oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
-						} else if ("REV" == projectStatus) {
-							oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
-						}
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Identification</span>';
 					}
+				} else if ("FREV" == projectStatus) {
+					oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 				} else {
-					if ("DROP" == projectStatus) {
-						oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem ml-2">Identification</span>';
-					} else {
-						oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-						if ("Y" == [[${project.androidFlag}]]) {
-							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
-						} else {
-							oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
-						}
+					if ("CONF" == identificationStatus) {
+						oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+					} else if ("PROG" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+					} else if ("REQ" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+					} else if ("REV" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 					}
 				}
-				
-				if ("CONF" != identificationStatus) {
-					oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
-					oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+			} else {
+				if ("DROP" == projectStatus) {
+					oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem ml-2">Identification</span>';
 				} else {
-					oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
-					if ("DROP" == projectStatus) {
+					oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+				}
+			}
+			
+			if ("CONF" != identificationStatus) {
+				oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+				oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+			} else {
+				oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+				if ("DROP" == projectStatus) {
+					if ("CONF" == verificationStatus) {
+						oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Packaging</span>';
+					} else {
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+					}
+				} else {
+					if ("" == verificationStatus) {
+						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+						} else if ("" != identificationStatus) {
+							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+						}
+					} else if ("PROG" == verificationStatus) {
+						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+						} else {
+							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+						}
+					} else if ("REV" == verificationStatus) {
+						oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+					} else if ("REQ" == verificationStatus) {
+						oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+					} else if ("NA" == verificationStatus || "DROP" == verificationStatus) {
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+					} else {
 						if ("CONF" == verificationStatus) {
-							oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Packaging</span>';
+							oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 						} else {
-							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
-						}
-					} else {
-						if ("" == verificationStatus) {
-							if ("COMP" == projectStatus || "Y" == statusRequestYn) {
-								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
-							} else if ("" != identificationStatus) {
-								oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
-							}
-						} else if ("PROG" == verificationStatus) {
-							if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+							if ("NA" == [[${project.distributeTarget}]]) {
 								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
 							} else {
-								oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
-							}
-						} else if ("REV" == verificationStatus) {
-							oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
-						} else if ("REQ" == verificationStatus) {
-							oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
-						} else if ("NA" == verificationStatus || "DROP" == verificationStatus) {
-							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
-						} else {
-							if ("CONF" == verificationStatus) {
-								oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
-							} else {
-								if ("NA" == [[${project.distributeTarget}]]) {
-									oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
-								} else {
-									if ("PROG" == projectStatus) {
-										oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
-									} else if ("REQ" == projectStatus) {
-										oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
-									} else if ("REV" == projectStatus) {
-										oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
-									} else if ("FREV" == projectStatus) {
-										oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
-									}
+								if ("PROG" == projectStatus) {
+									oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+								} else if ("REQ" == projectStatus) {
+									oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+								} else if ("REV" == projectStatus) {
+									oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+								} else if ("FREV" == projectStatus) {
+									oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 								}
 							}
 						}
 					}
 				}
-				
-				if ("CONF" == identificationStatus && "NA" == verificationStatus && "NA" == destributionStatus) {
-					oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
-					oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
-				} else if ("CONF" != verificationStatus) {
-					oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
-					oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
-				} else {
-					if ("DROP" == projectStatus){
-						oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
-						oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Distribution</span>';
+			}
+			
+			display += oscProgress;
+			
+			// vulnerability score
+			var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
+			var vulnerability = "<span class=\"ml-2\"> | </span>";
+			
+			var cvssScore = displayInfo.cvssScore;
+			var secCode = displayInfo.secCode;
+			var secCvssScore = displayInfo.secCvssScore;
+			
+			if ("N" != secCvssScore && "Fixed" != secCode) {
+				cvssScore = secCvssScore;
+			}
+			
+			if ("N" != secCode) {
+				if ("Fixed" == secCode) {
+					if ("N" != cvssScore) {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Resolved(" + cvssScore + ")</span>";
 					} else {
-						switch (destributionStatus){
-							case "":
-								if ("COMP" != projectStatus){
-									oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
-									oscProgress += "<span class='badge badge-success size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
-								} else {
-									oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
-									oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Distribution</span>';
-								}
-								
-								break;
-							case "ERROR":
-								oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
-								oscProgress += "<span class='badge badge-danger size-sm width-6rem ml-2' style='cursor:pointer;' onMouseOver='this.innerHTML=\"Error\"' onMouseOut='this.innerHTML=\"Distribution\"' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
-
-								break;
-							case "NA":
-								oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
-								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
-
-								break;
-							default:
-								if ("NA" == [[${project.distributeTarget}]]){
-									oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
-									oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Distribution</span>';
-								} else{
-									oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
-									if ("DONE" == destributionStatus) {
-										oscProgress += "<span class='badge badge-outline-dark-blue size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
-									} else {
-										if ("PROG" == projectStatus) {
-											oscProgress += "<span class='badge badge-success size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
-										} else if ("REQ" == projectStatus) {
-											oscProgress += "<span class='badge badge-pink size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
-										} else if ("REV" == projectStatus) {
-											oscProgress += "<span class='badge badge-yellow size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
-										} else if ("FREV" == projectStatus) {
-											oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Distribute', '/project/distribution/" + [[${project.prjId}]] +"')\">Distribution</span>";
-										} 
-									}
-								}
-								
-								break;
-						}
-					}
-				}
-				
-				display += oscProgress;
-				
-				// vulnerability score
-				var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
-				var vulnerability = "<span class=\"ml-2\"> | </span>";
-				
-				var cvssScore = [[${project.cvssScore}]];
-				var secCode = [[${project.secCode}]];
-				var secCvssScore = [[${project.secCvssScore}]];
-				
-				if (secCvssScore != null && (secCode != null && "Fixed" != secCode)) {
-					cvssScore = secCvssScore;
-				}
-				
-				if (secCode != null) {
-					if ("Fixed" == secCode) {
-						if (cvssScore != null && cvssScore != 0) {
-							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(" + cvssScore + ")</span>";
-						} else {
-							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(N/A)</span>";
-						}
-					} else {
-						if (cvssScore >= standardScore) {
-							vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Need to resolve(" + cvssScore + ")</span>";
-						} else {
-							if (cvssScore != null && cvssScore != 0) {
-								vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(" + cvssScore + ")</span>";
-							} else {
-								vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(N/A)</span>";
-							}
-						}
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Resolved(N/A)</span>";
 					}
 				} else {
-					if (cvssScore != null && cvssScore != 0) {
-						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem ml-2\">Discovered("+cvssScore+")</span>";
+					if ("0" != cvssScore && "N" != cvssScore) {
+						if (cvssScore - standardScore >= 0) {
+							vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Need to resolve(" + cvssScore + ")</span>";
+						} else {
+							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Discovered(" + cvssScore + ")</span>";
+						}
 					} else {
-						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem ml-2\">Discovered(N/A)</span>";
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>";
 					}
 				}
-				
-				display += vulnerability;
-				$("#displayProjectInfo").html(display);
-				
-				if ($(".goToEditLink").width() > 300) {
-					$(".goToEditLink").addClass("ellipsis");
+			} else {
+				if ("0" != cvssScore && "N" != cvssScore) {
+					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered("+cvssScore+")</span>";
+				} else {
+					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered(N/A)</span>";
 				}
+			}
+			
+			display += vulnerability;
+			$("#displayProjectInfo").html(display);
+			
+			if ($(".goToEditLink").width() > 300) {
+				$(".goToEditLink").addClass("ellipsis");
+			}
+		},
+		checkValidMsg : function () {
+			$(".networkServerTypeDiv").removeClass("cus-is-invalid");
+			$("input[name='prjName']").removeClass("is-invalid");
+			$("select[name='osType']").removeClass("is-invalid");
+			$("select[name='distributionType']").removeClass("is-invalid");
+			$(".retxt").text("");
 		},
 		save : function() {
+			fn.checkValidMsg();
+			
 			var confirmMsg = "";
 			var ossNotice = $("[name='noticeType']:checked").val();
 
+			var innerHtml = '<br><textarea id="prjSaveEditor"></textarea>';
 			if(!isCheckT && ossNotice == "99"){
 				confirmMsg  = "OSS 고지문 발급이 필요한 경우에는, 'Cancel' 클릭 후 OSS Notice 및 Distribution type을 다시 확인해주시기 바랍니다.";
 				confirmMsg += "<br><br>" + "If it is necessary to generate the OSS Notice, please click 'Cancel' and check the OSS Notice and Distributio type again.";
+				confirmMsg += "<br><br>If necessary, please enter a comment.";
+				confirmMsg += innerHtml;
 			} else {
-				confirmMsg = [[#{msg.common.confirm.save}]];
+				confirmMsg = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
+				confirmMsg += innerHtml;
 			}
 			
-			if ('Y' == identificationStatusConfFlag){
-				alertify.confirm(confirmMsg, function (e) {
-					if (e) {
-						fn.showCopyStatusConfirm();
-					} else {
-						return false;
+			// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+			
+			if (typeof alertify.prjSaveDialog === 'undefined') {
+				alertify.dialog('prjSaveDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+        	}
+			
+			alertify.prjSaveDialog()
+       		.set('onok', function(e) {
+       			// prevent clicking the OK button on Enter
+				if (typeof keyCode !== 'undefined' && keyCode == 13) {
+					keyCode = undefined;
+					return false;
+				}
+       			
+       			if (e) {
+       				var editorVal = $("#prjSaveEditor").summernote('code');
+       				if ("" != $(editorVal).text().trim()) {
+						$("input[name='userComment']").val(editorVal);
 					}
-				});
-			} else {
-				alertify.confirm(confirmMsg, function (e) {
-					if (e) {
-						fn.saveSubmit();
-					} else {
-						return false;
-					}
-				});
-			}
+       				
+       				if ('Y' == identificationStatusConfFlag){
+       					fn.showCopyStatusConfirm();
+       				} else {
+       					fn.saveSubmit();
+       				}
+       			} else {
+       				return false;
+       			}
+       		})
+       		.set('onshow', function(e){
+       			$("#prjSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+       		.set('title', 'Save').setContent(confirmMsg)
+			.show();
 		},
 		tableRefresh : function() {
-			setTimeout(function() {
-				var width = $(".card-body").width();
-				$('.ui-jqgrid-btable').each(function(){
-					var id =  $(this).attr('id');
-					$(this).jqGrid('setGridWidth', 0, true);
-					$(this).jqGrid('setGridWidth', width, true);
-				});
-			}, 300);
-		},
-		createTabInFrame : function(name, url){
-			var tabData = [name, url];
-			var data = {
-				tabData:tabData,
-				action:'create'
-			};
-			
-			parent.postMessage(JSON.stringify(data),"*");
-		},
+            setTimeout(function() {
+                var width = $(".card-body").width();
+                $('.ui-jqgrid-btable').each(function(){
+                    var id =  $(this).attr('id');
+                    $(this).jqGrid('setGridWidth', 0, true);
+                    $(this).jqGrid('setGridWidth', width, true);
+                });
+            }, 300);
+        },
 		copy : function(){
 			var prjId = $('input[name=prjId]').val();
 			
@@ -882,7 +874,7 @@
 				cache : false,
 				contentType : 'application/json',
 				success: function(resultData){
-					if(resultData.isValid == "true") {
+					if (resultData.isValid == "true") {
 						if (resultData.addWatcher !== undefined){
 							var userId = resultData.addWatcher.split("/")[1];
 							var watcher = $("#"+userId).find('input[name=watchers]').val();
@@ -892,6 +884,11 @@
 						}
 						
 						alertify.success([[#{msg.common.success}]]);
+					} else {
+						// email로 watcher등록을 실패할 경우 error message를 띄움.
+						if ('' != uEmail) {
+							alertify.error("Invalid email address.", 0);
+						}
 					}
 				},
 				error : fn.onError
@@ -919,7 +916,7 @@
 					contentType : 'application/json',
 					success: function(resultData){
 						if(resultData.isValid == "true") {
-							$(obj).parent().parent().remove();
+							$(obj).parent().remove();
 							alertify.success([[#{msg.common.success}]]);
 						}
 					},
@@ -1141,10 +1138,6 @@
 					$('input[name=comment]').val($('#additionalInformation').summernote('code'));
 				}
 				
-				if ("" != $('#comment').summernote('code')) {
-					$('input[name=userComment]').val($('#comment').summernote('code'));
-				}
-				
 				cleanErrMsg("_modelList");
 
 				var rows = fn.getModelGridRows('#_modelList');
@@ -1200,7 +1193,7 @@
 				} else {
 					$('#checkbox3').val('Y');
 				}
-				
+				 
  				$("#projectForm").ajaxForm({
  					url : URL,
  					type : 'POST',
@@ -1288,6 +1281,7 @@
 								reloadTabInframe('/project/list');
 								
 								deleteTabInFrame('/project/copy/'+data.copy.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
 								
 								activeTabInFrameList("PROJECT");
 							});
@@ -1296,6 +1290,7 @@
 								reloadTabInframe('/project/list');
 								
 								deleteTabInFrame('/project/copy/'+data.copy.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
 								
 								activeTabInFrameList("PROJECT");
 							});
@@ -1308,6 +1303,7 @@
 								reloadTabInframe('/project/list');
 								
 								deleteTabInFrame('/project/copy/'+data.copy.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
 								
 								activeTabInFrameList("PROJECT");
 							});
@@ -1317,7 +1313,7 @@
 								
 								if (prjId == '') {
 									deleteTabInFrame('/project/edit');
-									activeTabInFrameList("PROJECT");
+									createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
 								} else {
 									var status = data.detail.destributionStatus;
 									var flag = "false";
@@ -1335,6 +1331,9 @@
 												activeTabInFrameList("PROJECT");
 											}
 										);
+									} else {
+										deleteTabInFrame('/project/edit' +prjId);
+										createTabInFrame(prjId + '_Project', '/project/edit/' + prjId);
 									}
 								}
 							});	
@@ -1461,12 +1460,60 @@
 				
 				return userId;
 			},
+			handleUserCommentPopupOpen : function () {
+				// 코멘트 팝업
+		        const param = {
+		            "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_USER')}]],
+		            "referenceId" : [[${project.prjId}]]
+		        }
+				
+		        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+		        	if (!alertify.editDialog){
+						alertify.dialog('editDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+								
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+								
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 0;
+								
+									return setup;
+								},
+						    	hooks: {
+						    		onshow: function() {
+						        		this.elements.dialog.style.maxWidth = 'none';
+						          		this.elements.dialog.style.width = '700px';
+						        	}
+								}
+							};
+						}, false, 'confirm');
+		    		}
+				
+					alertify.editDialog(res);
+		      	},
+		       	null,
+		      	function () {
+		         	$("#modifiedCommentInPjtEditor").summernote({
+		            	height: 180,
+		              	callbacks: {
+		                 	onInit: function () {
+		                      	$(this).summernote('code', $("#userContents").val());
+		                 	}
+		              	}
+		           	});
+		     	});
+			},
 			sendEditor : function(type){
 				//코멘트 저장
-				var editorVal = "";
+				var editorVal = $("#modifiedCommentInPjtEditor").summernote('code');
 				
-				if(!editorVal || editorVal == "") {
-					alertify.alert("<spring:message code='msg.project.enter.comment' />", function(){});
+				if ("" != $(editorVal).text().trim()) {
+					alertify.alert([[#{msg.project.enter.comment}]], function(){});
 					
 					return false;
 				}
@@ -1483,10 +1530,11 @@
 						if (json.isValid == 'false'){
 							alertify.error([[#{msg.common.valid2}]], 0);
 						} else {
-							$('.ajs-close').trigger("click");
 							alertify.success([[#{msg.project.sent.comments.success}]]);
-							
-							$(".commentBtn open").trigger( "click" );
+							$("#modifiedCommentInPjtEditor").summernote('code', '');
+							$("#userContents").val('');
+							$('.ajs-close').trigger("click");
+		                    fn_comment.getCommentList(commentsParam);
 						}
 					},
 					error : function(){
@@ -1602,11 +1650,6 @@
 					divTemp.appendChild(textarea);
 					$("#reqToOpenDiv").append(divTemp);
 					
-					$("#reqToOpenTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
-					if (info != null && info.contents != null) {
-						$("#reqToOpenTextarea").summernote('code', info.contents);
-					}
-					
 					divTemp = document.createElement("div");
 					divTemp.classList.add("col-12");
 					
@@ -1631,6 +1674,9 @@
 					
 					if (info != null && info.referenceDiv != null && info.referenceDiv == identificationHisCode) {
 						inputRadio.setAttribute('checked', true);
+						if ([[${@CommonFunction.isAdmin()}]]) {
+							inputRadio.setAttribute('disabled', true);
+						}
 					}
 					
 					formCheck.appendChild(inputRadio);
@@ -1639,38 +1685,94 @@
 					col.appendChild(formGroup);
 					$("#reqToOpenDiv2").append(col);
 					
-					col = document.createElement("div");
-					col.classList.add("col-3");
-					
-					formGroup = document.createElement("div");
-					formGroup.classList.add("form-group");
-					
-					formCheck = document.createElement("div");
-					formCheck.classList.add("form-check");
-					
-					inputRadio = document.createElement("input");
-					inputRadio.classList.add("form-check-input");
-					inputRadio.type = "radio";
-					inputRadio.name = "referenceDiv";
-					inputRadio.value = packagingHisCode;
-					
-					label = document.createElement("label");
-					label.classList.add("form-check-label");
-					label.innerText = "Packaging";
-					
-					if (info != null && info.referenceDiv != null && info.referenceDiv == packagingHisCode) {
-						inputRadio.setAttribute('checked', true);
+					if ([[${project.verificationStatus}]] != null && [[${project.verificationStatus}]] != 'NA') {
+						col = document.createElement("div");
+						col.classList.add("col-3");
+						
+						formGroup = document.createElement("div");
+						formGroup.classList.add("form-group");
+						
+						formCheck = document.createElement("div");
+						formCheck.classList.add("form-check");
+						
+						inputRadio = document.createElement("input");
+						inputRadio.classList.add("form-check-input");
+						inputRadio.type = "radio";
+						inputRadio.name = "referenceDiv";
+						inputRadio.value = packagingHisCode;
+						
+						label = document.createElement("label");
+						label.classList.add("form-check-label");
+						label.innerText = "Packaging";
+						
+						if (info != null && info.referenceDiv != null && info.referenceDiv == packagingHisCode) {
+							inputRadio.setAttribute('checked', true);
+							if ([[${@CommonFunction.isAdmin()}]]) {
+								inputRadio.setAttribute('disabled', true);
+							}
+						}
+						
+						formCheck.appendChild(inputRadio);
+						formCheck.appendChild(label);
+						formGroup.appendChild(formCheck);
+						col.appendChild(formGroup);
+						$("#reqToOpenDiv2").append(col);
 					}
 					
-					formCheck.appendChild(inputRadio);
-					formCheck.appendChild(label);
-					formGroup.appendChild(formCheck);
-					col.appendChild(formGroup);
-					$("#reqToOpenDiv2").append(col);
+					if ([[${@CommonFunction.isAdmin()}]]) {
+						let colDiv = document.createElement("div");
+						colDiv.classList.add("col-12");
+						
+						formGroup = document.createElement("div");
+						
+						label = document.createElement("label");
+						label.innerText = "Creator";
+						
+						let span = document.createElement("span");
+						span.classList.add("ml-3");
+						span.innerText = info.creatorDivisionName + ' > ' + info.creatorName + '(' + info.creator + ')';
+						
+						formGroup.appendChild(label);
+						formGroup.appendChild(span);
+						formGroup.appendChild(document.createElement("br"));
+						
+						label = document.createElement("label");
+						label.innerText = "Create Date";
+						
+						span = document.createElement("span");
+						span.classList.add("ml-3");
+						span.innerText = info.createdDate;
+						formGroup.appendChild(label);
+						formGroup.appendChild(span);
+						colDiv.appendChild(formGroup);
+						
+						$("#reqToOpenDiv2").append(colDiv);
+						
+						let divTemp = document.createElement("div");
+						divTemp.classList.add("col-12");
+						
+						formGroup = document.createElement("div");
+						formGroup.classList.add("form-group");
+						
+						label = document.createElement("label");
+						
+						divTemp = document.createElement("div");
+						divTemp.classList.add("col-12");
+						let textarea = document.createElement("textarea");
+						textarea.id = "reqToOpenTextareaAdmin";
+						
+						span = document.createElement("span");
+						span.classList.add("mb-1");
+						span.innerText = "Are you sure you want to reject";
+						divTemp.appendChild(span);
+						divTemp.appendChild(textarea);
+						$("#reqToOpenDiv3").append(divTemp);
+					}
 					
 					const reqToOpenHtml = $(".requestToOpenPop").html();
 					$("#reqToOpenDiv").empty();
 					$("#reqToOpenDiv2").empty();
+					$("#reqToOpenDiv3").empty();
 					
 					if(!alertify.reqToOpen){
 						alertify.dialog('reqToOpen', function() {
@@ -1684,7 +1786,7 @@
 									
 									var setup = alertify.confirm().setup();
 									setup.buttons = [];
-									setup.focus.element = 1;
+									setup.focus.element = 0;
 									
 									return setup;
 								},
@@ -1698,7 +1800,125 @@
 						}, false, 'alert');
                 	}
 					
-					alertify.reqToOpen(reqToOpenHtml).set('title', 'Request To Open');
+					alertify.reqToOpen().set('title', 'Request To Open').set('onshow', function(e){
+						$("#reqToOpenTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+						if (info != null && info.contents != null) {
+							$("#reqToOpenTextarea").summernote('code', info.contents);
+						}
+						if ([[${@CommonFunction.isAdmin()}]]) {
+							$("#reqToOpenTextarea").summernote("disable");
+							$("#reqToOpenTextarea").next().find(".note-editable").addClass("note-editable");
+							$('#reqToOpenTextareaAdmin').summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+						} 
+					}).setContent(reqToOpenHtml).show();
+				}
+			},
+			notRequestToOpenPop : function(){
+				var type = "";
+				var commId = "";
+				if ("N" == [[${project.viewOnlyFlag}]]) {
+					var readOnly = false;
+					var mode = "reject";
+					var identificationHisCode = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]];
+					var packagingHisCode = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]];
+					
+						var innerHtml	= 	'<div class="notRequestToOpenPop">';
+						innerHtml		+= 	'	<div class="row"><div class="col-12">';
+						innerHtml		+= 	'		<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">';
+						innerHtml		+= 	'			<div class="row col-12">';
+						innerHtml    	+= 	'				<input type="hidden" id="commentsMode" name="commentsMode" value="'+mode+'"/>';
+						innerHtml    	+= 	'				<input type="hidden" id="commIdPopup" name="commIdPopup" value="'+commId+'"/>';
+						innerHtml    	+= 	'				<textarea id="editor3"></textarea>';
+						innerHtml		+=	'			</div>';
+						innerHtml		+= 	'			<div class="row col-12">';
+						innerHtml		+= 	'				<div class="col-3">';
+						innerHtml		+= 	'					<div class="form-group">';
+						innerHtml		+= 	'						<div class="form-check">';
+						innerHtml		+= 	'							<input class="form-check-input" type="radio" name="referenceDiv" value="' + identificationHisCode + '" id="referenceDiv1"><label class="form-check-label" for="referenceDiv1">Identification</label>';
+						innerHtml		+=	'						</div>';
+						innerHtml		+=	'					</div>';
+						innerHtml		+=	'				</div>';
+					
+					if ([[${project.verificationStatus}]] != null && 'NA' != [[${project.verificationStatus}]]) {
+						innerHtml		+= 	'				<div class="col-3">';
+						innerHtml		+= 	'					<div class="form-group">';
+						innerHtml		+= 	'						<div class="form-check">';
+						innerHtml		+= 	'							<input class="form-check-input" type="radio" name="referenceDiv" value="' + packagingHisCode + '" id="referenceDiv2"><label class="form-check-label" for="referenceDiv2">Packaging</label>';
+						innerHtml		+=	'						</div>';
+						innerHtml		+=	'					</div>';
+						innerHtml		+=	'				</div>';
+					}
+					
+						innerHtml		+=	'			</div>';
+						innerHtml		+=	'		</div>';
+						innerHtml		+=	'	</div></div>';
+						innerHtml		+=	'</div>';
+					
+					if(!alertify.notReqRejectConfirm){
+						alertify.dialog('notReqRejectConfirm', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
+								}
+							};
+						}, false, 'confirm');
+					}
+					
+					alertify.notReqRejectConfirm().set('title', 'Reopen').set('onok', function(e){
+						if (e) {
+							var referenceDiv = $(':radio[name="referenceDiv"]:checked').val();
+							var deleteOsdd = "";
+							var commentsMode = $('#commentsMode').val();
+							var commId = $('#commIdPopup').val();
+							var matilType = "";
+							
+							if (typeof referenceDiv === "undefined") {
+								alertify.alert([[#{msg.project.required.rejectDiv}]], function(){});
+
+								return false;
+							}
+							
+							var data;
+							var userComment = "";
+							var summernoteVal = $("#editor3").summernote('code');
+							
+							if ("" != $(summernoteVal).text().trim()) {
+								userComment = summernoteVal;
+							}
+							
+							if (referenceDiv == identificationHisCode) {
+								data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : userComment, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "delOsdd" : deleteOsdd, "commId" : null, "statusRequestYn" : "N"};
+							} else if (referenceDiv == packagingHisCode) {
+								data = {"prjId" : [[${project.prjId}]], "verificationStatus" : "PROG", "useCustomNoticeYn" : [[${project.useCustomNoticeYn}]], "userComment" : userComment, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "delOsdd" : deleteOsdd, "commId" : null, "statusRequestYn" : "N"};
+							} else if (referenceDiv == distributionHisCode) {
+								data = {"referenceId" : [[${project.prjId}]], "contents" : userComment, "referenceDiv": referenceDiv, "commentsMode" : commentsMode, "delOsdd" : deleteOsdd};
+							}
+							if (data) fn.commentsSave(data);
+						} else {
+							return false;
+						}
+					})
+					.set('onshow', function(e){
+           				$("#editor3").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           			})
+					.setContent(innerHtml).show();
 				}
 			},
 			commentsSave : function(data){
@@ -1717,7 +1937,7 @@
 								alertify.alert([[#{msg.common.success}]], function(){
 									reloadTabInframe('/project/list');
 									deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
-									activeTabInFrameList("PROJECT");
+									createTabInFrame([[${project.prjId}]] + '_Project', '/project/edit/' + [[${project.prjId}]]);
 								});
 							}
 						},
@@ -1736,9 +1956,15 @@
 							cache : false,
 							contentType : 'application/json',
 							success: function(data){
-								reloadTabInframe('/project/list');
-								deleteTabInFrame('/project/edit/'+ [[${project.prjId}]]);
-								activeTabInFrameList("PROJECT");
+								if(data.isValid == 'false'){
+									alertify.error([[#{msg.common.valid2}]], 0);
+								} else {
+									alertify.alert([[#{msg.common.success}]], function(){
+										reloadTabInframe('/project/list');
+										deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
+										activeTabInFrameList("PROJECT");
+									});
+								}
 							},
 							error : function(){
 								alertify.error([[#{msg.common.valid2}]], 0);
@@ -1836,9 +2062,7 @@
 				var protocol = window.location.protocol;
 				var host =  window.location.host;
 				copyUrl = protocol + "//" + host + "/project/shareUrl/" + [[${project.prjId}]];
-				
-				var locale = [[${#locale}]];
-				if (locale) copyUrl += "?lang=" + locale;
+				copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
 				$("#copyUrl").val(copyUrl);
 				
 				//launch it.
@@ -1983,7 +2207,14 @@
 				var matilType = "";
 				
 				if ("insert" == commentsMode || "update" == commentsMode || "reject" == commentsMode) {
-					if ("" == $("#reqToOpenTextarea").next().find(".note-editable").text()) {
+					var editorVal = "";
+					if ([[${@CommonFunction.isAdmin()}]]) {
+						editorVal = $("#reqToOpenTextareaAdmin").summernote('code');
+					} else {
+						editorVal = $("#reqToOpenTextarea").summernote('code');
+					}
+					
+					if ("" == $(editorVal).text().trim()){
 						alertify.alert([[#{msg.project.required.comments.reject}]], function(){});
 						return false;
 					}
@@ -1997,17 +2228,17 @@
 				if ("reject" == commentsMode) {
 					if (referenceDiv != null) {
 						if (referenceDiv == [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]]) {
-							data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "commId" : null, "statusRequestYn" : "N"};
+							data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : editorVal, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "commId" : null, "statusRequestYn" : "N"};
 						} else if (referenceDiv == [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]]) {
-							data = {"prjId" : [[${project.prjId}]], "verificationStatus" : "PROG", "useCustomNoticeYn" : [[${project.useCustomNoticeYn}]], "userComment" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "commId" : null, "statusRequestYn" : "N"};
+							data = {"prjId" : [[${project.prjId}]], "verificationStatus" : "PROG", "useCustomNoticeYn" : [[${project.useCustomNoticeYn}]], "userComment" : editorVal, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "commId" : null, "statusRequestYn" : "N"};
 						} else if ("" == referenceDiv) {
-							data = {"referenceId" : [[${project.prjId}]], "contents" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv": referenceDiv, "commentsMode" : commentsMode};
+							data = {"referenceId" : [[${project.prjId}]], "contents" : editorVal, "referenceDiv": referenceDiv, "commentsMode" : commentsMode};
 						}
 					} else {
-						data = {"referenceId" : [[${project.prjId}]], "contents" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv": referenceDiv, "commentsMode" : commentsMode};
+						data = {"referenceId" : [[${project.prjId}]], "contents" : editorVal, "referenceDiv": referenceDiv, "commentsMode" : commentsMode};
 					}
 				} else {
-					data = {"referenceId" : [[${project.prjId}]], "contents" : $("#reqToOpenTextarea").next().find(".note-editable").html(), "referenceDiv" : referenceDiv, "commId" : commId, "commentsMode" : commentsMode};
+					data = {"referenceId" : [[${project.prjId}]], "contents" : editorVal, "referenceDiv" : referenceDiv, "commId" : commId, "commentsMode" : commentsMode};
 				}
 				
 				fn.commentsSave(data);
@@ -2026,41 +2257,54 @@
             mvEditTab : function(prjId){
                 createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
             },
-            mvIdentification : function(prjId){
-                createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/'+6);
+            mvIdentification : function(){
+            	if ("Y" == [[${project.androidFlag}]]) {
+    				createTabInFrame([[${project.prjId}]]+"_Identify", "/project/identification/" + [[${project.prjId}]] + "/4");
+    			} else {
+    				createTabInFrame([[${project.prjId}]]+"_Identify", "/project/identification/" + [[${project.prjId}]] + "/5");
+    			}
             },
-            mvVerification : function(prjId){
-                createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
+            mvVerification : function(){
+            	createTabInFrame([[${project.prjId}]] + "_Packaging", "/project/verification/" + [[${project.prjId}]]);
             },
-            mvSecurityTab : function(prjId){
-                createTabInFrame(prjId+'_Security', '/project/security/'+prjId);
-            },
+            mvSecurity : function(){
+            	createTabInFrame([[${project.prjId}]] + "_Security", "/project/security/" + [[${project.prjId}]]);
+            }
 		}
 	
 	var fn_comment = {
+		callbackFunction : function () {
+	       	fn_comment.getCommentList(commentsParam);
+	    },
 		getCommentList : function(param) {
-			$.ajax({
-				type: "GET",
-				url: '/comment/getCusCommentList',
-				dataType : 'html',
-				cache : false,
-				data : param,
-				success: function (res) {
-					$("#commentList").empty();
-					$("#commentList").html(res);
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
+			if ([[${project.copyFlag}]] != 'Y') {
+				$.ajax({
+					type: "GET",
+					url: '/comment/getCusCommentList',
+					dataType : 'html',
+					cache : false,
+					data : param,
+					success: function (res) {
+						if (typeof param.height !== undefined) {
+							$(".comment-card-body").attr("style", "max-height:" + param.height + "px; overflow-y: auto;");
+						}
+						$("#commentList").empty();
+						$("#commentList").html(res);
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
 		},
 		getMoreCommentsList : function() {
 			commentsParam["moreFlag"] = "Y";
+			commentsParam["height"] = $(".comment-card-body").height();
 			fn_comment.getCommentList(commentsParam);
 		},
 		editComments : function(_commId, _referenceDiv, _referenceId) {
 			$.ajax({
-	    		url : '/comment/getEditPopup',
+		   		url : '/comment/getEditPopup',
 				type : 'POST',
 				data : {'commId' : _commId},
 				dataType : 'html',
@@ -2078,7 +2322,7 @@
 									
 									var setup = alertify.confirm().setup();
 									setup.buttons = [];
-									setup.focus.element = 1;
+									setup.focus.element = 0;
 									
 									return setup;
 								},
@@ -2090,7 +2334,7 @@
 								}
 							};
 						}, false, 'alert');
-                	}
+	               	}
 					
 					alertify.editComments(res).set('title', 'Edit Comments');
 					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
@@ -2099,11 +2343,12 @@
 	    	});
 		},
 		updateComments : function (_commId, _referenceDiv, _referenceId) {
-			if ("" == $("#commentEdit").next().find(".note-editable").text()) {
+			var summernoteVal = $("#commentEdit").summernote('code');
+			if ("" == summernoteVal) {
 				alertify.alert("Please enter a comment", function(){});
 				return false;
 			} else {
-				var param = {commId : _commId, contents : replaceWithLink($("#commentEdit").next().find(".note-editable").html()), referenceDiv: _referenceDiv, referenceId: _referenceId};
+				var param = {commId : _commId, contents : replaceWithLink(summernoteVal), referenceDiv: _referenceDiv, referenceId: _referenceId};
 				$.ajax({
 					url : '/comment/updateComment',
 					type : 'POST',
@@ -2146,6 +2391,36 @@
 		},
 		closeAlertifyView : function () {
 			fn.closeAlertifyView();
+		},
+		activateCommentArea : function () {
+			var commentRow = $("#commentList .card-body").length;
+			
+			// change tab area
+			if (!$(".basicInfoCommentArea").is(":visible")) {
+				$(".basicInfoAreaTop").hide();
+				$(".basicInfoArea").removeClass("col-md-10");
+				$(".basicInfoAreaBottom").hide();
+				$(".basicInfoArea").addClass("col-md-9");
+				
+				fn_comment.getCommentList(commentsParam);
+				$(".basicInfoCommentArea").show();
+				
+				tableRefreshGridArea('notEntire');
+			} else {
+				$(".basicInfoAreaTop").show();
+				$(".basicInfoArea").removeClass("col-md-9");
+				$(".basicInfoArea").addClass("col-md-10");
+				$(".basicInfoAreaBottom").show();
+	 			$(".basicInfoCommentArea").hide();
+	 			
+	 			tableRefreshGridArea('entire');
+			}
+		},
+		showCommentHistory : function () {
+			fn_comment.activateCommentArea();
+			
+			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_HIS')}]];
+	        openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
 		}
 	}
 	
@@ -2198,13 +2473,21 @@
 							if(watcher.prjUserName == undefined){
 								str = watcher.prjDivisionName;
 							} else {
-								str = '';
+								str = '<b';
 								
 								if (divisionEmptyCd != watcher.prjDivision) {
-									str += watcher.prjDivisionName;
+									if(deptUseYn == "N"){
+										str += ' class="deleteUser"';
+									}
+									
+									str += '>'+watcher.prjDivisionName+'</b>/<b';
 								}
 								
-								str += watcher.prjUserName;
+								if(userUseYn == "N"){
+									str += ' class="deleteUser"';
+								}
+								
+								str += '>'+watcher.prjUserName+'</b>';
 							}
 							
 							fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
@@ -2295,8 +2578,8 @@
 				
 				$("#complete").hide();
 				$("#drop").hide();
-			} else if(data.createThird) {
-				$("[name='additionalInformation']").summernote('code', data.createThird);
+			} else if (data.createThird != null) {
+				$("#additionalInformation").summernote('code', data.createThird);
 			} else {
 				$("#complete").hide(); 
 				$("#copy").hide();
@@ -2355,6 +2638,7 @@
 				}
 			}
 			
+			commentsParam.height = $(window).height() - 120;
 			fn_comment.getCommentList(commentsParam);
 		},
 		getModelGridData : function(param){
@@ -2461,6 +2745,7 @@
 				gridview: true,
 				rownumbers: true,
 				rowNum:[[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
+				toppager: true,
 			   	pgtext: false,
 			   	pginput:false,
 				viewrecords: true,
@@ -2472,8 +2757,6 @@
 					if(isChangeModelInfo == "false") {
 						$("#pagerModel").hide();
 					}
-					
-					fn.tableRefresh();
 				},
 				onSelectRow: function(rowid) {
 					if(rowid){
@@ -2493,7 +2776,7 @@
 			});
 
             if(!isReadOnly) {
-                $("#_modelList").jqGrid('navGrid',"#pagerModel",{edit:false,add:true,del:false,search:false,refresh:false
+                $("#_modelList").jqGrid('navGrid',"#_modelList_toppager",{edit:false,add:true,del:false,search:false,refresh:false
                     , addfunc: function (rowid) {
                         var _tempRandId = $.jgrid.randId();
                         var lastCategory = "";

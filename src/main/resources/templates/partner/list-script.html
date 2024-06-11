@@ -13,7 +13,7 @@ var refreshParam = {};
 const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT'))}]];
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var changeWatcherArr = [];
-var role = [[${sessUserInfo.authority}]];
+var role = [[${#authentication.authorities[0].authority}]];
 
 $(document).ready(function () {
 	'use strict';
@@ -26,15 +26,9 @@ $(document).ready(function () {
 		$(".btnAdd").hide();
 	}
 	
-	var startDate = String([[${searchBean?.createdDate1}]]);
-    var endDate = String([[${searchBean?.createdDate2}]]);
-
-    if (startDate && startDate != 'null' && endDate && endDate != 'null') {
-        var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
-        var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
-        $("#schDateRange").val(formattedStartDate + ' - ' + formattedEndDate);
-    }
-
+	var startDate;
+    var endDate;
+	
     $("#schDateRange").daterangepicker({
         autoUpdateInput: false
     }).on('apply.daterangepicker', function(ev, picker) {
@@ -44,10 +38,141 @@ $(document).ready(function () {
     })
    	.on('cancel.daterangepicker', function(ev, picker) {
     	$(this).val("");
-        $("input[name='createdDate1']").val("");
-        $("input[name='createdDate2']").val("");
-        $('#schDateRange').attr('placeholder', 'Created Date');
+      	$("input[name='createdDate1']").val("");
+      	$("input[name='createdDate2']").val("");
+     	$('#schDateRange').attr('placeholder', 'Created Date');
   	});
+    
+    var input = ["partnerName", "publicYn", "createdDate1", "createdDate2", "softwareName", "softwareVersion", "creator", "reviewer", "watchers", "ossName", "ossVersion", "licenseName"];
+	var singleSelect = ["division"];
+	var multiSelect = ["status"];
+	var textarea = ["binaryName", "userComment", "description"];
+    
+    var optionSelectedFlag = false;
+	if (typeof localStorage.partnerSearchConditions !== "undefined") {
+		var localStorageSearchConditions = JSON.parse(localStorage.partnerSearchConditions);
+		
+		if (Date.now() > localStorageSearchConditions.expire) {
+    		localStorage.removeItem("partnerSearchConditions");
+    	} else {
+    		Object.keys(localStorageSearchConditions).forEach(function(key) {
+    			if (input.includes(key)) {
+    				if ("publicYn" == key) {
+    					var publicYn = localStorageSearchConditions[key];
+    					if ("" == publicYn || "N" == publicYn) $("#checkbox3").prop("checked", true);
+    				} else {
+    					var searchValue = localStorageSearchConditions[key];
+    					if ("partnerName" != key && "" != searchValue) optionSelectedFlag = true;
+    					
+    					$("input[name='"+key+"']").val(searchValue);
+        				if ("createdDate1" == key) {
+        					startDate = localStorageSearchConditions[key];
+        				} else if ("createdDate2" == key) {
+        					endDate = localStorageSearchConditions[key];
+        				}
+    				}
+    			} else if (singleSelect.includes(key)) {
+    				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+    				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+    			} else if (multiSelect.includes(key)) {
+    				var statuses = localStorageSearchConditions[key];
+    				if ("" != statuses) {
+    					optionSelectedFlag = true;
+    					statuses = statuses.split(",");
+    					$("select[name='"+key+"']").val(statuses).trigger('change');
+    				} else {
+    					$("select[name='"+key+"']").val(statuses).trigger('change');
+    					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
+    				}
+    			} else if (textarea.includes(key)) {
+    				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+    				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+    			}
+    		});
+    	}
+	} else {
+		for (var i in input) {
+			if ("partnerName" != input[i] && "publicYn" != input[i]) {
+				var inputValue = $("input[name='"+input[i]+"']").val();
+				if ("" != inputValue) {
+					optionSelectedFlag = true;
+					break;
+				}
+			}
+		}
+		
+		if (!optionSelectedFlag) {
+			for (var i in singleSelect) {
+				var selectedValue = $("select[name='"+singleSelect[i]+"'] option:selected").val();
+				if ("" != selectedValue) {
+					optionSelectedFlag = true;
+					break;
+				}
+			}
+		}
+		
+		if (!optionSelectedFlag) {
+			var multiSelectedValue = $("select[name='status']").select2("val");
+			if (multiSelectedValue != null) optionSelectedFlag = true;
+		}
+		
+		if (!optionSelectedFlag) {
+			for (var i in textarea) {
+				var textareaValue = $("textarea[name='"+textarea[i]+"']").val();
+				if ("" != textareaValue) {
+					optionSelectedFlag = true;
+					break;
+				}
+			}
+		}
+		
+		startDate = String([[${searchBean?.createdDate1}]]);
+		endDate = String([[${searchBean?.createdDate2}]]);
+	}
+	
+	if (optionSelectedFlag) {
+		$(".optionSelected").show();
+	} else {
+		$(".optionSelected").hide();
+	}
+	
+	refreshParam = fn.setGridParam();
+	
+	$('#search').on('click',function(e){
+		e.preventDefault();
+		var postData = fn.setGridParam();
+		
+		var localStorageData = fn.setGridParam();
+		localStorageData.expire = Date.now() + 300000;
+        localStorage.setItem("partnerSearchConditions", JSON.stringify(localStorageData));
+		
+        optionSelectedFlag = false;
+        Object.keys(localStorageData).forEach(function(key) {
+			if (input.includes(key)) {
+				if ("partnerName" != key && "publicYn" != key && "" != localStorageData[key]) optionSelectedFlag = true;
+			} else if (singleSelect.includes(key)) {
+				if ("" != localStorageData[key]) optionSelectedFlag = true;
+			} else if (multiSelect.includes(key)) {
+				if ("" != localStorageData[key]) optionSelectedFlag = true;
+			} else if (textarea.includes(key)) {
+				if ("" != localStorageData[key]) optionSelectedFlag = true;
+			}
+		});
+        
+        if (optionSelectedFlag) {
+			$(".optionSelected").show();
+		} else {
+			$(".optionSelected").hide();
+		}
+        
+		$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
+	});
+	
+	if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+        var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+        var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+        $("#schDateRange").val(formattedStartDate + ' - ' + formattedEndDate);
+    }
 });
 
 var gridTooltip = {
@@ -67,19 +192,10 @@ var gridTooltip = {
 //event
 var evt = {
 	init : function(){
-        $('#division').select2({placeholder: "Division", allowClear: true});
-        $('#parStatusSelect').select2({placeholder: "Status", allowClear: true});
-
-		refreshParam = fn.setGridParam();
+		$('select[name=division]').select2({placeholder: "Division", allowClear: true});
+		$('select[name=status]').select2({placeholder: "Status", allowClear: true});
 		
-		$('#search').on('click',function(e){
-			e.preventDefault();
-			var postData = fn.setGridParam();
-			
-			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
-		});
-		
-		var selectNames = ["division", "status"];
+		var selectNames = ["parDivision"];
 		for (var i in selectNames) {
 			$("select[name=" + selectNames[i] + "] option:eq(0)").prop("selected", true);
 		}
@@ -89,7 +205,7 @@ var evt = {
 var fn = {
 	displaySoftwareName : function (cellvalue, options, rowObject) {
 		var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+options.rowId+"')\">" + cellvalue + "</span>";
-        return display;
+	   	return display;
 	},
 	mvEditTab : function (partnerId) {
 		createTabInFrame(partnerId+'_3rdParty', '/partner/edit/'+partnerId);
@@ -371,13 +487,14 @@ var fn = {
 							    hooks: {
 							    	onshow: function() {
 							        	this.elements.content.style.top = "60px";
+							        	this.elements.dialog.style.maxWidth = 'none';
 							        }
 								}
 							};
 						}, false, 'confirm');
                 	}
 					
-					alertify.changeWatcherDialog(res).set('title', 'Change Watcher').set('resizable', true).resizeTo('1000', '420');
+					alertify.changeWatcherDialog(res).set('title', 'Change Watcher').set('resizable', true).resizeTo('1000', '400');
 				}
 			});
 		} else {
@@ -388,6 +505,36 @@ var fn = {
 		fn.resetChangeWatcherPop();
 	},
 	changeWatcherAdd : function() {
+		var msg = "";
+		var notPermissionPartnerIds = [];
+		var permissionPartnerIds = [];
+		var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		for (var i in partnerIds) {
+			var gridData = $('#list').jqGrid('getRowData', partnerIds[i]);
+			if ("1" == gridData.statusPermission) {
+				permissionPartnerIds.push(partnerIds[i]);
+			} else {
+				notPermissionPartnerIds.push(partnerIds[i]);
+			}
+		}
+		
+		if (notPermissionPartnerIds.length > 0) {
+			msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]];
+			msg += '<br/> - '
+			for (var i in notPermissionPartnerIds) {
+				msg += '3rd Party-' + notPermissionPartnerIds[i];
+				if(i < notPermissionPartnerIds.length-1){
+					msg += ', ';
+				}
+			}
+		}
+		
+		if (permissionPartnerIds.length == 0) {
+			alertify.alert(msg, function(){});
+			return false;
+		}
+		
 		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
 				if (changeWatcherArr.length == 0) {
@@ -395,9 +542,8 @@ var fn = {
 					return false;
 				}
 				
-				var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
-				var data = {"partnerIds" : partnerIds, "changeWatcherList" : changeWatcherArr};
-				
+				var data = {"partnerIds" : permissionPartnerIds, "changeWatcherList" : changeWatcherArr};
+
 				$.ajax({
 					url : '/partner/addWatchers',
 					type : 'POST',
@@ -406,24 +552,61 @@ var fn = {
 					cache : false,
 					contentType : 'application/json',
 					success: function(resultData){
-						if(resultData.isValid == "true") {
-							alertify.success([[#{msg.common.success}]]);
+						if (resultData.isValid == "true") {
+							if ("" == msg) {
+								alertify.success([[#{msg.common.success}]]);
+								fn.resetChangeWatcherPop();
+							} else {
+								alertify.alert(msg, function(){
+									fn.resetChangeWatcherPop();
+								});
+							}
 						} else {
 							alertify.error([[#{msg.common.valid2}]], 0);
+							fn.closeAlertify();
 						}
 					},
 					error : function(){
 						alertify.error([[#{msg.common.valid2}]], 0);
+						fn.closeAlertify();
 					}
 				});
-				
-				fn.resetChangeWatcherPop();
 			} else {
 				return false;
 			}
 		});
 	},
 	changeWatcherDelete : function() {
+		var msg = "";
+		var notPermissionPartnerIds = [];
+		var permissionPartnerIds = [];
+		var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		for (var i in partnerIds) {
+			var gridData = $('#list').jqGrid('getRowData', partnerIds[i]);
+			if ("1" == gridData.statusPermission) {
+				permissionPartnerIds.push(partnerIds[i]);
+			} else {
+				notPermissionPartnerIds.push(partnerIds[i]);
+			}
+		}
+		
+		if (notPermissionPartnerIds.length > 0) {
+			msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]];
+			msg += '<br/> - '
+			for (var i in notPermissionPartnerIds) {
+				msg += '3rd Party-' + notPermissionPartnerIds[i];
+				if(i < notPermissionPartnerIds.length-1){
+					msg += ', ';
+				}
+			}
+		}
+		
+		if (permissionPartnerIds.length == 0) {
+			alertify.alert(msg, function(){});
+			return false;
+		}
+		
 		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
 			if (e) {
 				if (changeWatcherArr.length == 0) {
@@ -431,8 +614,7 @@ var fn = {
 					return false;
 				}
 				
-				var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
-				var data = {"partnerIds" : partnerIds, "changeWatcherList" : changeWatcherArr};
+				var data = {"partnerIds" : permissionPartnerIds, "changeWatcherList" : changeWatcherArr};
 				
 				$.ajax({
 					url : '/partner/removeWatchers',
@@ -557,7 +739,7 @@ var fn = {
 		var html  = '<span class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
 		html += str;
 		if ("Y" != [[${searchBean.viewOnlyFlag}]]) {
-			html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
+			html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
 		}
 		html += '</div>';
 		target.append(html);
@@ -573,6 +755,10 @@ var fn = {
 			return alertify.error([[#{enter.watcher.error}]], 0);
 		}
 		
+		if ("" == domain) {
+			return alertify.error([[#{select.watcher.domain.error}]], 0);
+		}
+		
 		var _email = adId + "@" + domain;
 		var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
 
@@ -581,6 +767,10 @@ var fn = {
 
 			return alertify.error([[#{invalid.email.error}]], 0);
 		}
+		
+		var duplicateFlag = changeWatcherArr.filter(function(a){ 
+			return a.parEmail == _email;
+		}).length > 0;
 		
 		$.ajax({
 			type: "POST",
@@ -758,9 +948,9 @@ var fn = {
 		$("select[name=parDomain]").val("").trigger('change');
 		$("select[name=listKind]").val("").trigger('change');
 		$("input[name=listId]").val("");
+		fn.closeAlertify();
 	},
 	closeAlertify : function() {
-		fn.resetChangeWatcherPop();
 		$(".ajs-close").trigger("click");
 	},
 	onUpdateSuccess : function(json, status){
@@ -770,6 +960,188 @@ var fn = {
         } else {
             alertify.error([[#{msg.common.valid2}]], 0);
         }
+    },
+    deletePartner : function () {
+    	var partnerIds = new Array();
+    	partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+    	
+    	if (partnerIds.length > 0) {
+    		var notPermissions = new Array();
+			var permissions = new Array();
+    		
+			for (var i in partnerIds) {
+				var rowData = $('#list').jqGrid('getRowData', partnerIds[i]);
+				if (rowData.statusPermission > 0) {
+					permissions.push(partnerIds[i]);
+				} else {
+					notPermissions.push(partnerIds[i]);
+				}
+			}
+			
+			if (permissions.length > 0) {
+				permissions.sort();
+				if (notPermissions.length > 0) notPermissions.sort();
+				
+				var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
+	           	innerHtml 		+= '<textarea id="delParEditor"></textarea>';
+	           	
+	           	// prevent clicking the OK button on Enter
+				let keyCode;
+				$(document).on('keydown', function (event) {
+					keyCode = event.keyCode;
+				});
+					
+	           	if (!alertify.delParDialog){
+	    			alertify.dialog('delParDialog', function() {
+	    				return {
+	    					setup: function() {
+	    						var settings = alertify.confirm().settings;
+	    						
+	    						for (var prop in settings) {
+	    							this.settings[prop] = settings[prop];
+	    						}
+	    						
+	    						var setup = alertify.confirm().setup();
+	    						setup.focus.element = 0;
+	    						
+	    						return setup;
+	    					},
+	    				    hooks: {
+	    				    	onshow: function() {
+	    				        	this.elements.dialog.style.maxWidth = 'none';
+	    				          	this.elements.dialog.style.width = '650px';
+	    				        }
+	    					}
+	    				};
+	    			}, false, 'confirm');
+	        	}
+	           	
+	           	alertify.delParDialog()
+           		.set('onok', function(e) {
+           			// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
+					
+				   	if (e) {
+				   		var editorVal = $("#delParEditor").summernote('code');
+				   		if ("" == $(editorVal).text().trim()) {
+							alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+							return false;
+						} else {
+							fn.deleteSubmit(permissions, notPermissions);
+						}
+				   	} else {
+				   		return false;
+				   	}
+           		})
+           		.set('onshow', function(e){
+           			$("#delParEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           		})
+           		.setContent(innerHtml)
+				.show();
+			} else {
+				var notPermissionsLength = notPermissions.length;
+				if (notPermissionsLength > 0) notPermissions.sort();
+				
+				var message = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]];
+				message += "<br>&emsp;- ";
+				notPermissions.forEach (function (el, index) {
+					message += "3RD-" + el;
+					if (index < notPermissionsLength-1) {
+						message += ", ";
+					}
+				});
+				
+				alertify.alert(message, function(){});
+				return false;
+			}
+    	} else {
+    		alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+			return false;
+    	}
+    },
+    deleteSubmit : function (partnerIds, notPermissions) {
+    	$.ajax({
+			url : '/partner/multiDelAjax',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : {'partnerIds' : partnerIds, userComment : replaceWithLink($("#delParEditor").summernote('code'))},
+			success: function(data){
+				if ("10" == data.resCd) {
+					var message = "";
+					var notPermissionsLength = notPermissions.length;
+					var permissionsLength = partnerIds.length;
+					
+					if (notPermissionsLength > 0) {
+						message = [[${@CommonFunction.getCustomMessage('msg.common.check.delete.success', '3rd parties')}]];
+						message += "<br>&emsp;- ";
+						partnerIds.forEach (function (el, index) {
+							message += "3RD-" + el;
+							if (index < permissionsLength-1) {
+								message += ", ";
+							}
+						});
+						
+						message += "<br><br>";
+						message += [[${@CommonFunction.getCustomMessage('msg.common.check.delete.fail', '3rd parties')}]];
+						message += "<br>&emsp;- ";
+						notPermissions.forEach (function (el, index) {
+							message += "3RD-" + el;
+							if (index < notPermissionsLength-1) {
+								message += ", ";
+							}
+						});
+					} else {
+						message = [[${@CommonFunction.getCustomMessage('msg.common.delete.success', '3rd parties')}]];
+						message += "<br>&emsp;- ";
+						partnerIds.forEach (function (el, index) {
+							message += "3RD-" + el;
+							if (index < permissionsLength-1) {
+								message += ", ";
+							}
+						});
+					}
+					
+					if (typeof alertify.mulDelPartnerDialog === 'undefined') {
+						alertify.dialog('mulDelPartnerDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.alert().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.alert().setup();
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '550px';
+							        }
+								}
+							};
+						}, false, 'alert');
+	            	}
+					
+					alertify.mulDelPartnerDialog(message, function(e) {
+						reloadTabInframe('/partner/list');
+					});
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			},
+			error: function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
     }
 }
 
@@ -836,9 +1208,15 @@ var partnerList = {
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'creator', index: 'creator', width: 80, align: 'center', sortable : true};
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true, hidden: true};
+	        colModelObj = {name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
+	        if ("ROLE_ADMIN" != role) {
+	        	colModelObj["hidden"] = true;
+	        }
 	        colModelArr.push(colModelObj);
-	        colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true, hidden: true};
+	        colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
+	        if ("ROLE_ADMIN" != role) {
+	        	colModelObj["hidden"] = true;
+	        }
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'reviewer', index: 'reviewer', width: 80, align: 'left', formatter: 'select', edittype:'text', formatter:fn.getUserName 
 					  , editoptions: {
@@ -881,6 +1259,10 @@ var partnerList = {
 	        colModelArr.push(colModelObj);
 	        colModelObj = {name: 'fileName', index: 'fileName', width: 70, align: 'left', hidden:true};
 	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'permission', index: 'permission', width: 50, hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50,hidden:true};
+			colModelArr.push(colModelObj);
 	        
 		$('#list').jqGrid({
 			url: '/partner/listAjax',
@@ -894,7 +1276,7 @@ var partnerList = {
 				records:function(obj){return obj.records;}
 			},
 		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description'
-			  	, 'CVE ID', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName'],
+			  	, 'CVE ID', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName', 'permission', 'statusPermission'],
             colModel: colModelArr,
 			onSelectRow: function(id){},
 			rowNum: rowNum,
@@ -912,7 +1294,7 @@ var partnerList = {
 			loadonce: false,
 			height: 'auto',
 			multiselect : true,
-            multiselectWidth: 30,
+            multiselectWidth: 35,
 			onCellSelect: function(rowid,iCol,cellcontent,e) {
 				if (role == "ROLE_ADMIN"){
 					$("#list").jqGrid('saveRow',lastsel);
@@ -921,125 +1303,125 @@ var partnerList = {
 				}
 			},
 			loadComplete: function(data){
-				totalRow = data.records;
-				data = data.rows;
+				if (data != null) {
+					totalRow = data.records;
+					data = data.rows;
 
-				var target = $("#list");
-				var arr = target.jqGrid('getDataIDs');
-				var rowid;
+					var target = $("#list");
+					var arr = target.jqGrid('getDataIDs');
+					var rowid;
 
-				for(var idx in arr) {
-					rowid = arr[idx];
+					for(var idx in arr) {
+						rowid = arr[idx];
 
-					//prjName prjVersion 데이터 join
-					var swNmVer = data[idx].softwareName;
+						//prjName prjVersion 데이터 join
+						var swNmVer = data[idx].softwareName;
 
-					if(data[idx].softwareVersion != ""){
-						swNmVer += " (ver "+data[idx].softwareVersion+")";
+						if(data[idx].softwareVersion != ""){
+							swNmVer += " ("+data[idx].softwareVersion+")";
+						}
+
+						$("#list").jqGrid("setCell",rowid,"softwareName",swNmVer,"");
 					}
 
-					$("#list").jqGrid("setCell",rowid,"softwareName",swNmVer,"");
-				}
-
-				if (totalRow == 0){
-					var startDate = $("#createdDate1").val()||0;
-					var endDate = $("#createdDate2").val()||0;
-					var diffNum = +startDate - +endDate;
-					
-					if(diffNum > 0 && endDate > 0){
-						alertify.alert([[#{msg.common.search.check.date}]], function(){});
+					if (totalRow == 0){
+						var startDate = $("#createdDate1").val()||0;
+						var endDate = $("#createdDate2").val()||0;
+						var diffNum = +startDate - +endDate;
+						
+						if(diffNum > 0 && endDate > 0){
+							alertify.alert([[#{msg.common.search.check.date}]], function(){});
+						}
 					}
-				}
-				for(var i=0; i<data.length; i++){
-					if(data[i].status){
-						if(data[i].status.indexOf("PROG") != -1){
-							$("#list").jqGrid("setCell", data[i].partnerId, "status", 'Progress');
+					for(var i=0; i<data.length; i++){
+						if(data[i].status){
+							if(data[i].status.indexOf("PROG") != -1){
+								$("#list").jqGrid("setCell", data[i].partnerId, "status", 'Progress');
+							}
+							
+							if(data[i].status.indexOf("REV") != -1){
+								$("#list").jqGrid("setCell", data[i].partnerId, "status", 'Review');
+							}
+							
+							if(data[i].status.indexOf("REQ") != -1){
+								$("#list").jqGrid("setCell", data[i].partnerId, "status",'Request');
+							}
+							
+							if(data[i].status.indexOf("CONF") != -1){
+								$("#list").jqGrid("setCell", data[i].partnerId, "status",'Confirm');
+							}							
 						}
-						
-						if(data[i].status.indexOf("REV") != -1){
-							$("#list").jqGrid("setCell", data[i].partnerId, "status", 'Review');
-						}
-						
-						if(data[i].status.indexOf("REQ") != -1){
-							$("#list").jqGrid("setCell", data[i].partnerId, "status",'Request');
-						}
-						
-						if(data[i].status.indexOf("CONF") != -1){
-							$("#list").jqGrid("setCell", data[i].partnerId, "status",'Confirm');
-						}							
 					}
+
+	                /* columns licalization */
+//	                 var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
+//	                 var setUpColumnButton = document.getElementById('setUpColumnButton');
+
+//	                 if (!setUpColumnButton) {
+//	                     var division = 'partner';
+//	                     var totalColInfos = [
+//	                         {'Checkbox' : 'cb'},
+//	                         {'ID' : 'partnerId'},
+//	                         {'3rd Party Name': 'partnerName'},
+//	                         {'Software Name (Version)': 'softwareName'},
+//	                         {'Software Version': 'softwareVersion'},
+//	                         {'Status': 'status'},
+//	                         {'Delivery Form': 'deliveryForm'},
+//	                         {'Description': 'description'},
+//	                         {'CVE ID': 'cveId'},
+//	                         {'Vulnerability': 'cvssScore'},
+//	                         {'Division': 'division'},
+//	                         {'Creator': 'creator'},
+//	                         {'Created Date': 'createdDate'},
+//	                         {'Updated Date': 'modifiedDate'},
+//	                         {'Reviewer': 'reviewer'}];
+//	                     var defaultColNames = ['partnerId', 'partnerName', 'softwareName', 'status']
+//	                     var savedColNames = [];
+
+//	                     var dropdownMenuOptions = {
+//	                         _division: division,
+//	                         _totalColInfos: totalColInfos,
+//	                         _defaultColNames: defaultColNames,
+//	                         _savedColNames: savedColNames
+//	                     };
+
+//	                     var dropdownArea = document.createElement('div');
+//	                     dropdownArea.className = 'dropdown';
+//	                     var newButton = createDropdownButton();
+//	                     var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+
+//	                     dropdownArea.appendChild(newButton);
+//	                     dropdownArea.appendChild(dropdownMenu);
+
+//	                     parentElement.appendChild(dropdownArea);
+
+//	                     document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+//	                         event.stopPropagation();
+//	                         var dropdownMenu = document.getElementById("setUpColumnMenu");
+//	                         dropdownMenu.classList.toggle("show");
+//	                     });
+//	                 }
+
+//	 				if(!gridTooltip.existTooltip){
+//	 					$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_status"))
+//	 						.attr("title", gridTooltip.tooltipCont).tooltip({
+//	 						content: function () {
+//	 							return $(this).prop('title');
+//	 						}
+//	 					});
+//	 					gridTooltip.existTooltip = true;
+//	 				}
+
+					if ($("#list_toppager_left").find('button').length == 0) {
+	               		var appendIcon = "";
+	               		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Partner\" onclick=\"createTabInFrame('New_3rdParty', '/partner/edit')\"><i class=\"fas fa-plus\"></i></button>";
+	                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deletePartner()\"><i class=\"far fa-trash-alt\"></i></button>";
+	                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+	                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
+	                            
+	                  	$("#list_toppager_left").append(appendIcon);
+	            	}
 				}
-
-                /* columns licalization */
-//                 var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
-//                 var setUpColumnButton = document.getElementById('setUpColumnButton');
-
-//                 if (!setUpColumnButton) {
-//                     var division = 'partner';
-//                     var totalColInfos = [
-//                         {'Checkbox' : 'cb'},
-//                         {'ID' : 'partnerId'},
-//                         {'3rd Party Name': 'partnerName'},
-//                         {'Software Name (Version)': 'softwareName'},
-//                         {'Software Version': 'softwareVersion'},
-//                         {'Status': 'status'},
-//                         {'Delivery Form': 'deliveryForm'},
-//                         {'Description': 'description'},
-//                         {'CVE ID': 'cveId'},
-//                         {'Vulnerability': 'cvssScore'},
-//                         {'Division': 'division'},
-//                         {'Creator': 'creator'},
-//                         {'Created Date': 'createdDate'},
-//                         {'Updated Date': 'modifiedDate'},
-//                         {'Reviewer': 'reviewer'}];
-//                     var defaultColNames = ['partnerId', 'partnerName', 'softwareName', 'status']
-//                     var savedColNames = [];
-
-//                     var dropdownMenuOptions = {
-//                         _division: division,
-//                         _totalColInfos: totalColInfos,
-//                         _defaultColNames: defaultColNames,
-//                         _savedColNames: savedColNames
-//                     };
-
-//                     var dropdownArea = document.createElement('div');
-//                     dropdownArea.className = 'dropdown';
-//                     var newButton = createDropdownButton();
-//                     var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
-
-//                     dropdownArea.appendChild(newButton);
-//                     dropdownArea.appendChild(dropdownMenu);
-
-//                     parentElement.appendChild(dropdownArea);
-
-//                     document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
-//                         event.stopPropagation();
-//                         var dropdownMenu = document.getElementById("setUpColumnMenu");
-//                         dropdownMenu.classList.toggle("show");
-//                     });
-//                 }
-
-// 				if(!gridTooltip.existTooltip){
-// 					$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_status"))
-// 						.attr("title", gridTooltip.tooltipCont).tooltip({
-// 						content: function () {
-// 							return $(this).prop('title');
-// 						}
-// 					});
-// 					gridTooltip.existTooltip = true;
-// 				}
-
-				if ($("#list_toppager_left").find('button').length == 0) {
-               		var appendIcon = "";
-                 	if ([[${@CommonFunction.isAdmin()}]]) {
-                   		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Partner\" onclick=\"createTabInFrame('New_3rdParty', '/partner/edit')\"><i class=\"fas fa-plus\"></i></button>";
-                    	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deletePartner()\"><i class=\"far fa-trash-alt\"></i></button>";
-                  	}
-                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
-                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
-                            
-                  	$("#list_toppager_left").append(appendIcon);
-            	}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 //				createTabInFrame(rowid+'_3rdParty', '/partner/edit/'+rowid);

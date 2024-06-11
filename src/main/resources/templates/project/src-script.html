@@ -2,9 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <th:block th:fragment="srcScript">
 <script th:inline="javascript">
-var ossNames = [];
 var objs = [];
-var licenseNames = [];
 var srcData;
 var _srcLoadListLength = 0;
 var _srcUploadFile;
@@ -13,76 +11,111 @@ var src_evt = {
 	csvDelFileSeq : [],
 	csvFileSeq : [],
 	init: function(){
-        $("#loading_wrap").show();
 		src_fn.getSrcGridData();
 		
 		$('#_srcAddList').jqGrid(src_fn.setParamProject3());
 		
 		var srcList = $("#srcList");
 		//Not aplicable
-		var aplicable = $('#applicableSrc').is(':checked');
-		
-		if(aplicable){
+		if ($('#applicableSrc').is(':checked') || "N" == $("input[name='identificationSubStatusSrc']").val()) {
 			$('.srcBtn').hide();
 		}
 		
-		// 그리드 리셋 버튼
-		$("#srcResetUp").click(function(e){
- 			e.preventDefault();
- 			
-			alertify.confirm([[#{msg.common.confirm.reset}]], function (e) {
-				if (e) {
-					$("#srcList").jqGrid('clearGridData');
-					$("#_srcAddList").jqGrid('clearGridData');
-				} else {
-					return false;
-				}
-			});
+		src_fn.csvUploadFile();
+	},
+	srcProjectSelect : function () {
+		$("select[name=srcProjectSelect]").on("change", function() {
+			var value = $(this).val();
+			if ("pNm" == value) {
+				$("input[name=srcPrjSearchText]").removeClass("autoComProjectIdConf");
+				$("input[name=srcPrjSearchText]").removeClass("resetAutoComp");
+				$("input[name=srcPrjSearchText]").addClass("autoComProjectNmConf");
+				
+				callAutoCompleteFnc("autoComProjectNmConf");
+			} else if ("pId" == value) {
+				$("input[name=srcPrjSearchText]").removeClass("autoComProjectNmConf");
+				$("input[name=srcPrjSearchText]").removeClass("resetAutoComp");
+				$("input[name=srcPrjSearchText]").addClass("autoComProjectIdConf");
+				
+				callAutoCompleteFnc("autoComProjectIdConf");
+			} else {
+				$("input[name=srcPrjSearchText]").removeClass("autoComProjectNmConf");
+				$("input[name=srcPrjSearchText]").removeClass("autoComProjectIdConf");
+				$("input[name=srcPrjSearchText]").addClass("resetAutoComp");
+				
+				callAutoCompleteFnc("resetAutoComp");
+			}
 		});
+	} 
+};
+
+// src 그리드 데이터 전역 변수
+var srcMainData;
+var srcValidMsgData;
+var srcDiffMsgData;
+var srcInfoMsgData;
+
+// SRC 함수
+var src_fn = {
+	reset : function () {
+		$("#srcList").jqGrid('clearGridData');
+		$("#_srcAddList").jqGrid('clearGridData');
 		
-		// 그리드 저장 버튼
-		$("#srcSaveUp").click(function(e){
-			if (com_fn.checkStatus()){
-				e.preventDefault();
-				
-				com_fn.exitCell(_mainLastsel, "srcList");
-				
-				alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
-					if (e) {
+		com_fn.exitRow("srcList");
+		// 메인, 서브 그리드 세이브 모드
+		fn_grid_com.totalGridSaveMode('srcList');
+		// 닉네임 체크
+		src_fn.saveMakeData(true);
+	},
+	projectSearch : function () {
+		var searchSelect = $("select[name='srcProjectSelect'] option:selected").val();
+		var searchText = $("input[name='srcPrjSearchText']").val();
+		switch(searchSelect){
+			case "pNm" : $("#srcProjectForm input[name='prjName']").val(searchText);
+				break;
+			case "pVer" : $("#srcProjectForm input[name='prjVersion']").val(searchText);
+				break;
+			case "pId" : $("#srcProjectForm input[name='prjId']").val(searchText);
+				break;
+		}
+		var postData = $('#srcProjectForm').serializeObject();
+		$('#_srcProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
+		$('.srcProject1').show();
+		$('.srcProject2').hide();
+	},
+	save : function () {
+		if (com_fn.checkStatus()){
+			com_fn.exitCell(_mainLastsel, "srcList");
+			
+			var notApplicable = false;
+			var saveMsg = [[#{msg.common.confirm.save}]];
+			var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
+			if ("N" == identificationSubStatusSrc) {
+				notApplicable = true;
+				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
+				_srcLoadListLength = 0;	
+			}
+			
+			alertify.confirm(saveMsg, function (e) {
+				if (e) {
+					if (notApplicable) {
+						src_fn.reset();
+					} else {
 						com_fn.exitRow("srcList");
 						// 메인, 서브 그리드 세이브 모드
 						fn_grid_com.totalGridSaveMode('srcList');
 						// 닉네임 체크
-						src_fn.saveMakeData();
-					} else {
-						return false;
+						src_fn.saveMakeData(false);
 					}
-				});
-			}else {
-				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
-			}
-		});
-		
-		// 프로젝트 조회 버튼
-		$('#srcProjectSearchBtn').click(function(e){
-			e.preventDefault();
-			var searchSelect = $("select[name='srcProjectSelect'] option:selected").val();
-			var searchText = $("input[name='srcPrjSearchText']").val();
-			switch(searchSelect){
-				case "pNm" : $("#srcProjectForm input[name='prjName']").val(searchText);
-					break;
-				case "pVer" : $("#srcProjectForm input[name='prjVersion']").val(searchText);
-					break;
-				case "pId" : $("#srcProjectForm input[name='prjId']").val(searchText);
-					break;
-			}
-			var postData = $('#srcProjectForm').serializeObject();
-			$('#_srcProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
-			$('.srcProject1').show();
-			$('.srcProject2').hide();
-			tableRefreshNew("_srcProjectList1");
-		});
-		
+				} else {
+					return false;
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.project.warn.project.status}]], function(){});
+		}
+	},
+	csvUploadFile : function () {
 		var accept1 = '';
 		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
 		for (var i in fileAccept) {
@@ -192,69 +225,7 @@ var src_evt = {
 				}
 			}
 		});
-		
-		// ossNames auto complete
-		fn_grid_com.griOssNames().success(function(data, status, headers, config){
-			if(data != null && ossNames == ""){
-				data.forEach(function(obj){
-					ossNames.push(obj.ossName);
-				})
-			}
-		});
-		
-		// licenseNames auto complete
-		commonAjax.getLicenseTags().success(function(data, status, headers, config){
-			if(data != null && licenseNames == ""){
-				var tag = "";
-				data.forEach(function(obj){
-					if(obj!=null) {
-						tag ={
-							value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
-							label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
-							type : obj.licenseType,
-							obligation : obj.obligation,
-							obligationChecks : obj.obligationChecks
-						}
-						
-						licenseNames.push(tag);
-					}
-				});
-			}
-		});
-		
-		$("select[name=srcProjectSelect]").on("change", function() {
-			var value = $(this).val();
-			if ("pNm" == value) {
-				$("input[name=srcPrjSearchText]").removeClass("autoComProjectIdConf");
-				$("input[name=srcPrjSearchText]").removeClass("resetAutoComp");
-				$("input[name=srcPrjSearchText]").addClass("autoComProjectNmConf");
-				
-				callAutoCompleteFnc("autoComProjectNmConf");
-			} else if ("pId" == value) {
-				$("input[name=srcPrjSearchText]").removeClass("autoComProjectNmConf");
-				$("input[name=srcPrjSearchText]").removeClass("resetAutoComp");
-				$("input[name=srcPrjSearchText]").addClass("autoComProjectIdConf");
-				
-				callAutoCompleteFnc("autoComProjectIdConf");
-			} else {
-				$("input[name=srcPrjSearchText]").removeClass("autoComProjectNmConf");
-				$("input[name=srcPrjSearchText]").removeClass("autoComProjectIdConf");
-				$("input[name=srcPrjSearchText]").addClass("resetAutoComp");
-				
-				callAutoCompleteFnc("resetAutoComp");
-			}
-		});
-	}
-};
-
-// src 그리드 데이터 전역 변수
-var srcMainData;
-var srcValidMsgData;
-var srcDiffMsgData;
-var srcInfoMsgData;
-
-// SRC 함수
-var src_fn = {
+	},
 	// src 그리드 데이터
 	getSrcGridData : function(param, type){
 		var url = "append".indexOf(type) > -1  
@@ -301,14 +272,23 @@ var src_fn = {
 		});
 	},
 	// 저장 데이터 만들기
-	saveMakeData : function(){
+	saveMakeData : function(resetFlag){
 		cleanErrMsg("srcList");
 		var target = $("#srcList");
 		var prjId = [[${project.prjId}]];
 		var csvFileId = $('#srcCsvFileId').val();
 		var fileData = src_evt.csvDelFileSeq;
-		var fileSeq = src_evt.csvFileSeq;
-		var identificationSubStatusSrc = $("#applicableSrc:checked").val();
+		var csvFiles = $(".csvFileArea").find("input[type=hidden]");
+		var fileSeq = [];
+		for (var i = 0; i < csvFiles.length; i++){
+			var obj = {fileSeq : csvFiles.eq(i).val()};
+			fileSeq.push(obj);
+		}
+		if (fileSeq.length == 0) {
+			$("#srcCsvFileId").val("");
+			csvFileId = "";
+		}
+		var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
 		
 		var mainData = target.jqGrid('getGridParam','data');
 		var srcAddListData = $("#_srcAddList").jqGrid("getRowData");
@@ -316,11 +296,15 @@ var src_fn = {
 		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
 				   , "identificationSubStatusSrc" : identificationSubStatusSrc, "mainData" : JSON.stringify(mainData), "srcAddListData" : JSON.stringify(srcAddListData)};
 		
-		// 닉네임 체크
-		src_fn.nickNameValid(mainData, finalData);
+		if (resetFlag) {
+			src_fn.resetExeSave(finalData);
+		} else {
+			// 닉네임 체크
+			src_fn.nickNameValid(mainData, finalData);
+		}
 	},
 	// 저장
-	exeSave : function(finalData){
+	exeSave : function(finalData, refreshComment){
 		$.ajax({
 			url : '/project/saveSrc',
 			type : 'POST',
@@ -351,11 +335,73 @@ var src_fn = {
 						src_evt.csvDelFileSeq = [];
 						src_evt.csvFileSeq = [];
 						com_fn.saveFlagObject["SRC"] = true;
+						com_fn.changeMode("view", false);
 						alertify.success([[#{msg.common.success}]]);
 
 						curIdenStatus = data.resultData||"";
 						if(curIdenStatus == "PROG"){
 							com_fn.btnCtl(userRole, curIdenStatus);
+						}
+						
+						if (refreshComment) fn_comment.getCommentList(commentsParam);
+					} else {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	resetExeSave : function(finalData) {
+		$.ajax({
+			url : '/project/saveSrc',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				_mainLastsel = -1;
+				
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid}]], 0);
+					if(data.validMsg) {
+						alertify.alert(data.validMsg, function(){});
+					}
+					
+					if(srcValidMsgData) {
+						gridValidMsgNew(srcValidMsgData, "srcList");
+					}
+					
+					if(srcDiffMsgData) {
+						gridDiffMsg(srcDiffMsgData, "srcList");
+					}
+				} else {
+					if("10" == data.resCd) {
+						alertify.success([[#{msg.common.success}]]);
+						src_fn.getSrcGridData();
+						$("#mergeYn").val("N");
+						src_evt.csvDelFileSeq = [];
+						src_evt.csvFileSeq = [];
+						com_fn.saveFlagObject["SRC"] = true;
+						com_fn.changeMode("view", false);
+
+						curIdenStatus = data.resultData||"";
+						if(curIdenStatus == "PROG"){
+							com_fn.btnCtl(userRole, curIdenStatus);
+						}
+						
+						var fileSeqs = new Array();
+						// delete upload file
+						$(".srcCsvFileSeq").each(function(index, item) {
+							var fileObj = {fileSeq : $(item).val()};
+							fileSeqs.push(fileObj);
+						});
+						
+						if (fileSeqs.length > 0) {
+							com_fn.resetDeleteFiles(fileSeqs, 'src', 'csvFileArea');
 						}
 					} else {
 						alertify.error([[#{msg.common.valid2}]], 0);
@@ -383,6 +429,7 @@ var src_fn = {
 			$('#_srcProjectList2').jqGrid(src_fn.setParamProject2());
 			$('#_srcAddList').jqGrid(src_fn.setParamProject3());
 			$('#_srcProjectList2').jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+			src_evt.srcProjectSelect();
 		}
 	},
 	// 프로젝트 검색
@@ -423,8 +470,8 @@ var src_fn = {
 			height: 'auto',
 			mtype: 'GET',
 			loadComplete: function(data){
-				$('.commentDiv').find('p').css('margin','0px 0px');
-				tableRefreshNew("_srcProjectList1");
+				$('#_srcProjectList1').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height": "360px"});
+				adjustMultiPageGridSize();
 			}
 		}
 	},
@@ -469,7 +516,8 @@ var src_fn = {
 					}
 				}
 				
-				tableRefreshNew("_srcProjectList2");
+				$('#_srcProjectList2').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
+				adjustMultiPageGridSize();
 			}
 		}
 	},
@@ -513,9 +561,14 @@ var src_fn = {
                 if (data.rows.length > 0) {
                 	_srcLoadListLength = data.rows.length;
                     $("#_srcAddListContainer").show();
+                    if (typeof $(".srcCsvFileSeq").val() !== "undefined") {
+						$(".existFileSrc").show();
+					} else {
+						$(".existFileSrc").hide();
+					}
+                } else {
+                	$(".existFileSrc").show();
                 }
-                
-                tableRefreshNew("_srcAddList");
 			}
 		}
 	},	
@@ -523,10 +576,10 @@ var src_fn = {
 	makeNickNamePopup : function(obj, finalData) {
 		if(obj.validMsg && obj.validMsg.length != 0) {
 			alertify.alert(obj.validMsg, function (e) {
-				src_fn.exeSave(finalData);
+				src_fn.exeSave(finalData, true);
 			});
 		} else {
-			src_fn.exeSave(finalData);
+			src_fn.exeSave(finalData, false);
 		}
 	},
 	// 닉네임 체크
@@ -612,16 +665,7 @@ var src_fn = {
 		$('.srcProject2').hide();
 		$("#_srcAddListContainer").show();
 	},
-	exportList : function(obj) {
-    	var exportListId = '#' + $(obj).siblings("div").attr("id");
-        if ($(exportListId).css('display')=='none') {
-            $(exportListId).show();
-        }else{
-            $(exportListId).hide();
-        }
-        $(exportListId).menu();
-    },
-    selectDownloadFile : function(target) {
+	selectDownloadFile : function(target) {
     	// download file
         if (target === "report_sub") {
         	src_fn.downloadExcel();
@@ -651,6 +695,8 @@ var src_fn = {
     },
 	// 다운로드 엑셀
 	downloadExcel : function(){
+		loadingIden.show();
+		
 		$.ajax({
 			type: "POST",
 			url: '/exceldownload/getExcelPost',
@@ -659,6 +705,8 @@ var src_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
+				loadingIden.hide();
+				
 				if ("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
@@ -737,7 +785,6 @@ var src_fn = {
 	},
 	// load report data
 	exeLoadReportData : function(finalData){
-        $("#loading_wrap").show();
 		try {
 			$.ajax({
 				url : '/project/getSheetData',
@@ -777,7 +824,7 @@ var src_fn = {
 					}
 				},
 				error: function(data){
-                    $("#loading_wrap").hide();
+					loading.hide();
 					$('.ossUpload').children().remove();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
@@ -883,9 +930,9 @@ var src_fn = {
 		}
     			
     	var btnHtml = 	'<div class="custom-layout" style="text-align: center;">';
-		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px;" class="btn btn-lg-gray" onclick="src_fn.loadToList(\'resetLoad\')">Reset & Load</button>';
-		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-teal-01" onclick="src_fn.loadToList(\'append\')"/>Load & Append</button>';
-		btnHtml 	+=	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-yellow-04" onclick="$(\'.ajs-close\').trigger(\'click\')"/>Cancel</button>';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px;" class="btn btn-dark" onclick="src_fn.loadToList(\'resetLoad\')">Reset & Load</button>';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-dark" onclick="src_fn.loadToList(\'append\')"/>Load & Append</button>';
+		btnHtml 	+=	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-outline-dark" onclick="$(\'.ajs-close\').trigger(\'click\')"/>Cancel</button>';
 		btnHtml 	+=	'</div>';
 		
 		alertify.commentDialog(btnHtml);
@@ -895,7 +942,6 @@ var src_fn = {
 //SRC 그리드
 var src_grid = {
 	load: function(){
-        $("#loading_wrap").show();
 		var currentOssName = "";
 		var ondblClickRowBln = false;
 		var srcList = $("#srcList");
@@ -1210,7 +1256,7 @@ var src_grid = {
 			cellsubmit : 'clientArray',
 			ignoreCase: true,
 			multiselect: true,
-            multiselectWidth: 30,
+            multiselectWidth: 35,
 		    onSortCol: function (index, columnIndex, sortOrder) {
 		    	isSort = true;
 		    },
@@ -1251,8 +1297,38 @@ var src_grid = {
 					// 한번에 처리
 					$("#srcList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
 				}
-
-				tableRefreshNew("srcList");
+				
+				// append button event
+				if ($("#srcList_toppager_left").find('button').length == 0) {
+					var permission = [[${project.statusPermission}]] == 1;
+                	var identificationStatus = [[${project.identificationStatus}]];
+					
+                	var appendBtn = "";
+                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('SRC', 'srcList', "+permission+", '"+identificationStatus+"')\">";
+                	if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                	} else {
+                		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                	}
+            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('SRC', 'srcList', 'main', "+permission+", '"+identificationStatus+"')\">";
+            		if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                	}
+            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('SRC', "+permission+", '"+identificationStatus+"')\">";
+            		if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                	}
+                	appendBtn += "<button type=\"button\" id=\"srcDropTop\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+                	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"srcDropTop\">";
+                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"src_fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"src_fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span></div>";
+                                        
+                    $("#srcList_toppager_left").append(appendBtn);
+                }
 				
 				//sort후 ValidMsgData reload
 				if(isSort){
@@ -1284,31 +1360,36 @@ var src_grid = {
 				}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
-				// 체크 박스 영역 제외
-				cleanErrMsg("srcList", rowid);
-
-				fn_grid_com.setCellEdit(srcList, rowid, srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
-
-				// 서브 그리드 제외
-				ondblClickRowBln = false;
+				var permission = [[${project.statusPermission}]] == 1;
+            	var identificationStatus = [[${project.identificationStatus}]];
 				
- 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
- 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
- 	 			
-				var result = $('#'+rowid+'_licenseName').val().split(",");
+				if (permission && "CONF" != identificationStatus) {
+					// 체크 박스 영역 제외
+					cleanErrMsg("srcList", rowid);
 
-				result.forEach(function(cur,idx){
-					if(cur != ""){
-						var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+					fn_grid_com.setCellEdit(srcList, rowid, srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
 
-						$('#'+rowid+'_licenseNameBtn').append(mult);
-					}
-				});
-				
-				$('#'+rowid+'_licenseName').val("");
-                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name;
-                var nextRow = rowid;
-                $('#'+nextRow+"_"+nextCol).focus();
+					// 서브 그리드 제외
+					ondblClickRowBln = false;
+					
+	 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
+	 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+	 	 			
+					var result = $('#'+rowid+'_licenseName').val().split(",");
+
+					result.forEach(function(cur,idx){
+						if(cur != ""){
+							var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+
+							$('#'+rowid+'_licenseNameBtn').append(mult);
+						}
+					});
+					
+					$('#'+rowid+'_licenseName').val("");
+	                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name;
+	                var nextRow = rowid;
+	                $('#'+nextRow+"_"+nextCol).focus();
+				}
 			},
 			onPaging: function(action) {
 				cleanErrMsg("srcList");
@@ -1330,13 +1411,10 @@ var src_grid = {
 					gridInfoMsg(srcInfoMsgData, "srcList");
 				}
 
-                $("#loading_wrap").hide();
-
-                initCount++;
-                if (initCount === 4) {
-                    $('#loading_wrap_total').hide();
-                }
-                updateGridRowCount('srcList', 'srcPager'); 
+				srcGridCompleteFlag = true;
+				com_fn.checkGridComplete(false);
+				adjustMultiPageGridSize();
+				updateGridRowCount('srcList', 'srcPager');
 			},
 			removeHighLight : true
 		});
@@ -1351,17 +1429,17 @@ var src_grid = {
 			}
 		});
 		
-		srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
-			  , addfunc: function () { 
-				  com_fn.saveFlagObject["SRC"] = false;
-				  fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);
-			  }
-			  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
-			  , cloneToTop:true
-		});
+// 		srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
+// 			  , addfunc: function () { 
+// 				  com_fn.saveFlagObject["SRC"] = false;
+// 				  fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);
+// 			  }
+// 			  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
+// 			  , cloneToTop:true
+// 		});
 		
-		$('#srcList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
-        $('#srcList').closest(".ui-jqgrid-htable").css({"table-layout":"auto"});
+//		$('#srcList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+//      $('#srcList').closest(".ui-jqgrid-htable").css({"table-layout":"auto"});
 	}
 }
 </script>

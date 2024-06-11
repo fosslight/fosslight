@@ -31,13 +31,6 @@
             packaging.init();
             fn.displayProjectInfo();
             
-            $('.btnCommentHistory').on('click', function (e) {
-                e.preventDefault();
-
-                var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]];
-                openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
-            });
-
             // 버튼 컨트롤
             fn.btnCtl(userRole, curIdenStatus);
             $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
@@ -55,24 +48,9 @@
                     {name: 'ossName', index: 'ossName', width: 150, align: 'left', editable: false},
                     {name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable: false},
                     {name: 'downloadLocation', index: 'downloadLocation', width: 70, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, align: 'left', editable: false},
-                    {
-                        name: 'homepage',
-                        index: 'homepage',
-                        width: 70,
-                        align: 'left',
-                        formatter: 'link2',
-                        editable: false
-                    },
+                    {name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: 'link2', editable: false},
                     {name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable: false},
-                    {
-                        name: 'filePath',
-                        index: 'filePath',
-                        width: 250,
-                        align: 'left',
-                        editable: true,
-                        formatter: fn.textBox,
-                        unformat: fn.unformatterTextBox
-                    },
+                    {name: 'filePath', index: 'filePath', width: 250, align: 'left', editable: true, formatter: fn.textBox, unformat: fn.unformatterTextBox},
                     {name: 'verifyFileCount', index: 'verifyFileCount', width: 50, align: 'left', editable: false}
                 ],
                 rowNum: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_MAX')}]],
@@ -85,9 +63,11 @@
                 viewrecords: true,
                 sortorder: 'desc',
                 height: 'auto',
-                caption: '* Open Source List to disclose source code',
+                toppager: true,
                 loadComplete: function () {
-                	if ($("[name='btnSavePath']").is(":visible")) {
+                	var permission = [[${project.statusPermission}]] == 1;
+                	
+                	if (permission && "CONF" != curIdenStatus) {
                 		// load후 filepath editmode로 변경
                         var $this = $(this), ids = $this.jqGrid('getDataIDs'), i, l = ids.length;
 
@@ -95,16 +75,25 @@
                             $this.jqGrid('editRow', ids[i], false); // 	true로 변경하면 엔터키 입력시 saverow되어버림
                         }
                 	}
+                	
+                	if ($("#list_toppager_left").find('button').length == 0) {
+                		var appendHtml = "<dlv class=\"d-flex\">";
+                    	appendHtml += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Export Path\" onclick=\"fn.exportPath()\"><i class=\"fas fa-download\"></i></button>";
+                    	appendHtml += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Upload Path\" onclick=\"fn.uploadPath("+permission+")\">";
+                    	if (!permission || "CONF" == curIdenStatus) {
+                    		appendHtml += "<i class=\"fas fa-upload gridIconDisabled\"></i></button>";
+                    	} else {
+                    		appendHtml += "<i class=\"fas fa-upload\"></i></button>";
+                    	}
+                        appendHtml += "<span class=\"d-flex-align mr-3\" style=\"margin-left: auto;\">* Enter the path info of source code for each OSS and click the Verify button</span></div>";
+                        
+                        $("#list_toppager_left").append(appendHtml);
+                    }
                 }
             });
-
-            $("#list").jqGrid('navGrid', "#pager", {
-                add: false,
-                edit: false,
-                del: false,
-                search: false,
-                refresh: false
-            });
+            
+            $('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height": "500px"});
+            $("#list").jqGrid('navGrid', "#pager", {add: false, edit: false, del: false, search: false, refresh: false});
 
             if (typeof datas.ossList !== "undefined" && datas.ossList != null && datas.ossList.length < 1) {
                 $("[name='btnSavePath']").hide();
@@ -112,13 +101,36 @@
                 
                 if (isAdmin && $("#div_approve")) {
                     $("#div_approve").hide();
-                }
-            }
-
-            if ($(".warningPop").length > 0 && "CONF" != curIdenStatus
-                && (!$('input[name=fileSeq_1]') || $('input[name=fileSeq_1]').val() == "")) {
-                alertify.alert($("body > div.pop.warningPop > div.popdata").html(), function () {
-                });
+                } else if (datas.ossList.length > 1) {
+            		if ($(".warningPop").length > 0 && "CONF" != curIdenStatus
+                            && (!$('input[name=fileSeq_1]') || $('input[name=fileSeq_1]').val() == "")) {
+                        	
+                        	if (!alertify.warningPopDialog) {
+            					alertify.dialog('warningPopDialog', function() {
+            						return {
+            							setup: function() {
+            								var settings = alertify.confirm().settings;
+            								
+            								for (var prop in settings) {
+            									this.settings[prop] = settings[prop];
+            								}
+            								
+            								var setup = alertify.confirm().setup();
+            								return setup;
+            							},
+            						    hooks: {
+            						    	onshow: function() {
+            						        	this.elements.dialog.style.maxWidth = 'none';
+            						          	this.elements.dialog.style.width = '650px';
+            						        }
+            							}
+            						};
+            					}, false, 'confirm');
+                        	}	
+                        	
+                    	alertify.warningPopDialog($(".warningPop").html(), function (){});
+                  	}
+            	}
             }
 
             if (userRole == "ROLE_USER") {
@@ -132,6 +144,7 @@
                     $(".editYn").attr("readonly", true);
                     $(".editYn").css("background-color", "#f3f6f8");
                     $('#editor2').summernote('disable');
+                    appendReadOnlyFlag = true;
                 }
             }
 
@@ -157,6 +170,7 @@
         		if ("Packaging" == tabId && datas.ossList.length < 1) {
     				alertify.alert([[#{msg.project.verification.confirm.package}]], function(){
     					$("#tabMenuNotice").click();
+    					if ('CONF' == curIdenStatus) $("#save").hide();
     				});
     			} else if("Notice" == tabId && isAndroid == "Y") {
     				$("#tabMenuPackaging").click();
@@ -164,8 +178,14 @@
     			}
         		
         		if ("Packaging" == tabId) {
+        			$("#save").hide();
+        			$("#btnSavePath").show();
+        			$("#verify").show();
         			$("#girdAreaPackaging").show();
         		} else {
+        			$("#verify").hide();
+        			$("#btnSavePath").hide();
+        			$("#save").show();
         			$("#girdAreaPackaging").hide();
         		}
         	});
@@ -244,30 +264,30 @@
                 });
 				
                 $('#registFile_1').uploadFile({
-                    url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=1',
+                    url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=1&permission=' + [[${project.statusPermission}]],
                     multiple: false,
                     dragDrop: true,
                     fileName: 'myfile',
                     onSuccess: function (e, data) {
                         var result = jQuery.parseJSON(data);
 
-                        if (result[0] != "UNSUPPORTED_FILE") {
+                        if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
                                 var appendHtml = '<br>' + item[0].createdDate;
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
-                                uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'1\')">X</span>' + appendHtml + '</li>';
+                                uploadFileTag += '<span class="badge bg-danger uploadFile1" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'1\')">X</span>' + appendHtml + '</li>';
 
                                 $('.ajax-file-upload-statusbar').fadeOut('slow');
                                 $('.ajax-file-upload-statusbar').remove();
-
-                                $(".uploadList_1").append(uploadFileTag);
+                                $('.uploadList_1 ul').append(uploadFileTag);
                                 $('input[name=fileSeq_1]').val(item[0].registSeq);
                             });
 
                             $('.verifyFile_1').hide();
                             $("#uploadAdd_1").show();
                             $("#uploadRemove_1").hide();
+                            if (!$('.uploadList_1').is("visible")) $('.uploadList_1').show();
 
                             // verified 초기화
                             verified = false;
@@ -284,21 +304,21 @@
                 });
 
                 $('#registFile_2').uploadFile({
-                    url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=2',
+                    url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=2&permission=' + [[${project.statusPermission}]],
                     multiple: false,
                     dragDrop: true,
                     fileName: 'myfile',
                     onSuccess: function (e, data) {
                         var result = jQuery.parseJSON(data);
 
-                        if (result[0] != "UNSUPPORTED_FILE") {
+                        if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
                             result.forEach(function (item) {
                                 var appendHtml = '<br>' + item[0].createdDate;
                                 var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
                                 var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
-                                uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'2\')">X</span>' + appendHtml + '</li>';
+                                uploadFileTag += '<span class="badge bg-danger uploadFile2" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'2\')">X</span>' + appendHtml + '</li>';
 
-                                $('.uploadList_2').append(uploadFileTag);
+                                $('.uploadList_2 ul').append(uploadFileTag);
                                 $('input[name=fileSeq_2]').val(item[0].registSeq);
                                 $('.ajax-file-upload-statusbar').fadeOut('slow');
                                 $('.ajax-file-upload-statusbar').remove();
@@ -308,46 +328,7 @@
                             $('.verifyFile_2').hide();
                             $("#uploadAdd_2").show();
                             $("#uploadRemove_2").hide();
-
-                            // verified 초기화
-                            verified = false;
-
-                            evt.uploadStatus = true;
-
-                            fn.autoVerify();
-                        } else {
-                            $('.ajax-file-upload-statusbar').fadeOut('slow');
-                            $('.ajax-file-upload-statusbar').remove();
-                            alertify.alert(result[1], function () {
-                            });
-                        }
-                    },
-                });
-
-                $('#registFile_3').uploadFile({
-                    url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=3',
-                    multiple: false,
-                    dragDrop: true,
-                    fileName: 'myfile',
-                    onSuccess: function (e, data) {
-                        var result = jQuery.parseJSON(data);
-                        
-                        if (result[0] != "UNSUPPORTED_FILE") {
-                            result.forEach(function (item) {
-                                var appendHtml = '<br>' + item[0].createdDate;
-                                var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
-                                var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
-                                uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'3\')">X</span>' + appendHtml + '</li>';
-
-                                $('.uploadList_3').append(uploadFileTag);
-                                $('input[name=fileSeq_3]').val(item[0].registSeq);
-                                $('.ajax-file-upload-statusbar').fadeOut('slow');
-                                $('.ajax-file-upload-statusbar').remove();
-                                // $("#fileUplWarnMessage_3").hide();
-                            });
-
-                            $('.verifyFile_3').hide();
-                            $("#uploadRemove_3").hide();
+                            if (!$('.uploadList_2').is("visible")) $('.uploadList_2').show();
 
                             // verified 초기화
                             verified = false;
@@ -363,59 +344,52 @@
                     },
                 });
 
-                //export
-                $("[name='export_path']").click(function () {
-                    var target = $('#list');
-                    var arr = [];
-                    arr = target.jqGrid('getDataIDs');
+                $('#registFile_3').uploadFile({
+                    url: '/project/verification/registFile?prjId=' + datas.verify.data.prjId + '&fileSeq=3&permission=' + [[${project.statusPermission}]],
+                    multiple: false,
+                    dragDrop: true,
+                    fileName: 'myfile',
+                    onSuccess: function (e, data) {
+                        var result = jQuery.parseJSON(data);
+                        
+                        if (result[0] != "UNSUPPORTED_FILE" && result[0] != "NOT_PERMISSION") {
+                            result.forEach(function (item) {
+                                var appendHtml = '<br>' + item[0].createdDate;
+                                var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
+                                var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a><input type="hidden" value="' + item[0].registSeq + '"/>';
+                                uploadFileTag += '<span class="badge bg-danger uploadFile3" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'3\')">X</span>' + appendHtml + '</li>';
 
-                    for (var i in arr) {
-                        target.jqGrid('saveRow', arr[i]);
-                    }
+                                $('.uploadList_3 ul').append(uploadFileTag);
+                                $('input[name=fileSeq_3]').val(item[0].registSeq);
+                                $('.ajax-file-upload-statusbar').fadeOut('slow');
+                                $('.ajax-file-upload-statusbar').remove();
+                                // $("#fileUplWarnMessage_3").hide();
+                            });
 
-                    var data = target.jqGrid('getRowData');
+                            $('.verifyFile_3').hide();
+                            $("#uploadRemove_3").hide();
+                            if (!$('.uploadList_3').is("visible")) $('.uploadList_3').show();
 
-                    for (var i in arr) {
-                        target.jqGrid('editRow', arr[i], true);
-                    }
+                            // verified 초기화
+                            verified = false;
 
-                    $.ajax({
-                        type: "POST",
-                        url: '/exceldownload/getExcelPost',
-                        data: JSON.stringify({"type": "verification", "parameter": JSON.stringify(data)}),
-                        dataType: 'json',
-                        cache: false,
-                        contentType: 'application/json',
-                        success: function (data) {
-                            if ("false" == data.isValid) {
-                                alertify.error([[#{msg.common.valid2}]], 0);
-                            } else {
-                                window.location = '/exceldownload/getFile?id=' + data.validMsg;
-                            }
-                        },
-                        error: function (data) {
-                            alertify.error([[#{msg.common.valid2}]], 0);
+                            evt.uploadStatus = true;
+
+                            fn.autoVerify();
+                        } else {
+                            $('.ajax-file-upload-statusbar').fadeOut('slow');
+                            $('.ajax-file-upload-statusbar').remove();
+                            alertify.alert(result[1], function () {});
                         }
-                    });
+                    },
                 });
-
-                $("[name='upload_path']").click(function () {
-                	if (!$("[name='btnSavePath']").is(":visible")) {
-                		alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.verificationStatus, 'identification')}]], function(){});
-            			
-            			return false;
-                	}
-                	
-                    $("#changePathPop").show();
-                    $("#blind_wrap").show();
-                });
-
+                
                 $("#btnChangePathCancel").click(function () {
                     $("#changePathPop").hide();
                     $("#blind_wrap").hide();
                 });
 
-                //upload Verification File
+              	//upload Verification File
                 var accept = '';
                 var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
                 for (var i in fileAccept) {
@@ -460,100 +434,23 @@
                         }
                     }
                 });
-
-                //oss bom list 가 없으면 export, verify, fileupload 숨김
+                
+              	//oss bom list 가 없으면 export, verify, fileupload 숨김
                 if (typeof datas.ossList !== "undefined" && datas.ossList != null && datas.ossList.length < 1) {
-                    $(".tabMenu a").eq("1").click();
+                	$("#tabMenuNotice").trigger("click");
+                    $("#packageBtn").hide();
+                    if ([[${project.verificationStatus}]] != 'CONF' && [[${project.dropYn}]] != 'Y' && ([[${@CommonFunction.isAdmin()}]] || [[${project.viewOnlyFlag}]] == 'N')) {
+                    	$("#noticeBtn").show();
+                    }
                 }
-
+                
                 //Verify 프로세스
                 $("[name='verify']").on('click', function () {
-                    fn.verify();
-                });
-
-
-                //Verify Save Path
-                $("[name='btnSavePath']").on('click', function () {
-                    gridCleanErrMsg("list"); // 기존 error message 삭제
-                    var target = $('#list');
-                    var arr = [];
-                    arr = target.jqGrid('getDataIDs');
-
-                    for (var i in arr) {
-                        target.jqGrid('saveRow', arr[i]);
-                    }
-
-                    var filePaths = [];
-                    var componentIds = [];
-
-                    // empty check
-                    for (var i in arr) {
-                        var _path = target.jqGrid('getCell', arr[i], 'filePath');
-                        var _componentId = target.jqGrid('getCell', arr[i], 'componentId');
-
-                        filePaths.push(_path);
-                        componentIds.push(_componentId);
-                    }
-
-                    // edit mode 원복
-                    for (var i in arr) {
-                        target.jqGrid('editRow', arr[i], true);
-                    }
-
-                    var fileSeqs = [];
-
-                    if ($('input[name=fileSeq_1]').val() != '') {
-                        fileSeqs.push($('input[name=fileSeq_1]').val());
-                    }
-
-                    if ($('input[name=fileSeq_2]').val() != '') {
-                        fileSeqs.push($('input[name=fileSeq_2]').val());
-                    }
-
-                    if ($('input[name=fileSeq_3]').val() != '') {
-                        fileSeqs.push($('input[name=fileSeq_3]').val());
-                    }
-
-                    var obj = {
-                        prjId: [[${project.prjId}]],
-                        gridFilePaths: filePaths,
-                        gridComponentIds: componentIds,
-                        fileSeqs: fileSeqs,
-                        deleteFlag: $("#deleteFlag").val(),
-                        statusVerifyYn: $("#verifyFlag").val(),
-                        deleteFiles: (deleteFileList.length > 0 ? "Y" : "N")
-                    }
-
-                    $.ajax({
-                        url: '/project/verification/savePath',
-                        type: 'POST',
-                        dataType: 'json',
-                        contentType: 'application/json',
-                        cache: false,
-                        data: JSON.stringify(obj),
-                        timeout: 1000 * 60 * 10,
-                        success: function (json) {
-                            loading.hide();
-
-                            if (json.isValid == 'false') {
-                                alertify.error([[#{msg.common.valid2}]], 0);
-                            } else {
-                                alertify.alert([[#{msg.common.success}]], function () {
-                                    createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/' + [[${project.prjId}]]);
-                                });
-                            }
-                        },
-                        error: function (data) {
-                            loading.hide();
-                            alertify.error([[#{msg.common.valid2}]], 0);
-                        }
-                    });
-                });
-
-                //OSS Notice 등록
-                $("#save").on('click', function () {
-                    hideErrMsg();
-                    fn.saveOrGetNotice('save');
+                	if (com_fn.checkStatus()) {
+                		fn.verify();
+                	} else {
+                		alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+                	}
                 });
 
                 /**
@@ -626,149 +523,161 @@
 
                 // verConfirm 버튼
                 $('#verConfirm').click(function (e) {
-                    e.preventDefault();
+                	if (com_fn.checkStatus()){
+                		e.preventDefault();
 
-                    if (fn.checkVerify()) {
-                        alertify.error([[#{msg.project.required.verify}]]);
+                        if (fn.checkVerify()) {
+                            alertify.error([[#{msg.project.required.verify}]]);
 
-                        return false;
-                    }
-
-                    if ($("#append").prop("checked")) {
- 						$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
- 						$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
-                    }
-
-                    if ("" != $("#confirmEditor").summernote('code')){
-                		$("#noticeForm input[name=userComment]").val($("#confirmEditor").summernote('code'));
-                	}
-            		
-            		$("#editCompanyName").attr("disabled", false);
-                    $("#editOssDistributionSite").attr("disabled", false);
-                    $("#editEmail").attr("disabled", false);
-
-                    $('#noticeForm').ajaxForm({
-                        url: '/project/verification/noticeAjax?confirm=conf',
-                        type: 'POST',
-                        dataType: "text",
-                        cache: false,
-                        success: function (data) {
-                            var result = jQuery.parseJSON(data);
-
-                            if (result.isValid == 'false') {
-                                alertify.error([[#{msg.common.valid2}]], 0);
-                            } else {
-                                reloadTabInframe('/project/list');
-                                loading.hide();
-
-                                var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
-                                fn.defaultNotice(checkedFlag);
-
-                                alertify.alert([[#{msg.common.success}]], function () {
-                                    deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
-                                    activeTabInFrameList("PROJECT");
-                                });
-                            }
-                        },
-                        error: function (data) {
-                            loading.hide();
-                            alertify.error([[#{msg.common.valid2}]], 0);
+                            return false;
                         }
-                    }).submit();
+
+                        if ($("#append").prop("checked")) {
+     						$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+     						$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+                        }
+
+                        $("#editCompanyName").attr("disabled", false);
+                        $("#editOssDistributionSite").attr("disabled", false);
+                        $("#editEmail").attr("disabled", false);
+
+                        $('#noticeForm').ajaxForm({
+                            url: '/project/verification/noticeAjax?confirm=conf',
+                            type: 'POST',
+                            dataType: "text",
+                            cache: false,
+                            success: function (data) {
+                                var result = jQuery.parseJSON(data);
+
+                                if (result.isValid == 'false') {
+                                    alertify.error([[#{msg.common.valid2}]], 0);
+                                } else {
+                                    reloadTabInframe('/project/list');
+                                    loading.hide();
+
+                                    var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+                                    fn.defaultNotice(checkedFlag);
+
+                                    alertify.alert([[#{msg.common.success}]], function () {
+                                        deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
+                                        activeTabInFrameList("PROJECT");
+                                    });
+                                }
+                            },
+                            error: function (data) {
+                                loading.hide();
+                                alertify.error([[#{msg.common.valid2}]], 0);
+                            }
+                        }).submit();
+                	} else {
+                		alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+                	}
                 });
 
                 // verReject 버튼
                 $('#verReject').click(function (e) {
-                    e.preventDefault();
+                	if (com_fn.checkStatus()){
+                		e.preventDefault();
 
-                    if (distributionStatus == "PROC") {
-                        var comment = [[#{msg.project.distribution.loading}]];
+                        if (distributionStatus == "PROC") {
+                            var comment = [[#{msg.project.distribution.loading}]];
 
-                        alertify.error(comment, 0);
+                            alertify.error(comment, 0);
 
-                        return false;
-                    }
+                            return false;
+                        }
 
-                    var innerHtml 	= 'Are you sure you want to reject?';
-                    innerHtml 		+= '<textarea id="editor3"></textarea>';
-                    
-                    if(!alertify.verRejectDialog){
-						alertify.dialog('verRejectDialog', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-									
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-									
-									var setup = alertify.confirm().setup();
-									setup.focus.element = 1;
-									
-									return setup;
-								},
-							    hooks: {
-							    	onshow: function() {
-							        	this.elements.dialog.style.maxWidth = 'none';
-							          	this.elements.dialog.style.width = '650px';
-							        }
-								}
-							};
-						}, false, 'confirm');
+                        var innerHtml 	= 'Are you sure you want to reject?<br>';
+                        innerHtml 		+= '<textarea id="editor3"></textarea>';
+                        
+                        if(!alertify.verRejectDialog){
+    						alertify.dialog('verRejectDialog', function() {
+    							return {
+    								setup: function() {
+    									var settings = alertify.confirm().settings;
+    									
+    									for (var prop in settings) {
+    										this.settings[prop] = settings[prop];
+    									}
+    									
+    									var setup = alertify.confirm().setup();
+    									setup.focus.element = 0;
+    									
+    									return setup;
+    								},
+    							    hooks: {
+    							    	onshow: function() {
+    							        	this.elements.dialog.style.maxWidth = 'none';
+    							          	this.elements.dialog.style.width = '650px';
+    							        }
+    								}
+    							};
+    						}, false, 'confirm');
+                    	}
+                        
+                        alertify.verRejectDialog(innerHtml, function () {
+     						if ("" == $("#editor3").summernote('code')){
+     							alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+    							return false;
+     						} else {
+                            	var data = {
+                                	"prjId": [[${project.prjId}]]
+                                	, "verificationStatus": "PROG"
+                                	, "useCustomNoticeYn": "N"
+                                	, "userComment": $("#editor3").summernote('code')
+                                	, "referenceDiv": "12"
+                                	, "noticeFileFormat": $("#noticeFileFormat").val()
+                            	};
+
+                            	fn.exeProjectStatus(data, "PROG");
+    						}
+                        });
+                        
+                        $("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                	} else {
+                		alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
                 	}
-                    
-                    alertify.verRejectDialog(innerHtml, function () {
- 						if ("" == $("#editor3").summernote('code')){
- 							alertify.alert([[#{msg.project.required.comments}]], function(){});
-
-							return false;
- 						} else {
-                        	var data = {
-                            	"prjId": [[${project.prjId}]]
-                            	, "verificationStatus": "PROG"
-                            	, "useCustomNoticeYn": "N"
-                            	, "userComment": $("#editor3").summernote('code')
-                            	, "referenceDiv": "12"
-                            	, "noticeFileFormat": $("#noticeFileFormat").val()
-                        	};
-
-                        	fn.exeProjectStatus(data, "PROG");
-						}
-                    });
-                    
-                    $("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
                 });
 
                 // verRequest 버튼
                 $('#verRequest').click(function (e) {
-                	e.preventDefault();
+                	if (com_fn.checkStatus()){
+                		e.preventDefault();
 
-                    if (fn.checkVerify()) {
-                        alertify.error([[#{msg.project.required.verify}]]);
+                        if (fn.checkVerify()) {
+                            alertify.error([[#{msg.project.required.verify}]]);
 
-                        return false;
-                    }
+                            return false;
+                        }
 
-                    gStatus = "REQ";
-                    tempHandler = e;
+                        gStatus = "REQ";
+                        tempHandler = e;
 
-                    $("#save").trigger("click");
+                        $("#save").trigger("click");
+                	} else {
+                		alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+                	}
                 });
 
                 // verReviewStart 버튼
                 $('#verReviewStart').click(function (e) {
-                    e.preventDefault();
+                	if (com_fn.checkStatus()) {
+                		e.preventDefault();
 
-                    var data = {
-                        "prjId": [[${project.prjId}]]
-                        , "verificationStatus": "REV"
-                        , "useCustomNoticeYn": $('#useCustomNoticeYn').val()
-                        , "userComment": [[${project.userComment}]]
-                        , "referenceDiv": "12"
-                        , "noticeFileFormat": $("#noticeFileFormat").val()
-                    };
+                        var data = {
+                            "prjId": [[${project.prjId}]]
+                            , "verificationStatus": "REV"
+                            , "useCustomNoticeYn": $('#useCustomNoticeYn').val()
+                            , "userComment": [[${project.userComment}]]
+                            , "referenceDiv": "12"
+                            , "noticeFileFormat": $("#noticeFileFormat").val()
+                        };
 
-                    fn.exeProjectStatus(data, "REV");
+                        fn.exeProjectStatus(data, "REV");
+                	} else {
+                		alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+                	}
                 });
 
                 $('#btnReadme').click(function (e) {
@@ -808,7 +717,7 @@
                 $('#send_1').on('click', function () {
                     var wgetUrl = $("#sendWgetUrl_1").val();
                     var obj = {
-                        prjId: datas.verify.data.prjId,
+                        prjId: [[${project.prjId}]],
                         wgetUrl: wgetUrl
                     };
 
@@ -825,17 +734,24 @@
 
                             if (resultCode == 0) {
                                 result.forEach(function (item) {
+                                	var appendHtml = '<br>' + item[0].createdDate;
                                     var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
+                                    var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a>';
+                                    uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'1\')">X</span>' + appendHtml + '</li>';
 
-                                    $('.uploadList_1 ul').append('<li><span><strong><a href="' + _url + '">' + item[0].originalFilename + '</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'1\')"></span></li>');
+                                    $('.uploadList_1 ul').append(uploadFileTag);
                                     $('input[name=fileSeq_1]').val(item[0].registSeq);
                                     $('.ajax-file-upload-statusbar').fadeOut('slow');
                                     $('.ajax-file-upload-statusbar').remove();
+                                    $("#wgetUrl_1").hide();
                                     // $("#fileUplWarnMessage_1").hide();
                                 });
 
                                 $('.verifyFile_1').hide();
                                 $("#uploadAdd_1").show();
+								$("#sendWgetUrl_1").val("");
+                                
+                                if (!$('.uploadList_1').is("visible")) $('.uploadList_1').show();
                             } else {
                                 alertify.error([[#{msg.common.valid2}]], 0);
                             }
@@ -849,7 +765,7 @@
                 $('#send_2').on('click', function () {
                     var wgetUrl = $("#sendWgetUrl_2").val();
                     var obj = {
-                        prjId: datas.verify.data.prjId,
+                        prjId: [[${project.prjId}]],
                         wgetUrl: wgetUrl
                     };
 
@@ -866,18 +782,25 @@
 
                             if (resultCode == 0) {
                                 result.forEach(function (item) {
+                                	var appendHtml = '<br>' + item[0].createdDate;
                                     var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
-
-                                    $('.uploadList_2 ul').append('<li><span><strong><a href="' + _url + '">' + item[0].originalFilename + '</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'2\')"></span></li>');
+                                    var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a>';
+                                    uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'2\')">X</span>' + appendHtml + '</li>';
+                                	
+                                    $('.uploadList_2 ul').append(uploadFileTag);
                                     $('input[name=fileSeq_2]').val(item[0].registSeq);
                                     $('.ajax-file-upload-statusbar').fadeOut('slow');
                                     $('.ajax-file-upload-statusbar').remove();
+                                    $("#wgetUrl_2").hide();
                                     // $("#fileUplWarnMessage_2").hide();
                                 });
 
                                 $('.verifyFile_2').hide();
                                 $("#uploadAdd_2").show();
                                 $("#uploadRemove_2").hide();
+								$("#sendWgetUrl_2").val("");
+                                
+                                if (!$('.uploadList_2').is("visible")) $('.uploadList_2').show();
                             } else {
                                 alertify.error([[#{msg.common.valid2}]], 0);
                             }
@@ -891,7 +814,7 @@
                 $('#send_3').on('click', function () {
                     var wgetUrl = $("#sendWgetUrl_3").val();
                     var obj = {
-                        prjId: datas.verify.data.prjId,
+                        prjId: [[${project.prjId}]],
                         wgetUrl: wgetUrl
                     };
 
@@ -908,17 +831,24 @@
 
                             if (resultCode == 0) {
                                 result.forEach(function (item) {
+                                	var appendHtml = '<br>' + item[0].createdDate;
                                     var _url = '/download/' + item[0].registSeq + '/' + item[0].fileName;
+                                    var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item[0].originalFilename + '</a>';
+                                    uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'3\')">X</span>' + appendHtml + '</li>';
 
-                                    $('.uploadList_3 ul').append('<li><span><strong><a href="' + _url + '">' + item[0].originalFilename + '</a></strong><input type="button" value="Delete" class="smallDelete" onclick="fn.deleteFile(this,\'' + item[0].registSeq + '\', \'3\')"></span></li>');
+                                    $('.uploadList_3 ul').append(uploadFileTag);
                                     $('input[name=fileSeq_3]').val(item[0].registSeq);
                                     $('.ajax-file-upload-statusbar').fadeOut('slow');
                                     $('.ajax-file-upload-statusbar').remove();
+                                    $("#wgetUrl_3").hide();
                                     // $("#fileUplWarnMessage_3").hide();
                                 });
 
                                 $('.verifyFile_3').hide();
                                 $("#uploadRemove_3").hide();
+                                $("#sendWgetUrl_3").val("");
+                                
+                                if (!$('.uploadList_3').is("visible")) $('.uploadList_3').show();
                             } else {
                                 alertify.error([[#{msg.common.valid2}]], 0);
                             }
@@ -1042,56 +972,6 @@
                 });
                 //// [Pakage Document Download END]
 
-                $("#identificationTab").click(function () {
-                    var prjId = [[${project.prjId}]];
-                    var idx = getTabIndex(prjId + "_Identify");
-
-                    if (idx != "") {
-                        changeTabInFrame(idx);
-                    } else {
-                        createTabInFrame(prjId + '_Identify', '/project/identification/' + prjId + '/5');
-                    }
-                });
-                $("#packagingTab").click(function () {
-                    var prjId = [[${project.prjId}]];
-                    var idx = getTabIndex(prjId + "_Packaging");
-
-                    if (idx != "") {
-                        changeTabInFrame(idx);
-                    } else {
-                        createTabInFrame(prjId + '_Packaging', '/project/verification/' + prjId);
-                    }
-                });
-                $("#distributionTab").click(function () {
-                    var prjId = [[${project.prjId}]];
-                    var idx = getTabIndex(prjId + "_Distribute");
-
-                    if (idx != "") {
-                        changeTabInFrame(idx);
-                    } else {
-                        createTabInFrame(prjId + '_Distribute', '/project/distribution/' + prjId);
-                    }
-                });
-                $("#editTab").click(function () {
-                    var prjId = [[${project.prjId}]];
-                    var idx = getTabIndex(prjId + "_Project");
-
-                    if (idx != "") {
-                        changeTabInFrame(idx);
-                    } else {
-                        createTabInFrame(prjId + '_Project', '/project/edit/' + prjId);
-                    }
-                });
-                $("#securityTab").click(function () {
-                    var prjId = [[${project.prjId}]];
-                    var idx = getTabIndex(prjId + "_Security");
-
-                    if (idx != "") {
-                        changeTabInFrame(idx);
-                    } else {
-                        createTabInFrame(prjId + '_Security', '/project/security/' + prjId);
-                    }
-                });
                 $("#append").click(function (e) {
                     var checked = $(this).prop("checked");
                     $("#editAppendedYn").val(checked ? "Y" : "N");
@@ -1135,8 +1015,11 @@
                 	
                     $(".multiSet > div:eq(1)").prev().show();
                     $(".multiSet > div:eq(1)").show();
+                    $("#registFileDiv_2").attr("style", "display: block;");
                     $("#uploadAdd_1").hide();
                     $("#uploadRemove_2").show();
+                    $("input[name='packageFileType2']").val("1");
+					fn.disabledSelect();
                 });
 
                 $("#uploadAdd_2").click(function (e) {
@@ -1146,63 +1029,263 @@
                 	}
                 	
                     $(".multiSet > div:eq(2)").show();
+                    $("#registFileDiv_3").attr("style", "display: block;");
                     $("#uploadAdd_2").hide();
                     $("#uploadRemove_3").show();
+                    $("input[name='packageFileType3']").val("1");
+					fn.disabledSelect();
                 });
 
                 $("#uploadRemove_1").click(function (e) {
-                    var fileSeq = $('input[name=fileSeq_2]').val();
-
-                    if (fileSeq != "") {
-                        $("#uploadRemove_1").hide();
-                        $("#uploadAdd_1").show();
+                	var fileSeq2 = $('input[name=fileSeq_2]').val();
+                    var fileSeq3 = $('input[name=fileSeq_3]').val();
+                   
+                    if ("" != fileSeq2 && "" != fileSeq3) {
+                    	var fileType2 = $('input[name=packageFileType2]').val();
+                    	var fileType3 = $('input[name=packageFileType3]').val();
+                    	
+                    	$("#uploadRemove_1").hide();
+                        $("#uploadAdd_1").hide();
 
                         var html = $('.uploadList_2 ul li').html();
                         $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
                         $('input[name=fileSeq_1]').val($('input[name=fileSeq_2]').val());
+                        $('input[name=packageFileType1]').val(fileType2);
 
-                        $(".multiSet > div:eq(1)").hide();
                         $('.verifyFile_1').hide();
                         // $("#fileUplWarnMessage_1").hide();
                         $(".uploadList_2 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_1").find("span").removeClass("uploadFile2");
+                        $(".uploadList_1").find("span").addClass("uploadFile1");
+                        $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_2]').val() +"\", \"1\")");
+                        
+                        $("#uploadRemove_2").hide();
+                        $("#uploadAdd_2").hide();
+                        
+                        var html = $('.uploadList_3 ul li').html();
+                        $('.uploadList_2 ul').empty();
+                        $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
+                        $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
+                        $('input[name=packageFileType2]').val(fileType3);
+                        
+                        $('.verifyFile_2').hide();
+                        // $("#fileUplWarnMessage_2").hide();
+                        $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_2").find("span").removeClass("uploadFile3");
+                        $(".uploadList_2").find("span").addClass("uploadFile2");
+                        $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                        
+                        $('input[name=fileSeq_3]').val("");
+                        $('input[name=packageFileType3]').val("");
+                        $(".multiSet > div:eq(2)").hide();
+                    } else {
+                    	if ("" != fileSeq2) {
+                    		var fileType2 = $('input[name=packageFileType2]').val();
+                    		
+                    		$("#uploadRemove_1").hide();
+                            $("#uploadAdd_1").hide();
+
+                            var html = $('.uploadList_2 ul li').html();
+                            $('.uploadList_1 ul').append('<li>' + html.split("'2'").join("'1'") + '</li>');
+                            $('input[name=fileSeq_1]').val($('input[name=fileSeq_2]').val());
+                            $('input[name=packageFileType1]').val(fileType2);
+                            $('input[name=fileSeq_2]').val("");
+                            $('input[name=packageFileType2]').val("");
+                            
+                            $('.verifyFile_1').hide();
+                            // $("#fileUplWarnMessage_1").hide();
+                            $(".uploadList_2 > ul > li > span > .smallDelete").trigger("click");
+                            $(".uploadList_1").find("span").removeClass("uploadFile2");
+                            $(".uploadList_1").find("span").addClass("uploadFile1");
+                            $(".uploadFile1").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_2]').val() +"\", \"1\")");
+                            
+                            $("#uploadRemove_2").hide();
+                            $("#uploadAdd_2").hide();
+                            
+                            $(".multiSet > div:eq(1)").hide();
+                    	}
                     }
                 });
 
                 $("#uploadRemove_2").click(function (e) {
                     var fileSeq = $('input[name=fileSeq_3]').val();
-
-                    if (fileSeq == "") {
+					
+                    if ("" == fileSeq) {
+                    	$('input[name=packageFileType2]').val("");
                         $(".multiSet > div:eq(1)").hide();
                         $("#uploadAdd_1").show();
                     } else {
-                        $("#uploadAdd_2").show();
+                    	$("#uploadRemove_2").hide();
+                        $("#uploadAdd_2").hide();
 
                         var html = $('.uploadList_3 ul li').html();
+                        $('.uploadList_2 ul').empty();
                         $('.uploadList_2 ul').append('<li>' + html.split("'3'").join("'2'") + '</li>');
                         $('input[name=fileSeq_2]').val($('input[name=fileSeq_3]').val());
-                        $(".multiSet > div:eq(2)").hide();
+                        $('input[name=packageFileType2]').val($('input[name=packageFileType3]').val());
+                        
                         $('.verifyFile_2').hide();
                         // $("#fileUplWarnMessage_2").hide();
-
                         $(".uploadList_3 > ul > li > span > .smallDelete").trigger("click");
+                        $(".uploadList_2").find("span").removeClass("uploadFile3");
+                        $(".uploadList_2").find("span").addClass("uploadFile2");
+                        $(".uploadFile2").attr('onclick', "fn.deleteFile(this, \""+ $('input[name=fileSeq_3]').val() +"\", \"2\")");
+                        
+                        $('input[name=fileSeq_3]').val("");
+                        $('input[name=packageFileType3]').val("");
+                        $(".multiSet > div:eq(2)").hide();
                     }
 
                 });
 
                 $("#uploadRemove_3").click(function (e) {
-                    $("#uploadAdd_2").show();
+                	$('input[name=packageFileType3]').val("");
                     $(".multiSet > div:eq(2)").hide();
+                    $("#uploadAdd_2").show();
                 });
+                
+                setTimeout(function() {
+                	fn.disabledSelect();
+                }, 300);
             }
         }
 
         var fn = {
+        		disabledSelect : function() {
+    				if ([[${project.statusPermission}]] != 1 || "CONF" == [[${project.verificationStatus}]]) {
+                    	$("input[name='myfile']").prop("disabled", true);
+                    	$("input[name='myfile']").parent().parent().addClass("custom-select-disabled");
+                    	$("input[name='myfile']").parent().parent().css('pointer-events', 'none');
+                	}
+    			},
+    			save : function () {
+    				if (com_fn.checkStatus()){
+    					hideErrMsg();
+                        fn.saveOrGetNotice('save');
+    				} else {
+    					alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+    				}
+    			},
+    			savePath : function () {
+    				if (com_fn.checkStatus()) {
+    					gridCleanErrMsg("list"); // 기존 error message 삭제
+                        var target = $('#list');
+                        var arr = [];
+                        arr = target.jqGrid('getDataIDs');
+
+                        for (var i in arr) {
+                            target.jqGrid('saveRow', arr[i]);
+                        }
+
+                        var filePaths = [];
+                        var componentIds = [];
+
+                        // empty check
+                        for (var i in arr) {
+                            var _path = target.jqGrid('getCell', arr[i], 'filePath');
+                            var _componentId = target.jqGrid('getCell', arr[i], 'componentId');
+
+                            filePaths.push(_path);
+                            componentIds.push(_componentId);
+                        }
+
+                        // edit mode 원복
+                        for (var i in arr) {
+                            target.jqGrid('editRow', arr[i], true);
+                        }
+
+                        var fileSeqs = [];
+                        var fileTypeSeqs = [];
+
+                        if ($('input[name=fileSeq_1]').val() != '') {
+                            fileSeqs.push($('input[name=fileSeq_1]').val());
+                        }
+
+                        if ($('input[name=fileSeq_2]').val() != '') {
+                            fileSeqs.push($('input[name=fileSeq_2]').val());
+                        }
+
+                        if ($('input[name=fileSeq_3]').val() != '') {
+                            fileSeqs.push($('input[name=fileSeq_3]').val());
+                        }
+                        
+                        if ($('input[name="packageFileType1"]').val() != '') {
+                        	fileTypeSeqs.push($('input[name="packageFileType1"]').val());
+                        }
+                        
+                        if ($('input[name="packageFileType2"]').val() != '') {
+                        	fileTypeSeqs.push($('input[name="packageFileType2"]').val());
+                        }
+                        
+                        if ($('input[name="packageFileType3"]').val() != '') {
+                        	fileTypeSeqs.push($('input[name="packageFileType3"]').val());
+                        }
+                        
+                        var obj = {
+                            prjId: [[${project.prjId}]],
+                            gridFilePaths: filePaths,
+                            gridComponentIds: componentIds,
+                            fileSeqs: fileSeqs,
+                            fileTypeSeqs: fileTypeSeqs,
+                            deleteFlag: $("#deleteFlag").val(),
+                            statusVerifyYn: $("#verifyFlag").val(),
+                            deleteFiles: (deleteFileList.length > 0 ? "Y" : "N")
+                        }
+
+                        $.ajax({
+                            url: '/project/verification/savePath',
+                            type: 'POST',
+                            dataType: 'json',
+                            contentType: 'application/json',
+                            cache: false,
+                            data: JSON.stringify(obj),
+                            timeout: 1000 * 60 * 10,
+                            success: function (json) {
+                                loading.hide();
+
+                                if (json.isValid == 'false') {
+                                    alertify.error([[#{msg.common.valid2}]], 0);
+                                } else {
+                                    alertify.alert([[#{msg.common.success}]], function () {
+                                    	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
+                                        createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/' + [[${project.prjId}]]);
+                                    });
+                                }
+                            },
+                            error: function (data) {
+                                loading.hide();
+                                alertify.error([[#{msg.common.valid2}]], 0);
+                            }
+                        });
+    				} else {
+    					
+    				}
+    			},
+    			getProjectStatus : function () {
+            		$.ajax({
+            			url : "/project/getProjectStatus",
+            			type : 'POST',
+            			data : JSON.stringify({"prjId" : [[${project.prjId}]]}),
+            			dataType : 'json',
+            			cache : false,
+            			async : false,
+            			contentType : 'application/json',
+            			success : function(data){
+            				displayInfo = data;
+            			},
+            			error : function(){
+            				alertify.error([[#{msg.common.valid2}]], 0);
+            			}
+            		});
+            	},
         		displayProjectInfo : function() {
+        			fn.getProjectStatus();
+        			
         			var display = "";
         			
         			var pNm = [[${project.prjName}]];
         			var pVer = [[${project.prjVersion}]];
-        			if ("" != pVer && pVer != null) pNm += " (v" + pVer + ")";
+        			if ("" != pVer && pVer != null) pNm += " (" + pVer + ")";
         			
         			// project name
         			var prjName = "<span class=\"description-percentage text-dark-gray\">";
@@ -1211,32 +1294,31 @@
         			
         			// status
         			var status = "<span class=\"ml-2\"> | </span>";
-        			var projectStatus = [[${project.status}]];
-        			var customStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), project.status)}]];
+        			var projectStatus = displayInfo.projectStatus;
         			
         			switch(projectStatus){
         			case 'REQ':
-        				status += "<span class=\"text-pink text-bold ml-2\">" + customStatus + "</span>";
+        				status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
 
         				break;
         			case 'REV':
-        				status += "<span class=\"text-yellow text-bold ml-2\">" + customStatus + "</span>";
+        				status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
 
         				break;
         			case 'DROP':
-        				status += "<span class=\"text-gray text-bold ml-2\">" + customStatus + "</span>";
+        				status += "<span class=\"text-gray text-bold ml-2\">Drop</span>";
 
         				break;
         			case 'FREV':
-        				status += "<span class=\"text-purple text-bold ml-2\">" + customStatus + "</span>";
+        				status += "<span class=\"text-purple text-bold ml-2\">Final Review</span>";
 
         				break;
         			case 'COMP':
-        				status += "<span class=\"text-dark-blue text-bold ml-2\">" + customStatus + "</span>";
+        				status += "<span class=\"text-dark-blue text-bold ml-2\">Complete</span>";
 
         				break;
         			default:
-        				status += "<span class=\"text-success text-bold ml-2\">" + customStatus + "</span>";
+        				status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
 
         				break;
         			}
@@ -1254,97 +1336,76 @@
         			if ("" != identificationStatus) {
         				if ("DROP" == projectStatus) {
         					if ("CONF" == identificationStatus) {
-        						oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Identification</span>';
+        						oscProgress += '<span class="badge badge-gray size-sm width-6rem px-1 ml-2">Identification</span>';
         					} else {
-        						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Identification</span>';
+        						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Identification</span>';
         					}
         				} else if ("FREV" == projectStatus) {
-        					oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-        					if ("Y" == [[${project.androidFlag}]]) {
-        						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
-        					} else {
-        						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
-        					}
+        					oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         				} else {
-        					var initDiv = "";
-        					if ("Y" == [[${project.androidFlag}]]) {
-        						initDiv = "4";
-        					} else {
-        						initDiv = "5";
-        					}
-        					
         					if ("CONF" == identificationStatus) {
-        						oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-        						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+        						oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         					} else if ("PROG" == projectStatus) {
-        						oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-        						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+        						oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         					} else if ("REQ" == projectStatus) {
-        						oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-        						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+        						oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         					} else if ("REV" == projectStatus) {
-        						oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-        						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+        						oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         					}
         				}
         			} else {
         				if ("DROP" == projectStatus) {
-        					oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem ml-2">Identification</span>';
+        					oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2">Identification</span>';
         				} else {
-        					oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" ";
-        					if ("Y" == [[${project.androidFlag}]]) {
-        						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
-        					} else {
-        						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
-        					}
+        					oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
         				}
         			}
         			
         			if ("CONF" != identificationStatus) {
         				oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
-        				oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+        				oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
         			} else {
         				oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
         				if ("DROP" == projectStatus) {
         					if ("CONF" == verificationStatus) {
-        						oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Packaging</span>';
+        						oscProgress += '<span class="badge badge-gray size-sm width-6rem px-1 ml-2">Packaging</span>';
         					} else {
-        						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+        						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
         					}
         				} else {
         					if ("" == verificationStatus) {
         						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
-        							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+        							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
         						} else if ("" != identificationStatus) {
-        							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\"><i class=\"fas fa-circle circleIcon\"></i> Packaging</span>";
+        							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
         						}
         					} else if ("PROG" == verificationStatus) {
         						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
-        							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+        							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
         						} else {
-        							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\"><i class=\"fas fa-circle circleIcon\"></i> Packaging</span>";
+        							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
         						}
         					} else if ("REV" == verificationStatus) {
-        						oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\"><i class=\"fas fa-circle circleIcon\"></i> Packaging</span>";
+        						oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
         					} else if ("REQ" == verificationStatus) {
-        						oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\"><i class=\"fas fa-circle circleIcon\"></i> Packaging</span>";
+        						oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
         					} else if ("NA" == verificationStatus || "DROP" == verificationStatus) {
-        						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+        						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
         					} else {
         						if ("CONF" == verificationStatus) {
-        							oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\"><i class=\"fas fa-circle circleIcon\"></i> Packaging</span>";
+        							oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
         						} else {
         							if ("NA" == [[${project.distributeTarget}]]) {
-        								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+        								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
         							} else {
         								if ("PROG" == projectStatus) {
-        									oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\"><i class=\"fas fa-circle circleIcon\"></i> Packaging</span>";
+        									oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
         								} else if ("REQ" == projectStatus) {
-        									oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\"><i class=\"fas fa-circle circleIcon\"></i> Packaging</span>";
+        									oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
         								} else if ("REV" == projectStatus) {
-        									oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\"><i class=\"fas fa-circle circleIcon\"></i> Packaging</span>";
+        									oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
         								} else if ("FREV" == projectStatus) {
-        									oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\"><i class=\"fas fa-circle circleIcon\"></i> Packaging</span>";
+        									oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
         								}
         							}
         						}
@@ -1358,37 +1419,37 @@
         			var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
         			var vulnerability = "<span class=\"ml-2\"> | </span>";
         			
-        			var cvssScore = [[${project.cvssScore}]];
-        			var secCode = [[${project.secCode}]];
-        			var secCvssScore = [[${project.secCvssScore}]];
+        			var cvssScore = displayInfo.cvssScore;
+        			var secCode = displayInfo.secCode;
+        			var secCvssScore = displayInfo.secCvssScore;
         			
-        			if (secCvssScore != null && (secCode != null && "Fixed" != secCode)) {
+        			if ("N" != secCvssScore && "Fixed" != secCode) {
         				cvssScore = secCvssScore;
         			}
         			
-        			if (secCode != null) {
+        			if ("N" != secCode) {
         				if ("Fixed" == secCode) {
-        					if (cvssScore != null && cvssScore != 0) {
-        						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '" + suffix + "/project/security/" + [[${project.prjId}]] + "')\">Resolved(" + cvssScore + ")</span>";
+        					if ("N" != cvssScore) {
+        						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Resolved(" + cvssScore + ")</span>";
         					} else {
-        						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '" + suffix + "/project/security/" + [[${project.prjId}]] + "')\">Resolved(N/A)</span>";
+        						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Resolved(N/A)</span>";
         					}
-    					} else {
-    						if (cvssScore >= standardScore) {
-            					vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '" + suffix + "/project/security/" + [[${project.prjId}]] + "')\">Need to resolve(" + cvssScore + ")</span>";
-            				} else {
-            					if (cvssScore != null && cvssScore != 0) {
-            						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '" + suffix + "/project/security/" + [[${project.prjId}]] + "')\">Discovered(" + cvssScore + ")</span>";
-            					} else {
-            						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '" + suffix + "/project/security/" + [[${project.prjId}]] + "')\">Discovered(N/A)</span>";
-            					}
-            				}
-    					}
-        			} else {
-    					if (cvssScore != null && cvssScore != 0) {
-        					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem ml-2\">Discovered("+cvssScore+")</span>";
         				} else {
-        					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem ml-2\">Discovered(N/A)</span>";
+        					if ("0" != cvssScore && "N" != cvssScore) {
+        						if (cvssScore - standardScore >= 0) {
+        							vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Need to resolve(" + cvssScore + ")</span>";
+        						} else {
+        							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Discovered(" + cvssScore + ")</span>";
+        						}
+        					} else {
+        						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>";
+        					}
+        				}
+        			} else {
+        				if ("0" != cvssScore && "N" != cvssScore) {
+        					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered("+cvssScore+")</span>";
+        				} else {
+        					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered(N/A)</span>";
         				}
         			}
         			
@@ -1402,17 +1463,30 @@
         	mvEditTab : function(prjId){
         		createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
         	},
+        	mvIdentification : function() {
+        		if ("Y" == [[${project.androidFlag}]]) {
+    				createTabInFrame([[${project.prjId}]]+"_Identify", "/project/identification/" + [[${project.prjId}]] + "/4");
+    			} else {
+    				createTabInFrame([[${project.prjId}]]+"_Identify", "/project/identification/" + [[${project.prjId}]] + "/5");
+    			}
+        	},
+        	mvVerification : function() {
+        		createTabInFrame([[${project.prjId}]] + "_Packaging", "/project/verification/" + [[${project.prjId}]]);
+        	},
+        	mvSecurity : function() {
+        		createTabInFrame([[${project.prjId}]] + "_Security", "/project/security/" + [[${project.prjId}]]);
+        	},
             deleteFile: function (element, fileSeq, i) {
                 $('input[name=fileSeq_' + i + ']').val('');
 
-                var fileSeq = $("[name='fileSeq_"+i+"']").val();
-//              var fileSeq_2 = $("[name='fileSeq_2']").val();
-//              var fileSeq_3 = $("[name='fileSeq_3']").val();
+                var fileSeq_1 = $("[name='fileSeq_1']").val();
+              	var fileSeq_2 = $("[name='fileSeq_2']").val();
+              	var fileSeq_3 = $("[name='fileSeq_3']").val();
 
                 $('.verifyFile_' + i).show();
                 $("#uploadAdd_" + i).hide();
 				
-                if ("" == fileSeq) {
+                if (!(fileSeq_1 == "" && fileSeq_2 == "" && fileSeq_3 == "")) {
                 	$("#uploadRemove_" + i).show();
                 }
                 
@@ -1427,12 +1501,26 @@
                 // $("#fileUplWarnMessage_" + i).show();
 
                 $(".uploadList_" + i).empty();
-                $("#registFileDiv_" + i).css("display", "flex");
-                $("select[name='selectOption_"+i+"'] option:eq(0)").prop("selected", true);
+                
+                var selectedOption = $("select[name='selectOption_"+i+"']").prop("selected", true).val();
+                if ("1" == selectedOption) {
+                	$("#registFileDiv_" + i).parent().show();
+                    $("#registFileDiv_" + i).css("display", "block");
+                } else if ("2" == selectedOption) {
+                	$("#sendWgetUrl_" + i).parent().parent().show();;
+                	$("#sendWgetUrl_" + i).show();
+                } else {
+                	$("#projectSearch_" + i).show();
+                }
                 
                 deleteFileList.push(i);
             },
             onRegistSuccess: function (json, status) {
+            	$("#noticeFileFormat").prop("disabled", true);
+            	
+            	var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+                fn.defaultNotice(checkedFlag);
+            	
                 if (json.isValid == 'false') {
                     alertify.error([[#{msg.common.valid}]], 0);
                     createValidMsgComplex(json);
@@ -1444,10 +1532,6 @@
                             }
                         }
                     });
-
-                    var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
-
-                    fn.defaultNotice(checkedFlag);
 
                     loading.hide();
                 } else {
@@ -1470,7 +1554,8 @@
                         tempHandler = ""; // temp clear
                     } else {
                         alertify.alert([[#{msg.common.success}]], function () {
-                            createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/1/' + [[${project.prjId}]]);
+                        	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
+							createTabInFrame([[${project.prjId}]] + '_Packaging', "/project/verification/1/" + [[${project.prjId}]]);
                         });
                     }
                 }
@@ -1481,16 +1566,17 @@
 //			206 PROG	Progress
 //			206 REQ		Request
 //			206 REV		Review
-
+				var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+				
                 // 상태에 따른 버튼 컨트롤
                 var btn_div = $(".projdecBtn");
-                var btn_confirm = $(".confirm");
-                var btn_reject = $(".reject");
-                var btn_review = $(".review");
-                var btn_restart = $(".restart");
+                var btn_confirm = $("#verConfirm");
+                var btn_reject = $("#verReject");
+                var btn_review = $("#verRequest");
+                var btn_restart = $("#verReviewStart");
                 var btn_save = $("#save");
-                var btn_verify = $("[name='verify']");
-                var btn_savePath = $("[name='btnSavePath']");
+                var btn_verify = $("#verify");
+                var btn_savePath = $("#btnSavePath");
                 var verFileUploder = $(".packageSelect");
 
                 status = status||"";
@@ -1504,9 +1590,15 @@
                             btn_reject.hide();
                             btn_review.show();
                             btn_restart.hide();
-                            btn_save.show();
-                            btn_verify.show();
-                            btn_savePath.show();
+                            if ("notice" == targetId) {
+                            	btn_save.show();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_verify.show();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_savePath.show();
+                            }
                             verFileUploder.prop("disabled", false);
 
                             break;
@@ -1515,9 +1607,15 @@
                             btn_reject.hide();
                             btn_review.show();
                             btn_restart.hide();
-                            btn_save.show();
-                            btn_verify.show();
-                            btn_savePath.show();
+                            if ("notice" == targetId) {
+                            	btn_save.show();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_verify.show();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_savePath.show();
+                            }
                             verFileUploder.prop("disabled", false);
 
                             break;
@@ -1526,21 +1624,35 @@
                             btn_reject.hide();
                             btn_review.hide();
                             btn_restart.show();
-                            btn_save.show();
-                            btn_verify.show();
-                            btn_savePath.show();
+                            if ("notice" == targetId) {
+                            	btn_save.show();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_verify.show();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_savePath.show();
+                            }
                             verFileUploder.prop("disabled", false);
                             
                             break;
 
                         case "REV":
                             btn_confirm.show();
+                            btn_reject.removeClass("btn-lg-red");
+                            btn_reject.addClass("btn-outline-lg-red");
                             btn_reject.show();
                             btn_review.hide();
                             btn_restart.hide();
-                            btn_save.show();
-                            btn_verify.show();
-                            btn_savePath.show();
+                            if ("notice" == targetId) {
+                            	btn_save.show();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_verify.show();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_savePath.show();
+                            }
                             verFileUploder.prop("disabled", false);
                             
                             break;
@@ -1550,9 +1662,15 @@
                             btn_reject.show();
                             btn_review.hide();
                             btn_restart.hide();
-                            btn_save.hide();
-                            btn_verify.show();
-                            btn_savePath.hide();
+                            if ("notice" == targetId) {
+                            	btn_save.hide();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_verify.show();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_savePath.hide();
+                            }
                             verFileUploder.prop("disabled", true);
 
                             // 고지문구 버튼 비활성
@@ -1578,16 +1696,28 @@
                             btn_confirm.hide();
                             btn_reject.hide();
                             btn_restart.hide();
-                            btn_save.show();
-                            verFileUploder.prop("disabled", false);
+                            if ("notice" == targetId) {
+//                            	btn_save.show();
+                            }
+                            if ([[${project.statusPermission}]] == 1) {
+                            	verFileUploder.prop("disabled", false);
+                            } else {
+                            	verFileUploder.prop("disabled", true);
+                            }
                             break;
                         case "PROG":
                             btn_review.show();
                             btn_confirm.hide();
                             btn_reject.hide();
                             btn_restart.hide();
-                            btn_save.show();
-                            verFileUploder.prop("disabled", false);
+                            if ("notice" == targetId) {
+//                            	btn_save.show();
+                            }
+                            if ([[${project.statusPermission}]] == 1) {
+                            	verFileUploder.prop("disabled", false);
+                            } else {
+                            	verFileUploder.prop("disabled", true);
+                            }
                             break;
 
                         case "REQ":
@@ -1595,16 +1725,21 @@
                             btn_reject.show();
                             btn_review.hide();
                             btn_restart.hide();
-                            btn_save.hide();
+                            if ("notice" == targetId) {
+                            	btn_save.hide();
+                            }
                             verFileUploder.prop("disabled", true);
                             break;
 
                         case "REV":
                             btn_confirm.hide();
+                            btn_reject.removeClass("btn-lg-red");
                             btn_reject.hide();
                             btn_review.hide();
                             btn_restart.hide();
-                            btn_save.hide();
+                            if ("notice" == targetId) {
+                            	btn_save.hide();
+                            }
                             verFileUploder.prop("disabled", true);
                             break;
 
@@ -1613,8 +1748,12 @@
                             btn_reject.show();
                             btn_review.hide();
                             btn_restart.hide();
-                            btn_save.hide();
-                            btn_savePath.hide();
+                            if ("notice" == targetId) {
+                            	btn_save.hide();
+                            }
+                            if ("notice" != targetId) {
+                            	btn_savePath.hide();
+                            }
                             verFileUploder.prop("disabled", true);
                             break;
                     }
@@ -1622,7 +1761,7 @@
             },
             exeProjectStatus: function (data, status) {
                 curIdenStatus = status;
-                $(".commentBtn.open").trigger("click");
+                
                 $.ajax({
                     url: '/project/updateProjectStatus',
                     type: 'POST',
@@ -1635,7 +1774,8 @@
                         reloadTabInframe('/project/list');
 
                         alertify.alert([[#{msg.common.success}]], function () {
-                            createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/' + [[${project.prjId}]]);
+                        	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
+							createTabInFrame([[${project.prjId}]] + '_Packaging', "/project/verification/" + [[${project.prjId}]]);
                         });
                     },
                     error: function (data) {
@@ -1700,16 +1840,32 @@
                 if (result.isValid == 'false') {
                     alertify.error([[#{msg.common.valid2}]], 0);
                 } else {
+                	// prevent clicking the OK button on Enter
+    				let keyCode;
+    				$(document).on('keydown', function (event) {
+    					keyCode = event.keyCode;
+    				});
+                	
                 	var contents = '<textarea cols="80" id="noticeEditPop" name="noticeEditPop" rows="10"></textarea>';
-        			alertify.confirm(contents)
+        			alertify.confirm()
         					.set({'resizable': true, 'startMaximized':true}).resizeTo('650', '480')
         					.set('labels', {ok:'save'})
-        					.set('onok', function(event){ 
-        						fn.saveNoticeEditPop(); 
-        						return false; 
-        					});
-        					
-        			$("#noticeEditPop").summernote({height: 250, minHeight: null, maxHeight: null, lang: "ko-KR"});
+        					.set('onok', function(event){
+        						// prevent clicking the OK button on Enter
+        						if (typeof keyCode !== 'undefined' && keyCode == 13) {
+        							keyCode = undefined;
+        							return false;
+        						}
+        						
+        						fn.saveNoticeEditPop();
+        						return false;
+        					})
+        					.set('onshow', function(event){
+        						$("#noticeEditPop").summernote({height: 700, minHeight: null, maxHeight: null, lang: "ko-KR"});
+        						$("#noticeEditPop").summernote('code', result.resultData);
+        					})
+        					.setContent(contents)
+        					.show();
 					
 					fn.defaultNotice(false);
                 }
@@ -1852,10 +2008,21 @@
                 }
 
                 if ($("#append").prop("checked")) {
- 					$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
- 					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+					$("#editAppendedYn").val("Y");
+                	
+                	if ("" != $("#append").prop("checked")) {
+                		$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+     					$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+                	}
+                } else {
+                	$("#editAppendedYn").val("N");
+                	$("#editor2").summernote("code", '');
+                	$('#noticeForm input[name=appendedTEXT]').val("");
+                	$('#noticeForm input[name=appended]').val("");
                 }
 
+                $("#noticeFileFormat").prop("disabled", false);
+                
                 $('#noticeForm').ajaxForm({
                     url: customUrl,
                     type: 'POST',
@@ -2018,57 +2185,67 @@
             },
 
             // 업로드 화면 컨트롤
-            changeSelectOption: function (target) {
-                var name = $(target).attr("name");
-                var value = $("[name='" + name + "'] option:selected").val()
+            changeSelectOption: function (target, activate) {
+            	var name = $(target).attr("name");
+                var value = $("[name='" + name + "'] option:selected").val();
                 var key = name.split("_")[1];
+            	
+            	if (activate) {
+                    switch (value) {
+                        case "1":
+                            var liCnt = $(".uploadList_1").find('li').length;
+                            if (liCnt == 0) {
+                            	$('#registFileDiv_' + key).parent().show();
+                                $('#registFileDiv_' + key).show();
+                            }
 
-                switch (value) {
-                    case "1":
-                        var liCnt = $(".uploadList_1").find('li').length;
-                        if (liCnt == 0) {
-                            $('#registFileDiv_' + key).show();
-                        }
+                            $('#wgetUrl_' + key).hide();
+                            $('#projectSearch_' + key).hide();
+                            $("input[name='packageFileType"+key+"']").val(value);
+                            
+                            break;
+                        case "2":
+                        	$('#registFileDiv_' + key).parent().hide();
+                            $('#registFileDiv_' + key).hide();
+                            $('#wgetUrl_' + key).show();
+                            $('#projectSearch_' + key).hide();
+                            $("input[name='packageFileType"+key+"']").val(value);
+                            
+                            break;
+                        case "3":
+                        	$('#registFileDiv_' + key).parent().hide();
+                            $('#registFileDiv_' + key).hide();
+                            $('#wgetUrl_' + key).hide();
+                            $('#projectSearch_' + key).show();
+                            $("input[name='packageFileType"+key+"']").val(value);
+                            
+                            switch (key) {
+                                case "1":
+                                    projectList_1.load();
+                                    projectList_1.packagingLoad();
 
-                        $('#wgetUrl_' + key).hide();
-                        $('#projectSearch_' + key).hide();
+                                    break;
+                                case "2":
+                                    projectList_2.load();
+                                    projectList_2.packagingLoad();
 
-                        break;
-                    case "2":
-                        $('#registFileDiv_' + key).hide();
-                        $('#wgetUrl_' + key).show();
-                        $('#projectSearch_' + key).hide();
+                                    break;
+                                case "3":
+                                    projectList_3.load();
+                                    projectList_3.packagingLoad();
 
-                        break;
-                    case "3":
-                        $('#registFileDiv_' + key).hide();
-                        $('#wgetUrl_' + key).hide();
-                        $('#projectSearch_' + key).show();
+                                    break;
+                                default:
+                                    break;
+                            }
 
-                        switch (key) {
-                            case "1":
-                                projectList_1.load();
-                                projectList_1.packagingLoad();
-
-                                break;
-                            case "2":
-                                projectList_2.load();
-                                projectList_2.packagingLoad();
-
-                                break;
-                            case "3":
-                                projectList_3.load();
-                                projectList_3.packagingLoad();
-
-                                break;
-                            default:
-                                break;
-                        }
-
-                        break;
-                    default:
-                        break;
-                }
+                            break;
+                        default:
+                            break;
+                    }
+            	} else {
+            		$("input[name='packageFileType"+key+"']").val(value);
+            	}
             },
 
             downloadNotice: function () {
@@ -2329,13 +2506,15 @@
                 }
             },
             defaultNotice: function (checked, type) {
-                if (checked) {
+            	if (checked) {
                     $("#companyName").attr("disabled", !checked);
                     $("#ossDistributionSite").attr("disabled", !checked);
                     $("#email").attr("disabled", !checked);
                     $("#hideOssVersion").attr("disabled", !checked);
                     $("#append").attr("disabled", !checked);
-
+					$("#noticeFileFormat").attr("disabled", !checked);
+                    $("#fileFormatLabel").attr("style", "color: #212529;");
+					
                     if ($("#companyName").prop("checked")) {
                         $("#editCompanyName").attr("disabled", !checked);
                     } else {
@@ -2363,7 +2542,9 @@
                     $("#email").attr("disabled", !checked);
                     $("#hideOssVersion").attr("disabled", !checked);
                     $("#append").attr("disabled", !checked);
-
+                    $("#noticeFileFormat").attr("disabled", !checked);
+                    $("#fileFormatLabel").attr("style", "color: #6c757d;");
+                    
                     $("#editCompanyName").attr("disabled", !checked);
                     $("#editOssDistributionSite").attr("disabled", !checked);
                     $("#editEmail").attr("disabled", !checked);
@@ -2393,6 +2574,8 @@
 
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     var btn_Save = $("#save");
+                    
+                    var targetId = $("#menu-tab").find(".active").attr("aria-controls");
 
                     if (userRole == "ROLE_ADMIN") { // 관리자 권한 일 경우
                         switch (curIdenStatus) {
@@ -2403,7 +2586,7 @@
 
                                 break;
                             default:
-                                btn_Save.show();
+                              	if ("notice" == targetId) btn_Save.show();
                                 fn.defaultNotice(checked, "init");
 
                                 break;
@@ -2412,7 +2595,7 @@
                         switch (curIdenStatus) {
                             case "":
                             case "PROG":
-                                btn_Save.show();
+                            	if ("notice" == targetId) btn_Save.show();
                                 fn.defaultNotice(checked, "init");
 
                                 break;
@@ -2483,8 +2666,8 @@
                 }
             },
             reuseSearch: function (target) {
-                var reuseKeyword = $(target).prev().val();
-                var targetGrid = $(target).attr("id").split("_")[1];
+            	var targetGrid = $(target).attr("id").split("_")[1];
+                var reuseKeyword = $("#verifyProjectSearch_" + targetGrid).val();
                 var postData = {reuseKeyword: reuseKeyword};
 
                 if ($("#projectList_" + targetGrid).length > 0) {
@@ -2497,12 +2680,17 @@
                 }
             },
             projectPackagingSearch: function (prjId, seq) {
+            	var width = $("#searchResult" + seq).width();
+            	
                 var postData = {prjId: prjId};
                 if ($("#projectList_" + seq).length > 0) {
                     $("#packagingList_" + seq).jqGrid('setGridParam', {
                         postData: postData,
                         url: '/project/verification/reuseProjectPackagingSearch'
                     }).trigger('reloadGrid');
+                    
+                    $("#packagingList_" + seq).jqGrid("setGridWidth", 0, true);
+                    $("#packagingList_" + seq).jqGrid("setGridWidth", width, true);
                 }
             },
             displayComment: function (cellvalue, options, rowObject) {
@@ -2534,9 +2722,9 @@
                     success: function (data) {
                         var item = data.file[0];
 
-                        var appendHtml = '<span style="margin-left:20px;">' + item.createdDate + '</span>';
+                        var appendHtml = '<br>' + item.createdDate;
                         var _url = '/download/' + item.registSeq + '/' + item.fileName;
-                        var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + obj.originalFilename + '</a><input type="hidden" value="' + obj.registSeq + '"/>';
+                        var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="' + _url + '">' + item.originalFilename + '</a><input type="hidden" value="' + item.registSeq + '"/>';
                         uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteFile(this,\'' + item.registSeq + '\', \'' + targetSeq + '\'))">X</span>' + appendHtml + '</li>';
 
                         $('.uploadList_' + targetSeq + ' ul').append(uploadFileTag);
@@ -2545,11 +2733,18 @@
                         $('.ajax-file-upload-statusbar').remove();
                         // $('#fileUplWarnMessage_' + targetSeq).hide();
 
+                        $("#packaging_" + targetSeq).hide();
+                        $("#projectList_" + targetSeq).clearGridData();
+                        
                         $('.verifyFile_' + targetSeq).hide();
                         $("#uploadAdd_" + targetSeq).show();
                         $("#uploadRemove_" + targetSeq).hide();
-
+                        $("#projectSearch_" + targetSeq).hide();
+                        if (!$(".uploadList_" + targetSeq).is("visible")) $(".uploadList_" + targetSeq).show();
+						
+                        verified = false;
                         evt.uploadStatus = true;
+                        fn.autoVerify();
                     },
                     error: function (data) {
                         alertify.error([[#{msg.common.valid2}]], 0);
@@ -2752,6 +2947,55 @@
                         alertify.error([[#{msg.common.valid2}]], 0);
                     }
                 });
+            },
+            closeAlertifyView : function () {
+            	$(".ajs-close").trigger("click");
+    		},
+            exportPath : function () {
+            	var target = $('#list');
+                var arr = [];
+                arr = target.jqGrid('getDataIDs');
+
+                for (var i in arr) {
+                    target.jqGrid('saveRow', arr[i]);
+                }
+
+                var data = target.jqGrid('getRowData');
+
+                for (var i in arr) {
+                    target.jqGrid('editRow', arr[i], true);
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: '/exceldownload/getExcelPost',
+                    data: JSON.stringify({"type": "verification", "parameter": JSON.stringify(data)}),
+                    dataType: 'json',
+                    cache: false,
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if ("false" == data.isValid) {
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        } else {
+                            window.location = '/exceldownload/getFile?id=' + data.validMsg;
+                        }
+                    },
+                    error: function (data) {
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+            },
+            uploadPath : function (permission) {
+            	if (!permission) {
+            		alertify.alert([[#{msg.common.not.permission}]], function(){});
+            		return false;
+            	} else if ("CONF" == curIdenStatus) {
+            		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+            		return false
+            	}
+            	
+            	$("#changePathPop").attr("style", "display: flex");
+            	$("#blind_wrap").show();
             }
         }
 
@@ -2785,10 +3029,47 @@
                 
     			if ("1" == tabDefaultIdx) {
     				$("#tabMenuNotice").click();
+    				$("#girdAreaPackaging").hide();
+    				$("#btnSavePath").hide();
+    				$("#verify").hide();
+    				$("#save").show();
     			} else {
     				$("#tabMenuPackaging").click();
+    				$("#girdAreaPackaging").show();
+    				$("#btnSavePath").show();
+    				$("#verify").show();
+    				$("#save").hide();
     			}
-            }
+            },
+            checkStatus : function(){
+    			var returnFlag = false;
+    			
+    			$.ajax({
+    				url : '/project/getProjectStatus',
+    				type : 'POST',
+    				data : JSON.stringify({"prjId" : [[${project.prjId}]]}),
+    				dataType : 'json',
+    				cache : false,
+    				async : false,
+    				contentType : 'application/json',
+    				success : function(data){
+    					distributeDeployYn = data.distributeDeployYn||"";
+    					distributeDeployTime = data.distributeDeployTime||"";
+    					var status = data.verificationStatus||"";
+    					var identificationStatus = data.identificationStatus||"";
+    					if (status == curIdenStatus && "CONF" == identificationStatus) {
+    						returnFlag = true;
+    					} else {
+    						returnFlag = false;
+    					}
+    				},
+    				error : function(){
+    					alertify.error([[#{msg.common.valid2}]], 0);
+    				}
+    			});
+    			
+    			return returnFlag;
+    		}
         }
 
         var packaging = {
@@ -2818,9 +3099,9 @@
                     $("#uploadAdd_3").show();
                 }
 
-                fn.changeSelectOption($("[name=selectOption_1]"));
-//			fn.changeSelectOption($("[name=selectOption_2]"));
-//			fn.changeSelectOption($("[name=selectOption_3]"));
+                fn.changeSelectOption($("[name=selectOption_1]"), false);
+				fn.changeSelectOption($("[name=selectOption_2]"), false);
+				fn.changeSelectOption($("[name=selectOption_3]"), false);
             }
         }
 
@@ -2848,23 +3129,9 @@
                         {name: 'prjId', index: 'prjId', width: 80, align: 'center', sorttype: 'int'},
                         {name: 'prjName', index: 'prjName', width: 243, align: 'left'},
                         {name: 'prjVersion', index: 'prjVersion', width: 80, align: 'left'},
-                        {
-                            name: 'distributionType',
-                            index: 'distributionType',
-                            width: 130,
-                            align: 'left',
-                            sortable: true
-                        },
+                        {name: 'distributionType', index: 'distributionType', width: 130, align: 'left', sortable: true},
                         {name: 'creator', index: 'creator', width: 100, align: 'left', sortable: true},
-                        {
-                            name: 'createdDate',
-                            index: 'createdDate',
-                            width: 100,
-                            align: 'center',
-                            formatter: 'date',
-                            formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'},
-                            sortable: true
-                        }
+                        {name: 'createdDate', index: 'createdDate', width: 100, align: 'center', formatter: 'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable: true}
                     ],
                     onSelectRow: function (id) {
                         fn.projectPackagingSearch($(this).getCell(id, "prjId"), 1);
@@ -2883,16 +3150,11 @@
                     sortorder: 'desc',
                     height: 'auto',
                     loadComplete: function () {
+                    	adjustPageGridSize();
                     }
                 });
 
-                $("#projectList_1").jqGrid('navGrid', "#pager_1", {
-                    add: false,
-                    edit: false,
-                    del: false,
-                    search: false,
-                    refresh: false
-                });
+                $("#projectList_1").jqGrid('navGrid', "#pager_1", {add: false, edit: false, del: false, search: false, refresh: false});
             },
             packagingLoad: function () {
                 $("#packagingList_1").jqGrid({
@@ -2918,6 +3180,8 @@
                         for (var i in row) {
                             $("#packagingList_1").jqGrid('setCell', +i + 1, 'fileSeq', "<input type=\"button\" value=\"load\" class=\"btnCLight w55\" onclick=\"fn.loadReusePackagingFile('" + data.prjId + "', '" + row[i].fileSeq + "', '1')\">");
                         }
+                        
+                        adjustPageGridSize();
                     }
                 });
             }
@@ -2947,23 +3211,9 @@
                         {name: 'prjId', index: 'prjId', width: 80, align: 'center', sorttype: 'int'},
                         {name: 'prjName', index: 'prjName', width: 243, align: 'left'},
                         {name: 'prjVersion', index: 'prjVersion', width: 80, align: 'left'},
-                        {
-                            name: 'distributionType',
-                            index: 'distributionType',
-                            width: 130,
-                            align: 'left',
-                            sortable: true
-                        },
+                        {name: 'distributionType', index: 'distributionType', width: 130, align: 'left', sortable: true},
                         {name: 'creator', index: 'creator', width: 100, align: 'left', sortable: true},
-                        {
-                            name: 'createdDate',
-                            index: 'createdDate',
-                            width: 100,
-                            align: 'center',
-                            formatter: 'date',
-                            formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'},
-                            sortable: true
-                        }
+                        {name: 'createdDate', index: 'createdDate', width: 100, align: 'center', formatter: 'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable: true}
                     ],
                     onSelectRow: function (id) {
                         fn.projectPackagingSearch($(this).getCell(id, "prjId"), 2);
@@ -2981,16 +3231,11 @@
                     sortorder: 'desc',
                     height: 'auto',
                     loadComplete: function () {
+                    	adjustPageGridSize();
                     }
                 });
 
-                $("#projectList_2").jqGrid('navGrid', "#pager_2", {
-                    add: false,
-                    edit: false,
-                    del: false,
-                    search: false,
-                    refresh: false
-                });
+                $("#projectList_2").jqGrid('navGrid', "#pager_2", {add: false, edit: false, del: false, search: false, refresh: false});
             },
             packagingLoad: function () {
                 $("#packagingList_2").jqGrid({
@@ -3016,6 +3261,8 @@
                         for (var i in row) {
                             $("#packagingList_2").jqGrid('setCell', +i + 1, 'fileSeq', "<input type=\"button\" value=\"load\" class=\"btnCLight w55\" onclick=\"fn.loadReusePackagingFile('" + data.prjId + "', '" + row[i].fileSeq + "', '2')\">");
                         }
+                        
+                        adjustPageGridSize();
                     }
                 });
             }
@@ -3045,23 +3292,9 @@
                         {name: 'prjId', index: 'prjId', width: 80, align: 'center', sorttype: 'int'},
                         {name: 'prjName', index: 'prjName', width: 243, align: 'left'},
                         {name: 'prjVersion', index: 'prjVersion', width: 80, align: 'left'},
-                        {
-                            name: 'distributionType',
-                            index: 'distributionType',
-                            width: 130,
-                            align: 'left',
-                            sortable: true
-                        },
+                        {name: 'distributionType', index: 'distributionType', width: 130, align: 'left', sortable: true},
                         {name: 'creator', index: 'creator', width: 100, align: 'left', sortable: true},
-                        {
-                            name: 'createdDate',
-                            index: 'createdDate',
-                            width: 100,
-                            align: 'center',
-                            formatter: 'date',
-                            formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'},
-                            sortable: true
-                        }
+                        {name: 'createdDate', index: 'createdDate', width: 100, align: 'center', formatter: 'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable: true}
                     ],
                     onSelectRow: function (id) {
                         fn.projectPackagingSearch($(this).getCell(id, "prjId"), 3);
@@ -3079,16 +3312,11 @@
                     sortorder: 'desc',
                     height: 'auto',
                     loadComplete: function () {
+                    	adjustPageGridSize();
                     }
                 });
 
-                $("#projectList_3").jqGrid('navGrid', "#pager_3", {
-                    add: false,
-                    edit: false,
-                    del: false,
-                    search: false,
-                    refresh: false
-                });
+                $("#projectList_3").jqGrid('navGrid', "#pager_3", {add: false, edit: false, del: false, search: false, refresh: false});
             },
             packagingLoad: function () {
                 $("#packagingList_3").jqGrid({
@@ -3114,6 +3342,8 @@
                         for (var i in row) {
                             $("#packagingList_3").jqGrid('setCell', +i + 1, 'fileSeq', "<input type=\"button\" value=\"load\" class=\"btnCLight w55\" onclick=\"fn.loadReusePackagingFile('" + data.prjId + "', '" + row[i].fileSeq + "', '3')\">");
                         }
+                        
+                        adjustPageGridSize();
                     }
                 });
             }
@@ -3240,21 +3470,31 @@
             			
             			fn_comment.getCommentList(commentsParam);
             			$(".comment-area").show();
-            			
-            			tableRefreshNew("refresh");
             		} else {
              			$(".contents-area").removeClass("col-lg-9");
              			$(".contents-area").addClass("col-lg-12");
              			$(".comment-area").hide();
-            			
-             			tableRefreshNew("refresh");
             		}
             	},
             	showCommentHistory : function () {
+            		fn_comment.activateCommentArea();
+            		
             		var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]];
                     openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
             	}
             }
+        
+        $(document).keydown(function (e) {
+          	if (e.keyCode == 13) {
+           		var activeInput = $('.form-control:focus');
+				if (activeInput.length > 0) {
+			    	var submitButton = activeInput.closest('.input-group').find('[type="button"]');
+			    	if (submitButton.length > 0) {
+			        	submitButton.click();
+			    	}
+				}
+          	}
+      	});
         //]]>
     </script>
 </th:block>

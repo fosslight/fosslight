@@ -2,9 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <th:block th:fragment="depScript">
 <script th:inline="javascript">
-var ossNames = [];
 var objs = [];
-var licenseNames = [];
 var depData;
 var _depLoadListLength = 0;
 var _depUploadFile;
@@ -14,224 +12,45 @@ var dep_evt = {
 	csvDelFileSeq : [],
 	csvFileSeq : [],
 	init: function(){
-        $("#loading_wrap").show();
 		dep_fn.getDepGridData();
 		
-		$('#_depAddList').jqGrid(dep_fn.setParamProject3());
+		if ("N" != $("input[name='identificationSubStatusDep']").val()) {
+			$('#_depAddList').jqGrid(dep_fn.setParamProject3());
+		}
 		
 		var depList = $("#depList");
-		//Not aplicable
-		var aplicable = $('#applicableDep').is(':checked');
 		
-		if (aplicable) {
+		//Not aplicable
+		if ($('#applicableDep').is(':checked') || "N" == $("input[name='identificationSubStatusDep']").val()) {
 			$('.depBtn').hide();
 		}
 
-		// 그리드 리셋 버튼
-		$("#depResetUp").click(function(e){
-			e.preventDefault();
-	 		
-			alertify.confirm([[#{msg.common.confirm.reset}]], function (e) {
-				if (e) {
-					$("#depList").jqGrid('clearGridData');
-					$("#_depAddList").jqGrid('clearGridData');
-				} else {
-					return false;
-				}
-			});
-		});
-		
-		// 그리드 저장 버튼
-		$("#depSaveUp").click(function(e){
-			if (com_fn.checkStatus()){
-				e.preventDefault();
-				
-				com_fn.exitCell(_mainLastsel, "depList");
-				
-				alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
-					if (e) {
-						com_fn.exitRow("depList");						
-						// 메인, 서브 그리드 세이브 모드
-						fn_grid_com.totalGridSaveMode('depList');
-						// 닉네임 체크
-						dep_fn.saveMakeData();
-					} else {
-						return false;
-					}
-				});
-			}else {
-				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
-			}
-		});
-		
-		// 프로젝트 조회 버튼
-		$('#depProjectSearchBtn').click(function(e){
-			e.preventDefault();
-			var searchSelect = $("select[name='depProjectSelect'] option:selected").val();
-			var searchText = $("input[name='depPrjSearchText']").val();
-			switch(searchSelect){
-				case "pNm" : $("#depProjectForm input[name='prjName']").val(searchText);
-					break;
-				case "pVer" : $("#depProjectForm input[name='prjVersion']").val(searchText);
-					break;
-				case "pId" : $("#depProjectForm input[name='prjId']").val(searchText);
-					break;
-			}
-			var postData = $('#depProjectForm').serializeObject();
+		dep_fn.csvUploadFile();
+	}
+};
 
-			$('#_depProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
-			$('.depProject1').show();
-			$('.depProject2').hide();
-		});
-		
-		var accept1 = '';
-		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
-		for (var i in fileAccept) {
-			if ('12' == fileAccept[i].cdDtlNo) {
-				accept1 = fileAccept[i].cdDtlExp;
-			}
+// dep 그리드 데이터 전역 변수
+var depMainData;
+var depValidMsgData;
+var depDiffMsgData;
+
+// dep 함수
+var dep_fn = {
+	reset : function () {
+		if (com_fn.checkStatus()){
+			$("#depList").jqGrid('clearGridData');
+			$("#_depAddList").jqGrid('clearGridData');
+			
+			com_fn.exitRow("depList");
+			// 메인, 서브 그리드 세이브 모드
+			fn_grid_com.totalGridSaveMode('depList');
+			// 닉네임 체크
+			dep_fn.saveMakeData(true);
+		} else {
+			alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 		}
-		
-		//파일업로드
-		$('#depCsvFile').uploadFile({
-			url:'/project/csvFile',
-			multiple:false,
-			dragDrop:true,
-			fileName:'myfile',
-			allowedTypes:accept1,
-			sequential:true,
-			sequentialCount:1,
-			dynamicFormData: function(){
-				var data ={ "registFileId" :$('#depCsvFileId').val(), "tabNm" : "DEP"}
-				return data;
-			},
-			onSuccess:function(files,data,xhr,pd) {
-				var result = jQuery.parseJSON(data);
-				
-				if(result[1] == null) {
-					if(result[0] == "TAB_GUBN_ERROR") {
-						alertify.error([[#{msg.common.upload.failed.separator}]], 0);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-					}else{
-						alertify.error([[#{msg.common.valid}]], 0);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-					} 
-				} else {
-					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
-						alertify.alert(result[1], function(){
-							$('.ajax-file-upload-statusbar').fadeOut('slow');
-							$('.ajax-file-upload-statusbar').remove();
-						});
-					} else if(result[2] == "CSV_FILE") {
-						dep_fn.getCsvData(result[0][0].registSeq);
-
-						$('#depCsvFileId').val(result[0][0].registFileId);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-
-						dep_fn.makeFileTag(result[0][0]);
-					} else if(result[2] == "EXCEL_FILE") {
-						if (result[1].length != 0) {
-							for (var i = 0; i < result[1].length; i++) {
-								var num = i+1;
-								var checkedTxt = "";
-								
-								var sheetName = result[1][i].name.toUpperCase().trim();
-								if(sheetName.startsWith("DEP") || sheetName.indexOf("DEPENDENCY") > -1){
-									checkedTxt = "checked";
-								}
-								
-								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
-												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
-								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
-								$("#sheetBody").append(sheetTr);
-							}
-							
-							$('#sheetApply').attr('onclick', 'dep_fn.getSheetData('+result[0][0].registSeq+')');
-						}
-						
-						if (typeof alertify.selectSheet === "undefined") {
-							alertify.dialog('selectSheet', function() {
-								return {
-									setup: function() {
-										var settings = alertify.confirm().settings;
-										
-										for (var prop in settings) {
-											this.settings[prop] = settings[prop];
-										}
-										
-										var setup = alertify.confirm().setup();
-										setup.buttons = [];
-										setup.focus.element = 1;
-										
-										return setup;
-									},
-								    hooks: {
-								    	onshow: function() {
-								        	this.elements.dialog.style.maxWidth = 'none';
-								          	this.elements.dialog.style.width = '365px';
-								        }
-									}
-								};
-							}, false, 'alert');
-	                	}
-						
-						alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
-						$("#sheetBody").empty();
-						
-						$('#depCsvFileId').val(result[0][0].registFileId);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-						
-						_depUploadFile = result[0][0];
-					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
-						dep_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
-
-						$('#depCsvFileId').val(result[0][0].registFileId);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-
-						dep_fn.makeFileTag(result[0][0]);
-					} else {
-						alertify.error([[#{msg.common.valid}]], 0);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-					}
-				}
-			}
-		});
-		
-		// ossNames auto complete
-		fn_grid_com.griOssNames().success(function(data, status, headers, config){
-			if(data != null && ossNames == ""){
-				data.forEach(function(obj){
-					ossNames.push(obj.ossName);
-				})
-			}
-		});
-		
-		// licenseNames auto complete
-		commonAjax.getLicenseTags().success(function(data, status, headers, config){
-			if(data != null && licenseNames == ""){
-				var tag = "";
-				data.forEach(function(obj){
-					if(obj!=null) {
-						tag ={
-							value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
-							label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
-							type : obj.licenseType,
-							obligation : obj.obligation,
-							obligationChecks : obj.obligationChecks
-						}
-						
-						licenseNames.push(tag);
-					}
-				});
-			}
-		});
-		
+	},
+	depProjectSelect : function () {
 		$("select[name=depProjectSelect]").on("change", function() {
 			var value = $(this).val();
 			if ("pNm" == value) {
@@ -254,16 +73,56 @@ var dep_evt = {
 				callAutoCompleteFnc("resetAutoComp");
 			}
 		});
-	}
-};
+	},
+	projectSearch : function () {
+		var searchSelect = $("select[name='depProjectSelect'] option:selected").val();
+		var searchText = $("input[name='depPrjSearchText']").val();
+		switch(searchSelect){
+			case "pNm" : $("#depProjectForm input[name='prjName']").val(searchText);
+				break;
+			case "pVer" : $("#depProjectForm input[name='prjVersion']").val(searchText);
+				break;
+			case "pId" : $("#depProjectForm input[name='prjId']").val(searchText);
+				break;
+		}
+		var postData = $('#depProjectForm').serializeObject();
 
-// dep 그리드 데이터 전역 변수
-var depMainData;
-var depValidMsgData;
-var depDiffMsgData;
-
-// dep 함수
-var dep_fn = {
+		$('#_depProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
+		$('.depProject1').show();
+		$('.depProject2').hide();
+	},
+	save : function () {
+		if (com_fn.checkStatus()){
+			com_fn.exitCell(_mainLastsel, "depList");
+			
+			var notApplicable = false;
+			var saveMsg = [[#{msg.common.confirm.save}]];
+			var identificationSubStatusDep = $("input[name='identificationSubStatusDep']").val();
+			if ("N" == identificationSubStatusDep) {
+				notApplicable = true;
+				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
+				_depLoadListLength = 0;	
+			}
+			
+			alertify.confirm(saveMsg, function (e) {
+				if (e) {
+					if (notApplicable) {
+						dep_fn.reset();
+					} else {
+						com_fn.exitRow("depList");						
+						// 메인, 서브 그리드 세이브 모드
+						fn_grid_com.totalGridSaveMode('depList');
+						// 닉네임 체크
+						dep_fn.saveMakeData(false);
+					}
+				} else {
+					return false;
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.project.warn.project.status}]], function(){});
+		}
+	},
 	// dep 그리드 데이터
 	getDepGridData : function(param, type){
 		var url = "append".indexOf(type) > -1  
@@ -298,6 +157,9 @@ var dep_fn = {
 				$("#depList").jqGrid('GridUnload');
 				dep_grid.load();
 
+				// totla record 표시
+				$("#depList_toppager_right, #depPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+depMainData.length+'</div>');
+				
 				fn_grid_com.addEtcKeyDownEvent($('#depList'), depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
 			},
 			error : function(){
@@ -306,7 +168,7 @@ var dep_fn = {
 		});
 	},
 	// 저장 데이터 만들기
-	saveMakeData : function(){
+	saveMakeData : function(resetFlag){
 		cleanErrMsg("depList");
 		var target = $("#depList");
 		var prjId = [[${project.prjId}]];
@@ -322,14 +184,18 @@ var dep_fn = {
 			$("#depCsvFileId").val("");
 			csvFileId = "";
 		}
-		var identificationSubStatusDep = $("#applicableDep:checked").val();
+		var identificationSubStatusDep = $("input[name='identificationSubStatusDep']").val();
 		var mainData = target.jqGrid('getGridParam','data');
 		var depAddListData = $("#_depAddList").jqGrid("getRowData");
 		// 최종 데이터
 		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
 				   , "identificationSubStatusDep" : identificationSubStatusDep, "mainData" : JSON.stringify(mainData), "depAddListData" : JSON.stringify(depAddListData)};
 		
-		dep_fn.exeSave(finalData);
+		if (resetFlag) {
+			dep_fn.resetExeSave(finalData);
+		} else {
+			dep_fn.exeSave(finalData);
+		}
 	},
 	// 저장
 	exeSave : function(finalData){
@@ -369,6 +235,68 @@ var dep_fn = {
 						if(curIdenStatus == "PROG"){
 							com_fn.btnCtl(userRole, curIdenStatus);
 						}
+						
+						com_fn.changeMode("view", false);
+					} else {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	resetExeSave : function(finalData){
+		$.ajax({
+			url : '/project/saveDep',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				_mainLastsel = -1;
+				loading.hide();
+				
+				if ("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid}]], 0);
+					if(data.validMsg) {
+						alertify.alert(data.validMsg, function(){});
+					}
+					
+					if(depValidMsgData) {
+						gridValidMsgNew(depValidMsgData, "depList");
+					}
+					
+					if(depDiffMsgData) {
+						gridDiffMsg(depDiffMsgData, "depList");
+					}
+				} else {
+					if("10" == data.resCd) {
+						curIdenStatus = data.resultData||"";
+						if(curIdenStatus == "PROG"){
+							com_fn.btnCtl(userRole, curIdenStatus);
+						}
+						
+						dep_fn.getDepGridData();
+						$("#mergeYn").val("N");
+						dep_evt.csvDelFileSeq = [];
+						dep_evt.csvFileSeq = [];
+						com_fn.saveFlagObject["DEP"] = true;
+						
+						var fileSeqs = new Array();
+						// delete upload file
+						$(".depCsvFileSeq").each(function(index, item) {
+							var fileObj = {fileSeq : $(item).val()};
+							fileSeqs.push(fileObj);
+						});
+						
+						if (fileSeqs.length > 0) {
+							com_fn.resetDeleteFiles(fileSeqs, 'dep', 'depCsvFileArea');
+						}
+						
+						com_fn.changeMode("view", false);
 					} else {
 						alertify.error([[#{msg.common.valid2}]], 0);
 					}
@@ -395,6 +323,7 @@ var dep_fn = {
 			$('#_depProjectList2').jqGrid(dep_fn.setParamProject2());
 			$('#_depAddList').jqGrid(dep_fn.setParamProject3());
 			$('#_depProjectList2').jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+			dep_fn.depProjectSelect();
 		}
 	},
 	// 프로젝트 검색
@@ -436,7 +365,9 @@ var dep_fn = {
 			mtype: 'GET',
 			loadComplete: function(data){
 				$('.commentDiv').find('p').css('margin','0px 0px');
-				tableRefreshNew("_depProjectList1");
+			},
+			gridComplete: function() {
+				$('#_depProjectList1').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
 			}
 		}
 	},
@@ -481,7 +412,7 @@ var dep_fn = {
 					}
 				}
 				
-				tableRefreshNew("_depProjectList2");
+				$('#_depProjectList1').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
 			}
 		}
 	},
@@ -501,7 +432,7 @@ var dep_fn = {
 			colNames: ['prjId', 'ID','project Name', 'project Version', 'Component Count', 'referenceDiv'],
 			colModel: [
 				{name: 'prjId', index: 'prjId', width: 110, align: 'center', formatter: function(){
-					return '${project.prjId}';
+					return [[${project.prjId}]];
 				}, hidden:true},
 				{name: 'referenceId', index: 'referenceId', width: 68, align: 'center', key:true},
 				{name: 'prjName', index: 'prjName', width: 390, align: 'left'},
@@ -525,9 +456,14 @@ var dep_fn = {
                 if (data.rows.length > 0) {
                 	_depLoadListLength = data.rows.length
                     $("#_depAddListContainer").show();
+                	if (typeof $(".depCsvFileSeq").val() !== "undefined") {
+						$(".existFileDep").show();
+					} else {
+						$(".existFileDep").hide();
+					}
+                } else {
+                	$(".existFileDep").show();
                 }
-                
-                tableRefreshNew("_depAddList");
 			}
 		}
 	},	
@@ -594,16 +530,7 @@ var dep_fn = {
 		$('.depProject2').hide();
 		$("#_depAddListContainer").show();
 	},
-	exportList : function(obj) {
-    	var exportListId = '#' + $(obj).siblings("div").attr("id");
-        if ($(exportListId).css('display')=='none') {
-            $(exportListId).show();
-        }else{
-            $(exportListId).hide();
-        }
-        $(exportListId).menu();
-    },
-    selectDownloadFile : function(target) {
+	selectDownloadFile : function(target) {
     	// download file
         if (target === "report_sub") {
         	dep_fn.downloadExcel();
@@ -621,8 +548,6 @@ var dep_fn = {
         		dep_fn.selectDownloadFileValidation();
         	}
         }
-        // hide list
-        $("#depExportList").hide();
     },
     selectDownloadFileValidation : function() {
     	if (com_fn.checkSelectDownloadFile('DEP')) {
@@ -633,6 +558,8 @@ var dep_fn = {
     },
 	// 다운로드 엑셀
 	downloadExcel : function(){
+		loadingIden.show();
+		
 		$.ajax({
 			type: "POST",
 			url: '/exceldownload/getExcelPost',
@@ -641,6 +568,8 @@ var dep_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
+				loadingIden.hide();
+				
 				if("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
@@ -756,7 +685,7 @@ var dep_fn = {
 					}
 				},
 				error: function(data){
-                    $("#loading_wrap").hide();
+					loading.hide();
                     $('.ossUpload').children().remove();
 					alertify.error([[#{msg.common.valid}]], 0);
 				}
@@ -860,9 +789,9 @@ var dep_fn = {
 		}
     			
 		var btnHtml = 	'<div class="custom-layout" style="text-align: center;">';
-		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px;" class="btn btn-lg-gray" onclick="dep_fn.loadToList(\'resetLoad\')">Reset & Load</button>';
-		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-teal-01" onclick="dep_fn.loadToList(\'append\')"/>Load & Append</button>';
-		btnHtml 	+=	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-yellow-04" onclick="$(\'.ajs-close\').trigger(\'click\')"/>Cancel</button>';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px;" class="btn btn-dark" onclick="dep_fn.loadToList(\'resetLoad\')">Reset & Load</button>';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-dark" onclick="dep_fn.loadToList(\'append\')"/>Load & Append</button>';
+		btnHtml 	+=	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-outline-dark" onclick="$(\'.ajs-close\').trigger(\'click\')"/>Cancel</button>';
 		btnHtml 	+=	'</div>';
 		
 		alertify.commentDialog(btnHtml);
@@ -899,6 +828,126 @@ var dep_fn = {
 		}
 		
 		return display;
+    },
+    csvUploadFile : function () {
+    	var accept1 = '';
+		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept) {
+			if ('12' == fileAccept[i].cdDtlNo) {
+				accept1 = fileAccept[i].cdDtlExp;
+			}
+		}
+		
+		//파일업로드
+		$('#depCsvFile').uploadFile({
+			url:'/project/csvFile',
+			multiple:false,
+			dragDrop:true,
+			fileName:'myfile',
+			allowedTypes:accept1,
+			sequential:true,
+			sequentialCount:1,
+			dynamicFormData: function(){
+				var data ={ "registFileId" :$('#depCsvFileId').val(), "tabNm" : "DEP"}
+				return data;
+			},
+			onSuccess:function(files,data,xhr,pd) {
+				var result = jQuery.parseJSON(data);
+				
+				if(result[1] == null) {
+					if(result[0] == "TAB_GUBN_ERROR") {
+						alertify.error([[#{msg.common.upload.failed.separator}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}else{
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					} 
+				} else {
+					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
+						alertify.alert(result[1], function(){
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						});
+					} else if(result[2] == "CSV_FILE") {
+						dep_fn.getCsvData(result[0][0].registSeq);
+
+						$('#depCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						dep_fn.makeFileTag(result[0][0]);
+					} else if(result[2] == "EXCEL_FILE") {
+						if (result[1].length != 0) {
+							for (var i = 0; i < result[1].length; i++) {
+								var num = i+1;
+								var checkedTxt = "";
+								
+								var sheetName = result[1][i].name.toUpperCase().trim();
+								if(sheetName.startsWith("DEP") || sheetName.indexOf("DEPENDENCY") > -1){
+									checkedTxt = "checked";
+								}
+								
+								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+								$("#sheetBody").append(sheetTr);
+							}
+							
+							$('#sheetApply').attr('onclick', 'dep_fn.getSheetData('+result[0][0].registSeq+')');
+						}
+						
+						if (typeof alertify.selectSheet === "undefined") {
+							alertify.dialog('selectSheet', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons = [];
+										setup.focus.element = 0;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '365px';
+								        }
+									}
+								};
+							}, false, 'alert');
+	                	}
+						
+						alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
+						$("#sheetBody").empty();
+						
+						$('#depCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+						
+						_depUploadFile = result[0][0];
+					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
+						dep_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
+
+						$('#depCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						dep_fn.makeFileTag(result[0][0]);
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
+			}
+		});
     }
 }
 
@@ -913,9 +962,9 @@ var dep_grid = {
 		depList.jqGrid({
 			datatype: 'local',
 			data : depMainData,
-			colNames: ['gridId', 'ID_KEY', 'ID', 'Manifest file', 'ReferenceId', 'ReferenceDiv', 'OssId', 'OSS Name','OSS Version','License','Download Location'
+			colNames: ['gridId', 'ID_KEY', 'ID', 'Package URL', 'ReferenceId', 'ReferenceDiv', 'OssId', 'OSS Name','OSS Version','License','Download Location'
 			           ,'Homepage','LicenseId','Copyright Text'
-			           ,'CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'depList\');">Exclude','LicenseDiv', 'Comment', 'Dependencies', 'refOssName'],
+			           ,'CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'depList\');">Exclude','LicenseDiv', 'Comment', 'Depends On', 'refOssName'],
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
 				{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
@@ -1221,7 +1270,7 @@ var dep_grid = {
 			cellsubmit : 'clientArray',
 			ignoreCase: true,
 			multiselect: true,
-            multiselectWidth: 30,
+            multiselectWidth: 35,
 		    onSortCol: function (index, columnIndex, sortOrder) {
 		    	isSort = true;
 		    },
@@ -1263,7 +1312,37 @@ var dep_grid = {
 					$("#depList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
 				}
 				
-				tableRefreshNew("depList");
+				// append button event
+				if ($("#depList_toppager_left").find('button').length == 0) {
+					var permission = [[${project.statusPermission}]] == 1;
+                	var identificationStatus = [[${project.identificationStatus}]];
+					
+                	var appendBtn = "";
+               		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('DEP', 'depList', "+permission+", '"+identificationStatus+"')\">";
+               		if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                	} else {
+                		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                	}
+                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('DEP', 'depList', 'main', "+permission+", '"+identificationStatus+"')\">";
+                	if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                	}
+                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('DEP', "+permission+", '"+identificationStatus+"')\">";
+                	if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                	}
+                	appendBtn += "<button type=\"button\" id=\"exportDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+                	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
+                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"dep_fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"dep_fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span></div>";
+                    
+                    $("#depList_toppager_left").append(appendBtn);
+                }
 				
 				//sort후 ValidMsgData reload
 				if(isSort){
@@ -1295,30 +1374,35 @@ var dep_grid = {
 				}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
-				// 체크 박스 영역 제외
-				cleanErrMsg("depList", rowid);
-
-				fn_grid_com.setCellEdit(depList, rowid, depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
-
-				// 서브 그리드 제외
-				ondblClickRowBln = false;
+				var permission = [[${project.statusPermission}]] == 1;
+            	var identificationStatus = [[${project.identificationStatus}]];
 				
- 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
- 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
- 	 			
-				var result = $('#'+rowid+'_licenseName').val().split(",");
+				if (permission && "CONF" != identificationStatus) {
+					// 체크 박스 영역 제외
+					cleanErrMsg("depList", rowid);
 
-				result.forEach(function(cur,idx){
-					if(cur != ""){
-						var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-						$('#'+rowid+'_licenseNameBtn').append(mult);
-					}
-				});
-				
-				$('#'+rowid+'_licenseName').val("");
-				var nextCol = depList.jqGrid('getGridParam', 'colModel')[iCol].name
-				var nextRow = rowid
-				$('#'+nextRow+"_"+nextCol).focus();
+					fn_grid_com.setCellEdit(depList, rowid, depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
+
+					// 서브 그리드 제외
+					ondblClickRowBln = false;
+					
+	 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
+	 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+	 	 			
+					var result = $('#'+rowid+'_licenseName').val().split(",");
+
+					result.forEach(function(cur,idx){
+						if(cur != ""){
+							var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+							$('#'+rowid+'_licenseNameBtn').append(mult);
+						}
+					});
+					
+					$('#'+rowid+'_licenseName').val("");
+					var nextCol = depList.jqGrid('getGridParam', 'colModel')[iCol].name
+					var nextRow = rowid
+					$('#'+nextRow+"_"+nextCol).focus();
+				}
 			},
 			onPaging: function(action) {
 				cleanErrMsg("depList");
@@ -1335,14 +1419,12 @@ var dep_grid = {
 				if(depDiffMsgData) {
 					gridDiffMsg(depDiffMsgData, "depList");
 				}
-                $("#loading_wrap").hide();
 
-                initCount++;
-                if (initCount === 4) {
-                    $('#loading_wrap_total').hide();
-                }
-				
-				updateGridRowCount('depList', 'depPager'); 
+                depGridCompleteFlag = true;
+				com_fn.checkGridComplete(false);
+				adjustMultiPageGridSize();
+
+				updateGridRowCount('depList', 'depPager');
 			},
 			removeHighLight : true
 		});
@@ -1358,16 +1440,16 @@ var dep_grid = {
 			}
 		});
 		
-		depList.jqGrid('navGrid',"#depPager",{add:true,edit:false,del:true,search:false,refresh:false
-			  , addfunc: function () { 
-				  com_fn.saveFlagObject["DEP"] = false;
-				  fn_grid_com.rowAddNew('depList',depList,"main", null, com_fn.getLicenseName);
-			  }
-			  , delfunc: function () { fn_grid_com.rowDelNew(depList,"main");}
-			  , cloneToTop:true
-		});
+// 		depList.jqGrid('navGrid',"#depPager",{add:true,edit:false,del:true,search:false,refresh:false
+// 			  , addfunc: function () { 
+// 				  com_fn.saveFlagObject["DEP"] = false;
+// 				  fn_grid_com.rowAddNew('depList',depList,"main", null, com_fn.getLicenseName);
+// 			  }
+// 			  , delfunc: function () { fn_grid_com.rowDelNew(depList,"main");}
+// 			  , cloneToTop:true
+// 		});
 		
-		$('#depList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+// 		$('#depList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
 	}
 }
 </script>

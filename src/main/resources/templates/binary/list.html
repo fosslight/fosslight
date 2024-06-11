@@ -19,22 +19,24 @@
                                     <!-- <div class="card collapsed-card search-form"> -->
                                     <div class="card-header" style="border-bottom: none">
                                         <div class="row">
-                                            <div class="col-md-8">
-                                                <div class="row">
-                                                    <div class="input-group">
-                                                        <input class="form-control" name="fileName" placeholder="Binary Name" type="text" value=""/>
-                                                        <div class="input-group-append">
-                                                            <button class="btn btn-default" id="search" type="submit">
-                                                                <i class="fa fa-search"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
+                                            <div class="col-md-7 d-flex">
+                                                <div class="row" style="width: 100%;">
+                                                	<div class="col-12">
+                                                		<div class="input-group">
+                                                        	<input class="form-control" name="fileName" placeholder="Binary Name" type="text" value=""/>
+                                                        	<div class="input-group-append">
+                                                            	<button class="btn btn-default" id="search" type="button"><i class="fa fa-search"></i></button>
+                                                        	</div>
+                                                    	</div>
+                                                	</div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-2 d-flex justify-content-start mx-2">
-                                                <div class="input-group-append d-flex align-items-center">
-                                                    <a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem" title="Collapse">+ Advanced Search</a>
-                                                </div>
+                                            <div class="col-md-3 pl-3 d-flex">
+                                            	<div class="col-md-7 d-flex align-items-center">
+                                            		<div class="input-group-append d-flex align-items-center">
+                                                        <a class="text-blue-gray" data-card-widget="collapse" style="font-size: 1rem;" th:text="'+ Advanced Search'" title="Collapse"></a>
+                                                    </div>
+                                            	</div>
                                             </div>
                                         </div>
                                     </div>
@@ -42,15 +44,13 @@
                                         <div class="row">
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control" name="parentName" placeholder="Project Name" th:value="${searchBean?.parentName}" type="text"/>
+                                                    <input class="form-control" name="parentName" placeholder="Project Name" type="text"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
                                                     <div class="form-group">
-                                                        <input class="form-control autoComOss" name="ossName"
-                                                               placeholder="OSS Name"
-                                                               th:value="${searchBean.ossName}" type="text"/>
+                                                        <input class="form-control autoComOss" name="ossName" placeholder="OSS Name" type="text"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -62,51 +62,42 @@
                                                                     <i class="far fa-calendar-alt"></i>
                                                                 </span>
                                                         </div>
-                                                        <input class="form-control" id="updateRange"
-                                                               placeholder="Updated Date" type="text"/>
+                                                        <input class="form-control" id="updateRange" placeholder="Updated Date" type="text"/>
+                                                        <input name="schStartDate" type="hidden" />
+														<input name="schEndDate" type="hidden" />
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control" name="platformName"
-                                                           placeholder="Platform Name" th:value="${searchBean.platformName}"
-                                                           type="text"/>
+                                                    <input type="text" class="form-control" name="platformName" placeholder="Platform Name"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
                                                     <div class="form-group">
-                                                        <input class="form-control" name="ossVersion"
-                                                               placeholder="OSS Version" th:value="${searchBean.ossVersion}"
-                                                               type="text"/>
+                                                        <input type="text" class="form-control" name="ossVersion" placeholder="OSS Version"/>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control" name="tlshCheckSum" placeholder="TLSH"
-                                                           th:value="${searchBean.tlshCheckSum}" type="text"/>
+                                                    <input type="text" class="form-control" name="tlshCheckSum" placeholder="TLSH"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control" name="platformVersion"
-                                                           placeholder="Platform Version"
-                                                           th:value="${searchBean.platformVersion}" type="text"/>
+                                                    <input type="text" class="form-control" name="platformVersion" placeholder="Platform Version"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control" name="license"
-                                                           placeholder="License Name" th:value="${searchBean.license}"
-                                                           type="text"/>
+                                                    <input type="text" class="form-control" name="license" placeholder="License Name"/>
                                                 </div>
                                             </div>
                                             <div class="col-4">
                                                 <div class="form-group">
-                                                    <input class="form-control" name="checkSum" placeholder="Checksum"
-                                                           th:value="${searchBean.checkSum}" type="text"/>
+                                                    <input type="text" class="form-control" name="checkSum" placeholder="Checksum"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -116,25 +107,20 @@
                         </div>
                     </form>
                     <div class="row">
-                        <div class="col-12 mt-3">
+                    	<div class="col-md-6">
+                    	</div>
+                    	<div class="col-md-6">
+                        	<div class="row float-right mr-1">
+                            	<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-outline-lg-red btn-sm width-5rem px-1" id="btnSaveBat" th:text="Save"></button>
+                        	</div>
+                    	</div>
+                	</div>
+                    <div class="row mt-1">
+                        <div class="col-md-12">
                             <div class="jqGridSet">
-                                <table id="list">
-                                    <tr>
-                                        <td></td>
-                                    </tr>
-                                </table>
+                                <table id="list"><tr><td></td></tr></table>
                                 <div id="pager"></div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row px-1 mt-2">
-                    <div class="col-md-6">
-                    </div>
-                    <div class="col-md-6">
-                        <div class="row float-right nav-item">
-                            <button class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3" type="button" onclick="binary_fn.downloadExcel()"><i class="far fa-file-excel mr-2"></i>Export</button>
-                            <button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-danger btn-sm width-6rem mr-xm px-3 btn-transition-page" id="btnSaveBat" href="javascript:;">Save</button>
                         </div>
                     </div>
                 </div>

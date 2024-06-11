@@ -2,296 +2,36 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <th:block th:fragment="binScript">
 <script th:inline="javascript">
-var ossNames = [];
 var objs = [];
-var licenseNames = [];
 var binData;
 var _binLoadListLength = 0;
 var _binUploadFile;
+editMode = [[${editMode}]];
+editMode = editMode||"";
+var binEditMode = editMode;
 
 // BIN 이벤트
 var bin_evt = {
 	csvDelFileSeq : [],
+	csvFileSeq : [],
 	init: function(){
-        $("#loading_wrap").show();
 		bin_fn.getBinGridData();
-		$('#_binAddList').jqGrid(bin_fn.setParamProject3());
+		
+		if ("N" != $("input[name='identificationSubStatusBin']").val()) {
+			$('#_binAddList').jqGrid(bin_fn.setParamProject3());
+		}
+		
 		var binList = $("#binList");
+		
 		//Not aplicable
-		var aplicable = $('#applicableBin').is(':checked');
-
-		if(aplicable){
+		if ($('#applicableBin').is(':checked') || "N" == $("input[name='identificationSubStatusBin']").val()) {
 			$('.binBtn').hide();
 		}
 		
-		// 그리드 리셋 버튼
-		$("#binReset, #binResetUp").click(function(e){
- 			e.preventDefault();
- 			
-			alertify.confirm([[#{msg.common.confirm.reset}]], function (e) {
-				if (e) {
-					$("#binList").jqGrid('clearGridData');
-					$("#_binAddList").jqGrid('clearGridData');
-				} else {
-					return false;
-				}
-			});
-		});
-		// 그리드 저장 버튼
-		$("#binSave, #binSaveUp").click(function(e){
-			if (com_fn.checkStatus()){
-				e.preventDefault();
-				
-				com_fn.exitCell(_mainLastsel, "binList");
-				
-				alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
-					if (e) {
-						com_fn.exitRow("binList");
-						// 메인, 서브 그리드 세이브 모드
-						fn_grid_com.totalGridSaveMode('binList');
-						// 닉네임 체크
-						bin_fn.saveMakeData();
-					} else {
-						return false;
-					}
-				});
-			}else {
-				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
-			}
-		});
-		// 프로젝트 조회 버튼
-		$('#binProjectSearchBtn').click(function(e){
-			e.preventDefault();
-			var searchSelect = $("select[name='binProjectSelect'] option:selected").val();
-			var searchText = $("input[name='binPrjSearchText']").val();
-			switch(searchSelect){
-				case "pNm" : $("#binProjectForm input[name='prjName']").val(searchText);
-					break;
-				case "pVer" : $("#binProjectForm input[name='prjVersion']").val(searchText);
-					break;
-				case "pId" : $("#binProjectForm input[name='prjId']").val(searchText);
-					break;
-			}
-			var postData = $('#binProjectForm').serializeObject();
-			
-			$('#_binProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
-			$('.binProject1').show();
-			$('.binProject2').hide();
-		});
-		
-		// csv파일 업로드
-		var accept1 = '';
-		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
-		for (var i in fileAccept) {
-			if ('12' == fileAccept[i].cdDtlNo) {
-				accept1 = fileAccept[i].cdDtlExp;
-			}
-		}
-		
-		//파일업로드
-		$('#binCsvFile').uploadFile({
-			url:'/project/binCsvFile',
-			multiple:false,
-			dragDrop:true,
-			fileName:'myfile',
-			allowedTypes:accept1,
-			sequential:true,
-			sequentialCount:1,
-			dynamicFormData: function() {
-				var data = { "registFileId" :$('#binCsvFileId').val() };
-				
-				return data;
-			},
-			onSuccess:function(files,data,xhr,pd){
-				var result = jQuery.parseJSON(data);
-				if(result[1] == null) {
-					alertify.error([[#{msg.common.valid}]], 0);
-					$('.ajax-file-upload-statusbar').fadeOut('slow');
-					$('.ajax-file-upload-statusbar').remove();
-				} else {
-					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
-						alertify.alert(result[1], function() {
-							$('.ajax-file-upload-statusbar').fadeOut('slow');
-							$('.ajax-file-upload-statusbar').remove();
-						});
-					} else if(result[2] == "CSV_FILE") {
-						bin_fn.getCsvData(result[0][0].registSeq);
-
-						$('#binCsvFileId').val(result[0][0].registFileId);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-
-						bin_fn.makeFileTag(result[0][0]);
-					} else if(result[2] == "EXCEL_FILE") {
-						if (result[1].length != 0) {
-							for (var i = 0; i < result[1].length; i++) {
-								var num = i+1;
-								var checkedTxt = "";
-								
-								if(result[1][i].name.toUpperCase().trim().startsWith("BIN")) {
-									checkedTxt = "checked";
-								}
-								
-								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
-												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
-								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
-								$("#sheetBody").append(sheetTr);
-							}
-							
-							$('#sheetApply').attr('onclick', 'bin_fn.getSheetData('+result[0][0].registSeq+')');
-						}
-						
-						if (typeof alertify.selectSheet === "undefined") {
-							alertify.dialog('selectSheet', function() {
-								return {
-									setup: function() {
-										var settings = alertify.confirm().settings;
-										
-										for (var prop in settings) {
-											this.settings[prop] = settings[prop];
-										}
-										
-										var setup = alertify.confirm().setup();
-										setup.buttons = [];
-										setup.focus.element = 1;
-										
-										return setup;
-									},
-								    hooks: {
-								    	onshow: function() {
-								        	this.elements.dialog.style.maxWidth = 'none';
-								          	this.elements.dialog.style.width = '365px';
-								        }
-									}
-								};
-							}, false, 'alert');
-	                	}
-						
-						alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
-						$("#sheetBody").empty();
-						
-						$('#binCsvFileId').val(result[0][0].registFileId);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-						
-						_binUploadFile = result[0][0];	
-					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
-						bin_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
-
-						$('#binCsvFileId').val(result[0][0].registFileId);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-
-						bin_fn.makeFileTag(result[0][0]);
-					} else {
-						alertify.error([[#{msg.common.valid}]], 0);
-						$('.ajax-file-upload-statusbar').fadeOut('slow');
-						$('.ajax-file-upload-statusbar').remove();
-					}
-				}
-			}
-		});
-		
-		// Result 파일 업로드
-		if($('.binBinaryFileArea').find('li').length == 0) {
-			$('#binBinaryFile').show();
-		} else {
-			$('#binBinaryFile').hide();
-		}		
-		
-		var accept4 = '';
-		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
-		for (var i in fileAccept) {
-			if ('19' == fileAccept[i].cdDtlNo) {
-				accept4 = fileAccept[i].cdDtlExp;
-			}
-		}
- 		
-		$('#binBinaryFile').uploadFile({
-			url:'/project/binCsvFile?fileType=text',
-			multiple:false,
-			dragDrop:true,
-			allowedTypes:accept4,
-			fileName:"myfile",
-			sequential:true,
-			sequentialCount:1,
-			dynamicFormData: function() {
-				var data ={ "registFileId" : '' }
-
-				return data;
-			},
-			onSubmit:function(files){
-				// file ext 재확인
-				var accept4 = "";
-				var ext = files[0].split(".")[1];
-				
-				var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
-				for (var i in fileAccept) {
-					if ('19' == fileAccept[i].cdDtlNo) {
-						accept4 = fileAccept[i].cdDtlExp;
-					}
-				}
-				
-				if(accept4 != ext){
-					return false;
-				}
-			},
-			onSuccess:function(files,data,xhr,pd){
-				var result = jQuery.parseJSON(data);
-				
-				if(result == null) {
-					alertify.error([[#{msg.common.valid}]], 0);
-					$('.ajax-file-upload-statusbar').fadeOut('slow');
-					$('.ajax-file-upload-statusbar').remove();
-				} else {
-					result = result[0][0];
-					$('#binBinaryFileId').val(result.registFileId);
-					$('.ajax-file-upload-statusbar').fadeOut('slow');
-					$('.ajax-file-upload-statusbar').remove();
-					bin_fn.makeFileTag2(result);	
-
-					if($('.binBinaryFileArea').find('li').length == 0) {
-						$('#binBinaryFile').show();
-					} else {
-						$('#binBinaryFile').hide();
-					}			
-				}
-			},
-			onError:function(files,status,errMsg,pd){
-				alertify.error([[#{msg.common.valid2}]], 0);
-			}
-		});
-		
-		// ossNames auto complete
-		fn_grid_com.griOssNames().success(function(data, status, headers, config){
-			if(data != null && ossNames == ""){
-				data.forEach(function(obj){
-					ossNames.push(obj.ossName);
-				})
-			}
-		});
-		
-		// licenseNames auto complete
-		commonAjax.getLicenseTags().success(function(data, status, headers, config){
-			if(data != null && licenseNames == ""){
-				var tag = "";
-				
-				data.forEach(function(obj){
-					if(obj!=null) {
-						tag ={
-							value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
-							label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
-							type : obj.licenseType,
-							obligation : obj.obligation,
-							obligationChecks : obj.obligationChecks
-						}
-						
-						licenseNames.push(tag);
-					}
-				});
-			}
-		});
-		
+		bin_fn.csvUploadFile();
+		bin_fn.binaryUploadFile();
+	},
+	binProjectSelect : function () {
 		$("select[name=binProjectSelect]").on("change", function() {
 			var value = $(this).val();
 			if ("pNm" == value) {
@@ -322,9 +62,9 @@ var binValidMsgData;
 var binDiffMsgData;
 var binInfoMsgData;
 
-// SRC 함수
+// BIN 함수
 var bin_fn = {
-	// src 그리드 데이터
+	// bin 그리드 데이터
 	getBinGridData : function(param, type){
 		var url = "append".indexOf(type) > -1  
 					? '/project/identificationMergedGrid/'+[[${project.prjId}]]+'/15' 
@@ -374,7 +114,7 @@ var bin_fn = {
 		});
 	},
 	// 저장 데이터 만들기
-	saveMakeData : function(){
+	saveMakeData : function(resetFlag){
 		cleanErrMsg("binList");
 		var target = $("#binList");
 		var prjId = [[${project.prjId}]];
@@ -382,11 +122,16 @@ var bin_fn = {
 		if("" != binCsvFileId && $(".binFileArea").find("li").length == 0){
 			binCsvFileId = "";
 		}
+		if (typeof binCsvFileId === 'undefined') binCsvFileId = "";
+		
 		var binBinaryFileId = $("#binBinaryFileId").val();
 		if("" != binBinaryFileId && $(".binBinaryFileArea").find("li").length == 0){
 			binBinaryFileId = "";
 		}
-		var identificationSubStatusBin = $("#applicableBin:checked").val();
+		if (typeof binBinaryFileId === 'undefined') binBinaryFileId = "";
+		
+		var identificationSubStatusBin = $("input[name='identificationSubStatusBin']").val();
+		if (typeof identificationSubStatusBin === 'undefined') identificationSubStatusBin = "";
 		
 		var delFileData = bin_evt.csvDelFileSeq;
 		
@@ -400,11 +145,15 @@ var bin_fn = {
 		var finalData = {"prjId" : prjId, "binCsvFileId" : binCsvFileId , "binBinaryFileId" : binBinaryFileId, "csvDelFileIds" : JSON.stringify(delFileData)
 					   , "identificationSubStatusBin" : identificationSubStatusBin, "mainData" : JSON.stringify(mainData), "subData" : JSON.stringify(subData), "binAddListData" : JSON.stringify(binAddListData)};
 
-		// 닉네임 체크
-		bin_fn.nickNameValid(mainData, subData, finalData);
+		if (resetFlag) {
+			bin_fn.resetExeSave(finalData);
+		} else {
+			// 닉네임 체크
+			bin_fn.nickNameValid(mainData, subData, finalData);
+		}
 	},
 	// 저장
-	exeSave : function(finalData){
+	exeSave : function(finalData, refreshComment){
 		$.ajax({
 			url : '/project/saveBin',
 			type : 'POST',
@@ -429,6 +178,7 @@ var bin_fn = {
 						$("#mergeYn").val("N");
 						bin_evt.csvDelFileSeq = [];
 						com_fn.saveFlagObject["BIN"] = true;
+						com_fn.changeMode("view", false);
 						alertify.success([[#{msg.common.success}]]);
 						
 						if(data.changeBySystemNotice && data.changeBySystemNotice && data.changeBySystemNotice != "") {
@@ -439,6 +189,66 @@ var bin_fn = {
 						if(curIdenStatus == "PROG"){
 							com_fn.btnCtl(userRole, curIdenStatus);
 						}
+						
+						if (refreshComment) fn_comment.getCommentList(commentsParam);
+					} else {
+						alertify.error([[#{msg.common.valid2}]]);
+					}
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	resetExeSave : function(finalData){
+		$.ajax({
+			url : '/project/saveBin',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				_mainLastsel = -1;
+				
+				if("false" == data.isValid) {
+					binValidMsgData = data.resultData;
+					
+					alertify.error([[#{msg.common.valid}]], 0);
+					
+					if(data.validMsg) {
+						alertify.alert(data.validMsg, function(){});
+					}
+				} else {
+					if("10" == data.resCd){
+						bin_fn.getBinGridData();
+						$("#mergeYn").val("N");
+						bin_evt.csvDelFileSeq = [];
+						com_fn.saveFlagObject["BIN"] = true;
+						
+						curIdenStatus = data.resultData||"";
+						if(curIdenStatus == "PROG"){
+							com_fn.btnCtl(userRole, curIdenStatus);
+						}
+						
+						var fileSeqs = new Array();
+						// delete upload file
+						$(".binCsvFileSeq").each(function(index, item) {
+							var fileObj = {fileSeq : $(item).val()};
+							fileSeqs.push(fileObj);
+						});
+						
+						$(".binBinaryFileSeq").each(function(index, item) {
+							var fileObj = {fileSeq : $(item).val()};
+							fileSeqs.push(fileObj);
+						});
+						
+						if (fileSeqs.length > 0) {
+							com_fn.resetDeleteFiles(fileSeqs, 'bin', 'binFileArea');
+						}
+						
+						com_fn.changeMode("view", false);
 					} else {
 						alertify.error([[#{msg.common.valid2}]]);
 					}
@@ -465,6 +275,7 @@ var bin_fn = {
 			$('#_binProjectList2').jqGrid(bin_fn.setParamProject2());
 			$('#_binAddList').jqGrid(bin_fn.setParamProject3());
 			$('#_binProjectList2').jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+			bin_evt.binProjectSelect();
 		}
 	},
 	// 프로젝트 검색
@@ -506,7 +317,9 @@ var bin_fn = {
 			mtype: 'GET',
 			loadComplete: function(data){
 				$('.commentDiv').find('p').css('margin','0px 0px');
-				tableRefreshNew("_binProjectList1");
+			},
+			gridComplete: function() {
+				$('#_binProjectList1').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
 			}
 		}
 	},
@@ -551,7 +364,7 @@ var bin_fn = {
 					}
 				}
 				
-				tableRefreshNew("_binProjectList2");
+				$('#_binProjectList2').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
 			}
 		}
 	},			
@@ -595,9 +408,14 @@ var bin_fn = {
                 if (data.rows.length > 0) {
                 	_binLoadListLength = data.rows.length;
                     $("#_binAddListContainer").show();
+                    if (typeof $(".binCsvFileSeq").val() !== "undefined" || typeof $(".binBinaryFileSeq").val() !== "undefined") {
+						$(".existFileBin").show();
+					} else {
+						$(".existFileBin").hide();
+					}
+                } else {
+                	$(".existFileBin").show();
                 }
-                
-                tableRefreshNew("_binAddList");
             }
 		}
 	},	
@@ -605,10 +423,10 @@ var bin_fn = {
 	makeNickNamePopup : function(obj, finalData){
 		if(obj.validMsg && obj.validMsg.length != 0){
 			alertify.confirm(obj.validMsg, function () {
-				bin_fn.exeSave(finalData);
+				bin_fn.exeSave(finalData, true);
 			});
 		}else{
-			bin_fn.exeSave(finalData);
+			bin_fn.exeSave(finalData, false);
 		}
 	},
 	// 닉네임 체크
@@ -631,14 +449,20 @@ var bin_fn = {
 			}
 		})
 	},
-	makeFileTag : function(obj){
+	makeFileTag : function(obj, type){
+		if ("excel" == type) {
+			$("#binCsvFileId").val(obj.registFileId);
+		}
+		
 		var appendHtml = '<br>'+obj.createdDate;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
-		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
+		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" name=\"fileSeq\" value="'+obj.registSeq+'"/>';
 		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="com_fn.deleteFiles(this, \'1\')">X</span>'+appendHtml+'</li>';
 		$('.binFileArea').append(uploadFileTag);
 	},
 	makeFileTag2 : function(obj){
+		$("#binBinaryFileId").val(obj.registFileId);
+		
 		var appendHtml = '<br>'+obj.createdDate;
 		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
 		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
@@ -707,15 +531,6 @@ var bin_fn = {
 		$('.binProject2').hide();
 		$("#_binAddListContainer").show();
 	},
-	exportList : function(obj) {
-    	var exportListId = '#' + $(obj).siblings("div").attr("id");
-        if ($(exportListId).css('display')=='none') {
-            $(exportListId).show();
-        }else{
-            $(exportListId).hide();
-        }
-        $(exportListId).menu();
-    },
     selectDownloadFile : function(target) {
     	// download file
         if (target === "report_sub") {
@@ -734,8 +549,6 @@ var bin_fn = {
         		bin_fn.selectDownloadFileValidation();
         	}
         }
-        // hide list
-        $("#binExportList").hide();
     },
     selectDownloadFileValidation : function() {
     	if (com_fn.checkSelectDownloadFile('BIN')) {
@@ -746,6 +559,8 @@ var bin_fn = {
     },
 	// 다운로드 엑셀
 	downloadExcel : function(){
+		loadingIden.show();
+		
 		$.ajax({
 			type: "POST",
 			url: '/exceldownload/getExcelPost',
@@ -754,6 +569,8 @@ var bin_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
+				loadingIden.hide();
+				
 				if("false" == data.isValid) {
 					alertify.error([[#{msg.common.valid2}]], 0);
 				} else {
@@ -771,6 +588,12 @@ var bin_fn = {
 	closeBinPop : function(){
 		$('.ossSelectPop').hide();
 	},
+	getNotSheetData : function() {
+		var object = {fileSeq : _binUploadFile.registSeq};
+		bin_evt.csvDelFileSeq.push(object);
+		_binUploadFile = undefined;
+		com_fn.closeAlertifyView();
+	},
 	getSheetData : function(seq){
 		var sheetNum = [];
 		$('input:checkbox[name="sheetNameSelect"]').each(function(){
@@ -784,7 +607,7 @@ var bin_fn = {
 			
 			return;
 		} else {
-            $("#loading_wrap").show();
+			loading.show();
 			
 			var target = $("#binList");
 			fn_grid_com.totalGridSaveMode('binList');
@@ -885,7 +708,6 @@ var bin_fn = {
 						if(data.externalData2) { // validData 표시
 							binDiffMsgData = data.externalData2;
 						}
-						
 
 						if(data.externalData3) { // validData 표시
 							binInfoMsgData = data.externalData3;
@@ -893,7 +715,7 @@ var bin_fn = {
 						
 						bin_fn.makeOssList(data.resultData);
 						
-						bin_fn.makeFileTag(_binUploadFile);
+						bin_fn.makeFileTag(_binUploadFile, 'excel');
 						_binUploadFile = undefined
 						
 						if(data.validMsg) {
@@ -914,7 +736,6 @@ var bin_fn = {
 			com_fn.closeAlertifyView();
 		}
 	},
-
 	makeOssList : function(data){
 		binMainData = data.mainData;
 		
@@ -968,13 +789,271 @@ var bin_fn = {
 		}
     			
     	var btnHtml = 	'<div class="custom-layout" style="text-align: center;">';
-		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px;" class="btn btn-lg-gray" onclick="bin_fn.loadToList(\'resetLoad\')">Reset & Load</button>';
-		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-teal-01" onclick="bin_fn.loadToList(\'append\')"/>Load & Append</button>';
-		btnHtml 	+=	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-yellow-04" onclick="$(\'.ajs-close\').trigger(\'click\')"/>Cancel</button>';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px;" class="btn btn-dark" onclick="bin_fn.loadToList(\'resetLoad\')">Reset & Load</button>';
+		btnHtml 	+= 	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-dark" onclick="bin_fn.loadToList(\'append\')"/>Load & Append</button>';
+		btnHtml 	+=	'	<button type="button" style="margin-top: 35px; margin-left: 20px;" class="btn btn-outline-dark" onclick="$(\'.ajs-close\').trigger(\'click\')"/>Cancel</button>';
 		btnHtml 	+=	'</div>';
 		
 		alertify.commentDialog(btnHtml);
-    }
+    },
+    csvUploadFile : function () {
+		// csv파일 업로드
+		var accept1 = '';
+		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept) {
+			if ('12' == fileAccept[i].cdDtlNo) {
+				accept1 = fileAccept[i].cdDtlExp;
+			}
+		}
+		
+		//파일업로드
+		$('#binCsvFile').uploadFile({
+			url:'/project/binCsvFile',
+			multiple:false,
+			dragDrop:true,
+			fileName:'myfile',
+			allowedTypes:accept1,
+			sequential:true,
+			sequentialCount:1,
+			dynamicFormData: function() {
+				var data = { "registFileId" :$('#binCsvFileId').val() };
+				
+				return data;
+			},
+			onSuccess:function(files,data,xhr,pd){
+				var result = jQuery.parseJSON(data);
+				if(result[1] == null) {
+					alertify.error([[#{msg.common.valid}]], 0);
+					$('.ajax-file-upload-statusbar').fadeOut('slow');
+					$('.ajax-file-upload-statusbar').remove();
+				} else {
+					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
+						alertify.alert(result[1], function() {
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						});
+					} else if(result[2] == "CSV_FILE") {
+						bin_fn.getCsvData(result[0][0].registSeq);
+
+						$('#binCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						bin_fn.makeFileTag(result[0][0], 'csv');
+					} else if(result[2] == "EXCEL_FILE") {
+						if (result[1].length != 0) {
+							for (var i = 0; i < result[1].length; i++) {
+								var num = i+1;
+								var checkedTxt = "";
+								
+								if(result[1][i].name.toUpperCase().trim().startsWith("BIN")) {
+									checkedTxt = "checked";
+								}
+								
+								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+								$("#sheetBody").append(sheetTr);
+							}
+							
+							$('#sheetApply').attr('onclick', 'bin_fn.getSheetData('+result[0][0].registSeq+')');
+							$('.btnCancel').attr('onclick', 'bin_fn.getNotSheetData()');
+						}
+						
+						if (typeof alertify.selectSheet === "undefined") {
+							alertify.dialog('selectSheet', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons = [];
+										setup.focus.element = 1;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '365px';
+								        }
+									}
+								};
+							}, false, 'alert');
+	                	}
+						
+						alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
+						$("#sheetBody").empty();
+						
+						$('#binCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+						
+						_binUploadFile = result[0][0];	
+					} else if(result[2] == "SPDX_SPREADSHEET_FILE"){
+						bin_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
+
+						$('#binCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						bin_fn.makeFileTag(result[0][0], 'spdx');
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
+			}
+		});
+	},
+	binaryUploadFile : function() {
+		// Result 파일 업로드
+		if ($('.binBinaryFileArea').find('li').length == 0) {
+			$('#binBinaryFile').show();
+		} else {
+			$('#binBinaryFile').hide();
+		}
+		
+		var accept4 = '';
+		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept) {
+			if ('19' == fileAccept[i].cdDtlNo) {
+				accept4 = fileAccept[i].cdDtlExp;
+			}
+		}
+ 		
+		$('#binBinaryFile').uploadFile({
+			url:'/project/binCsvFile?fileType=text',
+			multiple:false,
+			dragDrop:true,
+			allowedTypes:accept4,
+			fileName:"myfile",
+			sequential:true,
+			sequentialCount:1,
+			dynamicFormData: function() {
+				var data ={ "registFileId" : '' }
+
+				return data;
+			},
+			onSubmit:function(files){
+				// file ext 재확인
+				var accept4 = "";
+				var fileNm = files[0];
+				
+				var _fileLen = fileNm.length;
+				var _lastDot = fileNm.lastIndexOf(".") + 1;
+				var ext = fileNm.substring(_lastDot, _fileLen);
+				
+				var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+				for (var i in fileAccept) {
+					if ('19' == fileAccept[i].cdDtlNo) {
+						accept4 = fileAccept[i].cdDtlExp;
+					}
+				}
+				
+				if(accept4 != ext){
+					return false;
+				}
+			},
+			onSuccess:function(files,data,xhr,pd){
+				var result = jQuery.parseJSON(data);
+				
+				if(result == null) {
+					alertify.error([[#{msg.common.valid}]], 0);
+					$('.ajax-file-upload-statusbar').fadeOut('slow');
+					$('.ajax-file-upload-statusbar').remove();
+				} else {
+					result = result[0][0];
+					$('#binBinaryFileId').val(result.registFileId);
+					$('.ajax-file-upload-statusbar').fadeOut('slow');
+					$('.ajax-file-upload-statusbar').remove();
+					bin_fn.makeFileTag2(result);	
+
+					if($('.binBinaryFileArea').find('li').length == 0) {
+						$('#binBinaryFile').show();
+					} else {
+						$('#binBinaryFile').hide();
+					}			
+				}
+			},
+			onError:function(files,status,errMsg,pd){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	reset : function () {
+		$("#binList").jqGrid('clearGridData');
+		$("#_binAddList").jqGrid('clearGridData');
+		
+		com_fn.exitRow("binList");
+		// 메인, 서브 그리드 세이브 모드
+		fn_grid_com.totalGridSaveMode('binList');
+		// 닉네임 체크
+		bin_fn.saveMakeData(true);
+	},
+	projectSearch : function () {
+		var searchSelect = $("select[name='binProjectSelect'] option:selected").val();
+		var searchText = $("input[name='binPrjSearchText']").val();
+		switch(searchSelect){
+			case "pNm" : 
+					$("#binProjectForm input[name='prjName']").val(searchText);
+					$("#binProjectForm input[name='prjVersion']").val("");
+					$("#binProjectForm input[name='prjId']").val("");
+				break;
+			case "pVer" : 
+					$("#binProjectForm input[name='prjVersion']").val(searchText);
+					$("#binProjectForm input[name='prjName']").val("");
+					$("#binProjectForm input[name='prjId']").val("");
+				break;
+			case "pId" : 
+					$("#binProjectForm input[name='prjId']").val(searchText);
+					$("#binProjectForm input[name='prjVersion']").val("");
+					$("#binProjectForm input[name='prjName']").val("");
+				break;
+		}
+		var postData = $('#binProjectForm').serializeObject();
+		
+		$('#_binProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
+		$('.binProject1').show();
+		$('.binProject2').hide();
+	},
+	save : function () {
+		if (com_fn.checkStatus()){
+			com_fn.exitCell(_mainLastsel, "binList");
+			
+			var notApplicable = false;
+			var saveMsg = [[#{msg.common.confirm.save}]];
+			var identificationSubStatusBin = $("input[name='identificationSubStatusBin']").val();
+			if ("N" == identificationSubStatusBin) {
+				notApplicable = true;
+				saveMsg = [[#{msg.common.confirm.save.notApplicable}]];
+				_binLoadListLength = 0;	
+			}
+			
+			alertify.confirm(saveMsg, function (e) {
+				if (e) {
+					if (notApplicable) {
+						bin_fn.reset();
+					} else {
+						com_fn.exitRow("binList");
+						// 메인, 서브 그리드 세이브 모드
+						fn_grid_com.totalGridSaveMode('binList');
+						// 닉네임 체크
+						bin_fn.saveMakeData(false);
+					}
+				} else {
+					return false;
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.project.warn.project.status}]], function(){});
+		}
+	},
 }
 
 //SRC 그리드
@@ -990,7 +1069,7 @@ var bin_grid = {
 			data : binMainData,
 			colNames: ['gridId', 'ID_KEY','ID','Binary Name', 'ReferenceId', 'ReferenceDiv', 'OssId', 'OSS Name','OSS Version','License','Download Location'
 			           ,'Homepage','LicenseId','Copyright Text'/*,'License Text'*/
-			           ,'CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'binList\');">Exclude','LicenseDiv', 'customBinaryYn', 'Comment'],
+			           ,'CVE ID','Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'binList\');">Exclude','LicenseDiv', 'customBinaryYn', 'Comment', 'Tlsh', 'Check Sum'],
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
 				{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
@@ -1264,7 +1343,9 @@ var bin_grid = {
 							});
 						}
 					}
-				}
+				},
+				{name: 'tlsh', index: 'tlsh', editable:false, hidden:true},
+				{name: 'checkSum', index: 'checkSum', editable:false, hidden:true}
 			],
 			autoencode: true,
 			editurl:'clientArray',
@@ -1323,6 +1404,38 @@ var bin_grid = {
 					$("#binList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
 				}
 				
+				// append button event
+				if ($("#binList_toppager_left").find('button').length == 0) {
+					var permission = [[${project.statusPermission}]] == 1;
+                	var identificationStatus = [[${project.identificationStatus}]];
+					
+                	var appendBtn = "";
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('BIN', 'binList', "+permission+", '"+identificationStatus+"')\">";
+                    if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                	} else {
+                		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                	}
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('BIN', 'binList', 'main', "+permission+", '"+identificationStatus+"')\">";
+                    if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                	}
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('BIN', "+permission+", '"+identificationStatus+"')\">";
+                    if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                	}
+                    appendBtn += "<button type=\"button\" id=\"exportDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+	            	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
+                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bin_fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bin_fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span></div>";
+                    
+                    $("#binList_toppager_left").append(appendBtn);
+                }
+				
 				//sort후 ValidMsgData reload
 				if(isSort){
 					isSort = false;
@@ -1350,37 +1463,41 @@ var bin_grid = {
 				if(iCol == "3") {
 					fn_grid_com.showOssViewPage(binList, rowid, true, binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
 				}
-				
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
-				if (iCol == "4"){ 
-					com_fn.exitCell(_mainLastsel, "binList");
-					
-					fn_grid_com.showBinaryViewPage(binList, rowid, true, binValidMsgData, binDiffMsgData, binInfoMsgData);
-				}
+				var permission = [[${project.statusPermission}]] == 1;
+            	var identificationStatus = [[${project.identificationStatus}]];
 				
-				cleanErrMsg("binList", rowid);
-				fn_grid_com.setCellEdit(binList, rowid, binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
+            	if (permission && "CONF" != identificationStatus) {
+            		if (iCol == "4"){ 
+    					com_fn.exitCell(_mainLastsel, "binList");
+    					
+    					fn_grid_com.showBinaryViewPage(binList, rowid, true, binValidMsgData, binDiffMsgData, binInfoMsgData);
+    				}
+    				
+    				cleanErrMsg("binList", rowid);
+    				fn_grid_com.setCellEdit(binList, rowid, binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
 
-				// 서브 그리드 제외 
-				ondblClickRowBln = false;
+    				// 서브 그리드 제외 
+    				ondblClickRowBln = false;
 
- 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
- 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
-				var result = $('#'+rowid+'_licenseName').val().split(",");
+     	 			$('#'+rowid+'_licenseName').addClass('autoCom');
+     	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+    				var result = $('#'+rowid+'_licenseName').val().split(",");
 
-				result.forEach(function(cur,idx){
-					if(cur != ""){
-						var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+    				result.forEach(function(cur,idx){
+    					if(cur != ""){
+    						var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 
-						$('#'+rowid+'_licenseNameBtn').append(mult);
-					}
-				});
-				
-				$('#'+rowid+'_licenseName').val("");
-                var nextCol = binList.jqGrid('getGridParam', 'colModel')[iCol].name
-                var nextRow = rowid
-               	$('#'+nextRow+"_"+nextCol).focus();
+    						$('#'+rowid+'_licenseNameBtn').append(mult);
+    					}
+    				});
+    				
+    				$('#'+rowid+'_licenseName').val("");
+                    var nextCol = binList.jqGrid('getGridParam', 'colModel')[iCol].name
+                    var nextRow = rowid
+                   	$('#'+nextRow+"_"+nextCol).focus();
+            	}
 			},
 			onPaging: function(action) {
 				cleanErrMsg("binList");
@@ -1400,13 +1517,11 @@ var bin_grid = {
 				if(binInfoMsgData) {
 					gridInfoMsg(binInfoMsgData, "binList");
 				}
-                $("#loading_wrap").hide();
+				
+				binGridCompleteFlag = true;
+				com_fn.checkGridComplete(false);
+				adjustMultiPageGridSize();
 
-                initCount++;
-                if (initCount === 4) {
-                    $('#loading_wrap_total').hide();
-                }
-              
 				updateGridRowCount('binList', 'binPager');
 			},
 			removeHighLight : true
@@ -1414,16 +1529,14 @@ var bin_grid = {
 		binList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () {
 			updateGridRowCount('binList', 'binPager');
 		}});
-		binList.jqGrid('navGrid',"#binPager",{add:true,edit:false,del:true,search:false,refresh:false
+/* 		binList.jqGrid('navGrid',"#binPager",{add:true,edit:false,del:true,search:false,refresh:false
 			  , addfunc: function () {
 				  com_fn.saveFlagObject["BIN"] = false;
 				  fn_grid_com.rowAddNew('binList',binList,"main", null, com_fn.getLicenseName);
 			  }
 			  , delfunc: function () { fn_grid_com.rowDelNew(binList,"main");}
 			  , cloneToTop:true
-		});
-		
-		$('#binList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+		}); */
 	}
 }
 </script>

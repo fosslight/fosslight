@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="partyFragments">
+	<input type="hidden" id="thirdEditMode" value="N"/>
+		<div class="card-body bg-ivory">
+			<div th:if="${project.identificationSubStatusPartner == 'N'}" class="row">
+				<div class="col-lg-6">
+					<div id="chkApplicableParty" class="icheck-danger d-inline">
+						<label th:text="'Not Applicable'"></label>
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row d-flex-align-right float-right">
+						<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+							<i class="fas fa-edit customIcon2 text-gray"></i>
+						</span>
+					</div>
+				</div>
+			</div>
+			<input type="hidden" name="identificationSubStatusPartner" th:value="${project.identificationSubStatusPartner}">
+			<div id="content_party">
+				<form id="3rdSearchForm" class="partyBtn">
+					<input type="hidden" name="publicYn" value="Y" />
+					<input type="hidden" name="partnerName" />
+					<input type="hidden" name="softwareName" />
+					<input type="hidden" name="partnerId" />
+					<div class="partyBtn" name="content_party" id="3rdSearch">
+						<div th:if="${project.statusPermission == 1}" class="row">
+							<div class="col-lg-6"></div>
+							<div class="col-lg-6">
+								<div class="row d-flex-align-right float-right">
+									<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+										<i class="fas fa-edit customIcon2 text-gray"></i>
+									</span>
+								</div>
+							</div>
+						</div>
+						<div class="row" style="display: none;">
+							<div class="col-md-2">
+								<div class="form-group">
+									<select class="custom-select custom-narrow-item" name="3rdSerarchSelect" th:disabled="true">
+										<option th:value="3rdPartyName" th:text="'3rd party Name'"></option>
+										<option th:value="sName" th:text="'Software Name'"></option>
+										<option th:value="3rdPartyId" th:text="'3rd party Id'"></option>
+									</select>
+								</div>
+							</div>
+							<div class="col-md-5">
+								<div class="input-group input-group-md">
+									<input type="text" class="form-control autoComConfParty custom-narrow-item" name="3rdSearchText" th:disabled="true" />
+									<span class="input-group-append">
+										<button type="button" class="btn btn-default btn-flat custom-narrow-item" id="3rdSearchBtn" th:text="Search" th:disabled="true"></button>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<form id="projectSearchForm" class="partyBtn">
+					<input type="hidden" name="publicYn" value="Y">
+					<input type="hidden" name="prjName" />
+					<input type="hidden" name="prjVersion" />
+					<input type="hidden" name="prjId" />
+					<div name="content_party" id="projectSearch" style="display: none;">
+						<div class="row mt-3">
+							<div class="col-md-2">
+								<div class="form-group">
+									<select class="custom-select custom-narrow-item"
+										name="3rdProjectSelect">
+										<option th:value="pNm" th:text="'Project Name'"></option>
+										<option th:value="pVer" th:text="'Project Version'"></option>
+										<option th:value="pId" th:text="'Project Id'"></option>
+									</select>
+								</div>
+							</div>
+							<div class="col-md-5">
+								<div class="input-group input-group-md">
+									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjSearchText">
+									<span class="input-group-append">
+										<button type="button" class="btn btn-default btn-flat custom-narrow-item" id="3rdProjectSearchBtn" th:text="Search"></button>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="3rdProjectSearch partyBtn">
+					<div class="three1list mt-3" style="display: none;">
+						<div class="pl-1 py-2">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Search Results</span>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_list">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+								<div id="pager"></div>
+							</div>
+						</div>
+					</div>
+					<div class="three2list" style="display: none;">
+						<div class="row pl-1 pr-4">
+							<div class="col-4 pr-3">
+								<i class="fas fa-caret-square-right pr-1"></i>
+								<span>Detail Preview</span>
+							</div>
+							<div class="col-8 pr-1 pb-2">
+								<a class="btn btn-outline-dark btn-xs float-right px-3" th:onclick="|party_evt.loadToList()|" th:text="Load"></a>
+							</div>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_list2">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+								<div id="pager2"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="3rdProjectSearch2 partyBtn">
+					<div class="three3list" style="display: none;">
+						<div class="pl-1 py-2">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Search Results</span>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_list-1">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+								<div id="pager-1"></div>
+							</div>
+						</div>
+					</div>
+					<div class="three4list" style="display: none;">
+						<div class="row pl-1 pr-4">
+							<div class="col-4 pr-3">
+								<i class="fas fa-caret-square-right pr-1"></i>
+								<span>Detail Preview</span>
+							</div>
+							<div class="col-8 pr-1 pb-2">
+								<a class="btn btn-outline-dark btn-xs float-right px-3" th:onclick="|party_evt.projectToAddList()|" th:text="Load"></a>
+							</div>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_list-2">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+								<div id="pager2-2"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="_3rdAddListContainer" style="display: none;">
+				<!--<hr class="my-3">-->
+				<div class="pl-1 py-2">
+					<i class="fas fa-caret-square-right pr-1"></i>
+					<span>Loaded List</span>
+				</div>
+				<div class="px-2 pt-1">
+					<div class="innerJqGridSet">
+						<table id="_3rdAddList">
+							<tr>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+</th:block>
+<th:block th:fragment="depFragments">
+	<input type="hidden" id="depEditMode" value="N"/>
+		<div class="card-body bg-ivory">
+			<div th:if="${project.identificationSubStatusDep == 'N'}" class="row">
+				<div class="col-lg-6">
+					<div id="chkApplicableDep" class="icheck-danger d-inline">
+						<label th:text="'Not Applicable'"></label>
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row d-flex-align-right float-right">
+						<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+							<i class="fas fa-edit customIcon2 text-gray"></i>
+						</span>
+					</div>
+				</div>
+			</div>
+			<input type="hidden" name="identificationSubStatusDep" th:value="${project.identificationSubStatusDep}">
+			<div id="content_dep">
+				<form id="depUploadForm" class="depBtn">
+					<input type="hidden" id="depCsvFileId" th:value="${project.depCsvFileId}">
+					<div name="content_dep" id="depUploadSearch">
+						<div class="row" id="content-dep">
+							<div class="col-12">
+								<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row">
+									<div class="col-lg-6">
+									</div>
+									<div class="col-lg-6">
+										<div class="row d-flex-align-right float-right">
+											<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+												<i class="fas fa-edit customIcon2 text-gray"></i>
+											</span>
+										</div>
+									</div>
+								</div>
+								<div class="row existFileDep">
+									<div class="col-lg-2 pl-3 mt-1">
+										<strong th:text="'FOSSLight Report'"></strong>
+									</div>
+									<div class="col-lg-9">
+										<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+											<ul class="depCsvFileArea">
+												<th:block th:if="${project.depCsvFile != null}">
+													<th:block th:each="csvFile : ${project.depCsvFile}">
+														<li th:if="${csvFile.delYn eq 'N'}">
+															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+															<input type="hidden" class="depCsvFileSeq" th:value="${csvFile.fileSeq}" /><br>[[${csvFile.createdDate}]]
+														</li>
+													</th:block>
+												</th:block>
+												<th:block th:unless="${project.depCsvFile != null}">
+													<li class="mt-1" th:text="'No File'"></li>
+												</th:block>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div id="depProjectSearch" style="display: none;">
+					<form id="depProjectForm" class="depBtn">
+						<input type="hidden" name="publicYn" value="Y">
+						<input type="hidden" name="prjName" />
+						<input type="hidden" name="prjVersion" />
+						<input type="hidden" name="prjId" />
+						<div class="row mt-3">
+							<div class="col-md-2">
+								<div class="form-group">
+									<select class="custom-select custom-narrow-item custom-narrow-item" name="depProjectSelect">
+										<option th:value="pNm" th:text="'Project Name'"></option>
+										<option th:value="pVer" th:text="'Project Version'"></option>
+										<option th:value="pId" th:text="'Project Id'"></option>
+									</select>
+								</div>
+							</div>
+							<div class="col-md-5">
+								<div class="input-group input-group-md">
+									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="depPrjSearchText">
+									<span class="input-group-append">
+										<button type="button" class="btn btn-default btn-flat custom-narrow-item" th:onclick="|dep_fn.projectSearch()|" th:text="Search"></button>
+									</span>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="depProjectSearch depBtn">
+					<div class="depProject1" style="display: none;">
+						<div class="pl-1 py-2">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Search Results</span>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_depProjectList1">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+								<div id="depProjectPager1"></div>
+							</div>
+						</div>
+					</div>
+					<div class="depProject2" style="display: none;">
+						<div class="row pl-1 pr-4">
+							<div class="col-4 pr-3">
+								<i class="fas fa-caret-square-right pr-1"></i>
+								<span>Detail Preview</span>
+							</div>
+							<div class="col-8 pr-1 pb-2">
+								<a class="btn btn-light-gray btn-sm float-right px-4" th:onclick="|dep_fn.showDialog()|" th:text="Load"></a>
+							</div>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_depProjectList2">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="_depAddListContainer" style="display: none">
+					<hr class="my-3 existFileDep">
+					<div class="pl-1 py-2">
+						<i class="fas fa-caret-square-right pr-1"></i>
+						<span>Loaded List</span>
+					</div>
+					<div class="px-2 pt-1">
+						<div class="outerJqGridSet">
+							<table id="_depAddList">
+								<tr>
+									<td></td>
+								</tr>
+							</table>
+						</div>
+					</div>	
+				</div>
+			</div>
+		</div>
+</th:block>
+<th:block th:fragment="srcFragments">
+		<input type="hidden" id="srcEditMode" value="N"/>
+		<div class="card-body bg-ivory">
+			<div th:if="${project.identificationSubStatusSrc == 'N'}" class="row">
+				<div class="col-lg-6">
+					<div id="chkApplicableDep" class="icheck-danger d-inline">
+						<label th:text="'Not Applicable'"></label>
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row d-flex-align-right float-right">
+						<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+							<i class="fas fa-edit customIcon2 text-gray"></i>
+						</span>
+					</div>
+				</div>
+			</div>
+			<input type="hidden" name="identificationSubStatusSrc" th:value="${project.identificationSubStatusSrc}">
+			<div id="content_src">
+				<form id="srcUploadForm" class="srcBtn">
+					<input type="hidden" id="srcCsvFileId" th:value="${project.srcCsvFileId}">
+					<div name="content_src" id="srcUploadSearch">
+						<div class="row" id="content-src">
+							<div class="col-12">
+								<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row">
+									<div class="col-lg-6"></div>
+									<div class="col-lg-6">
+										<div class="row d-flex-align-right float-right">
+											<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+												<i class="fas fa-edit customIcon2 text-gray"></i>
+											</span>
+										</div>
+									</div>
+								</div>
+								<div class="row existFileSrc">
+									<div class="col-lg-2 pl-3 mt-1">
+										<strong th:text="'FOSSLight Report'"></strong>
+									</div>
+									<div class="col-lg-9">
+										<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+											<ul class="csvFileArea">
+												<th:block th:if="${project.csvFile != null}">
+													<th:block th:each="csvFile : ${project.csvFile}">
+														<li th:if="${csvFile.delYn eq 'N'}">
+															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+															<input type="hidden" class="srcCsvFileSeq" th:value="${csvFile.fileSeq}" />
+															<br>[[${csvFile.createdDate}]]
+														</li>
+													</th:block>
+												</th:block>
+												<th:block th:unless="${project.csvFile != null}">
+													<li class="mt-1" th:text="'No File'"></li>
+												</th:block>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+
+				<form id="srcProjectForm" class="srcBtn">
+					<input type="hidden" name="publicYn" value="Y">
+					<input type="hidden" name="prjName" />
+					<input type="hidden" name="prjVersion" />
+					<input type="hidden" name="prjId" />
+					<div name="content_src" id="srcProjectSearch" style="display: none;">
+						<div class="row mt-3">
+							<div class="col-md-2">
+								<div class="form-group">
+									<select class="custom-select custom-narrow-item" name="srcProjectSelect">
+										<option th:value="pNm" th:text="'Project Name'"></option>
+										<option th:value="pVer" th:text="'Project Version'"></option>
+										<option th:value="pId" th:text="'Project Id'"></option>
+									</select>
+								</div>
+							</div>
+							<div class="col-md-5">
+								<div class="input-group input-group-md">
+									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="srcPrjSearchText">
+									<span class="input-group-append">
+										<button type="button" class="btn btn-default btn-flat custom-narrow-item" id="srcProjectSearchBtn" th:text="Search"></button>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+
+				<div class="srcProjectSearch srcBtn">
+					<div class="srcProject1" style="display: none;">
+						<div class="pl-1 py-2">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Search Results</span>
+						</div>
+						<div class="px-2 pt-1">
+							<table id="_srcProjectList1">
+								<tr>
+									<td></td>
+								</tr>
+							</table>
+							<div id="srcProjectPager1"></div>
+						</div>
+					</div>
+					<div class="srcProject2" style="display: none;">
+						<div class="row pl-1 pr-4">
+							<div class="col-4 pr-3">
+								<i class="fas fa-caret-square-right pr-1"></i>
+								<span>Detail Preview</span>
+							</div>
+							<div class="col-8 pr-1 pb-2">
+								<a class="btn btn-dark btn-sm float-right px-3"
+									th:onclick="|src_fn.showDialog()|" th:text="Load"></a>
+							</div>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_srcProjectList2">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div id="_srcAddListContainer" style="display: none">
+						<hr class="my-3 existFileSrc">
+						<div class="pl-1 py-2">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Loaded List</span>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_srcAddList"><tr><td></td></tr></table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+</th:block>
+<th:block th:fragment="binFragments">
+	<input type="hidden" id="binEditMode" value="N"/>
+		<div class="card-body bg-ivory">
+			<div th:if="${project.identificationSubStatusBin == 'N'}" class="row">
+				<div class="col-lg-6">
+					<div id="chkApplicableDep" class="icheck-danger d-inline">
+						<label th:text="'Not Applicable'"></label>
+					</div>
+				</div>
+				<div class="col-lg-6">
+					<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row d-flex-align-right float-right">
+						<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+							<i class="fas fa-edit customIcon2 text-gray"></i>
+						</span>
+					</div>
+				</div>
+			</div>
+			<input type="hidden" name="identificationSubStatusBin" th:value="${project.identificationSubStatusBin}">
+			<div id="content_bin">
+				<form id="binUploadForm" class="binBtn">
+				<input type="hidden" id="binCsvFileId" th:value="${project.binCsvFileId }"/>
+				<input type="hidden" id="binBinaryFileId" th:value="${project.binBinaryFileId }"/>
+					<div name="content_bin" id="binUploadSearch">
+						<div class="row" id="content-bin">
+							<div class="col-12">
+								<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row">
+          							<div class="col-lg-6"></div>
+           							<div class="col-lg-6">
+           								<div class="row d-flex-align-right float-right">
+                  							<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+                      							<i class="fas fa-edit customIcon2 text-gray"></i>
+                  							</span>
+           								</div>
+             						</div>
+                      			</div>
+								<div class="row existFileBin">
+									<div class="col-lg-2 pl-3 mt-1">
+										<strong th:text="'FOSSLight Report'"></strong>
+									</div>
+									<div class="col-lg-9">
+										<div class="row up-area">
+											<div class="col-lg-2">
+												<p th:text="'FOSSLight Report'"></p>
+											</div>
+											<div class="col-lg-7">
+												<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+													<ul class="binFileArea">
+														<th:block th:if="${project.binCsvFile != null}">
+															<th:block th:each="csvFile : ${project.binCsvFile}">
+																<li th:if="${csvFile.delYn == 'N'}">
+																	<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+																	<input type="hidden" class="binCsvFileSeq" th:value="${csvFile.fileSeq}" /> <br>[[${csvFile.createdDate}]]
+																</li>
+															</th:block>
+														</th:block>
+														<th:block th:unless="${project.binCsvFile != null}">
+															<li th:text="'No File'"></li>
+														</th:block>
+													</ul>
+												</div>
+											</div>
+										</div>
+										<div class="row">
+											<div class="col-lg-2">
+												<p th:text="'fosslight_binary.txt'"></p>
+											</div>
+											<div class="col-lg-8">
+												<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+													<ul class="binBinaryFileArea">
+														<th:block th:if="${project.binBinaryFile != null}">
+															<th:block th:each="csvFile : ${project.binBinaryFile}">
+																<li th:if="${csvFile.delYn == 'N'}">
+																	<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+																	<input type="hidden" class="binBinaryFileSeq" th:value="${csvFile.fileSeq}" /> <br>[[${csvFile.createdDate}]]
+																</li>
+															</th:block>
+														</th:block>
+														<th:block th:unless="${project.binBinaryFile != null}">
+															<li th:text="'No File'"></li>
+														</th:block>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+
+				<form id="binProjectForm" class="binBtn">
+					<input type="hidden" name="publicYn" value="Y">
+					<input type="hidden" name="prjName" />
+					<input type="hidden" name="prjVersion" />
+					<input type="hidden" name="prjId" />
+					<div name="content_bin" id="binProjectSearch" style="display: none;">
+						<div class="row mt-3">
+							<div class="col-md-2">
+								<div class="form-group">
+									<select class="custom-select custom-narrow-item"
+										name="binProjectSelect">
+										<option th:value="pNm" th:text="'Project Name'"></option>
+										<option th:value="pVer" th:text="'Project Version'"></option>
+										<option th:value="pId" th:text="'Project Id'"></option>
+									</select>
+								</div>
+							</div>
+							<div class="col-md-5">
+								<div class="input-group input-group-md">
+									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="binPrjSearchText">
+										<span class="input-group-append">
+										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|bin_fn.projectSearch()|" th:text="Search"></button>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+				<div class="binProjectSearch binBtn">
+					<div class="binProject2" style="display: none;">
+						<div class="pl-1 py-2">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Search Results</span>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_binProjectList1">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+								<div id="binProjectPager1"></div>
+							</div>
+						</div>
+					</div>
+					<div class="binProject2" style="display: none;">
+						<div class="row pl-1 pr-4">
+							<div class="col-4 pr-3">
+								<i class="fas fa-caret-square-right pr-1"></i>
+								<span>Detail Preview</span>
+							</div>
+							<div class="col-8 pr-1 pb-2">
+								<a class="btn btn-outline-dark btn-xs float-right px-3" th:onclick="|bin_fn.showDialog()|" th:text="Load"></a>
+							</div>
+						</div>
+						<div class="px-2 pt-1">
+							<div class="innerJqGridSet">
+								<table id="_binProjectList2">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="_binAddListContainer" style="display: none">
+					<hr class="my-3 existFileBin">
+					<div class="pl-1 py-2">
+						<i class="fas fa-caret-square-right pr-1"></i>
+						<span>Loaded List</span>
+					</div>
+					<div class="px-2 pt-1">
+						<div class="innerJqGridSet">
+							<table id="_binAddList">
+								<tr>
+									<td></td>
+								</tr>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</th:block>
+<th:block th:fragment="binandroidFragments">
+	<input type="hidden" id="binandroidEditMode" value="N"/>
+	<div class="card-body bg-ivory">
+		<div th:if="${project.identificationSubStatusAndroid == 'N'}" class="row">
+          	<div class="col-lg-6">
+             	<div id="chkApplicableBinAndroid" class="icheck-danger d-inline">
+                 	<label th:text="'Not Applicable'"></label>
+              	</div>
+          	</div>
+          	<div class="col-lg-6">
+             	<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row d-flex-align-right float-right">
+                  	<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+                      	<i class="fas fa-edit customIcon2 text-gray"></i>
+                 	</span>
+             	</div>
+          	</div>
+       	</div>
+		<input type="hidden" name="identificationSubStatusAndroid" th:value="${project.identificationSubStatusAndroid}">
+		<div id="content_android">
+			<form id="binAndroidUploadForm" class="binAndroidBtn">
+				<input type="hidden" id="srcAndroidCsvFileId" name="srcAndroidCsvFileId" th:value="${project.srcAndroidCsvFileId}" />
+				<input type="hidden" id="srcAndroidNoticeFileId" name="srcAndroidNoticeFileId" th:value="${project.srcAndroidNoticeFileId}" />
+				<input type="hidden" id="srcAndroidNoticeXmlId" name="srcAndroidNoticeXmlId" th:value="${project.srcAndroidNoticeXmlId}" />
+				<input type="hidden" id="srcAndroidResultFileId" name="srcAndroidResultFileId" th:value="${project.srcAndroidResultFileId}" />
+				<input type="hidden" id="srcAndroidNoticeSaveYn" name="srcAndroidNoticeSaveYn" value="N" />
+				<div name="content_android" id="binAndroidUploadSearch">
+					<div class="row" id="content_android">
+						<div class="col-12">
+							<div th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="row">
+                            	<div class="col-lg-6"></div>
+                                <div class="col-lg-6">
+                                	<div class="row d-flex-align-right float-right">
+                                    	<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+                                        	<i class="fas fa-edit customIcon2 text-gray"></i>
+                                       	</span>
+                                   	</div>
+                               	</div>
+                           	</div>
+							<div class="row">
+								<div class="col-lg-2 pl-3 mt-1">
+									<strong th:text="'Android Model'"></strong>
+								</div>
+								<div class="col-lg-10">
+									<div class="row">
+										<div class="col-lg-2">
+											<p th:text="'FOSSLight Report'"></p>
+										</div>
+										<div class="col-lg-10">
+											<div class="ajax-file-upload-container mt-0" style="width: 100%;">
+												<ul class="androidCsvFileArea">
+													<th:block th:if="${project.androidCsvFile != null}">
+														<th:block th:each="csvFile : ${project.androidCsvFile}">
+															<li th:if="${csvFile.delYn == 'N'}">
+																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+																<input type="hidden" class="androidCsvFileSeq" th:value="${csvFile.fileSeq}" />
+																<br>[[${csvFile.createdDate}]]
+															</li>
+														</th:block>
+													</th:block>
+													<th:block th:if="${project.androidCsvFile == null}">
+														<li th:text="'No File'"></li>
+													</th:block>
+												</ul>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-lg-2">
+											<p class="text-danger" th:text="'NOTICE'"></p>
+										</div>
+										<div class="col-lg-10">
+											<div class="ajax-file-upload-container mt-0" style="width: 100%;">
+												<ul class="androidNoticeFileArea">
+													<th:block th:if="${project.androidNoticeFile != null}">
+														<th:block th:each="csvFile : ${project.androidNoticeFile}">
+															<li th:if="${csvFile.delYn == 'N'}">
+																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+																<input type="hidden" class="androidNoticeFileSeq" th:value="${csvFile.fileSeq}" />
+																<br>[[${csvFile.createdDate}]]
+															</li>
+														</th:block>
+													</th:block>
+													<th:block th:unless="${project.androidNoticeFile != null}">
+														<li th:text="'No File'"></li>
+													</th:block>
+												</ul>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-lg-2">
+											<p th:text="'fosslight_binary.txt'"></p>
+										</div>
+										<div class="col-lg-10">
+											<div class="ajax-file-upload-container mt-0" style="width: 100%;">
+												<ul class="androidResultFileArea">
+													<th:block th:if="${project.androidResultFile != null}">
+														<th:block th:each="csvFile : ${project.androidResultFile}">
+															<li th:if="${csvFile.delYn eq 'N'}">
+																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+																<input type="hidden" class="androidResultFile" th:value="${csvFile.fileSeq}" />
+																<br>[[${csvFile.createdDate}]]
+															</li>
+														</th:block>
+													</th:block>
+													<th:block th:unless="${project.androidResultFile != null}">
+														<li th:text="'No File'"></li>
+													</th:block>
+												</ul>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+			<form id="binAndroidProjectForm" class="binAndroidBtn">
+				<input type="hidden" name="publicYn" value="Y">
+				<input type="hidden" name="prjName" />
+				<input type="hidden" name="prjVersion" />
+				<input type="hidden" name="prjId" />
+				<div name="content_android" id="binAndroidProjectSearch" style="display: none;">
+					<div class="row mt-3">
+						<div class="col-md-2">
+							<div class="form-group">
+								<select class="custom-select" name="binAndroidProjectSelect">
+									<option th:value="pNm" th:text="'Project Name'"></option>
+									<option th:value="pVer" th:text="'Project Version'"></option>
+									<option th:value="pId" th:text="'Project Id'"></option>
+								</select>
+							</div>
+						</div>
+						<div class="col-md-5">
+							<div class="input-group input-group-md">
+								<input type="text" class="form-control" name="binAndroidPrjSearchText">
+								<span class="input-group-append">
+									<button type="button" class="btn btn-outline-dark btn-flat" id="binAndroidProjectSearchBtn" th:text="Search"></button>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+			<div class="binAndroidProjectSearch binAndroidBtn">
+				<div class="binAndroidProject1 mt-3" style="display: none;">
+					<div class="pl-1 py-2">
+						<i class="fas fa-caret-square-right pr-1"></i>
+						<span>Search Results</span>
+					</div>
+					<div class="px-2 pt-1">
+						<div class="innerJqGridSet">
+							<table id="_binAndroidProjectList1">
+								<tr>
+									<td></td>
+								</tr>
+							</table>
+							<div id="binAndroidProjectPager1"></div>
+						</div>
+					</div>
+				</div>
+				<div class="binAndroidProject2 mt-5" style="display: none;">
+					<div class="row pl-1 pr-4">
+						<div class="col-4 pr-3">
+							<i class="fas fa-caret-square-right pr-1"></i>
+							<span>Detail Preview</span>
+						</div>
+						<div class="col-8 pr-1 pb-2">
+							<a class="btn btn-outline-dark btn-xs float-right px-3" 
+								th:onclick="|binAndroid_fn.loadToList()|" th:text="Load"></a>
+						</div>
+					</div>
+					<div class="px-2 pt-1">
+						<div class="row mt-3" id="content_android">
+							<div class="col-12">
+								<div class="row">
+									<div class="col-lg-2 pl-3 mt-1">
+										<strong th:text="'NOTICE'"></strong>
+									</div>
+									<div class="col-lg-3">
+										<div class="row">
+											<div class="col-lg-1"></div>
+											<div class="col-lg-11" style="display: flex;">
+												<div class="fileuploader" id="androidNoticeFileDummy"
+													th:text="Upload"></div>
+											</div>
+										</div>
+									</div>
+									<div class="col-lg-7">
+										<div class="ajax-file-upload-container" style="margin-top: 0px;">
+											<ul class="androidNoticeFileAreaDummy"></ul>
+										</div>
+									</div>
+								</div>
+								<hr class="my-3">
+								<div class="row">
+									<div class="col-lg-2 pl-3 mt-1">
+										<strong th:text="'fosslight_binary.txt'"></strong>
+									</div>
+									<div class="col-lg-3">
+										<div class="row">
+											<div class="col-lg-1"></div>
+											<div class="col-lg-11" style="display: flex;">
+												<div class="fileuploader" id="androidResultFileDummy" th:text="Upload"></div>
+											</div>
+										</div>
+									</div>
+									<div class="col-lg-7">
+										<div class="ajax-file-upload-container" style="margin-top: 0px;">
+											<ul class="androidResultFileAreaDummy"></ul>
+										</div>
+									</div>
+								</div>
+								<div class="row" id="_binandroidAddListContainer">
+									<hr class="my-3">
+									<div class="pl-3 py-2">
+										<i class="fas fa-caret-square-right pr-1"></i>
+										<span>Loaded List</span>
+									</div>
+									<div class="px-4 pt-1">
+										<div class="innerJqGridSet">
+											<table id="_binAndroidProjectList2">
+												<tr>
+													<td></td>
+												</tr>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</th:block>
+<th:block th:fragment="bomFragments">
+	<div class="row">
+		<div class="col-lg-2"></div>
+		<div class="col-lg-10 loadedProjectArea"></div>
+	</div>
+</th:block>
+<th:block th:fragment="batFragments">
+		<div class="card-body bg-ivory">
+			<div class="row">
+				<div class="col-lg-6"></div>
+				<div class="col-lg-6">
+					<div class="row d-flex-align-right float-right">
+						<span th:if="${project.permission > 0 and project.identificationStatus != 'CONF'}" class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+							<i class="fas fa-edit customIcon2 text-gray"></i>
+						</span>
+					</div>
+				</div>
+			</div>
+			<div id="content_bat">
+				<div name="content_bat" id="binaryFile">
+					<div class="row">
+						<div class="col-md-10">
+							<div class="row">
+								<div class="col-5" style="display: flex;">
+									<input type="hidden" id="binaryFileId" th:value="${project.srcCsvFileId}" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div name="content_bat" id="wgetUrl" style="display: none;">
+					<div class="row">
+						<div class="col-md-10">
+							<div class="row">
+								<div class="col-5">
+									<div class="input-group input-group-md">
+										<input type="text" class="form-control">
+										<span class="input-group-append">
+											<button type="button" class="btn btn-outline-dark btn-flat" id="send" th:text="send"></button>
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row mt-3 ml-3" id="content-bat" style="display: none;">
+				<div class="innerJqGridSet">
+					<table id="_binaryFileList">
+						<tr>
+							<td></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+</th:block>
+</body>
+</html>

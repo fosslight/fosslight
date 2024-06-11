@@ -6,19 +6,19 @@
 <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
     <div class="wrapper">
-        <div class="custom-layout">
+        <div class="custom-layout multi-grid-page">
             <!-- Content Header (Page header) -->
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row">
                     	<div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
                     	<div class="float-right align-items-center mt-2" style="margin-left: auto;">
-                        	<div class="helpLink f-left dropdown float-right px-1">
+<!--                        <div class="helpLink f-left dropdown float-right px-1">
                                 <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
                                 <div class="dropdown-menu mt-0">
                                     <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Security')|">How to use FossLight Hub</a>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="float-right">
                         		<button class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
                         	</div>
@@ -33,9 +33,10 @@
             	<div class="row">
             	<div class="contents-area col-9">
             		<input type="hidden" name="prjId" th:value="${project.prjId}"/>
-                    <div class="card card-dark card-tabs">
-                        <div class="card-header p-0 pt-1" style="display:inline-block;">
-                        	<div class="float-left" style="display:inline;">
+            		<div class="topper-content">
+                    <div class="card card-secondary card-tabs">
+                        <div class="card-header d-flex p-0 pt-1">
+                        	<div class="d-flex align-items-center">
                             	<ul class="nav nav-tabs" id="menu-tab" role="tablist">
                                 	<li class="nav-item">
                                     	<a class="nav-link active" id="tabMenuTotal" data-toggle="pill" href="#menu-total" role="tab" aria-controls="menu-total" aria-selected="true" th:text="Total"></a>
@@ -48,12 +49,18 @@
                                 	</li>
                             	</ul>
                         	</div>
+                        	<div class="d-flex-align" style="margin-left: auto;">
+	                        	<span th:if="${project.statusPermission > 0}" class="ml-2 mr-2 px-2 pointer" id="save" th:onclick="|total.save()|" title="save">
+									<i class="fas fa-save customIcon2"></i>
+								</span>
+	                        </div>
                         </div>
                     </div>
-
-					<div class="row pl-2" name="gridArea" id="gridAreaTotal" style="width: 100%; display: none;">
+                    </div>
+					<div class="bottom-component">
+					<div class="row pl-2 grid-area" name="gridArea" id="gridAreaTotal" style="width: 100%; display: none;">
                         <!-- buttons -->
-                        <div class="col-md-12 mb-3 pl-2">
+ <!--                  	<div class="col-md-12 mb-3 pl-2">
                             <div class="row">
                                 <div class="col-md-6">
                                 </div>
@@ -63,17 +70,17 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- grids -->
-                        <div class="col-md-12 outerJqGridSet">
+                        <div class="col-md-12 jqGridSet">
                             <table id="totalList"><tr><td></td></tr></table>
                             <div id="totalListPager"></div>
                         </div>
                     </div>
                     
-                    <div class="row pl-2" name="gridArea" id="gridAreaFixed" style="width: 100%;display: none;">
+                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaFixed" style="width: 100%;display: none;">
                         <!-- buttons -->
-                        <div class="col-md-12 mb-3 pl-2">
+<!--                   	<div class="col-md-12 mb-3 pl-2">
                             <div class="row">
                             	<div class="col-md-6">
                                 </div>
@@ -83,17 +90,17 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- grids -->
-                        <div class="col-md-12 outerJqGridSet">
+                        <div class="col-md-12 jqGridSet">
                             <table id="fixedList"><tr><td></td></tr></table>
                             <div id="fixedListPager"></div>
                         </div>
                     </div>
                     
-                    <div class="row pl-2" name="gridArea" id="gridAreaNotFixed" style="width: 100%; display: none;">
+                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaNotFixed" style="width: 100%; display: none;">
                         <!-- buttons -->
-                        <div class="col-md-12 mb-3 pl-2">
+<!--                   	<div class="col-md-12 mb-3 pl-2">
                             <div class="row">
                             	<div class="col-md-6">
                                 </div>
@@ -103,12 +110,13 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- grids -->
-                        <div class="col-md-12 outerJqGridSet">
+                        <div class="col-md-12 jqGridSet">
                             <table id="notFixedList"><tr><td></td></tr></table>
                             <div id="notFixedListPager"></div>
                         </div>
+                    </div>
                     </div>
                 </div>
                 <div class="col-lg-3 comment-area">

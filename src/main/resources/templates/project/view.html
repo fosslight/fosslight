@@ -1,28 +1,60 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<link rel="stylesheet" th:href="@{/css/datatables/dataTables.bootstrap4.min.css}">
+<script th:src="@{/js/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/js/datatables/dataTables.bootstrap4.min.js}"></script>
+<th:block th:replace="project/view-script :: viewScript"></th:block>
 <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
     <div class="wrapper">
         <div class="custom-layout ml-2 mr-2" style="height: auto">
-            <section class="content">
-            	<div class="card col-md-9 mt-2">
-            		<div class="card-header" style="border-bottom : 0">
-						<h3 class="card-title">Project Basic Information</h3>
-					</div>
+            <section class="content-header">
+            	<div class="container-fluid">
+            		<div class="d-flex align-items-center mt-3 ml-2" id="displayProjectInfo"></div>
+				</div>
+			</section>
+			<section class="content">
+				<div class="card card-secondary">
+					<div class="card-header">
+				 		<h3 class="card-title" th:text="'Project Information'"></h3>
+				 	</div>
 					<div class="card-body">
 						<div class="row">
-							<div class="col-lg-6">
+							<div class="col-md-12">
 								<div class="table-responsive">
 									<table class="table">
 										<tbody>
 											<tr class="text-smaller">
 												<th style="width: 30%" th:text="#{msg.common.field.project.name}"></th>
-												<td th:text="${project?.prjName}"></td>
+												<td>
+													<span th:text="${project?.prjName}"></span>
+												</td>
 											</tr>
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.project.version}"></th>
-												<td th:text="${project?.prjVersion}"></td>
+												<td>
+													<span th:text="${project?.prjVersion}"></span>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th><span th:text="#{msg.common.field.priority}"></span><i class="fas fa-info-circle fa-lg ml-1 text-light-gray" id="helpLink_priority" data-html="true" data-placement="right"></i></th>
+												<td>
+													<th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+														<span th:if="${code[0] == project.priority}" th:text="${code[1]}"></span>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.permission}"></th>
+												<td>
+													<th:block th:if="${project != null and project.publicYn != 'N'}">
+														<span th:text="'Everyone'"></span><br>
+													</th:block>
+													<th:block th:unless="${project != null and project.publicYn != 'N'}">
+														<span th:text="'Creator & Watcher'"></span><br>	
+													</th:block>
+												</td>
 											</tr>
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.OS}"></th>
@@ -37,98 +69,104 @@
 													</th:block>
 												</td>
 											</tr>
-											<tr th:if="${project.viewOnlyFlag != 'Y'}" class="text-smaller">
-												<th th:text="#{msg.common.field.permission}"></th>
-												<td>
-													<th:block th:if="${project != null and project.publicYn != 'N'}">
-														<span th:text="'View > Everyone'"></span><br>
-													</th:block>
-													<th:block th:unless="${project != null and project.publicYn != 'N'}">
-														<span th:text="'View > Creator & Watcher'"></span><br>	
-													</th:block>
-													<span th:text="'Edit > Creator & Watcher only'"></span>
-												</td>
-											</tr>
 											<tr class="text-smaller">
-												<th th:text="#{msg.common.field.distributionType}"></th>
+												<th><span th:text="#{msg.common.field.distributionType}"></span><i class="fas fa-info-circle fa-lg ml-1 text-light-gray" id="helpLink_distributionType" data-html="true" data-placement="bottom"></i></th>
 												<td>
 													<th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
 														<th:block th:if="${code[0] == project.distributionType}">
 															<span th:text="${code[1]}"></span>
 														</th:block>
 													</th:block>
-													<br>
-													<span th:text="'- Network service only ? '"></span><span th:if="${project.networkServerType == 'Y'}" th:text="Yes"></span><span th:if="${project.networkServerType != 'Y'}" th:text="No"></span>
+													<span th:if="${project.networkServerType == 'Y'}" th:text="' > Network service only'"></span>
+												</td>
+											</tr>
+											<tr class="text-smaller" data-widget="expandable-table" aria-expanded="false">
+												<th th:onclick="|fn.modelTableToggle()|">Model Information <i class="expandable-table-caret fas fa-caret-left fa-fw"></i></th>
+												<td>
+													<div id="modelTableDiv" style="display: none;">
+													<table class="table table-bordered table-hover dataTable dtr-inline" id="modelTable">
+														<thead>
+                                                    		<tr>
+                                                        		<th class="text-center" th:text="category"></th>
+                                                        		<th class="text-center" th:text="modelName"></th>
+                                                       		 	<th class="text-center" th:text="releaseDate"></th>
+                                                    		</tr>
+                                                		</thead>
+													</table>
+													</div>
 												</td>
 											</tr>
 											<tr class="text-smaller">
-												<th th:text="'Distribution Site'"></th>
+												<th th:text="#{msg.common.field.additionalInformation}"></th>
+												<td th:utext="${project.comment}"></td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.watcher}"></th>
 												<td>
-													<th:block th:each="code, status : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTE_CODE'))}"></th:block>
-														<th:block th:if="${project.distributeDeployTime != null or project.destributionStatus == 'RSV'}">
-															<th:block th:if="${status.index == 0}">
-																<th:block th:if="${project.distributeTarget == null or project.distributeTarget == code[0]}" th:text="${code[1]}"></th:block>
+													<th:block th:if="${project.watcherList != null}" th:each="watcher, status : ${project.watcherList}">
+														<th:block th:if="${watcher.prjEmail != ''}">
+															<span th:text="${watcher.prjEmail + ' / Email'}"></span>
+														</th:block>
+														<th:block th:unless="${watcher.prjEmail != ''}">
+															<th:block th:if="${watcher.prjDivisionName != ''}">
+																<span th:text="${watcher.prjDivisionName}"></span>
+																<span th:if="${watcher.prjUserName != ''}" th:text="${' / ' + watcher.prjUserName}"></span>
 															</th:block>
-															<th:block th:if="${status.index != 0}">
-																<th:block th:if="${project.distributeTarget == code[0]}" th:text="${code[1]}"></th:block>
+															<th:block th:unless="${watcher.prjDivisionName != ''}">
+																<span th:if="${watcher.prjUserName != ''}" th:text="${watcher.prjUserName}"></span>
+																<span th:if="${watcher.prjUserId != ''}" th:text="${' / ' + watcher.prjUserId}"></span>
 															</th:block>
 														</th:block>
-														<th:block th:unless="${project.distributeDeployTime != null or project.destributionStatus == 'RSV'}">
-															<th:block th:if="${status.index == 0}">
-																<th:block th:if="${project.distributeTarget == null or project.distributeTarget == code[0]}" th:text="${code[1]}"></th:block>
-															</th:block>
-															<th:block th:if="${status.index != 0}">
-																<th:block th:if="${project.distributeTarget == code[0]}" th:text="${code[1]}"></th:block>
-															</th:block>
+														<span th:if="${status.count != status.size}" th:text="', '"></span>
+														<th:block th:if="${status.count%2 == 0}"><br></th:block>
+													</th:block>
+												</td>
+											</tr>
+											<tr th:if="${project?.prjId != null and project?.copyFlag != 'Y'}" class="text-smaller">
+												<th th:text="#{msg.common.field.creator}"></th>
+												<td th:text="${project.prjUserName}"></td>
+											</tr>
+											<tr th:if="${project?.prjId != null and project?.copyFlag != 'Y'}" class="text-smaller">
+												<th th:text="#{msg.common.field.division}"></th>
+												<td th:text="${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), project.division)}"></td>
+											</tr>
+											<tr th:if="${project?.prjId != null and project?.copyFlag != 'Y'}" class="text-smaller">
+												<th th:text="#{msg.common.field.reviewer}"></th>
+												<td th:text="${project.reviewerName}"></td>
+											</tr>
+											<tr class="text-smaller">
+												<th><span th:text="#{msg.common.field.download}"></span></th>
+												<td>
+													<th:block th:if="${project.identificationStatus == 'CONF'}">
+														<span style="cursor:pointer;" th:onclick="fn.downloadReport(this, [[${project.permission}]])"><i class="far fa-file-excel hover-icon fa-1-5x mr-1" title="FOSSLight Report"></i></span>
+														<span th:if="${project.reviewReportFileId != null}" style="cursor:pointer;" th:onclick="fn.downloadReviewReport(this,[[${project.permission}]])">
+															<i class="far fa-file-pdf hover-icon fa-1-5x mr-1" title="FOSSLight Review Report"></i>
+														</span>
+													</th:block>
+													<th:block th:if="${project.verificationStatus == 'CONF'}">
+														<th:block th:if="${project.noticeType != '99' and (project.noticeFileId != '' and project.noticeFileId != null)}">
+															<span style="cursor:pointer;" th:onclick="fn.downloadNotice(this, [[${project.permission}]])">
+																<i class="far fa-file-code hover-icon fa-1-5x mr-1" title="OSS Notice"></i>
+															</span>
+														</th:block>
+														<th:block th:if="${project.packageFileId != '' and project.packageFileId != null}">
+															<span style="cursor:pointer;" th:onclick="fn.downloadPackage(this, [[${project.permission}]])">
+																<i class="far fa-file-archive hover-icon fa-1-5x mr-1" title="Packaging File1"></i>
+															</span>
+														</th:block>
+														<th:block th:if="${project.packageFileId2 != '' and project.packageFileId2 != null}">
+															<span style="cursor:pointer;" th:onclick="fn.downloadPackageMulti(this, '2', [[${project.permission}]])">
+																<i class="far fa-file-archive hover-icon fa-1-5x mr-1" title="Packaging File2"></i>
+															</span>
+														</th:block>
+														<th:block th:if="${project.packageFileId3 != '' and project.packageFileId3 != null}">
+															<span style="cursor:pointer;" th:onclick="fn.downloadPackageMulti(this, '3', [[${project.permission}]])">
+																<i class="far fa-file-archive hover-icon fa-1-5x mr-1" title="Packaging File3"></i>
+															</span>
 														</th:block>
 													</th:block>
 												</td>
 											</tr>
-										</tbody>
-									</table>
-								</div>
-							</div>
-							<div class="col-lg-6">
-								<div class="table-responsive">
-									<table class="table">
-										<tbody>
-											<tr class="text-smaller">
-												<th style="width: 30%" th:text="#{msg.common.field.project.status}"></th>
-												<td>
-													<div class="row">
-														<div class="col-12 col-sm-4">
-															<div class="info-box bg-light">
-																<div class="info-box-content">
-																	<span class="info-box-text text-center text-muted">Identification</span>
-																</div>
-															</div>
-														</div>
-														<div class="col-12 col-sm-4">
-															<div class="info-box bg-light">
-																<div class="info-box-content">
-																	<span class="info-box-text text-center text-muted">Verification</span>
-																</div>
-															</div>
-														</div>
-														<div class="col-12 col-sm-4">
-															<div class="info-box bg-light">
-																<div class="info-box-content">
-																	<span class="info-box-text text-center text-muted">Distribution</span>
-																</div>
-															</div>
-														</div>
-													</div>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
-							</div>
-							<div class="col-lg-12">
-								<div class="table-responsive">
-									<table class="table">
-										<tbody>
-											
 										</tbody>
 									</table>
 								</div>

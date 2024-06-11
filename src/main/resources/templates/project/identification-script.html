@@ -5,15 +5,24 @@
 var partnerFlag = [[${partnerFlag}]];
 var batFlag = [[${batFlag}]];
 var newPrjFlag = [[${newPrjFlag}]];
+var commonEditMode = "";
+var comTargetId = "";
+var partyGridCompleteFlag = false;
+var depGridCompleteFlag = false;
+var srcGridCompleteFlag = false;
+var binGridCompleteFlag = false;
+var bomGridCompleteFlag = false;
 
 $(document).ready(function () {
+	loadingIden.show();
+	
 	com_evt.init();
 	if (partnerFlag) party_evt.init();
 	dep_evt.init();
 	src_evt.init();
 	bin_evt.init();
 	bom_evt.init();
-	if (batFlag) bat_evt.init();
+//	if (batFlag) bat_evt.init();
 	fn.displayProjectInfo();
 	
 	$("[id^=tabMenu]").on("click", function() {
@@ -21,6 +30,17 @@ $(document).ready(function () {
 		tabId = tabId.replace("tabMenu", "");
 		$("[name=gridArea]").hide();
 
+		$('#save').attr('onclick', "com_fn.save('"+tabId+"')");
+		
+		if ("Bom" == tabId) {
+			$('#save').attr('title', "merge and save");
+			$('#reset').hide();
+		} else {
+			$('#save').attr('title', "");
+			$('#reset').attr('onclick', "com_fn.reset('"+tabId+"')");
+			$('#reset').show();
+		}
+		
         var applicable = $("#applicable" + tabId).is(':checked');
 		$("#gridArea"+tabId).show();
 		
@@ -28,19 +48,82 @@ $(document).ready(function () {
 			var btnClass = "." + tabId.toLowerCase() + "Btn";
 			$(btnClass).hide();
 		}
+		
+		switch (tabId) {
+			case "Party" : 
+				commonEditMode = $("#thirdEditMode").val();
+				comTargetId = "_3rdAddList";
+				break;
+			case "Dep" : 
+				commonEditMode = $("#depEditMode").val();
+				comTargetId = "_depAddList";
+				break;
+			case "Src" : 
+				commonEditMode = $("#srcEditMode").val();
+				comTargetId = "_srcAddList";
+				break;
+			case "Bin" : 
+				commonEditMode = $("#binEditMode").val();
+				comTargetId = "_binAddList";
+				break;
+		}
+		adjustMultiPageGridSize();
 	});
-
-//	if ("N" == newPrjFlag) $("#expandBtn").trigger("click");
+	
+	$(document).keydown(function (e) {
+		if (e.keyCode == 13) {
+			if ($("#partnerSearch").is(":visible")) {
+				party_evt.partnerSearch();
+				return false;
+			}
+			if ($("#partnerProjectSearch").is(":visible")) {
+				party_evt.projectSearch();
+				return false;
+			}
+			if ($("#depProjectSearchBtn").is(":visible")) {
+				dep_fn.projectSearch();
+				return false;
+			}
+			if ($("#srcProjectSearch").is(":visible")) {
+				src_fn.projectSearch();
+				return false;
+			}
+			if ($("#binProjectSearch").is(":visible")) {
+				bin_fn.projectSearch();
+				return false;
+			}
+		}
+	});
 });
 
+var displayInfo;
 /* identification 코멘트 관련 함수 */
 var fn = {
+		getProjectStatus : function () {
+			$.ajax({
+				url : "/project/getProjectStatus",
+				type : 'POST',
+				data : JSON.stringify({"prjId" : [[${project.prjId}]]}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success : function(data){
+					displayInfo = data;
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
 		displayProjectInfo : function() {
+			fn.getProjectStatus();
+			
 			var display = "";
 			
 			var pNm = [[${project.prjName}]];
 			var pVer = [[${project.prjVersion}]];
-			if ("" != pVer && pVer != null) pNm += " (v" + pVer + ")";
+			if ("" != pVer && pVer != null) pNm += " (" + pVer + ")";
 			
 			// project name
 			var prjName = "<span class=\"description-percentage text-dark-gray\">";
@@ -49,32 +132,31 @@ var fn = {
 			
 			// status
 			var status = "<span class=\"ml-2\"> | </span>";
-			var projectStatus = [[${project.status}]];
-			var customStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), project.status)}]];
+			var projectStatus = displayInfo.projectStatus;
 			
 			switch(projectStatus){
 			case 'REQ':
-				status += "<span class=\"text-pink text-bold ml-2\">" + customStatus + "</span>";
+				status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
 
 				break;
 			case 'REV':
-				status += "<span class=\"text-yellow text-bold ml-2\">" + customStatus + "</span>";
+				status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
 
 				break;
 			case 'DROP':
-				status += "<span class=\"text-gray text-bold ml-2\">" + customStatus + "</span>";
+				status += "<span class=\"text-gray text-bold ml-2\">Drop</span>";
 
 				break;
 			case 'FREV':
-				status += "<span class=\"text-purple text-bold ml-2\">" + customStatus + "</span>";
+				status += "<span class=\"text-purple text-bold ml-2\">Final Review</span>";
 
 				break;
 			case 'COMP':
-				status += "<span class=\"text-dark-blue text-bold ml-2\">" + customStatus + "</span>";
+				status += "<span class=\"text-dark-blue text-bold ml-2\">Complete</span>";
 
 				break;
 			default:
-				status += "<span class=\"text-success text-bold ml-2\">" + customStatus + "</span>";
+				status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
 
 				break;
 			}
@@ -97,39 +179,23 @@ var fn = {
 						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2 customShadow">Identification</span>';
 					}
 				} else if ("FREV" == projectStatus) {
-					oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" ";
-					if ("Y" == [[${project.androidFlag}]]) {
-						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
-					} else {
-						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
-					}
+					oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 				} else {
-					var initDiv = "5";
-					
 					if ("CONF" == identificationStatus) {
-						oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" ";
-						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+						oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 					} else if ("PROG" == projectStatus) {
-						oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" ";
-						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+						oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 					} else if ("REQ" == projectStatus) {
-						oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" ";
-						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+						oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 					} else if ("REV" == projectStatus) {
-						oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" ";
-						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+						oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 					}
 				}
 			} else {
 				if ("DROP" == projectStatus) {
-					oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2">Identification</span>';
+					oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow">Identification</span>';
 				} else {
-					oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" ";
-					if ("Y" == [[${project.androidFlag}]]) {
-						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
-					} else {
-						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
-					}
+					oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
 				}
 			}
 			
@@ -149,35 +215,35 @@ var fn = {
 						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
 							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
 						} else if ("" != identificationStatus) {
-							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 						}
 					} else if ("PROG" == verificationStatus) {
 						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
 							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
 						} else {
-							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 						}
 					} else if ("REV" == verificationStatus) {
-						oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+						oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 					} else if ("REQ" == verificationStatus) {
-						oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+						oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 					} else if ("NA" == verificationStatus || "DROP" == verificationStatus) {
 						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
 					} else {
 						if ("CONF" == verificationStatus) {
-							oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+							oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 						} else {
 							if ("NA" == [[${project.distributeTarget}]]) {
 								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
 							} else {
 								if ("PROG" == projectStatus) {
-									oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+									oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 								} else if ("REQ" == projectStatus) {
-									oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+									oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 								} else if ("REV" == projectStatus) {
-									oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+									oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 								} else if ("FREV" == projectStatus) {
-									oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2 customShadow' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+									oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
 								}
 							}
 						}
@@ -191,34 +257,34 @@ var fn = {
 			var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
 			var vulnerability = "<span class=\"ml-2\"> | </span>";
 			
-			var cvssScore = [[${project.cvssScore}]];
-			var secCode = [[${project.secCode}]];
-			var secCvssScore = [[${project.secCvssScore}]];
+			var cvssScore = displayInfo.cvssScore;
+			var secCode = displayInfo.secCode;
+			var secCvssScore = displayInfo.secCvssScore;
 			
-			if (secCvssScore != null && (secCode != null && "Fixed" != secCode)) {
+			if ("N" != secCvssScore && "Fixed" != secCode) {
 				cvssScore = secCvssScore;
 			}
 			
-			if (secCode != null) {
+			if ("N" != secCode) {
 				if ("Fixed" == secCode) {
-					if (cvssScore != null && cvssScore != 0) {
-						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(" + cvssScore + ")</span>";
+					if ("N" != cvssScore) {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Resolved(" + cvssScore + ")</span>";
 					} else {
-						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(N/A)</span>";
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Resolved(N/A)</span>";
 					}
 				} else {
-					if (cvssScore >= standardScore) {
-						vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Need to resolve(" + cvssScore + ")</span>";
-					} else {
-						if (cvssScore != null) {
-							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(" + cvssScore + ")</span>";
+					if ("0" != cvssScore && "N" != cvssScore) {
+						if (cvssScore - standardScore >= 0) {
+							vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Need to resolve(" + cvssScore + ")</span>";
 						} else {
-							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(N/A)</span>";
+							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Discovered(" + cvssScore + ")</span>";
 						}
+					} else {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>";
 					}
 				}
 			} else {
-				if (cvssScore != null) {
+				if ("0" != cvssScore && "N" != cvssScore) {
 					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered("+cvssScore+")</span>";
 				} else {
 					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered(N/A)</span>";
@@ -232,6 +298,22 @@ var fn = {
 				$(".goToEditLink").addClass("ellipsis");
 			}
 	},
+	mvEditTab : function(prjId){
+        createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
+    },
+    mvIdentification : function() {
+		if ("Y" == [[${project.androidFlag}]]) {
+			createTabInFrame([[${project.prjId}]]+"_Identify", "/project/identification/" + [[${project.prjId}]] + "/4");
+		} else {
+			createTabInFrame([[${project.prjId}]]+"_Identify", "/project/identification/" + [[${project.prjId}]] + "/5");
+		}
+	},
+	mvVerification : function() {
+		createTabInFrame([[${project.prjId}]] + "_Packaging", "/project/verification/" + [[${project.prjId}]]);
+	},
+	mvSecurity : function() {
+		createTabInFrame([[${project.prjId}]] + "_Security", "/project/security/" + [[${project.prjId}]]);
+	},
     handleUserCommentPopupOpen: function () {
         // 코멘트 팝업
         const param = {
@@ -241,21 +323,31 @@ var fn = {
         getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
                 if (!alertify.editDialog) {
                     alertify.dialog('editDialog', function () {
-                        return {
-                            main: function (content) {
-                                this.setContent(content);
-                            },
-                            setup: function () {
-                                return {
-                                    buttons: [],
-                                    focus: {element: 0}
-                                };
-                            }
-                        };
-                    });
+                    	return {
+        					setup: function() {
+        						var settings = alertify.confirm().settings;
+        					
+        						for (var prop in settings) {
+        							this.settings[prop] = settings[prop];
+        						}
+        					
+        						var setup = alertify.confirm().setup();
+        						setup.buttons = [];
+        						setup.focus.element = 0;
+        					
+        						return setup;
+        					},
+        			    	hooks: {
+        			    		onshow: function() {
+        			        		this.elements.dialog.style.maxWidth = 'none';
+        			          		this.elements.dialog.style.width = '700px';
+        			        	}
+        					}
+        				};
+                    }, false, 'confirm');
                 }
 
-                editDailog = alertify.editDialog(res).set('resizable', true).resizeTo('25%', 380);
+                alertify.editDialog(res);
             },
             null,
             function () {
@@ -332,9 +424,6 @@ var fn = {
                 alertify.error([[#{msg.common.valid2}]], 0);
             }
         });
-    },
-    mvEditTab : function(prjId){
-        createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
     }
 }
 </script>

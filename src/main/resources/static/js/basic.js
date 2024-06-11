@@ -935,8 +935,10 @@ function createValidMsgComplex(msgData) {
                 } else if ($('select[name=' + key + ']').length > 0) {
 					if ('osType' == key || 'licenseType' == key) {
 						$('select[name=' + key + ']').focus().next().next("span.retxt,div.retxt").html(value).show();
+						$('select[name=' + key + ']').focus().next().next().next("span.retxt,div.retxt").html(value).show();
 					} else {
 						$('select[name=' + key + ']').focus().next("span.retxt,div.retxt").html(value).show();
+						$('select[name=' + key + ']').focus().next().next("span.retxt,div.retxt").html(value).show();
 					}
                     
                     $('select[name=' + key + ']').addClass("is-invalid");
@@ -2103,7 +2105,7 @@ function tableRefreshGridArea () {
 }
 
 function tableRefreshGridArea (flag) {
-	var width = $(".wrapper").find(".contents-area").width() - 20;
+	var width = $(".wrapper").find(".contents-area").width() - 30;
 	
 	$('.ui-jqgrid-btable').each(function () {
         var id = $(this).attr('id');
@@ -2785,7 +2787,6 @@ var searchDateOptions = {searchoptions: {sopt: ['eq', 'lt', 'le', 'gt', 'ge']}};
 
 
 function replaceWithLink(text) {
-    console.log(text);
     return text.replace(LINKREGEXP, findAndReplace);
 }
 
@@ -3762,7 +3763,7 @@ function optimizeGridSizeAdjustmentPage() {
 
 	let jqGridSetElementId = jqGridSetElement.find('table').attr("id");
 	if (!jqGridSetElementId) {
-		 const jqgridId = jqGridSetElement.find('.ui-jqgrid').attr("id");
+		const jqgridId = jqGridSetElement.find('.ui-jqgrid').attr("id");
 	    if (jqgridId != null || jqgridId != undefined) {
 	        jqGridSetElementId = jqgridId.match(/gbox_(.*)/)[1];
 	    }
@@ -3771,8 +3772,15 @@ function optimizeGridSizeAdjustmentPage() {
 	if(jqgridSetWidth < jqgridMinSetWidth) {
 		return false;
 	}
-	$("#" + jqGridSetElementId).jqGrid('setGridWidth', jqgridSetWidth);
 	
+	$('.ui-jqgrid-btable').each(function () {
+        var id = $(this).attr('id');
+		
+        if (id == jqGridSetElementId) {
+			$(this).jqGrid('setGridWidth', 0, true);
+            $(this).jqGrid('setGridWidth', jqgridSetWidth, true);
+        }
+    });
 	
 	// 2. Adjust the height of the element corresponding to 'topper-content' if it is defined
 	const topperContent = $(".topper-content");
@@ -3814,26 +3822,70 @@ function optimizeGridSizeAdjustmentPage() {
             });
         }
     }
+    
+    innerJqgirdSetElement = $(".tab-pane.active .exception-grid-view");
+    if (innerJqgirdSetElement.length > 0) {
+        let innerJqgirdSetWidth = innerJqgirdSetElement.width()*0.7;
+		
+        let innerJqGridsIds = [];
+        innerJqgirdSetElement.find('table').each(function() {
+            innerJqGridsIds.push($(this).attr("id"));
+        });
+
+        if (innerJqGridsIds.length == 0) {
+            innerJqgirdSetElement.find('table').each(function() {
+                innerJqGridsIds.push($(this).find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1]);
+            });
+        }
+
+        if (innerJqGridsIds.length > 0) {
+            innerJqGridsIds.forEach(function(ids) {
+				if (typeof ids !== "undefined") $("#" + ids).jqGrid('setGridWidth', innerJqgirdSetWidth);
+            });
+        }
+    }
+    
+    innerJqgirdSetElement = $(".tab-pane.active .exception-grid-edit");
+    if (innerJqgirdSetElement.length > 0) {
+        let innerJqgirdSetWidth = innerJqgirdSetElement.width();
+		
+        let innerJqGridsIds = [];
+        innerJqgirdSetElement.find('table').each(function() {
+            innerJqGridsIds.push($(this).attr("id"));
+        });
+
+        if (innerJqGridsIds.length == 0) {
+            innerJqgirdSetElement.find('table').each(function() {
+                innerJqGridsIds.push($(this).find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1]);
+            });
+        }
+
+        if (innerJqGridsIds.length > 0) {
+            innerJqGridsIds.forEach(function(ids) {
+				if (typeof ids !== "undefined") $("#" + ids).jqGrid('setGridWidth', innerJqgirdSetWidth);
+            });
+        }
+    }
 }
 
 /**
  * Resize the sizes of multiple grids -> idenfication
  */
 function adjustMultiPageGridSize() {
-	optimizeGridSizeAdjustmentMultiPage()
+	optimizeGridSizeAdjustmentMultiPage();
 	
 	const resizeObserver = new ResizeObserver(entries => {
 		for (const entry of entries) {
 			const targetWidth = entry.contentRect.width;
 			optimizeGridSizeAdjustmentMultiPage();
-		} 
+		}
 	});
 
 	resizeObserver.observe(document.querySelector(".topper-content .card-tabs"));
 	
-	 document.querySelectorAll('.card-tabs .nav-link').forEach(navLink => {
-        navLink.addEventListener('click', () => {
-            optimizeGridSizeAdjustmentMultiPage();
+	document.querySelectorAll('.card-tabs .nav-link').forEach(navLink => {
+    	navLink.addEventListener('click', () => {
+        	optimizeGridSizeAdjustmentMultiPage();
         });
     });
 }
@@ -3842,13 +3894,16 @@ function optimizeGridSizeAdjustmentMultiPage() {
     const jqgridMinSetWidth = 150;
     let jqgridSetWidth;
     let jqGridSetElement;
+    let jqGridSetElements = [];
 
     // 1. Adjust the width of main-sized grids like party / src / bin / bom ... list.
     $('.container-fluid .bottom-component .grid-area').each(function() {
         if (window.getComputedStyle(this).getPropertyValue('display') !== 'none') {
-            jqGridSetElement = $(this).find('.jqGridSet');   
+            jqGridSetElement = $(this).find('.jqGridSet');
             jqgridSetWidth = jqGridSetElement.width();
-        }
+        } else {
+			jqGridSetElements.push($(this).find('.jqGridSet'));
+		}
     });
     
     if(jqgridSetWidth < jqgridMinSetWidth) {
@@ -3859,8 +3914,28 @@ function optimizeGridSizeAdjustmentMultiPage() {
     if (jqGridSetElementId == null || jqGridSetElementId == undefined) {
         jqGridSetElementId = jqGridSetElement.find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1];
     }
-  
-    $("#" + jqGridSetElementId).jqGrid('setGridWidth', jqgridSetWidth);
+  	
+  	$('.ui-jqgrid-btable').each(function () {
+        var id = $(this).attr('id');
+		
+        if (id == jqGridSetElementId) {
+			$(this).jqGrid('setGridWidth', 0, true);
+            $(this).jqGrid('setGridWidth', jqgridSetWidth, true);
+        }
+    });
+
+	// 1-1. Adjust the width of main-sized grids like fixed / notFixed ... security list.
+	if (jqGridSetElements.length > 0) {
+		for (var i in jqGridSetElements) {
+			let notDisplayJqGridSetElementId = jqGridSetElements[i].find('table').attr("id");
+    		if (notDisplayJqGridSetElementId == null || notDisplayJqGridSetElementId == undefined) {
+        		notDisplayJqGridSetElementId = jqGridSetElements[i].find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1];
+    		}
+    		if ("fixedList" == notDisplayJqGridSetElementId || "notFixedList" == notDisplayJqGridSetElementId){
+				$("#" + notDisplayJqGridSetElementId).jqGrid('setGridWidth', jqgridSetWidth);
+			}
+		}
+	}
 
     // 2. Adjust the height of main-sized grids like party / src / bin / bom ... list when .topper-content exists.
     const topperContent = $(".topper-content");

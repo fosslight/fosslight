@@ -4,9 +4,7 @@
 <script th:inline="javascript">
 var globalBinAndroidNoticeFileId = "";
 var globalBinAndroidResultFileId = "";
-var ossNames = [];
 var objs = [];
-var licenseNames = [];
 
 var binAndroidData;
 var binAndroidMainData;
@@ -280,36 +278,6 @@ var binAndroid_evt = {
 		
 		initAndroidDummyFileUpload();
 		
-		// ossNames auto complete
-		fn_grid_com.griOssNames().success(function(data, status, headers, config){
-			if(data != null && ossNames == ""){
-				data.forEach(function(obj){
-					ossNames.push(obj.ossName);
-				})
-			}
-		});
-		
-		// licenseNames auto complete
-		commonAjax.getLicenseTags().success(function(data, status, headers, config){
-			if(data != null && licenseNames == ""){
-				var tag = "";
-				
-				data.forEach(function(obj){
-					if(obj!=null) {
-						tag = {
-							value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
-							label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
-							type : obj.licenseType,
-							obligation : obj.obligation,
-							obligationChecks : obj.obligationChecks
-						}
-						
-						licenseNames.push(tag);
-					}
-				});
-			}
-		});
-
 //		fn_grid_com.checkLicenseTextValidation([[${project.prjId}]], "load");
 		$("#tabMenuBinAndroid").trigger("click");
 		$("#gridAreaBinAndroid").show();

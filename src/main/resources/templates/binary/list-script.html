@@ -40,7 +40,17 @@
 
         const binary_evt = {
             init: function () {
-                $('#updateRange').daterangepicker();
+                $('#updateRange').daterangepicker({
+        			autoUpdateInput: false
+        		}).on('apply.daterangepicker', function(ev, picker) {
+        		    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+        		    $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+        		    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+        		}).on('cancel.daterangepicker', function(ev, picker) {
+        			$(this).val("");
+        			$("input[name='schStartDate']").val("");
+        		    $("input[name='schEndDate']").val("");
+        		});
 
                 $('#btnSaveBat').click(function(){
                     binary_fn.saveBat();
@@ -50,7 +60,6 @@
                     e.preventDefault();
                     var postData = binary_fn.serializeObjectHelper();
                     binary_data.load(postData);
-                    resizingJqGidSet();
                 });
 
                 // licenseNames auto complete
@@ -72,10 +81,6 @@
                             }
                         });
                     }
-                });
-
-                $(".cal").on("keyup", function(e){
-                    calValidation(this, e);
                 });
             }
         }
@@ -376,9 +381,10 @@
                     , viewrecords: true
                     , sortorder: 'asc'
                     , loadonce: false
+                    , toppager:true
                     , height: 'auto'
                     , multiselect: true
-                    , multiselectWidth: 30
+                    , multiselectWidth: 35
                     , onSelectRow: function (rowid, iRow, iCol, e) {
                         // 마지막 수정된 row 저장
                         if (binary_grid.lastEditRowId && rowid != binary_grid.lastEditRowId) {
@@ -391,25 +397,18 @@
                         // id(key값)의 max값을 lastIdNo에 설정
                         binary_grid.lastIdNo = binary_fn.getMaxIdNo();
                         confirmFlag = false;
+                        
+                        if ($("#list_toppager_left").find('button').length == 0) {
+                        	var appendIcon = "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"binary_fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                            $("#list_toppager_left").append(appendIcon);
+                        }
                     }
                     , ondblClickRow: function (rowid, iRow, iCol, e) {
                     }
                 });
 
-                $("#list").jqGrid('navGrid', "#pager", {
-                    edit: isAdmin,
-                    add: false,
-                    del: isAdmin,
-                    search: false,
-                    refresh: false
-                }, binaryUpdateDialogEdit, null, binaryUpdateDialogDel);
-
-                $("#list").jqGrid('filterToolbar', {
-                    stringResult: true,
-                    searchOnEnter: true,
-                    searchOperators: true,
-                    defaultSearch: "cn"
-                });
+                $("#list").jqGrid('navGrid', "#pager", {edit: isAdmin, add: false, del: isAdmin, search: false, refresh: false}, binaryUpdateDialogEdit, null, binaryUpdateDialogDel);
+                $("#list").jqGrid('filterToolbar', {stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
             }
         }
 

@@ -9,6 +9,9 @@ var distributionStatus = [[${project.destributionStatus}]];
 var isAndroidModel = [[${project.androidFlag}]] == "Y";
 var _popupCheckOssName = null;
 var _popupCheckOssLicense = null;
+var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
+var ossNames = [];
+var licenseNames = [];
 
 //==========================================================================================
 //COMMON
@@ -16,6 +19,35 @@ var _popupCheckOssLicense = null;
 var com_evt = {
 	// init
 	init: function(){
+		// ossNames auto complete
+		fn_grid_com.griOssNames().success(function(data, status, headers, config){
+			if(data != null && ossNames == ""){
+				data.forEach(function(obj){
+					ossNames.push(obj.ossName);
+				})
+			}
+		});
+		
+		// licenseNames auto complete
+		commonAjax.getLicenseTags().success(function(data, status, headers, config){
+			if(data != null && licenseNames == ""){
+				var tag = "";
+				data.forEach(function(obj){
+					if(obj!=null) {
+						tag ={
+							value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
+							label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
+							type : obj.licenseType,
+							obligation : obj.obligation,
+							obligationChecks : obj.obligationChecks
+						}
+						
+						licenseNames.push(tag);
+					}
+				});
+			}
+		});
+		
 		com_fn.tabInit();
 
 		if (isAndroidModel) {
@@ -30,130 +62,171 @@ var com_evt = {
 			}
 		}
 		
-		$('.btnCommentHistory').on('click', function(e){
-			e.preventDefault();
-            var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]];
-            openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
-		});
-
 		// bomConfirm button
 		$('#bomConfirm').click(function(e){
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
-				if (isAndroidModel) {
-					if ("undefined" !== typeof binAndroidValidMsgData.isValid && "false" == binAndroidValidMsgData.isValid) {
-						alertify.alert([[#{msg.project.validation.error}]]);
-						
-						return false;
-					}
-				} else {
-					if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
-						var customKeys = [];
-						var keys = Object.keys(bomValidMsgData);
-						var unconfirmedLicenseCnt = 0;
-						
-						keys.forEach(function(obj){
-							var warningMsg = bomValidMsgData[obj];
-							if ("Unconfirmed license" == warningMsg) {
-								unconfirmedLicenseCnt++;
-								return false;
-							}
-							
-							if (obj.indexOf(".") > -1) {
-								var key = obj.split(".")[1];
-								if (!customKeys.includes(key)) customKeys.push(key);
-							}
-						});
-						
-						if (unconfirmedLicenseCnt > 0) {
-							alertify.alert([[#{msg.project.validation.error}]]);
-							
-							return false;
-						}
-						
-						var adminCheckList = $("#bomList").jqGrid('getGridParam','data').filter(function(element, index) {
-							var adminCheckYn = element.adminCheckYn;
-							return "Y" == adminCheckYn;
-						});
-		
-						if (adminCheckList.length > 0) {
-							var includeIds = adminCheckList.filter(function(cur) {
-								return customKeys.includes(cur.componentId);
-							});
-			
-							if (includeIds.length != customKeys.length) {
-								alertify.alert([[#{msg.project.validation.error}]]);
-				
-								return false;
-							}
-						} else {
-							alertify.alert([[#{msg.project.validation.error}]]);
-			
-							return false;
-						}
-					}
-				}
-				
-				if (com_fn.isAndroidOnly()) {
-					var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : ""};
-
-					if ($("#ignoreBinaryDbFlag")) {
-		 				data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
-					}
-
-		 			// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
-					if(!com_fn.validBomChangeStatus(true)) {
-						return false;
-					}
-
-					com_fn.checkSave(data, "CONF");
-				} else {
-					// 머지 체크
-					if("Y"!= $("#mergeYn").val()){
-						alertify.alert([[#{msg.project.required.bomSave}]], function(){});
-						$("#tabMenuBom").trigger("click");
-
-						return false;
-					}
-					
-					if (Bom_Save_Flg){
-						if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
-							alertify.alert([[#{msg.project.required.bomSave}]], function(){});
-
-							return false;
-						}
-
-						// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
-						if (!com_fn.validBomChangeStatus(false)) {
-							return false;
-						}
-
-						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : ""};
-                    	if ($("#ignoreBinaryDbFlag")) {
-                    		data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
-                    	}
-                    
-                    	loading.show();
-						$.ajax({
-							url :'/project/verification/reviewReportAjax?prjId='+[[${project.prjId}]],
-							type : 'POST',
-							cache : false,
-                        	async : false,
-							success: function(data){
-								loading.hide();
+				// prevent clicking the OK button on Enter
+				let keyCode;
+				$(document).on('keydown', function (event) {
+					keyCode = event.keyCode;
+				});
+               	
+               	if (typeof alertify.bomConfirmDialog === 'undefined') {
+					alertify.dialog('bomConfirmDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								setup.focus.element = 0;
+								
+								return setup;
 							},
-							error : function(data){
-								loading.hide();
-								alertify.error([[#{msg.common.valid2}]], 0);
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
 							}
-						});
+						};
+					}, false, 'confirm');
+            	}
+				
+				var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.confirm', true)}]];
+           		innerHtml 		+= '<br><textarea id="bomConfirmEditor"></textarea>';
+				
+           		alertify.bomConfirmDialog()
+           		.set('onok', function(e) {
+           			var editorVal = $("#bomConfirmEditor").summernote('code');
+       				if ("" == $(editorVal).text().trim()) {
+       					editorVal = "";
+       				}
+       				
+       				if (isAndroidModel) {
+    					if ("undefined" !== typeof binAndroidValidMsgData.isValid && "false" == binAndroidValidMsgData.isValid) {
+    						alertify.alert([[#{msg.project.validation.error}]]);
+    						
+    						return false;
+    					}
+    				} else {
+    					if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
+    						var customKeys = [];
+    						var keys = Object.keys(bomValidMsgData);
+    						var unconfirmedLicenseCnt = 0;
+    						
+    						keys.forEach(function(obj){
+    							var warningMsg = bomValidMsgData[obj];
+    							if ("Unconfirmed license" == warningMsg) {
+    								unconfirmedLicenseCnt++;
+    								return false;
+    							}
+    							
+    							if (obj.indexOf(".") > -1) {
+    								var key = obj.split(".")[1];
+    								if (!customKeys.includes(key)) customKeys.push(key);
+    							}
+    						});
+    						
+    						if (unconfirmedLicenseCnt > 0) {
+    							alertify.alert([[#{msg.project.validation.error}]]);
+    							
+    							return false;
+    						}
+    						
+    						var adminCheckList = $("#bomList").jqGrid('getGridParam','data').filter(function(element, index) {
+    							var adminCheckYn = element.adminCheckYn;
+    							return "Y" == adminCheckYn;
+    						});
+    		
+    						if (adminCheckList.length > 0) {
+    							var includeIds = adminCheckList.filter(function(cur) {
+    								return customKeys.includes(cur.componentId);
+    							});
+    			
+    							if (includeIds.length != customKeys.length) {
+    								alertify.alert([[#{msg.project.validation.error}]]);
+    				
+    								return false;
+    							}
+    						} else {
+    							alertify.alert([[#{msg.project.validation.error}]]);
+    			
+    							return false;
+    						}
+    					}
+    				}
+    				
+    				if (com_fn.isAndroidOnly()) {
+    					var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : ""};
 
- 						com_fn.checkSave(data, "CONF");	
-					} else {
-						alertify.alert([[#{msg.project.check.save}]], function(){});
-					}				
-				}
+    					if ($("#ignoreBinaryDbFlag")) {
+    		 				data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
+    					}
+
+    		 			// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
+    					if(!com_fn.validBomChangeStatus(true)) {
+    						return false;
+    					}
+
+    					com_fn.checkSave(data, "CONF");
+    				} else {
+    					// 머지 체크
+    					if("Y"!= $("#mergeYn").val()){
+    						alertify.alert([[#{msg.project.required.bomSave}]], function(){});
+    						$("#tabMenuBom").trigger("click");
+
+    						return false;
+    					}
+    					
+    					if (Bom_Save_Flg){
+    						if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
+    							alertify.alert([[#{msg.project.required.bomSave}]], function(){});
+
+    							return false;
+    						}
+
+    						// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
+    						if (!com_fn.validBomChangeStatus(false)) {
+    							return false;
+    						}
+
+    						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : editorVal};
+                        	if ($("#ignoreBinaryDbFlag")) {
+                        		data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
+                        	}
+                        
+                        	loading.show();
+    						$.ajax({
+    							url :'/project/verification/reviewReportAjax?prjId='+[[${project.prjId}]],
+    							type : 'POST',
+    							cache : false,
+                            	async : false,
+    							success: function(data){
+    								loading.hide();
+    							},
+    							error : function(data){
+    								loading.hide();
+    								alertify.error([[#{msg.common.valid2}]], 0);
+    							}
+    						});
+
+     						com_fn.checkSave(data, "CONF");	
+    					} else {
+    						alertify.alert([[#{msg.project.check.save}]], function(){});
+    					}				
+    				}
+           		})
+           		.set('onshow', function(e){
+           			$("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           		})
+           		.set('title', 'Confirm').setContent(innerHtml)
+				.show();
 			} else {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}	
@@ -164,15 +237,7 @@ var com_evt = {
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 
-				if (distributionStatus == "PROC"){
-					var comment = [[#{msg.project.distribution.loading}]];
-					
-					alertify.error(comment, 0);
-
-					return false;
-				}
-				
-				var innerHtml 	= 'Are you sure you want to reject?<br><br>';
+				var innerHtml 	= 'Are you sure you want to reject?<br>';
                	innerHtml 		+= '<textarea id="bomRejectEditor"></textarea>';
 				
              	// prevent clicking the OK button on Enter
@@ -207,12 +272,13 @@ var com_evt = {
 					}, false, 'confirm');
             	}
                	
-               	alertify.bomRejectDialog(innerHtml, function (e) {
-					// prevent clicking the OK button on Enter
+               	alertify.bomRejectDialog()
+           		.set('onok', function(e) {
+           			// prevent clicking the OK button on Enter
 					if (typeof keyCode !== 'undefined' && keyCode == 13) {
 						keyCode = undefined;
 						return false;
-					} 
+					}
 
 					if (e) {
 						var editorVal = $("#bomRejectEditor").summernote('code');
@@ -222,15 +288,18 @@ var com_evt = {
 
 							return false;
 						} else {
-							var data = {"prjId": [[${project.prjId}]], "identificationStatus": "PROG", "userComment": $("#bomRejectEditor").summernote('code')};
+							var data = {"prjId": [[${project.prjId}]], "identificationStatus": "PROG", "userComment": editorVal};
 							com_fn.checkSave(data, "PROG");
 						}
 					} else {
 						return false;
 					}
-				});
-				
-				$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           		})
+           		.set('onshow', function(e){
+           			$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           		})
+           		.setContent(innerHtml)
+				.show();
 			} else {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}
@@ -241,40 +310,83 @@ var com_evt = {
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
-				// 머지 체크
-				if("Y" != $("#mergeYn").val()) {
-					alertify.alert([[#{msg.project.required.bomSave}]], function(){
-						$("#tabMenuBom").trigger("click");
-					});
-					
-					return false;
-				}
-				
-				if (Bom_Save_Flg) {
-					if ($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
+				// in case of bin-android and Yocto
+				if (isAndroidModel) {
+					if ("" == $('#srcAndroidNoticeFileId').val()) {
+						alertify.alert([[#{msg.project.android.noticefile.required}]], function(){});
+						return false;
+					} else {
+						if ("Y" != $('#srcAndroidNoticeSaveYn').val()) {
+							alertify.alert([[#{msg.project.notice.save}]], function(){});
+							return false;
+						}
+					}
+				} else {
+					// 머지 체크
+					if("Y" != $("#mergeYn").val()) {
 						alertify.alert([[#{msg.project.required.bomSave}]], function(){
 							$("#tabMenuBom").trigger("click");
 						});
 						
 						return false;
 					}
-					
-					alertify.confirm([[#{msg.common.confirm.continue}]], function(e){
-						if(e) {
-							if (userRole != "ROLE_ADMIN"){
-								if(!com_fn.validBomChangeStatus(isAndroidModel)) {
-									return false;
-								}
-							}
-							var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REQ", "userComment" : ""};
-							
-							com_fn.checkSave(data, "REQ");
-						}
-					});
-				} else {
-					alertify.alert([[#{msg.project.check.save}]], function(){});
 				}
-			}else {
+				
+				// if there is no oss version, add a vulnerability confirmation request popup
+				var msg = "";
+				if (!isAndroidModel) {
+					var vulnNoOssVersionGridDatas = $("#bomList").jqGrid('getRowData').filter(function(cur) {
+						var cvssScore = $(cur.cvssScore).text();
+						var ossVersion = cur.ossVersion;
+						return "" != cvssScore && "" == ossVersion;
+					});
+	
+					if (vulnNoOssVersionGridDatas.length > 0) {
+						msg = [[#{msg.project.request.check.vulnerability}]];
+						for (var i in vulnNoOssVersionGridDatas) {
+							msg += '<br/>';
+							msg += '&emsp;- ' + vulnNoOssVersionGridDatas[i].ossName;
+						}
+					}
+				}
+				
+				if ("" != msg) {
+					if(!alertify.checkVulnAlert){
+						alertify.dialog('checkVulnAlert', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+								settings: {
+									oncontinue: null
+								},
+								callback: function(closeEvent) {
+									alertify.confirm().callback.call(this, closeEvent);
+								}
+							};
+						}, false, 'confirm');
+					}
+					
+					alertify.checkVulnAlert(msg)
+					.set('labels', {cancel: 'IGNORE'})
+					.set('onok', function(closeEvent){return;})
+					.set('oncancel', function(closeEvent){com_fn.bomReqeustStart();});
+				} else {
+					com_fn.bomReqeustStart();
+				}
+			} else {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 			}
 		});
@@ -285,7 +397,7 @@ var com_evt = {
 				e.preventDefault();
 				
 				// 머지 체크
-				if("N"== $("#mergeYn").val()){
+				if ("N" == $("#mergeYn").val()) {
 					alertify.alert([[#{msg.project.required.bomSave2}]], function(){});
 
 					return false;
@@ -303,42 +415,6 @@ var com_evt = {
 			}
 		});
 
-		$("#editTab").click(function(){
-			var prjId = [[${project.prjId}]];
-			var tabName = prjId+"_Project";
-			var existsTabFlag = existsTabName(tabName);
-
-			if (existsTabFlag) {
-				$("#tab--"+tabName).trigger("click");
-			} else {
-				callCreateTabInFrame(prjId+'_Project', '/project/edit/'+prjId, 'project-edit_' + prjId, true);
-			}
-		});
-
-		$("#packagingTab").click(function(){
-			var prjId = [[${project.prjId}]];
-			var tabName = prjId+"_Packaging";
-			var existsTabFlag = existsTabName(tabName);
-			
-			if(existsTabFlag) {
-				$("#tab--"+tabName).trigger("click");
-			} else {
-                callCreateTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId, 'project-verification_' + prjId, true);
-			}
-		});
-		
-		$("#distributionTab").click(function(){
-			var prjId = [[${project.prjId}]];
-			var tabName = prjId+"_Distribute";
-			var existsTabFlag = existsTabName(tabName);
-			
-			if(existsTabFlag) {
-				$("#tab--"+tabName).trigger("click");
-			} else {
-                callCreateTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId, 'project-distribution_' + prjId, true);
-			}
-		});
-
 		$("#ignoreBinaryDbFlag").on("click",function(){
 			if($("#ignoreBinaryDbFlag").prop("checked")) {
 				$("#ignoreBinaryDbFlag").val("Y");
@@ -347,27 +423,29 @@ var com_evt = {
 			}
 		});
 
-		$("#securityTab").click(function(){
-			var prjId = [[${project.prjId}]];
-			var tabName = prjId+"_Security";
-			var existsTabFlag = existsTabName(tabName);
-			
-			if (existsTabFlag) {
-				$("#tab--"+tabName).trigger("click");
-			} else{
-                callCreateTabInFrame(prjId+'_Security', '/project/security/'+prjId, 'project-security_' + prjId, true);
-			}
-		});
-		
 		com_fn.saveFlagObject["DEP"] = false;
 		com_fn.saveFlagObject["SRC"] = false;
 		com_fn.saveFlagObject["BIN"] = false;
 		com_fn.saveFlagObject["ANDROID"] = false;
+		
+		commentsParam.height = $(window).height() - 120;
+		fn_comment.getCommentList(commentsParam);
 	}
 }
 	
 //공통 함수
 var com_fn = {
+	checkGridComplete : function (isAndroid) {
+		if (isAndroid) {
+			if (androidGridCompleteFlag) {
+				loadingIden.hide();
+			}
+		} else {
+			if (partyGridCompleteFlag && depGridCompleteFlag && srcGridCompleteFlag && binGridCompleteFlag && bomGridCompleteFlag) {
+				loadingIden.hide();
+			}
+		}
+	},
 	saveFlagObject : {},
 	// 탭 초기화
 	tabInit: function(){
@@ -382,28 +460,17 @@ var com_fn = {
 		
 		$("[name=gridArea]").hide();
 		
-		// switch (initDiv) {
-		// 	case "0" : activateTab = "#tabMenuParty"; activateGridArea = "#gridAreaParty";
-		// 		break;
-		// 	case "1" : activateTab = "#tabMenuDep"; activateGridArea = "#gridAreaDep";
-		// 		break;
-		// 	case "2" : activateTab = "#tabMenuSrc"; activateGridArea = "#gridAreaSrc";
-		// 		break;
-		// 	case "3" : activateTab = "#tabMenuBin"; activateGridArea = "#gridAreaBin";
-		// 		break;
-		// 	default : activateTab = "#tabMenuBom"; activateGridArea = "#gridAreaBom";
-		// 		break;
-		// }
-
-        switch (initDiv) {
-            case "4" : activateTab = "#tabMenuBinAndroid"; activateGridArea = "#gridAreaBinAndroid";
-                break;
-            default : activateTab = "#tabMenuBom"; activateGridArea = "#gridAreaBom";
-                break;
-        }
-
-		$(activateTab).trigger("click");
-		$(activateGridArea).show();
+		if ("4" != initDiv) {
+            $("#tabMenuBom").addClass("active");
+            $("#menu-bom").addClass("active show");
+			$("#gridAreaBom").show();
+			$("#save").attr("title", "merge and save");
+			$("#reset").hide();
+		} else {
+            $("#tabMenuBinAndroid").addClass("active");
+            $("#menu-android").addClass("active show");
+			$("#gridAreaBinAndroid").show();
+		}
 	},
 	fnTabChange: function(target){
 		var tabContent = $(".tabContent");
@@ -482,6 +549,7 @@ var com_fn = {
 		var cbx_iden = $(".idenCbx");
 		var fileUploader = $(".fileUploader");
 		var chkStatus = status||"";
+		var permission = [[${project.permission}]] == 1;
 		
 		if (role == "ROLE_ADMIN"){ // 관리자 권한 일 경우
 			switch(chkStatus){
@@ -489,25 +557,23 @@ var com_fn = {
 					btn_div.hide();
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
 					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					cbx_iden.prop("disabled", false);
 					
 					break;
 				case "PROG":
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
 					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					cbx_iden.prop("disabled", false);
 					
 					break;
 				case "REQ":
 					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.show();
 					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					cbx_iden.prop("disabled", false);
 					
 					break;
 				case "REV":
+					btn_reject.removeClass("btn-lg-red");
+                    btn_reject.addClass("btn-outline-lg-red");
 					btn_confirm.show();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					cbx_iden.prop("disabled", false);
 					
 					break;
 				case "CONF":
@@ -515,7 +581,6 @@ var com_fn = {
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_Analysis.hide();
 					btn_Analysis_Result.hide();
 					btn_check.hide();
-					cbx_iden.prop("disabled", true);
 					
 					break;
 			}
@@ -527,17 +592,26 @@ var com_fn = {
 				case "":
 					btn_div.hide();
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					cbx_iden.prop("disabled", false);
+					btn_check.show();btn_bulkRegist.show();fileUploader.show();
+					if (permission) {
+						btn_Reset.show();btn_Merge.show();btn_Save.show();
+					} else {
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
+					}
 					
 					break;
 				case "PROG":
 					btn_confirm.hide();btn_reject.hide();btn_review.show();btn_restart.hide();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
-					cbx_iden.prop("disabled", false);
+					if (permission) {
+						btn_Reset.show();btn_Merge.show();btn_Save.show();
+					} else {
+						btn_Reset.hide();btn_Merge.hide();btn_Save.hide();
+					}
+					btn_check.show();btn_bulkRegist.show();fileUploader.show();
 					
 					break;
 				case "REQ":
+					btn_reject.addClass("btn-lg-red");
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();
 
@@ -550,7 +624,7 @@ var com_fn = {
 				case "CONF":
 					btn_confirm.hide();btn_reject.show();btn_review.hide();btn_restart.hide();
 					btn_Reset.hide();btn_Merge.hide();btn_Save.hide(); btn_Analysis.hide();btn_bulkRegist.hide();fileUploader.hide();
-					btn_Analysis_Result.hide();
+					btn_Analysis.hide();btn_Analysis_Result.hide();
 					btn_check.hide();
 
 					break;
@@ -559,31 +633,31 @@ var com_fn = {
 	},
 	// 사용 여부 체크 박스
 	chkApplicable : function(){
-		if([[${project.identificationSubStatusPartner}]] == 'N'){
+		if ('N' == [[${project.identificationSubStatusPartner}]]) {
 			$("#applicableParty").trigger('click');
 		}
 		
-		if([[${project.identificationSubStatusDep}]] == 'N'){
+		if ('N' == [[${project.identificationSubStatusDep}]]) {
             $("#applicableDep").trigger('click');
         }
 		
-		if([[${project.identificationSubStatusSrc}]] == 'N'){
+		if ('N' == [[${project.identificationSubStatusSrc}]]) {
 			$("#applicableSrc").trigger('click');
 		}
 		
-		if([[${project.identificationSubStatusBat}]] == 'N'){
+		if ('N' == [[${project.identificationSubStatusBat}]]) {
 			$("#applicableBat").trigger('click');
 		}
 		
-		if([[${project.identificationSubStatusBin}]] == 'N'){
+		if ('N' == [[${project.identificationSubStatusBin}]]) {
 			$("#applicableBin").trigger('click');
 		}
 		
-		if([[${project.identificationSubStatusAndroid}]] == 'N'){
+		if ('N' == [[${project.identificationSubStatusAndroid}]]) {
 			$("#applicableBinAndroid").trigger('click');
 		}
 		
-		if ([[${project.verificationStatus}]] == 'CONF') {
+		if ('CONF' == [[${project.verificationStatus}]]) {
 			$("#applicableParty").attr("disabled", true);
 			$("#applicableDep").attr("disabled", true);
 			$("#applicableSrc").attr("disabled", true);
@@ -772,51 +846,131 @@ var com_fn = {
 
 		if ($(obj).is(':checked')) {
 			if ("partyBtn" == target){
+				$("input[name='identificationSubStatusPartner']").val("N");
 				$("#gridAreaParty").show();
+				$(".3rdProjectSearch").hide();
+				$(".3rdProjectSearch2").hide();
 				$("#_3rdAddListContainer").hide();
 			} else if ("depBtn" == target){
+				$("input[name='identificationSubStatusDep']").val("N");
 				$("#gridAreaDep").show();
 				$("#_depAddListContainer").hide();
 			} else if ("srcBtn" == target){
+				$("input[name='identificationSubStatusSrc']").val("N");
 				$("#gridAreaSrc").show();
 				$("#_srcAddListContainer").hide();
 			} else if ("binBtn" == target){
+				$("input[name='identificationSubStatusBin']").val("N");
 				$("#gridAreaBin").show();
 				$("#_binAddListContainer").hide();
+			} else if ("binAndroidBtn" == target){
+				$("input[name='identificationSubStatusAndroid']").val("N");
+				$("#gridAreaBinAndroid").show();
+				$("#_binandroidAddListContainer").hide();
 			}
 			
 			$('.'+target).hide();
 		} else {
 			$('.'+target).show();
 			
-			if (target == "batBtn") {
-				bat_fn.changeSearch();
-			} else if ("partyBtn" == target){
+			if ("partyBtn" == target){
+				$("input[name='identificationSubStatusPartner']").val("");
+				$('#_3rdAddList').jqGrid(party_evt.setParamParty3());
+				
 				if (_3rdLoadListLength > 0) {
 					$("#_3rdAddListContainer").show();
 				} else {
 					$("#_3rdAddListContainer").hide();
 				}
 			} else if ("depBtn" == target){
+				$("input[name='identificationSubStatusDep']").val("");
+				
 				if (_depLoadListLength > 0) {
 					$("#_depAddListContainer").show();
 				} else {
 					$("#_depAddListContainer").hide();
 				}
 			} else if ("srcBtn" == target){
+				$("input[name='identificationSubStatusSrc']").val("");
+				
 				if (_srcLoadListLength > 0) {
 					$("#_srcAddListContainer").show();
 				} else {
 					$("#_srcAddListContainer").hide();
 				}
 			} else if ("binBtn" == target){
+				$("input[name='identificationSubStatusBin']").val("");
+				
 				if (_binLoadListLength > 0) {
 					$("#_binAddListContainer").show();
 				} else {
 					$("#_binAddListContainer").hide();
 				}
+			} else if ("binAndroidBtn" == target){
+				$("input[name='identificationSubStatusAndroid']").val("");
+				
+				if (_binandroidLoadListLength > 0) {
+					$("#_binandroidAddListContainer").show();
+				} else {
+					$("#_binandroidAddListContainer").hide();
+				}
 			}
 		}
+	},
+	customCheckApplicable : function (target, mode) {
+		if ("partyBtn" == target) {
+			if ("view" == mode) {
+				$("#chkApplicableParty").empty();
+				$("#chkApplicableParty").html("<label class=\"text-sm\">Not Applicable</label><input type=\"hidden\" name=\"identificationSubStatusPartner\" value=\"N\">");
+			} else {
+				$("#applicableParty").prop("checked", true);
+			}
+			
+			$("#gridAreaParty").show();
+			$("#_3rdAddListContainer").hide();
+		} else if ("depBtn" == target) {
+			if ("view" == mode) {
+				$("#chkApplicableDep").empty();
+				$("#chkApplicableDep").html("<label class=\"text-sm\">Not Applicable</label><input type=\"hidden\" name=\"identificationSubStatusDep\" value=\"N\">");
+			} else {
+				$("#applicableDep").prop("checked", true);
+			}
+			
+			$("#gridAreaDep").show();
+			$("#_depAddListContainer").hide();
+		} else if ("srcBtn" == target) {
+			if ("view" == mode) {
+				$("#chkApplicableSrc").empty();
+				$("#chkApplicableSrc").html("<label class=\"text-sm\">Not Applicable</label><input type=\"hidden\" name=\"identificationSubStatusSrc\" value=\"N\">");
+			} else {
+				$("#applicableSrc").prop("checked", true);
+			}
+			
+			$("#gridAreaSrc").show();
+			$("#_srcAddListContainer").hide();
+		} else if ("binBtn" == target) {
+			if ("view" == mode) {
+				$("#chkApplicableBin").empty();
+				$("#chkApplicableBin").html("<label class=\"text-sm\">Not Applicable</label><input type=\"hidden\" name=\"identificationSubStatusBin\" value=\"N\">");
+			} else {
+				$("#applicableBin").prop("checked", true);
+			}
+			
+			$("#gridAreaBin").show();
+			$("#_binAddListContainer").hide();
+		} else if ("binAndroidBtn" == target) {
+			if ("view" == mode) {
+				$("#chkApplicableBinAndroid").empty();
+				$("#chkApplicableBinAndroid").html("<label class=\"text-sm\">Not Applicable</label><input type=\"hidden\" name=\"identificationSubStatusAndroid\" value=\"N\">");
+			} else {
+				$("#applicableBinAndroid").prop("checked", true);
+			}
+			
+			$("#gridAreaBinAndroid").show();
+			$("#_binandroidAddListContainer").hide();
+		}
+		
+		$("." + target).hide();
 	},
 	// 버튼 제어
 	btnControl : function(tabNm){
@@ -829,7 +983,12 @@ var com_fn = {
 		$("#" + tabNm+"Btn").show();
 	},
 	displayDelete : function(cellvalue, options, rowObject){
-		return '<input type="button" value="Delete" class="btnCLight" onclick="party_evt.removeList('+options.rowId+', '+rowObject.partnerId+')"/>';
+		var mode = $("#thirdEditMode").val();
+		if ("Y" == mode) {
+			return '<input type="button" value="Delete" class="btnCLight" onclick="party_evt.removeList('+options.rowId+', '+rowObject.partnerId+')"/>';
+		} else {
+			return '';
+		}
 	},
 	deleteLicense : function(target){
 		$(target).parent().remove();
@@ -958,10 +1117,26 @@ var com_fn = {
 			
 			var partyGrid = [];
 			var partnerCheck = [[${project.identificationSubStatusPartner}]];
+			var depCheck = [[${project.identificationSubStatusDep}]];
+			var srcCheck = [[${project.identificationSubStatusSrc}]];
+			var binCheck = [[${project.identificationSubStatusBin}]];
+			
 			if ([[${partnerFlag}]]) {
 				partyGrid = $('#list3').jqGrid('getRowData');
-				partnerCheck = ($("#applicableParty").is(":checked") ? 'N' : 'Y');
+				var applicablePartyValue = $("input[name='identificationSubStatusPartner']").val();
+				partnerCheck = applicablePartyValue;
+				if ("N" != applicablePartyValue) partnerCheck = 'Y';
 			}
+			
+			var applicableDepValue = $("input[name='identificationSubStatusDep']").val();
+			depCheck = applicableDepValue;
+			if ("N" != applicableDepValue) depCheck = 'Y';
+			var applicableSrcValue = $("input[name='identificationSubStatusSrc']").val();
+			srcCheck = applicableSrcValue;
+			if ("N" != applicableSrcValue) srcCheck = 'Y';
+			var applicableBinValue = $("input[name='identificationSubStatusBin']").val();
+			binCheck = applicableBinValue;
+			if ("N" != applicableBinValue) binCheck = 'Y';
 			
 			var depMainGrid = $('#depList').jqGrid('getGridParam','data'); 
 			var srcMainGrid = $('#srcList').jqGrid('getGridParam','data');
@@ -978,8 +1153,9 @@ var com_fn = {
 				binMainGrid : JSON.stringify(binMainGrid),
 				binSubGrid : "",
 				applicableParty : partnerCheck,
-				applicableSrc : ($("#applicableSrc").is(":checked") ? 'N' : 'Y'),
-				applicableBin : ($("#applicableBin").is(":checked") ? 'N' : 'Y'),
+				applicableDep : depCheck,
+				applicableSrc : srcCheck,
+				applicableBin : binCheck,
 				status : status
 			}
 			
@@ -1041,9 +1217,17 @@ var com_fn = {
 		} else { // src, bin에 error level message 존재여부 확인
 			var arr = $("#bomList").jqGrid('getDataIDs');
 			var gridData = new Array();
-			var applicableDepChecked = $("#applicableDep").prop("checked");
-			var applicableSrcChecked = $("#applicableSrc").prop("checked");
-			var applicableBinChecked = $("#applicableBin").prop("checked");
+			
+			var applicableDepValue = $("input[name='identificationSubStatusDep']").val();
+			var applicableSrcValue = $("input[name='identificationSubStatusSrc']").val();
+			var applicableBinValue = $("input[name='identificationSubStatusBin']").val();
+			
+			var applicableDepChecked = false;
+			if ("N" == applicableDepValue) applicableDepChecked = true;
+			var applicableSrcChecked = false;
+			if ("N" == applicableSrcValue) applicableSrcChecked = true;
+			var applicableBinChecked = false;
+			if ("N" == applicableBinValue) applicableBinChecked = true;
 			
 			for(var i in arr){
 				var adminCheckYn = $("#bomList").jqGrid('getCell',arr[i],'adminCheck');
@@ -1233,11 +1417,11 @@ var com_fn = {
 						});
 					} else if(status == "PROG") { //reject한 경우는 새로고침 (save 버튼등이 문제)
 						alertify.alert([[#{msg.common.success}]], function() {
-							com_fn.btnCtl(userRole, status);
-							curIdenStatus = status;
  							if(isAndroidModel) {
+ 								deleteTabInFrame('/project/identification/'+prjId+'/4');
  								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/4');
  							} else {
+ 								deleteTabInFrame('/project/identification/'+prjId+'/5');
  								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
  							}
 						});
@@ -1247,22 +1431,25 @@ var com_fn = {
 						});	
 					} else if(userRole == "ROLE_ADMIN" && status == "REQ") { // admin이 request review한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
-							com_fn.btnCtl(userRole, status);
-							curIdenStatus = status;
  							if (isAndroidModel) {
+ 								deleteTabInFrame('/project/identification/'+prjId+'/4');
  								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/4");
 							} else {
+								deleteTabInFrame('/project/identification/'+prjId+'/5');
  								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/5");
  							}
 						});
 					} else if (status == "CONF") { // Admin이 confirm한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
-							deleteTabInFrame('/project/identification/'+prjId);	
+							if (isAndroidModel) {
+								deleteTabInFrame('/project/identification/'+prjId+'/4');
+								createTabInFrame(prjId+'_Identify', "/project/identification/" + prjId + "/4");
+							} else {
+								deleteTabInFrame('/project/identification/'+prjId+'/5');
+								createTabInFrame(prjId+'_Identify', "/project/identification/" + prjId + "/5");
+							}
 						});
 					} else {
-						com_fn.btnCtl(userRole, status);
-						curIdenStatus = status;
-						
 						// admin이 review start 한 경우 $("#mergeYn").val() 초기화
 						if(status == "REV") {
 							$("#mergeYn").val("N");
@@ -1270,73 +1457,78 @@ var com_fn = {
 							if($("#binaryDB")){
 								$("#binaryDB").show();
 							}
+							
+							com_fn.btnCtl(userRole, status);
+							curIdenStatus = status;
 						}
 						
-					if ("Y" == [[${project.androidFlag}]]) {
-						if(binAndroidValidMsgData) {
-							gridValidMsgNew(binAndroidValidMsgData, "binAndroidList");
-						}
+						if ("Y" == [[${project.androidFlag}]]) {
+							if(binAndroidValidMsgData) {
+								gridValidMsgNew(binAndroidValidMsgData, "binAndroidList");
+							}
 						
-						if(binAndroidDiffMsgData) {
-							gridDiffMsg(binAndroidDiffMsgData, "binAndroidList");
-						}
+							if(binAndroidDiffMsgData) {
+								gridDiffMsg(binAndroidDiffMsgData, "binAndroidList");
+							}
 						
-						if(binAndroidInfoMsgData) {
-							gridInfoMsg(binAndroidInfoMsgData, "binAndroidList");
-						}
+							if(binAndroidInfoMsgData) {
+								gridInfoMsg(binAndroidInfoMsgData, "binAndroidList");
+							}
 						
-						com_fn.saveFlagObject["ANDROID"] = false;
-					}
+							com_fn.saveFlagObject["ANDROID"] = false;
+						}
 					
-					if ("N" == [[${project.androidFlag}]]) {
-						// error message를 재표시
-						if(bomValidMsgData) {
-							gridValidMsgNew(bomValidMsgData, "bomList");
+						if ("N" == [[${project.androidFlag}]]) {
+							// error message를 재표시
+							if(bomValidMsgData) {
+								gridValidMsgNew(bomValidMsgData, "bomList");
+							}
+						
+							if(bomDiffMsgData) {
+								gridDiffMsg(bomDiffMsgData, "bomList");
+							}
+						
+							if(depValidMsgData) {
+								gridValidMsgNew(depValidMsgData, "depList");
+							}
+						
+							if(depDiffMsgData) {
+								gridDiffMsg(depDiffMsgData, "depList");
+							}
+						
+							if(srcValidMsgData) {
+								gridValidMsgNew(srcValidMsgData, "srcList");
+							}
+						
+							if(srcDiffMsgData) {
+								gridDiffMsg(srcDiffMsgData, "srcList");
+							}
+						
+// 							if(batValidMsgData) {
+// 								gridValidMsgNew(batValidMsgData, "batList");
+// 							}
+						
+							if(binValidMsgData) {
+								gridValidMsgNew(binValidMsgData, "binList");
+							}
+						
+							if(binDiffMsgData) {
+								gridDiffMsg(binDiffMsgData, "binList");
+							}
+						
+							if(binInfoMsgData) {
+								gridInfoMsg(binInfoMsgData, "binList");
+							}
+						
+							com_fn.saveFlagObject["DEP"] = false;
+							com_fn.saveFlagObject["SRC"] = false;
+							com_fn.saveFlagObject["BIN"] = false;
 						}
-						
-						if(bomDiffMsgData) {
-							gridDiffMsg(bomDiffMsgData, "bomList");
-						}
-						
-						if(depValidMsgData) {
-							gridValidMsgNew(depValidMsgData, "depList");
-						}
-						
-						if(depDiffMsgData) {
-							gridDiffMsg(depDiffMsgData, "depList");
-						}
-						
-						if(srcValidMsgData) {
-							gridValidMsgNew(srcValidMsgData, "srcList");
-						}
-						
-						if(srcDiffMsgData) {
-							gridDiffMsg(srcDiffMsgData, "srcList");
-						}
-						
-// 						if(batValidMsgData) {
-// 							gridValidMsgNew(batValidMsgData, "batList");
-// 						}
-						
-						if(binValidMsgData) {
-							gridValidMsgNew(binValidMsgData, "binList");
-						}
-						
-						if(binDiffMsgData) {
-							gridDiffMsg(binDiffMsgData, "binList");
-						}
-						
-						if(binInfoMsgData) {
-							gridInfoMsg(binInfoMsgData, "binList");
-						}
-						
-						com_fn.saveFlagObject["DEP"] = false;
-						com_fn.saveFlagObject["SRC"] = false;
-						com_fn.saveFlagObject["BIN"] = false;
-					}
 						alertify.alert([[#{msg.common.success}]], function(){});
 					}
 				}
+				
+				fn.displayProjectInfo();
 			},
 			error: function(data){
 				loading.hide();
@@ -1512,7 +1704,21 @@ var com_fn = {
 			}
 		});
 	},
-    bulkEdit : function(tab){
+	bulkEdit : function(tab, permission, status){
+		if ("3RD" == tab) {
+    		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', "3rd Party")}]], function(){});
+    		return false;
+    	} else if ("bom" == tab) {
+    		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', "BOM")}]], function(){});
+    		return false;
+    	} else if (!permission) {
+    		alertify.alert([[#{msg.common.not.permission}]], function(){});
+    		return false;
+    	} else if ("CONF" == status) {
+    		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+    		return false
+    	}
+		
     	if (!$(".idenSave").is(":visible")) {
 			alertify.alert([[${@CommonFunction.getMessageForDisabled('msg.project.warn.edit.disabled', project.identificationStatus, 'identification')}]], function(){});
 			
@@ -1689,6 +1895,8 @@ var com_fn = {
 		return reMakeArrObj;
     },
     downloadYaml : function(target) {
+    	loadingIden.show();
+    	
         var params = {'prjId':[[${project.prjId}]], 'prjName' : [[${project.prjName}]]};
 
         switch(target.toUpperCase()){
@@ -1707,6 +1915,8 @@ var com_fn = {
             cache : false,
             contentType : 'application/json',
             success: function (data) {
+            	loadingIden.hide();
+            	
                 if("false" == data.isValid) {
                     alertify.error([[#{msg.common.valid2}]], 0);
                 } else {
@@ -1719,6 +1929,8 @@ var com_fn = {
         });
     },
     downloadCycloneDXJson : function (target) {
+    	loadingIden.show();
+    	
 		$.ajax({
 			type: "POST",
 			url: "/cyclonedxdownload/getCycloneDXPost",
@@ -1727,6 +1939,8 @@ var com_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
+				loadingIden.hide();
+				
 				if("false" == data.isValid) {
 					if (typeof data.validMsg !== "undefined") {
 						if (data.validMsg.indexOf("generation failed") != -1) {
@@ -1747,6 +1961,8 @@ var com_fn = {
 		});
 	},
 	downloadCycloneDXXml : function (target) {
+		loadingIden.show();
+		
 		$.ajax({
 			type: "POST",
 			url: "/cyclonedxdownload/getCycloneDXPost",
@@ -1755,6 +1971,8 @@ var com_fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function (data) {
+				loadingIden.hide();
+				
 				if("false" == data.isValid) {
 					if (typeof data.validMsg !== "undefined") {
 						if (data.validMsg.indexOf("generation failed") != -1) {
@@ -1806,6 +2024,47 @@ var com_fn = {
 				if ("10" == data.resCd){
 					alertify.success([[#{msg.common.success}]]);
 					$(obj).closest('li').remove();
+					if ("15" == referenceDiv) {
+						if ("2" == type) {
+							bin_fn.binaryUploadFile();
+						}
+					}
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	resetDeleteFiles : function (fileSeqs, menu, target) {
+		var referenceDiv = "";
+		
+		switch(menu.toUpperCase()){
+			case "DEP":		referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]];	break;
+			case "SRC":		referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]];	break;
+			case "BIN":		referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}]];	break;
+			case "ANDROID":	referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_ANDROID')}]];	break;
+		}
+
+		var Data = {"csvDelFileIds" : JSON.stringify(fileSeqs), "prjId" : [[${project.prjId}]], "referenceDiv" : referenceDiv};
+		
+		$.ajax({
+			url : "/project/deleteFiles",
+			type : 'POST',
+			data : JSON.stringify(Data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				if ("10" == data.resCd){
+					alertify.success([[#{msg.common.success}]]);
+					$("." + target).empty();
+					if ("bin" == menu) {
+						$(".binBinaryFileArea" + target).empty();
+					}
+					com_fn.changeMode('view', true);
 				} else {
 					alertify.error([[#{msg.common.valid2}]], 0);
 				}
@@ -1847,25 +2106,109 @@ var com_fn = {
     	
     	return checkEmptyFlag;
 	},
+	bomReqeustStart : function () {
+		if (Bom_Save_Flg) {
+			if (!isAndroidModel) {
+				if ($('#bomList').jqGrid('getDataIDs').length == 0 && "Y" != $("#mergeYn").val()) {
+					alertify.alert([[#{msg.project.required.bomSave}]], function(){
+						$("#tabMenuBom").trigger("click");
+					});
+					
+					return false;
+				}
+			}
+			console.log("bomReqeustStart");
+			// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+			
+			if (typeof alertify.bomRequestDialog === 'undefined') {
+				alertify.dialog('bomRequestDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+        	}
+			
+			var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.request', true)}]];
+       		innerHtml 		+= '<br><textarea id="bomRequestEditor"></textarea>';
+			
+       		alertify.bomRequestDialog()
+       		.set('onok', function(e) {
+       			if(e) {
+					if (userRole != "ROLE_ADMIN"){
+						if (!isAndroidModel && !com_fn.validBomChangeStatus(isAndroidModel)) {
+							return false;
+						}
+					}
+					
+					var editorVal = $("#bomRequestEditor").summernote('code');
+       				if ("" == $(editorVal).text().trim()) {
+       					editorVal = "";
+       				}
+					
+					var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "REQ", "userComment" : editorVal};
+
+					com_fn.checkSave(data, "REQ");
+				} else {
+					alertify.alert([[#{msg.project.warn.project.status}]], function(){});
+				}
+       		})
+       		.set('onshow', function(e){
+           		$("#bomRequestEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           	})
+           	.set('title', 'Request').setContent(innerHtml)
+			.show();
+		} else {
+			alertify.alert([[#{msg.project.check.save}]], function(){});
+		}
+	},
 	closeAlertifyView : function () {
 		$(".ajs-close").trigger("click");
 	},
-	gridAddFunc : function (tab, targetId) {
+	gridAddFunc : function (tab, targetId, permission, status) {
 		if ("3RD" == tab) {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
 		} else if ("bom" == tab) {
-			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'bom')}]], function(){});
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'BOM')}]], function(){});
+		} else if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+		} else if ("CONF" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
 		} else {
 			var grid = $("#" + targetId);
 			com_fn.saveFlagObject[tab] = false;
 			fn_grid_com.rowAddNew(targetId, grid, "main", null, com_fn.getLicenseName);
 		}
 	},
-	gridDelFunc : function (targetId, subTargetId, target) {
-		if ("3RD" == subTargetId) {
+	gridDelFunc : function (gubn, targetId, target, permission, status) {
+		if ("3RD" == gubn) {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
-		} else if ("bom" == subTargetId) {
-			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'bom')}]], function(){});
+		} else if ("bom" == gubn) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', 'BOM')}]], function(){});
+		} else if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+		} else if ("CONF" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
 		} else {
 			var grid = $("#" + targetId);
 			var selarrrow = grid.jqGrid("getGridParam", "selarrrow");
@@ -1881,6 +2224,266 @@ var com_fn = {
 					}
 				});
 			}
+		}
+	},
+	changeMode : function(mode, resetFlag) {
+		var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+		var tabDiv = targetId.split("-")[1];
+		var modeFlag = "";
+		if ("view" == mode) {
+			modeFlag = "N";
+		} else {
+			modeFlag = "Y";
+		}
+		
+		var target = "";
+        switch (tabDiv) {
+            case "third" : 
+            	target = "_3rdAddList";
+                break;
+            case "dep" : 
+            	target = "_depAddList";
+                break;
+            case "src" : 
+            	target = "_srcAddList";
+                break;
+            case "bin" : 
+            	target = "_binAddList";
+                break;
+            case "android" : 
+            	target = "_binAndroidProjectList2";
+                break;
+        }
+		
+		if ("menu-bom" != targetId) {
+			$.ajax({
+	            url: "/project/identification/" + [[${project.prjId}]] + "/" + tabDiv + "/" + mode,
+	            type: 'POST',
+	            dataType: 'html',
+	            cache: false,
+	            success: function (data) {
+	            	$("#" + targetId).empty();
+					$("#" + targetId).html(data);
+					
+					switch (tabDiv) {
+						case "third" :
+							if (!resetFlag) {
+								$('#_list').jqGrid(party_evt.setParamParty1());
+								$('#_list2').jqGrid(party_evt.setParamParty2());
+							}
+							
+							if ("edit" == mode) {
+								$(".partyBtn").show();
+								callAutoCompleteFnc("autoComConfParty");
+								callAutoCompleteFnc("autoComProjectNmConf");
+								
+								party_evt.partySearchSelect();
+								party_evt.partyProjectSelect();
+								
+								if ("N" == $("input[name='identificationSubStatusPartner']").val()) {
+									com_fn.customCheckApplicable("partyBtn", "edit");
+								} else {
+									$('#_3rdAddList').jqGrid(party_evt.setParamParty3());
+								}
+							} else {
+								if ("N" == $("input[name='identificationSubStatusPartner']").val()) {
+									com_fn.customCheckApplicable("partyBtn", "view");
+								} else {
+									$('#_3rdAddList').jqGrid(party_evt.setParamParty3());
+								}
+							}
+							
+							setTimeout(function () {
+								$("#tabMenuParty").trigger("click");
+							}, 200);
+							
+							break;
+						case "dep" : 
+							if (!resetFlag) {
+								dep_fn.csvUploadFile();
+								$('#_depAddList').jqGrid(dep_fn.setParamProject3());
+							}
+							
+							if ("edit" == mode) {
+								$(".depBtn").show();
+								callAutoCompleteFnc("autoComProjectNmConf");
+								dep_fn.depProjectSelect();
+								
+								if ("N" == $("input[name='identificationSubStatusDep']").val()) {
+									com_fn.customCheckApplicable("depBtn", "edit");
+								}
+							} else {
+								if ("N" == $("input[name='identificationSubStatusDep']").val()) {
+									com_fn.customCheckApplicable("depBtn", "view");
+								}
+							}
+							
+							setTimeout(function () {
+								$("#tabMenuDep").trigger("click");
+							}, 200);
+							
+							break;
+						case "src" : 
+							if (!resetFlag) {
+								src_fn.csvUploadFile();
+								$('#_srcAddList').jqGrid(src_fn.setParamProject3());
+							}
+							
+							if ("edit" == mode) {
+								$(".srcBtn").show();
+								callAutoCompleteFnc("autoComProjectNmConf");
+								src_evt.srcProjectSelect();
+								
+								if ("N" == $("input[name='identificationSubStatusSrc']").val()) {
+									com_fn.customCheckApplicable("srcBtn", "edit");
+								}
+							} else {
+								if ("N" == $("input[name='identificationSubStatusSrc']").val()) {
+									com_fn.customCheckApplicable("srcBtn", "view");
+								}
+							}
+							
+							break;
+						case "bin" : 
+							if (!resetFlag) {
+								bin_fn.csvUploadFile();
+								bin_fn.binaryUploadFile();
+								$('#_binAddList').jqGrid(bin_fn.setParamProject3());
+							}
+							
+							if ("edit" == mode) {
+								$(".binBtn").show();
+								callAutoCompleteFnc("autoComProjectNmConf");
+								bin_evt.binProjectSelect();
+								
+								if ("N" == $("input[name='identificationSubStatusBin']").val()) {
+									com_fn.customCheckApplicable("binBtn", "edit");
+								}
+							} else {
+								if ("N" == $("input[name='identificationSubStatusBin']").val()) {
+									com_fn.customCheckApplicable("binBtn", "view");
+								}
+							}
+							
+							setTimeout(function () {
+								$("#tabMenuBin").trigger("click");
+							}, 200);
+							
+							break;
+						case "android" : 
+							if (!resetFlag) {
+								binAndroid_fn.csvUploadFile();
+								binAndroid_fn.noticeUploadFile();
+								binAndroid_fn.resultUploadFile();
+								
+								$('#_binAndroidProjectList2').jqGrid(binAndroid_fn.setParamProject2());
+								$('#_binAndroidProjectList2').jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+							}
+							
+							if ("edit" == mode) {
+								$(".binAndroidBtn").show();
+								callAutoCompleteFnc("autoComProjectNmConf");
+								binAndroid_fn.binAndroidProjectSelect();
+								
+								if ("N" == $("input[name='identificationSubStatusAndroid']").val()) {
+									com_fn.customCheckApplicable("binAndroidBtn", "edit");
+								}
+							} else {
+								if ("N" == $("input[name='identificationSubStatusAndroid']").val()) {
+									com_fn.customCheckApplicable("binAndroidBtn", "view");
+								}
+							}
+							
+							break;
+						case "bat" : 
+							bat_fn.binaryUploadFile();
+							break;
+					}
+	            },
+	            error: function () {
+	                alertify.error([[#{msg.common.valid2}]], 0);
+	            },
+	            complete : function(xhr, status) {
+	            	if ("third" == tabDiv) {
+            			$("#tabMenuParty").trigger("click");
+	            	} else if ("dep" == tabDiv) {
+	            		$("#tabMenuDep").trigger("click");
+	            	} else if ("src" == tabDiv) {
+	            		$("#tabMenuSrc").trigger("click");
+	            	} else if ("bin" == tabDiv) {
+	            		$("#tabMenuBin").trigger("click");
+	            	} else if ("android" == tabDiv) {
+	            		$("#tabMenuBinAndroid").trigger("click");
+	            	}
+	            }
+			});
+		}
+	},
+	save : function (tab) {
+		if ("Party" == tab) {
+			party_evt.save();
+		} else if ("Dep" == tab) {
+			dep_fn.save();
+		} else if ("Src" == tab) {
+			src_fn.save();
+		} else if ("Bin" == tab) {
+			bin_fn.save();
+		} else if ("Bat" == tab) {
+			bat_fn.save();
+		} else if ("BinAndroid" == tab) {
+			binAndroid_fn.save();
+		} else if ("Bom" == tab) {
+			bom_fn.beforeSave();
+		}
+	},
+	reset : function (tab) {
+		if ("Bom" == tab) {
+			bom_fn.reset();
+		} else {
+			var componentId = "";
+			var msg = "";
+			
+			if ("Party" == tab) {
+				msg = [[#{msg.common.delete.records}]];
+				componentId = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_PARTNER')}]];
+			} else {
+				msg = [[#{msg.common.delete.recordsAndFiles}]];
+				
+				if ("Dep" == tab) {
+					componentId = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_DEP')}]];
+				} else if ("Src" == tab) {
+					componentId = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_SRC')}]];
+				} else if ("Bin" == tab) {
+					componentId = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_BIN')}]];
+				} else if ("BinAndroid" == tab) {
+					componentId = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMPONENT_ID_ANDROID')}]];
+				}
+			}
+			
+			alertify.confirm(msg, function(e){
+				if (e) {
+					com_fn.resetAll(tab, componentId)
+				} else {
+					return false;
+				}
+			});
+		}
+	},
+	resetAll : function (tab, initDiv) {
+		if ("Party" == tab) {
+			party_evt.reset();
+		} else if ("Dep" == tab) {
+			dep_fn.reset();
+		} else if ("Src" == tab) {
+			src_fn.reset();
+		} else if ("Bin" == tab) {
+			bin_fn.reset();
+		} else if ("Bat" == tab) {
+			bat_fn.reset();
+		} else if ("BinAndroid" == tab) {
+			binAndroid_fn.reset();
+		} else if ("Bom" == tab) {
+			bom_fn.reset();
 		}
 	}
 }
@@ -1932,7 +2535,7 @@ var com_fn = {
 								
 									var setup = alertify.confirm().setup();
 									setup.buttons = [];
-									setup.focus.element = 1;
+									setup.focus.element = 0;
 								
 									return setup;
 								},
@@ -2002,6 +2605,36 @@ var com_fn = {
 			fn.closeAlertifyView();
 		},
 		activateCommentArea : function () {
+			var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+			var tabDiv = targetId.split("-")[1];
+			var commonEditMode = "";
+			
+			var targetId = "";
+			switch (tabDiv) {
+				case "third" : 
+					targetId = "_3rdAddList";
+					commonEditMode = $("#thirdEditMode").val();
+					break;
+				case "dep" : 
+					targetId = "_depAddList";
+					commonEditMode = $("#depEditMode").val();
+					break;
+				case "src" : 
+					targetId = "_srcAddList";
+					commonEditMode = $("#srcEditMode").val();
+					break;
+				case "bin" : 
+					targetId = "_binAddList";
+					commonEditMode = $("#binEditMode").val();
+					break;
+				case "android" : 
+					targetId = "_binAndroidProjectList2";
+					commonEditMode = $("#binandroidEditMode").val();
+					break;
+			}
+			
+			
+			
 			// change tab area
 			if (!$(".comment-area").is(":visible")) {
 				$(".contents-area").removeClass("col-12");
@@ -2009,19 +2642,15 @@ var com_fn = {
 				
 				fn_comment.getCommentList(commentsParam);
 				$(".comment-area").show();
-				
-				tableRefresh();
-				tableRefreshNew("refresh");
 			} else {
 	 			$(".contents-area").removeClass("col-lg-9");
 	 			$(".contents-area").addClass("col-12");
 	 			$(".comment-area").hide();
-				
-	 			tableRefresh();
-	 			tableRefreshNew("refresh");
 			}
 		},
 		showCommentHistory : function () {
+			fn_comment.activateCommentArea();
+			
 			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]];
 	        openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
 		}

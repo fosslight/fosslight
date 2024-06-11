@@ -1,0 +1,159 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<link rel="stylesheet" th:href="@{/css/datatables/dataTables.bootstrap4.min.css}">
+<script th:src="@{/js/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/js/datatables/dataTables.bootstrap4.min.js}"></script>
+<th:block th:replace="oss/view-script :: viewScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <div class="custom-layout ml-2 mr-2" style="height: auto">
+        	<section class="content-header">
+        		<div class="container-fluid"></div>
+        	</section>
+            <section class="content">
+				<div class="card card-secondary">
+					<div class="card-header">
+				 		<h3 class="card-title" th:text="'Open Source Information'"></h3>
+				 	</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-md-12">
+								<div class="table-responsive">
+									<table class="table" style="table-layout: fixed; word-wrap: break-word;">
+										<tbody>
+											<tr class="text-smaller">
+												<th style="width: 30%"><span th:text="#{msg.common.field.OSS.name}"></span><i class="fas fa-info-circle fa-lg ml-1 ossI icon-blue" style="cursor: pointer;" title="Detail Info" th:onclick="|fn.showOssViewPage(this)|"></i></th>
+												<td>
+													<input name="ossName" type="hidden" th:value="${detail?.ossName}"/>
+													<span th:text="${detail?.ossName}"></span>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th><span th:text="#{msg.common.field.nickname}"></span></th>
+												<td>
+													<th:block th:each="nickname, status : ${detail?.ossNicknames}">
+														<span class="text-sm" th:text="${nickname}"></span>
+														<span th:if="${status.count != status.size}" class="text-sm" th:text="', '"></span>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.OSS.version}"></th>
+												<td>
+													<input name="ossVersion" type="hidden" th:value="${detail?.ossVersion}"/>
+													<span th:text="${detail?.ossVersion}"></span>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.OSS.type}"></th>
+												<td>
+													<span id="ossType"></span>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.declaredLicense}"></th>
+												<td>
+													<table class="table table-bordered table-hover dataTable dtr-inline" id="_licenseChoice">
+														<thead>
+                                                    		<tr>
+                                                        		<th class="text-center" th:text="''"></th>
+                                                        		<th class="text-center" th:text="License"></th>
+                                                       		 	<th class="text-center" th:text="Copyright"></th>
+                                                    		</tr>
+                                                		</thead>
+													</table>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.detectedLicense}"></th>
+												<td>
+													<th:block th:if="${detail?.detectedLicenses != null}" th:each="license, status : ${detail?.detectedLicenses}">
+														<span th:text="${license}"></span>
+														<span th:if="${status.count != status.size}" th:text="|, |"></span>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.licenseType}"></th>
+												<td>
+													<span id="ltDiv"></span>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.obligation}"></th>
+												<td>
+													<span id="obDiv"></span>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.downloadLocation}"></th>
+												<td>
+													<th:block th:if="${detail?.downloadLocations != null}" th:each="downloadLocation, status : ${detail?.downloadLocations}">
+														<a th:href="${downloadLocation}" th:text="${downloadLocation}" target="_blank"></a>
+														<th:block th:if="${status.count != status.size}"><br/></th:block>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.homepage}"></th>
+												<td>
+													<a th:href="${detail?.homepage}" th:text="${detail?.homepage}" target="_blank"></a>
+												</td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.Copyright}"></th>
+												<td style="white-space: pre;"><span th:utext="${detail?.copyright}"></span></td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.summaryDescription}"></th>
+												<td style="white-space: pre;"><span th:utext="${detail?.summaryDescription}"></span></td>
+											</tr>
+											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.attribution}"></th>
+												<td style="white-space: pre;"><span th:utext="${detail?.attribution}"></span></td>
+											</tr>
+											<tr class="text-smaller" th:if="${components != null}">
+												<th th:text="#{msg.common.field.project}"></th>
+												<td>
+													<table class="table table-bordered table-hover dataTable dtr-inline" id="_projectList">
+														<thead>
+                                                    		<tr>
+                                                        		<th class="text-center" th:text="ID"></th>
+                                                        		<th class="text-center" th:text="'Project Name (Version)'"></th>
+                                                    		</tr>
+                                                		</thead>
+													</table>
+												</td>
+											</tr>
+											<tr th:if="${vulnInfoList != null}" class="text-smaller">
+												<th>
+													<span th:text="#{msg.common.field.vulnerability}"></span>
+													<span th:if="${vulnListMore != null}" class="btn-lg-light-gray btn-xm width-3rem ml-2 pl-2 pr-2 pointer" th:text="'+More'" th:onclick="|fn.vulnListMore()|"></span>
+												</th>
+												<td>
+													<table class="table table-bordered table-hover dataTable dtr-inline" id="_vulnInfoList">
+														<thead>
+                                                    		<tr>
+                                                        		<th class="text-center" th:text="|CVE ID|"></th>
+                                                        		<th class="text-center" th:text="|NVD Score|"></th>
+                                                        		<th class="text-center" th:text="Description"></th>
+                                                        		<th class="text-center" th:text="|Published Date|"></th>
+                                                    		</tr>
+                                                		</thead>
+													</table>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

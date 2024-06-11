@@ -11,37 +11,35 @@
 <th:block th:replace="project/identification-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
-    <div class="content-wrapper custom-layout">
+    <div class="custom-layout multi-grid-page">
         <section class="content-header">
-            <div class="container-fluid">
+            <div class="container-fluid grid-sm">
                 <div class="row">
                 	<div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
                 	<div class="float-right align-items-center mt-2" style="margin-left: auto;">
-                      	<div class="helpLink f-left dropdown float-right px-1">
-                          	<a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
-                          	<div class="dropdown-menu mt-0">
-                             	<a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|" th:text="|How to use FossLight Hub|"></a>
-                               	<a class="dropdown-item text-dark" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Identification', 'I')|" th:text="'Role of Creator & Reviewer'"></a>
-                         	</div>
-                      	</div>
-                       	<div class="float-right" th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV')}">
-                        	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1" id="bomReject" th:text="Reject"></button>
-                        	<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
-                     	</div>
-                      	<div class="float-right">
-                        	<button th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF'}"
-                               		type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1" id="autoReview" th:text="'Auto Review'"></button>
-                         	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
-                                	type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
-                         	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
-                                	type="button" class="btn btn-lg-red btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
-                          	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
-                                	type="button" class="btn btn-lg-red btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
-                           	<button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
-                                	type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
-                          	<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
-                      	</div>
-                	</div>
+<!--                   	<div class="helpLink f-left dropdown float-right px-1">
+                        	<a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
+                            <div class="dropdown-menu mt-0">
+                            	<a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Identification')|" th:text="|How to use FossLight Hub|"></a>
+                                <a class="dropdown-item text-dark" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Identification', 'I')|" th:text="'Role of Creator & Reviewer'"></a>
+                           	</div>
+                       	</div> -->
+                        <div class="float-right">
+                        	<th:block th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
+                               	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                               	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
+                               	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
+                               	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>
+                        	</th:block>
+                        	<button th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.distributeDeployYn == 'Y' or project.identificationStatus == 'REV') and project.statusRequestYn == 'N'}"
+                        			type="button" class="btn btn-default disabled btn-sm width-6rem px-1" id="bomReject" th:text="Reject"></button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
+                       	</div>
+                        <span th:if="${@CommonFunction.isAdmin() and project.binBinaryFileId != null}" class="icheck-danger center-atom mr-1 ignoreBinaryDbCheckbox projdecBtn" style="font-size: .85rem">
+                        	<input class="form-check-input text-orange" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" th:value="N" type="checkbox">
+                            <label class="form-check-label text-lg-gray mt-1" for="ignoreBinaryDbFlag" th:text="'Do not register in binary DB'"></label>
+                        </span>
+                   	</div>
                 </div>
             </div>
         </section>
@@ -49,1137 +47,225 @@
             <div class="container-fluid">
             	<div class="row">
             	<div class="contents-area col-lg-9">
-                <div class="card card-dark card-tabs">
-                    <div class="card-header p-0 pt-1" style="display:inline-block;">
-                        <div class="float-left" style="display:inline;">
+            	<div class="topper-content">
+                <div class="card card-secondary card-tabs grid-sm">
+                    <div id="card_header" class="card-header d-flex p-0 pt-1">
+                        <div class="d-flex align-items-center">
                             <ul class="nav nav-tabs" id="menu-tab" role="tablist">
                                 <li class="nav-item">
-                                    <a aria-controls="menu-third-party" aria-selected="false" class="nav-link"
-                                       data-toggle="pill"
-                                       href="#menu-third-party" id="tabMenuParty" role="tab"
-                                       th:text="'3rd party'"></a>
+                                    <a aria-controls="menu-third-party" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-third-party" id="tabMenuParty" role="tab" th:text="'3rd party'"></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a aria-controls="menu-dep" aria-selected="false" class="nav-link"
-                                       data-toggle="pill" href="#menu-dep"
-                                       id="tabMenuDep" role="tab" th:text="DEP"></a>
+                                    <a aria-controls="menu-dep" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-dep" id="tabMenuDep" role="tab" th:text="DEP"></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a aria-controls="menu-src" aria-selected="false" class="nav-link"
-                                       data-toggle="pill" href="#menu-src"
-                                       id="tabMenuSrc" role="tab" th:text="SRC"></a>
+                                    <a aria-controls="menu-src" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-src" id="tabMenuSrc" role="tab" th:text="SRC"></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a aria-controls="menu-bin" aria-selected="false" class="nav-link"
-                                       data-toggle="pill" href="#menu-bin"
-                                       id="tabMenuBin" role="tab" th:text="BIN"></a>
+                                    <a aria-controls="menu-bin" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-bin" id="tabMenuBin" role="tab" th:text="BIN"></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a aria-controls="menu-bom" aria-selected="false" class="nav-link"
-                                       data-toggle="pill" href="#menu-bom"
-                                       id="tabMenuBom" role="tab" th:text="BOM"></a>
-                                </li>
-                                <li class="nav-item" th:if="${batFlag}">
-                                    <a aria-controls="menu-bat" aria-selected="false" class="nav-link"
-                                       data-toggle="pill" href="#menu-bat"
-                                       id="tabMenuBat" role="tab" th:text="BAT"></a>
+                                    <a aria-controls="menu-bom" aria-selected="false" class="nav-link" data-toggle="pill" href="#menu-bom" id="tabMenuBom" role="tab" th:text="BOM"></a>
                                 </li>
                             </ul>
                         </div>
+                        <div class="d-flex-align" style="margin-left: auto;">
+                           	<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="px-2 pointer idenReset" id="reset" title="reset" th:onclick="|com_fn.reset('Bom')|">
+                            	<i class="fas fa-undo-alt customIcon2"></i>
+							</span>
+							<span th:if="${project.statusPermission > 0 and project.identificationStatus != 'CONF'}" class="ml-2 mr-2 px-2 pointer idenSave" id="save" th:onclick="|com_fn.save('Bom')|" title="save">
+								<i class="fas fa-save customIcon2"></i>
+							</span>
+                           	 <span class="btn btn-tool ml-1 mr-2 pointer" id="expandBtn" data-card-widget="collapse" title="Collapse">
+                            	<i class="fas fa-minus"></i>
+                           	</span>
+                       	</div>
                     </div>
                     <div class="card-body">
-                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-content" id="identification-tabContent">
                             <!-- 3rd party -->
-                            <div aria-labelledby="custom-tabs-four-home-tab" class="tab-pane fade"
-                                 id="menu-third-party"
-                                 role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="row mt-1">
-                                            <div class="col-md-4 partyBtn" name="search-condition_party">
-                                                <div class="icheck-secondary d-inline partyBtn">
-                                                    <input id="radio_party_01" name="selectOption" th:checked="true"
-                                                           th:onchange="|party_evt.changeSelectOption()|" th:value="1"
-                                                           type="radio">
-                                                    <label class="text-sm" for="radio_party_01"
-                                                           th:text="'3rd party Search'"></label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 partyBtn" name="search-condition_party">
-                                                <div class="icheck-secondary d-inline partyBtn">
-                                                    <input id="radio_party_02" name="selectOption"
-                                                           th:onchange="|party_evt.changeSelectOption()|"
-                                                           th:value="2" type="radio">
-                                                    <label class="text-sm" for="radio_party_02"
-                                                           th:text="'Project Search'"></label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="icheck-danger d-inline">
-                                                    <input id="applicableParty"
-                                                           th:onchange="|com_fn.checkAplicable(this, 'partyBtn')|"
-                                                           type="checkbox"
-                                                           value="N">
-                                                    <label class="text-sm" for="applicableParty"
-                                                           th:text="'Not Applicable'"></label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr class="my-3">
-                                <div id="content_party">
-                                    <form class="partyBtn" id="3rdSearchForm">
-                                        <input name="publicYn" type="hidden" value="Y"/>
-                                        <input name="partnerName" type="hidden"/>
-                                        <input name="softwareName" type="hidden"/>
-                                        <input name="partnerId" type="hidden"/>
-                                        <div id="3rdSearch" name="content_party">
-                                            <div class="row mt-3">
-                                                <div class="col-md-2">
-                                                    <div class="form-group">
-                                                        <select class="custom-select custom-narrow-item"
-                                                                name="3rdSerarchSelect">
-                                                            <option th:text="'3rd party Name'"
-                                                                    th:value="3rdPartyName"></option>
-                                                            <option th:text="'Software Name'" th:value="sName"></option>
-                                                            <option th:text="'3rd party Id'"
-                                                                    th:value="3rdPartyId"></option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-5">
-                                                    <div class="input-group input-group-md">
-                                                        <input class="form-control autoComConfParty custom-narrow-item"
-                                                               name="3rdSearchText"
-                                                               type="text"/>
-                                                        <span class="input-group-append">
-                                                            <button class="btn btn-default btn-flat custom-narrow-item"
-                                                                    id="3rdSearchBtn"
-                                                                    th:text="Search" type="button"></button>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <form class="partyBtn" id="projectSearchForm">
-                                        <input name="publicYn" type="hidden" value="Y">
-                                        <input name="prjName" type="hidden"/>
-                                        <input name="prjVersion" type="hidden"/>
-                                        <input name="prjId" type="hidden"/>
-                                        <div id="projectSearch" name="content_party" style="display: none;">
-                                            <div class="row mt-3">
-                                                <div class="col-md-2">
-                                                    <div class="form-group">
-                                                        <select class="custom-select custom-narrow-item"
-                                                                name="3rdProjectSelect">
-                                                            <option th:text="'Project Name'" th:value="pNm"></option>
-                                                            <option th:text="'Project Version'"
-                                                                    th:value="pVer"></option>
-                                                            <option th:text="'Project Id'" th:value="pId"></option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-5">
-                                                    <div class="input-group input-group-md">
-                                                        <input class="form-control autoComProjectNmConf custom-narrow-item"
-                                                               name="prjSearchText"
-                                                               type="text">
-                                                        <span class="input-group-append">
-                                                            <button class="btn btn-default btn-flat custom-narrow-item"
-                                                                    id="3rdProjectSearchBtn"
-                                                                    th:text="Search" type="button"></button>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <div class="3rdProjectSearch">
-                                        <div class="three1list card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm" th:text="'Search Results'"></div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_list">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                    <div id="pager"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="three2list card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm py-2">
-                                                <div class="row">
-                                                    <div class="col-2" th:text="'Detail preview'"></div>
-                                                    <div class="col-10">
-                                                        <a class="btn btn-yellow-04 btn-xs float-right px-3"
-                                                           style="font-size: .8rem"
-                                                           th:onclick="|party_evt.loadToList()|"
-                                                           th:text="load"></a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_list2">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                    <div id="pager2"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="3rdProjectSearch2">
-                                        <div class="three3list card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_list-1">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                    <div id="pager-1"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="three4list card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm py-2">
-                                                <div class="row">
-                                                    <div class="col-2" th:text="'Detail preview'"></div>
-                                                    <div class="col-10">
-                                                        <a class="btn btn-yellow-04 btn-xs float-right px-3"
-                                                           style="font-size: .8rem"
-                                                           th:onclick="|party_evt.projectToAddList()|"
-                                                           th:text="load"></a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_list-2">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                    <div id="pager2-2"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mt-4" id="_3rdAddListContainer" style="display: none;">
-                                    <div class="card card-light-gray-02 card-outline">
-                                        <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
-                                        <div class="card-body px-3 pt-3">
-                                            <div class="innerJqGridSet">
-                                                <table id="_3rdAddList">
-                                                    <tr>
-                                                        <td></td>
-                                                    </tr>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="tab-pane fade" id="menu-third-party" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            	<th:block th:if="${editMode == 'Y'}">
+                            		<th:block th:replace="project/fragments/edit :: partyFragments"></th:block>
+                            	</th:block>
+                            	<th:block th:unless="${editMode == 'Y'}">
+                            		<th:block th:replace="project/fragments/view :: partyFragments"></th:block>
+                            	</th:block>
                             </div>
-                            <!-- /.3rd party -->
+                           	<!-- /.3rd party -->
 
                             <!-- dep -->
-                            <div aria-labelledby="custom-tabs-four-home-tab" class="tab-pane fade" id="menu-dep"
-                                 role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="row mt-1">
-                                            <div class="col-md-4 depBtn" name="search-condition_dep">
-                                                <div class="icheck-secondary d-inline">
-                                                    <input checked class="idenCbx" id="radio_dep_01"
-                                                           name="depSelectOption"
-                                                           th:onchange="|dep_fn.changeSelectOption()|"
-                                                           type="radio" value="1">
-                                                    <label class="text-sm" for="radio_dep_01"
-                                                           th:text="'Upload Analysis Result'"></label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 depBtn" name="search-condition_dep">
-                                                <div class="icheck-secondary d-inline">
-                                                    <input class="idenCbx" id="radio_dep_02" name="depSelectOption"
-                                                           th:onchange="|dep_fn.changeSelectOption()|"
-                                                           type="radio" value="2">
-                                                    <label class="text-sm" for="radio_dep_02"
-                                                           th:text="'Project Search'"></label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="icheck-danger d-inline">
-                                                    <input class="idenCbx" id="applicableDep"
-                                                           th:onchange="|com_fn.checkAplicable(this, 'depBtn')|"
-                                                           type="checkbox"
-                                                           value="N">
-                                                    <label class="text-sm" for="applicableDep"
-                                                           th:text="'Not Applicable'"></label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr class="my-3">
-                                <div id="content_dep">
-                                    <form class="depBtn" id="depUploadForm">
-                                        <input id="depCsvFileId" th:value="${project.depCsvFileId}" type="hidden">
-                                        <div id="depUploadSearch" name="content_dep">
-                                            <div class="row mt-3" id="content-dep">
-                                                <div class="col-12">
-                                                    <div class="row">
-                                                        <div class="col-lg-1 pl-3 mt-1">
-                                                            <strong th:text="'FOSSLight Report'"></strong>
-                                                        </div>
-                                                        <div class="col-lg-3 fileUploader">
-                                                            <div class="row">
-                                                                <div class="col-lg-1"></div>
-                                                                <div class="col-lg-11" style="display: flex;">
-                                                                    <div class="fileuploader" id="depCsvFile"
-                                                                         th:text="Upload"></div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-7">
-                                                            <div class="ajax-file-upload-container"
-                                                                 style="margin-top: 0px; width: 100%;">
-                                                                <ul class="depCsvFileArea">
-                                                                    <th:block th:if="${project.depCsvFile != null}">
-                                                                        <th:block
-                                                                                th:each="csvFile : ${project.depCsvFile}">
-                                                                            <li th:if="${csvFile.delYn eq 'N'}">
-                                                                                <a class="ajax-file-upload-filename"
-                                                                                   th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"
-                                                                                   th:text="${csvFile.origNm}"></a>
-                                                                                <input type="hidden"
-                                                                                       th:value="${csvFile.fileSeq}"/>
-                                                                                <span class="badge bg-danger"
-                                                                                      style="cursor:pointer;"
-                                                                                      th:onclick="|com_fn.deleteFiles(this, '1')|"
-                                                                                      th:text="X"></span>
-                                                                                <br>[[${csvFile.createdDate}]]
-                                                                            </li>
-                                                                        </th:block>
-                                                                    </th:block>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <form class="depBtn" id="depProjectForm">
-                                        <input name="publicYn" type="hidden" value="Y">
-                                        <input name="prjName" type="hidden"/>
-                                        <input name="prjVersion" type="hidden"/>
-                                        <input name="prjId" type="hidden"/>
-                                        <div id="depProjectSearch" name="content_dep" style="display: none;">
-                                            <div class="row mt-3">
-                                                <div class="col-md-2">
-                                                    <div class="form-group">
-                                                        <select class="custom-select custom-narrow-item custom-narrow-item"
-                                                                name="depProjectSelect">
-                                                            <option th:text="'Project Name'" th:value="pNm"></option>
-                                                            <option th:text="'Project Version'"
-                                                                    th:value="pVer"></option>
-                                                            <option th:text="'Project Id'" th:value="pId"></option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-5">
-                                                    <div class="input-group input-group-md">
-                                                        <input class="form-control autoComProjectNmConf custom-narrow-item"
-                                                               name="depPrjSearchText"
-                                                               type="text">
-                                                        <span class="input-group-append">
-                                                            <button class="btn btn-default btn-flat custom-narrow-item"
-                                                                    id="depProjectSearchBtn"
-                                                                    th:text="Search" type="button"></button>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <div class="depProjectSearch depBtn">
-                                        <div class="depProject1 card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_depProjectList1">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                    <div id="depProjectPager1"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="depProject2 card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm py-2">
-                                                <div class="row">
-                                                    <div class="col-2" th:text="'Detail preview'"></div>
-                                                    <div class="col-10">
-                                                        <a class="btn btn-outline-lg-red btn-sm float-right px-3"
-                                                           th:onclick="|dep_fn.showDialog()|" th:text="load"></a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_depProjectList2">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4" id="_depAddListContainer" style="display: none">
-                                        <div class="card card-light-gray-02 card-outline">
-                                            <div class="card-header text-sm py-2" th:text="|Loaded List|"></div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_depAddList">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- /. dep -->
-
+                           	<div class="tab-pane fade" id="menu-dep" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                              	<th:block th:if="${editMode == 'Y'}">
+                                	<th:block th:replace="project/fragments/edit :: depFragments"></th:block>
+                              	</th:block>
+                             	<th:block th:unless="${editMode == 'Y'}">
+                               		<th:block th:replace="project/fragments/view :: depFragments"></th:block>
+                              	</th:block>
+                       		</div>
+                         	<!-- /. dep -->
+                            
                             <!-- src -->
-                            <div aria-labelledby="custom-tabs-four-home-tab" class="tab-pane fade" id="menu-src"
-                                 role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="row mt-1">
-                                            <div class="col-md-4 srcBtn" name="search-condition_src">
-                                                <div class="icheck-secondary d-inline">
-                                                    <input checked class="idenCbx" id="srcR1"
-                                                           name="srcSelectOption"
-                                                           th:onchange="|src_fn.changeSelectOption()|" type="radio"
-                                                           value="1">
-                                                    <label class="text-sm" for="srcR1"
-                                                           th:text="'Upload Analysis Result'"></label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 srcBtn" name="search-condition_src">
-                                                <div class="icheck-secondary d-inline">
-                                                    <input class="idenCbx" id="srcR2" name="srcSelectOption"
-                                                           th:onchange="|src_fn.changeSelectOption()|"
-                                                           type="radio" value="2">
-                                                    <label class="text-sm" for="srcR2"
-                                                           th:text="'Project Search'"></label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="icheck-danger d-inline">
-                                                    <input class="idenCbx" id="applicableSrc"
-                                                           th:onchange="|com_fn.checkAplicable(this, 'srcBtn')|"
-                                                           type="checkbox"
-                                                           value="N">
-                                                    <label class="text-sm" for="applicableSrc"
-                                                           th:text="'Not Applicable'"></label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr class="my-3">
-                                <div id="content_src">
-                                    <form class="srcBtn" id="srcUploadForm">
-                                        <input id="srcCsvFileId" th:value="${project.srcCsvFileId}" type="hidden">
-                                        <div id="srcUploadSearch" name="content_src">
-                                            <div class="row mt-3" id="content-src">
-                                                <div class="col-12">
-                                                    <div class="row">
-                                                        <div class="col-lg-1 pl-3 mt-1">
-                                                            <strong th:text="'FOSSLight Report'"></strong>
-                                                        </div>
-                                                        <div class="col-lg-3 fileUploader">
-                                                            <div class="row">
-                                                                <div class="col-lg-1"></div>
-                                                                <div class="col-lg-11" style="display: flex;">
-                                                                    <div class="fileuploader" id="srcCsvFile"
-                                                                         th:text="Upload"></div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-7">
-                                                            <div class="ajax-file-upload-container"
-                                                                 style="margin-top: 0px; width: 100%;">
-                                                                <ul class="csvFileArea">
-                                                                    <th:block th:if="${project.csvFile != null}">
-                                                                        <th:block
-                                                                                th:each="csvFile : ${project.csvFile}">
-                                                                            <li th:if="${csvFile.delYn eq 'N'}">
-                                                                                <a class="ajax-file-upload-filename"
-                                                                                   th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"
-                                                                                   th:text="${csvFile.origNm}"></a>
-                                                                                <input type="hidden"
-                                                                                       th:value="${csvFile.fileSeq}"/>
-                                                                                <span class="badge bg-danger"
-                                                                                      style="cursor:pointer;"
-                                                                                      th:onclick="|com_fn.deleteFiles(this, '1')|"
-                                                                                      th:text="X"></span>
-                                                                                <br>[[${csvFile.createdDate}]]
-                                                                            </li>
-                                                                        </th:block>
-                                                                    </th:block>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <form class="srcBtn" id="srcProjectForm">
-                                        <input name="publicYn" type="hidden" value="Y">
-                                        <input name="prjName" type="hidden"/>
-                                        <input name="prjVersion" type="hidden"/>
-                                        <input name="prjId" type="hidden"/>
-                                        <div id="srcProjectSearch" name="content_src" style="display: none;">
-                                            <div class="row mt-3">
-                                                <div class="col-md-2">
-                                                    <div class="form-group">
-                                                        <select class="custom-select custom-narrow-item "
-                                                                name="srcProjectSelect">
-                                                            <option th:text="'Project Name'" th:value="pNm"></option>
-                                                            <option th:text="'Project Version'"
-                                                                    th:value="pVer"></option>
-                                                            <option th:text="'Project Id'" th:value="pId"></option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-5">
-                                                    <div class="input-group input-group-md">
-                                                        <input class="form-control autoComProjectNmConf custom-narrow-item"
-                                                               name="srcPrjSearchText"
-                                                               type="text">
-                                                        <span class="input-group-append">
-                                                            <button class="btn btn-default btn-flat custom-narrow-item"
-                                                                    id="srcProjectSearchBtn"
-                                                                    th:text="Search" type="button"></button>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <div class="srcProjectSearch srcBtn">
-                                        <div class="srcProject1 card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_srcProjectList1">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                    <div id="srcProjectPager1"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="srcProject2 card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm py-2">
-                                                <div class="row">
-                                                    <div class="col-2" th:text="'Detail preview'"></div>
-                                                    <div class="col-10">
-                                                        <a class="btn btn-outline-lg-red btn-sm float-right px-3"
-                                                           th:onclick="|src_fn.showDialog()|" th:text="load"></a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_srcProjectList2">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4" id="_srcAddListContainer" style="display: none">
-                                        <div class="card card-light-gray-02 card-outline">
-                                            <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_srcAddList">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- /.src -->
-
-                            <!-- bin -->
-                            <div aria-labelledby="custom-tabs-four-home-tab" class="tab-pane fade" id="menu-bin"
-                                 role="tabpanel">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="row mt-1">
-                                            <div class="col-md-4 binBtn" name="search-condition_bin">
-                                                <div class="icheck-secondary d-inline">
-                                                    <input checked class="idenCbx" id="binR1" name="binSelectOption"
-                                                           th:onchange="|bin_fn.changeSelectOption()|"
-                                                           type="radio" value="1">
-                                                    <label class="text-sm" for="binR1"
-                                                           th:text="'Upload Analysis Result'"></label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4 binBtn" name="search-condition_bin">
-                                                <div class="icheck-secondary d-inline">
-                                                    <input class="idenCbx" id="binR2" name="binSelectOption"
-                                                           th:onchange="|bin_fn.changeSelectOption()|"
-                                                           type="radio"
-                                                           value="2">
-                                                    <label class="text-sm" for="binR2"
-                                                           th:text="'Project Search'"></label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="icheck-danger d-inline">
-                                                    <input class="idenCbx" id="applicableBin"
-                                                           th:onchange="|com_fn.checkAplicable(this, 'binBtn')|"
-                                                           type="checkbox"
-                                                           value="N">
-                                                    <label class="text-sm" for="applicableBin"
-                                                           th:text="'Not Applicable'"></label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr class="my-3">
-                                <div id="content_bin">
-                                    <form class="binBtn" id="binUploadForm">
-                                        <div id="binUploadSearch" name="content_bin">
-                                            <div class="row mt-3" id="content-bin">
-                                                <div class="col-12">
-                                                    <div class="row">
-                                                        <div class="col-md-1 pl-3 mt-1">
-                                                            <strong th:text="'FOSSLight Report'"></strong>
-                                                        </div>
-                                                        <div class="col-lg-11">
-                                                            <div class="row">
-                                                                <div class="col-lg-2">
-                                                                    <p style="text-align:center;"
-                                                                       th:text="'FOSSLight Report'"></p>
-                                                                </div>
-                                                                <div class="col-lg-3 fileUploader">
-                                                                    <div class="fileuploader" id="binCsvFile"
-                                                                         th:text="Upload"></div>
-                                                                </div>
-                                                                <div class="col-lg-5">
-                                                                    <div class="ajax-file-upload-container"
-                                                                         style="margin-top: 0px; width: 100%;">
-                                                                        <ul class="binFileArea">
-                                                                            <th:block
-                                                                                    th:if="${project.binCsvFile != null}">
-                                                                                <th:block
-                                                                                        th:each="csvFile : ${project.binCsvFile}">
-                                                                                    <li th:if="${csvFile.delYn eq 'N'}">
-                                                                                        <a class="ajax-file-upload-filename"
-                                                                                           th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"
-                                                                                           th:text="${csvFile.origNm}"></a>
-                                                                                        <input type="hidden"
-                                                                                               value="${csvFile.fileSeq}"/>
-                                                                                        <span class="badge bg-danger"
-                                                                                              style="cursor:pointer;"
-                                                                                              th:onclick="|com_fn.deleteFiles(this, '1')|"
-                                                                                              th:text="X"></span>
-                                                                                        <br>[[${csvFile.createdDate}]]
-                                                                                    </li>
-                                                                                </th:block>
-                                                                            </th:block>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-lg-2 pl-1">
-                                                                    <p style="margin-bottom: 0.4rem !important;" th:text="'fosslight_binary.txt'"></p>
-                                                                    <div>
-                                                                        <div class="form-check center-atom projdecBtn"
-                                                                              th:if="${@CommonFunction.isAdmin()}">
-                                                                            <th:block th:if="${project.srcAndroidResultFileId != null or project.binBinaryFileId != null}">
-                                                                                <input class="form-check-input" id="ignoreBinaryDbFlag"
-                                                                                       name="ignoreBinaryDbFlag" th:value="N" type="checkbox" style="margin-top: 0.42rem !important;">
-                                                                                <label class="form-check-label text-blue-gray text-sm" for="ignoreBinaryDbFlag"
-                                                                                       th:text="'Do not register in binary DB'"></label>
-                                                                            </th:block>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-lg-3">
-                                                                    <div class="fileuploader" id="binBinaryFile"
-                                                                         th:text="Upload"></div>
-                                                                </div>
-                                                                <div class="col-lg-5">
-                                                                    <div class="ajax-file-upload-container binary"
-                                                                         style="margin-top: 0px; width: 100%;">
-                                                                        <ul class="binBinaryFileArea">
-                                                                            <th:block
-                                                                                    th:if="${project.binBinaryFile != null}">
-                                                                                <th:block
-                                                                                        th:each="csvFile : ${project.binBinaryFile}">
-                                                                                    <li th:if="${csvFile.delYn eq 'N'}">
-                                                                                        <a class="ajax-file-upload-filename"
-                                                                                           th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"
-                                                                                           th:text="${csvFile.origNm}"></a>
-                                                                                        <input type="hidden"
-                                                                                               value="${csvFile.fileSeq}"/>
-                                                                                        <span class="badge bg-danger"
-                                                                                              style="cursor:pointer;"
-                                                                                              th:onclick="|com_fn.deleteFiles(this, '2')|"
-                                                                                              th:text="X"></span>
-                                                                                        <br>[[${csvFile.createdDate}]]
-                                                                                    </li>
-                                                                                </th:block>
-                                                                            </th:block>
-                                                                        </ul>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <form class="binBtn" id="binProjectForm">
-                                        <input name="publicYn" type="hidden" value="Y">
-                                        <input name="prjName" type="hidden"/>
-                                        <input name="prjVersion" type="hidden"/>
-                                        <input name="prjId" type="hidden"/>
-                                        <div id="binProjectSearch" name="content_bin" style="display: none;">
-                                            <div class="row mt-3">
-                                                <div class="col-md-2">
-                                                    <div class="form-group">
-                                                        <select class="custom-select custom-narrow-item"
-                                                                name="binProjectSelect">
-                                                            <option th:text="'Project Name'" th:value="pNm"></option>
-                                                            <option th:text="'Project Version'"
-                                                                    th:value="pVer"></option>
-                                                            <option th:text="'Project Id'" th:value="pId"></option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-5">
-                                                    <div class="input-group input-group-md">
-                                                        <input class="form-control autoComProjectNmConf custom-narrow-item"
-                                                               name="binPrjSearchText"
-                                                               type="text">
-                                                        <span class="input-group-append">
-                                                            <button class="btn btn-default btn-flat custom-narrow-item"
-                                                                    id="binProjectSearchBtn"
-                                                                    th:text="Search" type="button"></button>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <div class="binProjectSearch binBtn">
-                                        <div class="binProject1 card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm py-2" th:text="'Search Results'"></div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_binProjectList1">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                    <div id="binProjectPager1"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="binProject2 card card-light-gray-02 card-outline"
-                                             style="display:none;">
-                                            <div class="card-header text-sm py-2">
-                                                <div class="row">
-                                                    <div class="col-2" th:text="'Detail preview'"></div>
-                                                    <div class="col-10">
-                                                        <a class="btn btn-outline-lg-red btn-xs float-right px-3"
-                                                           style="font-size: .8rem" th:onclick="|bin_fn.showDialog()|"
-                                                           th:text="load"></a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_binProjectList2">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="mt-4" id="_binAddListContainer" style="display: none">
-                                        <div class="card card-light-gray-02 card-outline">
-                                            <div class="card-header text-sm py-2" th:text="'Loaded List'"></div>
-                                            <div class="card-body px-3 pt-3">
-                                                <div class="innerJqGridSet">
-                                                    <table id="_binAddList">
-                                                        <tr>
-                                                            <td></td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- /.bin -->
-
-                            <!-- bom -->
-                            <div aria-labelledby="custom-tabs-four-home-tab" class="tab-pane fade" id="menu-bom"
-                                 role="tabpanel">
-                                <div class="row"></div>
-                            </div>
-                            <!-- /.bom -->
+                           	<div class="tab-pane fade" id="menu-src" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                               	<th:block th:if="${editMode == 'Y'}">
+                                	<th:block th:replace="project/fragments/edit :: srcFragments"></th:block>
+                               	</th:block>
+                              	<th:block th:unless="${editMode == 'Y'}">
+                                	<th:block th:replace="project/fragments/view :: srcFragments"></th:block>
+                            	</th:block>
+                           	</div>
+                         	<!-- /.src -->
+                       		
+                        	<!-- bin -->
+                          	<div class="tab-pane fade" id="menu-bin" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                             	<th:block th:if="${editMode == 'Y'}">
+                               		<th:block th:replace="project/fragments/edit :: binFragments"></th:block>
+                               	</th:block>
+                              	<th:block th:unless="${editMode == 'Y'}">
+                                	<th:block th:replace="project/fragments/view :: binFragments"></th:block>
+                              	</th:block>
+                          	</div>
+                          	<!-- /.bin -->
+                         	
+                          	<!-- bom -->
+                          	<div class="tab-pane fade" id="menu-bom" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                              	<th:block th:if="${editMode == 'Y'}">
+                                	<th:block th:replace="project/fragments/edit :: bomFragments"></th:block>
+                              	</th:block>
+                               	<th:block th:unless="${editMode == 'Y'}">
+                                	<th:block th:replace="project/fragments/view :: bomFragments"></th:block>
+                              	</th:block>
+                           	</div>
+                         	<!-- /.bom -->
                         </div>
                     </div>
                 </div>
-
-                <div class="row pl-2" id="gridAreaParty" name="gridArea" style="width: 100%; display: none;">
+                </div>
+				<div class="bottom-component mb-5">
+                <div class="row pl-2 grid-area" id="gridAreaParty" name="gridArea" style="width: 100%; display: none;">
                     <!-- buttons -->
                     <div class="col-md-12 mb-3 pl-2">
                         <div class="row">
-                            <div class="col-md-6"></div>
-                            <div class="col-md-6">
-                                <div class="row float-right">
-                                    <button class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset"
-                                            th:onclick="|party_evt.reset()|"
-                                            th:text="Reset"
-                                            type="button"></button>
-                                    <button class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave"
-                                            th:onclick="|party_evt.save()|"
-                                            th:text="Save"
-                                            type="button"></button>
-                                </div>
-                            </div>
+                            
                         </div>
                     </div>
                     <!-- grids -->
-                    <div class="col-md-12 outerJqGridSet partyBtn">
-                        <table id="list3">
-                            <tr>
-                                <td></td>
-                            </tr>
-                        </table>
+                    <div class="col-md-12 jqGridSet partyBtn">
+                        <table id="list3"><tr><td></td></tr></table>
                         <div id="pager3"></div>
                     </div>
                 </div>
-                <div class="row pl-2" id="gridAreaDep" name="gridArea" style="width: 100%; display: none;">
+                <div class="row pl-2 grid-area" id="gridAreaDep" name="gridArea" style="width: 100%; display: none;">
                     <!-- buttons -->
                     <div class="col-md-12 mb-3 pl-2">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="row float-left pl-2">
-                                    <button class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn"
-                                            th:if="${project.dropYn != 'Y' and @CommonFunction.isAdmin()}"
-                                            th:onclick="|com_fn.CheckOssViewPage('DEP')|"
-                                            th:text="'Check Oss Name'"
-                                            type="button"></button>
-                                    <button class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn"
-                                            th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                            th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|"
-                                            th:text="'Check License'"
-                                            type="button"></button>
-                                    <button class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn"
-                                            th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                            th:onclick="|com_fn.bulkEdit('DEP')|"
-                                            th:text="'Bulk Edit'" type="button"></button>
+                                <div class="row float-left pl-2 depBtn">
+                                	<button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}" class="btn btn-sm btn-outline-dark dropdown-toggle idenCheckBtn" type="button" data-toggle="dropdown">
+                                        <span class="dropdown-icon"></span>Pre-Review
+                                   	</button>
+                                   	<div class="dropdown-menu" role="menu">
+                                       	<span th:class="'custom-layout dropdown-item ' + ${!@CommonFunction.isAdmin() ? 'disabled' : '' + ' pointer ' }" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Open Source'"></span>
+                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'License'"></span>
+                                   	</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="row float-right">
-
-                                    <div class="btn-group mr-xm">
-                                        <button class="btn btn-yellow-04 btn-sm" type="button">Export</button>
-                                        <button class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon"
-                                                data-toggle="dropdown"
-                                                type="button">
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </button>
-                                        <div class="dropdown-menu" role="menu">
-                                            <a class="dropdown-item"
-                                               th:onclick="|dep_fn.selectDownloadFile('report_sub')|"
-                                               th:text="'FOSSLight Report (Spreadsheet)'"></a>
-                                            <a class="dropdown-item" th:onclick="|dep_fn.selectDownloadFile('YAML')|"
-                                               th:text="'FOSSLight Report (YAML)'"></a>
-                                        </div>
-                                    </div>
-
-                                    <button class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset"
-                                            id="depResetUp"
-                                            th:if="${project.dropYn != 'Y'}"
-                                            th:text="Reset" type="button"></button>
-                                    <button class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave" id="depSaveUp"
-                                            th:if="${project.dropYn != 'Y'}" th:text="Save"
-                                            type="button"></button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <!-- grids -->
-                    <div class="col-md-12 outerJqGridSet depBtn">
-                        <table id="depList">
-                            <tr>
-                                <td></td>
-                            </tr>
-                        </table>
+                    <div class="col-md-12 jqGridSet depBtn">
+                        <table id="depList"><tr><td></td></tr></table>
                         <div id="depPager"></div>
                     </div>
                 </div>
-                <div class="row pl-2" id="gridAreaSrc" name="gridArea" style="width: 100%; display: none;">
+                <div class="row pl-2 grid-area" id="gridAreaSrc" name="gridArea" style="width: 100%; display: none;">
                     <!-- buttons -->
                     <div class="col-md-12 mb-3 pl-2">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="row float-left pl-2">
-                                    <button class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn"
-                                            th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                            th:onclick="|com_fn.CheckOssViewPage('SRC')|"
-                                            th:text="'Check Oss Name'"
-                                            type="button"></button>
-                                    <button class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn"
-                                            th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                            th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|"
-                                            th:text="'Check License'"
-                                            type="button"></button>
-                                    <button class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn"
-                                            th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                            th:onclick="|com_fn.bulkEdit('SRC')|"
-                                            th:text="'Bulk Edit'" type="button"></button>
+                                <div class="row float-left pl-2 srcBtn">
+                                    <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}" class="btn btn-outline-dark btn-sm dropdown-toggle idenCheckBtn" type="button" data-toggle="dropdown">
+                                        <span class="dropdown-icon"></span>Pre-Review
+                                  	</button>
+                                    <div class="dropdown-menu" role="menu">
+                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssViewPage('SRC')|" th:text="'Open Source'"></span>
+                                   		<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('SRC')|" th:text="'License'"></span>
+                                   	</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="row float-right">
-                                    <div class="btn-group mr-xm">
-                                        <button class="btn btn-yellow-04 btn-sm" type="button">Export</button>
-                                        <button class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon"
-                                                data-toggle="dropdown"
-                                                type="button">
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </button>
-                                        <div class="dropdown-menu" role="menu">
-                                            <a class="dropdown-item" style="cursor: pointer;"
-                                               th:onclick="|src_fn.selectDownloadFile('report_sub')|"
-                                               th:text="'FOSSLight Report (Spreadsheet)'"></a>
-                                            <a class="dropdown-item" style="cursor: pointer;"
-                                               th:onclick="|src_fn.selectDownloadFile('YAML')|"
-                                               th:text="'FOSSLight Report (YAML)'"></a>
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset"
-                                            id="srcResetUp"
-                                            th:if="${project.dropYn != 'Y'}"
-                                            th:text="Reset" type="button"></button>
-                                    <button class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave" id="srcSaveUp"
-                                            th:if="${project.dropYn != 'Y'}" th:text="Save"
-                                            type="button"></button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <!-- grids -->
-                    <div class="col-md-12 outerJqGridSet srcBtn">
-                        <table id="srcList">
-                            <tr>
-                                <td></td>
-                            </tr>
-                        </table>
+                    <div class="col-md-12 jqGridSet srcBtn">
+                        <table id="srcList"><tr><td></td></tr></table>
                         <div id="srcPager"></div>
                     </div>
                 </div>
-                <div class="row pl-2" id="gridAreaBin" name="gridArea" style="width: 100%; display: none;">
+                <div class="row pl-2 grid-area" id="gridAreaBin" name="gridArea" style="width: 100%; display: none;">
                     <!-- buttons -->
                     <div class="col-md-12 mb-3 pl-2">
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="row float-left pl-2">
-                                    <button class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn"
-                                            th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                            th:onclick="|com_fn.CheckOssViewPage('BIN')|"
-                                            th:text="'Check Oss Name'"
-                                            type="button"></button>
-                                    <button class="btn btn-yellow-04 btn-sm width-10rem mr-xm px-3 idenCheckBtn"
-                                            th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                            th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|"
-                                            th:text="'Check License'"
-                                            type="button"></button>
-                                    <button class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenCheckBtn"
-                                            th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}"
-                                            th:onclick="|com_fn.bulkEdit('BIN')|"
-                                            th:text="'Bulk Edit'" type="button"></button>
+                                <div class="row float-left pl-2 binBtn">
+                                    <button th:if="${project.dropYn != 'Y' and (@CommonFunction.isAdmin() or project.viewOnlyFlag == 'N')}" class="btn btn-outline-dark btn-sm dropdown-toggle idenCheckBtn" type="button" data-toggle="dropdown">
+                                   		<span class="dropdown-icon"></span>Pre-Review
+                                  	</button>
+                                   	<div class="dropdown-menu" role="menu">
+                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssViewPage('BIN')|" th:text="'Open Source'"></span>
+                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('BIN')|" th:text="'License'"></span>
+                                  	</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="row float-right">
-                                    <div class="btn-group mr-xm">
-                                        <button class="btn btn-yellow-04 btn-sm" type="button">Export</button>
-                                        <button class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon"
-                                                data-toggle="dropdown"
-                                                type="button">
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </button>
-                                        <div class="dropdown-menu" role="menu">
-                                            <a class="dropdown-item"
-                                               th:onclick="|bin_fn.selectDownloadFile('report_sub')|"
-                                               th:text="'FOSSLight Report (Spreadsheet)'"></a>
-                                            <a class="dropdown-item" th:onclick="|bin_fn.selectDownloadFile('YAML')|"
-                                               th:text="'FOSSLight Report (YAML)'"></a>
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenReset" id="binReset"
-                                            th:if="${project.dropYn != 'Y'}" th:text="Reset"
-                                            type="button"></button>
-                                    <button class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave" id="binSave"
-                                            th:if="${project.dropYn != 'Y'}" th:text="Save"
-                                            type="button"></button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <!-- grids -->
-                    <div class="col-md-12 outerJqGridSet binBtn">
-                        <table id="binList">
-                            <tr>
-                                <td></td>
-                            </tr>
-                        </table>
+                    <div class="col-md-12 jqGridSet binBtn">
+                        <table id="binList"><tr><td></td></tr></table>
                         <div id="binPager"></div>
                     </div>
                 </div>
-                <div class="row pl-2" id="gridAreaBom" name="gridArea" style="width: 100%;display: none;">
+                <div class="row pl-2 grid-area" id="gridAreaBom" name="gridArea" style="width: 100%;display: none;">
                     <!-- buttons -->
                     <div class="col-md-12 mb-3 pl-2">
                         <div class="row">
                             <input id="mergeYn" type="hidden"/>
                             <div class="col-md-6">
                                 <div class="row float-left pl-2">
-                                    <button class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenAnalysis"
-                                            sec:authorize="hasRole('ROLE_ADMIN')"
-                                            th:if="${autoAnalysisFlag and project.dropYn != 'Y'}"
-                                            th:onclick="|bom_fn.analysisValidation()|"
-                                            th:text="'Auto Analysis'"
-                                            type="button"></button>
-                                    <button class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenAnalysisResult"
-                                            sec:authorize="hasRole('ROLE_ADMIN')"
-                                            th:if="${autoAnalysisFlag and project.dropYn != 'Y'}"
-                                            th:onclick="|bom_fn.showAnalysisResult()|"
-                                            th:text="'Analysis Result'"
-                                            type="button"></button>
-                                    <button class="btn btn-danger btn-sm width-10rem mr-xm px-3 idenBulkRegist"
-                                            sec:authorize="hasRole('ROLE_ADMIN')"
-                                            th:if="${project.dropYn != 'Y'}"
-                                            th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"
-                                            th:text="'OSS bulk registration'"
-                                            type="button"></button>
-                                </div>
+                                	<th:block th:if="${autoAnalysisFlag}">
+                                		<button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y' and autoAnalysisFlag}"
+                                        		type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenAnalysis" th:text="'Auto Analysis'" th:onclick="|bom_fn.analysisValidation()|"></button>
+                                   		<button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y' and autoAnalysisFlag}" style="display: none;"
+                                        		type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenAnalysisResult" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
+                                	</th:block>
+                                   	<button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y'}"
+                                        	type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenBulkRegist" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
+                              	</div>
                             </div>
                             <div class="col-md-6">
                                 <div class="row float-right">
-                                    <button class="btn btn-danger btn-sm width-10rem mr-xm px-3"
-                                            sec:authorize="hasRole('ROLE_ADMIN')"
-                                            th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])"
-                                            th:text="'Save (Binary DB)'"
-                                            type="button"></button>
-                                    <div class="btn-group mr-xm">
-                                        <button class="btn btn-yellow-04 btn-sm" type="button">Export</button>
-                                        <button class="btn btn-yellow-04 btn-sm dropdown-toggle dropdown-icon"
-                                                data-toggle="dropdown"
-                                                type="button">
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </button>
-                                        <div class="dropdown-menu" role="menu">
-                                            <a class="dropdown-item pointer"
-                                               th:onclick="|bom_fn.selectDownloadFile('report_sub')|"
-                                               th:text="'FOSSLight Report (Spreadsheet)'"></a>
-                                            <a class="dropdown-item pointer"
-                                               th:onclick="|bom_fn.selectDownloadFile('YAML')|"
-                                               th:text="'FOSSLight Report (YAML)'"></a>
-                                            <a class="dropdown-item pointer"
-                                               th:onclick="|bom_fn.selectDownloadFile('Spreadsheet_sub')|"
-                                               th:text="'SPDX (Spreadsheet)'"></a>
-                                            <a class="dropdown-item pointer"
-                                               th:onclick="|bom_fn.selectDownloadFile('RDF_sub')|"
-                                               th:text="'SPDX (RDF)'"></a>
-                                            <a class="dropdown-item pointer"
-                                               th:onclick="|bom_fn.selectDownloadFile('TAG_sub')|"
-                                               th:text="'SPDX (TAG)'"></a>
-                                            <a class="dropdown-item pointer"
-                                               th:onclick="|bom_fn.selectDownloadFile('JSON_sub')|"
-                                               th:text="'SPDX (JSON)'"></a>
-                                            <a class="dropdown-item pointer"
-                                               th:onclick="|bom_fn.selectDownloadFile('YAML_sub')|"
-                                               th:text="'SPDX (YAML)'"></a>
-                                            <a class="dropdown-item pointer"
-                                               th:onclick="|bom_fn.selectDownloadFile('cdxJSON')|"
-                                               th:text="'CycloneDX (JSON)'"></a>
-                                            <a class="dropdown-item pointer"
-                                               th:onclick="|bom_fn.selectDownloadFile('cdxXML')|"
-                                               th:text="'CycloneDX (XML)'"></a>
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3 idenSave"
-                                            id="bomResetUp"
-                                            th:if="${project.dropYn != 'Y'}"
-                                            th:text="Reset" type="button"></button>
-                                    <button class="btn btn-teal-01 btn-sm width-6rem px-3 idenSave" id="bomSaveUp"
-                                            th:if="${project.dropYn != 'Y'}" th:text="Save"
-                                            type="button"></button>
+                                   	<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenSave" th:onclick="bom_fn.binaryDBSave([[${project.prjId}]])" th:text="'Save (Binary DB)'"></button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <!-- grids -->
-                    <div class="col-md-12 outerJqGridSet">
-                        <table id="bomList">
-                            <tr>
-                                <td></td>
-                            </tr>
-                        </table>
+                    <div class="col-md-12 jqGridSet">
+                        <table id="bomList"><tr><td></td></tr></table>
                         <div id="bomPager"></div>
                     </div>
+                </div>
                 </div>
             </div>
             	<div class="col-lg-3 comment-area">
@@ -1194,14 +280,24 @@
                       	</div>
                       	<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
                            	<div clas="row">
-                               	<div clas="col-md-12" id="commentList"></div>
+                               	<div clas="col-md-12" id="commentList">
+                               		<div class="card-body">
+										<div class="row">
+											<div class="col-md-12">
+												<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
+											</div>
+										</div>
+									</div>
+                               	</div>
                          	</div>
                   		</div>
                     </div>
            		</div>
 			</div>
             </div>
+            
             <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+            <th:block th:replace="fragments/common-fragments :: loadingIdenFragment"></th:block>
         </section>
     </div>
 </div>

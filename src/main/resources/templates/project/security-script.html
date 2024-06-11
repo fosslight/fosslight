@@ -8,7 +8,10 @@ var fixedMainData = [];
 var notfixedMainData = [];
 var saveFlag = false;
 var prevEditSel;
-var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
+var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'security'};
+var totalValidMsgData;
+var fixedValidMsgData;
+var notFixedValidMsgData;
 
 $(function () {
 	'use strict';
@@ -20,12 +23,14 @@ $(function () {
 		tabId = tabId.replace("tabMenu", "");
 		$("[name=gridArea]").hide();
 		$("#gridArea"+tabId).show();
-	});
-	
-	$('.btnCommentHistory').on('click', function(e){
-		e.preventDefault();
-        var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_HIS')}]];
-		openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
+		
+		if ("Total" == tabId) {
+			$('#save').attr('onclick', "total.save()");
+		} else if ("Fixed" == tabId) {
+			$('#save').attr('onclick', "fixed.save()");
+		} else {
+			$('#save').attr('onclick', "notFixed.save()");
+		}
 	});
 });
 
@@ -44,8 +49,17 @@ var sec_com_evt = {
 				loading.hide();
 				
 				totalMainData = data.totalGridData;
+				if (data.totalValidData) {
+					totalValidMsgData = data.totalValidData;
+				}
 				fixedMainData = data.fixedGridData;
+				if (data.fixedValidData) {
+					fixedValidMsgData = data.fixedValidData;
+				}
 				notfixedMainData = data.notFixedGridData;
+				if (data.notFixedValidData) {
+					notFixedValidMsgData = data.notFixedValidData;
+				}
 				
 				// 리로드 대신 그리드 삭제 후 다시 그리기
 				$("#totalList").jqGrid('GridUnload');
@@ -372,6 +386,10 @@ var sec_com_fn = {
   			if(!editFlag){
       			alertify.success([[#{msg.common.success}]]);
           	}
+  			
+  			setTimeout(function() {
+  				adjustMultiPageGridSize();
+  			}, 100);
      	}
   	}
 }
@@ -483,9 +501,9 @@ var total = {
 		totalList.jqGrid({
 			datatype: 'local',
 			data: totalMainData,
-			colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
 			colModel: [
-				{name: 'gridId', index: 'gridId', editable:false, hidden:true},
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
 				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
 				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
 				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
@@ -507,6 +525,7 @@ var total = {
 		   	editurl:'clientArray',
  			autowidth: true,
  			multiselect: true,
+ 			multiselectWidth: 35,
 			pager: '#totalListPager',
 			rowNum: 200,
 			rowList: [200, 500, 1000, 5000],
@@ -564,17 +583,20 @@ var total = {
 	            	var appendBtn = "";
 	                
 	            	if ([[${@CommonFunction.isAdmin()}]]) {
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm bg-lg-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('total')\"><i class=\"fas fa-plus\"></i></button>";
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm bg-lg-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('total', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('total')\"><i class=\"fas fa-plus\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('total', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
 	                }
 	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('total')\"><i class=\"fas fa-pencil-alt\"></i></button>";
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.checkDownloadExcel('total')\"><i class=\"fas fa-download\"></i></button>";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('total')\"><i class=\"fas fa-download\"></i></button>";
 	                	                
 	                $("#totalList_toppager_left").append(appendBtn);
 	            }
 			},
-			gridComplete: function() {
-				updateGridRowCount('totalList', 'totalListPager'); 
+			gridComplete : function() {
+				if (totalValidMsgData) {
+					gridValidMsgNew(totalValidMsgData, "totalList");
+				}
+				updateGridRowCount('totalList', 'totalListPager');
 			}
 		});
 			
@@ -589,7 +611,7 @@ var total = {
 			}	
 		});
 			
-//		totalList.jqGrid('navGrid',"#totalListPager",{add:false,edit:false,del:true,search:false,refresh:false, cloneToTop:true});
+//		totalList.jqGrid('navGrid',"#totalListPager",{add:false,edit:false,del:false,search:false,refresh:false, cloneToTop:true});
 	},
 	save : function(){
 		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
@@ -610,9 +632,9 @@ var fixed = {
 		fixedList.jqGrid({
 			datatype: 'local',  
 			data: fixedMainData,
-			colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
 			colModel: [
-				{name: 'gridId', index: 'gridId', editable:false, hidden:true},
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
 				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
 				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
 				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
@@ -634,6 +656,7 @@ var fixed = {
 			editurl:'clientArray',
  			autowidth: true,
  			multiselect: true,
+ 			multiselectWidth: 35,
 			pager: '#fixedListPager',
 			rowNum: 200,
 			rowList: [200, 500, 1000, 5000],
@@ -691,17 +714,21 @@ var fixed = {
 	            	var appendBtn = "";
 	                
 	            	if ([[${@CommonFunction.isAdmin()}]]) {
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm bg-lg-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('fixed')\"><i class=\"fas fa-plus\"></i></button>";
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm bg-lg-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('fixed', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('fixed')\"><i class=\"fas fa-plus\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('fixed', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
 	                }
 	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('fixed')\"><i class=\"fas fa-pencil-alt\"></i></button>";
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.checkDownloadExcel('fixed')\"><i class=\"fas fa-download\"></i></button>";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('fixed')\"><i class=\"fas fa-download\"></i></button>";
 	                	                
 	                $("#fixedList_toppager_left").append(appendBtn);
 	            }
 			},
 			gridComplete : function() {
-				updateGridRowCount('fixedList', 'fixedListPager'); 
+				if (fixedValidMsgData) {
+					gridValidMsgNew(fixedValidMsgData, "fixedList");
+				}
+				updateGridRowCount('fixedList', 'fixedListPager');
+				adjustMultiPageGridSize();
 			}
 		});
 			
@@ -715,8 +742,6 @@ var fixed = {
 				updateGridRowCount('fixedList', 'fixedListPager'); 
 			}		
 		});
-		
-//		fixedList.jqGrid('navGrid',"#fixedListPager",{add:false,edit:false,del:true,search:false,refresh:false, cloneToTop:true});
 	},
 	save : function(){
 		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
@@ -737,9 +762,9 @@ var notFixed = {
 		notFixedList.jqGrid({ 
 			datatype: 'local',
 			data: notfixedMainData,
-			colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
 			colModel: [
-				{name: 'gridId', index: 'gridId', editable:false, hidden:true},
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
 				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
 				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
 				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
@@ -761,6 +786,7 @@ var notFixed = {
 			editurl:'clientArray',
  			autowidth: true,
  			multiselect: true,
+ 			multiselectWidth: 35,
 			pager: '#notFixedListPager',
 			rowNum: 200,
 			rowList: [200, 500, 1000, 5000],
@@ -818,17 +844,23 @@ var notFixed = {
 	            	var appendBtn = "";
 	                
 	            	if ([[${@CommonFunction.isAdmin()}]]) {
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm bg-lg-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('notFixed')\"><i class=\"fas fa-plus\"></i></button>";
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm bg-lg-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('notFixed', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('notFixed')\"><i class=\"fas fa-plus\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('notFixed', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
 	                }
 	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('notFixed')\"><i class=\"fas fa-pencil-alt\"></i></button>";
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.checkDownloadExcel('notFixed')\"><i class=\"fas fa-download\"></i></button>";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('notFixed')\"><i class=\"fas fa-download\"></i></button>";
 	                	                
 	                $("#notFixedList_toppager_left").append(appendBtn);
 	            }
 			},
-			gridComplete : function () {
-				updateGridRowCount('notFixedList', 'notFixedListPager'); 
+			gridComplete : function() {
+				if (notFixedValidMsgData) {
+					gridValidMsgNew(notFixedValidMsgData, "notFixedList");
+				}
+				
+				adjustMultiPageGridSize();
+				
+				updateGridRowCount('notFixedList', 'notFixedListPager');
 			}
 		});
 		
@@ -858,13 +890,33 @@ var notFixed = {
 	}
 }
 
+var displayInfo;
 var fn = {
+		getProjectStatus : function () {
+			$.ajax({
+				url : "/project/getProjectStatus",
+				type : 'POST',
+				data : JSON.stringify({"prjId" : [[${project.prjId}]]}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success : function(data){
+					displayInfo = data;
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
 		displayProjectInfo : function() {
+			fn.getProjectStatus();
+			
 			var display = "";
 			
 			var pNm = [[${project.prjName}]];
 			var pVer = [[${project.prjVersion}]];
-			if ("" != pVer && pVer != null) pNm += " (v" + pVer + ")";
+			if ("" != pVer && pVer != null) pNm += " (" + pVer + ")";
 			
 			// project name
 			var prjName = "<span class=\"description-percentage text-dark-gray\">";
@@ -1020,34 +1072,34 @@ var fn = {
 			var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
 			var vulnerability = "<span class=\"ml-2\"> | </span>";
 			
-			var cvssScore = [[${project.cvssScore}]];
-			var secCode = [[${project.secCode}]];
-			var secCvssScore = [[${project.secCvssScore}]];
+			var cvssScore = displayInfo.cvssScore;
+			var secCode = displayInfo.secCode;
+			var secCvssScore = displayInfo.secCvssScore;
 			
-			if (secCvssScore != null && (secCode != null && "Fixed" != secCode)) {
+			if ("N" != secCvssScore && "Fixed" != secCode) {
 				cvssScore = secCvssScore;
 			}
 			
-			if (secCode != null) {
+			if ("N" != secCode) {
 				if ("Fixed" == secCode) {
-					if (cvssScore != null && cvssScore != 0) {
-						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(" + cvssScore + ")</span>";
+					if ("N" != cvssScore) {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Resolved(" + cvssScore + ")</span>";
 					} else {
-						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(N/A)</span>";
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Resolved(N/A)</span>";
 					}
 				} else {
-					if (cvssScore >= standardScore) {
-						vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Need to resolve(" + cvssScore + ")</span>";
-					} else {
-						if (cvssScore != null && cvssScore != 0) {
-							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(" + cvssScore + ")</span>";
+					if ("0" != cvssScore && "N" != cvssScore) {
+						if (cvssScore - standardScore >= 0) {
+							vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Need to resolve(" + cvssScore + ")</span>";
 						} else {
-							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(N/A)</span>";
+							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Discovered(" + cvssScore + ")</span>";
 						}
+					} else {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>";
 					}
 				}
 			} else {
-				if (cvssScore != null && cvssScore != 0) {
+				if ("0" != cvssScore && "N" != cvssScore) {
 					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered("+cvssScore+")</span>";
 				} else {
 					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered(N/A)</span>";
@@ -1296,7 +1348,6 @@ var fn = {
 				
 				fn_comment.getCommentList(commentsParam);
 				$(".comment-area").show();
-				
 			} else {
 	 			$(".contents-area").removeClass("col-lg-9");
 	 			$(".contents-area").addClass("col-12");
@@ -1304,8 +1355,10 @@ var fn = {
 			}
 		},
 		showCommentHistory : function () {
+			fn_comment.activateCommentArea();
+			
 			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_HIS')}]];
-	        openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
+	        openCommentHistory('/comment/popup/security/' + _rDiv + '/' + [[${project.prjId}]]);
 		}
 	}
 </script>
