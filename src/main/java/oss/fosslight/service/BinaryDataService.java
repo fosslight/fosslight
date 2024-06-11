@@ -1105,8 +1105,7 @@ public class BinaryDataService  extends CoTopComponent {
 	}
 	
 	@Transactional
-	private void addOssComponentByBinaryInfoAndroid(List<OssComponents> componentList,
-			Map<String, List<BinaryData>> binaryRegInfoMap) {
+	private void addOssComponentByBinaryInfoAndroid(List<OssComponents> componentList, Map<String, List<BinaryData>> binaryRegInfoMap) {
 
 		for(OssComponents bean : componentList) {
 			String binaryName = avoidNull(bean.getBinaryName());
@@ -1316,12 +1315,12 @@ public class BinaryDataService  extends CoTopComponent {
 			
 	}
 
-	public Map<String, List<BinaryData>> getBinaryListFromBinaryDB(boolean isAndroid, Project projectInfo) {
+	public Map<String, List<BinaryData>> getBinaryListFromBinaryDB(boolean isAndroid, Project projectInfo, Map<String, String[]> checkSumInfoMap) {
 		Map<String, List<BinaryData>> listMap = new HashMap<>();
 		
 		if(projectInfo != null ) {
 			if(isAndroid) {
-				if(!isEmpty(projectInfo.getSrcAndroidResultFileId())) {
+				if ((checkSumInfoMap == null || checkSumInfoMap.isEmpty()) && !isEmpty(projectInfo.getSrcAndroidResultFileId())) {
 
 					T2File binaryTextFile = fileService.selectFileInfoById(projectInfo.getSrcAndroidResultFileId());
 					
@@ -1329,7 +1328,6 @@ public class BinaryDataService  extends CoTopComponent {
 						Map<String, Object> readFileData = CommonFunction.getAndroidResultFileInfo(binaryTextFile, new ArrayList<String>());
 						
 						if(readFileData != null && readFileData.containsKey("addCheckList")) {
-							Map<String, String[]> checksumInfoMap = new HashMap<>();
 							List<OssComponents> _loadlist = (List<OssComponents>) readFileData.get("addCheckList");
 							
 							for(OssComponents bean : _loadlist) {
@@ -1348,43 +1346,46 @@ public class BinaryDataService  extends CoTopComponent {
 									continue;
 								}
 
-								checksumInfoMap.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), bean.getTlsh(), avoidNull(bean.getSourceCodePath())});
+								checkSumInfoMap.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), bean.getTlsh(), avoidNull(bean.getSourceCodePath())});
 							}
-							
-							try {
-								for(String binaryname : checksumInfoMap.keySet()) {
-									String[] datas = checksumInfoMap.get(binaryname);
-									
-									List<BinaryData> _list = autoIDService.findOssInfoWithBinaryName(binaryname, datas[0], datas[1]);
-								
-									if(listMap.containsKey(binaryname) && _list != null) {
-										List<BinaryData> resultList = listMap.get(binaryname);
-										if(resultList != null){
-											resultList.addAll(_list);
-											listMap.put(binaryname, resultList);
-										}
-										
-									} else {
-										listMap.put(binaryname, _list);
-									}
-								}
-							} catch (Exception e) {
-								log.error(e.getMessage(), e);
-							}							
 						}
 					}
-					
+				}
+				
+				if (checkSumInfoMap != null && !checkSumInfoMap.isEmpty()) {
+					try {
+						for(String binaryname : checkSumInfoMap.keySet()) {
+							String[] datas = checkSumInfoMap.get(binaryname);
+							
+							List<BinaryData> _list = autoIDService.findOssInfoWithBinaryName(binaryname, datas[0], datas[1]);
+						
+							if(listMap.containsKey(binaryname) && _list != null) {
+								List<BinaryData> resultList = listMap.get(binaryname);
+								if(resultList != null){
+									resultList.addAll(_list);
+									listMap.put(binaryname, resultList);
+								}
+								
+							} else {
+								listMap.put(binaryname, _list);
+							}
+						}
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+					}	
 				}
 			} else {
-				if(!isEmpty(projectInfo.getBinBinaryFileId())) {
+				if ((checkSumInfoMap == null || checkSumInfoMap.isEmpty()) &&!isEmpty(projectInfo.getBinBinaryFileId())) {
 					T2File binaryTextFile = fileService.selectFileInfoById(projectInfo.getBinBinaryFileId());
 					
-					Map<String, String[]> loadDataMap = loadBinaryText(binaryTextFile, true);
-					
-					if(loadDataMap != null && !loadDataMap.isEmpty()) {
+					checkSumInfoMap = loadBinaryText(binaryTextFile, true);
+				}
+				
+				if (checkSumInfoMap != null && !checkSumInfoMap.isEmpty()) {
+					if (checkSumInfoMap != null && !checkSumInfoMap.isEmpty()) {
 						try {
-							for(String binaryname : loadDataMap.keySet()) {
-								String[] datas = loadDataMap.get(binaryname);
+							for(String binaryname : checkSumInfoMap.keySet()) {
+								String[] datas = checkSumInfoMap.get(binaryname);
 								
 								List<BinaryData> _list = autoIDService.findOssInfoWithBinaryName(binaryname, datas[0], datas[1]);
 								

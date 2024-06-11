@@ -2842,7 +2842,7 @@
 			, BAR.GUIREPORT_FLAG
 		</if>
 			, M.REF_OSS_NAME
-		<if test="@oss.fosslight.util.StringUtil@equals('14', referenceDiv) or @oss.fosslight.util.StringUtil@equals('15', referenceDiv)">
+		<if test="@oss.fosslight.util.StringUtil@equals('14', referenceDiv) or @oss.fosslight.util.StringUtil@equals('15', referenceDiv) or @oss.fosslight.util.StringUtil@equals('20', referenceDiv)">
 			, M.TLSH, M.CHECK_SUM
 		</if>
 	   FROM OSS_COMPONENTS M

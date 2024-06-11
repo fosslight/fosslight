@@ -73,7 +73,7 @@ public interface ApiProjectMapper {
 
 	Map<String, Object> selectProjectMaster2(Map<String, Object> _tempPrjInfo);
 
-	List<String> selectDuplicatedProject2(Project project);	
+	List<Project> getProjectInfo(Project project);
 	
 	List<ProjectIdentification> selectOssComponentsList(Project project);
 

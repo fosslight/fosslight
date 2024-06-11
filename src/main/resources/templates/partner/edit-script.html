@@ -21,8 +21,11 @@ var sampleFile = [[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstD
 var _popupCheckOssName = null;
 var _popupCheckOssLicense = null;
 var saveFlag = false;
+var commentsParam = {referenceDiv : '3rd'};
 var documentsFileCnt = 0;
 var ossFileObj;
+var partnerStatus = [[${detail.status}]];
+var partnerId = [[${detail.partnerId}]];
 
 $(document).ready(function () {
 	'use strict';
@@ -70,54 +73,24 @@ $(document).ready(function () {
 	
 	if (partnerData.partnerId != null) {
 		$("input[name=creatorNm]").val(partnerData.creatorName||"");
-		
-		ossAnalysisStatus = ossAnalysisStatus||"";
-		if ("SUCCESS" == ossAnalysisStatus.toUpperCase() && [[${detail.status}]] != "CONF") {
-			$(".idenAnalysisResult").show();
-		}
+		fn.displayPartnerInfo();
 	}
 	
-	$("#_projectList").jqGrid({
-		datatype: 'local',
-		data: prjList,
-		colNames:['ID','Project Name', 'Project Version'],
-		colModel:[
-			{name:'prjId',index:'prjId', width:70, sortable:false, align:"center", key:true},
-			{name:'prjName',index:'prjName', width:400, sortable:false},
-			{name:'prjVersion',index:'prjVersion', width:100, sortable:false, align:"center"}
-		],
-		rowNum:100,
-		viewrecords: true,
-		height: 'auto',
-		ondblClickRow: function(rowid,iRow,iCol,e) {
-			var rowData = $("#_projectList").jqGrid('getRowData',rowid);
-			if("Y" != rowData.oldSystemFlag) {
-				createTabInFrame(rowData['prjId']+'_Project','/project/edit/'+rowData['prjId']);
-			}
-		},
-		loadComplete: function(data) {
-			if(data.records > 0) {
-				var multRowIds = []; 
-				var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
-				for(var _idx=0;_idx<rowsCount;_idx++) {
-					row = rows[_idx];
-					className = row.className;
-					if (className.indexOf('jqgrow') !== -1) {
-						rowid = row.id;
-						rowData = data.rows[rowIdx++];
-						if(rowData.oldSystemFlag == "Y") {
-							className = className + ' excludeRow';
-						}
-						row.className = className;
-					} else if(className.indexOf('ui-subgrid') !== -1){
-						rowIdx++;
-					}
-				}
-			}
-		}
-	});
+	if (prjList != null) {
+		grid.projectList();
+	}
 	
 	$(".select2").select2();
+	
+	$("[id^=tabMenu]").on("click", function() {
+		var tabId = $(this).attr("id");
+		tabId = tabId.replace("tabMenu", "");
+		$("[name=gridArea]").hide();
+		
+		if ("Party" == tabId) {
+			$("#girdAreaParty").show();
+		}
+	});
 });
 
 var commentTemp = '';
@@ -133,81 +106,270 @@ var evt = {
 		$('select[name=userDivision]').trigger('change');
 		$('select[name=division]').trigger('change');
 
-		//와쳐 추가 버튼
-		$('#addWatcher').on('click', function(){
-			/* division 정보 */
-			var $divSel	= $("#userDivision")
-			  , divVal	= $divSel.val()
-			  , divTxt	= $divSel.find("option[value='"+divVal+"']").text();
-							
-			/* division 정보 */
-			var $userSel	= $("#userName")
-			  , userVal		= $userSel.val()||""
-			  , userTxt		= $userSel.find("option[value='"+userVal+"']").text();
-
-			// 선택한 item이 없을 경우.
-			if(divVal == "" || userVal == "") {
-				return alertify.error([[#{msg.project.required.selectDivision}]], 0);
-			}
-			
-			/* tag 정보 */
-			var isNew = true;
-			
-			$(".watcherTags").each(function(i, tag){
-				var tagDiv = $(tag).val().split("/")[0]
-				  , tagUid = $(tag).val().split("/")[1];
-				
-				if(divVal == tagDiv) {
-					if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
-						isNew = false;
-
-						return false;
-					}
-					
-					if(userVal == 'all') { // all을 선택했을 경우 기존 부서의 userId를 가진 tag를 삭제
-						$(tag).closest('span').remove();
-					} else if(tagUid == userVal) {
-						isNew = false;	// 이미 등록된 watcher가 있을경우
-					}
-				}
-			});
-			
-			if(isNew) {
-				var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
-				fn.addWatcher(divVal, userVal, '');
-				fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
-			}
-		});
-		
 		$('div.multiTxtSet2 .smallDelete').on('click', function(){
 			$(this).parent().remove();
 		});
 
-		//코멘트 임시저장
-		$('.saveEditorDraft').click(function(){
-			var editorVal = ""; //replaceWithLink(CKEDITOR.instances.editor.getData());
-			var register = [[${sessUserInfo.userId}]];
-			var param = { referenceId : $('input[name=partnerId]').val(), referenceDiv :'21', contents : editorVal };
+		fn.confirmationUploadFile();
+		fn.ossUploadFile();
+		fn.partnerBinaryUploadFile();
+		fn.documentsUploadFile();
+		
+		// file uploader hide in CONF status
+        if ('CONF' == [[${detail.status}]]) {
+            $(".ajax-upload-dragdrop").hide();
+        }
+
+        if ([[${detail.partnerId}]] != null) {
+			fn.publicChange();
+		}
+        
+      	//프로젝트 리스트 더보기
+		$("#listMore").on("click",function(){
+			createTabInFrameWithCondition("Project List", '/project/list', 'PARTNERLISTMORE', $('input[name=partnerName]').val());
+		});
+        
+		$("#domain").on("change", function(e){
+			var value = $(this).find("option:selected").val();
+			var domain = $(this).find("option:selected").text();
+			
+			if(etcDomain == value){
+				$("#emailTemp").val("").show();
+			} else {
+				$("#emailTemp").val(domain).hide();
+			}
+		});
+
+		$("#createProject").on("click", function(){
+			if (partnerData != null) {
+				var partnerId = partnerData.partnerId||"";
+				var partnerName = partnerData.partnerName||"";
+				var softwareName = partnerData.softwareName||"";
+				if (softwareName.indexOf("/") > -1){
+					softwareName = softwareName.replace("/", "[]");
+				}
+				createTabInFrameWithCondition("New_Project", '/project/edit', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
+			}
+		});
+	},
+	tabInit: function(){
+		var tabContent = $(".tabContent");
+		var tabMenuA = $(".tabMenu a");
+
+/* 		if (partnerData != null && partnerData.partnerId == null) {
+			tabMenuA.eq("1").hide();
+		} */
+		
+		tabContent.hide();
+		tabMenuA.click(function () {
+			$(".tabMenu a span").remove();
+			tabMenuA.eq("0").text("3rd party");
+			if ([[${batFlag}]]) {
+				tabMenuA.eq("1").text("BAT(Optional)");
+			}
+			
+			var tag = "<span>"+$(this).text()+"</span>";
+			$(this).html(tag);
+			
+			tabContent.hide();
+			activeTabText = $(this).text();
+			activeTab = $(this).attr("rel");
+			
+			$("#" + activeTab).show();
+
+			if(activeTab == "batDiv") {
+				$(".projdecBtn").hide();
+			} else {
+				$(".projdecBtn").show();
+			}
+			
+			// _mainLastsel 꼬이는것 방지
+			if(activeTab == "0") {
+				_mainLastsel = $('#list').jqGrid('getGridParam', "selrow" );
+			} else if(activeTab == "batDiv") {}
+			
+			// 선택된 로우가 없을경우 _mainLastsel 초기화
+			if(typeof(_mainLastsel)!="string") {
+				_mainLastsel = -1;
+			}
+		});
+		
+		tabMenuA.eq("0").click(); 
+	}
+};
+
+// party 그리드 데이터 전역 변수
+var partyMainData;
+var partySubData;
+var partyValidMsgData_e = []; //초기화
+var partyDiffMsgData_e = []; //초기화
+var partyInfoMsgData_e = []; // 초기화
+var fn = {
+	displayPartnerInfo : function () {
+		var display = "";
+		
+		var softwareName = [[${detail.softwareName}]];
+		var softwareVersion = [[${detail.softwareVersion}]];
+		if ("" != softwareVersion && softwareVersion != null) {
+			softwareName += " (" + softwareVersion + ")";
+		}
+		
+		var partnerName = "<span class=\"text-dark-gray text-bold hover-line goToEditLink\">" + softwareName + "</span>";
+		display += partnerName
+		
+		var status = "<span class=\"ml-2\"> | </span>";
+		var partnerStatus = [[${detail.status}]];
+		
+		switch(partnerStatus){
+			case "REQ" :
+				status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
+					break;
+			case "REV" :
+				status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
+					break;
+			case "CONF" :
+				status += "<span class=\"text-dark text-bold ml-2\">Confirm</span>";
+					break;
+			default :
+				status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
+					break;
+		}
+		
+		display += status;
+		
+		$("#displayPartnerInfo").html(display);
+		
+		if ($(".goToEditLink").width() > 300) {
+			$(".goToEditLink").addClass("ellipsis");
+		}
+	},
+	addWatcherFnc : function () {
+		/* division 정보 */
+		var $divSel	= $("#userDivision")
+		  , divVal	= $divSel.val()
+		  , divTxt	= $divSel.find("option[value='"+divVal+"']").text();
+						
+		/* division 정보 */
+		var $userSel	= $("#userName")
+		  , userVal		= $userSel.val()||""
+		  , userTxt		= $userSel.find("option[value='"+userVal+"']").text();
+
+		// 선택한 item이 없을 경우.
+		if(divVal == "" || userVal == "") {
+			return alertify.error([[#{msg.project.required.selectDivision}]], 0);
+		}
+		
+		/* tag 정보 */
+		var isNew = true;
+		
+		$(".watcherTags").each(function(i, tag){
+			var tagDiv = $(tag).val().split("/")[0]
+			  , tagUid = $(tag).val().split("/")[1];
+			
+			if(divVal == tagDiv) {
+				if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+					isNew = false;
+
+					return false;
+				}
+				
+				if(userVal == 'all') { // all을 선택했을 경우 기존 부서의 userId를 가진 tag를 삭제
+					$(tag).closest('span').remove();
+				} else if(tagUid == userVal) {
+					isNew = false;	// 이미 등록된 watcher가 있을경우
+				}
+			}
+		});
+		
+		if(isNew) {
+			var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
+			fn.addWatcher(divVal, userVal, '');
+			fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+		}
+	},
+	addEmailFnc : function () {
+		/* AD ID 정보 */
+		var adId = $("#adId").val();
+		var domain = $("#emailTemp").val();
+
+		if ("" == adId) {
+			$("#adId").focus();
+			// return alertify.error('Please enter watcher AD ID', 0);
+			return alertify.error([[#{enter.watcher.error}]], 0);
+		}
+		
+		var _email = adId + "@" + domain;
+		var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
+
+		if (regEmail.test(_email) == false) {
+			$("#adId").focus();
+			return alertify.error([[#{invalid.email.error}]], 0);
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: '/system/user/checkEmail', 
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'email' : _email},
+			success: function (data) {
+				if("true" == data.isValid) {
+					var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
+					fn.addWatcher(data.division, data.userId, '');
+					fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
+				} else {
+					fn.addWatcher('', '', _email);
+					fn.addHtml($("#multiDiv"), _email, _email, "Email");
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+		
+		$("#adId").val('');
+		$("#domain").val([[${@CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN')}]]).trigger('change');
+	},
+	addListFnc : function () {
+		var listKind = $("#listKind").val()
+		  , listId = $("#listId").val();
+			
+		if (fn.chkListValidation(listKind, listId)){
+			var obj = {};
+			
+			obj["listKind"] = listKind;
+			obj["listId"] = listId;
+			
+			fn.copyWatcher(obj);
+		}
+	},
+	publicChange : function () {
+		$("[name='publicYn']:checked").parent().addClass("active");
+		
+		$("[name='publicYn']").on('change',function(e){
+			var param = {partnerId : [[${detail.partnerId}]], publicYn : ($("[name='publicYn']:checked").val())};
 			
 			$.ajax({
-				url : '/partner/saveComment',
+				url : '/partner/updatePublicYn',
 				type : 'POST',
+				data : JSON.stringify(param),
 				dataType : 'json',
 				cache : false,
-				data : param,
-				success : function(json){
-					if(json.isValid == 'false'){
-						alertify.error([[#{msg.common.valid2}]], 0);
-					} else {
-						alertify.success([[#{msg.common.success}]]);
-						$(".commentBtn.open").trigger( "click" );
-					}
+				contentType : 'application/json',
+				success: function(){
+					alertify.success([[#{msg.common.success}]]);
 				},
-				error : function(){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
+				error : fn.onError
 			});
 		});
+	},
+	setProjectInfo : function (cellvalue, options, rowObject) {
+		var display = cellvalue;
+		if ("" != rowObject.prjVersion) display = display + " [" + rowObject.prjVersion + "]";
+		return display;
+	},
+	confirmationUploadFile : function () {
 		//파일업로드
 		var accept1 = '';
 		var fileAccept1 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
@@ -244,7 +406,8 @@ var evt = {
 				$('.ajax-file-upload-statusbar').remove();
 			}
 		});
-		
+	},
+	ossUploadFile : function() {
 		//파일업로드
 		var accept2 = '';
 		var fileAccept2 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
@@ -360,8 +523,8 @@ var evt = {
 				}
 			}
 		});
-		
-		
+	},
+	partnerBinaryUploadFile : function () {
 		var accept4 = '';
 		var fileAccept4 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
 		for (var i in fileAccept4) {
@@ -416,8 +579,9 @@ var evt = {
 			onError:function(files,status,errMsg,pd){
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
-		});			
-		
+		});
+	},
+	documentsUploadFile : function () {
 		$('#documentsFile').uploadFile({
 			url : '/partner/documentsFile',
 			multiple:false,
@@ -454,193 +618,120 @@ var evt = {
 				$('.ajax-file-upload-statusbar').remove();
 			}
 		});
+	},
+	handleUserCommentPopupOpen : function() {
+		// 코멘트 팝업
+        const param = {
+            "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+            "referenceId" : $('input[name=partnerId]').val()
+        }
+		
+        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+        	if (!alertify.editDialog){
+				alertify.dialog('editDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+						
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+						
+							var setup = alertify.confirm().setup();
+							setup.buttons = [];
+							setup.focus.element = 0;
+						
+							return setup;
+						},
+				    	hooks: {
+				    		onshow: function() {
+				        		this.elements.dialog.style.maxWidth = 'none';
+				          		this.elements.dialog.style.width = '700px';
+				        	}
+						}
+					};
+				}, false, 'confirm');
+    		}
+		
+			alertify.editDialog(res);
+      	},
+       	null,
+      	function () {
+         	$("#modifiedCommentInPjtEditor").summernote({
+            	height: 180,
+              	callbacks: {
+                 	onInit: function () {
+                      	$(this).summernote('code', $("#userContents").val());
+                 	}
+              	}
+           	});
+     	});
+	},
+	sendEditor : function(type){
+		//코멘트 저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
 
-        // file uploader hide in CONF status
-        if(String([[${detail.status}]]) == 'CONF') {
-            $(".ajax-upload-dragdrop").hide();
+        if(!editorVal || editorVal == "") {
+            alertify.alert([[#{msg.project.enter.comment}]], function(){});
+            return false;
         }
 
-		// email 왓쳐 추가
-		$("#addEmail").click(function(){
-			/* AD ID 정보 */
-			var adId = $("#adId").val();
-			var domain = $("#emailTemp").val();
-
-			if ("" == adId) {
-				$("#adId").focus();
-				// return alertify.error('Please enter watcher AD ID', 0);
-				return alertify.error([[#{enter.watcher.error}]], 0);
-			}
-			
-			var _email = adId + "@" + domain;
-			var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
-
-			if (regEmail.test(_email) == false) {
-				$("#adId").focus();
-				return alertify.error([[#{invalid.email.error}]], 0);
-			}
-			
-			$.ajax({
-				type: "POST",
-				url: '/system/user/checkEmail', 
-				type : 'GET',
-				dataType : 'json',
-				cache : false,
-				data : {'email' : _email},
-				success: function (data) {
-					if("true" == data.isValid) {
-						var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
-						fn.addWatcher(data.division, data.userId, '');
-						fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
-					} else {
-						fn.addWatcher('', '', _email);
-						fn.addHtml($("#multiDiv"), _email, _email, "Email");
-					}
-				},
-				error: function(data){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				}
-			});
-			
-			$("#adId").val('');
-			$("#domain").val([[${@CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN')}]]).trigger('change');
-		});
+		var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]], contents : editorVal, mailSendType : type};
 		
-		$('.btnCommentHistory').on('click', function(e){
-			e.preventDefault();
-			if (partnerData.partnerId != null) {
-                var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]];
-                openCommentHistory('/comment/popup/3rd/' + _rDiv + '/' + partnerData.partnerId);
-			}
-			
-		});
-		
-		$('#partnerForm').ajaxForm({
-			url : '/partner/saveAjax',
+		$.ajax({
+			url : '/partner/sendComment',
 			type : 'POST',
 			dataType : 'json',
 			cache : false,
-			success: fn.onRegistSuccess,
-			error: function(data){
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.success([[#{msg.project.sent.comments.success}]]);
+                	$("#modifiedCommentInPjtEditor").summernote('code', '');
+                	$("#userContents").val('');
+                	$('.ajs-close').trigger("click");
+                	fn_comment.getCommentList(commentsParam);
+                
+                	if (_popupComment == null || _popupComment.closed) {
+                	} else {
+                		_popupComment.callbackFunction();
+                	}
+				}
+			},
+			error : function(){
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
+	},
+	saveEditor : function(){
+		//코멘트 임시저장
+		var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+		var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]], contents : editorVal};
 		
-		if (partnerData != null && partnerData.partnerId != null){
-			$("[name='publicYn']").on('change',function(e){
-				var param = {partnerId : partnerData.partnerId, publicYn : ($("[name='publicYn']:checked").val())};
-				
-				$.ajax({
-					url : '/partner/updatePublicYn',
-					type : 'POST',
-					data : JSON.stringify(param),
-					dataType : 'json',
-					cache : false,
-					contentType : 'application/json',
-					success: function(){
-						alertify.success([[#{msg.common.success}]]);
-					},
-					error : fn.onError
-				});
-			});
-		}
-		
-		$('#addList').on('click', function(){
-			var listKind = $("#listKind").val()
-			  , listId = $("#listId").val();
-				
-			if (fn.chkListValidation(listKind, listId)){
-				var obj = {};
-				
-				obj["listKind"] = listKind;
-				obj["listId"] = listId;
-				
-				fn.copyWatcher(obj);
-			}
-		});
-
-		$("#domain").on("change", function(e){
-			var value = $(this).find("option:selected").val();
-			var domain = $(this).find("option:selected").text();
-			
-			if(etcDomain == value){
-				$("#emailTemp").val("").show();
-			} else {
-				$("#emailTemp").val(domain).hide();
-			}
-		});
-
-		//프로젝트 리스트 더보기
-		$("#listMore").on("click",function(){
-			createTabInFrameWithCondition("Project List", '/project/list', 'PARTNERLISTMORE', $('input[name=partnerName]').val());
-		});
-
-		$("#createProject").on("click", function(){
-			if (partnerData != null) {
-				var partnerId = partnerData.partnerId||"";
-				var partnerName = partnerData.partnerName||"";
-				var softwareName = partnerData.softwareName||"";
-				if (softwareName.indexOf("/") > -1){
-					softwareName = softwareName.replace("/", "[]");
+		$.ajax({
+			url : '/project/saveComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.success([[#{msg.common.success}]]);
+					$("#userContents").val(editorVal);
+					$('.ajs-close').trigger("click");
 				}
-				createTabInFrameWithCondition("New_Project", '/project/edit', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
 	},
-	tabInit: function(){
-		var tabContent = $(".tabContent");
-		var tabMenuA = $(".tabMenu a");
-
-		if (partnerData != null && partnerData.partnerId == null) {
-			tabMenuA.eq("1").hide();
-		}
-		
-		tabContent.hide();
-		tabMenuA.click(function () {
-			$(".tabMenu a span").remove();
-			tabMenuA.eq("0").text("3rd party");
-			if ([[${batFlag}]]) {
-				tabMenuA.eq("1").text("BAT(Optional)");
-			}
-			
-			var tag = "<span>"+$(this).text()+"</span>";
-			$(this).html(tag);
-			
-			tabContent.hide();
-			activeTabText = $(this).text();
-			activeTab = $(this).attr("rel");
-			
-			$("#" + activeTab).show();
-
-			if(activeTab == "batDiv") {
-				$(".projdecBtn").hide();
-			} else {
-				$(".projdecBtn").show();
-			}
-			
-			// _mainLastsel 꼬이는것 방지
-			if(activeTab == "0") {
-				_mainLastsel = $('#list').jqGrid('getGridParam', "selrow" );
-			} else if(activeTab == "batDiv") {}
-			
-			// 선택된 로우가 없을경우 _mainLastsel 초기화
-			if(typeof(_mainLastsel)!="string") {
-				_mainLastsel = -1;
-			}
-		});
-		
-		tabMenuA.eq("0").click(); 
-	}
-};
-
-// party 그리드 데이터 전역 변수
-var partyMainData;
-var partySubData;
-var partyValidMsgData_e = []; //초기화
-var partyDiffMsgData_e = []; //초기화
-var fn = {
-	editDescription : function(){
-		var linkText = initCKEditorNoToolbar("editor4", false);
+/* 	editDescription : function(){
+		var linkText = "";
 		var data = {"partnerId" : $('input[name=partnerId]').val() , "description" : linkText};
 		$.ajax({
 			url : '/partner/updateDescription',
@@ -656,7 +747,7 @@ var fn = {
 				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
-	},
+	}, */
 	// party 그리드 데이터
 	getPartyGridData : function(){
 		if (partnerData.partnerId != null) {
@@ -675,6 +766,7 @@ var fn = {
 					partyMainData = data.mainData;
 					partyValidMsgData_e = []; //초기화
 					partyDiffMsgData_e = []; //초기화
+					partyInfoMsgData_e = [];
 					
 					if(data.validData) {
 						partyValidMsgData_e = data.validData;
@@ -682,13 +774,19 @@ var fn = {
 					if(data.diffData) {
 						partyDiffMsgData_e = data.diffData;
 					}
-
+					if(data.infoData) {
+						partyInfoMsgData_e = data.infoData;	
+					}
+					
 					// 리로드 대신 그리드 삭제 후 다시 그리기
 					$("#list").jqGrid('GridUnload');
 					
 					grid.init();
 					
-					fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, null, com_fn.getLicenseName);
+					// totla record 표시
+					$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
+					
+					fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
 				},
 				error : function(){
 					alertify.error([[#{msg.common.valid2}]], 0);
@@ -724,10 +822,53 @@ var fn = {
 		if (fn.checkStatus()){
 			com_fn.exitCell(_mainLastsel, "list");
 			
-			alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
-				if (e) {
-					cleanErrMsg("list");
+			// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+			
+			if (typeof alertify.parSaveDialog === 'undefined') {
+				alertify.dialog('parSaveDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+        	}
+			
+			var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
+       		innerHtml 		+= '<br><textarea id="parSaveEditor"></textarea>';
+			
+       		alertify.parSaveDialog()
+       		.set('onok', function(e) {
+       			// prevent clicking the OK button on Enter
+				if (typeof keyCode !== 'undefined' && keyCode == 13) {
+					keyCode = undefined;
+					return false;
+				}
+       			
+       			if (e) {
+       				cleanErrMsg("list");
 					$("div.retxt").hide();
+					$("input, textarea").removeClass("is-invalid");
+					$(".permissionRadio").find(".active").find("input").prop("checked", true);
 					
 					//public 값 넣어주기
 					if($('#checkbox3').is(':checked')) {
@@ -760,8 +901,22 @@ var fn = {
 			 		});
 			 		
 					$('#ossComponentsStr').val(JSON.stringify(mainData));
-					$('#userComment').val(""); // replaceWithLink(CKEDITOR.instances['editor'].getData())
-					$('#description').val(replaceWithLink($("#descriptionTextarea").summernote('code')));
+					var comment = $("#parSaveEditor").summernote('code');
+       				if ("" != $(comment).text().trim()) {
+						$("#userComment").val(comment);
+					} else {
+						$('#userComment').val("");
+					}
+       				var editorVal = $("#descriptionTextarea").summernote('code');
+					if ("" != $(editorVal).text().trim()){
+						$('#description').val(replaceWithLink(editorVal));
+					} else {
+						$('#description').val("");
+					}
+					
+					if ("CONF" == [[${detail.status}]]) {
+						fn.disabledComfirmedRow(false);
+					}
 					
 					var prjId = partnerData.partnerId||"";
 					var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
@@ -778,14 +933,27 @@ var fn = {
 							alertify.error([[#{msg.common.valid2}]], 0);
 						}
 					});
-				} else {
-					return false;
-				}
-			});
+       			} else {
+       				return false;
+       			}
+       		})
+       		.set('title', 'Save').setContent(innerHtml)
+       		.set('onshow', function(e){
+       			$("#parSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+			.show();
 		}else{
 			alertify.alert([[#{msg.partner.warning}]], function(){});
 		}
 
+	},
+	disabledComfirmedRow : function(disabledBoolean) {
+		var diabledNameList = ['partnerName', 'softwareName', 'softwareVersion', 'publicYn', 'division', 'reviewerName'];
+		diabledNameList.forEach(function(names){
+			$('input[name='+names+']').prop('disabled', disabledBoolean);
+		});
+		
+		$("#deliveryForm").prop("disabled", disabledBoolean);
 	},
 	makeNickNamePopup : function(obj) {
 		// ajax FormSubmit 사용시 huge String 문자가 포함되면 data가 전송되지 않는 문제가 있어서 formsubmi에서 applicaton/json으로 변경
@@ -872,7 +1040,7 @@ var fn = {
 		} else {
 			if("10" == data.resCd){
 				if (isStatusChangeFlag) {
-					var param = {status : 'REQ', partnerId : partnerData.partnerId||"", userComment : ""};
+					var param = {status : 'REQ', partnerId : [[${detail.partnerId}]], userComment : ""};
 					checkObligationFlag = false;
 					var _list = $("#list");
 					var mainData = _list.jqGrid('getGridParam','data');
@@ -897,6 +1065,8 @@ var fn = {
 						cache : false,
 						success : function(data){
 							if (data.isValid == "false") {
+								alertify.alert(com_fn.setMessage([[#{msg.project.validation.error}]]), function(){});
+								
 								gridCleanErrMsg("list");
 								partyValidMsgData_e = data.externalData;
 								partyDiffMsgData_e = data.externalData2;
@@ -912,8 +1082,11 @@ var fn = {
 								alertify.error([[#{msg.common.valid}]], 0);
 							} else {
 								reloadTabInframe('/partner/list');
-								if (partnerData.partnerId != null) {
-									reloadTabInframe('/partner/edit/'+partnerData.partnerId);
+								if ([[${detail.partnerId}]] != null) {
+									alertify.alert([[#{msg.common.success}]], function(){
+										deleteTabInFrame("/partner/edit/" + [[${detail.partnerId}]]);
+										createTabInFrame([[${detail.partnerId}]] + '_3rdParty', "/partner/edit/" + [[${detail.partnerId}]]);
+									});
 								}
 							}
 						},
@@ -925,10 +1098,14 @@ var fn = {
 					var partnerId = $('input[name=partnerId]').val();
 					alertify.alert([[#{msg.common.success}]], function(){
 						reloadTabInframe('/partner/list');
-						
+						if ("CONF" == [[${detail.status}]]) {
+							fn.disabledComfirmedRow(true);
+						}
 						if(partnerId){
+							com_fn.changeMode('view', false, [[${detail.status}]]);
+							partnerStatus = [[${detail.status}]];
 							fn.getPartyGridData();
-
+							fn_comment.getCommentList(commentsParam);
 							saveFlag = true;
 						} else {
 							deleteTabInFrame('/partner/edit');	
@@ -994,37 +1171,6 @@ var fn = {
 		btnHtm +='<input type="button" value="All" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="fn.sendEditor(\'WR\')"/>&nbsp;&nbsp;&nbsp;';
 
 		alertify.myAlert(btnHtm);
-	},
-	sendEditor : function(type){
-		//코멘트 저장
-        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
-
-        if(!editorVal || editorVal == "") {
-            alertify.alert([[#{msg.project.enter.comment}]], function(){});
-            return false;
-        }
-
-		var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :'20', contents : editorVal, mailSendType : type};
-		
-		$.ajax({
-			url : '/partner/sendComment',
-			type : 'POST',
-			dataType : 'json',
-			cache : false,
-			data : param,
-			success : function(json){
-				if(json.isValid == 'false'){
-					alertify.error([[#{msg.common.valid2}]], 0);
-				} else {
-                    alertify.success([[#{msg.project.sent.comments.success}]]);
-                    $("#userComment").val('');
-                    editDailog.close();
-				}
-			},
-			error : function(){
-				alertify.error([[#{msg.common.valid2}]], 0);
-			}
-		});
 	},
 	modifyComment : function(obj){
 		$('.commModifyPop').show();
@@ -1104,17 +1250,70 @@ var fn = {
 		});
 	},
 	reset : function(){
-		alertify.confirm([[#{msg.common.confirm.reset}]], function (e) {
-			if (e) {
-				$("#list").jqGrid('clearGridData');
-			} else {
-				return false;
-			}
-		});
+		if (fn.checkStatus()){
+			alertify.confirm([[#{msg.partner.check.reset}]], function (e) {
+				if (e) {
+					$('.ossUpload').empty();
+					$('.binaryUpload').empty();
+					
+					var mode = $("#mode").val();
+					if ("edit" == mode) {
+						fn.ossUploadFile();
+						fn.partnerBinaryUploadFile();
+					} else {
+						var appendHtml = "<li><span>No File</span></li>";
+						$('.ossUpload').append(appendHtml);
+						$('.binaryUpload').append(appendHtml);
+					}
+					
+					var target = $("#list");
+					target.jqGrid('clearGridData');
+
+					fn_grid_com.totalGridSaveMode('list');
+					var mainData = target.jqGrid('getGridParam','data'); // 메인 그리드
+					
+			 		mainData.forEach( function(_rowData){
+			 			var _rowId = _rowData['gridId'];
+			 			
+			 			if(_rowData["obligationLicense"] == "90") {
+			 				if(_rowData["notify"] == "Y") {
+			 					if(_rowData["source"] == "Y") {
+			 						_rowData["obligationType"] = "11";
+			 					} else {
+			 						_rowData["obligationType"] = "10";
+			 					}
+			 				} else if(_rowData["notify"] == "N") {
+			 					_rowData["obligationType"] = "99";
+			 				}
+			 			}
+			 		});
+			 		
+					$('#ossComponentsStr').val(JSON.stringify(mainData));
+					
+	 				var postData = $("#partnerForm").serializeObject();
+					$.ajax({
+						url : '/partner/saveAjax',
+						type : 'POST',
+						data : JSON.stringify(postData),
+						dataType : 'json',
+						contentType : 'application/json',
+						cache : false,
+						success: fn.onRegistSuccess,
+						error: function(data){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
 	},
 	delete : function(){
 		if (fn.checkStatus()){
-			var innerHtml 	= [[#{msg.partner.delete.warning}]];
+			var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
            	innerHtml 		+= '<textarea id="parDelEditor"></textarea>';
            	
        		// prevent clicking the OK button on Enter
@@ -1148,44 +1347,52 @@ var fn = {
 				}, false, 'confirm');
         	}
            	
-			alertify.deleteParDialog(innerHtml, function () {
-				// prevent clicking the OK button on Enter
-				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-					keyCode = undefined;
-					return false;
-				}
-				
-				var editorVal = $("#parDelEditor").summernote('code');
-				
-				if ("" == $(editorVal).text().trim()) {
-					alertify.alert([[#{msg.project.required.comments}]], function(){});
+           	alertify.deleteParDialog()
+       		.set('onok', function(e) {
+       			if (e) {
+       				// prevent clicking the OK button on Enter
+    				if (typeof keyCode !== 'undefined' && keyCode == 13) {
+    					keyCode = undefined;
+    					return false;
+    				}
+    				
+    				var editorVal = $("#parDelEditor").summernote('code');
+    				
+    				if ("" == $(editorVal).text().trim()) {
+    					alertify.alert([[#{msg.project.required.comments}]], function(){});
 
-					return false;
-				} else {
-					var partnerId = $('input[name=partnerId]').val();
-					$.ajax({
-						url : '/partner/delAjax',
-						type : 'POST',
-						dataType : 'json',
-						cache : false,
-						data : {'partnerId' : partnerId, userComment : replaceWithLink($("#parDelEditor").summernote('code')) },
-						success: function(data){
-							if(partnerId) {
-								deleteTabInFrame('/partner/edit/'+partnerId);			
-							} else {
-								deleteTabInFrame('/partner/edit');
-							}
-							
-							reloadTabInframe('/partner/list');
-						},
-						error: function(){
-							alertify.error([[#{msg.common.valid2}]], 0);
-						}
-					});
-				}
-			});
-
-			$("#parDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+    					return false;
+    				} else {
+    					var partnerId = $('input[name=partnerId]').val();
+    					$.ajax({
+    						url : '/partner/delAjax',
+    						type : 'POST',
+    						dataType : 'json',
+    						cache : false,
+    						data : {'partnerId' : partnerId, userComment : replaceWithLink($("#parDelEditor").summernote('code')) },
+    						success: function(data){
+    							if(partnerId) {
+    								deleteTabInFrame('/partner/edit/'+partnerId);			
+    							} else {
+    								deleteTabInFrame('/partner/edit');
+    							}
+    							
+    							reloadTabInframe('/partner/list');
+    						},
+    						error: function(){
+    							alertify.error([[#{msg.common.valid2}]], 0);
+    						}
+    					});
+    				}
+       			} else {
+       				return false;
+       			}
+       		})
+           	.set('title', 'Delete').setContent(innerHtml)
+       		.set('onshow', function(e){
+       			$("#parDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+			.show();
 		} else {
 			alertify.alert([[#{msg.partner.warning}]], function(){});
 		}
@@ -1217,6 +1424,9 @@ var fn = {
 		$("#list").jqGrid('GridUnload');
 		
 		grid.init();
+
+		// totla record 표시
+		$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
 	},
 	displayButton : function(cellvalue){
 		var icon1 = "<input type=\"button\" value=\"Delete\" class=\"btnCLight gray wauto\" onclick=\"fn.deleteOssComponents(this)\"/>";
@@ -1258,6 +1468,11 @@ var fn = {
 			}
 		});
 	},
+	selectDomain : function() {
+		var tempDomain = $("select[name=parDomain] option:checked").text();
+		if ("Select Domain" == adIdDomain) adIdDomain = "";
+		$("input[name=emailTemp]").val(tempDomain);
+	},
 	//requestReview
 	requestReview : function(){
 		if (fn.checkStatus()){
@@ -1274,6 +1489,12 @@ var fn = {
 			var innerHtml 	= 'Are you sure you want to reject?<br><br>';
            	innerHtml 		+= '<textarea id="partnerRejectEditor"></textarea>';
 			
+         	// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+           	
            	if (!alertify.partnerRejectDialog){
 				alertify.dialog('partnerRejectDialog', function() {
 					return {
@@ -1285,7 +1506,7 @@ var fn = {
 							}
 							
 							var setup = alertify.confirm().setup();
-							setup.focus.element = -1;
+							setup.focus.element = 0;
 							
 							return setup;
 						},
@@ -1299,38 +1520,54 @@ var fn = {
 				}, false, 'confirm');
            	}
            	
-           	alertify.partnerRejectDialog(innerHtml, function () {
-				var comment = $("#partnerRejectEditor").summernote('code');
-           		comment = comment.trim();
+           	alertify.partnerRejectDialog()
+       		.set('onok', function(e) {
+       			if (e) {
+       				// prevent clicking the OK button on Enter
+    				if (typeof keyCode !== 'undefined' && keyCode == 13) { 
+    					keyCode = undefined;
+    					return false;
+    				}
+       				
+					var editorVal = $("#partnerRejectEditor").summernote('code');
+    				
+    				if ("" == $(editorVal).text().trim()){
+               			alertify.alert([[#{msg.project.required.comments}]], function(){});
 
-           		if ("" == comment) {
-           			alertify.alert([[#{msg.project.required.comments}]], function(){});
+    					return false;
+    				} else {
+    					var param = {status : 'PROG', partnerId : partnerData.partnerId||"", userComment : replaceWithLink($("#partnerRejectEditor").summernote('code'))};
 
-					return false;
-				} else {
-					var param = {status : 'PROG', partnerId : partnerData.partnerId||"", userComment : replaceWithLink($("#partnerRejectEditor").summernote('code'))};
-
-					$.ajax({
-						url : '/partner/changeStatus',
-						type : 'POST',
-						data : param,
-						dataType : 'json',
-						cache : false,
-						success : function(data){
-							reloadTabInframe('/partner/list');
-							
-							if (partnerData.partnerId != null) {
-								reloadTabInframe('/partner/edit/'+partnerData.partnerId);
-							}
-						},
-						error : function(){
-							alertify.error([[#{msg.common.valid2}]], 0);
-						}
-					});
-				}
-			});
-
-           	$("#partnerRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+    					$.ajax({
+    						url : '/partner/changeStatus',
+    						type : 'POST',
+    						data : param,
+    						dataType : 'json',
+    						cache : false,
+    						success : function(data){
+    							reloadTabInframe('/partner/list');
+    							
+    							if (partnerData.partnerId != null) {
+    								alertify.alert([[#{msg.common.success}]], function() {
+    									deleteTabInFrame("/partner/edit/" + partnerId);
+    									createTabInFrame(partnerId + '_3rdParty', "/partner/edit/" + partnerId);
+    								});
+    							}
+    						},
+    						error : function(){
+    							alertify.error([[#{msg.common.valid2}]], 0);
+    						}
+    					});
+    				}
+       			} else {
+       				return false;
+       			}
+       		})
+       		.set('title', 'Reject').setContent(innerHtml)
+       		.set('onshow', function(e){
+       			$("#partnerRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+			.show();
 		} else {
 			alertify.alert([[#{msg.partner.warning}]], function(){});
 		}
@@ -1347,8 +1584,10 @@ var fn = {
 				cache : false,
 				success : function(data){
 					reloadTabInframe('/partner/list');
-					if (partnerData.partnerId != null) {
-						reloadTabInframe('/partner/edit/'+partnerData.partnerId);
+					
+					if (partnerId != null && partnerId != ''){
+						deleteTabInFrame("/partner/edit/" + partnerId);
+						createTabInFrame(partnerId + '_3rdParty', "/partner/edit/" + partnerId);
 					}
 				},
 				error : function(){
@@ -1383,6 +1622,12 @@ var fn = {
 			var innerHtml 	= 'Are you sure you want to confirm?<br><br>';
            	innerHtml 		+= '<textarea id="partnerConfirmEditor"></textarea>';
            	
+         	// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+           	
            	if (!alertify.partnerConfirmDialog){
 				alertify.dialog('partnerConfirmDialog', function() {
 					return {
@@ -1394,7 +1639,7 @@ var fn = {
 							}
 							
 							var setup = alertify.confirm().setup();
-							setup.focus.element = 1;
+							setup.focus.element = 0;
 							
 							return setup;
 						},
@@ -1408,44 +1653,66 @@ var fn = {
 				}, false, 'confirm');
            	}
 			
-           	alertify.partnerConfirmDialog(innerHtml, function () {
-           		var ignoreBinaryDbFlag = $("#ignoreBinaryDbFlag").val();
-           		if (typeof ignoreBinaryDbFlag === 'undefined') ignoreBinaryDbFlag = "";
-           		
-           		var param = {status : 'CONF', partnerId : partnerData.partnerId||"", binaryFileId : partnerData.binaryFileId||"", "ignoreBinaryDbFlag" : ignoreBinaryDbFlag};
-           		if ("" != $("#partnerConfirmEditor").summernote('code')) {
-					param["userComment"] = replaceWithLink($("#partnerConfirmEditor").summernote('code'));
-				} else {
-					param["userComment"] = "";
-				}
-           		
-           		$.ajax({
-    				url : '/partner/changeStatus',
-    				type : 'POST',
-    				data : param,
-    				dataType : 'json',
-    				cache : false,
-    				success : function(data){
-    					if(data.isValid == "false") {
-    						gridValidMsgNew(data, "list");
-    						
-    						alertify.error([[#{msg.common.valid}]], 0);
-    					} else {
-    						reloadTabInframe('/partner/list');
-    						
-    						if (partnerData.partnerId != null){
-    							reloadTabInframe('/partner/edit/'+partnerData.partnerId);	
-    						}
-    					}
-    					
-    				},
-    				error : function(){
-    					alertify.error([[#{msg.common.valid2}]], 0);
+        	alertify.partnerConfirmDialog()
+        	.set('onok', function(e) {
+        		if (e) {
+        			// prevent clicking the OK button on Enter
+    				if (typeof keyCode !== 'undefined' && keyCode == 13) { 
+    					keyCode = undefined;
+    					return false;
     				}
-    			});
-           	});
-           	
-           	$("#partnerConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+        			
+    				var ignoreBinaryDbFlag = $("#ignoreBinaryDbFlag").val();
+               		if (typeof ignoreBinaryDbFlag === 'undefined') ignoreBinaryDbFlag = "";
+               		
+               		var editorVal = $("#partnerConfirmEditor").summernote('code');
+       				if ("" == $(editorVal).text().trim()) {
+       					editorVal = "";
+       				}
+               		
+               		var param = {status : 'CONF', partnerId : [[${detail.partnerId}]], binaryFileId : [[${detail.binaryFileId}]], "ignoreBinaryDbFlag" : ignoreBinaryDbFlag};
+               		if ("" != editorVal) {
+    					param["userComment"] = replaceWithLink(editorVal);
+    				} else {
+    					param["userComment"] = "";
+    				}
+               		
+               		$.ajax({
+        				url : '/partner/changeStatus',
+        				type : 'POST',
+        				data : param,
+        				dataType : 'json',
+        				cache : false,
+        				success : function(data){
+        					if(data.isValid == "false") {
+        						gridValidMsgNew(data, "list");
+        						
+        						alertify.error([[#{msg.common.valid}]], 0);
+        					} else {
+        						reloadTabInframe('/partner/list');
+        						
+        						if (partnerId != null && partnerId != ''){
+        							alertify.alert([[#{msg.common.success}]], function() {
+        								deleteTabInFrame("/partner/edit/" + partnerId);
+        								createTabInFrame(partnerId + '_3rdParty', "/partner/edit/" + partnerId);
+        							});
+        						}
+        					}
+        					
+        				},
+        				error : function(){
+        					alertify.error([[#{msg.common.valid2}]], 0);
+        				}
+        			});
+        		} else {
+        			return false;
+        		}
+        	})
+           	.set('title', 'Confirm').setContent(innerHtml)
+       		.set('onshow', function(e){
+       			$("#partnerConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+			.show();
 		} else {
 			alertify.alert([[#{msg.partner.warning}]], function(){});
 		}
@@ -1605,9 +1872,11 @@ var fn = {
 		$.each(msgData,function(key,value) {
 			if("isValid" != key) {
 				if($('input[name='+key+']').length > 0) {
-					$('input[name='+key+']').next("div.retxt").html(value).show();
+					$('input[name=' + key + ']').addClass("is-invalid");
+					$('input[name=' + key + ']').next("div.retxt").html(value).show();
 				} else if($('textarea[name='+key+']').length > 0) {
-					$('textarea[name='+key+']').next("div.retxt").html(value).show();
+					$('textarea[name=' + key + ']').addClass("is-invalid");
+					$('textarea[name=' + key + ']').next("div.retxt").html(value).show();
 				} 
 			}
 		});
@@ -1625,16 +1894,22 @@ var fn = {
 			}
 		}
 		
-		var html  = '<div class="external-event mr-1"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		var html  = "";
+		if ($("#multiDiv").find(".external-event").length == 0) {
+			html  = '<div class="external-event"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		} else {
+			html  = '<div class="external-event ml-1"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		}
+		
 		html += str;
-		html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
+		html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i></div>';
 		
 		target.append(html);
 	},
 	addWatcher : function(uDiv, uId, uEmail) {
-		var partnerId = partnerData.partnerId;
+		var partnerId = [[${detail.partnerId}]];
 
-		if (partnerId != null) {
+		if (partnerId == null) {
 			return true;
 		}
 		
@@ -1648,8 +1923,14 @@ var fn = {
 			cache : false,
 			contentType : 'application/json',
 			success: function(resultData){
-				if(resultData.isValid == "true") {
-					alertify.success([[#{msg.common.success}]]);
+				if (resultData.isValid == "true") {
+					if ('' != uEmail){
+						alertify.success([[#{msg.common.success}]]);
+					}
+				} else {
+					if ('' != uEmail){
+						alertify.error("Invalid email address.", 0);
+					}
 				}
 			},
 			error : fn.onError
@@ -1666,7 +1947,7 @@ var fn = {
 
 		var partnerId = partnerData.partnerId;
 
-		if (partnerId == null) {
+		if ("" == partnerId || partnerId == null) {
 			return true;
 		}
 		
@@ -1770,7 +2051,7 @@ var fn = {
 						}
 					}
 					
-					if(partnerId) {
+					if (partnerId != null) {
 						alertify.success([[#{msg.common.success}]]);
 					}
 				}
@@ -1853,7 +2134,7 @@ var fn = {
 		var obligationType = rowObject["obligationType"];
 		
 		if (obligationLicense == 10 || obligationLicense == 11) {
-			display="<span class=\"iconSet ops\"></span>";
+			display="<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
 		} else if(obligationLicense == 90) {
 			display = '<select id="'+options.rowId+'_notify" onchange="fn.onNotifyCboxClick(' + options.rowId + ')">'
 				+ '<option value=""></option>'
@@ -1870,7 +2151,7 @@ var fn = {
 		var obligationType = rowObject["obligationType"];
 		
 		if(obligationLicense == 11) {
-			display="<span class=\"iconSet man\"></span>";
+			display="<i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\"></i>";
 		} else if(obligationLicense == 90) {
 			display = '<select id="'+options.rowId+'_source" onchange="fn.onSourceCboxClick(' + options.rowId + ')">'
 				+ '<option value=""></option>'
@@ -1945,7 +2226,6 @@ var fn = {
 		if(selectedVal2 != $("#"+id+"_notify").val()) {
 			$("#"+id+"_notify").val(selectedVal2).trigger('change');
 		}
-
 	},
 	chkListValidation : function(listKind, listId){
 		if(listKind == ""){
@@ -1985,19 +2265,19 @@ var fn = {
 				_popupCheckOssName.close();
 			}
 			
-			var partnerId = partnerData.partnerId||"";
-			_popupCheckOssName = window.open("/oss/checkOssName?prjId="+partnerId+"&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+			if (partnerData != null && partnerData.partnerId != null) {
+				var partnerId = partnerData.partnerId;
+				_popupCheckOssName = window.open("/oss/checkOssName?prjId="+partnerId+"&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
 
-			if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
-				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+				if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
+					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+				}
 			}
 		} else {
 			alertify.alert([[#{msg.project.required.checkOssName}]], function(){});
 
 			return false;
 		}
-		
-		
 	},
 	CheckOssLicenseViewPage : function(){
 		if(saveFlag) {
@@ -2005,7 +2285,9 @@ var fn = {
 				_popupCheckOssLicense.close();
 			}
 			
-			_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId="+partnerData.partnerId||""+"&referenceDiv=20&targetName=partner", "Check License", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+			if (partnerData != null && partnerData.partnerId != null) {
+				_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId="+partnerData.partnerId+"&referenceDiv=20&targetName=partner", "Check License", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+			}
 
 			if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
 				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
@@ -2020,7 +2302,7 @@ var fn = {
 		var partnerId = $("input[name=partnerId]").val();
 		var returnFlag = false;
 
-		if ("" == partnerId||"") {
+		if (partnerId == "" || partnerId == null) {
 			returnFlag = true;
 		} else {
 			$.ajax({
@@ -2048,16 +2330,11 @@ var fn = {
 		var copyUrl = "";
 		var protocol = window.location.protocol;
 		var host =  window.location.host;
-		copyUrl = protocol + "//" + host + "/partner/shareUrl/" + partnerData.partnerId||"";
-
-		var langSelect = $('.userLang > select option:selected', window.parent.document)[0];
-		langSelect = $(langSelect).val();
-		if(langSelect){
-			copyUrl += "?lang=" + langSelect;
-		}
-		$("#copyUrl").show();
-		$("#copyUrl").val(copyUrl);
+		copyUrl = protocol + "//" + host + "/partner/shareUrl/" + [[${detail.partnerId}]];
+		copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
 		
+		$("#copyUrl").val(copyUrl);
+
 		//launch it.
 		var btnHtml 	= 	'<div class="row form-group">';
 		btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
@@ -2085,7 +2362,7 @@ var fn = {
 				},
 				hooks: {
 			    	onshow: function() {
-			          	this.elements.content.style.height = '200px';
+			          	this.elements.content.style.height = '220px';
 			        }
 				}
 			}});
@@ -2094,17 +2371,21 @@ var fn = {
 		alertify.myAlert(btnHtml);
 	},
 	copyUrl : function(target){
-		var copyUrl = document.getElementById( 'copyUrl' );
-		copyUrl.select();
-        document.execCommand( 'Copy' );
+		$('#copyUrl').attr('type', 'text');
+		$('#copyUrl').select();
+        var copyFlag = document.execCommand('copy');
+        $('#copyUrl').attr('type', 'hidden');
         
-        $("#copyUrl").hide();
-		$('.ajs-close').trigger("click");
-		alertify.success([[#{msg.common.success}]]);
+        if (copyFlag) {
+        	$('.ajs-close').trigger("click");
+    		alertify.success([[#{msg.common.success}]]);
+        } else {
+        	alertify.error([[#{msg.common.valid}]]);
+        }
 	},
 	binaryDBSave : function() {
 		var param = {
-			"partnerId" : partnerData.partnerId||"",
+			"partnerId" : partnerData.partnerId,
 			"referenceDiv" : "20"
 		};
 
@@ -2127,7 +2408,15 @@ var fn = {
 			}
 		});
     },
-    bulkEdit : function(){
+    bulkEdit : function(permission, status){
+    	if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		} else if ("CONF" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+			return false;
+		}
+    	
     	var gridList = $("#list");
         var targetGird = "list";
 
@@ -2172,7 +2461,7 @@ var fn = {
     	if (target === "report_sub") {
     		fn.downloadExcel();
     	} else {
-    		var status = '${detail.status}';
+    		var status = [[${detail.status}]];
         	if ('CONF' != status) {
         		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
     				if (e) {
@@ -2185,9 +2474,6 @@ var fn = {
         		fn.selectDownloadFileValidation(target);
         	}
     	}
-        
-    	// hide list
-        $("#ExportList").hide();
     },
     selectDownloadFileValidation : function(target) {
     	if (fn.checkSelectDownloadFile()) {
@@ -2373,6 +2659,7 @@ var fn = {
 		} else if ("documentsFile" == flag) {
 			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteDocumentsFile(this)">X</span>'+appendHtml+'</li>';
 			uploadFileTag += '<input type="hidden" value="'+obj.registSeq+'"/>';
+			if ("" == $("#documentsFileId").val()) $("#documentsFileId").val(obj.registFileId);
 			$('.documentsFileArea').append(uploadFileTag);
 		}
 	},
@@ -2418,37 +2705,6 @@ var fn = {
                     }
                 });
             });
-    },
-    sendEditor: function (type) {
-        //코멘트 저장
-        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
-
-        if (!editorVal || editorVal == "") {
-            alertify.alert([[#{msg.project.enter.comment}]], function () {});
-            return false;
-        }
-        var referenceId = [[${detail.partnerId}]]
-        var param = {referenceId: referenceId, referenceDiv: '20', contents: editorVal, mailSendType: type};
-
-        $.ajax({
-            url: '/project/sendComment',
-            type: 'POST',
-            dataType: 'json',
-            cache: false,
-            data: param,
-            success: function (json) {
-                if (json.isValid == 'false') {
-                    alertify.error([[#{msg.common.valid2}]], 0);
-                } else {
-                    alertify.success([[#{msg.project.sent.comments.success}]]);
-                    $("#userComment").val('');
-                    editDailog.close();
-                }
-            },
-            error: function () {
-                alertify.error([[#{msg.common.valid2}]], 0);
-            }
-        });
     },
     saveEditor: function () {
         //코멘트 임시저장
@@ -2516,7 +2772,6 @@ var datas = {
  				}
  			}
  		}
-		
 
 		userDivision = $('#division');
 		if (partnerData != null) {
@@ -2543,74 +2798,89 @@ var datas = {
 			}
 		}
 		
-		if (partnerData.partnerWatcher != null) {
-			partnerData.partnerWatcher.forEach(function(watcher, index, obj){
-				var deptUseYn = watcher.deptUseYn || "Y";
-				var userUseYn = watcher.userUseYn || "Y";
-				
-				if ("" != watcher){
-					if (watcher.parEmail){ 
-						fn.addHtml($("#multiDiv"), watcher.parEmail, watcher.parEmail, "Email");
-					} else {
-						str = '';
-						
-						if(watcher.parUserName == undefined){
-							str = watcher.parDivisionName;
-						} else {
-							if (divisionEmptyCd != watcher.prjDivision) {
-								str += watcher.parDivisionName +'/';
-							}
-							str += watcher.parUserName;
-						}
-						
-						fn.addHtml($("#multiDiv"), str, watcher.parDivision, watcher.parUserId);
-					}
-				}
-			});
+		if (partnerData != null && partnerData.partnerWatcher != null) {
+			datas.initPartnerWatcher(partnerData.partnerWatcher);
 		}
+		
+		if ([[${detail.partnerId}]] != null) {
+			commentsParam["referenceId"] = [[${detail.partnerId}]];
+		}
+		
+		commentsParam.height = $(window).height() - 120;
+		fn_comment.getCommentList(commentsParam);
 	},
-	getCommentList : function(){
-		$.ajax({
-			url : '/partner/getCommentList',
-			type : 'GET',
-			dataType : 'json',
-			cache : false,
-			data : {referenceId : $('input[name=partnerId]').val()},
-			success : function(data){
-				$('.commentListArea').children().remove();
-				
-				if(data.length != 0) {
-					for(var i = 0; i < data.length; i++) {
-						var commId = data[i].commId;
-						$('.commentListArea').append(commentTemp.html());
-						var temp = $('dl[name=commentClone]');
+	initPartnerWatcher : function (watcherList) {
+		watcherList.forEach(function(watcher, index, obj){
+			var deptUseYn = watcher.deptUseYn || "Y";
+			var userUseYn = watcher.userUseYn || "Y";
+			
+			if (watcher!=""){
+				if (watcher.parEmail) { 
+					fn.addHtml($("#multiDiv"), watcher.parEmail, watcher.parEmail, "Email");
+				} else {
+					var str = "";
+					
+					if (watcher.parUserName == undefined){
+						str = watcher.parDivisionName;
+					} else {
+						str = '<span class="text-bold"';
 						
-						if(data[i].status == "" || data[i].status == null || data[i].status == "undefined") {
-							temp.find('.nameArea').text(data[i].creator);
-						} else {
-							temp.find('.nameArea').text(data[i].status).append("</br>"+data[i].creator);
+						if (divisionEmptyCd != watcher.prjDivision) {
+							str += '>'+watcher.parDivisionName+'</span>/';
 						}
 						
-						temp.find('.dateArea').text(data[i].createdDate);
-						temp.find('.commentContentsArea').html(data[i].contents);
-						temp.find('input[name=commId]').val(commId);
-						temp.removeAttr('name');
-					}	
-				} else {
-					$('.commentListArea').append('<p class="noneTxt">No comments were registered.</p>');
+						str += '<span class="text-bold">';
+						str += watcher.parUserName+'</span>';
+					}
+					
+					fn.addHtml($("#multiDiv"), str, watcher.parDivision, watcher.parUserId);
 				}
-				
-				$('.commentBtn').removeClass('open');
-				$('.commentEditor').hide();
-				$('.projectContents').removeClass('pt255');
-			},
-			error : function(){
-				alertify.error([[#{msg.common.valid2}]], 0);
 			}
 		});
 	}
 }
 var grid = {
+	projectList : function () {
+		$("#_projectList").jqGrid({
+			datatype: 'local',
+			data: prjList,
+			colNames:['ID','Project Name', 'Project Version'],
+			colModel:[
+				{name:'prjId',index:'prjId', width:70, sortable:false, align:"center", key:true},
+				{name:'prjName',index:'prjName', width:400, sortable:false, formatter: fn.setProjectInfo},
+				{name:'prjVersion',index:'prjVersion', width:100, sortable:false, align:"center"}
+			],
+			rowNum:100,
+			viewrecords: true,
+			height: 'auto',
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				var rowData = $("#_projectList").jqGrid('getRowData',rowid);
+				if("Y" != rowData.oldSystemFlag) {
+					createTabInFrame(rowData['prjId']+'_Project','/project/edit/'+rowData['prjId']);
+				}
+			},
+			loadComplete: function(data) {
+				if(data.records > 0) {
+					var multRowIds = []; 
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						className = row.className;
+						if (className.indexOf('jqgrow') !== -1) {
+							rowid = row.id;
+							rowData = data.rows[rowIdx++];
+							if(rowData.oldSystemFlag == "Y") {
+								className = className + ' excludeRow';
+							}
+							row.className = className;
+						} else if(className.indexOf('ui-subgrid') !== -1){
+							rowIdx++;
+						}
+					}
+				}
+			}
+		});
+	},
 	init : function(){
 		var currentOssName = '';
 		var ondblClickRowBln = false;
@@ -2620,7 +2890,7 @@ var grid = {
 			datatype: 'local',
 			data : partyMainData,
 			colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
-					   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction'],
+					   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction', 'Tlsh', 'Check Sum'],
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
 				{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
@@ -2893,13 +3163,14 @@ var grid = {
 				{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
 				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : false, search : false},
 				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : false, search : false},
-				{name: 'restriction', index: 'restriction', width: 70, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false}
+				{name: 'restriction', index: 'restriction', width: 70, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
+				{name: 'tlsh', index: 'tlsh', editable:false, hidden:true},
+				{name: 'checkSum', index: 'checkSum', editable:false, hidden:true}
 			],
 			autoencode: true,
 			editurl:'clientArray',
 			autowidth: true,
 			height: 'auto',
-            shrinkToFit:false,
 			gridview: true,
 			pager: '#pager',
 			rowNum: 200,
@@ -2911,7 +3182,7 @@ var grid = {
 			cellsubmit : 'clientArray',
 			ignoreCase: true,
 			multiselect: true,
-            multiselectWidth: 32,
+            multiselectWidth: 35,
 			onSortCol: function (index, columnIndex, sortOrder) {
 				isSort = true;
 			},
@@ -2952,15 +3223,52 @@ var grid = {
 					
 					// 한번에 처리
 					$("#list tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
-					$("#list_toppager").remove();
 				}
 				
 				// 상태에 따른 화면 처리
-				fn.modeForStatus(partnerData.status||"");
+				fn.modeForStatus([[${detail.status}]]);
 				
 				if(isSort){
 					isSort = false;
 				}
+				
+				// append button event
+				if ($("#list_toppager_left").find('button').length == 0) {
+					var permission = partnerData.statusPermission == 1 || partnerData.partnerId == null;
+					var status = partnerData.status;
+					
+	            	var appendBtn = "";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('3rdParty', 'list', "+permission+", '"+status+"')\">";
+					if (!permission || "CONF" == status) {
+						appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+            		} else {
+            			appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+            		}
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('3rdParty', 'list', 'main', "+permission+", '"+status+"')\">";
+	            	if (!permission || "CONF" == status) {
+						appendBtn += "<i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
+            		} else {
+            			appendBtn += "<i class=\"far fa-trash-alt\"></i></button>";
+            		}
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"fn.bulkEdit("+permission+", '"+status+"')\">";
+	            	if (!permission || "CONF" == status) {
+						appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+            		} else {
+            			appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+            		}
+            		
+	            	appendBtn += "<button type=\"button\" id=\"exportDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+	            	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('Spreadsheet_sub')\">SPDX (Spreadsheet)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('RDF_sub')\">SPDX (RDF)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('TAG_sub')\">SPDX (TAG)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('JSON_sub')\">SPDX (JSON)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML_sub')\">SPDX (YAML)</span></div>";
+	            	
+	                $("#list_toppager_left").append(appendBtn);
+	            }
 			},
 			onSelectRow: function(rowid,status,eventObject) {
 			},
@@ -2990,9 +3298,11 @@ var grid = {
 				}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
-				if (iCol != "17" && $("#partySave").is(":visible")) {
+				var permission = partnerData.permission == 1;
+				
+				if (iCol != "17" && (permission && "CONF" != partnerStatus)) {
 					cleanErrMsg("list", rowid);
-					fn_grid_com.setCellEdit(partnerList, rowid, partyValidMsgData_e, partyDiffMsgData_e, null, com_fn.getLicenseName);
+					fn_grid_com.setCellEdit(partnerList, rowid, partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
 
 					// 서브 그리드 제외
 					ondblClickRowBln = false;
@@ -3000,11 +3310,12 @@ var grid = {
 					$('#'+rowid+'_licenseName').addClass('autoCom');
 					$('#'+rowid+'_licenseName').css({'width' : '60px'});
 					var result = $('#'+rowid+'_licenseName').val().split(",");
-
+					
 					result.forEach(function(cur,idx){
 						if(cur != ""){
-							var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-							$('#'+rowid+'_licenseName').parent().append(mult);
+							var mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+							
+							$('#'+rowid+'_licenseNameBtn').append(mult);
 						}
 					});
 					
@@ -3029,6 +3340,10 @@ var grid = {
 					gridDiffMsg(partyDiffMsgData_e, "list");
 				}
 				
+				if (partyInfoMsgData_e) {
+					gridInfoMsg(partyInfoMsgData_e, "list");
+				}
+				
 				var arr = [];
 				arr = partnerList.jqGrid('getDataIDs');
 
@@ -3038,17 +3353,13 @@ var grid = {
 						$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
 					}
 				}
-				
-				updateGridRowCount('list', 'pager'); 
 			},
 			removeHighLight : true
 
 		});
-		partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () {
-			updateGridRowCount('list', 'pager'); 
-		}});
+		partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 		
-		if ($("#partySave").is(":visible")) {
+/* 		if ($("#partySave").is(":visible")) {
 			partnerList.jqGrid('navGrid',"#pager",{add:true,edit:false,del:true,search:false,refresh:false
 				  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('list',partnerList,"main", null, com_fn.getLicenseName);}
 				  , delfunc: function () { fn_grid_com.rowDelNew(partnerList,"main");}
@@ -3056,13 +3367,66 @@ var grid = {
 			});
 		} else {
 			partnerList.jqGrid('navGrid',"#pager",{add:false,edit:false,del:false,search:false,refresh:false,cloneToTop:true});
-		}
+		} */
 		
 		$('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
 	}
 }
 
 var com_fn = {
+	changeMode : function (mode, resetFlag, status) {
+		var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+		var tabDiv = targetId.split("-")[1];
+		
+		if ("menu-party" == targetId) {
+			$.ajax({
+	            url: "/partner/" + mode + "/" + partnerData.partnerId,
+	            type: 'POST',
+	            dataType: 'html',
+	            cache: false,
+	            success: function (data) {
+	            	$("#" + targetId).empty();
+					$("#" + targetId).html(data);
+					
+					if ("party" == tabDiv) {
+						fn.confirmationUploadFile();
+						fn.ossUploadFile();
+						fn.partnerBinaryUploadFile();
+						fn.documentsUploadFile();
+						callAutoCompleteFnc("autoComCreatorDivision");
+						
+						// file uploader hide in CONF status
+				        if ('CONF' == [[${detail.status}]]) {
+				            $(".ajax-upload-dragdrop").hide();
+				        }
+						
+						$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+						var description = [[${detail.description}]];
+						if ("" != description) {
+							$("#descriptionTextarea").summernote('code', description);
+						}
+						
+						var partnerWatcher = [[${detail.partnerWatcher}]];
+						if (partnerWatcher != null) {
+							datas.initPartnerWatcher(partnerWatcher);
+						}
+						
+						var prjList2 = [[${prjList}]];
+						if (prjList2 != null) {
+							prjList = prjList2;
+							$("#_projectList").jqGrid('GridUnload');
+							grid.projectList();
+						}
+							
+						if ([[${detail.partnerId}]] != null) {
+							$("input[name=creatorNm]").val([[${detail.creatorName}]]);
+							fn.publicChange();
+						}
+					}
+	            }
+			});
+		}
+	},
 	deleteLicense : function(target){
 		$(target).parent().remove();
 	},
@@ -3210,6 +3574,8 @@ var com_fn = {
 	        	partyMainData = param;
 	        	grid.init();
 
+	        	// total record 표시
+				$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
 	        }
 		}catch(e){
 			alertify.error([[#{msg.common.valid2}]], 0);
@@ -3231,8 +3597,182 @@ var com_fn = {
 		}
 		
 		return reMakeArrObj;
-    }
+    },
+    gridAddFunc : function (gubn, targetId, permission, status) {
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		} else if ("CONF" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd party')}]], function(){});
+			return false;
+		}
+		
+		var grid = $("#" + targetId);
+		saveFlag = false;
+		fn_grid_com.rowAddNew(targetId, grid, "main", null, com_fn.getLicenseName);
+	},
+	gridDelFunc : function (tab, targetId, target, permission, status) {
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		} else if ("CONF" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+			return false;
+		}
+		
+		var grid = $("#" + targetId);
+		var selarrrow = grid.jqGrid("getGridParam", "selarrrow");
+		
+		if (selarrrow.length > 0) {
+			fn_grid_com.rowDelNew(grid, target);
+		} else {
+			alertify.confirm([[#{msg.common.confirm.delete.all}]], function (e) {
+				if (e) {
+					fn_grid_com.rowDelAll(grid, target);
+				} else {
+					return false;
+				}
+			});
+		}
+	}
 }
+
+	var fn_comment = {
+		callbackFunction : function () {
+        	fn_comment.getCommentList(commentsParam);
+        },
+		getCommentList : function(param) {
+			$.ajax({
+				type: "GET",
+				url: '/comment/getCusCommentList',
+				dataType : 'html',
+				cache : false,
+				data : param,
+				success: function (res) {
+					if (typeof param.height !== undefined) {
+						$(".comment-card-body").attr("style", "max-height:" + param.height + "px; overflow-y: auto;");
+					}
+					$("#commentList").empty();
+					$("#commentList").html(res);
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		getMoreCommentsList : function() {
+			commentsParam["moreFlag"] = "Y";
+			commentsParam["height"] = $(".comment-card-body").height();
+			fn_comment.getCommentList(commentsParam);
+		},
+		editComments : function(_commId, _referenceDiv, _referenceId) {
+			$.ajax({
+	    		url : '/comment/getEditPopup',
+				type : 'POST',
+				data : {'commId' : _commId},
+				dataType : 'html',
+				cache : false,
+				success : function(res){
+					if(!alertify.editComments){
+						alertify.dialog('editComments', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '750px';
+							        }
+								}
+							};
+						}, false, 'alert');
+                	}
+					
+					alertify.editComments(res).set('title', 'Edit Comments');
+					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
+					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
+				}
+	    	});
+		},
+		updateComments : function (_commId, _referenceDiv, _referenceId) {
+			var summernoteVal = $("#commentEdit").summernote('code');
+			if ("" == summernoteVal) {
+				alertify.alert("Please enter a comment", function(){});
+				return false;
+			} else {
+				var param = {commId : _commId, contents : replaceWithLink(summernoteVal), referenceDiv: _referenceDiv, referenceId: _referenceId};
+				$.ajax({
+					url : '/comment/updateComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						alertify.success([[#{msg.common.success}]]);
+						$('.ajs-close').trigger("click");
+						fn_comment.getCommentList(commentsParam);
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		deleteComments : function (_commId) {
+			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+				if (e) {
+					$.ajax({
+						url : '/comment/deleteComment',
+						type : 'POST',
+						dataType : 'json',
+						cache : false,
+						data : {'commId' : _commId},
+						success : function(data){
+							alertify.success([[#{msg.common.success}]]);
+							$('.ajs-close').trigger("click");
+							fn_comment.getCommentList(commentsParam);
+						},
+						error : function(){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		},
+		activateCommentArea : function () {
+			// change tab area
+			if (!$(".comment-area").is(":visible")) {
+				$(".contents-area").removeClass("col-md-12");
+				$(".contents-area").addClass("col-md-9");
+				
+				fn_comment.getCommentList(commentsParam);
+				$(".comment-area").show();
+			} else {
+				$(".contents-area").removeClass("col-md-9");
+				$(".contents-area").addClass("col-md-12");
+	 			$(".comment-area").hide();
+			}
+		},
+		showCommentHistory : function () {
+			fn_comment.activateCommentArea();
+			
+			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]];
+	        openCommentHistory('/comment/popup/3rd/' + _rDiv + '/' + [[${detail.partnerId}]]);
+		}
+	}
 //]]>
 </script>
 </th:block>

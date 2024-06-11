@@ -1791,15 +1791,15 @@ public class ApiProjectController extends CoTopComponent {
 
 	@ApiOperation(value = "Load Searched Project Oss to Src", notes = "Project > Identification > SRC")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
-	@GetMapping(value = { Url.API.FOSSLIGHT_API_OSS_LOAD_SRC })
+	@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
+	@PostMapping(value = { Url.API.FOSSLIGHT_API_OSS_LOAD_SRC })
 	public CommonResult ossLoadSrc(@RequestHeader String _token,
 			@ApiParam(value = "Project ID", required = true) @RequestParam(required = true) String targetPrjId,
-			@ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name") @RequestParam(required = false) String searchCondition,
+			@ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name") @RequestParam(required = true) String searchCondition,
 			@ApiParam(value = "Project ID to Load", required = false) @RequestParam(required = false) String prjIdToLoad,
 			@ApiParam(value = "Project Name to Load", required = false) @RequestParam(required = false) String prjNameToLoad,
 			@ApiParam(value = "Project Version to Load", required = false) @RequestParam(required = false) String prjVersionToLoad,
-			@ApiParam(value ="Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
+			@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false) @RequestParam(required = false) String resetFlag) {
 
 		log.error("/api/v1/oss_load_src called:" + targetPrjId);
 
@@ -1812,12 +1812,8 @@ public class ApiProjectController extends CoTopComponent {
 		try {
 			Map<String, Object> paramMap = new HashMap<>();
 
-			if(!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
+			if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
 				return responseService.getFailResult(errorMsgCode, "targetPrjId is not in the correct format");
-			}
-			
-			if(!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
-				return responseService.getFailResult(errorMsgCode, "prjIdToLoad is not in the correct format");
 			}
 			
 			paramMap.put("targetPrjId", targetPrjId);
@@ -1830,6 +1826,10 @@ public class ApiProjectController extends CoTopComponent {
 			            return responseService.getFailResult(errorMsgCode, "the prjIdToLoad is missing");
 			        }
 
+			        if (!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
+						return responseService.getFailResult(errorMsgCode, "prjIdToLoad is not in the correct format");
+					}
+			        
 			        // Check for duplication of targetPrjId with prjIdToLoad
 			        if (targetPrjId.equals(prjIdToLoad)) {
 			        	return responseService.getFailResult(errorMsgCode, "Please enter other prjIdToLoad that is different from targetPrjId");
@@ -1867,15 +1867,15 @@ public class ApiProjectController extends CoTopComponent {
 
 	@ApiOperation(value = "Load Searched Project Oss to Bin", notes = "Project > Identification > BIN")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
-	@GetMapping(value = { Url.API.FOSSLIGHT_API_OSS_LOAD_BIN })
+	@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
+	@PostMapping(value = { Url.API.FOSSLIGHT_API_OSS_LOAD_BIN })
 	public CommonResult ossLoadBin(@RequestHeader String _token,
 			@ApiParam(value = "Project ID", required = true) @RequestParam(required = true) String targetPrjId,
-			@ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name") @RequestParam(required = false) String searchCondition,
+			@ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name") @RequestParam(required = true) String searchCondition,
 			@ApiParam(value = "Project ID to Load", required = false) @RequestParam(required = false) String prjIdToLoad,
 			@ApiParam(value = "Project Name to Load", required = false) @RequestParam(required = false) String prjNameToLoad,
 			@ApiParam(value = "Project Version to Load", required = false) @RequestParam(required = false) String prjVersionToLoad,
-			@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
+			@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false) @RequestParam(required = false) String resetFlag) {
 
 		log.error("/api/v1/oss_load_bin called:" + targetPrjId);
 
@@ -1888,14 +1888,10 @@ public class ApiProjectController extends CoTopComponent {
 		try {
 			Map<String, Object> paramMap = new HashMap<>();
 			
-			if(!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
+			if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
 				return responseService.getFailResult(errorMsgCode, "targetPrjId is not in the correct format");
 			}
 			
-			if(!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
-				return responseService.getFailResult(errorMsgCode, "prjIdToLoad is not in the correct format");
-			}
-
 			paramMap.put("targetPrjId", targetPrjId);
 			paramMap.put("resetFlag", CoConstDef.FLAG_YES.equals(StringUtils.isEmpty(resetFlag) ? "Y" : resetFlag));
 
@@ -1906,6 +1902,10 @@ public class ApiProjectController extends CoTopComponent {
 			            return responseService.getFailResult(errorMsgCode, "the prjIdToLoad is missing");
 			        }
 	
+					if (!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
+						return responseService.getFailResult(errorMsgCode, "prjIdToLoad is not in the correct format");
+					}
+					
 			        // Check for duplication of targetPrjId with prjIdToLoad
 			        if (targetPrjId.equals(prjIdToLoad)) {
 			        	return responseService.getFailResult(errorMsgCode, "Please enter other prjIdToLoad that is different from targetPrjId");
@@ -1943,15 +1943,15 @@ public class ApiProjectController extends CoTopComponent {
 
 	@ApiOperation(value = "Load Searched Project Oss to Dep", notes = "Project > Identification > DEP")
 	@ApiImplicitParams({
-		@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
-	@GetMapping(value = { Url.API.FOSSLIGHT_API_OSS_LOAD_DEP })
+	@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
+	@PostMapping(value = { Url.API.FOSSLIGHT_API_OSS_LOAD_DEP })
 	public CommonResult ossLoadDep(@RequestHeader String _token,
 			@ApiParam(value = "Project ID", required = true) @RequestParam(required = true) String targetPrjId,
-			@ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name") @RequestParam(required = false) String searchCondition,
+			@ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name") @RequestParam(required = true) String searchCondition,
 			@ApiParam(value = "Project ID to Load", required = false) @RequestParam(required = false) String prjIdToLoad,
 			@ApiParam(value = "Project Name to Load", required = false) @RequestParam(required = false) String prjNameToLoad,
 			@ApiParam(value = "Project Version to Load", required = false) @RequestParam(required = false) String prjVersionToLoad,
-			@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag) {
+			@ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false) @RequestParam(required = false) String resetFlag) {
 
 		log.error("/api/v1/oss_load_dep called:" + targetPrjId);
 
@@ -1964,14 +1964,10 @@ public class ApiProjectController extends CoTopComponent {
 		try {
 			Map<String, Object> paramMap = new HashMap<>();
 
-			if(!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
+			if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
 				return responseService.getFailResult(errorMsgCode, "targetPrjId is not in the correct format");
 			}
 			
-			if(!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
-				return responseService.getFailResult(errorMsgCode, "prjIdToLoad is not in the correct format");
-			}
-		
 			paramMap.put("targetPrjId", targetPrjId);
 			paramMap.put("resetFlag", CoConstDef.FLAG_YES.equals(StringUtils.isEmpty(resetFlag) ? "Y" : resetFlag));
 
@@ -1982,6 +1978,10 @@ public class ApiProjectController extends CoTopComponent {
 			            return responseService.getFailResult(errorMsgCode, "the prjIdToLoad is missing");
 			        }
 	
+			        if (!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
+						return responseService.getFailResult(errorMsgCode, "prjIdToLoad is not in the correct format");
+					}
+			        
 			        // Check for duplication of targetPrjId with prjIdToLoad
 			        if (targetPrjId.equals(prjIdToLoad)) {
 			        	return responseService.getFailResult(errorMsgCode, "Please enter other prjIdToLoad that is different from targetPrjId");
@@ -2016,5 +2016,4 @@ public class ApiProjectController extends CoTopComponent {
 			return responseService.getFailResult(errorMsgCode, CoCodeManager.getCodeString(msgCode, errorMsgCode));
 		}
 	}
-
 }
