@@ -2134,9 +2134,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.updateProjectMaster(projectSubStatus);
 		}
 		
-		if (!CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
-			ossComponent = convertOssNickName(ossComponent);
-		}
+		ossComponent = convertOssNickName(ossComponent);
 		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
 		String refId = project.getReferenceId();
 		

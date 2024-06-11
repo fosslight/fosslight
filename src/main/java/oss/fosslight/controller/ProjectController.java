@@ -2609,8 +2609,8 @@ public class ProjectController extends CoTopComponent {
 		String prjId = (String) map.get("prjId");
 
 		Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> ossComponent = new ArrayList<ProjectIdentification>();
-		ossComponent = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);
+		List<ProjectIdentification> ossComponent = new ArrayList<ProjectIdentification>();try {
+		ossComponent = (List<ProjectIdentification>) fromJson(mainDataString, collectionType2);} catch (Exception e) {e.printStackTrace();}
 		
 		List<List<ProjectIdentification>> ossComponentLicense = null;
 		if (code.equals(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)) {

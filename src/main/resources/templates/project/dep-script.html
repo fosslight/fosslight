@@ -194,7 +194,37 @@ var dep_fn = {
 		if (resetFlag) {
 			dep_fn.resetExeSave(finalData);
 		} else {
-			dep_fn.exeSave(finalData);
+			dep_fn.nickNameValid(mainData, finalData);
+		}
+	},
+	// 닉네임 체크
+	nickNameValid : function(mainData, finalData){
+		var prjId = [[${project.prjId}]];
+		var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
+
+		$.ajax({
+			url : '/project/nickNameValid/16',
+			type : 'POST',
+			data : JSON.stringify(postData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				dep_fn.makeNickNamePopup(data, finalData);
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		})
+	},
+	// 닉네임 팝업 띄우기
+	makeNickNamePopup : function(obj, finalData) {
+		if (obj.validMsg && obj.validMsg.length != 0) {
+			alertify.alert(obj.validMsg, function (e) {
+				dep_fn.exeSave(finalData, true);
+			});
+		} else {
+			dep_fn.exeSave(finalData, false);
 		}
 	},
 	// 저장
