@@ -3826,10 +3826,16 @@ function adjustMultiPageGridSize() {
 		for (const entry of entries) {
 			const targetWidth = entry.contentRect.width;
 			optimizeGridSizeAdjustmentMultiPage();
-		}
+		} 
 	});
 
 	resizeObserver.observe(document.querySelector(".topper-content .card-tabs"));
+	
+	 document.querySelectorAll('.card-tabs .nav-link').forEach(navLink => {
+        navLink.addEventListener('click', () => {
+            optimizeGridSizeAdjustmentMultiPage();
+        });
+    });
 }
 
 function optimizeGridSizeAdjustmentMultiPage() {
@@ -3878,14 +3884,17 @@ function optimizeGridSizeAdjustmentMultiPage() {
     if (topperContent.length > 0) {
         let innerJqgirdSetElement = $(".tab-pane.active .card-body");
         let innerJqgirdSetWidth = innerJqgirdSetElement.width() - 22;
+        let activeNaviItemId = $(".nav-link.active").attr('aria-controls');
+        let activeTabPaneElement = $("#" + activeNaviItemId);
 
         let innerJqGridsIds = [];
-        innerJqgirdSetElement.find('table').each(function() {
+        
+        activeTabPaneElement.find('table').each(function() {
             innerJqGridsIds.push($(this).attr("id"));
         });
 
         if (innerJqGridsIds.length == 0) {
-            innerJqgirdSetElement.find('table').each(function() {
+            activeTabPaneElement.find('table').each(function() {
                 innerJqGridsIds.push($(this).find('.ui-jqgrid').attr("id").match(/gbox_(.*)/)[1]);
             });
         }
@@ -3896,5 +3905,10 @@ function optimizeGridSizeAdjustmentMultiPage() {
             });
         }
     }
+}
+
+function updateGridRowCount(gridId, pagerId) {
+    var rowCount = $('#' + gridId).getGridParam('records');
+    $('#' + pagerId + '_right').html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : ' + rowCount + '</div>');
 }
 
