@@ -1389,12 +1389,14 @@ var bom_data = {
 				}
 			});
 
-			$("#bomList").jqGrid('navGrid',"#bomPager",{add:false,edit:false,del:false,search:false,refresh:false, afterSearch : function () { updateGridRowCount('bomList', 'bomPager') }});
+			// $("#bomList").jqGrid('navGrid',"#bomPager",{add:false,edit:false,del:false,search:false,refresh:false});
 			$("#bomList").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
 				beforeSearch : function () {
 					if(!this.p.postData.referenceId) {
 						this.p.postData.referenceId = [[${project.prjId}]];
 					}
+				}, afterSearch : function () { 
+					updateGridRowCount('bomList', 'bomPager') 
 				}	
 			});
 		}
