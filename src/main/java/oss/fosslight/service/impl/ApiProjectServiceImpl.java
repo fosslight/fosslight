@@ -3313,12 +3313,18 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		targetProjectParam.setPrjId(targetPrjId);
 		targetProjectParam.setReferenceDiv(referenceDiv);
 		
-		List<String> targetIds = apiProjectMapper.selectDuplicatedProject2(targetProjectParam);
+		List<Project> targetProjectInfo = apiProjectMapper.getProjectInfo(targetProjectParam);
 		
-		if (targetIds.isEmpty()) {
+		if (targetProjectInfo == null || targetProjectInfo.isEmpty()) {
 			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
 			responseMap.put("msg", "Target project does not exist");
 			return responseMap;
+		} else {
+			if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull(targetProjectInfo.get(0).getNoticeType()))) {
+				responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+			    responseMap.put("msg", "Fail to load (Target Project to load is Android/Yocto).");
+			    return responseMap;
+			}
 		}
 
 		// Check the existence of the project to load
@@ -3329,23 +3335,34 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		registProjectParam.setReferenceDiv(referenceDiv);
 		registProjectParam.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
 
-		List<String> projectToLoadIds = apiProjectMapper.selectDuplicatedProject2(registProjectParam);
+		List<Project> projectToLoadInfo = apiProjectMapper.getProjectInfo(registProjectParam);
 
-		if (projectToLoadIds.isEmpty()) {
-			responseMap.put("code", "605");
-		    responseMap.put("msg", "Project to load is already loaded");
-		    return responseMap;
-		} 
-
-		if (projectToLoadIds.size() > 1) {
+		if (projectToLoadInfo == null || projectToLoadInfo.isEmpty()) {
 			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
-		    responseMap.put("msg", "Project to load exceeds 1");
+			if (isEmpty(prjIdToLoad)) {
+				responseMap.put("msg", "prjNameToLoad does not exist.");
+			} else {
+				responseMap.put("msg", "prjIdToLoad does not exist.");
+			}
+		    
+		    return responseMap;
+		} else {
+			if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(avoidNull(projectToLoadInfo.get(0).getNoticeType()))) {
+				responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+			    responseMap.put("msg", "Fail to load (Project to load is Android/Yocto).");
+			    return responseMap;
+			}
+		}
+
+		if (projectToLoadInfo.size() > 1) {
+			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+		    responseMap.put("msg", "Fail to load (more than 2 search results)");
 		    return responseMap;
 		}
 
 		// If prjIdToLoad is empty, set it to the first found project ID
 		if (StringUtils.isEmpty(prjIdToLoad)) {
-		    prjIdToLoad = projectToLoadIds.get(0);
+		    prjIdToLoad = projectToLoadInfo.get(0).getPrjId();
 		    registProjectParam.setPrjId(prjIdToLoad);
 		}
 		
@@ -3353,7 +3370,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		if (!resetFlag) {
 		    List<Project> loadedList = projectMapper.selectAddList(targetProjectParam);
 		    
-		    for (Project project : loadedList) {		       
+		    for (Project project : loadedList) {
 		        if (project.getReferenceId().equals(prjIdToLoad)) {
 		        	responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
 		        	responseMap.put("msg", "Project to load is already loaded");
@@ -3363,11 +3380,9 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 
 		targetProjectParam.setReferenceId(targetPrjId);
-		int ossComponentIdx = projectMapper.selectOssComponentMaxIdx(targetProjectParam);
+		int ossComponentIdx = 1;
 
 		if (resetFlag) {
-			ossComponentIdx = 1;
-			
 		    // Set parameters to delete OSS components of the target project
 		    ProjectIdentification projectIdParam = new ProjectIdentification();
 		    projectIdParam.setReferenceId(targetPrjId);
@@ -3391,6 +3406,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 
 		        projectMapper.deleteOssComponentsWithIds2(deleteParam);
 		    }
+		} else {
+			ossComponentIdx = projectMapper.selectOssComponentMaxIdx(targetProjectParam);
 		}
 
 		Project registOssComponentParam = new Project();

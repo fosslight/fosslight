@@ -991,23 +991,24 @@
 		   AND T1.PRJ_ID = #{prjId}
 	</select>
 
-	<select id="selectDuplicatedProject2"  parameterType="oss.fosslight.domain.Project" resultType="String">
-		SELECT 
-			PRJ_ID 
-		FROM 
-			PROJECT_MASTER 
+	<select id="getProjectInfo"  parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
+		SELECT T1.*
+			, T2.NOTICE_TYPE
+			, T2.NOTICE_TYPE_ETC
+		FROM PROJECT_MASTER T1
+		LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
 		WHERE USE_YN ='Y'
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(identificationStatus)">
-			AND IDENTIFICATION_STATUS = #{identificationStatus}
+			AND T1.IDENTIFICATION_STATUS = #{identificationStatus}
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
-			AND PRJ_ID = #{prjId}
+			AND T1.PRJ_ID = #{prjId}
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
-			AND PRJ_NAME = #{prjName} 
+			AND T1.PRJ_NAME = #{prjName} 
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
-			AND PRJ_VERSION = #{prjVersion}
+			AND T1.PRJ_VERSION = #{prjVersion}
 		</if>
 	</select>
 
