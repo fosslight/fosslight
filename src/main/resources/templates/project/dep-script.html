@@ -298,9 +298,6 @@ var dep_fn = {
 				$("#depList").jqGrid('GridUnload');
 				dep_grid.load();
 
-				// totla record 표시
-				$("#depList_toppager_right, #depPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+depMainData.length+'</div>');
-				
 				fn_grid_com.addEtcKeyDownEvent($('#depList'), depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
 			},
 			error : function(){
@@ -776,9 +773,6 @@ var dep_fn = {
 		// 리로드 대신 그리드 삭제 후 다시 그리기
 		$("#depList").jqGrid('GridUnload');
 		dep_grid.load();
-
-		// totla record 표시
-		$("#depList_toppager_right, #depPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+depMainData.length+'</div>');
 	},
 	
 	// upload Cancel시 DB삭제
@@ -1347,6 +1341,8 @@ var dep_grid = {
                 if (initCount === 4) {
                     $('#loading_wrap_total').hide();
                 }
+				
+				updateGridRowCount('depList', 'depPager'); 
 			},
 			removeHighLight : true
 		});
@@ -1357,6 +1353,8 @@ var dep_grid = {
 					cleanErrMsg("depList");
 					gridValidMsgNew(depValidMsgData, "depList");
 				}
+				
+				updateGridRowCount('depList', 'depPager'); 
 			}
 		});
 		

@@ -795,10 +795,14 @@ var part_grid = {
 					}
 
                     $("#loading_wrap_3rd").hide();
+                    
+					updateGridRowCount('list3', 'pager3'); 
 				}
 			});
-			$("#list3").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 			$("#list3").jqGrid('navGrid',"#pager3",{add:false,edit:false,del:false,search:false,refresh:false});
+			$("#list3").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", 
+				afterSearch : function () { updateGridRowCount('list3', 'pager3') }
+			});
 		},
 	}
 	

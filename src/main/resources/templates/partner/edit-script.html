@@ -688,9 +688,6 @@ var fn = {
 					
 					grid.init();
 					
-					// totla record 표시
-					$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
-					
 					fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, null, com_fn.getLicenseName);
 				},
 				error : function(){
@@ -1220,9 +1217,6 @@ var fn = {
 		$("#list").jqGrid('GridUnload');
 		
 		grid.init();
-
-		// totla record 표시
-		$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
 	},
 	displayButton : function(cellvalue){
 		var icon1 = "<input type=\"button\" value=\"Delete\" class=\"btnCLight gray wauto\" onclick=\"fn.deleteOssComponents(this)\"/>";
@@ -3045,12 +3039,14 @@ var grid = {
 					}
 				}
 				
-				tableRefreshGridArea('notEntire');
+				updateGridRowCount('list', 'pager'); 
 			},
 			removeHighLight : true
 
 		});
-		partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+		partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () {
+			updateGridRowCount('list', 'pager'); 
+		}});
 		
 		if ($("#partySave").is(":visible")) {
 			partnerList.jqGrid('navGrid',"#pager",{add:true,edit:false,del:true,search:false,refresh:false
@@ -3214,8 +3210,6 @@ var com_fn = {
 	        	partyMainData = param;
 	        	grid.init();
 
-	        	// total record 표시
-				$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
 	        }
 		}catch(e){
 			alertify.error([[#{msg.common.valid2}]], 0);

@@ -960,7 +960,8 @@ var bom_data = {
 	 			, autowidth: true
                 , height: 'auto'
                 , shrinkToFit: false
-				, gridview: true
+				, gridview: true						
+				, viewrecords: true
 			   	, pager: '#bomPager'
 				, recordpos:'right'
 				, loadonce:false
@@ -1040,9 +1041,6 @@ var bom_data = {
 					if (bomInfoMsgData) {
 						gridInfoMsg(bomInfoMsgData, "bomList");
 					}
-					
-					// totla record 표시
-					$("#bomList_toppager_right, #bomPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+bomMainData.length+'</div>');
 					
 					var datas = data.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
 					var strBomValidMsgData = Object.keys(bomValidMsgData||{}).join("");
@@ -1135,10 +1133,12 @@ var bom_data = {
                     tableRefresh();
 
                     $('#bomList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+                    
+                    updateGridRowCount('bomList', 'bomPager'); 
 				}
 			});
 
-			$("#bomList").jqGrid('navGrid',"#bomPager",{add:false,edit:false,del:false,search:false,refresh:false});
+			$("#bomList").jqGrid('navGrid',"#bomPager",{add:false,edit:false,del:false,search:false,refresh:false, afterSearch : function () { updateGridRowCount('bomList', 'bomPager') }});
 			$("#bomList").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
 				beforeSearch : function () {
 					if(!this.p.postData.referenceId) {

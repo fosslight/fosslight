@@ -349,8 +349,6 @@ var bat_fn = {
 				// 리로드 대신 그리드 삭제 후 다시 그리기
 				$("#batList").jqGrid('GridUnload');
 				bat_grid_list.load();
-
-				$("#batList_toppager_right, #batPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+batMainData.length+'</div>');
 				
 				fn_grid_com.addEtcKeyDownEvent($('#batList'), batValidMsgData);
 			},
@@ -487,8 +485,6 @@ var bat_fn = {
 					$("#batList").jqGrid('GridUnload');
 					bat_grid_list.load();
 
-					$("#batList_toppager_right, #batPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+batMainData.length+'</div>');
-					
 					fn_grid_com.addEtcKeyDownEvent($('#batList'), batValidMsgData);
 					
 				} else {
@@ -971,7 +967,7 @@ var bat_grid_list = {
 								},
 								removeHighLight : true
 							});
-		batList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+		batList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () { updateGridRowCount('batList', 'batPager'); }});
 		batList.jqGrid('navGrid',"#batPager",{add:false,edit:false,del:false,search:false,refresh:false
 											  , addfunc: function () { fn_grid_com.rowAdd('batList',batList,"main");fn_grid_com.addEtcKeyDownEvent($('#batList'), batValidMsgData);}
 											  , delfunc: function () { fn_grid_com.rowDel(batList,"main");}
@@ -1107,8 +1103,11 @@ var bat_grid_list = {
 						},10000
 					);
 				}
-				
+		
 				tableRefreshNew("_binaryFileList");
+			},
+			gridComplete : function() {
+				updateGridRowCount('batList', 'batPager');
 			}
 		}).trigger('reloadGrid');
 	}

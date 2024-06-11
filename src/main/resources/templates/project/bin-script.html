@@ -365,9 +365,6 @@ var bin_fn = {
 				
 				bin_grid.load();
 
-				// totla record 표시
-				$("#binList_toppager_right, #binPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+binMainData.length+'</div>');
-				
 				fn_grid_com.addEtcKeyDownEvent($('#binList'), binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
 				
 			},
@@ -926,9 +923,6 @@ var bin_fn = {
 		
 		bin_grid.load();
 
-		// totla record 표시
-		$("#binList_toppager_right, #binPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+binMainData.length+'</div>');
-		
 		fn_grid_com.addEtcKeyDownEvent($('#binList'), binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
 	},
 	identificationProjectSearch : function(id){
@@ -1329,8 +1323,6 @@ var bin_grid = {
 					$("#binList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
 				}
 				
-				tableRefreshNew("binList");
-				
 				//sort후 ValidMsgData reload
 				if(isSort){
 					isSort = false;
@@ -1414,11 +1406,14 @@ var bin_grid = {
                 if (initCount === 4) {
                     $('#loading_wrap_total').hide();
                 }
+              
+				updateGridRowCount('binList', 'binPager');
 			},
 			removeHighLight : true
 		});
-		binList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
-		
+		binList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () {
+			updateGridRowCount('binList', 'binPager');
+		}});
 		binList.jqGrid('navGrid',"#binPager",{add:true,edit:false,del:true,search:false,refresh:false
 			  , addfunc: function () {
 				  com_fn.saveFlagObject["BIN"] = false;

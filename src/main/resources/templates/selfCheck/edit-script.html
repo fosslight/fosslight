@@ -2733,12 +2733,14 @@ var src_grid = {
 					gridDiffMsg(srcDiffMsgData, "srcList", "SELF");
 				}
 				
-				resizingOuterJqGidSet();
+				updateGridRowCount('srcList', 'srcListPager');
 			}
 		});
 		
 		if (viewFlag == null) {
-			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () {
+				updateGridRowCount('srcList', 'srcListPager');
+			}});
 			srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
 													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);}
 													  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
@@ -2941,9 +2943,6 @@ var com_fn = {
 
 	        	srcMainData = param;
 	        	src_grid.load();
-
-	        	// total record 표시
-				$("#srcList_toppager_right, #srcPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+srcMainData.length+'</div>');
 	        }
 		}catch(e){
 			alertify.error([[#{msg.common.valid2}]], 0);

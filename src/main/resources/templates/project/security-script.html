@@ -372,10 +372,6 @@ var sec_com_fn = {
   			if(!editFlag){
       			alertify.success([[#{msg.common.success}]]);
           	}
-  			
-  			setTimeout(function() {
-  				tableRefresh()
-  			}, 100);
      	}
   	}
 }
@@ -517,7 +513,6 @@ var total = {
 			gridview: true,
 			sortable: function (permutation) {
 			},
-			viewrecords: true,
 			loadonce:true,
 			sortorder: 'desc',
 			height: 'auto',
@@ -563,7 +558,6 @@ var total = {
 						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
 					}
 				}
-				tableRefresh();
 				
 				// append button event
 				if ($("#totalList_toppager_left").find('button').length == 0) {
@@ -578,6 +572,9 @@ var total = {
 	                	                
 	                $("#totalList_toppager_left").append(appendBtn);
 	            }
+			},
+			gridComplete: function() {
+				updateGridRowCount('totalList', 'totalListPager'); 
 			}
 		});
 			
@@ -586,6 +583,9 @@ var total = {
 				if (!this.p.postData.referenceId) {
 					this.p.postData.referenceId = [[${project.prjId}]];
 				}
+			},
+			afterSearch: function () {
+				updateGridRowCount('totalList', 'totalListPager'); 
 			}	
 		});
 			
@@ -640,7 +640,6 @@ var fixed = {
 			gridview: true,
 			sortable: function (permutation) {
 			},
-			viewrecords: true,
 			loadonce:true,
 			toppager:true,
 			sortorder: 'desc',
@@ -687,8 +686,6 @@ var fixed = {
 					}
 				}
 				
-				tableRefresh();
-				
 				// append button event
 				if ($("#fixedList_toppager_left").find('button').length == 0) {
 	            	var appendBtn = "";
@@ -702,6 +699,9 @@ var fixed = {
 	                	                
 	                $("#fixedList_toppager_left").append(appendBtn);
 	            }
+			},
+			gridComplete : function() {
+				updateGridRowCount('fixedList', 'fixedListPager'); 
 			}
 		});
 			
@@ -710,7 +710,10 @@ var fixed = {
 				if(!this.p.postData.referenceId) {
 					this.p.postData.referenceId = [[${project.prjId}]];
 				}
-			}	
+			},
+			afterSearch: function () {
+				updateGridRowCount('fixedList', 'fixedListPager'); 
+			}		
 		});
 		
 //		fixedList.jqGrid('navGrid',"#fixedListPager",{add:false,edit:false,del:true,search:false,refresh:false, cloneToTop:true});
@@ -764,7 +767,6 @@ var notFixed = {
 			gridview: true,
 			sortable: function (permutation) {
 			},
-			viewrecords: true,
 			loadonce:true,
 			toppager:true,
 			sortorder: 'desc',
@@ -811,8 +813,6 @@ var notFixed = {
 					}
 				}
 				
-				tableRefresh();
-				
 				// append button event
 				if ($("#notFixedList_toppager_left").find('button').length == 0) {
 	            	var appendBtn = "";
@@ -826,6 +826,9 @@ var notFixed = {
 	                	                
 	                $("#notFixedList_toppager_left").append(appendBtn);
 	            }
+			},
+			gridComplete : function () {
+				updateGridRowCount('notFixedList', 'notFixedListPager'); 
 			}
 		});
 		
@@ -834,7 +837,10 @@ var notFixed = {
 				if(!this.p.postData.referenceId) {
 					this.p.postData.referenceId = [[${project.prjId}]];
 				}
-			}	
+			},
+			afterSearch: function () {
+				updateGridRowCount('notFixedList', 'notFixedListPager'); 
+			}			
 		});
 		
 //		notFixedList.jqGrid('navGrid',"#notFixedListPager",{add:false,edit:false,del:true,search:false,refresh:false, cloneToTop:true});
@@ -1291,13 +1297,10 @@ var fn = {
 				fn_comment.getCommentList(commentsParam);
 				$(".comment-area").show();
 				
-				tableRefresh();
 			} else {
 	 			$(".contents-area").removeClass("col-lg-9");
 	 			$(".contents-area").addClass("col-12");
 	 			$(".comment-area").hide();
-				
-	 			tableRefresh();
 			}
 		},
 		showCommentHistory : function () {

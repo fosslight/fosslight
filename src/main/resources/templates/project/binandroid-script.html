@@ -1691,11 +1691,14 @@ var binAndroid_grid = {
 				if(binAndroidInfoMsgData) {
 					gridInfoMsg(binAndroidInfoMsgData, "binAndroidList");
 				}
+				
+				updateGridRowCount('binAndroidList', 'binAndroidPager'); 
 			},
 			removeHighLight : true
 		});
 		
-		binAndroidList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+		binAndroidList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () { updateGridRowCount('binAndroidList', 'binAndroidPager'); }});
+		
 		binAndroidList.jqGrid('navGrid',"#binAndroidPager",{add:true,edit:false,del:true,search:false,refresh:false
 												  , addfunc: function () {
 													  com_fn.saveFlagObject["ANDROID"] = false; 
