@@ -1627,6 +1627,13 @@
             var rowCount = $('#' + gridId).getGridParam('records');
             $('#' + pagerId + '_right').html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Count : ' + rowCount + '</div>');
         }
+        
+        function updateLoadedListCount(pagerId, total, sum) {
+		    var message = '<div dir="ltr" style="text-align:right" class="ui-paging-info">Total-project: ' + total + ', oss components: ' + sum + '</div>';
+		    $('#' + pagerId).css('height', '2rem')
+		    $('#' + pagerId).children().last().find('#' + pagerId+ '_right').html(message);
+		}
+
     </script>
 </th:block>
 </html>

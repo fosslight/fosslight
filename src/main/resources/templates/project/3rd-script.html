@@ -572,8 +572,11 @@ var party_evt = {
 			onSelectRow: function(id){},
 			autoencode: true,
 			gridview: true,
+			pager: '#_3rdAddPager',
+		  	pgbuttons: false,
+		  	pgtext: false,
+		  	pginput: false,
 			sortname: 'partnerId',
-			viewrecords: true,
 			sortorder: 'desc',
 			loadonce: false,
 			height: 'auto',
@@ -619,6 +622,13 @@ var party_evt = {
 						createTabInFrame(_partnerId+'_3rdParty', '/partner/edit/'+_partnerId);
 					}
 				}
+			},
+			gridComplete: function() {
+				var total = $(this).getGridParam('records');
+                var sum = $(this).jqGrid('getCol', 'componentCount', false, 'sum');
+                updateLoadedListCount('_3rdAddPager', total, sum);
+                
+				adjustMultiPageGridSize();
 			}
 		}
 	},
@@ -683,10 +693,9 @@ var party_evt = {
 						  , componentCount : rows[i].componentCount
 					}
 					
-					$('#_3rdAddList').jqGrid('addRowData', _tempRandId, newData);
+					$('#_3rdAddList').jqGrid('addRowData', _tempRandId, newData);		
+					party_evt.loadToList2(); // addList 등록후 list3에 등록 처리함.
 				}
-				
-				party_evt.loadToList2(); // addList 등록후 list3에 등록 처리함.
 			},
 			error : function(){
 				alertify.error([[#{msg.common.valid2}]], 0);

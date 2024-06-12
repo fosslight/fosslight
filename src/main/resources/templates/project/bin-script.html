@@ -398,8 +398,10 @@ var bin_fn = {
 			autoencode: true,
 			gridview: true,
 			rowNum: 1000,
+			pager: '#_binAddPager',
+		 	pgbuttons:  false,
+		  	pgtext: false,
  			sortname: 'referenceId',
-			viewrecords: true,
  			sortorder: 'desc',
 			loadonce: false,
 			height: 'auto',
@@ -416,7 +418,14 @@ var bin_fn = {
                 } else {
                 	$(".existFileBin").show();
                 }
-            }
+            }, 
+			gridComplete: function() {
+				var total = $(this).getGridParam('records');
+                var sum = $(this).jqGrid('getCol', 'componentCount', false, 'sum');
+                updateLoadedListCount('_binAddPager', total, sum);
+                
+				adjustMultiPageGridSize();
+			}
 		}
 	},	
 	// 닉네임 팝업 띄우기
