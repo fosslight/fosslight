@@ -799,7 +799,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			String loadToListComment = "";
 			if (!isEmpty(identification.getRefPrjId()) &&
-					(CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv()))) {
+					(CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv()) 
+							|| CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(identification.getReferenceDiv()) 
+							|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv()))) {
 				loadToListComment = "(From Prj " + identification.getRefPrjId() + ")";
 			}
 			
