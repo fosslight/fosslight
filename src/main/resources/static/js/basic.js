@@ -3981,9 +3981,3 @@ function optimizeGridSizeAdjustmentMultiPage() {
         }
     }
 }
-
-function updateGridRowCount(gridId, pagerId) {
-    var rowCount = $('#' + gridId).getGridParam('records');
-    $('#' + pagerId + '_right').html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : ' + rowCount + '</div>');
-}
-
