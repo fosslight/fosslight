@@ -295,6 +295,9 @@ var party_evt = {
 					}
 					
 					$('#list3').jqGrid('addRowData', _tempRandId, newData);
+					if ("Y" == data[i].excludeYn) {
+						$("#" + _tempRandId).addClass("excludeRow");
+					}
 				}
 				
 				$('.three3list').hide();
