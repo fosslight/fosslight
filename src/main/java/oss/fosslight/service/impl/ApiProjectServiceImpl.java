@@ -3379,6 +3379,19 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		    }
 		}
 
+		Project registOssComponentParam = new Project();
+		registOssComponentParam.setReferenceId(prjIdToLoad);
+		registOssComponentParam.setReferenceDiv(referenceDiv);
+		
+		List<ProjectIdentification> components = apiProjectMapper.selectOssComponentsList(registOssComponentParam);
+		List<OssComponentsLicense> licenses;
+
+		if (components == null || components.isEmpty()) {
+			responseMap.put("code", CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE);
+        	responseMap.put("msg", "There is no data in the retrieved project");
+            return responseMap;
+		}
+		
 		targetProjectParam.setReferenceId(targetPrjId);
 		int ossComponentIdx = 1;
 
@@ -3408,21 +3421,6 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		    }
 		} else {
 			ossComponentIdx = projectMapper.selectOssComponentMaxIdx(targetProjectParam);
-		}
-
-		Project registOssComponentParam = new Project();
-		registOssComponentParam.setReferenceId(prjIdToLoad);
-		registOssComponentParam.setReferenceDiv(referenceDiv);
-		
-		List<ProjectIdentification> components = apiProjectMapper.selectOssComponentsList(registOssComponentParam);
-		List<OssComponentsLicense> licenses;
-
-		if (components.size() == 0) {
-			Project projectSubStatus = new Project();
-			projectSubStatus.setPrjId(targetPrjId);
-			projectSubStatus.setModifier(projectSubStatus.getLoginUserName());
-			projectSubStatus.setReferenceDiv(referenceDiv);
-			projectMapper.updateProjectMaster(projectSubStatus);
 		}
 
 		for (ProjectIdentification bean : components) {
