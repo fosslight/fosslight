@@ -228,7 +228,7 @@ var dep_fn = {
 		}
 	},
 	// 저장
-	exeSave : function(finalData){
+	exeSave : function(finalData, refreshComment){
 		$.ajax({
 			url : '/project/saveDep',
 			type : 'POST',
@@ -267,6 +267,7 @@ var dep_fn = {
 						}
 						
 						com_fn.changeMode("view", false);
+						if (refreshComment) fn_comment.getCommentList(commentsParam);
 					} else {
 						alertify.error([[#{msg.common.valid2}]], 0);
 					}
