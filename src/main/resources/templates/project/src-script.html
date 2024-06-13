@@ -277,19 +277,31 @@ var src_fn = {
 		var target = $("#srcList");
 		var prjId = [[${project.prjId}]];
 		var csvFileId = $('#srcCsvFileId').val();
-		var fileData = src_evt.csvDelFileSeq;
+		
 		var csvFiles = $(".csvFileArea").find("input[type=hidden]");
+		var fileData = [];
 		var fileSeq = [];
-		for (var i = 0; i < csvFiles.length; i++){
-			var obj = {fileSeq : csvFiles.eq(i).val()};
-			fileSeq.push(obj);
-		}
-		if (fileSeq.length == 0) {
+		
+		if (resetFlag) {
+			for (var i = 0; i < csvFiles.length; i++){
+				var obj = {fileSeq : csvFiles.eq(i).val()};
+				fileData.push(obj);
+			}
 			$("#srcCsvFileId").val("");
 			csvFileId = "";
+		} else {
+			fileData = src_evt.csvDelFileSeq;
+			for (var i = 0; i < csvFiles.length; i++){
+				var obj = {fileSeq : csvFiles.eq(i).val()};
+				fileSeq.push(obj);
+			}
+			if (fileSeq.length == 0) {
+				$("#srcCsvFileId").val("");
+				csvFileId = "";
+			}
 		}
-		var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
 		
+		var identificationSubStatusSrc = $("input[name='identificationSubStatusSrc']").val();
 		var mainData = target.jqGrid('getGridParam','data');
 		var srcAddListData = $("#_srcAddList").jqGrid("getRowData");
 		// 최종 데이터

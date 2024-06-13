@@ -118,22 +118,36 @@ var bin_fn = {
 		cleanErrMsg("binList");
 		var target = $("#binList");
 		var prjId = [[${project.prjId}]];
+
 		var binCsvFileId = $('#binCsvFileId').val();
-		if("" != binCsvFileId && $(".binFileArea").find("li").length == 0){
-			binCsvFileId = "";
-		}
-		if (typeof binCsvFileId === 'undefined') binCsvFileId = "";
-		
 		var binBinaryFileId = $("#binBinaryFileId").val();
-		if("" != binBinaryFileId && $(".binBinaryFileArea").find("li").length == 0){
+		var delFileData = [];
+		
+		if (resetFlag) {
+			binCsvFileId = "";
 			binBinaryFileId = "";
+			
+			var csvFiles = $(".binFileArea").find("input[type=hidden]");
+			for (var i = 0; i < csvFiles.length; i++){
+				var obj = {fileSeq : csvFiles.eq(i).val()};
+				delFileData.push(obj);
+			}
+		} else {
+			if("" != binCsvFileId && $(".binFileArea").find("li").length == 0){
+				binCsvFileId = "";
+			}
+			if (typeof binCsvFileId === 'undefined') binCsvFileId = "";
+			
+			if("" != binBinaryFileId && $(".binBinaryFileArea").find("li").length == 0){
+				binBinaryFileId = "";
+			}
+			if (typeof binBinaryFileId === 'undefined') binBinaryFileId = "";
+			
+			delFileData = bin_evt.csvDelFileSeq;
 		}
-		if (typeof binBinaryFileId === 'undefined') binBinaryFileId = "";
 		
 		var identificationSubStatusBin = $("input[name='identificationSubStatusBin']").val();
 		if (typeof identificationSubStatusBin === 'undefined') identificationSubStatusBin = "";
-		
-		var delFileData = bin_evt.csvDelFileSeq;
 		
 		// 메인 그리드
 		var mainData = target.jqGrid('getGridParam','data');

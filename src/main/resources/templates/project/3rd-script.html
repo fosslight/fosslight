@@ -278,7 +278,7 @@ var party_evt = {
 						, componentId : null 
 						, referenceId : [[${project.prjId}]]
 						, refPartnerName : data[i].refPartnerName
-						,  referenceDiv : '10'
+						, referenceDiv : '10'
 						, ossId : data[i].ossId
 						, ossName : data[i].ossName
 						, ossVersion : data[i].ossVersion
@@ -295,6 +295,9 @@ var party_evt = {
 					}
 					
 					$('#list3').jqGrid('addRowData', _tempRandId, newData);
+					if ("Y" == data[i].excludeYn) {
+						$("#" + _tempRandId).addClass("excludeRow");
+					}
 				}
 				
 				$('.three3list').hide();
