@@ -173,17 +173,30 @@ var dep_fn = {
 		var target = $("#depList");
 		var prjId = [[${project.prjId}]];
 		var csvFileId = $('#depCsvFileId').val();
-		var fileData = dep_evt.csvDelFileSeq;
+		
 		var csvFiles = $(".depCsvFileArea").find("input[type=hidden]");
+		var fileData = [];
 		var fileSeq = [];
-		for(var i=0; i<csvFiles.length; i++){
-			var obj = {fileSeq : csvFiles.eq(i).val()};
-			fileSeq.push(obj);
-		}
-		if(fileSeq.length == 0) {
+		
+		if (resetFlag) {
+			for(var i=0; i<csvFiles.length; i++){
+				var obj = {fileSeq : csvFiles.eq(i).val()};
+				fileData.push(obj);
+			}
 			$("#depCsvFileId").val("");
 			csvFileId = "";
+		} else {
+			fileData = dep_evt.csvDelFileSeq;
+			for(var i=0; i<csvFiles.length; i++){
+				var obj = {fileSeq : csvFiles.eq(i).val()};
+				fileSeq.push(obj);
+			}
+			if(fileSeq.length == 0) {
+				$("#depCsvFileId").val("");
+				csvFileId = "";
+			}
 		}
+		
 		var identificationSubStatusDep = $("input[name='identificationSubStatusDep']").val();
 		var mainData = target.jqGrid('getGridParam','data');
 		var depAddListData = $("#_depAddList").jqGrid("getRowData");
