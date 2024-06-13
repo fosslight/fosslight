@@ -416,7 +416,8 @@ var party_evt = {
 					}					
 				}
 				
-				tableRefreshNew("_list");
+				$('#_list').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height": "360px"});
+				adjustMultiPageGridSize();
 			}
 		}
 	},
@@ -456,7 +457,8 @@ var party_evt = {
 			height: 'auto',
 			mtype: 'GET',
 			loadComplete: function(data){
-				tableRefreshNew("_list2");
+				$('#_list2').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
+				adjustMultiPageGridSize();
 			}
 		}
 	},
@@ -501,6 +503,10 @@ var party_evt = {
 			loadComplete: function(data){
 				$('.commentDiv').find('p').css('margin','0px 0px');
 				tableRefreshNew("_list-1");
+			},
+			gridComplete : function() {
+				$('#_list-1').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"360px"});
+				adjustMultiPageGridSize();
 			}
 		}
 	},
@@ -545,7 +551,8 @@ var party_evt = {
 					}
 				}
 				
-				tableRefreshNew("_list-2");
+				$('#_list-2').closest(".ui-jqgrid-bdiv").children(":first").css({"max-height":"400px"});
+				adjustMultiPageGridSize();
 			}
 		}
 	},
@@ -612,8 +619,6 @@ var party_evt = {
 						}
 					}
 				}
-				
-				tableRefreshNew("_3rdAddList");
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				//해당 3rd party tab을 연다
@@ -780,13 +785,42 @@ var part_grid = {
 				cellEdit : true,
 				cellsubmit : 'clientArray',
 				ignoreCase: true,
+				toppager:true,
 			    onSortCol: function (index, columnIndex, sortOrder) {},
 				loadComplete: function(data) {
 					com_fn.exeLoadToList("list3","10");
 					
 					// exclude에 따른 음영설정
-					fn_grid_com.checkExclude(data, 'list3');
-					tableRefreshNew("list3");
+					// exclude에 따른 음영설정
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						className = row.className;
+						
+						if (className.indexOf('jqgrow') !== -1) {
+							rowid = row.id;
+							rowData = data.rows[rowIdx++];
+							
+							if(rowData.excludeYn == "Y") {
+								className= className + ' excludeRow';
+							}
+							
+							row.className = className;
+						} else if(className.indexOf('ui-subgrid') !== -1){
+							rowIdx++;
+						}
+					}
+					
+					// append button event
+					if ($("#list3_toppager_left").find('button').length == 0) {
+	                	var appendBtn = "";
+	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('3RD', 'list3', true)\"><i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('3RD', 'list3', '3RD', 'main, true')\"><i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
+	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('3RD')\"><i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+	                                        
+	                    $("#list3_toppager_left").append(appendBtn);
+	                }
 				},
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
 					if(iCol=="2") fn_grid_com.showOssViewPage(partList, rowid);
@@ -806,7 +840,8 @@ var part_grid = {
 						gridInfoMsg(partInfoData, "list3");
 					}
 
-                    $("#loading_wrap_3rd").hide();
+					partyGridCompleteFlag = true;
+					com_fn.checkGridComplete(false);
                     
 					updateGridRowCount('list3', 'pager3'); 
 				}
@@ -825,6 +860,31 @@ var fn = {
 		
 		return "("+partnerId+") " + partnerName;
 	}
+}
+
+function downloadExcel() {
+	loadingIden.show();
+	
+	$.ajax({
+		type: "POST",
+		url: '/exceldownload/getExcelPost',
+		data: JSON.stringify({"type":"partner", "parameter":[[${project.prjId}]]}),
+		dataType : 'json',
+		cache : false,
+		contentType : 'application/json',
+		success: function (data) {
+			loadingIden.hide();
+			
+			if ("false" == data.isValid) {
+				alertify.error([[#{msg.common.valid2}]], 0);
+			} else {
+				window.location = '/exceldownload/getFile?id='+data.validMsg;
+			}
+		},
+		error: function(data){
+			alertify.error([[#{msg.common.valid2}]], 0);
+		}
+	});
 }
 </script>
 </th:block>
