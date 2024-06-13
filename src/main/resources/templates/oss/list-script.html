@@ -650,7 +650,6 @@
                     toppager: true,
                     pager: '#pager',
                     gridview: true,
-                    viewrecords: true,
                     loadonce: false,
                     height: 'auto',
                     grouping: true,
@@ -688,6 +687,7 @@
                             $('[data-toggle="tooltip"]').tooltip({html: true});
                             oss_lst_data.existTooltip = true;
                         }
+                        updateGridRowCount('list', 'pager'); 
                     },
                     loadComplete: function (result) {
                         totalRow = result.records;

@@ -123,7 +123,6 @@ var binaryDataHistoryList = {
 				, sortable: function (permutation) {}
 				, sortname: 'actionId'
 				, sortorder: 'desc'
-				, viewrecords: true
 				, height: 'auto'
 				, loadonce: false
 				// 데이터 로딩 후
@@ -136,6 +135,9 @@ var binaryDataHistoryList = {
 					if(iCol=="0") {
 						fn_grid_com.showOssViewPage($("#list"), rowid, true);
 					}
+				},
+				gridComplete : function() {
+					updateGridRowCount('list', 'pager');	
 				}
 				
 			});

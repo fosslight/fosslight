@@ -79,7 +79,6 @@ var list = {
 			gridview: true,
 			sortable: function (permutation) {},
 			sortname: 'idx',
-			viewrecords: true,
 			sortorder: 'desc',
 			loadonce:false,
 			height: 'auto',
@@ -89,6 +88,9 @@ var list = {
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 				var rowData = $("#list").jqGrid('getRowData',rowid);
 				createTabInFrame('History', '/system/history/edit/'+rowData['idx']);
+			},
+			gridComplete : function() {
+				updateGridRowCount('list', 'pager');
 			}			
 		});
 	}

@@ -523,7 +523,6 @@ var list = {
 			sortable: function (permutation) {
 			},
 			sortname: 'prjId',
-			viewrecords: true,
 			sortorder: 'desc',
 			toppager:true,
 			height: 'auto',
@@ -614,6 +613,9 @@ var list = {
 //				var isAdmin = [[${@CommonFunction.isAdmin()}]];
 				
 //				createTabInFrame(rowData['prjId']+'_selfCheck', '/selfCheck/edit/'+rowData['prjId']);
+			},
+			gridComplete : function() {
+				updateGridRowCount('list', 'pager');	
 			},
 			postData : refreshParam
 		});

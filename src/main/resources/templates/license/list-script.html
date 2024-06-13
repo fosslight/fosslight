@@ -702,7 +702,10 @@
                     },
                     onSelectRow: function (id) {
                         $('#' + id + 'description').width(130).height(140);
-                    }
+                    },
+                	gridComplete : function() {
+						 updateGridRowCount('list', 'pager'); 
+					}
                 });
             }
         };

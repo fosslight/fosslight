@@ -69,7 +69,6 @@ var sentList = {
 			, sortable: function (permutation) {}
 			, sortname: 'sndSeq'
 			, sortorder: 'desc'
-			, viewrecords: true
 			, height: 'auto'
 			, loadonce: false
 			// 데이터 로딩 후
@@ -93,6 +92,7 @@ var sentList = {
 				
 				$("#list td[aria-describedby=list_emlTo]").css("text-overflow", "ellipsis");
 				$("#list td[aria-describedby=list_emlCc]").css("text-overflow", "ellipsis");
+				updateGridRowCount('list', 'pager');
 			}
 		});
 		

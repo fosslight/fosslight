@@ -135,11 +135,13 @@
 				, sortable: function (permutation) {}
 				, sortname: 'id'
 				, sortorder: 'desc'
-				, viewrecords: true
 				, height: 'auto'
 				, loadonce: false
 				// 데이터 로딩 후
 				, loadComplete: function(data) {}
+				, gridComplete : function() {
+					updateGridRowCount('list', 'pager');
+				}
 			});
 			
             $("#list").jqGrid('navGrid', "#list_toppager", {edit:true, add:false, del:false, search:false, refresh:false}, updateDialogEdit);
