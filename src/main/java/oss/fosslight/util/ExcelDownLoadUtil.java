@@ -17,16 +17,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -63,6 +54,7 @@ import org.cyclonedx.model.OrganizationalEntity;
 import org.cyclonedx.model.Tool;
 import org.cyclonedx.model.vulnerability.Vulnerability.Source;
 import org.spdx.library.SpdxVerificationHelper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
@@ -71,6 +63,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
+import org.thymeleaf.util.StringUtils;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -108,6 +101,7 @@ import oss.fosslight.service.VulnerabilityService;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
+@org.springframework.stereotype.Component
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
 public class ExcelDownLoadUtil extends CoTopComponent {
@@ -135,7 +129,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	
 	// Controller
 	private static ProjectController projectController	= getWebappContext().getBean(ProjectController.class);
-	
+
+	private static Optional<String> suffix;
+
+	@Value("${fosslight.suffix:}")
+	public void setSuffix(String suffixValue) {
+		suffix = Optional.of(suffixValue);
+	}
+
 	private static final int MAX_RECORD_CNT = 99999;
 	private static final int MAX_RECORD_CNT_LIST = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_EXCEL_DOWNLOAD, CoConstDef.CD_MAX_ROW_COUNT))+1;	
 
@@ -1110,26 +1111,46 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		Cell networkServiceOnly = sheet.getRow(10).getCell(1);
 		networkServiceOnly.setCellType(CellType.STRING);
 		networkServiceOnly.setCellValue(project.getNetworkServerType());
-				
-		// About OSC Process
-		// Distribution Site
-		Cell distributionSite = sheet.getRow(13).getCell(1);
-		distributionSite.setCellType(CellType.STRING);
-		distributionSite.setCellValue(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, project.getDistributeTarget()));
-		// Notice Type		
-		String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, project.getNoticeType());
-		
-		if (!isEmpty(project.getNoticeTypeEtc())) {
-			noticeTypeStr += " (" +CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, project.getNoticeTypeEtc()) + ")";
+
+		String suffixValue = suffix.orElse("");
+		log.info("suffix :: " + suffixValue);
+		if (StringUtils.equals(suffixValue, "/lge")) {
+			// About OSC Process
+			// Distribution Site
+			Cell distributionSite = sheet.getRow(13).getCell(1);
+			distributionSite.setCellType(CellType.STRING);
+			distributionSite.setCellValue(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, project.getDistributeTarget()));
+			// Notice Type
+			String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, project.getNoticeType());
+
+			if (!isEmpty(project.getNoticeTypeEtc())) {
+				noticeTypeStr += " (" +CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, project.getNoticeTypeEtc()) + ")";
+			}
+
+			Cell noticeType = sheet.getRow(14).getCell(1);
+			noticeType.setCellType(CellType.STRING);
+			noticeType.setCellValue(noticeTypeStr);
+			// Comment
+			Cell comment = sheet.getRow(15).getCell(1);
+			comment.setCellType(CellType.STRING);
+			comment.setCellValue(CommonFunction.html2text(project.getComment()));
+
+		} else {
+			// Notice Type
+			String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, project.getNoticeType());
+
+			if (!isEmpty(project.getNoticeTypeEtc())) {
+				noticeTypeStr += " (" +CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, project.getNoticeTypeEtc()) + ")";
+			}
+
+			Cell noticeType = sheet.getRow(13).getCell(1);
+			noticeType.setCellType(CellType.STRING);
+			noticeType.setCellValue(noticeTypeStr);
+			// Comment
+			Cell comment = sheet.getRow(14).getCell(1);
+			comment.setCellType(CellType.STRING);
+			comment.setCellValue(CommonFunction.html2text(project.getComment()));
 		}
-		
-		Cell noticeType = sheet.getRow(14).getCell(1);
-		noticeType.setCellType(CellType.STRING);
-		noticeType.setCellValue(noticeTypeStr);
-		// Comment
-		Cell comment = sheet.getRow(15).getCell(1);
-		comment.setCellType(CellType.STRING);
-		comment.setCellValue(CommonFunction.html2text(project.getComment()));
 	}
 
 	/**
