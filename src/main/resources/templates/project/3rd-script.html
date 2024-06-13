@@ -154,6 +154,43 @@ var party_evt = {
 			}
 		});
 	},
+	partySearchSelect : function () {
+		$("select[name=3rdSerarchSelect]").on("change", function() {
+			var value = $(this).val();
+			if ("sName" == value) {
+				$("input[name=3rdSearchText]").removeClass("autoComConfParty").removeClass("autoComConfPartyId");
+				$("input[name=3rdSearchText]").addClass("autoComConfSwNm");
+				
+				callAutoCompleteFnc("autoComConfSwNm");
+			} else if ("3rdPartyId" == value) {
+				$("input[name=3rdSearchText]").removeClass("autoComConfParty").removeClass("autoComConfSwNm");
+				$("input[name=3rdSearchText]").addClass("autoComConfPartyId");
+				
+				callAutoCompleteFnc("autoComConfPartyId");
+			} else {
+				$("input[name=3rdSearchText]").removeClass("autoComConfSwNm").removeClass("autoComConfPartyId");
+				$("input[name=3rdSearchText]").addClass("autoComConfParty");
+				
+				callAutoCompleteFnc("autoComConfParty");
+			}
+		});
+	},
+	partyProjectSelect : function () {
+		$("select[name=3rdProjectSelect]").on("change", function() {
+			var value = $(this).val();
+			if ("pNm" == value) {
+				$("input[name=prjSearchText]").removeClass("autoComProjectIdConf");
+				$("input[name=prjSearchText]").addClass("autoComProjectNmConf");
+				
+				callAutoCompleteFnc("autoComProjectNmConf");
+			} else if ("pId" == value) {
+				$("input[name=prjSearchText]").removeClass("autoComProjectNmConf");
+				$("input[name=prjSearchText]").addClass("autoComProjectIdConf");
+				
+				callAutoCompleteFnc("autoComProjectIdConf");
+			}
+		});
+	},
 	changeSelectOption : function(){
 		var value = $('input[name=selectOption]:checked').val();
 		
