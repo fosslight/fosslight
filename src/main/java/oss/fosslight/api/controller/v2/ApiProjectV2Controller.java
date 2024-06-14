@@ -295,8 +295,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Notice Platform (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String noticeTypeEtc,
             @ApiParam(value = "Priority (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String priority,
             @ApiParam(value = "Visible to everyone? (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false, defaultValue = "Y") String publicYn,
-            @ApiParam(value = "User comment", required = false) @RequestParam(required = false) String userComment,
-            @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment) {
+            @ApiParam(value = "User Comment", required = false) @RequestParam(required = false) String userComment,
+            @ApiParam(value = "Additional Information", required = false) @RequestParam(required = false) String additionalInformation) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -401,6 +401,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             paramMap.put("priority", priority);
             paramMap.put("loginUserName", userInfo.getUserId());
             paramMap.put("publicYn", publicYn);
+            paramMap.put("comment", avoidNull(additionalInformation, ""));
 
             result = apiProjectService.createProject(paramMap);
 
