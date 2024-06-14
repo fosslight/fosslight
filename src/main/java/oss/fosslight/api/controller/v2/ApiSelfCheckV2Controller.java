@@ -121,7 +121,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PutMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
     public ResponseEntity<Map<String, Object>> ossReportSelfCheck(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
@@ -343,7 +343,7 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PutMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
             @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id", required = true) String prjId,
