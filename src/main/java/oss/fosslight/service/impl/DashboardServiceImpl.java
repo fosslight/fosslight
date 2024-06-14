@@ -43,6 +43,8 @@ public class DashboardServiceImpl extends CoTopComponent implements DashboardSer
         
         if ("Progress".equals(project.getIdentificationStatus())) {
             paramMap.put("status", "PROG");
+		} else if ("Request".equals(project.getIdentificationStatus())){
+			paramMap.put("status", "REQ");
         } else if ("Review".equals(project.getIdentificationStatus())){
             paramMap.put("status", "REV");
         } else if ("Final Review".equals(project.getIdentificationStatus())){

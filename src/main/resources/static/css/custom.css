@@ -153,6 +153,7 @@ html { height: auto !important;}
 .custom-layout .bg-blue-gray { background-color: #596d82; }
 .custom-layout .bg-purple { background-color: #702f9f; }
 .custom-layout .bg-pink { background-color: #f70ce4; }
+.custom-layout .bg-pink:hover { background-color: #c60ab1; }
 .custom-layout .bg-brown { background-color: #a59381; }
 .custom-layout .btn.helpBtnL {
     border-right: none;

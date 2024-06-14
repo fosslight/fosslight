@@ -109,7 +109,7 @@
 			)
 		) RESULT
 		WHERE 1 = 1
-		AND RESULT.STATUS IN ('PROG', 'REV', 'FREV')
+		AND RESULT.STATUS IN ('PROG','REQ', 'REV', 'FREV')
 		<choose>
 			<when test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
 				ORDER BY CASE WHEN RESULT.STATUS = #{status} THEN 0 ELSE 1 END, RESULT.MODIFIED_DATE DESC
@@ -644,7 +644,7 @@
 			</if>
 			) RESULT
 			WHERE 1 = 1
-			AND RESULT.STATUS IN ('PROG', 'REV', 'FREV')
+			AND RESULT.STATUS IN ('PROG', 'REQ', 'REV', 'FREV')
 			GROUP BY RESULT.STATUS
 	</select>
 	
