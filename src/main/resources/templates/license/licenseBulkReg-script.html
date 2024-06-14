@@ -144,7 +144,6 @@
             { name: 'comment', index:'comment', width: 150, align: 'left', editable:false, edittype:"textarea"},
             { name: 'status', index:'status', width: 150, align: 'left'}
           ],
-          viewrecords: true,
           rowNum: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_DEFAULT')}]],
           rowList: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]],
           autowidth: true,
@@ -199,7 +198,10 @@
             var mainData = $("#list").jqGrid('getRowData');
 
             dataValidCheck(mainData)
-          }
+          }, 
+          gridComplete: function () {
+			updateGridRowCount('list', 'pager');
+		  }
         });
       }
     }

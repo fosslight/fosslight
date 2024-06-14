@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
 <th:block th:replace="oss/checkOssNamePopup-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
 	<div class="wrapper">
@@ -14,6 +15,7 @@
 						<div class="row">
 							<div class="jqGridSet" style="overflow: auto; width: 98%; height: 500px;">
             					<table id="ossList"><tr><td></td></tr></table>
+            					<div id="ossPager"></div>
             					<div class="row pl-2 mt-2 float-left">
         							<button type="button" id="btnChangeOss" class="btn btn-outline-dark btn-sm width-9rem px-2" th:text="'Change OSS Name'"></button>
         							<button th:if="${sessUserInfo.authority == 'ROLE_ADMIN'}" type="button" id="btnAddNickname" class="btn btn-outline-dark btn-sm width-9rem px-2" style="margin-left: .2rem;" th:text="'Add Nickname - OSS name(now)'"></button>

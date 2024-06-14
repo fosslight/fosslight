@@ -96,7 +96,7 @@ var setGrid = {
 			, rowNum : 15
 			, rowList : [15, 30, 50]
 			, loadonce : true // reload 여부, true 로 설정하면 한번만 데이터를 받아오고 그 다음부터는 데이터를 받아오지 않는다
-			, viewrecords : true
+			, gridComplete : function() { updateGridRowCount('list', 'pager'); }
 		});
 		
 		if ($("#list_toppager_left").find('button').length == 0) {
