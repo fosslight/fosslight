@@ -2205,7 +2205,6 @@ var list = {
 			gridview: true,
 			sortable: function (permutation) {},
 			sortname: 'prjId',
-			viewrecords: true,
 			sortorder: 'desc',
 			height: 'auto' ,
 			multiselect : true,
@@ -2332,6 +2331,7 @@ var list = {
 // 					}
 // 				}
 			},
+            gridComplete:function (){ updateGridRowCount('list', 'pager'); },
 			postData: refreshParam
 		});
 	}

@@ -378,7 +378,6 @@
                     , sortable: function (permutation) {
                     }
                     , sortname: 'fileName'
-                    , viewrecords: true
                     , sortorder: 'asc'
                     , loadonce: false
                     , toppager:true
@@ -405,6 +404,7 @@
                     }
                     , ondblClickRow: function (rowid, iRow, iCol, e) {
                     }
+                    , gridComplete:function (){ updateGridRowCount('list', 'pager'); }
                 });
 
                 $("#list").jqGrid('navGrid', "#pager", {edit: isAdmin, add: false, del: isAdmin, search: false, refresh: false}, binaryUpdateDialogEdit, null, binaryUpdateDialogDel);

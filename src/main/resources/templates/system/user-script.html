@@ -326,7 +326,6 @@ var userList = {
 			, gridview: true
 			, sortable: function (permutation) {}
 			, sortname: 'userId'
-			, viewrecords: true
 			, sortorder: 'asc'
 			, loadonce: true
 			, height: 'auto'
@@ -342,8 +341,10 @@ var userList = {
 			, loadComplete:function(data) {
 				// id(key값)의 max값을 lastIdNo에 설정
 				userList.lastIdNo = fn.getMaxIdNo();
-			}
-		})
+			},
+            gridComplete:function (){ updateGridRowCount('list', 'pager'); }
+
+        })
 	}
 };
 </script>

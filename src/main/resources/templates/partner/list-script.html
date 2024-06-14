@@ -1288,7 +1288,6 @@ var partnerList = {
 			sortable: function(permutation){
 			},
 			sortname: 'partnerId',
-			viewrecords: true,
 			sortorder: 'desc',
 			toppager:true,
 			loadonce: false,
@@ -1426,6 +1425,7 @@ var partnerList = {
 			ondblClickRow: function(rowid,iRow,iCol,e) {
 //				createTabInFrame(rowid+'_3rdParty', '/partner/edit/'+rowid);
 			},
+            gridComplete:function (){ updateGridRowCount('list', 'pager'); },
 			postData : refreshParam
 		})
 	}
