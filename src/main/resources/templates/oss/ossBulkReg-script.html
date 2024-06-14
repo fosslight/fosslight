@@ -239,7 +239,6 @@ console.log(isClicked);
             { name: 'comment', index:'comment', width: 150, align: 'left', editable:false, edittype:"textarea", editoptions: {rows:"5"}},
             { name: 'status', index:'status', width: 500, align: 'left'}
         ],
-        viewrecords: true,
         rowNum: rowNum,
         rowList: rowList,
         autowidth: true,
@@ -293,7 +292,10 @@ console.log(isClicked);
             var mainData = $("#list").jqGrid('getRowData');
 
             dataValidCheck(mainData)
-        }
+        },
+		gridComplete: function () {
+			updateGridRowCount('list', 'pager'); 
+		}
     });
 
     var accept1 = '';

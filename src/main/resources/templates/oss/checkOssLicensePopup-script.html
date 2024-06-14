@@ -73,6 +73,10 @@ var Ctrl_fn = {
 						gridview: true,
 						editurl:'clientArray',
 						loadonce: true,
+						pager: '#ossPager',
+						pgbuttons: false,
+					   	pgtext: false,
+					   	pginput:false,
 						height: 'auto',
 						rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
 						multiselect: true,
@@ -114,7 +118,7 @@ var Ctrl_fn = {
 							
 						},
 						onSelectRow: function(rowid){},
-						gridComplete:function (){}
+						gridComplete:function (){ updateGridRowCount('ossList', 'ossPager'); }
 				});
 			},
 			error : function(){

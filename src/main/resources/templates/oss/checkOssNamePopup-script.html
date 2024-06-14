@@ -393,6 +393,10 @@ var grid_fn = {
 				autoencode: true,
 				autowidth: true,
 				gridview: true,
+				pager: '#ossPager',
+				pgbuttons: false,
+			   	pgtext: false,
+			   	pginput:false,
 				editurl:'clientArray',
 				loadonce: true,
 				height: 'auto',
@@ -444,7 +448,7 @@ var grid_fn = {
 					
 				},
 				onSelectRow: function(rowid){},
-				gridComplete:function (){},
+				gridComplete:function (){ updateGridRowCount('ossList', 'ossPager'); },
 				onCellSelect: function(rowid,iCol,cellcontent,e) {
 					if (iCol=="5") {
 						var popupVisible = $(".sheetSelectPop").is(':visible');
