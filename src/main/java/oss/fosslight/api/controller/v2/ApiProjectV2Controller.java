@@ -159,7 +159,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PutMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE})
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE})
     public ResponseEntity<Map<String, Object>> updateModelList(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(required = true, name = "id") String prjId,
@@ -222,7 +222,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PutMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
     public ResponseEntity<Map<String, Object>> updateModelListUploadFile(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
@@ -721,7 +721,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 // 정상처리된 경우 세션 삭제
                 deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
                 deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
-                return new ResponseEntity<>(resultMap, HttpStatus.CREATED);
+                return new ResponseEntity<>(resultMap, HttpStatus.OK);
             } else {
                 if (resultMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
 
@@ -746,7 +746,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PutMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_BIN})
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_BIN})
     public ResponseEntity<Map<String, Object>> ossReportBin(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
@@ -1095,7 +1095,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(resultMap, HttpStatus.CREATED);
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @SuppressWarnings("unchecked")
@@ -1317,7 +1317,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
         }
 
-        return new ResponseEntity<>(resultMap, HttpStatus.CREATED);
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @SuppressWarnings("unchecked")

@@ -76,7 +76,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
             resultMap = apiPartnerService.getPartnerMasterList(paramMap);
 
-            return new ResponseEntity<>(resultMap, HttpStatus.CREATED);
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST,
                     CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
@@ -88,7 +88,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @PutMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_WATCHER})
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
             @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
@@ -131,7 +131,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
                             CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
                 }
             }
-            return new ResponseEntity(resultMap, HttpStatus.CREATED);
+            return new ResponseEntity(resultMap, HttpStatus.OK);
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
                     CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
