@@ -1254,6 +1254,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, param.getLicenseName()
 					, param.getLicenseType()
 					, CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, param.getObligationType())
+					, param.getDetectedLicense()
 					, param.getHomepage()
 					, param.getDownloadLocation()
 					, param.getCopyright()
