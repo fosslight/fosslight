@@ -190,7 +190,7 @@
                         render: function (data, type, row, meta) {
                             var rtnDisplay = "";
 
-                            if (row.prjDivision == "PRJ" && (row.status == "Progress" || row.status == "Review" || row.status = "Request")) {
+                          	if (row.prjDivision == "PRJ" && (status == "Progress" || status == "Request" || status == "Review")) {
                                 rtnDisplay = data;
 
                                 var initDiv;
@@ -200,16 +200,28 @@
                                 } else {
                                     initDiv = 0;
                                 }
+                                
+                                switch (status) {
+									case "Progress" : btnClass = "badge btn-success hover-success-btn"; 
+										break;
+									case "Request" : btnClass = "badge badge-pink hover-pink-btn";
+										break;
+									case "Review" : btnClass = "badge badge-yellow hover-yellow-btn"; 
+										break;
+								}
+									
 
                                 switch (data) {
-                                    case "I":
 									case "B":
-                                        rtnDisplay = `<span class="badge ${row.status === 'Progress' ? 'btn-success hover-success-btn' : row.status === 'Request' ?  'badge-pink hover-pink-btn' : 'badge-yellow hover-yellow-btn'} size-sm width-6rem d-flex-align fs-77p" onclick="createTabInFrame('${row.prjId}_Identify', '/project/identification/${row.prjId}/${initDiv}')" style="cursor: pointer;">Identification</span>`;
-                                        break;
-                                    case "P":
-                                        rtnDisplay = `<span class="badge ${row.status === 'Progress' ? 'btn-success hover-success-btn' : 'badge-yellow hover-yellow-btn'} size-sm width-6rem d-flex-align fs-77p" onclick="createTabInFrame('${row.prjId}_Packaging', '/project/verification/${row.prjId}')" style="cursor: pointer;">Packaging</span>`;
-                                        break;
-                                }
+							        	rtnDisplay = "<span class=\"" + btnClass + " size-sm width-6rem d-flex-align fs-77p\" onclick=\"createTabInFrame('" + prjId + "_Project', '/project/edit/" + prjId + "')\" style=\"cursor: pointer;\">Basic Info</span>";
+							        	break;
+								    case "I":
+								        rtnDisplay = "<span class=\"" + btnClass + " size-sm width-6rem d-flex-align fs-77p\" onclick=\"createTabInFrame('" + prjId + "_Identify', '/project/identification/" + prjId + "/" + initDiv + "')\" style=\"cursor: pointer;\">Identification</span>";
+								        break;
+								    case "P":
+								    	rtnDisplay = "<span class=\"" + btnClass + " size-sm width-6rem d-flex-align fs-77p\" onclick=\"createTabInFrame('" + prjId + "_Packaging', '/project/verification/" + prjId + "')\" style=\"cursor: pointer;\">Packaging</span>";
+								        break;
+								}
                             }
 
                             return rtnDisplay;
