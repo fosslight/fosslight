@@ -1,35 +1,34 @@
 package oss.fosslight.util;
 
-import static oss.fosslight.common.CoConstDef.CD_LICENSE_RESTRICTION;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
-
+import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
+import com.itextpdf.io.font.FontProgram;
+import com.itextpdf.io.font.FontProgramFactory;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.IBlockElement;
+import com.itextpdf.layout.element.IElement;
+import com.itextpdf.layout.font.FontProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.Vulnerability;
-import oss.fosslight.repository.CodeMapper;
-import oss.fosslight.repository.LicenseMapper;
-import oss.fosslight.repository.OssMapper;
-import oss.fosslight.repository.ProjectMapper;
-import oss.fosslight.repository.VerificationMapper;
+import oss.fosslight.domain.*;
+import oss.fosslight.repository.*;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.VulnerabilityService;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static oss.fosslight.common.CoConstDef.CD_LICENSE_RESTRICTION;
+
 
 @Slf4j
 public final class PdfUtil extends CoTopComponent {
@@ -56,12 +55,28 @@ public final class PdfUtil extends CoTopComponent {
         }
         return instance;
     }
-    public static ByteArrayInputStream html2pdf(String html) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HtmlConverter.convertToPdf(html, outputStream);
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-        return inputStream;
+
+    public static boolean html2pdf(String contents, String file) throws IOException {
+        ConverterProperties properties = new ConverterProperties();
+        FontProvider fontProvider = new DefaultFontProvider(false, false, false);
+
+        FontProgram fontProgram = FontProgramFactory.createFont(new ClassPathResource("/static/font/NanumBarunGothic.ttf").getURL().toString());
+        fontProvider.addFont(fontProgram);
+        properties.setFontProvider(fontProvider);
+
+        List<IElement> elements = HtmlConverter.convertToElements(contents, properties);
+        PdfDocument pdf = new PdfDocument(new PdfWriter(file));
+        Document document = new Document(pdf);
+
+        document.setMargins(50, 0, 50, 0);
+        for (IElement element : elements) {
+            document.add((IBlockElement) element);
+        }
+        document.close();
+
+        return true;
     }
+
     public String getReviewReportHtml(String prjId) throws Exception
     {
         Map<String,Object> convertData = new HashMap<>();
@@ -94,24 +109,28 @@ public final class PdfUtil extends CoTopComponent {
             OssMaster ossMaster = new OssMaster();
             ossMaster.setOssId(projectIdentification.getOssId());
             OssMaster oss = ossMapper.selectOssOne(ossMaster);
-            if (!oss.getSummaryDescription().equals("")) {
-                ossReview.add(oss);
-            }
+            if(oss != null) {
+                if (!avoidNull(oss.getSummaryDescription()).equals("")) {
 
-            //VulnerabilityReview
-            projectIdentification.setOssName(oss.getOssName());
-            projectIdentification.setOssVersion(oss.getOssVersion());
-            ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
-            if(prjOssMaster.getCvssScore()!=null) {
-                BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
+                    ossReview.add(oss);
+                }
 
-                if (bdScore.compareTo(new BigDecimal("8.0")) >= 0) {
-                    Vulnerability vulnerability = new Vulnerability();
-                    vulnerability.setOssName(oss.getOssName());
-                    vulnerability.setVersion(oss.getOssVersion());
-                    vulnerability.setCvssScore(prjOssMaster.getCvssScore());
-                    vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
-                    vulnerabilityReview.add(vulnerability);
+                //VulnerabilityReview
+                projectIdentification.setOssName(oss.getOssName());
+                projectIdentification.setOssVersion(oss.getOssVersion());
+                ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
+                if(prjOssMaster.getCvssScore()!=null) {
+                    BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
+                    BigDecimal mailingScore = new BigDecimal(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
+
+                    if (bdScore.compareTo(mailingScore) >= 0) {
+                        Vulnerability vulnerability = new Vulnerability();
+                        vulnerability.setOssName(oss.getOssName());
+                        vulnerability.setVersion(oss.getOssVersion());
+                        vulnerability.setCvssScore(prjOssMaster.getCvssScore());
+                        vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
+                        vulnerabilityReview.add(vulnerability);
+                    }
                 }
             }
 
@@ -120,35 +139,49 @@ public final class PdfUtil extends CoTopComponent {
             licenseMaster.setLicenseId(projectIdentification.getLicenseId());
 
             LicenseMaster license = licenseMapper.selectLicenseOne(licenseMaster);
-            if (!isEmpty(license.getRestriction())) {
-                String[] arrRestrictions = license.getRestriction().split(",");
-                String str = "";
-                for (int i = 0; i < arrRestrictions.length - 2; i++) {
-                    str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[i]) + ", ";
+            if(license != null) {
+                if (!isEmpty(license.getRestriction())) {
+                    String[] arrRestrictions = license.getRestriction().split(",");
+                    String str = "";
+                    for (int i = 0; i < arrRestrictions.length - 2; i++) {
+                        str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[i]) + ", ";
+                    }
+
+                    if (arrRestrictions.length > 0) {
+                        str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[arrRestrictions.length - 1]);
+                    }
+                    license.setRestriction(str);
                 }
 
-                if (arrRestrictions.length > 0) {
-                    str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[arrRestrictions.length - 1]);
+                if (!isEmpty(avoidNull(license.getRestriction())) || (!isEmpty(avoidNull(license.getDescription())) && !license.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS)) ) {
+                    licenseMasterMap.put(license.getLicenseName(), license);
                 }
-                license.setRestriction(str);
-            }
-
-            if (license.getRestriction() != null || license.getDescription() != null) {
-                licenseMasterMap.put(license.getLicenseName(), license);
             }
         }
+
         for (LicenseMaster licenseMaster : licenseMasterMap.values()) {
             licenseReview.add(licenseMaster);
+        }
+
+        if(ossReview.size() > 0) {
+            for(OssMaster om : ossReview) {
+                om.setSummaryDescription(CommonFunction.lineReplaceToBR(om.getSummaryDescription()));
+            }
+        }
+
+        if(licenseReview.size() > 0) {
+            for(LicenseMaster lm : licenseReview) {
+                lm.setDescription(CommonFunction.lineReplaceToBR(lm.getDescription()));
+                lm.setRestriction(CommonFunction.lineReplaceToBR(lm.getRestriction()));
+            }
         }
 
         convertData.put("OssReview", ossReview);
         convertData.put("LicenseReview", licenseReview);
         convertData.put("VulnerabilityReview", vulnerabilityReview);
-        convertData.put("templateUrl", "report/reviewReport.html");
+        convertData.put("templateURL", "report/reviewReport.html");
         
         return CommonFunction.VelocityTemplateToString(convertData);
-//        String pdfContent = getVelocityTemplateContent("/template/report/reviewReport.html", convertData);
-//        return pdfContent;
     }
 
     /**
