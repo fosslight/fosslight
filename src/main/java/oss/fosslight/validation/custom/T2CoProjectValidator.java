@@ -499,6 +499,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 							} else {
 								diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
 							}
+						} else {
+							if (CommonFunction.isAdmin()) {
+								errMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.UNCONFIRMED");
+							} else {
+								diffMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.UNCONFIRMED");
+							}
 						}
 					}
 					else if (!errMap.containsKey("OSS_NAME." + bean.getComponentId())
@@ -945,6 +951,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
 							} else {
 								diffMap.put("OSS_VERSION." + bean.getComponentId(), "OSS_VERSION.UNCONFIRMED");
+							}
+						} else {
+							if (CommonFunction.isAdmin()) {
+								errMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.UNCONFIRMED");
+							} else {
+								diffMap.put("OSS_NAME." + bean.getComponentId(), "OSS_NAME.UNCONFIRMED");
 							}
 						}
 					}
@@ -2339,6 +2351,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 								errMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.UNCONFIRMED");
 							} else {
 								diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.UNCONFIRMED");
+							}
+						} else {
+							if (CommonFunction.isAdmin()) {
+								errMap.put("OSS_NAME." + bean.getGridId(), "OSS_NAME.UNCONFIRMED");
+							} else {
+								diffMap.put("OSS_NAME." + bean.getGridId(), "OSS_NAME.UNCONFIRMED");
 							}
 						}
 					}
