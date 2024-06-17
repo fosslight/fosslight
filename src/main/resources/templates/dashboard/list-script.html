@@ -189,6 +189,8 @@
                         data : "stage",
                         render: function (data, type, row, meta) {
                             var rtnDisplay = "";
+                            var status = row.status;
+							var btnClass = "";
 
                           	if (row.prjDivision == "PRJ" && (status == "Progress" || status == "Request" || status == "Review")) {
                                 rtnDisplay = data;
