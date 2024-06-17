@@ -1287,6 +1287,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 			, REF_OSS_NAME
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+			, PACKAGE_URL
+			</if>
 			)
 			VALUES
 			(
@@ -1339,6 +1342,9 @@
 			, #{adminCheckYn}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 			, #{refOssName}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+			, #{packageUrl}
 			</if>
 			)
 	</insert>
@@ -1721,7 +1727,7 @@
 					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '16' THEN 15 
 					ELSE 99 END AS MERGE_ORDER, 
 			RTN.LICENSE_ID, RTN.LICENSE_NAME, GROUP_CONCAT(RTN.COPYRIGHT SEPARATOR '|') AS COPYRIGHT_TEXT, RTN.LICENSE_TYPE_IDX,
-			RTN.CVSS_SCORE_MAX, RTN.CVSS_SCORE_MAX1, RTN.CVSS_SCORE_MAX2, RTN.CVSS_SCORE_MAX3, RTN.LICENSE_TYPE, RTN.DEPENDENCIES, RTN.REF_OSS_NAME
+			RTN.CVSS_SCORE_MAX, RTN.CVSS_SCORE_MAX1, RTN.CVSS_SCORE_MAX2, RTN.CVSS_SCORE_MAX3, RTN.LICENSE_TYPE, RTN.DEPENDENCIES, RTN.REF_OSS_NAME, RTN.PACKAGE_URL
 		FROM  (
 			SELECT 
 				A1.REFERENCE_ID, A1.COMPONENT_ID, A1.REF_COMPONENT_ID, A1.REFERENCE_DIV, A1.COMPONENT_IDX,A1.OSS_ID, A1.OSS_NAME, A1.OSS_VERSION
@@ -1731,7 +1737,7 @@
 				, GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME
 				, IFNULL(A1.REF_DIV, (SELECT S.REFERENCE_DIV FROM OSS_COMPONENTS S WHERE S.COMPONENT_ID = A1.REF_COMPONENT_ID)) AS REF_DIV
 				, (CASE WHEN GROUP_CONCAT(A3.LICENSE_TYPE) REGEXP 'PMS|WCP|CP' THEN 1 WHEN A3.LICENSE_TYPE IS NULL THEN 1 ELSE CONCAT(GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ','), '-', 2) END) AS LICENSE_TYPE_IDX
-				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME
+				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME, A1.PACKAGE_URL
 				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
 				, CASE WHEN ((SELECT IFNULL(EXCLUDE_YN, 'N') FROM OSS_COMPONENTS WHERE COMPONENT_ID = A1.REF_COMPONENT_ID) != 'Y') THEN 
 				</if>
@@ -2742,6 +2748,7 @@
 			</choose>
 			IFNULL(M.HOMEPAGE, '') AS HOMEPAGE,
 			IFNULL(M.FILE_PATH, '') AS FILE_PATH,
+			IFNULL(M.PACKAGE_URL, '') AS PACKAGE_URL,
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('20', referenceDiv)">IF(M.BINARY_NAME IS NOT NULL AND M.BINARY_NAME != '', M.BINARY_NAME, M.FILE_PATH) AS BINARY_NAME,</when>
 				<otherwise>IFNULL(M.BINARY_NAME, '') AS BINARY_NAME,</otherwise>
@@ -3227,6 +3234,7 @@
 					, PRE_OBLIGATION_TYPE
 					, ADMIN_CHECK_YN
 					, REF_OSS_NAME
+					, PACKAGE_URL
 					)
 			SELECT
 					#{referenceId}
@@ -3270,6 +3278,7 @@
 					, PRE_OBLIGATION_TYPE
 					, ADMIN_CHECK_YN
 					, REF_OSS_NAME
+					, PACKAGE_URL
 			FROM OSS_COMPONENTS
 			WHERE COMPONENT_ID = #{refComponentId}
 	</insert>
@@ -3351,6 +3360,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 			, REF_OSS_NAME = #{refOssName}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+			, PACKAGE_URL = #{packageUrl}
+			</if>
 		WHERE
 			COMPONENT_ID = #{componentId}
 	</update>
@@ -3427,6 +3439,9 @@
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
 						, CHECK_SUM
 						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+						, PACKAGE_URL
+						</if>
 					)
 			VALUES
 					(
@@ -3496,6 +3511,9 @@
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
 						, #{checkSum}
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+						, #{packageUrl}
 						</if>
 					)
 	</insert>
@@ -5515,7 +5533,7 @@
 	<select id="selectOssComponentsSbomList" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssComponents">
 		SELECT 
 		 	T1.PRJ_ID, T1.PRJ_NAME, T1.PRJ_VERSION , T1.DISTRIBUTE_TARGET
-			, T2.COMPONENT_ID, T2.OSS_ID, T2.OSS_NAME, T2.OSS_VERSION 
+			, T2.COMPONENT_ID, T2.OSS_ID, T2.OSS_NAME, T2.OSS_VERSION
 			, IFNULL(T2.DOWNLOAD_LOCATION, T4.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
 			, IFNULL(T2.HOMEPAGE, T4.HOMEPAGE) AS HOMEPAGE
 			, T2.OBLIGATION_TYPE, T4.ATTRIBUTION AS OSS_ATTRIBUTION
@@ -5527,6 +5545,7 @@
  			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.ATTRIBUTION) AS ATTRIBUTION
 			, T2.ADMIN_CHECK_YN
 			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.LICENSE_TYPE) AS LICENSE_TYPE
+			, T2.PACKAGE_URL
 		FROM PROJECT_MASTER T1 
 			INNER JOIN OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '13' AND T2.OSS_NAME != '-'
 			INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
@@ -5918,6 +5937,7 @@
 		SELECT T2.OSS_ID
 				, T2.OSS_NAME
 				, T2.OSS_VERSION 
+				, T2.PACKAGE_URL
 				, T2.DEPENDENCIES
 		FROM PROJECT_MASTER T1 
 			INNER JOIN OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = #{referenceDiv} AND T2.OSS_NAME != '-'

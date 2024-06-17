@@ -182,14 +182,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 
 				List<OssMaster> ossDetectedLicense = ossMapper.selectOssDetectedLicenseList(bean);
-
-				StringBuilder sb = new StringBuilder(); // 초기화
-
-				 for (OssMaster licenseInfo : ossDetectedLicense) {
-					 sb.append(licenseInfo.getLicenseName()).append(",");
-				 }
-
-				 bean.setDetectedLicense(String.valueOf(sb));
+				if (ossDetectedLicense != null && !ossDetectedLicense.isEmpty()) {
+					StringBuilder sb = new StringBuilder(); // 초기화
+					for (OssMaster licenseInfo : ossDetectedLicense) {
+						sb.append(licenseInfo.getLicenseName()).append(",");
+					}
+					bean.setDetectedLicense(String.valueOf(sb));
+				}
 			}
 		}
 		

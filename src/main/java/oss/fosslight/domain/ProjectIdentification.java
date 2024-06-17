@@ -80,6 +80,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** The file path. */
 	private String filePath;
 	
+	/** The package url */
+	private String packageUrl;
+	
 	/** The binary name. */
 	private String binaryName;
 	
@@ -2155,5 +2158,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setCheckSum(String checkSum) {
 		this.checkSum = checkSum;
+	}
+
+	public String getPackageUrl() {
+		return packageUrl;
+	}
+
+	public void setPackageUrl(String packageUrl) {
+		this.packageUrl = packageUrl;
 	}
 }
