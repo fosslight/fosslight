@@ -190,7 +190,7 @@
                         render: function (data, type, row, meta) {
                             var rtnDisplay = "";
 
-                            if (row.prjDivision == "PRJ" && (row.status == "Progress" || row.status == "Review")) {
+                            if (row.prjDivision == "PRJ" && (row.status == "Progress" || row.status == "Review" || row.status = "Request")) {
                                 rtnDisplay = data;
 
                                 var initDiv;
@@ -203,7 +203,8 @@
 
                                 switch (data) {
                                     case "I":
-                                        rtnDisplay = `<span class="badge ${row.status === 'Progress' ? 'btn-success hover-success-btn' : 'badge-yellow hover-yellow-btn'} size-sm width-6rem d-flex-align fs-77p" onclick="createTabInFrame('${row.prjId}_Identify', '/project/identification/${row.prjId}/${initDiv}')" style="cursor: pointer;">Identification</span>`;
+									case "B":
+                                        rtnDisplay = `<span class="badge ${row.status === 'Progress' ? 'btn-success hover-success-btn' : row.status === 'Request' ?  'badge-pink hover-pink-btn' : 'badge-yellow hover-yellow-btn'} size-sm width-6rem d-flex-align fs-77p" onclick="createTabInFrame('${row.prjId}_Identify', '/project/identification/${row.prjId}/${initDiv}')" style="cursor: pointer;">Identification</span>`;
                                         break;
                                     case "P":
                                         rtnDisplay = `<span class="badge ${row.status === 'Progress' ? 'btn-success hover-success-btn' : 'badge-yellow hover-yellow-btn'} size-sm width-6rem d-flex-align fs-77p" onclick="createTabInFrame('${row.prjId}_Packaging', '/project/verification/${row.prjId}')" style="cursor: pointer;">Packaging</span>`;
