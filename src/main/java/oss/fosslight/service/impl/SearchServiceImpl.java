@@ -348,10 +348,28 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 		return "N";
 	}
 
-
 	@Override
     public History work(Object param) {
         return null;
     }
+
+	@Override
+	public String getUserColumns(Map<String, Object> params, String userId) {
+		String listType = (String)params.get("listType");
+		params.replace("listType", SearchType.valueOf(listType).getName());
+		params.put("userId", userId);
+
+		return searchMapper.selectUserColumns(params);
+	}
+
+	@Override
+	public void saveUserColumns(Map<String, Object> params, String userId) {
+		String listType = (String)params.get("listType");
+		params.replace("listType", SearchType.valueOf(listType).getName());
+		params.put("userId", userId);
+
+		searchMapper.insertUserColumns(params);
+	}
+
 
 }

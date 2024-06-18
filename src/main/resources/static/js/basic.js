@@ -3557,54 +3557,67 @@ function appendFormCheckboxValuesEl(el, item, selectedValues) {
     $('#' + el).append(addEl);
 }
 
-let division;
+// Create the dropdown
+let listType;
+let totalColInfos = [];
 let defaultColNames =[];
 let savedColNames = [];
 
-function createDropdownButton() {
-    var newButton = document.createElement('button');
-    newButton.setAttribute('type', 'button');
-    newButton.classList.add('btn', 'btn-sm', 'btn-grid-light-gray', 'float-left', 'mr-1');
-    newButton.setAttribute('data-toggle', 'dropdown');
-    newButton.setAttribute('id', 'setUpColumnButton');
-    newButton.setAttribute('aria-expanded', 'false');
-    newButton.innerHTML = '<i class="fas fa-cog"></i>';
-    return newButton;
-}
-
-function createDropdownMenu(options) {
-    const { _division, _totalColInfos, _defaultColNames, _savedColNames } = options;
-    division = _division;
+function createDropdownComponents(options) {
+    const { _listType, _totalColInfos, _defaultColNames, _savedColNames } = options;
+    listType = _listType;
     defaultColNames = _defaultColNames;
     savedColNames = _savedColNames;
 
-    const titleArea = document.createElement('div');
-    titleArea.className = "text-lg-gray pl-3"
-    titleArea.textContent = "Columns Setting"
+    // Create the dropdown area
+    var dropdownArea = $("<div></div>").addClass("dropdown");
 
-    const dropdownMenu = document.createElement('div');
-    dropdownMenu.classList.add('dropdown-menu', 'col-local');
-    dropdownMenu.setAttribute('id', 'setUpColumnMenu');
+    // Create the dropdown button
+    const newButton = $("<button></button>", {
+        type: "button",
+        id: "setUpColumnButton",
+        "data-toggle": "dropdown",
+        "aria-expanded": "false",
+        html: '<i class="fas fa-cog"></i>'
+    }).addClass("btn btn-sm btn-grid-light-gray float-left mr-1");
 
-    dropdownMenu.appendChild(titleArea);
-    dropdownMenu.appendChild(createDivider());
-    dropdownMenu.appendChild(createMenuItem('Restore Defaults', '#', 'dropdown-item', 'restoreDefaults()'))
+    // Create the dropdown menu
+    const titleArea = $("<div></div>", {
+        class: "text-lg-gray pl-3",
+        text: "Columns Setting"
+    });
 
-    const dropdownItemArea = document.createElement('div');
-    dropdownItemArea.style.height = '300px';
-    dropdownItemArea.style.overflowY = 'scroll';
+    const dropdownMenu = $("<div></div>", {
+        id: "setUpColumnMenu"
+    }).addClass("dropdown-menu col-local");
+
+    dropdownMenu.append(titleArea);
+    dropdownMenu.append(createDivider());
+    dropdownMenu.append(createMenuItem('Restore Defaults', '#', 'dropdown-item', 'restoreDefaults()'));
+
+    const dropdownItemArea = $("<div></div>").css({
+        height: '300px',
+        overflowY: 'scroll'
+    });
 
     _totalColInfos.forEach(colInfo => {
         const label = Object.keys(colInfo)[0];
         const id = colInfo[label];
-        dropdownItemArea.appendChild(createCheckboxItem(label, id));
+        dropdownItemArea.append(createCheckboxItem(label, id));
+        totalColInfos.push(id);
     });
+    console.log(">>>>>>>>>>>>>>>>>>>>>>" + totalColInfos);
+    dropdownMenu.append(dropdownItemArea);
+    dropdownMenu.append(createDivider());
+    dropdownMenu.append(createButtonArea(listType));
 
-    dropdownMenu.appendChild(dropdownItemArea);
-    dropdownMenu.appendChild(createDivider());
-    dropdownMenu.appendChild(createButtonArea());
+    // Append the dropdown menu to the button
+    newButton.append(dropdownMenu);
 
-    return dropdownMenu;
+    // Append the button to the dropdown area
+    dropdownArea.append(newButton);
+
+    return dropdownArea;
 }
 
 function createMenuItem(text, href, className, onClickFunction) {
@@ -3627,104 +3640,146 @@ function createDivider(className) {
 }
 
 function createCheckboxItem(label, id) {
-    const dropdownItem = document.createElement('span');
-    dropdownItem.className = 'dropdown-item';
-
-    const divCustomCheckbox = document.createElement('div');
-    divCustomCheckbox.className = 'custom-control custom-checkbox ml-1';
-
-    const inputCheckbox = document.createElement('input');
-    inputCheckbox.className = 'custom-control-input';
-    inputCheckbox.type = 'checkbox';
-    inputCheckbox.id = 'col_option_'+ id;
+    const dropdownItem = $("<span></span>").addClass('dropdown-item');
+    const divCustomCheckbox = $("<div></div>").addClass('custom-control custom-checkbox ml-1');
+    const inputCheckbox = $("<input>", {
+        class: 'custom-control-input',
+        type: 'checkbox',
+        id: 'col_option_'+ id
+    });
 
     if (defaultColNames.includes(id)) {
-        inputCheckbox.checked = true;
-        inputCheckbox.disabled = true;
+        inputCheckbox.prop("checked", true).prop("disabled", true);
     } else {
         if (savedColNames.includes(id)) {
-            inputCheckbox.checked = true;
+            inputCheckbox.prop("checked", true);
         }
     }
 
-    const labelCheckbox = document.createElement('label');
-    labelCheckbox.className = 'custom-control-label';
-    labelCheckbox.htmlFor = 'col_option_'+ id;
-    labelCheckbox.style.paddingTop = '2px';
-    labelCheckbox.style.fontWeight = '400';
-    labelCheckbox.textContent = label;
+    const labelCheckbox = $("<label></label>", {
+        class: 'custom-control-label',
+        for: 'col_option_'+ id,
+        style: 'padding-top: 2px; font-weight: 400;',
+        text: label
+    });
 
-    divCustomCheckbox.appendChild(inputCheckbox);
-    divCustomCheckbox.appendChild(labelCheckbox);
-
-    dropdownItem.appendChild(divCustomCheckbox);
+    divCustomCheckbox.append(inputCheckbox, labelCheckbox);
+    dropdownItem.append(divCustomCheckbox);
 
     return dropdownItem;
 }
 
-function saveColumnLocalization() {
-    // Save to database using AJAX
-
-
-    // Update grid display in the view
-    const checkedIds = [];
-    const checkboxes = document.querySelectorAll('.custom-control-input');
-    checkboxes.forEach(function(checkbox) {
-        if (checkbox.checked) {
-            checkedIds.push(checkbox.id);
-        }
-    });
-
-    const checkedColNames = [];
-    checkedIds.forEach(function(id) {
-        var colName = id.replace('col_option_', '');
-        checkedColNames.push(colName);
-    });
-
-    const grid = $("#list");
-    const allColNames = grid.jqGrid('getGridParam', 'colModel');
-    allColNames.forEach(function(colName, index) {
-        let _colName = colName.name
-        if(!defaultColNames.includes(_colName)) {
-            if (checkedColNames.includes(_colName)) {
-                grid.jqGrid('showCol', _colName);
-            } else {
-                grid.jqGrid('hideCol', _colName);
-            }
-        }
-    });
-}
-
-function createButtonArea() {
-    var buttonArea = document.createElement("div");
-    buttonArea.appendChild(createButton('Save', 'btn btn-ivory float-right mr-1 text-sm', 'saveColumnLocalization()'));
-    buttonArea.appendChild(createButton('Cancel', 'btn btn-default float-right mr-1 text-sm', 'removeDropdownMenu()'));
+function createButtonArea(listType) {
+    var buttonArea = $("<div></div>");
+    buttonArea.append(createButton('Save', 'btn btn-ivory float-right mr-1 text-sm', function() {
+        saveColumnLocalization(listType);
+    }));
+    buttonArea.append(createButton('Cancel', 'btn btn-default float-right mr-1 text-sm', function() {
+        removeDropdownMenu(listType);
+    }));
     return buttonArea;
 }
 
+
 function createButton(text, className, clickFunction) {
-    var button = document.createElement("button");
-    button.className = className;
-    button.textContent = text;
-    button.setAttribute("onclick", clickFunction);
+    var button = $("<button></button>").addClass(className).text(text).on("click", clickFunction);
     return button;
 }
 
 function restoreDefaults() {
     event.preventDefault();
-    const checkboxes = document.querySelectorAll('.custom-control-input');
-    checkboxes.forEach(function(checkbox) {
-        const id = checkbox.id.replace('col_option_', '');
+    $('.custom-control-input').each(function() {
+        const id = $(this).attr('id').replace('col_option_', '');
         if (defaultColNames.includes(id)) {
-            checkbox.checked = true;
+            $(this).prop('checked', true);
         } else {
-            checkbox.checked = false;
+            $(this).prop('checked', false);
         }
     });
 }
 
 function removeDropdownMenu() {
     $("#setUpColumnMenu").removeClass("show");
+}
+
+function getUserColumns(_listType) {
+    $.ajax({
+        url: "/searchFilter/getUserColumns",
+        type: 'POST',
+        dataType: "json",
+        data: { "listType": _listType },
+        cache: false,
+        success: function (data) {
+            if(data.columns == null || data.columns.length == 0) {
+                $('.custom-control-input').each(function() {
+                     $(this).prop('checked', true);
+                });
+            } else {
+                const setColumns = data.columns.split('|');
+                $('.custom-control-input').each(function() {
+                    const id = $(this).prop('id').replace('col_option_', '');
+                    if (setColumns.includes(id)) {
+                        $(this).prop('checked', true);
+                    } else {
+                        $(this).prop('checked', false);
+                    }
+                });
+            }
+
+            setSavedColumnLocalization ();
+        },
+        error: fn.onError
+    });
+}
+
+function saveColumnLocalization(listType) {
+    loading.show();
+
+    const checkboxes = document.querySelectorAll('.custom-control-input:checked');
+    const checkedColNames = Array.from(checkboxes, checkbox => checkbox.id.replace('col_option_', ''));
+
+    var columns = "";
+    checkedColNames.forEach(function(colName, index) {
+        if(index == 0) {
+            columns = colName;
+        } else {
+            columns += '|' + colName
+        }
+    })
+    var param = {
+        "columns" : columns,
+        "listType" : listType
+    }
+
+    $.ajax({
+        url: "/searchFilter/saveUserColumns",
+        type: 'POST',
+        dataType: "json",
+        data: param,
+        cache: false,
+        success: fn.onUpdateSuccess,
+        error: fn.onError
+    });
+
+    setSavedColumnLocalization();
+}
+
+function setSavedColumnLocalization () {
+    const uncheckedColNames = $('.custom-control-input:not(:checked)').map(function() {
+        return this.id.replace('col_option_', '');
+    }).get();
+
+    const grid = $("#list");
+    totalColInfos.forEach(colName => {
+        console.log(colName)
+        if (uncheckedColNames.includes(colName)) {
+            grid.jqGrid('hideCol', colName);
+        } else {
+            grid.jqGrid('showCol', colName);
+        }
+    });
+
+    adjustPageGridSize();
 }
 
 function initPromise(event) {
@@ -3736,7 +3791,7 @@ function initPromise(event) {
 }
 
 /**
- * Resize the sizes of single grids -> main view
+ * Resize the sizes of singe grids -> main view
  */
 function adjustPageGridSize() {
 	const jqGridSetElement = document.querySelector(".custom-layout .jqGridSet");

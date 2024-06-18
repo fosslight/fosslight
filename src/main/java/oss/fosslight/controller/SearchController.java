@@ -11,11 +11,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.common.Url;
 import oss.fosslight.domain.*;
 import oss.fosslight.common.Url.SEARCH;
 import oss.fosslight.service.SearchService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 @Controller
@@ -179,5 +181,29 @@ public class SearchController extends CoTopComponent {
         return homepage;
     }
 
+    @PostMapping(value = Url.SEARCH.GET_USER_COLUMNS_AJAX)
+    @ResponseBody ResponseEntity<Object> getUserColumns(@RequestParam Map<String, Object> params, HttpServletRequest req, HttpServletResponse res){
+        Object columns = searchService.getUserColumns(params, loginUserName());
+        if (Objects.isNull(columns)){
+            return makeJsonResponseHeader(false, "Not Found");
+        }
 
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("columns", columns);
+
+        return makeJsonResponseHeader(result);
+    }
+
+    @PostMapping(value = Url.SEARCH.SAVE_USER_COLUMNS_AJAX)
+    @ResponseBody ResponseEntity<Object> saveUserColumns(@RequestParam Map<String, Object> params, HttpServletRequest req, HttpServletResponse res){
+        Map<String,Object> resMap = new HashMap<>();
+        try {
+            searchService.saveUserColumns(params, loginUserName());
+            resMap.put("resCd", "10");
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            resMap.put("resCd", "20");
+        }
+        return makeJsonResponseHeader(resMap);
+    }
 }
