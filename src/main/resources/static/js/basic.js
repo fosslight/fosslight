@@ -3606,7 +3606,7 @@ function createDropdownComponents(options) {
         dropdownItemArea.append(createCheckboxItem(label, id));
         totalColInfos.push(id);
     });
-    console.log(">>>>>>>>>>>>>>>>>>>>>>" + totalColInfos);
+
     dropdownMenu.append(dropdownItemArea);
     dropdownMenu.append(createDivider());
     dropdownMenu.append(createButtonArea(listType));
@@ -3711,9 +3711,7 @@ function getUserColumns(_listType) {
         cache: false,
         success: function (data) {
             if(data.columns == null || data.columns.length == 0) {
-                $('.custom-control-input').each(function() {
-                     $(this).prop('checked', true);
-                });
+                restoreDefaults();
             } else {
                 const setColumns = data.columns.split('|');
                 $('.custom-control-input').each(function() {

@@ -936,7 +936,8 @@ public final class Url {
 		public static final String SELFCHECK = PATH + "/selfcheck";
 		public static final String PARTNER = PATH + "/partner";
 		public static final String VULNERABILITY = PATH + "/vulnerability";
-
+		public static final String SAVE_USER_COLUMNS_AJAX = PATH + "/saveUserColumns";
+		public static final String GET_USER_COLUMNS_AJAX = PATH + "/getUserColumns";
 	}
 	
 }
