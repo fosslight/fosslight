@@ -804,6 +804,8 @@ public class ExcelUtil extends CoTopComponent {
 		int tlshCol = -1;
 		// Check Sum
 		int checkSumCol = -1;
+		// Package URL
+		int packageUrlCol = -1;
 
 		Map<String, String> errMsg = new HashMap<>();
 		
@@ -895,6 +897,15 @@ public class ExcelUtil extends CoTopComponent {
 						copyrightTextCol = colIdx;
 						
 						break;
+					case "MANIFEST FILE":
+					case "PURL":
+					case "PACKAGE URL":
+						if (packageUrlCol > -1) {
+							dupColList.add(value);
+						}
+						packageUrlCol = colIdx;
+						
+						break;
 					case "PATH OR FILE":
 					case "PATH":
 					case "FILE OR DIRECTORY":
@@ -905,9 +916,6 @@ public class ExcelUtil extends CoTopComponent {
 					case "BINARY NAME OR (IF DELIVERY FORM IS SOURCE CODE) SOURCE PATH":
 					case "FILE NAME OR PATH":
 					case "SOURCE NAME OR PATH":
-					case "MANIFEST FILE":
-					case "PURL":
-					case "PACKAGE URL":
 					case "SOURCE OR BINARY PATH":
 					case "SOURCE PATH":
 						if (pathOrFileCol > -1) {
@@ -1243,6 +1251,8 @@ public class ExcelUtil extends CoTopComponent {
     					
     					bean.setFilePath(_replaceFilePath);
     				}
+    				
+    				bean.setPackageUrl(packageUrlCol < 0 ? "" : getCellData(row.getCell(packageUrlCol)));
     				
     				// empty row check
     				if (isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getBinaryName()) && isEmpty(bean.getFilePath())

@@ -1243,6 +1243,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				gridBean.setTlsh(bean.getTlsh());
 			}
 			
+			if (!isEmpty(bean.getPackageUrl())) gridBean.setPackageUrl(bean.getPackageUrl());
+			
 			// license 
 			int licenseIdx = 1;
 			if (bean.getOssComponentsLicense() != null) {
