@@ -10,22 +10,31 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.context.request.WebRequest;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RequiredArgsConstructor
 @RestControllerAdvice
 @Slf4j
+@Order(ExceptionAdviceOrder.GLOBAL)
 public class ExceptionAdvice {
 
     private final ResponseService responseService;
@@ -64,6 +73,13 @@ public class ExceptionAdvice {
     public CommonResult communicationException(HttpServletRequest request, CCommunicationException e) {
     	return responseService.getFailResult(CoConstDef.CD_OPEN_API_COMMUNICATION_ERROR_MESSAGE
 				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_COMMUNICATION_ERROR_MESSAGE));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
+            HttpServletRequest request, HttpRequestMethodNotSupportedException e) {
+        return new ResponseEntity<>(HttpStatus.METHOD_NOT_ALLOWED);
     }
     
     // org.apache.catalina.connector.ClientAbortException: java.io.IOException

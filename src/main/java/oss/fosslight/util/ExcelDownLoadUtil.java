@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -66,6 +67,9 @@ import com.opencsv.CSVWriter;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.dto.ExcelData;
+import oss.fosslight.api.dto.LicenseDto;
+import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -1913,10 +1917,36 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return null;
 	}
 
+	private static <T extends ExcelData> String makeExcelDataId(List<T> dataList, String type) throws Exception {
+		Workbook wb = null;
+		Sheet sheet = null;
+		FileInputStream inFile=null;
+
+		try {
+			inFile= new FileInputStream(downloadpath + File.separator + type + ".xlsx");
+			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
+            sheet = wb.getSheetAt(0);
+			wb.setSheetName(0, type);
+			List<String[]> rows = dataList.stream().map(ExcelData::toRow).collect(Collectors.toList());
+			makeSheet(sheet, rows);
+		} catch (FileNotFoundException e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			if (inFile != null) {
+				try {
+					inFile.close();
+				} catch (Exception ignored) {
+				}
+			}
+		}
+
+		return makeExcelFileId(wb, type);
+	}
+
 	public static String getExcelDownloadId(String type, String dataStr, String filepath) throws Exception {
 		return getExcelDownloadId(type, dataStr, filepath, null);
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "serial" })
 	public static String getExcelDownloadId(String type, String dataStr, String filepath, String extParam) throws Exception {
 		downloadpath = filepath;
@@ -2212,10 +2242,18 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				downloadId = getSecurityExcelId(result, projectMaster, param.getCode());
 				
 				break;
+			case "lite-oss":
+				Type ossListType = new TypeToken<List<OssDto>>(){}.getType();
+				var liteOssData = (List<OssDto>) fromJson(dataStr, ossListType);
+				downloadId = makeExcelDataId(liteOssData, "OssList");
+				break;
+			case "lite-licenses":
+				Type licenseListType = new TypeToken<List<LicenseDto>>(){}.getType();
+				var liteLicenseData = (List<LicenseDto>) fromJson(dataStr, licenseListType);
+				downloadId = makeExcelDataId(liteLicenseData, "LicenseList");
 			case "cycloneDXJson" :
 			case "cycloneDXXml" :
 				downloadId = getCycloneDXFileId(type, dataStr, extParam.equals("verify") ? true : false);
-				
 				break;
 			default:
 				break;

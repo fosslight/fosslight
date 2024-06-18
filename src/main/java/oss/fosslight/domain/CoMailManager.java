@@ -702,6 +702,13 @@ public class CoMailManager extends CoTopComponent {
 					convertDataMap.put("contentsSubTitle", subTitle);
 				}
     		}
+
+			if (CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT.equals(bean.getMsgType())) {
+				var flhSelfCheckUrl = avoidNull(bean.getParamExpansion1())
+						+ "/self-check/"
+						+ avoidNull(bean.getParamExpansion2());
+				convertDataMap.put("url", flhSelfCheckUrl);
+			}
     		
     		// mail Template
     		String msgContents = getVelocityTemplateContent(getTemplateFilePath(bean.getMsgType()), convertDataMap);
@@ -744,6 +751,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL:
     		case CoConstDef.CD_MAIL_TYPE_CHANGED_USER_INFO:
     		case CoConstDef.CD_MAIL_TYPE_VULNERABILITY_NVDINFO_DIFF:
+			case CoConstDef.CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT:
     			bean.setToIds(selectAdminMailAddr());
     			break;
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REQ_REVIEW:
