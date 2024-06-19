@@ -484,12 +484,12 @@
                 var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 
                 var colNameArr = ['ID', 'License Name (Identifier)', 'Identifier', 'License Type', 'Restriction', 'Obligation', 'Website', 'User Guide'];
-                if ([[${@CommonFunction.isAdmin()}]]) {
-                    colNameArr.push('Creator');
-                    colNameArr.push('Created Date');
-                    colNameArr.push('Modifier');
-                    colNameArr.push('Modified Date');
-                }
+ 
+                colNameArr.push('Creator');
+                colNameArr.push('Created Date');
+                colNameArr.push('Modifier');
+                colNameArr.push('Modified Date');
+              
                 var colModelArr = [];
                 var colModelObj = {name: 'licenseId', index: 'licenseId', width: 40, align: 'center', sorttype: 'int'};
                 colModelArr.push(colModelObj);
@@ -541,31 +541,51 @@
                     }
                 };
                 colModelArr.push(colModelObj);
-                if ([[${@CommonFunction.isAdmin()}]]) {
-                    colModelObj = {name: 'creator', index: 'creator', width: 40, align: 'center'};
-                    colModelArr.push(colModelObj);
-                    colModelObj = {
-                        name: 'createdDate',
-                        index: 'createdDate',
-                        width: 45,
-                        align: 'center',
-                        formatter: 'date',
-                        formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}
-                    };
-                    colModelArr.push(colModelObj);
-                    colModelObj = {name: 'modifier', index: 'modifier', width: 40, align: 'center'};
-                    colModelArr.push(colModelObj);
-                    colModelObj = {
-                        name: 'modifiedDate',
-                        index: 'modifiedDate',
-                        width: 45,
-                        align: 'center',
-                        formatter: 'date',
-                        formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}
-                    };
-                    colModelArr.push(colModelObj);
-                }
 
+                colModelObj = {name: 'creator', index: 'creator', width: 40, align: 'center'};
+                colModelArr.push(colModelObj);
+                colModelObj = {
+                    name: 'createdDate',
+                    index: 'createdDate',
+                    width: 45,
+                    align: 'center',
+                    formatter: 'date',
+                    formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}
+                };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'modifier', index: 'modifier', width: 40, align: 'center'};
+                colModelArr.push(colModelObj);
+                colModelObj = {
+                    name: 'modifiedDate',
+                    index: 'modifiedDate',
+                    width: 45,
+                    align: 'center',
+                    formatter: 'date',
+                    formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}
+                };
+                colModelArr.push(colModelObj);
+        
+               // apply user columns setting 
+                var listType = 'LICENSE';
+				var totalColInfos = [
+					{'ID': 'licenseId'},
+					{'License Name': 'licenseName'},
+					{'Identifier': 'shortIdentifier'},
+					{'License Type': 'licenseType'},
+					{'Restriction': 'restriction'},
+					{'Obligation': 'obligation'},
+					{'Website': 'webpage'},
+					{'User Guide': 'description'},
+					{'Creator': 'creator'},
+					{'Created Date': 'createdDate'},
+					{'Modifier': 'modifier'},
+					{'Modified Date': 'modifiedDate'}
+				]
+				var defaultColNames = ['licenseName', 'restriction', 'obligation'];
+				
+				applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);
+
+              
                 $("#list").jqGrid({
                     url: '/license/listAjax',
                     datatype: 'json',
@@ -637,67 +657,45 @@
                             }
                         }
 
-                        if ($("#list_toppager_left").find('button').length == 0) {
-                            var appendIcon = "";
+                         var pageButtonArea = $('#list_toppager_left');
+                        if (pageButtonArea.find('button').length == 0) {
+                        	var appendIcon = "";
                             if ([[${@CommonFunction.isAdmin()}]]) {
-                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
-                                appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
-                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_License', '/license/edit')\">Add License</span>";
-                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_License', '/license/licenseBulkReg')\">Bulk Registration</span></div>";
-                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deleteLicense()\"><i class=\"far fa-trash-alt\"></i></button>";
+                            	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
+                            	appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
+                            	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_License', '/license/edit')\">Add License</span>";
+                            	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_License', '/license/licenseBulkReg')\">Bulk Registration</span></div>";
+                            	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deleteLicense()\"><i class=\"far fa-trash-alt\"></i></button>";
                             }
                             appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
 
-                            $("#list_toppager_left").append(appendIcon);
+                            pageButtonArea.append(appendIcon);
                         }
-
+                        
+                        var setUpColumnButton = $('#setUpColumnButton');
                         /* columns licalization */
-                        var parentElement = document.querySelector('#list_toppager_left');
-                        var setUpColumnButton = document.getElementById('setUpColumnButton');
-
-                        if (!setUpColumnButton) {
-                            var division = 'license';
-                            var totalColInfos = [
-                                {'ID' : 'licenseId'},
-                                {'License Name (Identifier)': 'licenseName'},
-                                {'License Type': 'licenseType'},
-                                {'Restriction': 'restriction'},
-                                {'Obligation': 'obligation'},
-                                {'Website': 'webpage'}];
-
-                            if ([[${@CommonFunction.isAdmin()}]]) {
-                                totalColInfos.push({'Creator': 'creator'});
-                                totalColInfos.push({'Created Date': 'createdDate'});
-                                totalColInfos.push({'Modifier': 'modifier'});
-                                totalColInfos.push({'Modified Date': 'modifiedDate'});
-                            }
-                            var defaultColNames = ['licenseName', 'restriction', 'obligation']
+                        if (setUpColumnButton.length === 0) {
                             var savedColNames = [];
-
-                            var dropdownMenuOptions = {
-                                _division: division,
+                            var userColumnsSettingMenuOptions = {
+                                _listType: listType,
                                 _totalColInfos: totalColInfos,
                                 _defaultColNames: defaultColNames,
                                 _savedColNames: savedColNames
                             };
+                            pageButtonArea.append(createUserCoulmnsSettingButton(userColumnsSettingMenuOptions));
 
-                            var dropdownArea = document.createElement('div');
-                            dropdownArea.className = 'dropdown';
-                            var newButton = createDropdownButton();
-                            var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
-
-                            dropdownArea.appendChild(newButton);
-                            dropdownArea.appendChild(dropdownMenu);
-
-                            parentElement.appendChild(dropdownArea);
-
-                            document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+                            // Check for click events occurring inside the menu area
+                            $("#setUpColumnMenu").on("click", function(event) {
                                 event.stopPropagation();
-                                var dropdownMenu = document.getElementById("setUpColumnMenu");
-                                dropdownMenu.classList.toggle("show");
                             });
-                        }
 
+                            $('#setUpColumnButton').on("click", function(event) {
+                                event.stopPropagation();
+                                $('#setUpColumnMenu').toggleClass("show");
+                                $(this).toggleClass("show");
+                            })
+                        }
+                       
                         adjustPageGridSize();
                     },
                     onSelectRow: function (id) {

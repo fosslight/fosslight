@@ -1263,7 +1263,25 @@ var partnerList = {
 			colModelArr.push(colModelObj);
 			colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50,hidden:true};
 			colModelArr.push(colModelObj);
-	        
+	     			
+			// apply user columns setting 
+			var listType = 'THIRD_PARTY';
+			var totalColInfos = [
+				{'ID': 'partnerId'},
+				{'3rd Party Name': 'partnerName'},
+				{'Software Name (Version)': 'softwareName'},
+				{'Status': 'status'},
+				{'Vulnerability': 'cvssScore'},
+				{'Division': 'division'},
+				{'Creator': 'creator'},
+				{'Created Date': 'createdDate'},
+				{'Updated Date': 'modifiedDate'},
+				{'Reviewer': 'reviewer'}
+			];
+			var defaultColNames = ['partnerId', 'partnerName', 'softwareName', 'status'];
+		
+			applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);   
+
 		$('#list').jqGrid({
 			url: '/partner/listAjax',
 			datatype: 'json',
@@ -1351,75 +1369,41 @@ var partnerList = {
 							}							
 						}
 					}
-
-	                /* columns licalization */
-//	                 var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
-//	                 var setUpColumnButton = document.getElementById('setUpColumnButton');
-
-//	                 if (!setUpColumnButton) {
-//	                     var division = 'partner';
-//	                     var totalColInfos = [
-//	                         {'Checkbox' : 'cb'},
-//	                         {'ID' : 'partnerId'},
-//	                         {'3rd Party Name': 'partnerName'},
-//	                         {'Software Name (Version)': 'softwareName'},
-//	                         {'Software Version': 'softwareVersion'},
-//	                         {'Status': 'status'},
-//	                         {'Delivery Form': 'deliveryForm'},
-//	                         {'Description': 'description'},
-//	                         {'CVE ID': 'cveId'},
-//	                         {'Vulnerability': 'cvssScore'},
-//	                         {'Division': 'division'},
-//	                         {'Creator': 'creator'},
-//	                         {'Created Date': 'createdDate'},
-//	                         {'Updated Date': 'modifiedDate'},
-//	                         {'Reviewer': 'reviewer'}];
-//	                     var defaultColNames = ['partnerId', 'partnerName', 'softwareName', 'status']
-//	                     var savedColNames = [];
-
-//	                     var dropdownMenuOptions = {
-//	                         _division: division,
-//	                         _totalColInfos: totalColInfos,
-//	                         _defaultColNames: defaultColNames,
-//	                         _savedColNames: savedColNames
-//	                     };
-
-//	                     var dropdownArea = document.createElement('div');
-//	                     dropdownArea.className = 'dropdown';
-//	                     var newButton = createDropdownButton();
-//	                     var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
-
-//	                     dropdownArea.appendChild(newButton);
-//	                     dropdownArea.appendChild(dropdownMenu);
-
-//	                     parentElement.appendChild(dropdownArea);
-
-//	                     document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
-//	                         event.stopPropagation();
-//	                         var dropdownMenu = document.getElementById("setUpColumnMenu");
-//	                         dropdownMenu.classList.toggle("show");
-//	                     });
-//	                 }
-
-//	 				if(!gridTooltip.existTooltip){
-//	 					$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_list_status"))
-//	 						.attr("title", gridTooltip.tooltipCont).tooltip({
-//	 						content: function () {
-//	 							return $(this).prop('title');
-//	 						}
-//	 					});
-//	 					gridTooltip.existTooltip = true;
-//	 				}
-
-					if ($("#list_toppager_left").find('button').length == 0) {
+					
+                    var pageButtonArea = $('#list_toppager_left');
+                    if (pageButtonArea.find('button').length == 0) {
 	               		var appendIcon = "";
 	               		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Partner\" onclick=\"createTabInFrame('New_3rdParty', '/partner/edit')\"><i class=\"fas fa-plus\"></i></button>";
 	                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deletePartner()\"><i class=\"far fa-trash-alt\"></i></button>";
 	                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
-	                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
 	                            
-	                  	$("#list_toppager_left").append(appendIcon);
+	                  	pageButtonArea.append(appendIcon);
 	            	}
+	            	
+	            	var setUpColumnButton = $('#setUpColumnButton');
+					/* columns licalization */
+					if (setUpColumnButton.length === 0) {
+						var savedColNames = [];
+						var userColumnsSettingMenuOptions = {
+							_listType: listType,
+							_totalColInfos: totalColInfos,
+							_defaultColNames: defaultColNames,
+							_savedColNames: savedColNames
+						};
+						pageButtonArea.append(createUserCoulmnsSettingButton(userColumnsSettingMenuOptions));
+
+						// Check for click events occurring inside the menu area
+						$("#setUpColumnMenu").on("click", function (event) {
+							event.stopPropagation();
+						});
+
+						$('#setUpColumnButton').on("click", function (event) {
+							event.stopPropagation();
+							$('#setUpColumnMenu').toggleClass("show");
+							$(this).toggleClass("show");
+						})
+					}
+					adjustPageGridSize();
 				}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {

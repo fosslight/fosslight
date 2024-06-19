@@ -2183,6 +2183,26 @@ var list = {
 		colModelObj = {name: 'reviewerName', index: 'reviewerName', hidden: true};
 		colModelArr.push(colModelObj);
 		
+		// apply user columns setting on
+		var listType = 'PROJECT';
+        var totalColInfos = [
+            {'ID' : 'prjId'},
+            {'Project Name': 'prjName'},
+            {'Status': 'status'},
+            {'OSC Process': 'progress'},
+            {'Download': 'download'},
+            {'Distribution Type': 'distributionType'},
+            {'Security': 'cvssScore'},
+            {'Division': 'division'},
+            {'Creator': 'creator'},
+            {'Created Date': 'createdDate'},
+            {'Updated Date': 'modifiedDate'},
+            {'Reviewer': 'reviewer'}
+        ]
+        var defaultColNames = ['cb', 'prjId', 'prjName', 'status', 'progress']
+        
+       	applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);
+
 		$("#list").jqGrid({
 			url:'/project/listAjax',
 			datatype: 'json',
@@ -2246,61 +2266,42 @@ var list = {
 
                     gridTooltip.existTooltip = true;
                 }
-
+ 
+                var pageButtonArea = $('#list_toppager_left');
                 if ($("#list_toppager_left").find('button').length == 0) {
                 	var appendIcon = "";
                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"add project\" onclick=\"createTabInFrame('New_Project', '/project/edit')\"><i class=\"fas fa-plus\"></i></button>";
                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete project\" onclick=\"fn.deleteProject()\"><i class=\"far fa-trash-alt\"></i></button>";
                     appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
-                    appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
                     
                     $("#list_toppager_left").append(appendIcon);
                 }
                 
+                var setUpColumnButton = $('#setUpColumnButton');
                 /* columns licalization */
-/*              var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
-                var setUpColumnButton = document.getElementById('setUpColumnButton');
-
-                if (!setUpColumnButton) {
-                    var division = 'project';
-                    var totalColInfos = [
-                        {'Checkbox' : 'cb'},
-                        {'ID' : 'prjId'},
-                        {'Project Name': 'prjName'},
-                        {'Status': 'status'},
-                        {'OSC Process': 'progress'},
-                        {'Download': 'download'},
-                        {'Distribution Type': 'distributionType'},
-                        {'Vulnerability(Max Score)': 'cvssScore'},
-                        {'Division': 'division'},
-                        {'Creator': 'creator'},
-                        {'Reviewer': 'reviewer'}]
-                    var defaultColNames = ['prjId', 'prjName', 'status', 'progress']
+                if (setUpColumnButton.length === 0) {
                     var savedColNames = [];
-
                     var dropdownMenuOptions = {
-                        _division: division,
+                        _listType: listType,
                         _totalColInfos: totalColInfos,
                         _defaultColNames: defaultColNames,
                         _savedColNames: savedColNames
                     };
+                    pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
 
-                    var dropdownArea = document.createElement('div');
-                    dropdownArea.className = 'dropdown';
-                    var newButton = createDropdownButton();
-                    var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
-
-                    dropdownArea.appendChild(newButton);
-                    dropdownArea.appendChild(dropdownMenu);
-
-                    parentElement.appendChild(dropdownArea);
-
-                    document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+                    // Check for click events occurring inside the menu area
+                    $("#setUpColumnMenu").on("click", function(event) {
                         event.stopPropagation();
-                        var dropdownMenu = document.getElementById("setUpColumnMenu");
-                        dropdownMenu.classList.toggle("show");
                     });
-                } */
+
+                    $('#setUpColumnButton').on("click", function(event) {
+                        event.stopPropagation();
+                        $('#setUpColumnMenu').toggleClass("show");
+                        $(this).toggleClass("show");
+                    })
+                }
+                
+                adjustPageGridSize();
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {
 				

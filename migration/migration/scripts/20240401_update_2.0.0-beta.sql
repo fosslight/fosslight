@@ -27,13 +27,12 @@ ALTER TABLE `OSS_COMPONENTS` ADD `PACKAGE_URL` varchar(2000) NULL DEFAULT NULL;
 -- alter data type
 ALTER TABLE `OSS_COMPONENTS` MODIFY `COPYRIGHT` LONGTEXT DEFAULT NULL;
 
-
 -- Add user columns tatbel
 CREATE TABLE `USER_COLUMNS` (
-    `COLUMNS` longtext DEFAULT NULL,
-    `LIST_TYPE` varchar(20) NOT NULL DEFAULT '',
-    `CREATED_TIME` datetime NOT NULL DEFAULT current_timestamp(),
-    `UPDATED_TIME` datetime NOT NULL DEFAULT current_timestamp(),
-    `USER_ID` varchar(45) NOT NULL DEFAULT '',
-    PRIMARY KEY (`LIST_TYPE`,`USER_ID`)
+  `COLUMNS` longtext DEFAULT NULL,
+  `LIST_TYPE` varchar(20) NOT NULL DEFAULT '',
+  `CREATED_DATE` datetime NOT NULL DEFAULT current_timestamp(),
+  `UPDATED_DATE` datetime NOT NULL DEFAULT current_timestamp(),
+  `USER_ID` varchar(45) NOT NULL DEFAULT '',
+  PRIMARY KEY (`LIST_TYPE`,`USER_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

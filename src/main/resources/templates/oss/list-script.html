@@ -500,12 +500,11 @@
             oldRowNum: 20,
             load: function () {
             	var colNameArr = ['', 'ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
-            	if (isAdmin) {
-            		colNameArr.push("Creator");
-            		colNameArr.push("Created<br>Date");
-            		colNameArr.push("Modifier");
-            		colNameArr.push("Modified<br>Date");
-            	}
+
+                colNameArr.push("Creator");
+                colNameArr.push("Created<br>Date");
+                colNameArr.push("Modifier");
+                colNameArr.push("Modified<br>Date");
             	colNameArr.push("groupKey");
             	
             	var colModelArr = [
@@ -578,18 +577,16 @@
                     , {name: 'cveId', index: 'cveId', hidden: true}
                     , {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter: fn.displayVulnerability}
                 ];
-            	
-            	if (isAdmin) {
-            		var colModelObj = {name: 'creator', index: 'creator', width: 80, align: 'center'};
-            		colModelArr.push(colModelObj);
-            		colModelObj = {name: 'createdDate', index: 'createdDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
-            		colModelArr.push(colModelObj);
-            		colModelObj = {name: 'modifier', index: 'modifier', width: 80, align: 'center'};
-            		colModelArr.push(colModelObj);
-            		colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
-            		colModelArr.push(colModelObj);
-            	}
-            	
+
+                var colModelObj = {name: 'creator', index: 'creator', width: 80, align: 'center'};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'createdDate', index: 'createdDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'modifier', index: 'modifier', width: 80, align: 'center'};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
+                colModelArr.push(colModelObj);
+
             	var colModelObj = {
                         name: 'groupKey', index: 'groupKey', hidden: true
                         , cellattr: function (rowId, val, rawObject, cm, rdata) {
@@ -615,6 +612,29 @@
                     };
         		colModelArr.push(colModelObj);
             	
+               	// apply user columns setting 
+            	var listType = 'OSS';
+                var totalColInfos = [
+                    {'ID': 'id'},
+                    {'OSS Type': 'ossType'},
+                    {'OSS Name': 'ossName'},
+                    {'OSS Version': 'ossVersion'},
+                    {'License Name': 'licenseName'},
+                    {'LicenseType': 'licenseType'},
+                    {'Obligation': 'obligation'},
+                    {'DownloadLocation': 'downloadLocation'},
+                    {'Homepage': 'homepage'},
+                    {'Description': 'summaryDescription'},
+                    {'Vulnerability': 'cvssScore'},
+                    {'Creator': 'creator'},
+                    {'Created Date': 'createdDate'},
+                    {'Modifier': 'modifier'},
+                    {'Modified Date': 'modifiedDate'}
+                ];
+                var defaultColNames = ['id', 'group', 'ossName', 'ossVersion', 'licenseName', 'obligation'];
+                
+				applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);
+
                 $("#list").jqGrid({
                     url: "/oss/listAjax",
                     datatype: 'json',
@@ -784,87 +804,52 @@
     							rowIdx++;
     						}
     					}
-                        
+
+                        $('[data-toggle="tooltip"]').tooltip({html: true});
+
+                        var pageButtonArea = $('#list_toppager_left');
+                        if ($("#list_toppager_left").find('button').length == 0) {
+                            var appendIcon = "";
+                            if (isAdmin) {
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
+                                appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
+                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
+                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"oss_lst_fn.deleteOss()\"><i class=\"far fa-trash-alt\"></i></button>";
+                            }
+                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+
+                            $("#list_toppager_left").append(appendIcon);
+                        }
+
+                        var setUpColumnButton = $('#setUpColumnButton');
                         /* columns licalization */
-//                         var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
-//                         var setUpColumnButton = document.getElementById('setUpColumnButton');
+                        if (setUpColumnButton.length === 0) {
+                            var savedColNames = [];
+                            var dropdownMenuOptions = {
+                                _listType: listType,
+                                _totalColInfos: totalColInfos,
+                                _defaultColNames: defaultColNames,
+                                _savedColNames: savedColNames
+                            };
+                            pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
 
-//                         if (!setUpColumnButton) {
-//                             var division = 'oss';
-//                             var totalColInfos = [
-//                                 {'ID': 'group'},
-//                                 {'OSS Type': 'ossType'},
-//                                 {'OSS Name': 'ossName'},
-//                                 {'OSS Version': 'ossVersion'},
-//                                 {'License Name': 'licenseName'},
-//                                 {'LicenseType': 'licenseType'},
-//                                 {'Obligation': 'obligation'},
-//                                 {'DownloadLocation': 'downloadLocation'},
-//                                 {'Homepage': 'homepage'},
-//                                 {'Description': 'description'},
-//                                 {'Vulnerability': 'cveId'}];
-//                             var defaultColNames = ['ossName', 'ossVersion', 'licenseName', 'obligation']
-//                             var savedColNames = [];
+                            // Check for click events occurring inside the menu area
+                            $("#setUpColumnMenu").on("click", function(event) {
+                                event.stopPropagation();
+                            });
 
-//                             var dropdownMenuOptions = {
-//                                 _division: division,
-//                                 _totalColInfos: totalColInfos,
-//                                 _defaultColNames: defaultColNames,
-//                                 _savedColNames: savedColNames
-//                             };
+                            $('#setUpColumnButton').on("click", function(event) {
+                                event.stopPropagation();
+                                $('#setUpColumnMenu').toggleClass("show");
+                                $(this).toggleClass("show");
+                            })
+                        }
 
-//                             var dropdownArea = document.createElement('div');
-//                             dropdownArea.className = 'dropdown';
-//                             var newButton = createDropdownButton();
-//                             var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
-
-//                             dropdownArea.appendChild(newButton);
-//                             dropdownArea.appendChild(dropdownMenu);
-
-//                             parentElement.appendChild(dropdownArea);
-
-//                             document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
-//                                 event.stopPropagation();
-//                                 var dropdownMenu = document.getElementById("setUpColumnMenu");
-//                                 dropdownMenu.classList.toggle("show");
-//                             });
-//                         }
-
-                         	$('[data-toggle="tooltip"]').tooltip({html: true});
+                        adjustPageGridSize();
                     },
-                    // ondblClickRow: function (rowid, iRow, iCol, e) {
-                    //     if (iCol != 0) {
-                    //         var rowData = $("#list").jqGrid('getRowData', rowid);
-                    //
-                    //         if ("Y" != linkFlag) {
-                    //             callCreateTabInFrame(rowData['ossId'] + '_Opensource', '/oss/edit/' + rowData['ossId'], 'oss-edit_' + rowData['ossId'], true);
-                    //         } else {
-                    //             const openNewWindow = window.open("about:blank");
-                    //
-                    //             if (isAdmin) {
-                    //                 openNewWindow.location.href = "/oss/edit/" + rowData['ossId'];
-                    //             } else {
-                    //                 openNewWindow.location.href = "/oss/view/" + rowData['ossId'];
-                    //             }
-                    //         }
-                    //     }
-                    // },
                 });
-                
-                if ($("#list_toppager_left").find('button').length == 0) {
-                	var appendIcon = "";
-                    if (isAdmin) {
-                    	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
-                    	appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
-                    	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
-                    	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
-                    	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"oss_lst_fn.deleteOss()\"><i class=\"far fa-trash-alt\"></i></button>";
-                    }
-                    appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
-                    appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
-                    
-                    $("#list_toppager_left").append(appendIcon);
-                }
+
             }
         }
 
@@ -896,6 +881,17 @@
         }
 
         var fn = {
+            onUpdateSuccess : function(json, status){
+                loading.hide();
+                if (json.resCd == '10'){
+                    alertify.success([[#{msg.common.success}]]);
+                } else {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                }
+            },
+            onError : function(data, status){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            },
         	downloadExcel : function(){
         		if(isMaximumRowCheck(totalRow)){
         			var data = serializeObjectHelper();

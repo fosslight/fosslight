@@ -501,6 +501,21 @@ var list = {
 		colModelObj = {name: 'statusPermission', index: 'statusPermission', hidden:true};
 		colModelArr.push(colModelObj);
 		
+		// apply user columns setting 
+		var listType = 'SELF_CHECK';
+    	var totalColInfos = [
+    		{'ID' : 'prjId'},
+    		{'Project Name (Version)': 'prjName'},
+    		{'Download': 'download'},
+    		{'Vulnerability': 'cvssScore'},
+    		{'Division': 'division'},
+    		{'Creator': 'creator'},
+    		{'Created Date': 'createdDate'}
+        ];
+        var defaultColNames = ['prjId', 'prjName'];
+        
+        applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);
+
 		$("#list").jqGrid({
 			url:'/selfCheck/listAjax',
 			datatype: 'json',
@@ -596,16 +611,43 @@ var list = {
 //                         dropdownMenu.classList.toggle("show");
 //                     });
 //                 }
-				
-				if ($("#list_toppager_left").find('button').length == 0) {
+			    
+			    
+			    var pageButtonArea = $('#list_toppager_left');
+				if (pageButtonArea.find('button').length == 0) {
                		var appendIcon = "";
                		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Self-Check\" onclick=\"createTabInFrame('New_SelfCheck', '/selfCheck/edit')\"><i class=\"fas fa-plus\"></i></button>";
                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete Self-Check\" onclick=\"fn.deleteSelfCheck()\"><i class=\"far fa-trash-alt\"></i></button>";
                  	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
-                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"\"><i class=\"fas fa-cog\"></i></button>";
-                            
-                  	$("#list_toppager_left").append(appendIcon);
+                      
+                  	pageButtonArea.append(appendIcon);
             	}
+            	
+            	var setUpColumnButton = $('#setUpColumnButton');
+                /* columns licalization */
+                if (setUpColumnButton.length === 0) {
+                    var savedColNames = [];
+                    var dropdownMenuOptions = {
+                        _listType: listType,
+                        _totalColInfos: totalColInfos,
+                        _defaultColNames: defaultColNames,
+                        _savedColNames: savedColNames
+                    };
+                    pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
+
+                    // Check for click events occurring inside the menu area
+                    $("#setUpColumnMenu").on("click", function(event) {
+                        event.stopPropagation();
+                    });
+
+                    $('#setUpColumnButton').on("click", function(event) {
+                        event.stopPropagation();
+                        $('#setUpColumnMenu').toggleClass("show");
+                        $(this).toggleClass("show");
+                    })
+                }
+                
+                adjustPageGridSize();
 			},
 			onCellSelect: function(rowid,iCol,cellcontent,e) {},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
