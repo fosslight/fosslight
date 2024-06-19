@@ -368,7 +368,10 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
             }
 
             for (String email : emailList) {
-                boolean ldapCheck = apiProjectService.existLdapUserToEmail(email);
+                boolean ldapCheck = true;
+                if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
+                    ldapCheck = apiProjectService.existLdapUserToEmail(email);
+                }
                 if (!ldapCheck) {
                     return responseService.errorResponse(HttpStatus.NOT_FOUND, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE));
                 }
