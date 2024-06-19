@@ -74,7 +74,7 @@
            			success : function(data){
                         var progressCnt = 0;
                         var reviewCnt = 0;
-                        var reqeustCnt = 0;
+                        var requestCnt = 0;
                         var finalReviewCnt = 0;
                         var cntList = data;
 
@@ -91,7 +91,7 @@
                                         reviewCnt = cnt;
                                         break;
                                     case "REQ":
-                                        reqeustCnt = cnt;
+                                    	requestCnt = cnt;
                                         break;
                                     case "FREV":
                                         finalReviewCnt = cnt;
@@ -109,7 +109,7 @@
 
                         var $requestInner = $progressView.find(".bg-pink .inner");
                         $requestInner.empty();
-                        $requestInner.append("<h3>" + reqeustCnt + "</h3>");
+                        $requestInner.append("<h3>" + requestCnt + "</h3>");
                         $requestInner.append("<p>Request</p>");
 
                         var $reviewInner = $progressView.find(".bg-warning .inner");
