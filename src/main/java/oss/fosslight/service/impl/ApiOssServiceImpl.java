@@ -106,6 +106,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
             }
             var query = request.toBuilder()
                     .ossName(oss.getOssName())
+                    .ossVersion(oss.getOssVersion())
                     .ossId(oss.getOssId())
                     .build()
                     .toOssMaster();
