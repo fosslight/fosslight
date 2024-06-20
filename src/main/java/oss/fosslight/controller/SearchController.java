@@ -181,7 +181,7 @@ public class SearchController extends CoTopComponent {
         return homepage;
     }
 
-    @PostMapping(value = Url.SEARCH.GET_USER_COLUMNS_AJAX)
+    @PostMapping(value = SEARCH.GET_USER_COLUMNS_AJAX)
     @ResponseBody ResponseEntity<Object> getUserColumns(@RequestParam Map<String, Object> params, HttpServletRequest req, HttpServletResponse res){
         Object columns = searchService.getUserColumns(params, loginUserName());
         if (Objects.isNull(columns)){
@@ -194,7 +194,7 @@ public class SearchController extends CoTopComponent {
         return makeJsonResponseHeader(result);
     }
 
-    @PostMapping(value = Url.SEARCH.SAVE_USER_COLUMNS_AJAX)
+    @PostMapping(value = SEARCH.SAVE_USER_COLUMNS_AJAX)
     @ResponseBody ResponseEntity<Object> saveUserColumns(@RequestParam Map<String, Object> params, HttpServletRequest req, HttpServletResponse res){
         Map<String,Object> resMap = new HashMap<>();
         try {

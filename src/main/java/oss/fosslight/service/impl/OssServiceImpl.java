@@ -2080,7 +2080,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return checkName;
 	}
 
-	private String appendCheckOssName(List<OssMaster> ossNameList) {
+	private String appendCheckOssName(List<OssMaster> ossNameList, Map<String, String> ossInfoNames, String checkOssName) {
 		String checkName = "";
 
 		for (OssMaster ossBean : ossNameList) {
@@ -2089,6 +2089,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			checkName += ossBean.getOssName();
 		}
+		
+		if (ossInfoNames.containsKey(checkOssName.toUpperCase())) {
+			String ossNameTemp = ossInfoNames.get(checkOssName.toUpperCase());
+			if (!isEmpty(checkName)) {
+				checkName += "|";
+			}
+			checkName += ossNameTemp;
+		}
+		
 		return checkName;
 	}
 
@@ -2328,6 +2337,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
 		int urlSearchSeq = -1;
 		List<String> androidPlatformList = getAndroidPlatformList();
+		Map<String, String> ossInfoNames = CoCodeManager.OSS_INFO_UPPER_NAMES;
 
 		// oss name과 download location이 동일한 oss의 componentId를 묶어서 List<ProjectIdentification>을 만듬
 		list = list.stream()
@@ -2397,10 +2407,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					int cnt = ossMapper.checkOssNameUrl2Cnt(bean);
 					if (cnt == 0) {
 						bean.setOssNickName(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p));
-						String checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean));
+						String checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean), ossInfoNames, bean.getOssNickName());
 						if (!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
-							bean.setRecommendedNickname(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p));
+							bean.setRecommendedNickname(bean.getOssNickName());
 
 						} else {
 							if (urlSearchSeq == 7) {
@@ -2425,10 +2435,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 											redirectlocationUrl = oc.getURL().toString().split("//")[1];
 											bean.setDownloadLocation(redirectlocationUrl);
 											bean.setOssNickName(generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
-											checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean));
+											checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean), ossInfoNames, bean.getOssNickName());
 											if (!isEmpty(checkName)) {
 												bean.setCheckOssList("Y");
-												bean.setRecommendedNickname(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p) + "|" + generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
+												bean.setRecommendedNickname(bean.getOssNickName() + "|" + generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
 											} else {
 												checkName = generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p);
 											}
