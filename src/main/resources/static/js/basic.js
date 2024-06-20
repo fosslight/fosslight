@@ -3580,7 +3580,6 @@ function createUserCoulmnsSettingButton(options) {
 		type: "button",
 		id: "setUpColumnButton",
 		"data-toggle": "dropdown",
-		"aria-expanded": "false",
 		html: '<i class="fas fa-cog"></i>'
 	}).addClass("btn btn-sm btn-grid-light-gray float-left mr-1");
 
@@ -3591,7 +3590,8 @@ function createUserCoulmnsSettingButton(options) {
 	});
 
 	const dropdownMenu = $("<div></div>", {
-		id: "setUpColumnMenu"
+		id: "setUpColumnMenu",
+		role: "menu"
 	}).addClass("dropdown-menu col-local");
 
 	dropdownMenu.append(titleArea);
@@ -3615,13 +3615,26 @@ function createUserCoulmnsSettingButton(options) {
 	dropdownMenu.append(createButtonArea(listType));
 
 	// Append the dropdown menu to the button
-	newButton.append(dropdownMenu);
-
-	// Append the button to the dropdown area
 	dropdownArea.append(newButton);
 
+	// Append the button to the dropdown area
+	dropdownArea.append(dropdownMenu);
+	
+	attachEventHandler();
+	
 	return dropdownArea;
 }
+
+function attachEventHandler() {
+  $(document).on("click", function(event) {
+        if (!$(event.target).closest('.dropdown').length) {
+            $('.dropdown-menu').removeClass('show');
+            $('#setUpColumnButton').removeClass('show');
+        }
+    });
+}
+
+
 
 function createMenuItem(text, href, className, onClickFunction) {
 	const menuItem = document.createElement('a');
