@@ -336,6 +336,9 @@
         </if>
         WHERE T1.USE_YN = 'Y'
         /*검색 쿼리 시작*/
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+            AND (T1.OSS_VERSION = #{ossVersion})
+        </if>
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
             AND (
             <choose>
@@ -530,6 +533,9 @@
         </if>
         WHERE T1.USE_YN = 'Y'
         AND T1.OSS_NAME = #{ossName}
+        <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
+            AND (T1.OSS_VERSION = #{ossVersion})
+        </if>
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
             AND (
             <choose>
