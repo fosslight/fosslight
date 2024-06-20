@@ -24,6 +24,7 @@ public class ListOssDto {
     @Builder(toBuilder = true)
     public static class Request extends Paging {
         private String ossName;
+        private String ossVersion;
         private String ossId;
         @Builder.Default
         private Boolean ossNameExact = false;
@@ -114,6 +115,7 @@ public class ListOssDto {
         public OssMaster toOssMaster() {
             var ossMaster = new OssMaster();
             ossMaster.setOssName(ossName);
+            ossMaster.setOssVersion(ossVersion);
             ossMaster.setOssId(ossId);
             ossMaster.setOssNameAllSearchFlag((ossNameExact != null && ossNameExact) ? "Y" : "N");
             ossMaster.setLicenseName(licenseName);
