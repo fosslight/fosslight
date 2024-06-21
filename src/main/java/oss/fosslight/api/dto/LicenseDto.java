@@ -25,6 +25,7 @@ public class LicenseDto implements Comparable<LicenseDto>, ExcelData {
     protected String created;
     protected String modified;
     protected List<String> restrictions = new ArrayList<>();
+    protected String licenseNickname;
     protected String comb;
     protected List<Character> obligations;
     protected String attribution = "";
