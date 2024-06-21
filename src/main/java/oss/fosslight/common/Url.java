@@ -895,6 +895,8 @@ public final class Url {
 			/** API License List 조회 */
 			public static final String FOSSLIGHT_API_LICENSE_SEARCH			= "/licenses";
 
+		public static final String FOSSLIGHT_API_LICENSE_SEARCH_TEST			= "/licenses_test";
+
 
 		/** PROJECT */
 			/** API create Project  */
