@@ -40,6 +40,7 @@ public class ApiLicenseServiceImpl extends CoTopComponent implements ApiLicenseS
                 .build();
     }
 
+    @Override
     public String getLicenseExcel(ListLicenseDto.Request request) throws Exception {
         var licensesList = listLicenses(request).list;
         var dataStr = toJson(licensesList);
