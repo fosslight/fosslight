@@ -90,6 +90,10 @@ public final class PdfUtil extends CoTopComponent {
         projectMaster.setPrjId(prjId);
 
         Project project = projectMapper.selectProjectMaster(projectMaster);
+        String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + prjId;
+        String _s = "<a href='"+url+"' target='_blank'>" + project.getPrjName() + "(" + project.getPrjVersion()+")"+ "</a>";
+        project.setPrjName(_s);
+
         convertData.put("project", project);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
