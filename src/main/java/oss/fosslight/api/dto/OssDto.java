@@ -36,8 +36,13 @@ public class OssDto implements ExcelData {
     public void setObligations(String obligationType) {
         var typeArr = obligationType.toCharArray();
         obligations = new ArrayList<>();
-        obligations.add(typeArr[0] == '0' ? 'N' : 'Y');
-        obligations.add(typeArr[1] == '0' ? 'N' : 'Y');
+        if (typeArr.length == 0) {
+            obligations.add('N');
+            obligations.add('N');
+        } else {
+            obligations.add(typeArr[0] == '0' ? 'N' : 'Y');
+            obligations.add(typeArr[1] == '0' ? 'N' : 'Y');
+        }
     }
 
     @Override
