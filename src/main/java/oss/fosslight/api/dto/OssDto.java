@@ -28,7 +28,7 @@ public class OssDto implements ExcelData {
     List<Character> obligations;
 
     String copyright;
-    String nicknames;
+    String nicknames = "";
     String attribution = "";
 
     Boolean exclude = false;
