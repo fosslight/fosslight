@@ -46,12 +46,13 @@ public class SecurityConfig {
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
 	private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+	private final LiteAuthenticationEntryPoint liteAuthenticationEntryPoint;
 
 	@Bean
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		return http.csrf(AbstractHttpConfigurer::disable).exceptionHandling(exceptionHandling -> exceptionHandling
-						.authenticationEntryPoint(jwtAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler))
+						.authenticationEntryPoint(jwtAuthenticationEntryPoint).authenticationEntryPoint(liteAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler))
 				.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
 				.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeRequests(
