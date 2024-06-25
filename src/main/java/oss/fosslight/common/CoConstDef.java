@@ -32,7 +32,7 @@ public class CoConstDef {
 	
 	public final static String[] PERMIT_UTL_PATTERNS = { "/session/**", Url.USER.SAVE_AJAX, Url.USER.RESET_PASSWORD, "/*" + Url.USER.SAVE_AJAX,
 			Url.VULNERABILITY.VULN_POPUP, Url.VULNERABILITY.VULN_POPUP, Url.NOTICE.PUBLISHED_NOTICE,
-			Url.RENDER.COMPONENT, Url.API.PATH + "/**"
+			Url.RENDER.COMPONENT, Url.API.PATH + "/**", Url.APIV2.PATH + "/**", Url.API_LITE.PATH + "/**"
 			,CoConstDef.HEALTH_CHECK_URL, "/v2/api-docs", "/swagger-resources/**",
             "/swagger-ui/**", "/webjars/**", "/swagger/**" };
 	/**
