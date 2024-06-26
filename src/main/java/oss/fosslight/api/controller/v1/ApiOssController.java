@@ -38,7 +38,6 @@ import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import oss.fosslight.domain.T2Users;
 import java.lang.reflect.Type;
-import org.apache.jena.ext.com.google.common.reflect.TypeToken;
 
 @Api(tags = {"1. OSS & License"})
 @RequiredArgsConstructor

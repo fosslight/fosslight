@@ -851,8 +851,7 @@ public final class Url {
 			public static final String FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH	= "/downloadlocation_search";
 			public static final String FOSSLIGHT_API_AUTOANALYSIS_REGISTER				= "/autoAnalysis_register";
 			
-			public static final String FOSSLIGHT_API_AUTOANALYSIS_REGISTER		= "/autoAnalysis_register";
-			
+
 		/** LICENSE */
 			/** API License List 조회 */
 			public static final String FOSSLIGHT_API_LICENSE_SEARCH			= "/license_search";

@@ -209,12 +209,8 @@ public interface OssMapper {
 
 	String getOssAnalysisStatus(@Param("prjId") String prjId);
 	
-	String getOssAnalysisStatus(@Param("prjId") String prjId);
-	
 	OssAnalysis getNewestOssInfo(OssAnalysis bean);
 
-	OssAnalysis getNewestOssInfo2(OssAnalysis bean);
-	
 	OssAnalysis getNewestOssInfo2(OssAnalysis bean);
 	
 	List<OssMaster> getNewestOssInfoByOssMaster(OssMaster bean);

@@ -104,8 +104,6 @@ public interface OssService extends HistoryConfig{
 
 	OssAnalysis getNewestOssInfo2(OssAnalysis bean);
 	
-	OssAnalysis getNewestOssInfo2(OssAnalysis bean);
-	
 	Map<String, Object> updateAnalysisComplete(OssAnalysis bean) throws Exception;
 	
 	OssAnalysis getAutoAnalysisSuccessOssInfo(String referenceOssId);

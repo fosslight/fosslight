@@ -363,10 +363,7 @@ public class Project extends ComBean implements Serializable {
 	
 	private String vulDocInst;
 	private String vulDocInfo;
-	
-	private String vulDocInst;
-	private String vulDocInfo;
-	
+
 	private Float standardScore;
 	
 	private String copyWatcherLocation;
@@ -4447,38 +4444,6 @@ public class Project extends ComBean implements Serializable {
 
 	public void setNoticeFileFormat(String[] noticeFileFormat) {
 		this.noticeFileFormat = noticeFileFormat;
-	}
-
-	public String getVulDocInst() {
-		return vulDocInst;
-	}
-
-	public void setVulDocInst(String vulDocInst) {
-		this.vulDocInst = vulDocInst;
-	}
-
-	public String getVulDocInfo() {
-		return vulDocInfo;
-	}
-
-	public void setVulDocInfo(String vulDocInfo) {
-		this.vulDocInfo = vulDocInfo;
-	}
-
-	public String getPackageVulDocFileId() {
-		return packageVulDocFileId;
-	}
-
-	public void setPackageVulDocFileId(String packageVulDocFileId) {
-		this.packageVulDocFileId = packageVulDocFileId;
-	}
-
-	public T2File getPackageVulDocFileInfo() {
-		return packageVulDocFileInfo;
-	}
-
-	public void setPackageVulDocFileInfo(T2File packageVulDocFileInfo) {
-		this.packageVulDocFileInfo = packageVulDocFileInfo;
 	}
 
 	public String getSecCvssScore() {
