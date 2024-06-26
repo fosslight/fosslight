@@ -2015,7 +2015,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		String[] android = null;
 		while (ossNameMatcher.find()) {
 			for (String list : androidPlatformList){
-				if (ossNameMatcher.group(3).contains(list)){
+				if (ossNameMatcher.group(3).equalsIgnoreCase(list)){
 					isValid = true;
 					android = list.split("/");
 					break;
