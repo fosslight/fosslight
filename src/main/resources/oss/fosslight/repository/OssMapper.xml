@@ -1902,11 +1902,7 @@
 	<delete id="deleteOssAnalysis" parameterType="String">
 		DELETE FROM OSS_ANALYSIS_STATUS WHERE  PRJ_ID = #{prjId}
 	</delete>
-	
-	<delete id="deleteOssAnalysis" parameterType="String">
-		DELETE FROM OSS_ANALYSIS_STATUS WHERE PRJ_ID = #{prjId}
-	</delete>
-	
+
 	<insert id="insertOssAnalysisList" parameterType="oss.fosslight.domain.OssMaster">
 		INSERT INTO OSS_ANALYSIS_MAP (
 				COMPONENT_ID
@@ -2038,11 +2034,7 @@
 	<select id="getOssAnalysisStatus" parameterType="string" resultType="string">
 		SELECT STATUS FROM OSS_ANALYSIS_STATUS WHERE PRJ_ID = #{prjId}
 	</select>
-	
-	<select id="getOssAnalysisStatus" parameterType="string" resultType="string">
-		SELECT STATUS FROM OSS_ANALYSIS_STATUS WHERE PRJ_ID = #{prjId}
-	</select>
-	
+
 	<select id="getNewestOssInfo" parameterType="oss.fosslight.domain.OssAnalysis" resultType="oss.fosslight.domain.OssAnalysis">
 		SELECT #{groupId} AS GROUP_ID 
 			 , A.OSS_NAME
