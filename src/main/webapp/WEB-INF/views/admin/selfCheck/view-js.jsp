@@ -868,7 +868,8 @@ var src_grid = {
 		   	rowNum:${ct:getConstDef("DISP_PAGENATION_MAX")},
 			loadonce:true,			
 			cellEdit : true,
-			cellsubmit : 'clientArray',
+            multiselectWidth: 30,
+            cellsubmit : 'clientArray',
 			ignoreCase: true,
 		    onSortCol: function (index, columnIndex, sortOrder) {
 		    	isSort = true;

@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+    <script th:inline="javascript">
+        //<![CDATA[
+        /*global $ */
+        let initParam = {};
+        let isAdmin = [[ ${@CommonFunction.isAdmin() }]];
+        let groupBuffer = '';
+        let totalRow = 0;
+        let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) }]];
+        let linkFlag = [[ ${searchBean.linkFlag}]];
+        
+        $(document).ready(function () {
+            oss_lst_evt.init();
+        });
+
+        const oss_lst_evt = {
+            init: function () {
+                setMaxRowCnt(G_ROW_CNT);
+
+                //Initialize Select2 Elements
+                $('.select2').select2();
+
+                $('#creatorSelect').select2({
+                    placeholder: "Creator",
+                    allowClear: true,
+                });
+
+                $('#modifierSelect').select2({
+                    placeholder: "Modifier",
+                    allowClear: true,
+                });
+
+                $('#modifierSelect').select2({
+                    placeholder: "Modifier",
+                    allowClear: true,
+                });
+
+                $('#licenseTypeSelect').select2({
+                    placeholder: "License Type",
+                    allowClear: true,
+                });
+
+                $('#ossTypeSearchSelect').select2({
+                    placeholder: "OSS Type",
+                    allowClear: true,
+                });
+
+                /* created date & modified date event */
+                let cStartDate = [[${searchBean.cStartDate}]];
+                let cEndDate = [[${searchBean.cEndDate}]];
+                let mStartDate = [[${searchBean.mStartDate}]];
+                let mEndDate = [[${searchBean.mEndDate}]];
+                
+                $("#createdDate").daterangepicker({
+                    autoUpdateInput: false
+                }).on('apply.daterangepicker', function (ev, picker) {
+                    $("input[name='cStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                    $("input[name='cEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                })
+               	.on('cancel.daterangepicker', function (ev, picker) {
+               	 	$(this).val("");
+                    $("input[name='cStartDate']").val("");
+                    $("input[name='cEndDate']").val("");
+                    $('#createdDate').attr('placeholder', 'Created Date');
+               	});
+
+                $("#modifiedDate").daterangepicker({
+                    autoUpdateInput: false
+                }).on('apply.daterangepicker', function (ev, picker) {
+                    $("input[name='mStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                    $("input[name='mEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                })
+                .on('cancel.daterangepicker', function (ev, picker) {
+                	$(this).val("");
+                    $("input[name='mStartDate']").val("");
+                    $("input[name='mEndDate']").val("");
+                    $('#modifiedDate').attr('placeholder', 'Modified Date');
+               	});
+                
+                var input = ["ossName", "licenseName", "homepage", "cvssScore", "cStartDate", "cEndDate", "mStartDate", "mEndDate"];
+        		var checkbox = ["ossNameAllSearchFlag", "licenseNameAllSearchFlag", "homepageAllSearchFlag", "deactivateFlag"];
+        		var singleSelect = ["creator", "modifier", "licenseType"];
+        		var multiSelect = ["ossTypeSearch"];
+        		var textarea = ["copyrights", "summaryDescription"];
+                
+        		var optionSelectedFlag = false;
+                if (typeof localStorage.ossSearchConditions !== "undefined") {
+                	var localStorageSearchConditions = JSON.parse(localStorage.ossSearchConditions);
+                	
+                	if (Date.now() > localStorageSearchConditions.expire) {
+                		localStorage.removeItem("ossSearchConditions");
+                	} else {
+                		Object.keys(localStorageSearchConditions).forEach(function(key) {
+                			if (input.includes(key)) {
+                				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+                				if ("ossName" != key && "" != localStorageSearchConditions[key]) {
+                					optionSelectedFlag = true;
+                				}
+                				if ("cStartDate" == key) {
+                					cStartDate = localStorageSearchConditions[key];
+                				} else if ("cEndDate" == key) {
+                					cEndDate = localStorageSearchConditions[key];
+                				} else if ("mStartDate" == key) {
+                					mStartDate = localStorageSearchConditions[key];
+                				} else if ("mEndDate" == key) {
+                					mEndDate = localStorageSearchConditions[key];
+                				}
+                			} else if (checkbox.includes(key)) {
+                				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+                				if ("Y" == localStorageSearchConditions[key]) $("#" + key).prop("checked", true);
+                				if ("ossNameAllSearchFlag" != key && "" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                			} else if (singleSelect.includes(key)) {
+                				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+                				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                			} else if (multiSelect.includes(key)) {
+                				var ossType = localStorageSearchConditions[key];
+                				if ("" != ossType) {
+                					optionSelectedFlag = true;
+                					ossType = ossType.split("");
+                					$("select[name='"+key+"']").val(ossType).trigger('change');
+                				} else {
+                					$("select[name='"+key+"']").val(ossType).trigger('change');
+                					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
+                				}
+                			} else if (textarea.includes(key)) {
+                				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+                				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                			}
+                		});
+                	}
+                } else {
+                	for (var i in input) {
+        				if ("ossName" != input[i]) {
+        					var inputValue = $("input[name='"+input[i]+"']").val();
+        					if ("" != inputValue) {
+        						optionSelectedFlag = true;
+        						break;
+        					}
+        				}
+        			}
+                	
+                	if (!optionSelectedFlag) {
+        				for (var i in checkbox) {
+        					if ("ossNameAllSearchFlag" != checkbox[i]) {
+            					if ("Y" == $("input[name='"+ checkbox[i] +"']").val()) {
+            						optionSelectedFlag = true;
+            						break;
+            					}
+        					}
+        				}
+        			}
+                	
+                	if (!optionSelectedFlag) {
+        				for (var i in singleSelect) {
+        					var selectedValue = $("select[name='"+singleSelect[i]+"'] option:selected").val();
+        					if ("" != selectedValue) {
+        						optionSelectedFlag = true;
+        						break;
+        					}
+        				}
+        			}
+        			
+        			if (!optionSelectedFlag) {
+        				var multiSelectedValue = $("select[name='ossTypeSearch']").select2("val");
+        				if (multiSelectedValue != null) optionSelectedFlag = true;
+        			}
+        			
+        			if (!optionSelectedFlag) {
+        				for (var i in textarea) {
+        					var textareaValue = $("textarea[name='"+textarea[i]+"']").val();
+        					if ("" != textareaValue) {
+        						optionSelectedFlag = true;
+        						break;
+        					}
+        				}
+        			}
+                	
+                	cStartDate = [[${searchBean.cStartDate}]];
+                    cEndDate = [[${searchBean.cEndDate}]];
+                    mStartDate = [[${searchBean.mStartDate}]];
+                    mEndDate = [[${searchBean.mEndDate}]];
+                }
+                
+                if (optionSelectedFlag) {
+        			$(".optionSelected").show();
+        		} else {
+        			$(".optionSelected").hide();
+        		}
+                
+                if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
+                	var cStartDateFormat = cStartDate.substr(4,2) + "/" + cStartDate.substr(6,2) + "/" + cStartDate.substr(0,4);
+                	var cEndDateFormat = cEndDate.substr(4,2) + "/" + cEndDate.substr(6,2) + "/" + cEndDate.substr(0,4);
+                    $('#createdDate').val(cStartDateFormat + ' - ' + cEndDateFormat);
+                } else {
+                    $('#createdDate').attr('placeholder', 'Created Date');
+                }
+                
+                if ((mStartDate != null && "" != mStartDate) && (mEndDate != null && "" != mEndDate)) {
+                	var mStartDateFormat = mStartDate.substr(4,2) + "/" + mStartDate.substr(6,2) + "/" + mStartDate.substr(0,4);
+                	var mEndDateFormat = mEndDate.substr(4,2) + "/" + mEndDate.substr(6,2) + "/" + mEndDate.substr(0,4);
+                    $('#modifiedDate').val(mStartDateFormat + ' - ' + mEndDateFormat);
+                } else {
+                    $('#modifiedDate').attr('placeholder', 'Modified Date');
+                }
+
+                initParam = serializeObjectHelper();
+                var defaultSearchFlag = [[${searchBean.defaultSearchFlag}]];
+
+                if (defaultSearchFlag != 'N') {
+                    initParam.ignoreSearchFlag = "N";
+                }
+
+                var sentMailParam = $("input[name=ossName]").val();
+                if ("Y" == linkFlag && sentMailParam) {
+                    initParam.ignoreSearchFlag = "N";
+                    initParam = serializeObjectHelper();
+                }
+
+                $('#search').on('click', function (e) {
+                    e.preventDefault();
+
+                    const searchOSSName = $("input[type=text][name=ossName]").val();
+                    $("input[type=text][name=ossName]").val(searchOSSName.trim());
+
+                    const searchLicenseName = $("input[type=text][name=licenseName]").val();
+                    $("input[type=text][name=licenseName]").val(searchLicenseName.trim());
+
+                    const searchHomepage = $("input[type=text][name=homepage]").val();
+                    $("input[type=text][name=homepage]").val(searchHomepage.trim());
+
+                    const postData = oss_lst_fn.serializeObjectHelper();
+                    postData.ignoreSearchFlag = "N";
+                    
+                    var localStorageData = oss_lst_fn.serializeObjectHelper();
+                    localStorageData.expire = Date.now() + 300000;
+                    localStorage.setItem("ossSearchConditions", JSON.stringify(localStorageData));
+                    
+                    optionSelectedFlag = false;
+                    Object.keys(localStorageData).forEach(function(key) {
+            			if (input.includes(key)) {
+            				if ("ossName" != key && "" != localStorageData[key]) optionSelectedFlag = true;
+            			} else if (checkbox.includes(key)) {
+            				if ("ossNameAllSearchFlag" != key && "Y" == localStorageData[key]) optionSelectedFlag = true;
+            			} else if (singleSelect.includes(key)) {
+            				if ("" != localStorageData[key]) optionSelectedFlag = true;
+            			} else if (multiSelect.includes(key)) {
+            				if ("" != localStorageData[key]) optionSelectedFlag = true;
+            			} else if (textarea.includes(key)) {
+            				if ("" != localStorageData[key]) optionSelectedFlag = true;
+            			}
+            		});
+                    
+                    if (optionSelectedFlag) {
+            			$(".optionSelected").show();
+            		} else {
+            			$(".optionSelected").hide();
+            		}
+                    
+                    $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
+                });
+
+                $(".cal").on("keyup", function (e) {
+                    calValidation(this, e);
+                });
+
+                $("#ossNameAllSearchFlag").on("click", function (e) {
+                    $("input[name='ossNameAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
+                });
+
+                $("#licenseNameAllSearchFlag").on("click", function (e) {
+                    $("input[name='licenseNameAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
+                });
+
+                $("#homepageAllSearchFlag").on("click", function (e) {
+                    $("input[name='homepageAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
+                });
+
+                $("#deactivateFlag").on("click", function () {
+                    $("input[name='deactivateFlag']").val($(this).is(":checked") ? "Y" : "N");
+                });
+
+                $("#cvssScoreInput").on("input", function () {
+                    return oss_lst_fn.validateCvssScore();
+                });
+
+                oss_lst_data.init();
+            }
+        }
+
+        const oss_lst_data = {
+            typeCodes: [],
+            licenseTypeInformation:
+                "<div class=\"p-1\">" +
+                    "<div style=\"float:left\">" +
+                        "<strong class=\"mr-1 text-danger\">Multi</strong>" +
+                        "<strong>Multi License</strong>" +
+                        "<br>The OSS contains source codes under multiple licenses.<br />본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.<br />(e.g. lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> src is GPL-2.0)</p>" +
+                    "</div>" +
+                    "<div>" +
+                        "<strong class=\"mr-1 text-danger\">Dual</strong>" +
+                        "<strong>Dual License</strong>" +
+                        "<br>You can select one of registered licenses.<br />본 OSS는 등록된 License 중 하나를 선택할 수 있습니다.<br />(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</p>" +
+                    "</div>" +
+                    "<div>" +
+                        "<strong class=\"mr-1 text-danger\">V-Diff</strong>" +
+                        "<strong>Version different licenses</strong>" +
+                        "<br>The OSS is distributed under different licenses according to its version<span style=\"text-decoration : underline;\">versions</span>.<br />본 OSS는 Version에 따라 다른 License로 배포되고 있습니다.<br />(e.g. v1.0 is under GPL-2.0 and v2.0 is under BSD-3-Clause)</p>" +
+                    "</div>" +
+                "</div>",
+            obligationInformation:
+                "<div class=\"p-1\">" +
+                    "<div class=\"mb-1\">" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-1-3x\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
+                    "</div>" +
+                    "<div>" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+                    "</div>" +
+                "</div>",
+            existTooltip: false,
+            init: function () {
+                oss_lst_grid.load();
+            }
+        }
+
+        const oss_lst_fn = {
+            serializeObjectHelper: function () {
+                var postData = $('#ossSearch').serializeObject();
+                
+                if (postData.ossTypeSearch != null) {
+                    postData.ossTypeSearch = JSON.stringify(postData.ossTypeSearch);
+                    postData.ossTypeSearch = postData.ossTypeSearch.replace(/\"|\[|\]|\,/gi, "");
+                } else {
+                    postData.ossTypeSearch = "";
+                }
+				
+                return postData;
+            },
+            deleteOss: function () {
+                var deleteIds = [];
+
+                $("#list input[type=checkbox]").each(function () {
+                    if ($(this).is(":checked")) {
+                        var obj = {};
+
+                        var name = $(this).attr('name');
+                        var ossId = name.split("_")[2];
+                        deleteIds.push(ossId);
+                    }
+                });
+
+                if (deleteIds.length > 0) {
+                	const param = {
+                        category: "fragments",
+                        templateName: "common-fragments",
+                        fragmentName: "promptPopupFragment",
+                        data: {context: "Do you want to delete the oss ?"}
+                    };
+                    postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
+                       	// prevent clicking the OK button on Enter
+						let keyCode;
+						$(document).on('keydown', function (event) {
+							keyCode = event.keyCode;
+						});
+
+						if (!alertify.deleteOssListDialog){
+							alertify.dialog('deleteOssListDialog', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.focus.element = 0;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '650px';
+								        }
+									}
+								};
+							}, false, 'confirm');
+	                	}
+						
+						alertify.deleteOssListDialog()
+							.set('onok', function(e){
+								// prevent clicking the OK button on Enter
+								if (typeof keyCode !== 'undefined' && keyCode == 13) {
+									keyCode = undefined;
+									return false;
+								}
+							
+								var comment = $("#promptPopupEditor").summernote('code');
+	                            if (e) {
+	                            	if ("" == $(comment).text().trim()){
+	                                    alertify.alert(String([[#{msg.oss.required.deletion}]]), function () {
+	                                    });
+
+	                                    return false;
+	                                } else {
+	                                	oss_lst_fn.multiDelAjax(deleteIds, comment);
+	                                }
+	                            } else {
+	                                return false;
+	                            }
+							})
+							.set('onshow', function(event){
+								$("#promptPopupEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+							})
+							.setContent(res).show();
+                    }, null, function () {});
+                } else {
+                    alertify.alert([[#{msg.oss.select.ossTable}]], function () {});
+                }
+            },
+            multiDelAjax: function (deleteIds, comment) {
+                loading.show();
+                const _param = {"ossIds": deleteIds, "comment": comment};
+
+                postAjaxData(_param, "/oss/multiDelAjax", "json", function (res) {
+                    loading.hide();
+                    var msg = String([[ #{msg.common.success} ]]);
+
+                    if (typeof res.notDelOssList !== "undefined") {
+                        var notDelOss = res.notDelOssList;
+                        msg = String([[#{msg.oss.cannot.delete}]]);
+                        msg += '<br/>';
+                        for (var i in notDelOss) {
+                            msg += '<br/>';
+                            msg += '&emsp;&#8259; ' + notDelOss[i];
+                        }
+                    }
+                    alertify.alert(msg, function () {
+                        callReloadTabInframe("/oss/list", "oss-list");
+                    });
+                }, function () {
+                    alertify.error(String([[#{msg.common.valid2}]]), 0);
+                })
+            },
+            validateCvssScore: function (e) {
+                let inputValue = $("#cvssScoreInput").val();
+                let numericRegex = /^[0-9.]+$/;
+
+                if (!numericRegex.test(inputValue)) {
+                    $("#cvssScoreInput").val(inputValue.replace(/[^0-9.]/g, ''));
+                } else {
+                    let floatValue = parseFloat(inputValue);
+
+                    if (isNaN(floatValue) || floatValue < 0 || floatValue > 10 || !Number.isInteger(floatValue)) {
+                        $("#cvssScoreInput").val('');
+                    }
+                }
+            },
+            ossNameLinkFormat: function (cellvalue, options, rowObject) {
+            	var display = "";
+            	var url = "/oss/edit/" + rowObject['ossId'];
+                var ossNickname = rowObject['ossNickname'];
+				
+                if ("N" == linkFlag){
+                	if(ossNickname != null && ossNickname.length > 0) {
+                        if (ossNickname.indexOf('|') !== -1) {
+                            let ossNicknameArray = ossNickname.split('|');
+
+                            let str;
+                            if (ossNicknameArray.length <= 5) {
+                                str = ossNicknameArray.join('<br />');
+                            } else {
+                                str = ossNicknameArray.slice(0, 5).join('<br />') + '<br />...'
+                                 /*   '<br /><i class=\'fas fa-ellipsis-h\'></i>';*/
+                            }
+                            ossNickname = str;
+                        }
+                        display += "<a class=\"d-inline-block\" style=\"cursor: pointer;\" data-toggle=\"tooltip\" data-html=\"true\" data-placement=\"right\" title=\"" + ossNickname + "\">[Nick]</a>"
+                        display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block ml-1\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
+                    } else {
+                        display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
+                    }
+                } else {
+                	var url = '/oss/edit/'+rowObject['ossId'];
+    				display = "<a href='" + url + "' class='urlLink' target='_blank'>" + cellvalue + "</a>";
+                }
+            	 
+                return display;
+            },
+            mvEdit : function (url, ossId) {
+            	createTabInFrame(ossId+'_Opensource', url);
+            }
+        }
+
+        const oss_lst_grid = {
+            oldRowNum: 20,
+            load: function () {
+            	var colNameArr = ['', 'ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
+
+                colNameArr.push("Creator");
+                colNameArr.push("Created<br>Date");
+                colNameArr.push("Modifier");
+                colNameArr.push("Modified<br>Date");
+            	colNameArr.push("groupKey");
+            	
+            	var colModelArr = [
+                    {
+                    	name: 'group', width: 20, align: 'center',
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' colspan=2'
+                        },
+                        formatter: function myFormatter(cellvalue, options, rowObject) {
+                            return rowObject.ossId;
+                        }
+                    }
+                    , {
+                        name: 'ossId', index: 'ossId', width: 80, align: 'center',
+                        cellattr: function (rowId, tv, rawObject, cm, rdata) {
+                            return ' style="display:none;"';
+                        }
+                    }
+                    , {
+                        name: 'ossType',
+                        index: 'ossType',
+                        width: 70,
+                        align: 'center',
+                        sortable: false,
+                        formatter: fn_grid_com.ossTypeFormat
+                    }
+                    , {
+                        name: 'ossName',
+                        index: 'ossName',
+                        width: 200,
+                        align: 'left',
+                        formatter: oss_lst_fn.ossNameLinkFormat
+                    }
+                    , {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
+                    , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}
+                    , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
+                    , {name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false}
+                    , {
+                        name: 'downloadLocation',
+                        index: 'downloadLocation',
+                        width: 150,
+                        align: 'left',
+                        formatter: 'link',
+                        formatoptions: {target: '_blank'}
+                    }
+                    , {
+                        name: 'homepage',
+                        index: 'homepage',
+                        width: 65,
+                        align: 'left',
+                        formatter: 'link',
+                        formatoptions: {target: '_blank'}
+                    }
+                    , {
+                        name: 'summaryDescription',
+                        index: 'summaryDescription',
+                        width: 150,
+                        align: 'left'
+                        , cellattr: function (rowId, val, rawObject, cm, rdata) {
+                       		return 'title="' + rawObject['summaryDescription'] + '" style="cursor: pointer;"';
+                       	}
+                        , formatter: function (cellvalue, options, rowObject) {
+                        	if (cellvalue != null && "" != cellvalue) {
+                            	return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
+                            } else {
+                            	return "";
+                            }
+                      	}
+                    }
+                    , {name: 'cveId', index: 'cveId', hidden: true}
+                    , {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter: fn.displayVulnerability}
+                ];
+
+                var colModelObj = {name: 'creator', index: 'creator', width: 80, align: 'center'};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'createdDate', index: 'createdDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'modifier', index: 'modifier', width: 80, align: 'center'};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 75, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
+                colModelArr.push(colModelObj);
+
+            	var colModelObj = {
+                        name: 'groupKey', index: 'groupKey', hidden: true
+                        , cellattr: function (rowId, val, rawObject, cm, rdata) {
+                            var result;
+                            var isGroup = false;
+
+                            if (groupBuffer == val) {
+                                isGroup = true;
+                            } else {
+                                isGroup = false;
+                            }
+
+                            groupBuffer = val;
+
+                            if (isGroup) {
+                                result = 'isgroup="true"';
+                            } else {
+                                result = 'isgroup="false"';
+                            }
+
+                            return result;
+                        }
+                    };
+        		colModelArr.push(colModelObj);
+            	
+               	// apply user columns setting 
+            	var listType = 'OSS';
+                var totalColInfos = [
+                    {'ID': 'id'},
+                    {'OSS Type': 'ossType'},
+                    {'OSS Name': 'ossName'},
+                    {'OSS Version': 'ossVersion'},
+                    {'License Name': 'licenseName'},
+                    {'LicenseType': 'licenseType'},
+                    {'Obligation': 'obligation'},
+                    {'DownloadLocation': 'downloadLocation'},
+                    {'Homepage': 'homepage'},
+                    {'Description': 'summaryDescription'},
+                    {'Vulnerability': 'cvssScore'},
+                    {'Creator': 'creator'},
+                    {'Created Date': 'createdDate'},
+                    {'Modifier': 'modifier'},
+                    {'Modified Date': 'modifiedDate'}
+                ];
+                var defaultColNames = ['id', 'group', 'ossName', 'ossVersion', 'licenseName', 'obligation'];
+                
+				applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);
+
+                $("#list").jqGrid({
+                    url: "/oss/listAjax",
+                    datatype: 'json',
+                    postData: initParam,
+                    jsonReader: {
+                        repeatitems: false,
+                        id: 'ossId',
+                        root: function (obj) {
+                            //original RowNum save
+                            list.oldRowNum = $("#list").jqGrid('getGridParam', 'rowNum');
+                            //Change the rowNumber according to the number of lists.
+                            $("#list").jqGrid('setGridParam', {rowNum: obj.rows.length});
+                            $("#list").jqGrid('setGridParam', {defaultRowNum: list.oldRowNum});
+
+                            return obj.rows;
+                        },
+                        page: function (obj) {
+                            return obj.page;
+                        },
+                        total: function (obj) {
+                            return obj.total;
+                        },
+                        records: function (obj) {
+                            return obj.records;
+                        }
+                    },
+                    colNames: colNameArr,
+                    colModel: colModelArr,
+                    rowNum: 20,
+                    rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]],
+                    rowList: stringToArray([[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_LIST_STR")}]]),
+                    autowidth: true,
+                    toppager: true,
+                    pager: '#pager',
+                    gridview: true,
+                    loadonce: false,
+                    height: 'auto',
+                    grouping: true,
+                    groupingView: {
+                        groupField: ['groupKey'],
+                        groupColumnShow: [false]
+                    }, // Enter the column name by group.
+                    gridComplete: function () {
+                        // add button in header
+                        if (!oss_lst_data.existTooltip) {
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>')
+                                .appendTo($("#jqgh_list_obligation"))
+                                .attr("title", oss_lst_data.obligationInformation)
+                                .tooltip({
+                                    content: function () {
+                                        return $(this).prop('title');
+                                    }
+                                }).on('inserted.bs.tooltip', function() {
+							        var tooltipId = 'gridHeaderTooltip';
+							        $('.tooltip').attr('id', tooltipId);
+							    });
+
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true"  data-placement="bottom"></i>').appendTo($("#jqgh_list_ossType"))
+                                .attr("title", oss_lst_data.licenseTypeInformation)
+                                .tooltip({
+                                    content: function () {
+                                        return $(this).prop('title');
+                                    }
+                                }).on('inserted.bs.tooltip', function() {
+							        var tooltipId = 'gridHeaderTooltip';
+							        $('.tooltip').attr('id', tooltipId);
+							    });
+
+
+                            $('[data-toggle="tooltip"]').tooltip({html: true});
+                            oss_lst_data.existTooltip = true;
+                        }
+                        updateGridRowCount('list', 'pager'); 
+                    },
+                    loadComplete: function (result) {
+                        totalRow = result.records;
+                        var rows = result.rows;
+                        var grid = this;
+
+                        if (totalRow == 0) {
+                            var cStartDate = $("#cStartDate").val() || 0;
+                            var cEndDate = $("#cEndDate").val() || 0;
+                            var diffNum = +cStartDate - +cEndDate;
+
+
+                            var mStartDate = $("#mStartDate").val() || 0;
+                            var mEndDate = $("#mEndDate").val() || 0;
+                            var diffNum2 = +mStartDate - +mEndDate;
+
+                            if ((diffNum > 0 && cEndDate > 0)
+                                || (diffNum2 > 0 && mEndDate > 0)) {
+                                alertify.alert(String([[#{msg.common.search.check.date}]]), function () {
+                                });
+                            }
+                        }
+
+                        //rowNum initiate @@1
+                        $("#list").jqGrid('setGridParam', {rowNum: list.oldRowNum});
+
+                        // Insert the unfold button in the existing group header into the group column of the first row for each group (customize the first row to function as a group header).
+                        $('[id^=listghead_0]').each(function () {
+                            var addBtn = "<span style='cursor:pointer;' class='groupBtns ui-icon ui-icon-plus tree-wrap-ltr' onclick=\"$('#list').jqGrid('groupingToggle','" + $(this).attr("id") + "'); $('#" + $(this).next().attr("id") + "').show(); return false;\"> </span>";
+                            var position = $(this).next().next().children().eq(1).text();
+
+                            if (position != "") {
+                                $(this).next().children().eq(0).append(addBtn);
+                            }
+                        });
+                        //coloring groups
+                        //1. exist group button
+                        $('span.groupBtns').trigger('click').parent().parent().css('background-color', '#CDECFA');
+
+                        //2. below lists
+                        $('tr td[isgroup="true"]', grid).parent().css('background-color', '#E1F6FA');
+
+                        //3. Group sub display icon period in the following lists.
+                        $('tr td[isgroup="true"]', grid).parent().find('td:first')
+                            .prepend($('<span class="ui-icon ui-icon-carat-1-sw"></span>').css('display', 'inline-block'));
+
+                        //4. Group sub display check box
+                        var isAdmin = [[${@CommonFunction.isAdmin()}]];
+                        if (isAdmin) {
+                            $('#list > tbody > tr').not('[id^=listghead_0]').each(function () {
+                                var prevLocation = $(this).prev().prop('id');
+                                var nextLocation = $(this).next().prop('id');
+
+                                if (typeof prevLocation !== "undefined" && typeof nextLocation !== "undefined"
+                                    || typeof prevLocation !== "undefined") {
+                                    var position = $(this).prop('id');
+                                    var addCheckBox = '<input role="checkbox" type="checkbox" id="jqg_list_' + position + '" class="cbox" name="jqg_list_' + position + '">&emsp;';
+
+                                    $(this).children().eq(0).prepend(addCheckBox);
+                                }
+                            });
+                        }
+
+                        //group + - toggle
+                        $('span.groupBtns').on('click', function (e) {
+                            if ($(this).hasClass('ui-icon-plus')) {
+                                $(this).removeClass('ui-icon-plus').addClass('ui-icon-minus');
+                            } else {
+                                $(this).removeClass('ui-icon-minus').addClass('ui-icon-plus');
+                            }
+                        });
+
+                        $('.listghead_0').hide(); // hide basic groupHeader
+
+                        var datas = result.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
+    					
+    					for(var _idx=0;_idx<rowsCount;_idx++) {
+    						row = rows[_idx];
+    						className = row.className;
+    						
+    						if (className.indexOf('jqgrow') !== -1) {
+    							rowid = row.id;
+    							rowData = result.rows[rowIdx++];
+    							var dataObject = datas.filter(function(a){
+    								return a.ossId==rowid}
+    							)[0];
+    							
+    							if(dataObject.deactivateFlag == "Y" && className.indexOf('excludeRow') === -1) {
+    								className= className + ' excludeRow';
+    							}
+    							
+    							row.className = className;
+    						} else if(className.indexOf('ui-subgrid') !== -1){
+    							rowIdx++;
+    						}
+    					}
+
+                        $('[data-toggle="tooltip"]').tooltip({html: true});
+
+                        var pageButtonArea = $('#list_toppager_left');
+                        if ($("#list_toppager_left").find('button').length == 0) {
+                            var appendIcon = "";
+                            if (isAdmin) {
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
+                                appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
+                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_OpenSource', '/oss/edit')\">Add Open Source</span>";
+                                appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_Oss', '/oss/ossBulkReg')\">Bulk Registration</span></div>";
+                                appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"oss_lst_fn.deleteOss()\"><i class=\"far fa-trash-alt\"></i></button>";
+                            }
+                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+
+                            $("#list_toppager_left").append(appendIcon);
+                        }
+
+                        var setUpColumnButton = $('#setUpColumnButton');
+                        /* columns licalization */
+                        if (setUpColumnButton.length === 0) {
+                            var savedColNames = [];
+                            var dropdownMenuOptions = {
+                                _listType: listType,
+                                _totalColInfos: totalColInfos,
+                                _defaultColNames: defaultColNames,
+                                _savedColNames: savedColNames
+                            };
+                            pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
+
+                            // Check for click events occurring inside the menu area
+                            $("#setUpColumnMenu").on("click", function(event) {
+                                event.stopPropagation();
+                            });
+
+                            $('#setUpColumnButton').on("click", function(event) {
+                                event.stopPropagation();
+                                $('#setUpColumnMenu').toggleClass("show");
+                                $(this).toggleClass("show");
+                            })
+                        }
+
+                        adjustPageGridSize();
+                    },
+                });
+
+            }
+        }
+
+        function openDetailPage(ossId) {
+            if ("Y" != linkFlag) {
+                callCreateTabInFrame(ossId + '_Opensource', '/oss/edit/' + ossId, 'oss-edit_' + ossId, true);
+            } else {
+                const openNewWindow = window.open("about:blank");
+
+                if (isAdmin) {
+                    openNewWindow.location.href = "/oss/edit/" + ossId;
+                } else {
+                    openNewWindow.location.href = "/oss/view/" + ossId;
+                }
+            }
+        }
+
+        function serializeObjectHelper() {
+            var postData = $('#ossSearch').serializeObject();
+
+            if (postData.ossTypeSearch != null) {
+                postData.ossTypeSearch = JSON.stringify(postData.ossTypeSearch);
+                postData.ossTypeSearch = postData.ossTypeSearch.replace(/\"|\[|\]|\,/gi, "");
+            } else {
+                postData.ossTypeSearch = "";
+            }
+
+            return postData;
+        }
+
+        var fn = {
+            onUpdateSuccess : function(json, status){
+                loading.hide();
+                if (json.resCd == '10'){
+                    alertify.success([[#{msg.common.success}]]);
+                } else {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                }
+            },
+            onError : function(data, status){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            },
+        	downloadExcel : function(){
+        		if(isMaximumRowCheck(totalRow)){
+        			var data = serializeObjectHelper();
+        				
+        			if(data.copyrights == ''){
+        				data.copyrights = [];
+        			}
+        	
+        			$('input[name=parameter]').val(JSON.stringify(data));
+        			
+        			$("#ossSearch").ajaxForm({
+        				url :'/exceldownload/getExcelPostOss',
+        		        type : 'POST',
+        		        dataType:"json",
+        		        cache : false,
+        			    success : function (data) {
+        					if ("false" == data.isValid) {
+        						if(data.validMsg == "overflow") {
+        							alertify.error(getMsgMaxRowCnt(), 0);
+        						} else {
+        				       		alertify.error([[#{msg.common.valid2}]], 0);
+        						}
+        					} else {
+        						window.location = '/exceldownload/getFile?id='+data.validMsg;
+        					}
+        				},
+        				error : function(data){
+        					alertify.error([[#{msg.common.valid2}]], 0);
+        				}
+        			}).submit();
+        		}
+        	},
+        	displayVulnerability : function (cellvalue, options, rowObject) {
+        		var display = "";
+
+                if (parseInt(cellvalue) >= 9.0) {
+                    display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">CRITICAL</span>";
+                } else if (parseInt(cellvalue) >= 7.0) {
+                    display = "<span class=\"badge badge-danger pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">HIGH</span>";
+                } else if (parseInt(cellvalue) >= 4.0) {
+                    display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">MEDIUM</span>";
+                } else if (parseInt(cellvalue) > 0) {
+                    display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">LOW</span>";
+                } else if (parseInt(cellvalue) == 0 || cellvalue == undefined) {
+                    display = "<span style=\"font-size:0;\"></span>";
+                } else {
+                    display = cellvalue;
+                }
+				
+                return display;
+        	}
+        }
+        
+        //]]>
+    </script>
+</th:block>

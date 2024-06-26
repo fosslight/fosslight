@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+//<![CDATA[
+/*global $ */
+/*jslint browser: true, nomen: true */
+var lastsel;
+var userList;
+var userIdList;
+var totalRow = 0;
+var refreshParam = {};
+const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT'))}]];
+
+$(document).ready(function () {
+	'use strict';
+	setMaxRowCnt(G_ROW_CNT);
+	evt.init();
+	fn.getUserIdList();
+	showHelpLink("Self-Check_List_Main");
+});
+
+//데이터 객체
+var gridTooltip = {
+	typeCodes : [],
+    tooltipCont : "<div class=\"tooltipData\">"
+	               +"<dl><dt><span class=\"downSet btnReport\">FOSSLight Report</span>FOSSLight Report</dt></dl><br>"
+	               +"<dl><dt><span class=\"downSet btnNotice\">OSS Notice</span>OSS Notice</dt></dl><br>"
+	               +"<dl><dt><span class=\"downSet btnPackage\">Packaging File</span>Packaging File</dt></dl><br>"
+	               +"</div>",
+	existTooltip : false,
+	init : function(){
+		list.load();	// Grid Load
+	}
+	
+};	
+
+//OSS 쪽에서 프로젝트 검색을 위한 데이터
+var evt = {
+	init : function(){
+		$('select[name=distributionType]').val('${searchBean.distributionType}').trigger('change');
+		$('select[name=prjDivision]').val('${searchBean.prjDivision}').trigger('change');
+		
+		var startDate;
+        var endDate;
+
+        $("#schDateRange").daterangepicker({
+            autoUpdateInput: false
+        }).on('apply.daterangepicker', function(ev, picker) {
+		    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+		    $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+		    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+		})
+		.on('cancel.daterangepicker', function(ev, picker) {
+			$("#schDateRange").val("");
+			$("input[name='schStartDate']").val("");
+		    $("input[name='schEndDate']").val("");
+		    $('#schDateRange').attr('placeholder', 'Created Date');
+		});
+		
+        var input = ["prjName", "publicYn", "ossName", "schStartDate", "schEndDate", "licenseName", "creator"];
+        var optionSelectedFlag = false;
+		
+        if (typeof localStorage.selfCheckSearchConditions !== "undefined") {
+        	var localStorageSearchConditions = JSON.parse(localStorage.selfCheckSearchConditions);
+        	
+        	if (Date.now() > localStorageSearchConditions.expire) {
+        		localStorage.removeItem("selfCheckSearchConditions");
+        	} else {
+        		Object.keys(localStorageSearchConditions).forEach(function(key) {
+        			if (input.includes(key)) {
+        				var searchValue = localStorageSearchConditions[key];
+        				$("input[name='"+key+"']").val(searchValue);
+        				
+        				if ("prjName" != key && "publicYn" != key && "" != searchValue) optionSelectedFlag = true;
+        				if ("schStartDate" == key) {
+        					startDate = localStorageSearchConditions[key];
+        				} else if ("schEndDate" == key) {
+        					endDate = localStorageSearchConditions[key];
+        				} else if ("publicYn" == key) {
+        					if ("" == localStorageSearchConditions[key] || "N" == localStorageSearchConditions[key]) {
+        						$("#checkbox3").prop("checked", true);
+        					}
+        				}
+        			}
+        		});
+        	}
+		} else {
+			for (var i in input) {
+				if ("prjName" != input[i] && "publicYn" != input[i]) {
+					var inputValue = $("input[name='"+input[i]+"']").val();
+					if ("" != inputValue) {
+						optionSelectedFlag = true;
+						break;
+					}
+				}
+			}
+			
+			startDate = String([[${searchBean?.schStartDate}]]);
+			endDate = String([[${searchBean?.schEndDate}]]);
+		}
+		
+        if (optionSelectedFlag) {
+			$(".optionSelected").show();
+		} else {
+			$(".optionSelected").hide();
+		}
+        
+		if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+            var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+            $("#schDateRange").val(formattedStartDate + ' - ' + formattedEndDate);
+        }
+		
+		refreshParam = $('#projectSearch').serializeObject();
+		if($('#checkbox3').is(':checked')) {
+			refreshParam.publicYn = 'N';
+		} else {
+			refreshParam.publicYn = 'Y';
+		}
+		
+		$('#search').on('click',function(e){
+			e.preventDefault();
+			
+			var exPostdata = $("#list").jqGrid('getGridParam','postData');
+			exPostdata.ossId = ''; 
+			var postData=$('#projectSearch').serializeObject();
+			if ($('#checkbox3').is(':checked')) {
+				postData.publicYn = 'N';
+			} else {
+				postData.publicYn = 'Y';
+			}
+			
+			var localStorageData=$('#projectSearch').serializeObject();
+			if ($('#checkbox3').is(':checked')) {
+				localStorageData.publicYn = 'N';
+			} else {
+				localStorageData.publicYn = 'Y';
+			}
+			localStorageData.expire = Date.now() + 300000;
+            localStorage.setItem("selfCheckSearchConditions", JSON.stringify(localStorageData));
+			
+            optionSelectedFlag = false;
+            Object.keys(localStorageData).forEach(function(key) {
+    			if (input.includes(key)) {
+    				if ("prjName" != key && "publicYn" != key && "" != localStorageData[key]) optionSelectedFlag = true;
+    			}
+    		});
+            
+            if (optionSelectedFlag) {
+    			$(".optionSelected").show();
+    		} else {
+    			$(".optionSelected").hide();
+    		}
+            
+			$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
+		});
+	}
+}
+
+
+var fn = {
+	getUserIdList : function(){
+		return $.ajax({
+			type: 'GET',
+			url: '/project/getUserIdList',
+			data: {},
+			success : function(data){
+				if(data != null){
+					userIdList = data.slice(0,-1);
+					gridTooltip.init();
+				}
+			}
+		});
+	},
+	// unformater
+	unformatter : function(cellvalue, options, rowObject){
+		return cellvalue;
+	},
+	// Grid download cell display
+	displayReportDownload : function(cellvalue, options, rowObject){
+		var display = "";
+
+		if (rowObject.ossCount) {
+			if(parseInt(rowObject.ossCount) > 0) {
+				display = "<span style=\"cursor:pointer;\" onclick=\"fn.downloadReport(this)\"><i class=\"far fa-file-excel fa-lg ml-1\" title=\"FOSSLight Report\"></i></span>";
+			}
+		}
+		
+		return display;
+	},
+	// Grid vulnerability cell display
+	displayVulnerability : function(cellvalue, options, rowObject){
+		var display = "";
+
+		if (parseInt(cellvalue) >= 9.0 ) {
+			display = "<span class=\"badge badge-dark\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"openNVD('"+ rowObject.cveId +"')\">CRITICAL</span>";
+		} else if (parseInt(cellvalue) >= 7.0 ) {
+			display = "<span class=\"badge badge-danger\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"openNVD('"+ rowObject.cveId +"')\">HIGH</span>";
+		} else if (parseInt(cellvalue) >= 4.0) {
+			display = "<span class=\"badge badge-orange\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"openNVD('"+ rowObject.cveId +"')\">MEDIUM</span>";
+		} else if (parseInt(cellvalue) > 0) {
+			display = "<span class=\"badge badge-warning\" title=\"" + cellvalue + "\" style=\"cursor: pointer;\" onclick=\"openNVD('"+ rowObject.cveId +"')\">LOW</span>";
+		} else {
+			display = "<span style=\"font-size:0;\"></span>";
+		}
+		
+		return display;
+	},
+	displayComment : function(cellvalue, options, rowObject){
+		var display = "";
+		
+		if(cellvalue != ""){
+			var tmpStr = new RegExp();
+			tmpStr = /[<][^>]*[>]/gi;
+			
+			display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue.replace(tmpStr , "")+"</div>";
+		}
+		
+		return display;
+	},
+	downloadExcel : function(){
+		if(isMaximumRowCheck(totalRow)){
+			var data = JSON.stringify($('#projectSearch').serializeObject());
+		
+			$.ajax({
+				type: "POST",
+				url: '/exceldownload/getExcelPost',
+				data: JSON.stringify({"type" : "selfCheckList", "parameter" : data}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					} else {
+						window.location =  '/exceldownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	downloadReport : function(obj){
+		loading.show();
+		
+		var prjId = $(obj).closest('tr').attr('id');
+		
+		$.ajax({
+			type: "POST",
+			url: '/exceldownload/getExcelPost',
+			data: JSON.stringify({"type":"selfReport", "parameter":prjId}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				loading.hide();
+				
+				if ("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/exceldownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	displayProjectInfo : function(cellvalue, options, rowObject){
+		var prjName = rowObject['prjName'];
+		var prjVersion = rowObject['prjVersion']||'';
+		
+		if (prjVersion != ''){
+			prjName += ' (' + prjVersion + ')';
+		}
+		var permission = rowObject.permission == 1;
+		
+		var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+options.rowId+"', "+permission+")\">" + prjName + "</span>";
+	   	return display;
+	},
+	mvEditTab : function (prjId, permission) {
+//		if (permission) {
+			createTabInFrame(prjId+'_selfCheck', '/selfCheck/edit/'+prjId);
+//		} else {
+//			alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'self-check')}]], function(){});
+//		}
+	},
+	deleteSelfCheck : function () {
+		var selfIds = new Array();
+		selfIds = $("#list").jqGrid("getGridParam", "selarrrow");
+    	
+    	if (selfIds.length > 0) {
+    		var permissions = new Array();
+    		var notPermissions = new Array();
+			
+			for (var i in selfIds) {
+				var rowData = $('#list').jqGrid('getRowData', selfIds[i]);
+				if (rowData.statusPermission > 0) {
+					permissions.push(selfIds[i]);
+				} else {
+					notPermissions.push(selfIds[i]);
+				}
+			}
+    		
+			if (permissions.length > 0) {
+				permissions.sort();
+				if (notPermissions.length > 0) notPermissions.sort();
+				
+				var innerHtml 	= [[#{msg.selfcheck.confirm.remove.project}]] + '<br><br>';
+	           	innerHtml 		+= '<textarea id="delSelfEditor"></textarea>';
+	           	
+	           	// prevent clicking the OK button on Enter
+				let keyCode;
+				$(document).on('keydown', function (event) {
+					keyCode = event.keyCode;
+				});
+				
+	           	if (!alertify.delSelfDialog){
+	    			alertify.dialog('delSelfDialog', function() {
+	    				return {
+	    					setup: function() {
+	    						var settings = alertify.confirm().settings;
+	    						
+	    						for (var prop in settings) {
+	    							this.settings[prop] = settings[prop];
+	    						}
+	    						
+	    						var setup = alertify.confirm().setup();
+	    						setup.focus.element = 0;
+	    						
+	    						return setup;
+	    					},
+	    				    hooks: {
+	    				    	onshow: function() {
+	    				        	this.elements.dialog.style.maxWidth = 'none';
+	    				          	this.elements.dialog.style.width = '650px';
+	    				        }
+	    					}
+	    				};
+	    			}, false, 'confirm');
+	        	}
+	           	
+	           	alertify.delSelfDialog(innerHtml, function () {
+					// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
+
+					var editorVal = $("#delSelfEditor").summernote('code');
+
+					if ("" == $(editorVal).text().trim()) {
+						alertify.alert([[#{msg.project.required.comments}]], function () { });
+
+						return false;
+					} else {
+						fn.deleteSubmit(permissions, notPermissions);
+					}
+				});
+				
+				$("#delSelfEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			} else {
+				var notPermissionsLength = notPermissions.length;
+				if (notPermissionsLength > 0) notPermissions.sort();
+				
+				var message = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', 'self-check')}]];
+				message += "<br>&emsp;- ";
+				notPermissions.forEach (function (el, index) {
+					message += "SELF-" + el;
+					if (index < notPermissionsLength-1) {
+						message += ", ";
+					}
+				});
+				
+				alertify.alert(message, function(){});
+				return false;
+			}
+    	} else {
+    		alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+			return false;
+    	}
+	},
+	deleteSubmit : function (selfIds, notPermissions) {
+		$.ajax({
+			url : '/selfCheck/multiDelAjax',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : {'prjIds' : selfIds, deleteMemo : replaceWithLink($("#delSelfEditor").summernote('code'))},
+			success: function(data){
+				if ("10" == data.resCd) {
+					var message = "";
+					var notPermissionsLength = notPermissions.length;
+					var permissionsLength = selfIds.length;
+					
+					if (notPermissionsLength > 0) {
+						message = [[${@CommonFunction.getCustomMessage('msg.common.check.delete.success', 'self-check')}]];
+						message += "<br>&emsp;- ";
+						selfIds.forEach (function (el, index) {
+							message += "SELF-" + el;
+							if (index < permissionsLength-1) {
+								message += ", ";
+							}
+						});
+						
+						message += "<br><br>";
+						message += [[${@CommonFunction.getCustomMessage('msg.common.check.delete.fail', 'self-check')}]];
+						message += "<br>&emsp;- ";
+						notPermissions.forEach (function (el, index) {
+							message += "SELF-" + el;
+							if (index < notPermissionsLength-1) {
+								message += ", ";
+							}
+						});
+					} else {
+						message = [[${@CommonFunction.getCustomMessage('msg.common.delete.success', 'self-check')}]];
+						message += "<br>&emsp;- ";
+						selfIds.forEach (function (el, index) {
+							message += "SELF-" + el;
+							if (index < permissionsLength-1) {
+								message += ", ";
+							}
+						});
+					}
+					
+					if (typeof alertify.mulDelSelfDialog === 'undefined') {
+						alertify.dialog('mulDelSelfDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.alert().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.alert().setup();
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '550px';
+							        }
+								}
+							};
+						}, false, 'alert');
+	            	}
+					
+					alertify.mulDelSelfDialog(message, function(e) {
+						reloadTabInframe('/selfCheck/list');
+					});
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			},
+			error: function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	}
+}
+
+// jqGrid
+var list = {
+	load : function(){
+		var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
+		var rowList = rowStr.split(",");
+		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
+		
+		var colNameArr = ['ID', 'Project Name (Version)', 'Version', 'Operating System', 'Download', '', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'oss count', 'permission', 'statusPermission'];
+		var colModelArr = [];
+		var colModelObj = {name: 'prjId', index: 'prjId', width: 20, align: 'center', sorttype: 'int'};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'prjName', index: 'prjName', width: 120, align: 'left', formatter:fn.displayProjectInfo, unformatter:fn.unformatter};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'prjVersion', index: 'prjVersion', width: 40, align: 'left',hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'osType', index: 'osTypeEtc', align: 'left', sortable : true/* , formatter:fn.displayOsType */, hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'download', index: 'download', width: 30, align: 'center', formatter:fn.displayReportDownload, unformatter:fn.unformatter, sortable : false, title:false};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 30, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'division', index: 'division', width: 40, align: 'left', sortable : true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'creator', index: 'creator', width: 40, align: 'left'}
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'createdDate', index: 'createdDate', width: 40, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'ossCount', index: 'ossCount', align: 'left',hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'permission', index: 'permission', hidden:true};
+		colModelArr.push(colModelObj);
+		colModelObj = {name: 'statusPermission', index: 'statusPermission', hidden:true};
+		colModelArr.push(colModelObj);
+		
+		// apply user columns setting 
+		var listType = 'SELF_CHECK';
+    	var totalColInfos = [
+    		{'ID' : 'prjId'},
+    		{'Project Name (Version)': 'prjName'},
+    		{'Download': 'download'},
+    		{'Vulnerability': 'cvssScore'},
+    		{'Division': 'division'},
+    		{'Creator': 'creator'},
+    		{'Created Date': 'createdDate'}
+        ];
+        var defaultColNames = ['prjId', 'prjName'];
+        
+        applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);
+
+		$("#list").jqGrid({
+			url:'/selfCheck/listAjax',
+			datatype: 'json',
+			jsonReader:{
+				repeatitems: false,
+				id:'prjId',
+				root:function(obj){return obj.rows;},
+				page:function(obj){return obj.page;},
+				total:function(obj){return obj.total;},
+				records:function(obj){return obj.records;}
+			},
+			colNames: colNameArr,
+			colModel: colModelArr,
+			rowNum: rowNum,
+			rowList: rowList,
+			editurl:'clientArray',
+ 			autowidth: true,
+			pager: '#pager',
+			gridview: true,
+			sortable: function (permutation) {
+			},
+			sortname: 'prjId',
+			sortorder: 'desc',
+			toppager:true,
+			height: 'auto',
+			multiselect : true,
+            multiselectWidth: 35,
+			loadonce:false,
+			loadComplete:function(data) {
+				totalRow = data.records;
+				lastsel=-1;
+				
+				// color 설정
+				var target = $("#list");
+				var arr = target.jqGrid('getDataIDs');
+				var selectEl = "";
+				var status ="";
+				var rowid;
+				
+				$('input[id*="_releaseDate"]').attr('class', 'cal');
+
+				if(totalRow == 0){
+					var startDate = $("#schStartDate").val()||0;
+					var endDate = $("#schEndDate").val()||0;
+					var diffNum = +startDate - +endDate;
+					
+					if(diffNum > 0 && endDate > 0){
+						alertify.alert([[#{msg.common.search.check.date}]], function(){});
+					}
+				}
+				
+				/* columns licalization */
+//                 var parentElement = document.querySelector('#list_toppager #pg_list_toppager');
+//                 var setUpColumnButton = document.getElementById('setUpColumnButton');
+
+//                 if (!setUpColumnButton) {
+//                     var division = 'selfCheck';
+//                     var totalColInfos = [
+//                         {'ID' : 'prjId'},
+//                         {'Project Name (Version)': 'prjName'},
+//                         {'Download': 'download'},
+//                         {'Vulnerability': 'cvssScore'},
+//                         {'Division': 'division'},
+//                         {'Creator': 'creator'},
+//                         {'Created Date': 'createdDate'}];
+
+//                     if ([[${!distributionFlag}]]) {
+//                         totalColInfos.push({'Distribution Type': 'distributionType'});
+//                     }
+//                     var defaultColNames = ['id', 'prjName']
+//                     var savedColNames = [];
+
+//                     var dropdownMenuOptions = {
+//                         _division: division,
+//                         _totalColInfos: totalColInfos,
+//                         _defaultColNames: defaultColNames,
+//                         _savedColNames: savedColNames
+//                     };
+
+//                     var dropdownArea = document.createElement('div');
+//                     dropdownArea.className = 'dropdown';
+//                     var newButton = createDropdownButton();
+//                     var dropdownMenu = createDropdownMenu(dropdownMenuOptions);
+
+//                     dropdownArea.appendChild(newButton);
+//                     dropdownArea.appendChild(dropdownMenu);
+
+//                     parentElement.appendChild(dropdownArea);
+
+//                     document.getElementById("setUpColumnButton").addEventListener("click", function(event) {
+//                         event.stopPropagation();
+//                         var dropdownMenu = document.getElementById("setUpColumnMenu");
+//                         dropdownMenu.classList.toggle("show");
+//                     });
+//                 }
+			    
+			    
+			    var pageButtonArea = $('#list_toppager_left');
+				if (pageButtonArea.find('button').length == 0) {
+               		var appendIcon = "";
+               		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Self-Check\" onclick=\"createTabInFrame('New_SelfCheck', '/selfCheck/edit')\"><i class=\"fas fa-plus\"></i></button>";
+                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete Self-Check\" onclick=\"fn.deleteSelfCheck()\"><i class=\"far fa-trash-alt\"></i></button>";
+                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                      
+                  	pageButtonArea.append(appendIcon);
+            	}
+            	
+            	var setUpColumnButton = $('#setUpColumnButton');
+                /* columns licalization */
+                if (setUpColumnButton.length === 0) {
+                    var savedColNames = [];
+                    var dropdownMenuOptions = {
+                        _listType: listType,
+                        _totalColInfos: totalColInfos,
+                        _defaultColNames: defaultColNames,
+                        _savedColNames: savedColNames
+                    };
+                    pageButtonArea.append(createUserCoulmnsSettingButton(dropdownMenuOptions));
+
+                    // Check for click events occurring inside the menu area
+                    $("#setUpColumnMenu").on("click", function(event) {
+                        event.stopPropagation();
+                    });
+
+                    $('#setUpColumnButton').on("click", function(event) {
+                        event.stopPropagation();
+                        $('#setUpColumnMenu').toggleClass("show");
+                        $(this).toggleClass("show");
+                    })
+                }
+                
+                adjustPageGridSize();
+			},
+			onCellSelect: function(rowid,iCol,cellcontent,e) {},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+//				var rowData = $("#list").jqGrid('getRowData',rowid);
+//				var isAdmin = [[${@CommonFunction.isAdmin()}]];
+				
+//				createTabInFrame(rowData['prjId']+'_selfCheck', '/selfCheck/edit/'+rowData['prjId']);
+			},
+			gridComplete : function() {
+				updateGridRowCount('list', 'pager');	
+			},
+			postData : refreshParam
+		});
+	}
+};
+//]]>
+</script>
+</th:block>

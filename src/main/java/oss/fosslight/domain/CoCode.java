@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Vector;
 import org.springframework.util.StringUtils;
 
 import oss.fosslight.common.CoConstDef;
+import oss.fosslight.util.StringUtil;
 
 /**
  * The Class CoCode.
@@ -29,7 +31,15 @@ public class CoCode {
     /** The code dtls. */
     private Vector<CoCodeDtl> codeDtls;
     
-    /** The code dtls hash. */
+    public Vector<CoCodeDtl> getCodeDtls() {
+		return codeDtls;
+	}
+
+	public void setCodeDtls(Vector<CoCodeDtl> codeDtls) {
+		this.codeDtls = codeDtls;
+	}
+
+	/** The code dtls hash. */
     private HashMap<String, CoCodeDtl> codeDtlsHash;
     /** The code dtls hash. by Code dtls name */
     private HashMap<String, CoCodeDtl> codeDtlsNameHash;
@@ -343,7 +353,8 @@ public class CoCode {
                 continue;
               }
 	            
-	            stringbuffer.append("    <input name='statuses' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ").append((status.indexOf(codedtl.cdDtlNo)>-1)?"checked='checked'":""); 
+	            stringbuffer.append("    <input name='statuses' type='checkbox' value='").append(codedtl.cdDtlNo).append("' ");
+	            if (!StringUtil.isEmptyTrimmed(status)) stringbuffer.append((status.indexOf(codedtl.cdDtlNo)>-1)?"checked='checked'":"");
 	            stringbuffer.append(" style='margin:2px 5px 0px 0px;' />&nbsp;").append(codedtl.cdDtlNm).append("&nbsp;&nbsp;&nbsp;&nbsp;");
 	        }
         } else if (CoConstDef.CD_LICENSE_RESTRICTION.equals(cd)) {
@@ -354,7 +365,7 @@ public class CoCode {
         		newLineIdx = 4;
         	}
         	
-        	List<String> restrictionList = Arrays.asList(status.split(","));
+        	List<String> restrictionList = !StringUtil.isEmptyTrimmed(status) ? Arrays.asList(status.split(",")) : new ArrayList<>();
         	
         	int multiplyRestIdx = 1;
         	for (int k = codeDtls.size(); j < k; j++)

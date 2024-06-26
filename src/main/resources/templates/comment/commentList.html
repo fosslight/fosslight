@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:if="${commentListCnt > 0}">
+	<th:block th:each="comment, status : ${commentList}">
+		<div class="card-body" style="padding: .75rem; vertical-align: top; border-top: 1px solid #dee2e6;">
+			<div class="row">
+				<div class="col-lg-12">
+					<div class="post">
+						<div class="row">
+							<div class="col-lg-12" style="display: flex;">
+							<th:block th:if="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '19' or comment.referenceDiv == '20' or comment.referenceDiv == '60'}">
+								<span th:if="${comment.referenceDiv != '20'}" class="pt-1 pl-2 hashtag" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${comment.referenceDiv != '20' and not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
+								<th:block th:if="${not #strings.isEmpty(comment.status)}">
+									<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'}"></span>
+									<span th:unless="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#' + #strings.toLowerCase(comment.status)}"></span>
+								</th:block>							
+							</th:block>
+							<th:block th:unless="${comment.referenceDiv == '10' or comment.referenceDiv == '12' or comment.referenceDiv == '19' or comment.referenceDiv == '20' or comment.referenceDiv == '30' or comment.referenceDiv == '40' or comment.referenceDiv == '60' }">
+								<span class="pt-1 pl-2 hashtag" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
+								<th:block th:if="${not #strings.isEmpty(comment.status)}">
+									<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'}"></span>
+									<span th:unless="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#' + #strings.toLowerCase(comment.status)}"></span>
+								</th:block>
+							</th:block>
+							<th:block th:if="${comment.creator == comment.loginUserName}">
+								<span style="margin-left: auto;">
+               						<span class="p-1 pointer"><i class="fas fa-pencil-alt" th:onclick="fn_comment.editComments([[${comment.commId}]], [[${comment.referenceDiv}]], [[${comment.referenceId}]])"></i></span>
+               						<span class="p-1 pointer" th:onclick="fn_comment.deleteComments([[${comment.commId}]], [[${comment.referenceDiv}]], [[${comment.referenceId}]])"><i class="far fa-trash-alt"></i></span>
+         						</span>
+							</th:block>
+							</div>
+						</div>
+						<div class="col-lg-12">
+							<div class="user-block mt-1" style="display: flex;">
+								<span class="username" th:text="${comment.creator}"></span><span class="ml-2 text-sm" style="margin-top: .1rem;" th:text="${comment.createdDate}"></span>
+              				</div>
+						</div>
+						<div class="col-lg-12">
+							<p th:utext="${comment.contents}"></p>
+						</div>
+          			</div>
+				</div>
+			</div>
+      	</div>
+	</th:block>
+	<th:block th:if="${commentListCnt > 5 and #strings.equals(commentsHistory.moreFlag, 'N')}">
+		<div class="card-body" style="padding: .5rem; vertical-align: top; border-top: 1px solid #dee2e6;">
+			<div class="row">
+				<div class="col-md-12 text-center">
+					<button class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3" type="button" th:onclick="fn_comment.getMoreCommentsList()" th:text="'More +'"></button>
+				</div>
+			</div>
+		</div>
+	</th:block>
+</th:block>
+<th:block th:if="${commentListCnt == 0}">
+	<div class="card-body">
+		<div class="row">
+			<div class="col-md-12">
+				<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
+			</div>
+		</div>
+	</div>
+</th:block>
+</html>

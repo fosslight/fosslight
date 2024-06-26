@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="script">
+    <script th:inline="javascript">
+        /*global $ */
+        /*jslint browser: true, nomen: true */
+        var initParam = {};
+        var totalRow = 0;
+        const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT'))}]];
+
+        $(document).ready(function () {
+            'use strict';
+            setMaxRowCnt(G_ROW_CNT);
+            evt.init();
+            data.init();
+        });
+
+        //데이터 객체
+        var data = {
+            typeCodes: [],
+            tooltipCont:
+                "<div class=\"p-1\">" +
+                    "<div class=\"mb-1\">" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-1-3x\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
+                    "</div>" +
+                    "<div>" +
+                        "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+                    "</div>"+
+                "</div>",
+            existTooltip: false,
+            init: function () {
+                list.load();	// Grid Load
+            }
+        };
+
+        //이벤트 객체
+        var evt = {
+            init: function () {
+                $('#restrictionSelect').select2({
+                    placeholder: "Restriction",
+                    allowClear: true,
+                });
+
+                $('#licenseTypeSelect').select2({
+                    placeholder: "License Type",
+                    allowClear: true,
+                });
+
+                $('#obligationTypeSelect').select2({
+                    placeholder: "Obligation Type",
+                    allowClear: true,
+                });
+
+                $('#creatorSelect').select2({
+                    placeholder: "Creator",
+                    allowClear: true,
+                });
+
+                $('#modifierSelect').select2({
+                    placeholder: "Modifier",
+                    allowClear: true,
+                });
+
+                /* created date & modified date event */
+                let cStartDate;
+                let cEndDate;
+                let mStartDate;
+                let mEndDate;
+
+                $("#createdDate").daterangepicker({
+                    autoUpdateInput: false
+                }).on('apply.daterangepicker', function (ev, picker) {
+                    $("input[name='cStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                    $("input[name='cEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                })
+                    .on('cancel.daterangepicker', function (ev, picker) {
+                        $(this).val("");
+                        $("input[name='cStartDate']").val("");
+                        $("input[name='cEndDate']").val("");
+                        $('#createdDate').attr('placeholder', 'Created Date');
+                    });
+
+                $("#modifiedDate").daterangepicker({
+                    autoUpdateInput: false
+                }).on('apply.daterangepicker', function (ev, picker) {
+                    $("input[name='mStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                    $("input[name='mEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                })
+                    .on('cancel.daterangepicker', function (ev, picker) {
+                        $(this).val("");
+                        $("input[name='mStartDate']").val("");
+                        $("input[name='mEndDate']").val("");
+                        $('#modifiedDate').attr('placeholder', 'Modified Date');
+                    });
+
+                var input = ["licenseName", "webpage", "cStartDate", "cEndDate", "mStartDate", "mEndDate", "licenseNameAllSearchFlag"];
+                var singleSelect = ["licenseType", "obligationType", "creator", "modifier"];
+                var multiSelect = ["restrictions"];
+                var textarea = ["licenseText", "description"];
+
+                var optionSelectedFlag = false;
+                if (typeof localStorage.licenseSearchConditions !== "undefined") {
+                    var localStorageSearchConditions = JSON.parse(localStorage.licenseSearchConditions);
+
+                    if (Date.now() > localStorageSearchConditions.expire) {
+                        localStorage.removeItem("licenseSearchConditions");
+                    } else {
+                        Object.keys(localStorageSearchConditions).forEach(function(key) {
+                            if (input.includes(key)) {
+                                $("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+                                if ("licenseName" != key && "licenseNameAllSearchFlag" != key && "" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                                if ("cStartDate" == key) {
+                                    cStartDate = localStorageSearchConditions[key];
+                                } else if ("cEndDate" == key) {
+                                    cEndDate = localStorageSearchConditions[key];
+                                } else if ("mStartDate" == key) {
+                                    mStartDate = localStorageSearchConditions[key];
+                                } else if ("mEndDate" == key) {
+                                    mEndDate = localStorageSearchConditions[key];
+                                } else if ("licenseNameAllSearchFlag" == key) {
+                                    if ("Y" == localStorageSearchConditions[key]) $("#" + key).prop("checked", true);
+                                }
+                            } else if (singleSelect.includes(key)) {
+                                $("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+                                if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                            } else if (multiSelect.includes(key)) {
+                                var restrictions = localStorageSearchConditions[key];
+                                if ("" != restrictions) {
+                                    optionSelectedFlag = true;
+                                    restrictions = restrictions.split(",");
+                                    $("select[name='"+key+"']").val(restrictions).trigger('change');
+                                } else {
+                                    $("select[name='"+key+"']").val(restrictions).trigger('change');
+                                    $("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
+                                }
+                            } else if (textarea.includes(key)) {
+                                $("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+                                if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                            }
+                        });
+                    }
+                } else {
+                    for (var i in input) {
+                        if ("licenseName" != input[i] && "licenseNameAllSearchFlag" != input[i]) {
+                            var inputValue = $("input[name='"+input[i]+"']").val();
+                            if ("" != inputValue) {
+                                optionSelectedFlag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!optionSelectedFlag) {
+                        for (var i in singleSelect) {
+                            var selectedValue = $("select[name='"+singleSelect[i]+"'] option:selected").val();
+                            if ("" != selectedValue) {
+                                optionSelectedFlag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!optionSelectedFlag) {
+                        var multiSelectedValue = $("select[name='restrictions']").select2("val");
+                        if (multiSelectedValue != null) optionSelectedFlag = true;
+                    }
+
+                    if (!optionSelectedFlag) {
+                        for (var i in textarea) {
+                            var textareaValue = $("textarea[name='"+textarea[i]+"']").val();
+                            if ("" != textareaValue) {
+                                optionSelectedFlag = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    cStartDate = [[${searchBean.cStartDate}]];
+                    cEndDate = [[${searchBean.cEndDate}]];
+                    mStartDate = [[${searchBean.mStartDate}]];
+                    mEndDate = [[${searchBean.mEndDate}]];
+                }
+
+                if (optionSelectedFlag) {
+                    $(".optionSelected").show();
+                } else {
+                    $(".optionSelected").hide();
+                }
+
+                if ((cStartDate != null && "" != cStartDate) && (cEndDate != null && "" != cEndDate)) {
+                    var cStartDateFormat = cStartDate.substr(4,2) + "/" + cStartDate.substr(6,2) + "/" + cStartDate.substr(0,4);
+                    var cEndDateFormat = cEndDate.substr(4,2) + "/" + cEndDate.substr(6,2) + "/" + cEndDate.substr(0,4);
+                    $('#createdDate').val(cStartDateFormat + ' - ' + cEndDateFormat);
+                } else {
+                    $('#createdDate').attr('placeholder', 'Created Date');
+                }
+
+                if ((mStartDate != null && "" != mStartDate) && (mEndDate != null && "" != mEndDate)) {
+                    var mStartDateFormat = mStartDate.substr(4,2) + "/" + mStartDate.substr(6,2) + "/" + mStartDate.substr(0,4);
+                    var mEndDateFormat = mEndDate.substr(4,2) + "/" + mEndDate.substr(6,2) + "/" + mEndDate.substr(0,4);
+                    $('#modifiedDate').val(mStartDateFormat + ' - ' + mEndDateFormat);
+                } else {
+                    $('#modifiedDate').attr('placeholder', 'Modified Date');
+                }
+
+                initParam = fn.setGridParam();
+
+                var defaultSearchFlag = [[${searchBean.defaultSearchFlag}]];
+
+                if (defaultSearchFlag != 'N') {
+                    initParam.ignoreSearchFlag = "N";
+                }
+
+                $('#search').on('click', function (e) {
+                    e.preventDefault();
+                    var postData = fn.setGridParam();
+                    postData.ignoreSearchFlag = "N";
+
+                    var localStorageData = fn.setGridParam();
+                    localStorageData.ignoreSearchFlag = "N";
+                    localStorageData.expire = Date.now() + 300000;
+                    localStorage.setItem("licenseSearchConditions", JSON.stringify(localStorageData));
+
+                    optionSelectedFlag = false;
+                    Object.keys(localStorageData).forEach(function(key) {
+                        if (input.includes(key)) {
+                            if ("licenseName" != key && "licenseNameAllSearchFlag" != key && "" != localStorageData[key]) optionSelectedFlag = true;
+                        } else if (singleSelect.includes(key)) {
+                            if ("" != localStorageData[key]) optionSelectedFlag = true;
+                        } else if (multiSelect.includes(key)) {
+                            if ("" != localStorageData[key]) optionSelectedFlag = true;
+                        } else if (textarea.includes(key)) {
+                            if ("" != localStorageData[key]) optionSelectedFlag = true;
+                        }
+                    });
+
+                    if (optionSelectedFlag) {
+                        $(".optionSelected").show();
+                    } else {
+                        $(".optionSelected").hide();
+                    }
+
+                    $("#list").jqGrid('setGridParam', {postData: postData, page: 1}).trigger('reloadGrid');
+                });
+
+                $(".cal").on("keyup", function (e) {
+                    calValidation(this, e);
+                });
+
+                $("#licenseNameAllSearchFlag").on("change", function (e) {
+                    $("[name='licenseNameAllSearchFlag']").val($(this).prop("checked") ? "Y" : "N");
+                });
+            }
+        };
+
+        var fn = {
+        	displayLicenseName : function(cellvalue, options, rowObject) {
+                var link = $('<a>').prop({
+                    class : 'urlLink',
+                    href : 'javascript:',
+                    text : cellvalue
+                })
+
+                link.attr('onclick', 'openDetailPage(' + rowObject.licenseId + ')');
+                return link.prop('outerHTML');
+        	},
+            downloadExcel: function () {
+                if (isMaximumRowCheck(totalRow)) {
+                    var data = $('#licenseSearch').serializeObject();
+
+                    // restrictions은 licenseMaster에서 String으로 선언되어 있기 때문에 gson변환시 에러가 발생
+                    // array형으로 받을 수 있도록 다른이름에 재설정한다.
+                    if (typeof data.restrictions !== "undefined") {
+                        if (Array.isArray(data.restrictions)) {
+                            data.arrRestriction = data.restrictions;
+                        } else {
+                            var restrictionArr = [];
+                            restrictionArr.push(data.restrictions);
+                            data.arrRestriction = restrictionArr;
+                        }
+                    }
+                    data.restrictions = "";
+
+                    $.ajax({
+                        type: "POST",
+                        url: '/exceldownload/getExcelPost',
+                        data: JSON.stringify({"type": "license", "parameter": JSON.stringify(data)}),
+                        dataType: 'json',
+                        cache: false,
+                        contentType: 'application/json',
+                        success: function (data) {
+                            if ("false" == data.isValid) {
+                                if (data.validMsg == "overflow") {
+                                    alertify.error(getMsgMaxRowCnt(), 0);
+                                } else {
+                                    alertify.error([[#{msg.common.valid2}]], 0);
+                                }
+                            } else {
+                                window.location = '/exceldownload/getFile?id=' + data.validMsg;
+                            }
+                        },
+                        error: function (data) {
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        }
+                    });
+                }
+            },
+            validationDate: function () {
+                var flag = true;
+                var cStart = $('input[name=cStartDate]').val().replace(/\-/g, '');
+                var cEnd = $('input[name=cEndDate]').val().replace(/\-/g, '');
+                var mStart = $('input[name=mStartDate]').val().replace(/\-/g, '');
+                var mEnd = $('input[name=mEndDate]').val().replace(/\-/g, '');
+
+                //둘다 비었을때
+                if (!cStart && !cEnd) {
+
+                } else {
+                    if (!cStart) {
+                        alert([[#{msg.license.confirm.startdate}]]);
+
+                        flag = false;
+                    } else {
+                        alert([[#{msg.license.confirm.enddate}]]);
+
+                        flag = false;
+                    }
+                }
+                if (flag) {
+                    if (!mStart && !mEnd) {
+
+                    } else {
+                        if (!mStart) {
+                            alert([[#{msg.license.confirm.startdate}]]);
+
+                            flag = false;
+                        } else {
+                            alert([[#{msg.license.confirm.enddate}]]);
+
+                            flag = false;
+                        }
+                    }
+                }
+
+                return flag;
+            },
+            setGridParam: function () {
+                var paramData = $('#licenseSearch').serializeObject();
+
+                if (paramData.restrictions != null) {
+                    paramData.restrictions = JSON.stringify(paramData.restrictions);
+                    paramData.restrictions = paramData.restrictions.replace(/\"|\[|\]/gi, "");
+                } else {
+                    paramData.restrictions = "";
+                }
+
+                return paramData;
+            },
+        	onUpdateSuccess : function(json, status){
+                loading.hide();
+                if (json.resCd == '10'){
+                    alertify.success([[#{msg.common.success}]]);
+                } else {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                }
+            },
+            deleteLicense : function () {
+                var ids = $("#list").jqGrid("getGridParam", "selarrrow");
+
+                if (ids.length > 0) {
+                    var innerHtml 	= [[#{msg.license.confirm.delete}]] + '<br><br>';
+                    innerHtml 		+= '<textarea id="deleteLicenseEditor"></textarea>';
+
+                    // prevent clicking the OK button on Enter
+                    let keyCode;
+                    $(document).on('keydown', function (event) {
+                        keyCode = event.keyCode;
+                    });
+
+                    if (!alertify.deleteLicenseDialog){
+                        alertify.dialog('deleteLicenseDialog', function() {
+                            return {
+                                setup: function() {
+                                    var settings = alertify.confirm().settings;
+
+                                    for (var prop in settings) {
+                                        this.settings[prop] = settings[prop];
+                                    }
+
+                                    var setup = alertify.confirm().setup();
+                                    setup.focus.element = 0;
+
+                                    return setup;
+                                },
+                                hooks: {
+                                    onshow: function() {
+                                        this.elements.dialog.style.maxWidth = 'none';
+                                        this.elements.dialog.style.width = '650px';
+                                    }
+                                }
+                            };
+                        }, false, 'confirm');
+                    }
+
+                    alertify.deleteLicenseDialog()
+                        .set('onok', function(e){
+                            // prevent clicking the OK button on Enter
+                            if (typeof keyCode !== 'undefined' && keyCode == 13) {
+                                keyCode = undefined;
+                                return false;
+                            }
+
+                            if (e) {
+                                var editorVal = $("#deleteLicenseEditor").summernote('code');
+                                if ("" == $(editorVal).text().trim()){
+                                    alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+                                    return false;
+                                } else {
+                                    fn.deleteSubmit(ids);
+                                }
+                            } else {
+                                return false;
+                            }
+                        })
+                        .set('onshow', function(e){
+                            $("#deleteLicenseEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        })
+                        .setContent(innerHtml).show();
+                } else {
+                    alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+                    return false;
+                }
+            },
+            deleteSubmit : function (ids) {
+                loading.show();
+
+                var summernoteVal = replaceWithLink($("#deleteLicenseEditor").summernote('code'));
+                var params = {
+                    licenseIds : ids,
+                    comment : summernoteVal
+                }
+
+                $.ajax({
+                    url: '/license/multiDelAjax',
+                    type: "POST",
+                    dataType: 'json',
+                    cache: false,
+                    data: params,
+                    success: function (data) {
+                        loading.hide();
+
+                        if ("false" == data.isValid) {
+                            if(data.validMsg) {
+                                alertify.alert(data.validMsg, function(e){
+                                    reloadTabInframe('/license/list');
+                                });
+                            } else {
+                                alertify.error([[#{msg.common.valid2}]], 0);
+                            }
+                        } else {
+                            alertify.alert([[#{msg.common.success}]] ,function(e){
+                                reloadTabInframe('/license/list');
+                            });
+                        }
+                    },
+                    error: function (data) {
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+            },
+            onMoreLicenseDisplay : async function(licenseName) {
+                localStorage.setItem("ossSearchConditions", JSON.stringify({ "licenseName": licenseName }));
+                await callCreateTabInFrame("Open Source", "/oss/list", 'oss-list', true);
+            }
+        };
+
+        var list = {
+            load: function () {
+                var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
+                var rowList = rowStr.split(",");
+                var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
+
+                var colNameArr = ['ID', 'License Name (Identifier)', 'Identifier', 'License Type', 'Restriction', 'Obligation', 'Website', 'User Guide'];
+ 
+                colNameArr.push('Creator');
+                colNameArr.push('Created Date');
+                colNameArr.push('Modifier');
+                colNameArr.push('Modified Date');
+              
+                var colModelArr = [];
+                var colModelObj = {name: 'licenseId', index: 'licenseId', width: 40, align: 'center', sorttype: 'int'};
+                colModelArr.push(colModelObj);
+                colModelObj = {
+                    name: 'licenseName', index: 'licenseName', width: 160, align: 'left'
+                        , formatter: function(cellvalue, options, rowObject){
+                            var display = "";
+
+                            var _frameId = options.rowId + "_License";
+                            var _frameTarget = "/license/edit/" + options.rowId;
+                            display = "<a class='urlLink' href=\"javascript:;\" onclick=\"createTabInFrame('"+_frameId+"','"+_frameTarget+"')\" >" + cellvalue + "</a>";
+                            return display;
+                        }
+                };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'shortIdentifier', index: 'shortIdentifier', width: 50, align: 'left', hidden: true};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'licenseType', index: 'licenseType', width: 60, align: 'center'};
+                colModelArr.push(colModelObj);
+                colModelObj = {
+                    name: 'restriction',
+                    index: 'restriction',
+                    width: 30,
+                    align: 'center',
+                    formatter: fn_grid_com.displayLicenseRestriction,
+                    unformat: fn_grid_com.unformatter,
+                    sortable: false,
+                    search: false
+                };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'obligation', index: 'obligation', width: 50, align: 'left', sortable: false};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'webpage', index: 'webpage', width: 80, align: 'left', formatter: 'link'};
+                colModelArr.push(colModelObj);
+                colModelObj = {
+                    name: 'description'
+                    , index: 'description'
+                    , width: 100
+                    , align: 'left'
+                    , cellattr: function (rowId, val, rawObject, cm, rdata) {
+                        return 'title="' + rawObject['description'] + '" style="cursor: pointer;"';
+                    }
+                    , formatter: function (cellvalue, options, rowObject) {
+                        if (cellvalue != null && "" != cellvalue) {
+                            return cellvalue.replace(/<[^>]+>/g, '').split('\n')[0];
+                        } else {
+                            return "";
+                        }
+                    }
+                };
+                colModelArr.push(colModelObj);
+
+                colModelObj = {name: 'creator', index: 'creator', width: 40, align: 'center'};
+                colModelArr.push(colModelObj);
+                colModelObj = {
+                    name: 'createdDate',
+                    index: 'createdDate',
+                    width: 45,
+                    align: 'center',
+                    formatter: 'date',
+                    formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}
+                };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'modifier', index: 'modifier', width: 40, align: 'center'};
+                colModelArr.push(colModelObj);
+                colModelObj = {
+                    name: 'modifiedDate',
+                    index: 'modifiedDate',
+                    width: 45,
+                    align: 'center',
+                    formatter: 'date',
+                    formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}
+                };
+                colModelArr.push(colModelObj);
+        
+               // apply user columns setting 
+                var listType = 'LICENSE';
+				var totalColInfos = [
+					{'ID': 'licenseId'},
+					{'License Name': 'licenseName'},
+					{'Identifier': 'shortIdentifier'},
+					{'License Type': 'licenseType'},
+					{'Restriction': 'restriction'},
+					{'Obligation': 'obligation'},
+					{'Website': 'webpage'},
+					{'User Guide': 'description'},
+					{'Creator': 'creator'},
+					{'Created Date': 'createdDate'},
+					{'Modifier': 'modifier'},
+					{'Modified Date': 'modifiedDate'}
+				]
+				var defaultColNames = ['licenseName', 'restriction', 'obligation'];
+				
+				applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);
+
+              
+                $("#list").jqGrid({
+                    url: '/license/listAjax',
+                    datatype: 'json',
+                    postData: initParam,
+                    jsonReader: {
+                        repeatitems: false,
+                        id: 'licenseId',
+                        root: function (obj) {
+                            return obj.rows;
+                        },
+                        page: function (obj) {
+                            return obj.page;
+                        },
+                        total: function (obj) {
+                            return obj.total;
+                        },
+                        records: function (obj) {
+                            return obj.records;
+                        }
+                    },
+                    colNames: colNameArr,
+                    colModel: colModelArr,
+                    rowNum: rowNum,
+                    rowList: rowList,
+                    autowidth: true,
+                    toppager: true,
+                    pager: '#pager',
+                    gridview: true,
+                    sortable: function (permutation) {
+                    },
+                    sortname: 'licenseId',
+                    viewrecords: true,
+                    sortorder: 'desc',
+                    loadonce: false,
+                    height: 'auto',
+                    multiselect : true,
+                    multiselectWidth: 35,
+                    gridComplete: function () {
+
+                        if (!data.existTooltip) {
+                            $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_obligation"))
+                                .attr("title", data.tooltipCont).tooltip({
+                                content: function () {
+                                    return $(this).prop('title');
+                                }
+                            }).on('inserted.bs.tooltip', function() {
+						        var tooltipId = 'gridHeaderTooltip';
+						        $('.tooltip').attr('id', tooltipId);
+						    });
+                            data.existTooltip = true;
+                        }
+                    },
+                    loadComplete: function (result) {
+                        totalRow = result.records;
+                        // 헤더에 버튼 추가
+
+                        if (totalRow == 0) {
+                            var cStartDate = $("#cStartDate").val() || 0;
+                            var cEndDate = $("#cEndDate").val() || 0;
+                            var diffNum = +cStartDate - +cEndDate;
+
+                            var mStartDate = $("#mStartDate").val() || 0;
+                            var mEndDate = $("#mEndDate").val() || 0;
+                            var diffNum2 = +mStartDate - +mEndDate;
+
+                            if ((diffNum > 0 && cEndDate > 0) || (diffNum2 > 0 && mEndDate > 0)) {
+                                alertify.alert([[#{msg.common.search.check.date}]], function () {
+                                });
+                            }
+                        }
+
+                         var pageButtonArea = $('#list_toppager_left');
+                        if (pageButtonArea.find('button').length == 0) {
+                        	var appendIcon = "";
+                            if ([[${@CommonFunction.isAdmin()}]]) {
+                            	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\"><i class=\"fas fa-plus\"></i></button>";
+                            	appendIcon += "<div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\">";
+                            	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('New_License', '/license/edit')\">Add License</span>";
+                            	appendIcon += "<span class=\"dropdown-item pointer\" onclick=\"createTabInFrame('BulkReg_License', '/license/licenseBulkReg')\">Bulk Registration</span></div>";
+                            	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deleteLicense()\"><i class=\"far fa-trash-alt\"></i></button>";
+                            }
+                            appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+
+                            pageButtonArea.append(appendIcon);
+                        }
+                        
+                        var setUpColumnButton = $('#setUpColumnButton');
+                        /* columns licalization */
+                        if (setUpColumnButton.length === 0) {
+                            var savedColNames = [];
+                            var userColumnsSettingMenuOptions = {
+                                _listType: listType,
+                                _totalColInfos: totalColInfos,
+                                _defaultColNames: defaultColNames,
+                                _savedColNames: savedColNames
+                            };
+                            pageButtonArea.append(createUserCoulmnsSettingButton(userColumnsSettingMenuOptions));
+
+                            // Check for click events occurring inside the menu area
+                            $("#setUpColumnMenu").on("click", function(event) {
+                                event.stopPropagation();
+                            });
+
+                            $('#setUpColumnButton').on("click", function(event) {
+                                event.stopPropagation();
+                                $('#setUpColumnMenu').toggleClass("show");
+                                $(this).toggleClass("show");
+                            })
+                        }
+                       
+                        adjustPageGridSize();
+                    },
+                    onSelectRow: function (id) {
+                        $('#' + id + 'description').width(130).height(140);
+                    },
+                	gridComplete : function() {
+						 updateGridRowCount('list', 'pager'); 
+					}
+                });
+            }
+        };
+
+        function displayUrl(cellvalue) {
+            return "<a href=\"" + cellvalue + "\" class=\"urlLink\" target=\"_blank\">" + cellvalue + "</a>";
+        }
+
+        function openDetailPage(licenseId) {
+            callCreateTabInFrame(licenseId + '_License', '/license/edit/' + licenseId, 'license-edit_' + licenseId, true);
+        }
+    </script>
+</th:block>

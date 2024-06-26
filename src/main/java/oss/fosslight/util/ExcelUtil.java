@@ -45,7 +45,10 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -55,12 +58,18 @@ import oss.fosslight.common.ColumnMissingException;
 import oss.fosslight.common.ColumnNameDuplicateException;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.config.AppConstBean;
-import oss.fosslight.domain.*;
+import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssAnalysis;
+import oss.fosslight.domain.OssComponents;
+import oss.fosslight.domain.OssComponentsLicense;
+import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.Project;
+import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.T2File;
+import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.FileService;
-
-import static oss.fosslight.common.CoConstDef.*;
 
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
@@ -496,8 +505,8 @@ public class ExcelUtil extends CoTopComponent {
 		return value;
 	}
 
-	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, List<OssComponents> list, List<String> errMsgList) {
-		return readReport(readType, checkId, targetSheetNums, fileSeq, list, errMsgList, false);
+	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, List<OssComponents> list, List<String> errMsgList, Map<String, String> emptyErrMsg) {
+		return readReport(readType, checkId, targetSheetNums, fileSeq, list, errMsgList, emptyErrMsg, false);
 	}
 	
 	/**
@@ -511,8 +520,8 @@ public class ExcelUtil extends CoTopComponent {
 	 * @return
 	 */
 	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, 
-	        List<OssComponents> list,List<String> errMsgList, boolean exactMatchFlag) {
-		
+	        List<OssComponents> list,List<String> errMsgList, Map<String, String> emptyErrMsg, boolean exactMatchFlag) {
+
 		T2File fileInfo = fileService.selectFileInfo(fileSeq);
 		if (fileInfo == null) {
 			log.error("파일정보를 찾을 수 없습니다. fileSeq : " + avoidNull(fileSeq));
@@ -707,14 +716,16 @@ public class ExcelUtil extends CoTopComponent {
 					newLineYn = true;
 				}
 				if (!isEmpty(emptySheet)) {
-					returnMsg += newLineYn?"<br/><br/>":"";
-					returnMsg += "There are no OSS listed. Sheet Name : [".concat(emptySheet).concat("]");
-					returnMsg += "<br><br>";
-					returnMsg += "사용한 Open Source가 없으면, OSS Name란에 하이픈(\"-\")을 기재하고, License란에서는 \"LGE Proprietary License\" (3rd Party가 자체 개발한 File일 경우, Other Proprietary License)를 선택하십시오.";
-					returnMsg += "<br><br>";	
-					returnMsg += "For the files that do not use open source at all, enter \"-\" on the OSS Name field and select \"LGE Proprietary License\" on the License field (\"Other Proprietary License\" for the file obtained from the 3rd Party).";
+//					returnMsg += newLineYn?"<br/><br/>":"";
+//					returnMsg += "There are no OSS listed. Sheet Name : [".concat(emptySheet).concat("]");
+//					returnMsg += "<br><br>";
+//					returnMsg += "사용한 Open Source가 없으면, OSS Name란에 하이픈(\"-\")을 기재하고, License란에서는 \"LGE Proprietary License\" (3rd Party가 자체 개발한 File일 경우, Other Proprietary License)를 선택하십시오.";
+//					returnMsg += "<br><br>";	
+//					returnMsg += "For the files that do not use open source at all, enter \"-\" on the OSS Name field and select \"LGE Proprietary License\" on the License field (\"Other Proprietary License\" for the file obtained from the 3rd Party).";
+					emptyErrMsg.put("emptyErrMsg", getMessage("msg.common.check.sheet.empty" , new String[]{emptySheet}));
+				} else {
+					throw new ColumnMissingException(returnMsg);
 				}
-				throw new ColumnMissingException(returnMsg);
 			}
 
 		} catch (ColumnNameDuplicateException e) {
@@ -789,6 +800,12 @@ public class ExcelUtil extends CoTopComponent {
 		int packageIdentifierCol = -1;
 		// Dependencies
 		int dependenciesCol = -1;
+		// tlsh
+		int tlshCol = -1;
+		// Check Sum
+		int checkSumCol = -1;
+		// Package URL
+		int packageUrlCol = -1;
 
 		Map<String, String> errMsg = new HashMap<>();
 		
@@ -880,6 +897,15 @@ public class ExcelUtil extends CoTopComponent {
 						copyrightTextCol = colIdx;
 						
 						break;
+					case "MANIFEST FILE":
+					case "PURL":
+					case "PACKAGE URL":
+						if (packageUrlCol > -1) {
+							dupColList.add(value);
+						}
+						packageUrlCol = colIdx;
+						
+						break;
 					case "PATH OR FILE":
 					case "PATH":
 					case "FILE OR DIRECTORY":
@@ -890,7 +916,8 @@ public class ExcelUtil extends CoTopComponent {
 					case "BINARY NAME OR (IF DELIVERY FORM IS SOURCE CODE) SOURCE PATH":
 					case "FILE NAME OR PATH":
 					case "SOURCE NAME OR PATH":
-					case "MANIFEST FILE":
+					case "SOURCE OR BINARY PATH":
+					case "SOURCE PATH":
 						if (pathOrFileCol > -1) {
 							dupColList.add(value);
 						}
@@ -937,6 +964,7 @@ public class ExcelUtil extends CoTopComponent {
 					case "BINARY FILE":
 					case "BINARY/LIBRARY FILE":
 					case "BINARY NAME":
+					case "BINARY PATH":
 						if (binaryNameCol > -1) {
 							dupColList.add(value);
 						}
@@ -997,12 +1025,29 @@ public class ExcelUtil extends CoTopComponent {
 						}
 						
 						spdxIdentifierCol = colIdx;
+						break;
 					case "DEPENDENCIES":
+					case "DEPENDS ON":
 						if (dependenciesCol > -1) {
 							dupColList.add(value);
 						}
 
 						dependenciesCol = colIdx;
+						break;
+					case "TLSH":
+						if (tlshCol > -1) {
+							dupColList.add(value);
+						}
+
+						tlshCol = colIdx;
+						break;
+					case "SHA1":
+						if (checkSumCol > -1) {
+							dupColList.add(value);
+						}
+
+						checkSumCol = colIdx;
+						break;
 					default:
 						break;
 				}
@@ -1207,6 +1252,8 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setFilePath(_replaceFilePath);
     				}
     				
+    				bean.setPackageUrl(packageUrlCol < 0 ? "" : getCellData(row.getCell(packageUrlCol)));
+    				
     				// empty row check
     				if (isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getBinaryName()) && isEmpty(bean.getFilePath())
     						&& isEmpty(bean.getDownloadLocation()) && isEmpty(bean.getHomepage()) && isEmpty(bean.getCopyrightText())) {
@@ -1225,6 +1272,14 @@ public class ExcelUtil extends CoTopComponent {
     
     				if (dependenciesCol > -1) {
 						bean.setDependencies(dependenciesCol < 0 ? "" : avoidNull(getCellData(row.getCell(dependenciesCol))).trim().replaceAll("\t", ""));
+					}
+    				
+    				if (tlshCol > -1) {
+						bean.setTlsh(tlshCol < 0 ? "" : avoidNull(getCellData(row.getCell(tlshCol))).trim().replaceAll("\t", ""));
+					}
+    				
+    				if (checkSumCol > -1) {
+						bean.setCheckSum(checkSumCol < 0 ? "" : avoidNull(getCellData(row.getCell(checkSumCol))).trim().replaceAll("\t", ""));
 					}
     				
     				// homepage와 download location이 http://로 시작하지 않을 경우 자동으로 체워줌
@@ -1330,6 +1385,8 @@ public class ExcelUtil extends CoTopComponent {
 		int noticeHtmlCol = -1;
 		int excludeCol = -1;
 		int commentCol = -1;
+		int tlshCol = -1;
+		int sha1Col = -1;
 		
 		DefaultHeaderRowIndex = findHeaderRowIndex(sheet);
 		
@@ -1412,6 +1469,7 @@ public class ExcelUtil extends CoTopComponent {
 					break;
 				case "BINARY/LIBRARY FILE":
 				case "BINARY NAME":
+				case "BINARY PATH":
 					if (binaryFileCol > -1) {
 						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
 					}
@@ -1421,6 +1479,7 @@ public class ExcelUtil extends CoTopComponent {
 					break;
 				case "DIRECTORY":
 				case "SOURCE CODE PATH":
+				case "SOURCE PATH":
 					if (pathOrFileCol > -1) {
 						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
 					}
@@ -1446,6 +1505,7 @@ public class ExcelUtil extends CoTopComponent {
 					
 					break;
 				case "NOTICE.HTML":
+				case "NOTICE":
 					if (noticeHtmlCol > -1) {
 						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
 					}
@@ -1467,6 +1527,22 @@ public class ExcelUtil extends CoTopComponent {
 					}
 					
 					commentCol = colIdx;
+					
+					break;
+				case "TLSH":
+					if (tlshCol > -1) {
+						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
+					}
+					
+					tlshCol = colIdx;
+					
+					break;
+				case "SHA1":
+					if (sha1Col > -1) {
+						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
+					}
+					
+					sha1Col = colIdx;
 					
 					break;
 				default:
@@ -1559,6 +1635,9 @@ public class ExcelUtil extends CoTopComponent {
     			if ("false".equals(bean.getCopyrightText())) {
     				bean.setCopyrightText("");
     			}
+    			
+    			bean.setTlsh(tlshCol < 0 ? "" : getCellData(row.getCell(tlshCol)));
+    			bean.setCheckSum(sha1Col < 0 ? "" : getCellData(row.getCell(sha1Col)));
     
     			if (isEmpty(bean.getBinaryName()) && isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getFilePath()) 
     					&& isEmpty(bean.getDownloadLocation()) && isEmpty(bean.getHomepage()) && isEmpty(bean.getCopyrightText())) {
@@ -2548,9 +2627,10 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 
+		CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
 		try (
 			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
-			CSVReader csvReader = new CSVReader(csvFile, '|');
+			CSVReader csvReader = new CSVReaderBuilder(csvFile).withCSVParser(parser).build();
 		) {
 			List<String[]> allData = csvReader.readAll();
 			
@@ -3240,10 +3320,12 @@ public class ExcelUtil extends CoTopComponent {
 				String header = avoidNull(getCellData(cell)).trim().toUpperCase();
 				switch(header) {
 					case "BINARY/LIBRARY FILE":
+					case "BINARY PATH":
 					case "BINARY NAME": binaryNameCnt++;
 						break;
 						
 					case "DIRECTORY":
+					case "SOURCE PATH":
 					case "SOURCE CODE PATH": sourceCodePathCnt++;
 						break;
 						
@@ -3299,9 +3381,11 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 
+
+		CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
 		try (
 			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
-			CSVReader csvReader = new CSVReader(csvFile, '|');
+				CSVReader csvReader = new CSVReaderBuilder(csvFile).withCSVParser(parser).build();
 		) {
 			List<String[]> allData = csvReader.readAll();
 			if (allData != null) {

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+<th:block th:replace="oss/ossAnalysisResultDetail-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <div class="custom-layout" style="height: auto">
+			<section class="content">
+				<div class="container-fluid">
+					<div class="row mt-3">
+						<div class="col-4 detailView1">
+							<div class="col-12">
+							<form name="ossForm1" id="ossForm1">
+								<input type="hidden" name="ossLicensesJson"/>
+								<input type="hidden" name="ossId"/>
+								<input type="hidden" name="licenseType" id="licenseType" />
+								<input type="hidden" name="obligationType" id="obligationType" />
+								<input type="hidden" name="ossType"/>
+								<input type="hidden" name="validationType"/>
+								<input type="hidden" name="downloadLocation"/>
+								<input type="hidden" name="licenseDiv"/>
+								<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
+									<div class="form-group" style="margin-top: 1rem;">
+										<label class="text-smaller" th:text="Title"></label>
+										<div class="col-12">
+											<select class="form-control select2" id="selectTitle1" th:onchange="|Ctrl_fn.selectTitle(1)|" style="width: 100%;"></select>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.OSS.name}"></label>
+										<div class="col-12">
+											<input class="form-control" type="text" name="ossName" id="detailOssName1"/>
+											<span class="retxt"></span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.OSS.version}"></label>
+										<div class="col-12">
+											<input class="form-control" type="text" name="ossVersion" id="detailOssVersion1"/>
+											<span class="retxt"></span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.nickname}"></label>
+										<div class="col-12">
+											<div class="input-group">
+												<input class="form-control" type="text" id="input_ossNicknames1"/>
+												<div class="input-group-append">
+                                            		<button class="btn btn-outline-dark text-smaller" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.nicknameAdd('1')|"></button>
+                                          		</div>
+											</div>
+											<div class="col-12">
+                                    			<div class="row multiTxtSet detailNickName1"></div>
+                                    		</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.declaredLicense}"></label>
+										<!-- <button type="button" class="btn btn-info btn-xs" id="btnShowLicenseText1" th:text="'Show license text'"></button> -->
+										<div class="col-12">
+                                        	<div class="detailLicense1">
+                                       			<div class="mark1"></div>
+                                       			<div class="jqGridSet mt-1 mt5">
+                                            		<table id="_licenseChoice1"><tr><td></td></tr></table>
+                                            		<div id="_licenseChoicePager1"></div>
+                                        		</div>
+                                        	</div>
+                                        </div>
+                                        <div id="disp_licenseText1" style="display: none;"></div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.detectedLicense}"></label>
+										<div class="col-12">
+											<div class="input-group">
+                                        		<input class="form-control autoComOssLicense" id="input_detectedLicense1" type="text"/>
+                                           		<div class="input-group-append">
+                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.detectedLicenseAdd('1')|"></button>
+                                            	</div>
+                                     		</div>
+										</div>
+										<div class="col-12">
+                                    		<div class="row multiItemSet multiDetectedLicenseSet detailDetectedLicense1"></div>
+                                    	</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.Copyright}"></label>
+										<div class="col-12">
+											<textarea class="form-control" id="detailCopyright1" name="copyright" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.licenseType}"></label>
+										<div class="col-12" id="lt1"></div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.obligation}"></label>
+										<div class="col-12" id="ob1"></div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
+										<div class="col-12">
+											<div class="input-group">
+                                        		<input class="form-control" id="input_downloadLocations" type="text"/>
+                                           		<div class="input-group-append">
+                                            		<button class="btn btn-outline-dark text-smaller" id="downloadLocationAdd1" type="button" th:text="Add" th:onclick="|Ctrl_fn.downloadLocationAdd('1')|"></button>
+                                            	</div>
+                                     		</div>
+										</div>
+										<div class="col-12">
+											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation1"></div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.homepage}"></label>
+										<div class="col-12">
+											<input class="form-control" id="detailHomePage1" name="homepage" placeholder="http://" type="text"/>
+											<span class="urltxt"></span>
+											<span class="retxt"></span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.summaryDescription}"></label>
+										<div class="col-12">
+											<textarea class="form-control" name="summaryDescription" id="detailSummaryDescription1" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.comment}"></label>
+										<div class="col-12">
+											<textarea class="form-control" name="comment" id="detailcomment1" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<button type="button" class="btn btn-dark mx-1 text-smaller float-right" id="save1" name="save" th:text="Save"></button>
+									</div>
+								</div>
+							</form>
+							</div>
+						</div>
+						<div class="col-4 detailView2">
+							<div class="col-12">
+							<form name="ossForm2" id="ossForm2">
+								<input type="hidden" name="ossLicensesJson"/>
+								<input type="hidden" name="ossId"/>
+								<input type="hidden" name="licenseType" id="licenseType" />
+								<input type="hidden" name="obligationType" id="obligationType" />
+								<input type="hidden" name="ossType"/>
+								<input type="hidden" name="validationType"/>
+								<input type="hidden" name="downloadLocation"/>
+								<input type="hidden" name="licenseDiv"/>
+								<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
+									<div class="form-group" style="margin-top: 1rem;">
+										<label class="text-smaller" th:text="Title"></label>
+										<div class="col-12">
+											<select class="form-control select2" id="selectTitle2" th:onchange="|Ctrl_fn.selectTitle(2)|" style="width: 100%;"></select>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.OSS.name}"></label>
+										<div class="col-12">
+											<input class="form-control" type="text" name="ossName" id="detailOssName2"/>
+											<span class="retxt"></span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.OSS.version}"></label>
+										<div class="col-12">
+											<input class="form-control" type="text" name="ossVersion" id="detailOssVersion2"/>
+											<span class="retxt"></span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.nickname}"></label>
+										<div class="col-12">
+											<div class="input-group">
+												<input class="form-control" type="text" id="input_ossNicknames2"/>
+												<div class="input-group-append">
+                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.nicknameAdd('2')|"></button>
+                                          		</div>
+											</div>
+											<div class="col-12">
+                                    			<div class="row multiTxtSet detailNickName2"></div>
+                                    		</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.declaredLicense}"></label>
+										<!-- <button type="button" class="btn btn-info btn-xs" id="btnShowLicenseText2" th:text="'Show license text'"></button> -->
+										<div class="col-12">
+                                        	<div class="detailLicense2">
+                                       			<div class="mark1"></div>
+                                       			<div class="jqGridSet mt-1 mt5">
+                                            		<table id="_licenseChoice2"><tr><td></td></tr></table>
+                                            		<div id="_licenseChoicePager2"></div>
+                                        		</div>
+                                        	</div>
+                                        </div>
+                                        <div id="disp_licenseText2" style="display: none;"></div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.detectedLicense}"></label>
+										<div class="col-12">
+											<div class="input-group">
+                                        		<input class="form-control autoComOssLicense" id="input_detectedLicense2" type="text"/>
+                                           		<div class="input-group-append">
+                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.detectedLicenseAdd('2')|"></button>
+                                            	</div>
+                                     		</div>
+										</div>
+										<div class="col-12">
+                                    		<div class="row multiItemSet multiDetectedLicenseSet detailDetectedLicense2"></div>
+                                    	</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.Copyright}"></label>
+										<div class="col-12">
+											<textarea class="form-control" id="detailCopyright2" name="copyright" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.licenseType}"></label>
+										<span id="lt2"></span>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.obligation}"></label>
+										<span id="ob2"></span>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
+										<div class="col-12">
+											<div class="input-group">
+                                        		<input class="form-control" id="input_downloadLocations" type="text"/>
+                                           		<div class="input-group-append">
+                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.downloadLocationAdd('2')|"></button>
+                                            	</div>
+                                     		</div>
+										</div>
+										<div class="col-12">
+											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation2"></div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.homepage}"></label>
+										<div class="col-12">
+											<input class="form-control" id="detailHomePage2" name="homepage" placeholder="http://" type="text"/>
+											<span class="urltxt"></span>
+											<span class="retxt"></span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.summaryDescription}"></label>
+										<div class="col-12">
+											<textarea class="form-control" name="summaryDescription" id="detailSummaryDescription2" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.comment}"></label>
+										<div class="col-12">
+											<textarea class="form-control" name="comment" id="detailcomment2" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<button type="button" class="btn btn-dark mx-1 text-smaller float-right" id="save2" name="save" th:text="Save"></button>
+									</div>
+								</div>
+							</form>
+							</div>
+						</div>
+						<div class="col-4 detailView3">
+							<div class="col-12">
+							<form name="ossForm3" id="ossForm3">
+								<input type="hidden" name="ossLicensesJson"/>
+								<input type="hidden" name="ossId"/>
+								<input type="hidden" name="licenseType" id="licenseType" />
+								<input type="hidden" name="obligationType" id="obligationType" />
+								<input type="hidden" name="ossType"/>
+								<input type="hidden" name="validationType"/>
+								<input type="hidden" name="downloadLocation"/>
+								<input type="hidden" name="licenseDiv"/>
+								<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
+									<div class="form-group" style="margin-top: 1rem;">
+										<label class="text-smaller" th:text="Title"></label>
+										<div class="col-12">
+											<select class="form-control select2" id="selectTitle1" th:onchange="|Ctrl_fn.selectTitle(3)|" style="width: 100%;"></select>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.OSS.name}"></label>
+										<div class="col-12">
+											<input class="form-control" type="text" name="ossName" id="detailOssName3"/>
+											<span class="retxt"></span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.OSS.version}"></label>
+										<div class="col-12">
+											<input class="form-control" type="text" name="ossVersion" id="detailOssVersion3"/>
+											<span class="retxt"></span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.nickname}"></label>
+										<div class="col-12">
+											<div class="input-group">
+												<input class="form-control" type="text" id="input_ossNicknames3"/>
+												<div class="input-group-append">
+                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.nicknameAdd('1')|"></button>
+                                          		</div>
+											</div>
+											<div class="col-12">
+                                    			<div class="row multiTxtSet detailNickName3"></div>
+                                    		</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.declaredLicense}"></label>
+										<!-- <button type="button" class="btn btn-info btn-xs" id="btnShowLicenseText3" th:text="'Show license text'"></button> -->
+										<div class="col-12">
+                                        	<div class="detailLicense3">
+                                       			<div class="mark1"></div>
+                                       			<div class="jqGridSet mt-1 mt5">
+                                            		<table id="_licenseChoice3"><tr><td></td></tr></table>
+                                            		<div id="_licenseChoicePager3"></div>
+                                        		</div>
+                                        	</div>
+                                        </div>
+                                        <div id="disp_licenseText3" style="display: none;"></div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.detectedLicense}"></label>
+										<div class="col-12">
+											<div class="input-group">
+                                        		<input class="form-control autoComOssLicense" id="input_detectedLicense3" type="text"/>
+                                           		<div class="input-group-append">
+                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.detectedLicenseAdd('3')|"></button>
+                                            	</div>
+                                     		</div>
+										</div>
+										<div class="col-12">
+                                    		<div class="row multiItemSet multiDetectedLicenseSet detailDetectedLicense3"></div>
+                                    	</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.Copyright}"></label>
+										<div class="col-12">
+											<textarea class="form-control" id="detailCopyright3" name="copyright" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.licenseType}"></label>
+										<span id="lt3"></span>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.obligation}"></label>
+										<span id="ob3"></span>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
+										<div class="col-12">
+											<div class="input-group">
+                                        		<input class="form-control" id="input_downloadLocations" type="text"/>
+                                           		<div class="input-group-append">
+                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.downloadLocationAdd('3')|"></button>
+                                            	</div>
+                                     		</div>
+										</div>
+										<div class="col-12">
+											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation3"></div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.homepage}"></label>
+										<div class="col-12">
+											<input class="form-control" id="detailHomePage3" name="homepage" placeholder="http://" type="text"/>
+											<span class="urltxt"></span>
+											<span class="retxt"></span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.summaryDescription}"></label>
+										<div class="col-12">
+											<textarea class="form-control" name="summaryDescription" id="detailSummaryDescription3" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="text-smaller" th:text="#{msg.common.field.comment}"></label>
+										<div class="col-12">
+											<textarea class="form-control" name="comment" id="detailcomment3" rows="3"></textarea>
+										</div>
+									</div>
+									<div class="form-group">
+										<button type="button" class="btn btn-dark mx-1 text-smaller float-right" id="save3" name="save" th:text="Save"></button>
+									</div>
+								</div>
+							</form>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+			</section>
+		</div>
+    </div>
+</body>
+</html>

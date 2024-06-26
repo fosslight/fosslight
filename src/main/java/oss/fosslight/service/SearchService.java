@@ -41,4 +41,7 @@ public interface SearchService extends HistoryConfig {
 
 	void saveSearchFilter(Map<String, Object> params, String userId);
 
+    String getUserColumns(Map<String, Object> params, String userId);
+
+    void saveUserColumns(Map<String, Object> params, String userId);
 }

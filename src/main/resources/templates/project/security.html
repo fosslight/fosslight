@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="project/security-header :: headerFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="project/security-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <div class="custom-layout multi-grid-page">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                    	<div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
+                    	<div class="float-right align-items-center mt-2" style="margin-left: auto;">
+<!--                        <div class="helpLink f-left dropdown float-right px-1">
+                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
+                                <div class="dropdown-menu mt-0">
+                                    <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_Security')|">How to use FossLight Hub</a>
+                                </div>
+                            </div> -->
+                            <div class="float-right">
+                        		<button class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
+                        	</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+            	<div class="container-fluid">
+            	<div class="row">
+            	<div class="contents-area col-9">
+            		<input type="hidden" name="prjId" th:value="${project.prjId}"/>
+            		<div class="topper-content">
+                    <div class="card card-secondary card-tabs">
+                        <div class="card-header d-flex p-0 pt-1">
+                        	<div class="d-flex align-items-center">
+                            	<ul class="nav nav-tabs" id="menu-tab" role="tablist">
+                                	<li class="nav-item">
+                                    	<a class="nav-link active" id="tabMenuTotal" data-toggle="pill" href="#menu-total" role="tab" aria-controls="menu-total" aria-selected="true" th:text="Total"></a>
+                                	</li>
+                                	<li class="nav-item">
+                                    	<a class="nav-link" id="tabMenuFixed" data-toggle="pill" href="#menu-fixed" role="tab" aria-controls="menu-fixed" aria-selected="false" th:text="Fixed"></a>
+                                	</li>
+                                	<li class="nav-item">
+                                    	<a class="nav-link" id="tabMenuNotFixed" data-toggle="pill" href="#menu-not-fixed" role="tab" aria-controls="menu-not-fixed" aria-selected="false" th:text="'Not Fixed'"></a>
+                                	</li>
+                            	</ul>
+                        	</div>
+                        	<div class="d-flex-align" style="margin-left: auto;">
+	                        	<span th:if="${project.statusPermission > 0}" class="ml-2 mr-2 px-2 pointer" id="save" th:onclick="|total.save()|" title="save">
+									<i class="fas fa-save customIcon2"></i>
+								</span>
+	                        </div>
+                        </div>
+                    </div>
+                    </div>
+					<div class="bottom-component">
+					<div class="row pl-2 grid-area" name="gridArea" id="gridAreaTotal" style="width: 100%; display: none;">
+                        <!-- buttons -->
+ <!--                  	<div class="col-md-12 mb-3 pl-2">
+                            <div class="row">
+                                <div class="col-md-6">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row float-right">
+                                        <button type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:onclick="|total.save()|" th:text="Save"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                        <!-- grids -->
+                        <div class="col-md-12 jqGridSet">
+                            <table id="totalList"><tr><td></td></tr></table>
+                            <div id="totalListPager"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaFixed" style="width: 100%;display: none;">
+                        <!-- buttons -->
+<!--                   	<div class="col-md-12 mb-3 pl-2">
+                            <div class="row">
+                            	<div class="col-md-6">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row float-right">
+                                        <button type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:onclick="|fixed.save()|" th:text="Save"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                        <!-- grids -->
+                        <div class="col-md-12 jqGridSet">
+                            <table id="fixedList"><tr><td></td></tr></table>
+                            <div id="fixedListPager"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaNotFixed" style="width: 100%; display: none;">
+                        <!-- buttons -->
+<!--                   	<div class="col-md-12 mb-3 pl-2">
+                            <div class="row">
+                            	<div class="col-md-6">
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row float-right">
+                                        <button type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:onclick="|notFixed.save()|" th:text="Save"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                        <!-- grids -->
+                        <div class="col-md-12 jqGridSet">
+                            <table id="notFixedList"><tr><td></td></tr></table>
+                            <div id="notFixedListPager"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 comment-area">
+                	<div class="card card-lg-red" style="position:sticky;top:10px;">
+                     	<div class="card-header">
+                           	<h3 class="card-title" th:text="Comment"></h3>
+                           	<div class="card-tools">
+                           		<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
+                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
+                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
+                           	</div>
+                      	</div>
+                      	<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
+                           	<div clas="row">
+                               	<div clas="col-md-12" id="commentList"></div>
+                         	</div>
+                  		</div>
+                    </div>
+               	</div>
+                </div>
+                </div>
+                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+            </section>
+        </div>
+    </div>
+    
+    <form id="secBulkEditForm">
+		<input type="hidden" name="rowId" value=""/>
+		<input type="hidden" name="gridId" value=""/>
+		<input type="hidden" name="target" value=""/>
+	</form>
+</body>
+</html>

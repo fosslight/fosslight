@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+	<div class="row">
+         <div class="col-md-7">
+          	<table class="table table-striped table-valign-middle nowrap" style="width: 100%;">
+              	<thead>
+                  	<tr>
+                      	<th class="text-center" th:text="'Time Period'"></th>
+                      	<th class="text-center" th:utext="'New CVEs<br/>Received by NVD'"></th>
+                      	<th class="text-center" th:utext="'New CVEs<br/>Matched by NVD'"></th>
+                       	<th class="text-center" th:utext="'CVEs<br/>Matched by OSS'"></th>
+                  	</tr>
+             	</thead>
+              	<tbody>
+            		<tr th:if="${!#lists.isEmpty(nvdDashboard.timePeriodCntList)}" class="text-center" th:each="timePeriodCnt, status : ${nvdDashboard.timePeriodCntList}">
+            			<td class="text-bold" th:if="${status.count == 1}" th:text="Today"></td>
+            			<td class="text-bold" th:if="${status.count == 2}" th:text="'This week'"></td>
+            			<td class="text-bold" th:if="${status.count == 3}" th:text="'This Month'"></td>
+            			<td class="text-bold" th:if="${status.count == 4}" th:text="'Last Month'"></td>
+            			<td class="text-bold" th:if="${status.count == 5}" th:text="'This Year'"></td>
+                   		<td th:text="${timePeriodCnt.newCnt}"></td>
+                   		<td th:text="${timePeriodCnt.newMatCnt}"></td>
+                  		<td th:text="${timePeriodCnt.omMCnt}"></td>
+            		</tr>
+            		<tr th:if="${#lists.isEmpty(nvdDashboard.timePeriodCntList)}" class="text-center">
+            			<td class="text-bold" colspan="4" th:text="'There is no nvd dashboard count value'"></td>
+            		</tr>
+            	</tbody>
+        	</table>
+    	</div>
+     	<div class="col-md-5">
+          	<div class="row mt-3">
+            	<div class="col-md-7">
+                  	<div id="severityChart" style="height: 300px;"></div>
+              	</div>
+      			<div class="col-md-5">
+                	<table class="table table-striped table-valign-middle mr-1">
+                       	<thead>
+                          	<tr>
+                              	<th th:text="Severity"></th>
+                              	<th th:text="'Number of Vulns'"></th>
+                           	</tr>
+                      	</thead>
+                		<tbody>
+                			<tr th:if="${!#lists.isEmpty(nvdDashboard.nvdSeverityList)}" th:each="severity : ${nvdDashboard.nvdSeverityList}">
+                				<th:block th:if="${#strings.equals(severity.severity, 'CRITICAL')}">
+                					<td><span class="badge badge-dark">CRITICAL</span></td>
+                				</th:block>
+                				<th:block th:if="${#strings.equals(severity.severity, 'HIGH')}">
+                					<td><span class="badge badge-danger">HIGH</span></td>
+                				</th:block>
+                				<th:block th:if="${#strings.equals(severity.severity, 'MEDIUM')}">
+                					<td><span class="badge badge-orange">MEDIUM</span></td>
+                				</th:block>
+                				<th:block th:if="${#strings.equals(severity.severity, 'LOW')}">
+                					<td><span class="badge badge-warning">LOW</span></td>
+                				</th:block>
+                				<td class="severityCnt" th:text="${severity.cnt}"></td>
+                			</tr>
+              			</tbody>
+                 	</table>
+             	</div>
+         	</div>
+     	</div>
+  	</div>
+</html>

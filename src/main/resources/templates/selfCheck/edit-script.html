@@ -1,0 +1,3232 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<style>
+.note-editable { background-color: white; }
+</style>
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+//<![CDATA[
+/*global $ */
+/*jslint browser: true, nomen: true */
+var lastsel;
+var codeData;
+var userRole = [[${#authentication.authorities[0].authority}]];
+var arr = new Array();
+var ossNames = [];
+var objs = [];
+var licenseNames = [];
+var isSort = false;
+var _popupCheckOssName = null;
+var _popupCheckOssLicense = null;
+var saveFlag = false;
+var etcDomain = [[${@CommonFunction.getCoConstDefVal('CD_DTL_ECT_DOMAIN')}]];
+var divisionUseFlag = true;
+var projectPermission = [[${projectPermission}]];
+var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+var viewFlag = [[${viewFlag}]];
+var isNewFlag = false;
+var _uploadFileObj;
+
+$(document).ready(function() {
+	'use strict';
+
+	if ([[${project.prjId}]] != null) {
+		fn_self.modeChange([[${project.prjId}]], 'v');
+		showHelpLink("Self-Check_Edit_Export", "helpLink_vulerabiityExport");
+	}
+	
+	$("#editor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	$("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	
+	data.init();
+	evt.init();
+	
+	if ([[${project.prjId}]] != null) {
+		src_evt.init();
+		notice_evt.init();
+	} else {
+		isNewFlag = true;
+	}
+
+	if ($("#listKind > option").length == 1){
+		$(".listKindArea").hide();
+	}
+
+	com_fn.tabInit();
+	fn.appendEditVisible($("#append"));
+	fn.initNotice();
+	
+	if ("N" == projectPermission) {
+		fn.disabledBtn();
+	}
+	
+	$("[id^=tabMenu]").on("click", function() {
+		var tabId = $(this).attr("id");
+		tabId = tabId.replace("tabMenu", "");
+		$("[name=gridArea]").hide();
+		$("#gridArea"+tabId).show();
+	});
+});
+
+var fn_self ={
+	modeChange : function(prjId, type) {
+		if("v" == type) {
+			$.ajax({
+				url : '/selfCheck/selfCheckViewAjax',
+				dataType : 'html',
+				cache : false,
+				data : {prjId : prjId},
+				success : function(detailResult){
+					$("#divViewMode").html(replaceWithLink(detailResult));
+					$("#divViewMode").show();
+					
+					if ([[${project.statusPermission}]] == 0) $("#editBtn").hide();
+					
+					if ("N" == projectPermission) {
+						var viewModeButtons = $("#divViewMode input[type=button]");
+						$.each(viewModeButtons, function(index, obj){
+							var btnId = $(obj).attr("id");
+							if("edit" == btnId){
+								$(obj).hide();
+							}
+						});
+					}
+					$("#divEditMode").hide();
+					$("#divEditSaveBtn").hide();
+					if (viewFlag != null) $("#editBtn").hide();
+				},
+				error : function(request,status,error){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		} else if("c" == type) {
+			$("#divViewMode").show();
+			$("#divEditMode").hide();
+		} else {
+			$("#divViewMode").hide();
+			$("#divEditMode").show();
+			$("#divEditSaveBtn").show();
+			
+			$("#commentTextArea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			$("#commentTextArea").summernote('code', $("#commentTextArea").val());
+		}
+	}
+}
+
+// 이벤트
+var evt = {
+	init : function(){
+		// 저장
+		$("#save").click(function(){
+			$("div.retxt").hide();
+			$("input").removeClass("is-invalid");
+			
+			alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+				if (e) {
+					var prjName = $("[name='prjName']").val();
+
+					if(/[^\s]+/.test(prjName)){
+						$(".prjName").hide();
+						fn.saveSubmit();
+					} else {
+						$("#prjName").after(makeErrMsg("This field is required."));
+						$("#prjName").addClass("is-invalid");
+						$(".prjName").show();
+					}
+				} else {
+					return false;
+				}
+			});
+		});
+		
+		$("#cancel").click(function(){
+			fn_self.modeChange([[${project.prjId}]], 'v');
+		});
+		
+		$("#delete").click(function(){
+			alertify.confirm([[#{msg.selfcheck.confirm.remove.project}]], function (e) {
+				if (e) {
+					fn.deleteSubmit();
+				} else {
+					return false;
+				}
+			});
+		});
+		
+		// 직접입력
+		$('#osType').change(function(){
+			$("#osType option:selected").each(function () {
+				$("#osTypeEtc").val('');
+				
+				if($(this).val()== '999') {
+					$("#osTypeEtc").attr("disabled",false);
+				} else {
+					$("#osTypeEtc").attr("disabled",true);
+				}
+			});
+		});
+		
+		commonAjax.getCreatorDivisionTags().success(function(data, status, headers, config){
+			data.forEach(function(obj,index){
+				arr[index] = obj.userId+":"+obj.userName;
+			});
+		});
+		
+		// 왓쳐 추가
+		$("#addWatcher").click(function(){
+			/* division 정보 */
+			var $divSel	= $("#prjDivision"),
+				divVal	= $divSel.val(),
+				divTxt	= $divSel.find("option[value='"+divVal+"']").text();
+			
+			/* division 정보 */
+			var $userSel	= $("#prjUserId"),
+				userVal		= $userSel.val()||"",
+				userTxt		= $userSel.find("option[value='"+userVal+"']").text();
+				userTxt 	= userTxt.split("(")[0];
+			
+			// 선택한 item이 없을 경우.
+			if(divVal == "" || userVal == "") {
+				return alertify.error([[#{msg.project.required.selectDivision}]], 0);
+			}
+			
+			/* tag 정보 */
+			var isNew = true;
+			
+			$(".watcherTags").each(function(i, tag){
+				var tagDiv = $(tag).val().split("/")[0]
+				  , tagUid = $(tag).val().split("/")[1];
+				
+				if(divVal == tagDiv) {
+					if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+						isNew = false;
+
+						return false;
+					}
+					
+					if(userVal == 'all') { // all을 선택했을 경우 기존 부서의 userId를 가진 tag를 삭제
+						$(tag).closest('span').remove();
+					} else if(tagUid == userVal) {
+						isNew = false;	// 이미 등록된 watcher가 있을경우
+					}
+				}
+			});
+			
+			if (isNew) {
+				var watcherStr = "";
+				if (divisionEmptyCd != divVal) {
+					watcherStr = "<b>" + divTxt + "</b>/<b>" + userTxt + "</b>";
+				} else {
+					watcherStr = "<b>" + userTxt + "</b>"
+				}
+				fn.addWatcher(divVal, userVal, '');
+				fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+			}
+		});
+		
+		// email 왓쳐 추가
+		$("#addEmail").click(function() {
+			/* AD ID 정보 */
+			var adId = $("#adId").val();
+			var domain = $("#emailTemp").val();
+
+			if(adId == "") {
+				$("#adId").focus();
+				return alertify.error([[#{enter.watcher.error}]], 0);
+			}
+			
+			var _email = adId + "@" + domain;
+			var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
+
+			if (regEmail.test(_email) == false) {
+				$("#adId").focus();
+				return alertify.error([[#{invalid.email.error}]], 0);
+			}
+			
+			$.ajax({
+				type: "POST",
+				url: '/system/user/checkEmail', 
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {'email' : _email},
+				success: function (data) {
+					if("true" == data.isValid) {
+						var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
+						fn.addWatcher(data.division, data.userId, '');
+						fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
+					} else {
+						fn.addWatcher('', '', _email);
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+			
+			$("#adId").val('');
+			$("#emailTemp").val('');
+		});
+		
+		$('#addList').on('click', function(){
+			var listKind = $("#listKind").val(),
+				listId = $("#listId").val();
+				
+			if (fn.chkListValidation(listKind, listId)) {
+				var obj = {};
+				obj["listKind"] = listKind;
+				obj["listId"] = listId;
+				
+				fn.copyWatcher(obj);
+			}
+		});
+		
+		$(".select2").select2();
+	}
+};
+
+var fn = {
+	checkStatus : function () {
+		var checked = $("#companyName").prop("checked");
+		$("#editCompanyYn").val(checked ? "Y" : "N");
+			
+		checked = $("#ossDistributionSite").prop("checked");
+		$("#editDistributionSiteUrlYn").val(checked ? "Y" : "N");
+			
+		checked = $("#email").prop("checked");
+		$("#editEmailYn").val(checked ? "Y" : "N");
+	},
+	csvUploadFile : function () {
+		var accept1 = '';
+		var fileAccept1 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept1) {
+			if ('12' == fileAccept1[i].cdDtlNo) {
+				accept1 = fileAccept1[i].cdDtlExp;
+			}
+		}
+		
+		//파일업로드
+		$('#srcCsvFile').uploadFile({
+			url:'/project/csvFile',
+			multiple:false,
+			dragDrop:true,
+			fileName:'myfile',
+			allowedTypes:accept1,
+			sequential:true,
+			sequentialCount:1,
+			dynamicFormData: function() {
+				var data ={ "registFileId" :$('#srcCsvFileId').val(), "tabNm" : "SELF"}
+				return data;
+			},
+			onSuccess:function(files,data,xhr,pd) {
+				var result = jQuery.parseJSON(data);
+				
+				if(result[1] == null){
+					alertify.error([[#{msg.common.valid}]], 0);
+					
+					$('.ajax-file-upload-statusbar').fadeOut('slow');
+					$('.ajax-file-upload-statusbar').remove();
+				} else {
+					if (result[0] == "FILE_SIZE_LIMIT_OVER") {
+						alertify.alert(result[1], function(){
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						});
+					} else if (result[2] == "CSV_FILE") {
+						src_fn.getCsvData(result[0][0].registSeq);
+
+						$('#binCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						src_fn.makeFileTag(result[0][0]);
+					} else if (result[2] == "EXCEL_FILE") {
+						if(result[1].length != 0){
+							for (var i = 0; i < result[1].length; i++){
+								var num = i+1;
+								
+								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input"';
+								sheetTr += '<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+								$("#sheetBody").append(sheetTr);
+							}
+							
+							$('#sheetApply').attr('onclick', 'src_fn.getSheetData('+result[0][0].registSeq+')');
+						}
+						
+						if(!alertify.selectSheet){
+							alertify.dialog('selectSheet', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons = [];
+										setup.focus.element = 0;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '365px';
+								        }
+									}
+								};
+							}, false, 'alert');
+	                	}
+						
+						alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
+						$("#sheetBody").empty();
+						
+						$('#srcCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+						
+						_uploadFileObj = result[0][0];
+					} else if (result[2] == "SPDX_SPREADSHEET_FILE") {
+						src_fn.getSpdxSpreadsheetData(result[0][0].registSeq);
+
+						$('#srcCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						src_fn.makeFileTag(result[0][0]);
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
+			}
+		});
+	},
+	save : function () {
+		src_fn.saveAjax();
+	},
+	reset : function () {
+		alertify.confirm([[#{msg.common.delete.recordsAndFiles}]], function (e) {
+			if (e) {
+				$("#srcList").jqGrid('clearGridData');
+				
+				var csvFiles = $("input[name=uploadCsvFile]").length;
+				//배열에 값 주입
+				for (var i=0; i<csvFiles; i++){                          
+					var fileSeq = $("input[name=uploadCsvFile]").eq(i).val();
+					var object = {fileSeq : fileSeq};
+					src_evt.csvDelFileSeq.push(object);
+				}
+				
+				$(".csvFileArea").empty();
+				
+				com_fn.exitRow("srcList");
+				// 메인, 서브 그리드 세이브 모드
+				fn_grid_com.totalGridSaveMode('srcList');
+				// 닉네임 체크
+				src_fn.saveMakeData(true);
+			} else {
+				return false;
+			}
+		});
+	},
+	delete : function () {
+		alertify.confirm([[#{msg.selfcheck.confirm.remove.project}]], function (e) {
+			if (e) {
+				fn.deleteSubmit();
+			} else {
+				return false;
+			}
+		});
+	},
+	// 그리드 삭제 버튼
+	setDelBtn : function(cellvalue, options, rowObject){
+		return "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"fn.exeDelete('"+options.rowId+"')\" />";
+	},
+	// 그리드 삭제
+	exeDelete : function(rowId){
+		$("#_modelList").jqGrid('delRowData', rowId);
+	},
+	// 저장
+	saveSubmit : function(){
+		var editorVal = $("#editor").summernote('code');
+		if ("" != $(editorVal).text().trim()) {
+			$('input[name=comment]').val(replaceWithLink(editorVal));
+		} else {
+			$('input[name=comment]').val("");
+		}
+		
+		if (isNewFlag) {
+			var watchers = $("input[name=watchers]");
+			$.each(watchers, function(index, obj){
+				$("#projectForm").append(obj);
+			});
+		}
+		
+		$("#projectForm").ajaxForm({
+			url : '/selfCheck/saveAjax',
+			type : 'POST',
+			dataType: "json",
+			cache : false,
+			success: fn.onRegistSuccess,
+			error : fn.onError
+		}).submit();
+	},
+	// 삭제
+	deleteSubmit : function(){
+		$("#projectForm").ajaxForm({
+			url :'/selfCheck/delAjax',
+			type : 'POST',
+			dataType:"json",
+			cache : false,
+			success:fn.onDeleteSuccess,
+			error : fn.onError
+		}).submit();
+	},
+	// 성공 콜백
+	onRegistSuccess : function(json, status){
+		if(json.isValid == 'false') {
+			var _errMsg = [[#{msg.common.valid}]];
+
+			if(json.validMsg && json.validMsg != "") {
+				_errMsg += "</br>" + json.validMsg;
+			}
+			alertify.error(_errMsg, 0);
+			createValidMsgComplex(json);
+		} else {
+			var prjId = $('input[name=prjId]').val();
+			alertify.alert([[#{msg.common.success}]], function(){
+				reloadTabInframe('/selfCheck/list');
+
+				if (prjId == '') {
+					deleteTabInFrame('/selfCheck/edit');
+					createTabInFrame(json.resultData.prjId+'_selfCheck', '/selfCheck/edit/'+json.resultData.prjId);
+				} else {
+					fn_self.modeChange(prjId, 'v');
+					com_fn.changeMode("view", false);
+				}
+			});	
+		}
+	},
+	// 삭제 콜백
+	onDeleteSuccess : function(json, status){
+		var prjId = $('input[name=prjId]').val();
+		
+		if(json.resCd=='10'){
+			reloadTabInframe('/selfCheck/list');
+
+			alertify.alert([[#{msg.common.success}]], function(){
+				if(prjId) {
+					deleteTabInFrame('/selfCheck/edit/'+prjId);
+				} else {
+					deleteTabInFrame('/selfCheck/edit');
+				}
+			});
+		} else {
+			alertify.error([[#{msg.common.valid2}]], 0)
+		}
+	},
+	// 에러 콜백
+	onError : function(data, status){
+		alertify.error([[#{msg.common.valid2}]], 0);
+	},
+	shareUrl : function(){
+		var copyUrl = "";
+		var protocol = window.location.protocol;
+		var host =  window.location.host;
+		copyUrl = protocol + "//" + host + "/selfCheck/shareUrl/" + [[${project.prjId}]];
+		$("#copyUrl").val(copyUrl);
+		
+		//launch it.
+		var btnHtml 	= 	'<div class="row form-group">';
+		btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
+		btnHtml 		+= 	'		<input type="text" class="form-control" value="'+copyUrl+'" disabled/>';
+		btnHtml 		+= 	'	</div>';
+		btnHtml 		+= 	'</div>';
+		btnHtml 		+= 	'<div class="row float-right custom-layout">';
+		btnHtml 		+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" onclick="fn.copyUrl(this)">Copy</button>';
+		btnHtml 		+= 	'</div>';
+
+		if(!alertify.myAlert){
+			//define a new dialog
+			alertify.dialog('myAlert',function factory(){
+				return{
+					main:function(message){
+					this.message = message;
+				},
+				setup:function(){
+					return { 
+						focus: { element:0 }
+					};
+				},
+				prepare:function(){
+					this.setContent(this.message);
+				},
+				hooks: {
+			    	onshow: function() {
+			          	this.elements.content.style.height = '220px';
+			        }
+				}
+			}});
+		}
+		
+		alertify.myAlert(btnHtml);
+	},
+	copyUrl : function(target){
+		$('#copyUrl').attr('type', 'text');
+		$('#copyUrl').select();
+        var copyFlag = document.execCommand('copy');
+        $('#copyUrl').attr('type', 'hidden');
+        
+        if (copyFlag) {
+        	$('.ajs-close').trigger("click");
+    		alertify.success([[#{msg.common.success}]]);
+        } else {
+        	alertify.error([[#{msg.common.valid}]]);
+        }
+	},
+	openPreviewPop : function(data){
+		var result =jQuery.parseJSON(data);
+		
+		if(result.isValid == 'false') {
+           	alertify.error([[#{msg.common.valid2}]], 0);
+		} else {
+			var noti = document.createElement('pre');
+
+			//custom style.
+			noti.style.maxHeight = "400px";
+			noti.style.overflowWrap = "break-word";
+			noti.style.margin = "-16px -16px -16px 0";
+			noti.style.paddingBottom = "24px";
+			noti.appendChild(document.createTextNode(result.resultData));
+			
+			if (typeof alertify.selfCheckOpenPreviewPop === "undefined"){
+				alertify.dialog('selfCheckOpenPreviewPop', function() {
+					return {
+						setup: function() {
+							var settings = alertify.alert().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.alert().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.content.style.top = "57px";
+					        }
+						}
+					};
+				}, false, 'alert');
+        	}
+			
+			alertify.selfCheckOpenPreviewPop().set({'resizable': true, 'startMaximized':true, 'message':result.resultData}).show();
+			alertify.selfCheckOpenPreviewPop().set({'resizable': false, 'startMaximized':false});
+
+			var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+
+			if($("#chkUseCustomNotice").prop("checked")){
+				fn.defaultNotice(false);
+			}else{
+				fn.defaultNotice(checkedFlag);
+			}
+		}
+	},
+	openNoticeEditPop : function(data){
+		var result =jQuery.parseJSON(data);
+
+		if (result.isValid == 'false') {
+           	alertify.error([[#{msg.common.valid2}]], 0);
+		} else {
+			var contents = '<textarea id="editor3" name="editor3"></textarea>';
+			
+			alertify.confirm()
+					.set({'resizable': true, 'startMaximized':true})
+					.set('labels', {ok:'save'})
+					.set('onok', function(event){ fn.saveNoticeEditPop(); return false; })
+					.set('onshow', function(event){
+						$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+					})
+					.setContent(contents)
+					.show();
+			
+			fn.defaultNotice(false);
+		}
+	},
+	saveNoticeEditPop : function(){
+		if ("" != $("#editor3").summernote('code')) {
+			$('#noticeHtml').val($("#editor3").summernote('code'));
+		} else {
+			$('#noticeHtml').val("");
+		}
+		
+		$('#noticeForm').ajaxForm({
+			url : '/selfCheck/saveNoticeAjax',
+            type : 'POST',
+            dataType: 'json',
+            cache : false,
+            success: function(data){
+            	loading.hide();
+            	alertify.closeAll();
+            	
+            	if(data.isValid == 'false'){
+            		alertify.error([[#{msg.common.valid2}]], 0);
+            	}
+            },
+            error : function(data){
+            	loading.hide();
+            	alertify.closeAll();
+            	alertify.error([[#{msg.common.valid2}]], 0);
+            }
+		}).submit();
+	},
+	saveOrGetNotice : function(flag){
+		// 저장 : save, 프리뷰 : preview, 에디터 : editor
+		var customUrl;
+		var customDataType;
+		var customSucess;
+		var customError;
+		
+		if(flag == 'preview') {
+			customUrl      = '/selfCheck/noticeAjax';
+			customDataType = "text";
+			customSucess   = fn.openPreviewPop;
+			customError    = function(data){
+				if(!$("#companyName").prop("checked")) {
+					$("#editCompanyName").attr("disabled", true);
+				}
+				
+				if(!$("#ossDistributionSite").prop("checked")) {
+					$("#editOssDistributionSite").attr("disabled", true);
+				}
+				
+				if(!$("#email").prop("checked")) {
+					$("#editEmail").attr("disabled", true);
+				}
+				
+				loading.hide();
+            	alertify.error([[#{msg.common.valid2}]], 0);
+			}
+			
+			$("#editCompanyName").attr("disabled", false);
+			$("#editOssDistributionSite").attr("disabled", false);
+			$("#editEmail").attr("disabled", false);
+		} else if(flag == 'previewOnly') {
+			customUrl      = '/selfCheck/noticeAjax';
+			customDataType = "text";
+			customSucess   = fn.openPreviewPop;
+			customError    = function(data){
+				if(!$("#companyName").prop("checked")) {
+					$("#editCompanyName").attr("disabled", true);
+				}
+				
+				if(!$("#ossDistributionSite").prop("checked")) {
+					$("#editOssDistributionSite").attr("disabled", true);
+				}
+				
+				if(!$("#email").prop("checked")) {
+					$("#editEmail").attr("disabled", true);
+				}
+				
+				loading.hide();
+            	alertify.error([[#{msg.common.valid2}]], 0);
+			}
+			
+			$("#editCompanyName").attr("disabled", false);
+			$("#editOssDistributionSite").attr("disabled", false);
+			$("#editEmail").attr("disabled", false);
+			$("#previewOnly").val("Y");
+		} else if(flag == 'editor') {
+			customUrl      = '/selfCheck/noticeAjax';
+			customDataType = "text";
+			customSucess   = fn.openNoticeEditPop;
+			customError    = function(data){
+				if(!$("#companyName").prop("checked")) {
+					$("#editCompanyName").attr("disabled", true);
+				}
+				
+				if(!$("#ossDistributionSite").prop("checked")) {
+					$("#editOssDistributionSite").attr("disabled", true);
+				}
+				
+				if(!$("#email").prop("checked")) {
+					$("#editEmail").attr("disabled", true);
+				}
+				
+				loading.hide();
+            	alertify.error([[#{msg.common.valid2}]], 0);
+			}
+			
+			$("#editCompanyName").attr("disabled", false);
+			$("#editOssDistributionSite").attr("disabled", false);
+			$("#editEmail").attr("disabled", false);
+		}
+		
+		if($("#append").prop("checked")){
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+		}
+		
+		$('#noticeForm').ajaxForm({
+			url :customUrl,
+            type : 'POST',
+            dataType:customDataType,
+            cache : false,
+            success: customSucess,
+            error : customError
+		}).submit();
+	},
+	
+	downloadNotice : function(){
+		if($("#append").prop("checked")){
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+		}
+		
+		$("#editCompanyName").attr("disabled", false);
+		$("#editOssDistributionSite").attr("disabled", false);
+		$("#editEmail").attr("disabled", false);
+		$("#isSimpleNotice").val("N");
+		
+		$('#noticeForm').ajaxForm({
+			url :'/selfCheck/makeNoticePreview',
+            type : 'POST',
+            dataType:"json",
+            cache : false,
+            success: function (data) {
+				   if("false" == data.isValid) {
+		            	alertify.error([[#{msg.common.valid2}]], 0);
+				   } else {
+				       window.location =  '/selfCheck/downloadNoticePreview?id='+data.validMsg;
+
+					   var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+
+				       fn.defaultNotice(checkedFlag);
+				   }
+			   },
+            error : function(data){
+            	loading.hide();
+            	alertify.error([[#{msg.common.valid2}]], 0);
+            }
+		}).submit();
+	},
+	
+	downloadNoticeText : function(){
+		if($("#append").prop("checked")){
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+		}
+		
+		$("#editCompanyName").attr("disabled", false);
+		$("#editOssDistributionSite").attr("disabled", false);
+		$("#editEmail").attr("disabled", false);
+		$("#isSimpleNotice").val("N");
+		
+		$('#noticeForm').ajaxForm({
+			url :'/selfCheck/makeNoticeText',
+            type : 'POST',
+            dataType:"json",
+            cache : false,
+            success: function (data) {
+				   if("false" == data.isValid) {
+		            	alertify.error([[#{msg.common.valid2}]], 0);
+				   } else {
+				       window.location =  '/selfCheck/downloadNoticePreview?id='+data.validMsg;
+
+				       var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+
+				       fn.defaultNotice(checkedFlag);
+				   }
+			   },
+            error : function(data){
+            	loading.hide();
+            	
+            	alertify.error([[#{msg.common.valid2}]], 0);
+            }
+		}).submit();
+	},
+	
+	downloadNoticeSimple : function(){
+		if($("#append").prop("checked")){
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+		}
+		
+		$("#editCompanyName").attr("disabled", false);
+		$("#editOssDistributionSite").attr("disabled", false);
+		$("#editEmail").attr("disabled", false);
+		$("#isSimpleNotice").val("Y");
+		
+		$('#noticeForm').ajaxForm({
+			url :'/selfCheck/makeNoticeSimple',
+            type : 'POST',
+            dataType:"json",
+            cache : false,
+            success: function (data) {
+				   if("false" == data.isValid) {
+		            	alertify.error([[#{msg.common.valid2}]], 0);
+				   } else {
+				       window.location = '/selfCheck/downloadNoticePreview?id='+data.validMsg;
+
+				       var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+
+				       fn.defaultNotice(checkedFlag);
+				   }
+			   },
+            error : function(data){
+            	loading.hide();
+
+            	alertify.error([[#{msg.common.valid2}]], 0);
+            }
+		}).submit();
+	},
+	
+	downloadNoticeTextSimple : function(){
+		if($("#append").prop("checked")){
+			$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+			$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
+		}
+		
+		$("#editCompanyName").attr("disabled", false);
+		$("#editOssDistributionSite").attr("disabled", false);
+		$("#editEmail").attr("disabled", false);
+		$("#isSimpleNotice").val("Y");
+		
+		$('#noticeForm').ajaxForm({
+			url :'/selfCheck/makeNoticeTextSimple',
+            type : 'POST',
+            dataType:"json",
+            cache : false,
+            success: function (data) {
+				   if("false" == data.isValid) {
+		            	alertify.error([[#{msg.common.valid2}]], 0);
+				   } else {
+				       window.location =  '/selfCheck/downloadNoticePreview?id='+data.validMsg;
+				       var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+				       fn.defaultNotice(checkedFlag);
+				   }
+			   },
+            error : function(data){
+            	loading.hide();
+            	alertify.error([[#{msg.common.valid2}]], 0);
+            }
+		}).submit();
+	},
+	downloadSpdxSpreadSheetExcel : function(){
+		var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+		
+		$.ajax({
+			type: "POST",
+			url: '/spdxdownload/getSelfcheckSPDXPost',
+			data: JSON.stringify({"type":"spdx", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location =  '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	downloadSpdxRdf : function() {
+		var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+		
+		$.ajax({
+			type: "POST",
+			url: '/spdxdownload/getSelfcheckSPDXPost',
+			data: JSON.stringify({"type":"spdxRdf", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	
+	downloadSpdxTag : function() {
+		var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+		
+		$.ajax({
+			type: "POST",				   
+			url: '/spdxdownload/getSelfcheckSPDXPost',
+			data: JSON.stringify({"type":"spdxTag", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	downloadSpdxJson : function() {
+		var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+		
+		$.ajax({
+			type: "POST",
+			url: '/spdxdownload/getSelfcheckSPDXPost',
+			data: JSON.stringify({"type":"spdxJson", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		})
+	},
+	downloadSpdxYaml : function() {
+		var dataStr = JSON.stringify($('#noticeForm').serializeObject());
+		
+		$.ajax({
+			type: "POST",
+			url: '/spdxdownload/getSelfcheckSPDXPost',
+			data: JSON.stringify({"type":"spdxYaml", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		})
+	},
+	appendEditVisible : function(target){
+		var checked = $(target).prop("checked");
+		
+		if(checked) {
+			$("#editAppend").show();
+		} else {
+			$("#editAppend").hide();
+		}
+	},
+	defaultNotice : function(checked, type){
+		if(checked){
+			$("#companyName").attr("disabled", !checked);
+			$("#ossDistributionSite").attr("disabled", !checked);
+			$("#email").attr("disabled", !checked);
+			$("#hideOssVersion").attr("disabled", !checked);
+			$("#append").attr("disabled", !checked);
+			
+			if($("#companyName").prop("checked")) {
+				$("#editCompanyName").attr("disabled", !checked);
+			} else {
+				$("#editCompanyName").attr("disabled", checked);
+			}
+			
+			if($("#ossDistributionSite").prop("checked")) {
+				$("#editOssDistributionSite").attr("disabled", !checked);
+			} else {
+				$("#editOssDistributionSite").attr("disabled", checked);
+			}
+			
+			if($("#email").prop("checked")) {
+				$("#editEmail").attr("disabled", !checked);
+			} else {
+				$("#editEmail").attr("disabled", checked);
+			}
+			
+			if(type != "init" && $("#append").prop("checked")) {
+				$('#editor2').summernote('disable');
+			}
+		} else {
+			$("#companyName").attr("disabled",!checked);
+			$("#ossDistributionSite").attr("disabled",!checked);
+			$("#email").attr("disabled",!checked);
+			$("#hideOssVersion").attr("disabled",!checked);
+			$("#append").attr("disabled",!checked);
+			
+			$("#editCompanyName").attr("disabled", !checked);
+			$("#editOssDistributionSite").attr("disabled", !checked);
+			$("#editEmail").attr("disabled", !checked);
+			
+			if(type != "init" && $("#append").prop("checked")){
+				$('#editor2').summernote('disable');
+			}
+		}
+	},
+	initNotice : function(){
+		window.setTimeout(function(){
+			var editNoticeYn = $("[name='btnEditOssNotice']:checked").val();
+			var editCompanyYn = $("#companyName").val();
+			var editDistributionSiteUrlYn = $("#ossDistributionSite").val();
+			var editEmailYn = $("#email").val();
+			var hideOssVersionYn = $("#hideOssVersion").val();
+			var editAppendedYn = $("#append").val();
+			
+			var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
+			var btn_Save = $("#save");
+			
+			if(userRole == "ROLE_ADMIN"){ // 관리자 권한 일 경우					
+				btn_Save.show();
+				fn.defaultNotice(checked, "init");	
+			} else { // 일반 사용자 일 경우
+				if ([[${project.statusPermission}]] > 0 || [[${project.prjId}]] == null) {
+					btn_Save.show();
+					fn.defaultNotice(checked, "init");
+				} else {
+					btn_Save.hide();
+					$("[name='btnEditOssNotice']").attr("disabled", true)
+					fn.defaultNotice(false, "init");
+				}
+				
+/* 				switch(curIdenStatus){
+					case "":
+					case "PROG":
+						btn_Save.show();
+						fn.defaultNotice(checked, "init");
+
+						break;
+					default:
+						btn_Save.hide();
+						$("[name='btnEditOssNotice']").attr("disabled", true)
+						fn.defaultNotice(false, "init");
+
+						break;
+				} */
+			}
+			
+			if(editNoticeYn == "Y") {
+				$("[name='btnEditOssNotice']").trigger("click").attr("checked", true);
+			}
+			
+			if(editCompanyYn == "Y") {
+				$("#companyName").trigger("click").attr("checked", true);
+			}
+			
+			if(editDistributionSiteUrlYn == "Y") {
+				$("#ossDistributionSite").trigger("click").attr("checked", true);
+			}
+			
+			if(editEmailYn == "Y") {
+				$("#email").trigger("click").attr("checked", true);
+			}
+			
+			if(hideOssVersionYn == "Y") {
+				$("#hideOssVersion").trigger("click").attr("checked", true);
+			}
+			
+			if (editAppendedYn == "Y"){
+				$("#append").trigger("click").attr("checked", true);
+				$("#editor2").summernote({height: 250, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			}
+		}, 1);
+	},
+	bulkEdit : function(permission){
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		}
+		
+    	var gridList = $("#srcList");
+        var targetGird = "srcList";
+
+        var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
+        var rowCheckedArr = [];
+        for(var i=0; i<selarrrow.length; i++){
+			if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+				rowCheckedArr.push(selarrrow[i]);
+			}
+        }
+
+        if(rowCheckedArr.length > 0){
+            fn_grid_com.totalGridSaveMode(targetGird);
+            
+            var _popup = null;
+            
+            if(_popup == null || _popup.closed){
+                _popup = window.open("", "bulkEditViewSelfPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+                $("#selfBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+				$("#selfBulkEditForm > input[name=target]").val(targetGird);
+				$("#selfBulkEditForm > input[name=menu]").val("selfCheck");
+				$("#selfBulkEditForm").submit();
+                
+                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+                    alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+                }
+            } else {
+                _popup.close();
+                _popup = window.open("", "bulkEditViewSelfPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+                $("#selfBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+				$("#selfBulkEditForm > input[name=target]").val(targetGird);
+				$("#selfBulkEditForm > input[name=menu]").val("selfCheck");
+				$("#selfBulkEditForm").submit();
+            }
+        }else{
+            alertify.alert([[#{msg.oss.select.ossTable}]], function(){});
+            return false;
+        }
+	},
+    changeSelectOption : function(target){
+        var name = $(target).attr("name");
+        var value = $("[name='"+name+"']:checked").val()
+
+        var srcR1 = document.getElementById("srcR1");
+        var srcUploadUrl = document.getElementById("2");
+
+        switch(value){
+            case "1":
+                $('.checksrcR1').closest('span').show();
+                $('.check2').closest('span').hide();
+                $('.uploadSet').show();
+                $('.wgetUrl').hide();
+                srcUploadUrl.checked = false;
+                break;
+            case "2":
+                $('.checksrcR1').closest('span').hide();
+                $('.check2').closest('span').show();
+                $('.uploadSet').hide();
+                $('#wgetUrl_').show();
+                srcR1.checked = false;
+                break;
+            default:
+                break;
+        }
+    },
+    downloadYaml : function(){
+        var params = {"prjId" : [[${project.prjId}]], "prjName" : [[${project.prjName}]]};
+
+        $.ajax({
+            type: "POST",
+            url: '/selfCheck/makeYaml',
+            data: JSON.stringify(params),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    window.location = '/exceldownload/getFile?id='+data.validMsg;
+                }
+            },
+            error: function(data){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+    exportList:function(){
+        var buttonId = event.target.id;
+        var exportListId = "#" + $("#" + buttonId).siblings("div").attr("id");
+        if ($(exportListId).css('display')=='none') {
+            $(exportListId).show();
+        } else {
+            $(exportListId).hide();
+        }
+        $(exportListId).menu();
+    },
+    selectDownloadFile : function(targetFileId) {
+    	loadingIden.show();
+    	
+        // download file
+        if (targetFileId === "report_sub") {
+        	src_fn.downloadExcel();
+        } else {
+        	if (fn.checkSelectDownloadFile()) {
+        		if (targetFileId === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
+                else if (targetFileId === "RDF_sub") fn.downloadSpdxRdf();
+                else if (targetFileId === "TAG_sub") fn.downloadSpdxTag();
+                else if (targetFileId === "JSON_sub") fn.downloadSpdxJson();
+                else if (targetFileId === "YAML_sub") fn.downloadSpdxYaml();
+                else if (targetFileId === "YAML") fn.downloadYaml();
+        	} else {
+        		loadingIden.hide();
+        		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+        	}
+        }
+    },
+    checkSelectDownloadFile : function() {
+    	var checkEmptyFlag = false;
+    	
+    	$.ajax({
+    		type: "POST",
+			url: '/selfCheck/checkSelectDownloadFile',
+			data: JSON.stringify({"prjId":[[${project.prjId}]]}),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if (data.isValid) {
+					checkEmptyFlag = true;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+    	});
+    	
+    	return checkEmptyFlag;
+    },
+    chkListValidation : function(listKind, listId){
+		if(listKind == ""){
+			// TODO : 추후 문구 수정예정
+			alertify.error([[#{msg.project.watcher.selectlist}]], 0);
+
+			return false;
+		}
+		
+		if(listId == ""){
+			// TODO : 추후 문구 수정예정
+			alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
+
+			return false;
+		}
+		
+		return true;
+	},
+    CheckChar : function(){
+		if(event.keyCode == 64){//@ 특수문자 체크
+			alertify.alert([[#{msg.login.check.char}]], function(){});
+    		
+			event.returnValue = false;
+    	}
+	},
+    selectDivision : function() {
+		var division = $('#prjDivision').val();
+		$('#prjUserId').children().remove();
+		if(division == "") {
+			$('#prjUserId').val("").prev().text("select User").change();
+			return false;
+		}
+		$('#prjUserId').attr('disabled', false);
+		$.ajax({
+			url : '/partner/getUserList',
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'division' : division},
+			success : function(data){
+				data.forEach(function(obj){
+					$('#prjUserId').append('<option value='+obj.userId+'>'+obj.userName+'('+obj.userId+')</option>');
+				});
+				
+				$('#prjUserId').change();
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+    addHtml : function(target, str, division, userId){
+		var rlt = division+((userId!="") ? "/"+userId : "");
+		var html  = '<span class="external-event mr-1" id="'+userId+'"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+        html += str;
+		if ([[${project.viewOnlyFlag}]] != "Y") {
+			html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);" /></i>';
+		}
+		target.append(html);
+	},
+	addWatcher : function(uDiv, uId, uEmail) {
+		if($('input[name=prjId]').val() == "") {
+			return true;
+		}
+		
+		var data = {"prjId" : $('input[name=prjId]').val() , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
+		
+		$.ajax({
+			url : '/selfCheck/addWatcher',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(resultData){
+				if(resultData.isValid == "true") {
+					if(uEmail != ''){
+						// TODO - ldap search를 통해 확인된 domain을 우선적으로 적용하도록 처리가 필요함.
+						fn.addHtml($("#multiDiv"), resultData.email, resultData.email, "Email");
+					}
+					
+					if (resultData.addWatcher !== undefined){
+						var userId = resultData.addWatcher.split("/")[1];
+						var watcher = $("#"+userId).find('input[name=watchers]').val();
+						if (watcher !== undefined && watcher != resultData.addWatcher){
+							$("#"+userId).remove();
+						}
+					}
+					
+					alertify.success([[#{msg.common.success}]]);
+				} else {
+					// email로 watcher등록을 실패할 경우 error message를 띄움.
+					if(uEmail != ''){
+						alertify.error("Invalid email address.", 0);
+					}
+				}
+			},
+			error : fn.onError
+		});
+	},
+	removeWatcher : function(uDiv, uId, obj) {
+		var uEmail = "";
+		if("Email" == uId) {
+			uEmail = uDiv;
+			uId = "";
+			uDiv = "";
+		}
+		
+		if($('input[name=prjId]').val() == "") {
+			return true;
+		}
+		
+		var data = {"prjId" : $('input[name=prjId]').val() , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
+
+		$.ajax({
+			url : '/selfCheck/removeWatcher',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(resultData){
+				if (resultData.isValid == "true") {
+					$(obj).parent().remove();
+					alertify.success([[#{msg.common.success}]]);
+				}
+			},
+			error : fn.onError
+		});
+	},
+	copyWatcher : function(obj) {
+		var prjId = [[${project.prjId}]];
+		
+		obj["prjId"] = prjId;
+		
+		$.ajax({
+			url : '/selfCheck/copyWatcher',
+			type : 'POST',
+			data : JSON.stringify(obj),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(resultData){
+				var copyWatcher = resultData.copyWatcher;
+				
+				if(copyWatcher.length){
+					for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+						var isNew = true
+						  , division = copyWatcher[i].prjDivision || ""
+						  , divisionName = copyWatcher[i].prjDivisionName || ""
+						  , userId = copyWatcher[i].prjUserId || ""
+						  , userName = copyWatcher[i].prjUserName || ""
+						  , email = copyWatcher[i].prjEmail || ""
+						  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+						  , userUseYn = copyWatcher[i].userUseYn || "Y";
+						
+						$(".watcherTags").each(function(idx, tag){
+							var tagDiv = $(tag).val().split("/")[0]
+							  , tagUid = $(tag).val().split("/")[1];
+							  
+							if(division == tagDiv) {
+								if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+									isNew = false;
+									
+									return false;
+								} else if(tagUid == userId) {
+									isNew = false;	// 이미 등록된 watcher가 있을경우
+								}
+							}
+							
+							if(tagUid == "Email") {
+								if(email == tagDiv) {
+									isNew = false;
+								}
+							}
+						});
+						
+						if(isNew){
+							if(email != ""){
+								fn.addHtml($("#multiDiv"), email, email, "Email");
+							} else {
+								var str = "";
+								
+								if(userName == "") {
+									str = divisionName;
+								} else {
+									str = '<b';
+
+									if(divisionEmptyCd != division) {
+										if(deptUseYn == "N"){
+											str += ' class="deleteUser"';
+										}
+										
+										str += '>'+divisionName+'</b>/<b';
+									}
+									
+									if(userUseYn == "N"){
+										str += ' class="deleteUser"';
+									}
+									
+									str += '>'+userName+'</b>';
+								}
+								
+								fn.addHtml($("#multiDiv"), str, division, userId);
+							}
+						}
+					}
+					
+					if (prjId) {
+						alertify.success([[#{msg.common.success}]]);
+						$("input[name='listId']").val("");
+					}
+				}
+				
+				if (!copyWatcher.length) {
+					alertify.warning([[#{msg.project.required.id}]]);
+				}
+			},
+			error : fn.onError
+		});
+	},
+	disabledBtn : function () {
+		var tabContentButtons = $(".tabButtonArea input[type=button]");
+		var watcherButtons = $(".tbws1.w1025.mt10 input[type=button]");
+		tabContentButtons.push(watcherButtons);
+
+		$.each(tabContentButtons, function(index, obj){
+            // var value = $(obj).attr("value");
+		    // if("Export" != value){
+			// 	$(obj).hide();
+			// }
+            $(obj).hide();
+		});
+	},
+	showUnconfirmedLicense: function() {
+		var header    = '<p>';
+			header   += 	  '<b>' + [[#{msg.selfcheck.notice.error}]] + '</b>';
+			header   += '</p>';
+		var contents  = '<ul>';
+			contents +=	   unconfirmedLicenseList
+											.reduce((str, licenseName) => {
+												if(licenseName != '') {
+													str += fn.makeSquareStyle(licenseName);
+												}
+
+												return str;
+											}, '');
+			contents += '</ul>';
+
+		alertify.alert(header + '<br>' + contents);
+	},
+	makeSquareStyle: function(value){
+		return '<li style="list-style-type: square;">' + value + '</li>';
+	}
+};
+
+// 데이타
+var data = {
+	modelValues:'',
+	detail : [[${detail}]],
+	copy : [[${copy}]],
+	init : function(){
+		if(data.detail){
+			$('input[name=prjId]').val(data.detail.prjId);
+			$('input[name=prjName]').val(data.detail.prjName);
+			$('input[name=prjVersion]').val(data.detail.prjVersion);
+
+            if (viewFlag == null && data.detail.watcherList.length > 0) {
+                $(".tbws1.w1025.mt10").removeClass("collapsed-card")
+            }
+
+            if (viewFlag == null) {
+            	data.detail.watcherList.forEach(function(watcher, index, obj){
+    				var deptUseYn = watcher.deptUseYn || "Y";
+    				var userUseYn = watcher.userUseYn || "Y";
+    				
+    				if (watcher != "") {
+    					if (watcher.prjEmail) { 
+    						fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
+    					} else {
+    						var str = "";
+    						
+    						if (watcher.prjUserName == undefined){
+    							str = watcher.prjDivisionName;
+    						} else {
+    							str = '<b';
+    							
+    							if (divisionEmptyCd != watcher.prjDivision) {
+    								str += '>'+watcher.prjDivisionName+'</b>/<b';
+    							}
+    							
+    							str += '>'+watcher.prjUserName+'</b>';
+    						}
+    						
+    						fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
+    					}
+    				}
+    			});
+            }
+		}
+	}
+}
+
+// SRC 이벤트
+var src_evt = {
+	csvDelFileSeq : [],
+	csvFileSeq : [],
+	init: function(){
+		src_fn.getSrcGridData();
+		
+		var srcList = $("#srcList");
+		
+		fn.csvUploadFile();
+		
+		// ossNames auto complete
+		fn_grid_com.griOssNames().success(function(data, status, headers, config){
+			if(data != null && ossNames == ""){
+				data.forEach(function(obj){
+					ossNames.push(obj.ossName);
+				});
+			}
+		});
+		
+		// licenseNames auto complete
+		commonAjax.getLicenseTags().success(function(data, status, headers, config){
+			if(data != null && licenseNames == ""){
+				var tag = "";
+				
+				data.forEach(function(obj){
+					if(obj!=null) {
+						tag = {
+							value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
+							label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
+							type : obj.licenseType,
+							obligation : obj.obligation,
+							obligationChecks : obj.obligationChecks
+						}
+						
+						licenseNames.push(tag);
+					}
+				});
+			}
+		});
+	}
+};
+
+// src 그리드 데이터 전역 변수
+var srcMainData;
+var srcSubData;
+var srcValidMsgData;
+var srcDiffMsgData;
+var licenseData;
+var unconfirmedLicenseList;
+
+// SRC 함수
+var src_fn = {
+	// src 그리드 데이터
+	getSrcGridData : function(param){
+		$.ajax({
+			url : '/selfCheck/ossGrid/'+[[${project.prjId}]]+'/10',
+			dataType : 'json',
+			cache : false,
+			data : (param) ? param : {referenceId : [[${project.prjId}]]},
+			contentType : 'application/json',
+			success : function(data){
+				srcMainData = data.mainData;
+				srcValidMsgData = []; //초기화
+				srcDiffMsgData = []; //초기화
+				
+				if(data.validData) {
+					srcValidMsgData = data.validData;
+				}
+				
+				if(data.diffData) {
+					srcDiffMsgData = data.diffData;
+				}
+
+				unconfirmedLicenseList = data.unconfirmedLicenseList ? data.unconfirmedLicenseList : [];
+				
+				// 리로드 대신 그리드 삭제 후 다시 그리기
+				$("#srcList").jqGrid('GridUnload');
+				
+				src_grid.load();
+
+				// totla record 표시
+				$("#srcList_toppager_right, #srcPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+srcMainData.length+'</div>');
+				
+				fn_grid_com.addEtcKeyDownEvent($('#srcList'), srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	// 저장 데이터 만들기
+	saveMakeData : function(resetFlag){
+		cleanErrMsg("srcList");
+		
+		var target = $("#srcList");
+		var prjId = [[${project.prjId}]];
+		var csvFileId = $('#srcCsvFileId').val();
+		var fileData = src_evt.csvDelFileSeq;
+		var fileSeq = src_evt.csvFileSeq;
+		var identificationSubStatusSrc = "";
+		if(fileSeq.length == 0) {
+			$("#srcCsvFileId").val("");
+			csvFileId = "";
+		}
+		
+		// 메인 그리드
+		var mainData = target.jqGrid('getGridParam','data');
+		// 최종 데이터
+		var finalData = {"prjId" : prjId, "csvFileId" : csvFileId, "csvDelFileIds" : JSON.stringify(fileData), "csvFileSeqs" : JSON.stringify(fileSeq)
+				   , "identificationSubStatusSrc" : identificationSubStatusSrc, "mainData" : JSON.stringify(mainData)};
+
+		if (!resetFlag) {
+			// 닉네임 체크
+			src_fn.nickNameValid(mainData, finalData);
+		} else {
+			src_fn.exeSave(finalData);
+		}
+	},
+	// 저장
+	exeSave : function(finalData){
+		$.ajax({
+			url : '/selfCheck/saveSrc',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				_mainLastsel = -1;
+				
+				if("false" == data.isValid) {
+					srcValidMsgData = data.resultData;
+					
+					alertify.error([[#{msg.common.valid}]], 0);
+					
+					if (data.validMsg) {
+						alertify.alert(data.validMsg, function(){});
+					}
+					
+					if (srcValidMsgData) {
+						gridValidMsgNew(srcValidMsgData, "srcList");
+					}
+				} else {
+					if("10" == data.resCd){
+						src_fn.getSrcGridData();
+						src_evt.csvDelFileSeq = [];
+						src_evt.csvFileSeq = [];
+						reloadTabInframe('/selfCheck/list');
+						
+						saveFlag = true;
+						com_fn.changeMode("view", false);
+						
+						alertify.success([[#{msg.common.success}]]);
+					} else {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	// 닉네임 팝업 띄우기
+	makeNickNamePopup : function(obj, finalData) {
+		if(obj.validMsg && obj.validMsg.length != 0) {
+			loading.hide();
+			alertify.confirm(obj.validMsg, function () {
+				src_fn.exeSave(finalData);
+			});
+		} else {
+			src_fn.exeSave(finalData);
+		}
+	},
+	// 닉네임 체크
+	nickNameValid : function(mainData, finalData){
+		var prjId = [[${project.prjId}]];
+		var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
+		
+		$.ajax({
+			url : '/project/nickNameValid/10',
+			type : 'POST',
+			data : JSON.stringify(postData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				src_fn.makeNickNamePopup(data, finalData);
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	makeFileTag : function(obj){
+		var appendHtml = '<br>'+obj.createdDate;
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
+		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" name="uploadCsvFile" value="'+obj.registSeq+'"/>';
+		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="src_fn.deleteCsv(this, \'1\')">X</span>'+appendHtml+'</li>';
+		$('.csvFileArea').append(uploadFileTag);
+	},
+	deleteCsv : function(obj, type) {
+		var Seq = $(obj).prev().val();
+		var object = {fileSeq : Seq};
+		
+		src_evt.csvDelFileSeq.push(object);
+		
+		$(obj).closest('li').remove();
+	},
+	// 다운로드 엑셀
+	downloadExcel : function(){
+		$.ajax({
+			type: "POST",
+			url: '/exceldownload/getExcelPost',
+			data: JSON.stringify({"type":"selfReport", "parameter":[[${project.prjId}]]}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				loadingIden.hide();
+				
+				if ("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/exceldownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	closePop : function(){
+		src_fn.cancelFileDel();
+		
+		src_fn.closeAlertifyView();
+	},
+	closeAndroidPop : function(){
+		$('.ossSelectPop').hide();
+	},
+	getSheetData : function(seq){
+		var sheetNum = [];
+		
+		$('input:checkbox[name="sheetNameSelect"]').each(function(){
+			if($(this).is(':checked')){
+				sheetNum.push($(this).val());
+			}
+		});
+		
+		if(sheetNum.length == 0) {
+			alert([[#{msg.common.check.sheet}]]);
+			
+			return;
+		} else {
+			loading.show();
+			fn_grid_com.totalGridSaveMode('srcList');
+			cleanErrMsg("srcList");
+			var target = $("#srcList");
+			
+			// 메인 그리드
+			var mainData = target.jqGrid('getGridParam','data');
+			var finalData = {"readType":"self","prjId" : [[${project.prjId}]], "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+			var object = {fileSeq : seq};
+
+			src_evt.csvFileSeq.push(object);
+			src_fn.exeLoadReportData(finalData);
+		}
+	},
+	getCsvData : function(seq){
+		loading.show();
+		fn_grid_com.totalGridSaveMode('srcList');
+		cleanErrMsg("srcList");
+		var target = $("#srcList");
+
+		// 메인 그리드
+		var mainData = target.jqGrid('getGridParam','data');
+		var sheetNum = ["0"];
+		var finalData = {"readType":"self","prjId" : [[${project.prjId}]], "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+		var object = {fileSeq : seq};
+
+		src_evt.csvFileSeq.push(object);
+		src_fn.exeLoadReportData(finalData);
+	},
+	getSpdxSpreadsheetData : function(seq){
+		var sheetNum = ["1", "4"];
+
+		loading.show();
+		fn_grid_com.totalGridSaveMode('srcList');
+		cleanErrMsg("srcList");
+
+		var target = $("#srcList");
+		var mainData = target.jqGrid('getGridParam','data');
+		var finalData = {"readType":"self","prjId" : [[${project.prjId}]], "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+		var object = {fileSeq : seq};
+
+		src_evt.csvFileSeq.push(object);
+		src_fn.exeLoadReportData(finalData);
+    },
+	// load report data
+	exeLoadReportData : function(finalData){
+		try {
+			$.ajax({
+				url : '/project/getSheetData',
+				type : 'POST',
+				data : JSON.stringify(finalData),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(data){
+					loading.hide();
+
+					if ("false" == data.isValid) {
+						alertify.error([[#{msg.common.valid2}]], 0);
+						
+						if(data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						}
+					} else {
+						$('.sheetSelectPop').hide();
+
+						if(data.externalData) {
+							// validData 표시
+							srcValidMsgData = data.externalData;
+						}
+
+						if(data.externalData2) {
+							// validData 표시
+							srcDiffMsgData = data.externalData2;
+						}
+
+						src_fn.makeOssList(data.resultData);
+						
+						src_fn.makeFileTag(_uploadFileObj);
+						_uploadFileObj = undefined;
+						
+						if (data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
+							alertify.alert(data.resultData.systemChangeHisStr, function(){});
+						}
+					}
+				},
+				error: function(data){
+					loading.hide();
+					
+					$('.ossUpload').children().remove();
+					
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		} finally {
+			src_fn.closeAlertifyView();
+		}
+	},
+	closeAlertifyView : function () {
+		$(".ajs-close").trigger("click");
+	},
+	makeOssList : function(data){
+		srcMainData = data.mainData;
+		srcSubData = data.subData;
+		
+		//licenseName 재구성
+		var subData = new Object();
+		$.each(srcSubData,function(key,value) {
+			var strVal = "";
+			
+			for(var i=0; i < value.length; i++){
+				if(value[i].excludeYn == "N"){
+					strVal += value[i].licenseName+",";	
+				}
+			}
+			
+			for(var j=0; j < srcMainData.length; j++){
+				if(srcMainData[j]["licenseDiv"] == "M"){
+					if(key == srcMainData[j]["gridId"]){
+						srcMainData[j]["licenseName"] = strVal.substring(0,strVal.length-1);
+					}
+				}
+			}
+		});
+		
+		// 리로드 대신 그리드 삭제 후 다시 그리기
+		$("#srcList").jqGrid('GridUnload');
+		src_grid.load();
+
+		// totla record 표시
+		$("#srcList_toppager_right, #srcPager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+srcMainData.length+'</div>');
+	},
+	// upload Cancel시 DB삭제
+	cancelFileDel : function(){
+		var FileSeq = [];
+		var tabGubn = $(".tabMenu").find("span").text();
+		var seq = "";
+		
+		if(tabGubn == "SRC") {
+			seq = $('.csvFileArea > li:last').find("input[type=hidden]").val();
+		} else if(tabGubn == "BIN") {
+			seq = $('.binFileArea > li:last').find("input[type=hidden]").val();
+		}
+		
+		if(seq == "") {
+			return;
+		}
+		
+		var object = {fileSeq : seq};
+		FileSeq.push(object);
+		
+		var Data = {"csvDelFileIds" : JSON.stringify(FileSeq)};
+
+		$.ajax({
+			url : '/project/calcelFileDelSrc',
+			type : 'POST',
+			data : JSON.stringify(Data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data) {
+				if("10"== data.resCd) {
+					if(tabGubn == "SRC"){
+						$('.csvFileArea > li:last').remove();
+					}else if(tabGubn == "BIN"){
+						$('.binFileArea > li:last').remove();
+					}					
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			},
+			error: function(data) {
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	displayNotify : function(cellvalue, options, rowObject) {
+		var display = "";
+		var obligationType = rowObject["obligationType"];
+		var obligationGrayFlag = rowObject["obligationGrayFlag"];
+
+		if (obligationGrayFlag == "Y") {
+			var _obligationMsg = rowObject["obligationMsg"];
+			
+			if(!_obligationMsg || _obligationMsg == "") {
+				_obligationMsg = "unknown obligation";
+			}
+			
+			display = "<i class=\"fas fa-question-circle\" style=\"font-size: 1.2rem; cursor: pointer;\" title=\"Obligation is unclear\"></i>";
+		} else if (obligationType == 10){
+			display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
+		} else if (obligationType == 11) {
+			display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i><i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\"></i>";
+		}
+		
+		return display;
+	},
+	displaySource : function(cellvalue, options, rowObject) {
+		var display = "";
+		var obligationType = rowObject["obligationType"];
+		var obligationGrayFlag = rowObject["obligationGrayFlag"];
+
+		if(obligationType == 11){
+			display="<span class=\"iconSet man\"></span>";
+		}
+		
+		return display;
+	},
+	unDisplayNotify : function(cellvalue, options, rowObject) {
+		var display = $("#"+options.rowId+"_notify").val();
+		
+		return display;
+	},
+	unDisplaySource : function(cellvalue, options, rowObject) {
+		var display = $("#"+options.rowId+"_source").val();
+
+		return display;
+	},		
+	// License 상세 페이지 이동
+ 	showVulnViewPage : function(_ossName, _ossVersion) {
+ 		if(_ossVersion == ""){
+ 			_ossVersion = "-";
+	 	}
+	 	
+ 		var _url = '/vulnerability/vulnpopup?ossName='+_ossName+'&ossVersion='+_ossVersion; //+"&isPopup=Y"; // 사용하지 않는 parameter
+ 		
+		if(_popupVuln == null || _popupVuln.closed){
+			_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=950, height=600, toolbar=no, location=no, left=100, top=100");
+
+			if(!_popupVuln || _popupVuln.closed || typeof _popupVuln.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		} else {
+			_popupVuln.close();
+			
+			_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=900, height=600, toolbar=no, location=no, left=100, top=100");
+		}
+	},
+ 	showLicenseViewPage : function(gridNm, rowid) {
+ 		src_fn.exitCell(_mainLastsel);
+		cleanErrMsg("srcList", rowid);
+
+		var target = $("#"+gridNm);
+		target.jqGrid('saveRow',rowid);
+		
+		var licenseName = target.jqGrid('getCell',rowid,'licenseName');
+		
+		if(_popupLicense == null || _popupLicense.closed){
+			_popupLicense = window.open('/selfCheck/licensepopup?licenseName='+licenseName, 'licenseViewPopup_'+licenseName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+
+			if(!_popupLicense || _popupLicense.closed || typeof _popupLicense.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		} else {
+			_popupLicense.close();
+			
+			_popupLicense = window.open('/selfCheck/licensepopup?licenseName='+licenseName, 'licenseViewPopup_'+licenseName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+		}
+	},
+	// 메인 그리드 OSS 등록/상세 페이지 이동
+ 	showOssViewPage : function(gridNm, rowid) {
+ 		src_fn.exitCell(_mainLastsel);
+		cleanErrMsg("srcList", rowid);
+		
+ 		var target = $("#"+gridNm);
+		target.jqGrid('saveRow',rowid);
+		var ossName = target.jqGrid('getCell',rowid,'ossName');
+		var ossVersion = target.jqGrid('getCell',rowid,'ossVersion');
+		
+		if(ossVersion=="N/A") {
+			ossVersion = "";
+		}
+		
+		if(ossName != "") {
+			$.ajax({
+				url : '/oss/checkExistsOssByname',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {ossName : ossName},
+				contentType : 'application/json',
+				success : function(data){
+					if(data.isValid == 'true') {
+						if(_popup == null || _popup.closed) {
+							_popup = window.open('/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion, 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+
+							if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+								alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+							}
+						} else {
+							_popup.close();
+							_popup = window.open('/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion, 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+						}
+					} else {
+						alertify.alert([[#{msg.selfcheck.info.unconfirmed.oss}]], function(){});
+					}
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	checkOssIdByName : function(ossName) {},
+	displayGuide : function(cellvalue, options, rowObject) {
+		var licenseName = rowObject["licenseName"];
+		var licenseUserGuideYn = rowObject["licenseUserGuideYn"];
+		
+		var display = "";
+		
+		if("Y" == licenseUserGuideYn) {
+			display = "<div class=\"tcenter\"><a class='btnIcon tips' onclick=\"src_fn.popGuide('"+options.rowId+"')\">Tips</a></div>";
+		}
+		
+		return display;
+	},
+	popGuide : function(row_id) {
+		var _guide = $("#srcList").jqGrid('getCell', row_id, 'licenseUserGuideStr');
+
+		if(_guide) {
+			alertify.alert(_guide, function(){});
+		}
+	},
+	displayOssDetail : function(cellvalue, options, rowObject) {
+		var display = "";
+		var ossName = rowObject["ossName"];
+		var existsFlag = rowObject["ossNameExistsYn"];
+		
+		if (ossName === undefined || ossName == "" || ossName == null) {
+		} else {
+			if (existsFlag && existsFlag == "Y") {
+				display = "<i class=\"fas fa-info-circle\" style=\"font-size: 1.2rem; cursor: pointer; color: #31b404;\" title=\"Detail Info\" onclick=\"src_fn.showOssViewPage('srcList','"+options.rowId+"')\"></i>";
+			} else {
+				display = "";
+			}
+		}
+		
+		return display;
+	},
+	displayLicenseDetail : function(cellvalue, options, rowObject) {
+		var display = "";
+		var licenseName = rowObject["licenseName"];
+		var existsFlag = rowObject["licenseNameExistsYn"];
+		if (licenseName === undefined || licenseName == "" || licenseName == null) {
+		} else {
+			if (existsFlag == "Y") {
+				display = "<i class=\"fas fa-info-circle\" style=\"font-size: 1.2rem; cursor: pointer; color: #ed7728;\" title=\"Detail Info\" onclick=\"src_fn.showLicenseViewPage('srcList','"+options.rowId+"')\"></i>";
+			} else {
+				display = "";
+			}
+		}
+		
+		return display;
+	},
+	// vulnerability 
+	displayVulnerability : function(cellvalue, options, rowObject) {
+		var display = "";
+
+        if(cellvalue) {
+			if(parseInt(cellvalue) >= 9.0 ) {
+				display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">CRITICAL</span>";
+			} else if(parseInt(cellvalue) >= 7.0 ) {
+				display = "<span class=\"badge badge-danger pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">HIGH</span>";
+			} else if(parseInt(cellvalue) >= 4.0) {
+				display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">MEDIUM</span>";
+			} else if(parseInt(cellvalue) > 0) {
+				display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"src_fn.showVulnViewPage('"+ rowObject.ossName +"','"+rowObject.ossVersion+"')\">LOW</span>";
+			} else {
+				display = "<span style=\"font-size:0;\"></span>";
+			}
+		}
+
+		return display;
+	},
+	exitCell : function(_mainLastsel) {
+		if(_mainLastsel != -1){
+			var grid = $("#srcList");
+			var licenseName = com_fn.getLicenseName(grid.getRowData(_mainLastsel));
+			
+			grid.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
+			fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
+			grid.jqGrid('saveRow',_mainLastsel);
+		}
+	},
+	CheckOssViewPage : function() {
+		if(saveFlag) {
+			if(_popupCheckOssName != null) {
+				_popupCheckOssName.close();
+			}
+			
+			_popupCheckOssName = window.open('/oss/checkOssName?prjId='+[[${project.prjId}]]+'&referenceDiv=10&targetName=self', 'Check OSS Name', 'width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
+
+			if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		} else {
+			alertify.alert([[#{msg.project.required.checkOssName}]], function(){});
+
+			return false;
+		}
+	},
+	CheckOssLicenseViewPage : function() {
+		if(saveFlag) {
+			if(_popupCheckOssLicense != null) {
+				_popupCheckOssLicense.close();
+			}
+			
+			_popupCheckOssLicense = window.open('/oss/checkOssLicense?prjId='+[[${project.prjId}]]+'&referenceDiv=10&targetName=self', 'Check License', 'width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes');
+
+			if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		} else {
+			alertify.alert([[#{msg.project.required.checkOssLicense}]], function(){});
+
+			return false;
+		}
+	},
+	saveAjax : function() {
+		com_fn.exitCell(_mainLastsel, "srcList");
+		
+		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+			if (e) {
+				com_fn.exitRow("srcList");
+				// 메인, 서브 그리드 세이브 모드
+				fn_grid_com.totalGridSaveMode('srcList');
+				// 닉네임 체크
+				src_fn.saveMakeData();
+			} else {
+				return false;
+			}
+		});
+	},
+	createNoticeTab : function () {
+        if(saveFlag) {
+            createTabInFrame('Notice', '/selfCheck/verification/'+[[${project.prjId}]]);
+        } else {
+            alertify.error([[#{msg.project.required.checkOssName}]], 0);
+            return false;
+        }
+    },
+    uploadOSSByUrl : function() {
+
+        var wgetUrl = $("#sendWgetUrl").val();
+        
+        if(wgetUrl == "") {
+			alertify.alert('URL is empty');
+			return false;
+        }
+    	
+		$.ajax({
+			url : '/external/request-fl-scan',
+			type : 'POST',
+			data : {'prjId' : [[${project.prjId}]], 'wgetUrl' : wgetUrl},
+			dataType : 'json',
+			cache : false,
+			success : function(data){
+				if(data.success) {
+					alertify.success([[#{msg.common.success}]]);						
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+					if(data.msg) {
+						alertify.alert(data.msg);
+					}
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+    },
+    sheetNameSelectAll : function(obj) {
+    	if ($(obj).prop("checked")) {
+    		$("input[name='sheetNameSelect']").prop("checked", true);
+    	} else {
+    		$("input[name='sheetNameSelect']").prop("checked", false);
+    	}
+    }
+};
+
+//SRC 그리드
+var src_grid = {
+	load: function() {
+		loading.show();
+		
+		var currentOssName = "";
+		var ondblClickRowBln = false;
+		var srcList = $("#srcList");
+
+		gridTooltip.existTooltip = false;
+		srcList.jqGrid({
+			datatype: 'local',
+			data : srcMainData,
+			colNames: ['gridId', 'ID', 'ReferenceId', 'ReferenceDiv', 'ComponentIdx', 'Binary Name or Source Path', 'OssId', 'OSS Name','OSS Version','License', 'OSS Name Exists', 'License Exists'
+			           ,'LicenseId','Download Location','Homepage','Copyright Text','OSS Detail','License Detail','User<br/>Guide','CVE ID'
+			           ,'Vulnera<br/>bility','Obligation','Notify','Source','Restriction','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'srcList\');">Exclude','LicenseDiv', 'licenseUserGuideYn', 'licenseUserGuideStr','obligationGrayFlag', 'obligationMsg'],
+			colModel: [
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
+				{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype : 'int', search: false},
+				{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
+				{name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true},
+				{name: 'componentId', index: 'componentId', hidden:true},
+				{name: 'filePath', index: 'filePath', width: 170, align: 'left', editable:false, template: searchStringOptions,
+					editoptions: {
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+								});
+							}
+					}
+				},
+				{name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true},
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									// ossName auto complete
+									$(e).autocomplete({
+										source: ossNames
+										, minLength: 3 // IE 스크립트 성능이슈로 0->3 으로 변경 yuns
+										, open: function() { $(this).attr('state', 'open');}
+										, close: function () { $(this).attr('state', 'closed');}
+									}).focus(function() {
+										if ($(this).attr('state') != 'open') {
+											$(this).autocomplete("search");
+										}
+									}).on('autocompletechange', function() {
+										if(e.value!=""){
+											var rowid = (e.id).split('_')[0];
+											
+											fn_grid_com.griOssVersions($('#'+rowid+'_ossVersion')[0], e.value, 'srcList');
+											fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData, srcDiffMsgData);
+										}
+									}).dblclick(function(){
+										var rowid = (e.id).split('_')[0];
+
+										var licenseName = com_fn.getLicenseName(srcList.getRowData(rowid));
+										srcList.jqGrid("setCell", rowid, "licenseName", licenseName);
+										fn_grid_com.saveCellData(srcList.attr("id"), rowid, "licenseName", licenseName, null, null);
+										srcList.jqGrid('saveRow',rowid);
+										
+										fn_grid_com.mvOssPage(srcList, rowid);
+									});
+									
+									currentOssName = e.value;
+									
+									// oss name 변경시 oss detail 표시여부 체크
+									$(e).on("change", function() {
+										src_fn.checkOssIdByName(currentOssName);
+									});
+								}
+						}
+				},
+				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'left', editable: false, edittype: 'text', sorttype : 'float', template: searchStringOptions, 
+					editoptions: {
+						dataInit:
+							function (e) { 
+								fn_grid_com.griOssVersions(e, currentOssName, 'srcList');
+								
+								$(e).on( "autocompletechange", function() {
+									var rowid = (e.id).split('_')[0];
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData, srcDiffMsgData);
+								});
+							}
+					}
+				},
+ 				{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions, 
+ 					editoptions: {
+ 						dataInit: function (e) {
+ 								var licenseNameId = $(e).attr("id").split('_')[0];
+								var licenseNameTd = $(e).parent();
+
+								var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
+								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
+								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
+								displayLicenseNameCell += '</div>';
+					
+								$(licenseNameTd).empty();
+								$(licenseNameTd).html(displayLicenseNameCell);
+								$('#'+licenseNameId+'_licenseNameDiv').append(e);
+							
+								// licenseName auto complete
+								$(e).autocomplete({
+									source: licenseNames
+									, minLength: 0
+									, open: function() { $(this).attr('state', 'open'); }
+									, close: function () { $(this).attr('state', 'closed'); }
+								}).focus(function() {
+									if ($(this).attr('state') != 'open') {
+										$(this).autocomplete("search");
+									}
+								});
+								
+								// set license data
+								$(e).on( "autocompletechange", function() {
+									var rowid = (e.id).split('_')[0];
+									var mult = null;
+									var multText = null;
+									
+									for(var i in licenseNames){
+										if("" != e.value && e.value == licenseNames[i].value){
+											var licenseIds = $('#'+rowid+'_licenseId').val();
+											
+											mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+											multText = licenseNames[i].value;
+											break;
+										}
+									}
+									
+									if(mult == null){
+										mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+										multText = e.value;
+									}
+									
+									var rowLicenseNames = [];
+									$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
+										rowLicenseNames.push($(this).text());
+									});
+									
+									if (multText != null){
+										if(rowLicenseNames.length > 0){
+											var duplicateFlag = false;
+											for(var i in rowLicenseNames){
+												if(multText == rowLicenseNames[i]){
+													duplicateFlag = true;
+													break;
+												}
+											}
+											
+											if(!duplicateFlag){
+												$('#'+rowid+'_licenseNameBtn').append(mult);
+											}
+										} else {
+											$('#'+rowid+'_licenseNameBtn').append(mult);
+										}
+									}
+									
+									$('#'+rowid+'_licenseName').val("");
+									
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData, srcDiffMsgData);
+								}).on("keypress", function(evt){
+									if(evt.keyCode == 13){
+										var rowid = (e.id).split('_')[0];
+										var mult = null;
+										var multText = null;
+										
+										for(var i in licenseNames){
+											if("" != e.value && e.value == licenseNames[i].value){
+												var licenseIds = $('#'+rowid+'_licenseId').val();
+												
+												mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+												multText = licenseNames[i].value;
+												break;
+											}
+										}
+										
+										if(mult == null && "" != e.value){
+											mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+											multText = e.value;
+										}
+										
+										var rowLicenseNames = [];
+										$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
+											rowLicenseNames.push($(this).text());
+										});
+										
+										if (multText != null){
+											if(rowLicenseNames.length > 0){
+												var duplicateFlag = false;
+												for(var i in rowLicenseNames){
+													if(multText == rowLicenseNames[i]){
+														duplicateFlag = true;
+														break;
+													}
+												}
+												
+												if(!duplicateFlag){
+													$('#'+rowid+'_licenseNameBtn').append(mult);
+												}
+											} else {
+												$('#'+rowid+'_licenseNameBtn').append(mult);
+											}
+										}
+										
+										$('#'+rowid+'_licenseName').val("");
+										
+										fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+									}
+								});
+							}
+ 					}
+ 				},
+				{name: 'ossNameExistsYn', index: 'ossNameExistsYn', hidden:true},
+				{name: 'licenseNameExistsYn', index: 'licenseNameExistsYn', hidden:true},
+				{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
+				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, edittype:'text'},
+				{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:false, template: searchStringOptions, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, 
+ 					editoptions: {
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+
+										$("#"+rowid+"_homepage").val(value);
+									}
+									
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+								}).on("blur", function() {
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+
+										$("#"+e.id).val(value);
+									}
+								});
+							}
+					}
+				},
+				{name: 'copyrightText', index: 'copyrightText', width: 150, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
+					dataInit:
+						function (e) { 
+							$(e).on("change", function() {
+								var rowid = (e.id).split('_')[0];
+
+								fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+							});
+						}
+					}
+				},
+				{name: 'ossDetail', index: 'ossDetail', width: 50, align: 'center', formatter:src_fn.displayOssDetail, search : false, //template: searchStringOptions,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.ossNameExistsYn;
+
+						if(!rtnVal) {
+							rtnVal = "N";	
+						}
+						
+			            return rtnVal;
+                    }			
+				},
+				{name: 'licenseDetail', index: 'licenseDetail', width: 50, align: 'center', formatter:src_fn.displayLicenseDetail, search : false, //template: searchStringOptions,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.licenseNameExistsYn;
+
+						if(!rtnVal) {
+							rtnVal = "N";	
+						}
+						
+			            return rtnVal;
+                    }		
+				},
+				{name: 'userGuide', index: 'userGuide', width: 50, align: 'center', formatter:src_fn.displayGuide, unformatter:fn_grid_com.unformatter, search : false, //template: searchStringOptions,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.licenseUserGuideYn;
+
+						if(!rtnVal) {
+							rtnVal = "N";	
+						}
+						
+			            return rtnVal;
+                    }	
+				},
+				{name: 'cveId', index: 'cveId', hidden:true},
+				//{name: 'cvssScore', index: 'cvssScore', hidden:true},
+				{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:src_fn.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.cvssScore;
+
+						if(!rtnVal) {
+							rtnVal = "0";
+						}
+						
+			            return rtnVal;
+                    }
+				},
+				{name: 'obligation', index: 'obligation', width: 50, align: 'center', formatter: src_fn.displayNotify, unformat: src_fn.unDisplayNotify, search : false, //template: searchStringOptions, 
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.obligationType;
+
+						if(!rtnVal) {
+							rtnVal = "99";	
+						}
+						
+			            return rtnVal;
+                    }
+				},
+				{name: 'notify', index: 'notify', width: 40, align: 'center', hidden:true},
+				{name: 'source', index: 'source', width: 40, align: 'center', hidden:true},
+				{name: 'restriction', index: 'restriction', width: 50, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
+				{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false,
+ 					editoptions: {
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+
+									fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData, srcDiffMsgData);
+								});
+							}
+					}	
+				},
+				{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
+				{name: 'licenseUserGuideYn', index: 'licenseUserGuideYn', hidden:true},
+				{name: 'licenseUserGuideStr', index: 'licenseUserGuideStr', hidden:true},
+				{name: 'obligationGrayFlag', index: 'obligationGrayFlag', hidden:true},
+				{name: 'obligationMsg', index: 'obligationMsg', hidden:true}
+			],
+			autoencode: true,
+			editurl:'clientArray',
+ 			autowidth: true,
+			height: 'auto',
+            shrinkToFit:false,
+			gridview: true,
+		   	pager: '#srcPager',
+			rowNum: 200,
+			rowList: [200, 500, 1000, 5000],
+			recordpos:'right',
+		    toppager:true,
+			loadonce:true,
+			cellEdit : false,
+			cellsubmit : 'clientArray',
+			ignoreCase: true,
+			multiselect: true,
+            multiselectWidth: 35,
+		    onSortCol: function (index, columnIndex, sortOrder) {
+		    	isSort = true;
+		    },
+			loadComplete: function(data) {
+				_mainLastsel = -1;
+				
+				if(data.records > 0) {
+					var multRowIds = []; 
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+					
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						className = row.className;
+						
+						if (className.indexOf('jqgrow') !== -1) {
+							rowid = row.id;
+							rowData = data.rows[rowIdx++];
+							
+							if(rowData.licenseDiv != "M") {
+								className = className + ' singleLicenseClass';
+								$("#" + rowid).next("tr.ui-subgrid").hide();
+							} else {
+								multRowIds.push(rowid);
+							}
+							
+							if(rowData.excludeYn == "Y" && className.indexOf('excludeRow') === -1) {
+								className= className + ' excludeRow';
+							}
+							
+							row.className = className;
+						} else if (className.indexOf('ui-subgrid') !== -1){
+							rowIdx++;
+						}
+
+						// checkbox click event
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+					
+					// 한번에 처리
+					$("#srcList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
+					
+					if(!gridTooltip.existTooltip){
+						$('<span class="iconSet help right">Help</span>').appendTo($("#jqgh_srcList_obligation"))
+							.attr("title", gridTooltip.tooltipCont).tooltip({
+								content: function () {
+									return $(this).prop('title');
+								}
+							});
+						
+						gridTooltip.existTooltip = true;
+					}
+				}
+
+				//sort후 ValidMsgData reload
+				if(isSort){
+					isSort = false;
+				}
+				
+				// append button event
+                if ($("#srcList_toppager_left").find('button').length == 0) {
+                	var permission = [[${detail?.permission}]] == 1;
+                	
+                    var appendBtn = "";
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('srcList', "+permission+")\">";
+                    if (permission) {
+                    	appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                    } else {
+                    	appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                    }
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('srcList', 'main', "+permission+")\">";
+					if (permission) {
+						appendBtn += "<i class=\"far fa-trash-alt\"></i></button>";
+                    } else {
+                    	appendBtn += "<i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
+                    }
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"fn.bulkEdit("+permission+")\">";
+					if (permission) {
+						appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                    } else {
+                    	appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                    }
+                    appendBtn += "<button type=\"button\" id=\"topDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+                    appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"topDropdown\">";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('Spreadsheet_sub')\">SPDX (Spreadsheet)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('RDF_sub')\">SPDX (RDF)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('TAG_sub')\">SPDX (TAG)</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('JSON_sub')\">SPDX ((JSON))</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML_sub')\">SPDX ((YAML))</span></div>";
+
+                    $("#srcList_toppager_left").append(appendBtn);
+                }
+			},
+			beforeSelectRow: function(rowid, e) {
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+
+			    if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+			       iCol = $.jgrid.getCellIndex($td[0]);
+			       cm = p.colModel[iCol];
+			       if (cm != null && cm.name === "cb") {
+			           // multiselect checkbox is clicked
+			           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+			       }
+			    }
+			    
+				// 경고 클래스 설정
+				fn_grid_com.setWarningClass(srcList,rowid,["ossName","licenseName"]);
+				return true;
+			},
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				if(iCol=="2") {
+					fn_grid_com.showOssViewPage(srcList, rowid, true, srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
+				}
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				// 체크 박스 영역 제외
+				if(iCol!="25") {
+					cleanErrMsg("srcList", rowid);
+					fn_grid_com.setCellEdit(srcList, rowid, srcValidMsgData, srcDiffMsgData, null, com_fn.getLicenseName);
+
+					// 서브 그리드 제외
+					ondblClickRowBln = false;
+
+					$('#'+rowid+'_licenseName').addClass('autoCom');
+	 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+					var result = $('#'+rowid+'_licenseName').val().split(",");
+
+					result.forEach(function(cur,idx){
+						if(cur != ""){
+							var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+							$('#'+rowid+'_licenseNameBtn').append(mult);
+						}
+					});
+					$('#'+rowid+'_licenseName').val("");
+                    var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name
+                    var nextRow = rowid
+                    $('#'+nextRow+"_"+nextCol).focus();
+				}
+			},
+			onPaging: function(action) {
+				cleanErrMsg("srcList");
+				
+				fn_grid_com.totalGridSaveMode('srcList');
+			},
+			gridComplete : function() {
+				loading.hide();
+				
+				cleanErrMsg("srcList");
+				
+				if(srcValidMsgData) {
+					gridValidMsgNew(srcValidMsgData, "srcList", "SELF");
+				}
+				
+				if(srcDiffMsgData) {
+					gridDiffMsg(srcDiffMsgData, "srcList", "SELF");
+				}
+				
+				updateGridRowCount('srcList', 'srcListPager');
+			}
+		});
+		
+		if (viewFlag == null) {
+			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () {
+				updateGridRowCount('srcList', 'srcListPager');
+			}});
+//			srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
+// 													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);}
+// 													  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
+// 													  , cloneToTop:true
+// 			});
+		}
+		
+		$('#srcList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+	}
+};
+
+var gridTooltip = {
+		typeCodes : [],
+		tooltipCont : "<div class=\"tooltipData500\"><span style=\"color:red;\">Obligation is unclear. Obliagtion이 불명확한 경우입니다.</span>"
+	                   +"<dl><dt><span>non-included license : License is different from registered in FOSSLight Hub.</span></dt></dl><br>"
+	                   +"<dl><dt><span>unconfirmed oss : It is a new OSS not registered in FOSSLight Hub.</span></dt></dl><br>"
+	                   +"<dl><dt><span>unconfirmed version : It is the new OSS version that is not registered with FOSSLight Hub.</span></dt></dl><br>"
+	                   +"<dl><dt><span>unconfirmed license : It is a new license not registered in FOSSLight Hub.</span></dt></dl>"
+	                   +"</div>",
+		existTooltip : false
+};
+
+var com_fn = {
+	changeMode : function(mode, resetFlag) {
+		var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+		var tabDiv = targetId.split("-")[1];
+		
+		if ("selfCheck" == tabDiv) {
+			$.ajax({
+	            url: "/selfCheck/changeMode/" + [[${project.prjId}]] + "/" + mode,
+	            type: 'POST',
+	            dataType: 'html',
+	            cache: false,
+	            success: function (data) {
+	            	$("#" + targetId).empty();
+					$("#" + targetId).html(data);
+					
+					if ("edit" == mode) fn.csvUploadFile();
+					if ($(".csvFileArea").find("li").length > 0) {
+						$(".uploadCsvFileArea").show();
+					} else {
+						$(".uploadCsvFileArea").hide();
+					}
+	            }
+			});
+		}
+	},
+	gridAddFunc : function (targetId, permission) {
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		}
+		
+		var grid = $("#" + targetId);
+		saveFlag = false;
+		fn_grid_com.rowAddNew(targetId, grid, "main", null, com_fn.getLicenseName);
+	},
+	gridDelFunc : function (targetId, target, permission) {
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		}
+		
+		var grid = $("#" + targetId);
+		var selarrrow = grid.jqGrid("getGridParam", "selarrrow");
+		
+		if (selarrrow.length > 0) {
+			fn_grid_com.rowDelNew(grid, target);
+		} else {
+			alertify.confirm([[#{msg.common.confirm.delete.all}]], function (e) {
+				if (e) {
+					fn_grid_com.rowDelAll(grid, target);
+				} else {
+					return false;
+				}
+			});
+		}
+	},
+	tabInit : function(){
+		var initDiv = [[${initDiv}]];
+		var tabContent = $(".tabContent");
+		var tabMenuA = $(".tabMenu a");
+		
+		tabContent.hide();
+		tabMenuA.click(function () {
+			com_fn.fnTabChange(this);
+		});
+		
+		var tabDefaultIdx = "0";
+		
+		tabMenuA.eq(tabDefaultIdx).click();
+	},
+	fnTabChange: function(target){
+		var tabContent = $(".tabContent");
+		var tabMenuA = $(".tabMenu a");
+		
+		$(".tabMenu a span").remove();
+		
+		tabMenuA.eq("0").text("OSS List");
+		tabMenuA.eq("1").text("Notice");
+		
+		var tag = "<span>"+$(target).text()+"</span>";
+		
+		$(target).html(tag);
+		
+		tabContent.hide();
+		activeTabText = $(target).text();
+		activeTab = $(target).attr("rel");
+		
+		$("#" + activeTab).show();
+	},
+	deleteLicense : function(target){
+		$(target).parent().remove();
+	},
+	deleteLicenseRenewal : function(target){
+		$(target).parent().next().remove();
+		$(target).parent().remove();
+	},
+	getLicenseName : function(obj) {
+		return obj.licenseName.replace(/(<([^>]+)>)/ig, ",").split(",").reduce(function(arr, cur){
+		    if(cur.toUpperCase() != "X" && cur != ""){
+		        arr.push(cur);
+		    }
+
+		    return arr;
+		}, []).join(",");
+	},
+	exitCell : function(_mainLastsel, target) {
+		if(_mainLastsel != -1) {
+			var grid = $("#" + target);
+			var licenseName = com_fn.getLicenseName(grid.getRowData(_mainLastsel));
+
+			grid.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
+			fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
+			grid.jqGrid('saveRow',_mainLastsel);
+		}
+	},
+	exitRow : function(target){
+		var gridRowData = $("#" + target).jqGrid("getRowData");
+		gridRowData.forEach(function(obj){
+			var gridId = obj["gridId"];
+			var key = Object.keys(obj);
+			key.forEach(function(value){
+				if("gridId" != value){
+					var data = obj[value];
+					if(value == "downloadLocation" || value == "homepage"){
+						if(data.indexOf("Not the same as property") > -1){
+							data = data.split("Not the same as property")[0];
+						} else if(data.indexOf("The address should be") > -1){
+							data = data.split("The address should be")[0];
+						}
+					}
+					
+					if(data.indexOf("<div class") > -1){
+						data = data.split("<")[0];
+					}
+					
+					fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
+				}
+			});
+		});
+	},
+	showLicenseInfo : function(obj){
+		var licenseName = $(obj).text();
+
+		$.ajax({
+			url : '/license/getLicenseId',
+			type : 'POST',
+			data : {"licenseName" : licenseName},
+			dataType : 'json',
+			cache : false,
+			success : function(data){
+				var _frameId = data.licenseId + "_License";
+				var _frameTarget = "#<c:url value='/license/edit/" + data.licenseId + "'/>";
+				createTabInFrame(_frameId, _frameTarget);
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	bulkEditOssInfo : function(obj){
+		var editFlag = false;
+		try{
+			var ossArr = [];
+	        var rowId = obj["rowId"];
+	        var target = obj["target"];
+	        var param = $('#'+target).jqGrid('getGridParam','data');
+	        
+	        if(rowId.indexOf(",") > -1){
+	            ossArr = rowId.split(",");
+	            for(var idx in ossArr){
+	                com_fn.bulkEditSetCell(target, ossArr[idx], obj);
+
+	                for (var i=0; i<param.length; i++){
+	                    if(param[i]["gridId"] == ossArr[idx]){
+	                        for(var key in obj){
+	                            if(key != "rowId" && key != "target"){
+	                            	param[i][key] = obj[key];
+	                            }
+	                        }
+	                    }
+	                }
+	            }
+	        }else{
+	            com_fn.bulkEditSetCell(target, rowId, obj);
+
+	            for (var i=0; i<param.length; i++){
+	                if(param[i]["gridId"] == rowId){
+	                    for(var key in obj){
+	                        if(key != "rowId" && key != "target"){
+	                        	param[i][key] = obj[key];
+	                        }
+	                    }
+	                }
+	            }
+	        }
+
+	        $("#"+target).jqGrid('setGridParam', {data:param}).trigger('reloadGrid');
+		}catch(e){
+			alertify.error([[#{msg.common.valid2}]], 0);
+    		editFlag = true;
+    	}finally{
+    		if(!editFlag){
+	    		alertify.success([[#{msg.common.success}]]);
+    		}
+       	}
+    },
+    bulkEditSetCell : function (target, rowId, obj){
+        for(var key in obj){
+            if(key != "rowId" && key != "target"){
+            	$('#'+target).jqGrid('setCell', rowId, key, obj[key]);
+            }
+        }
+    },
+    bulkEditDelRow : function (target, rowId, flag){
+    	var delFlag = false;
+		try{
+			var selrow = "";
+			var param = $("#"+target).jqGrid('getGridParam', 'data');
+			
+	    	if(rowId.indexOf(",") > -1){
+	    		selrow = rowId.split(",");
+	    		for (var i=0; i<selrow.length; i++){
+	    			$("#"+target).jqGrid('delRowData', selrow[i]);
+	    			param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, selrow[i]);
+	        	}
+	        }else{
+	        	$("#"+target).jqGrid('delRowData', rowId);
+	        	param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, rowId);
+	        }
+
+	        if(flag == "main"){
+	        	$("#"+target).jqGrid('GridUnload');
+
+	        	srcMainData = param;
+	        	src_grid.load();
+	        }
+		}catch(e){
+			alertify.error([[#{msg.common.valid2}]], 0);
+        	delFlag = true;
+    	}finally{
+    		if(!delFlag){
+	    		alertify.success([[#{msg.common.success}]]);
+    		}
+       	}
+    },
+    bulkEditDeleteLocalDataAfterDelRow : function (dataArray, rowId){
+    	var reMakeArrObj=[];
+    	var newIdx = 0;
+
+    	for(var idx=0; idx < dataArray.length; ++idx) {
+			if(dataArray[idx].gridId != rowId) {
+				reMakeArrObj[newIdx++] = dataArray[idx];
+			}
+		}
+		
+		return reMakeArrObj;
+    }
+};
+
+var notice_evt = {
+	init : function(){
+		$("#append").click(function(e){
+			var checked = $(this).prop("checked");
+			$("#editAppendedYn").val(checked ? "Y" : "N");
+			fn.appendEditVisible(this);
+			
+			if (checked) {
+				$('#editor2').summernote('enable');
+			} else {
+				$('#editor2').summernote('disable');
+			}
+		});
+		
+		$("[name='btnEditOssNotice']").change(function(e){
+			var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
+			$("#editNoticeYn").val(checked ? "Y" : "N");
+			fn.defaultNotice(checked);
+		});
+		
+		$("#companyName").click(function(e){
+			var checked = $(this).prop("checked");
+			$("#editCompanyYn").val(checked ? "Y" : "N");
+			$("#editCompanyName").attr("disabled", !checked);
+		});
+		
+		$("#ossDistributionSite").click(function(e){
+			var checked = $(this).prop("checked");
+			$("#editDistributionSiteUrlYn").val(checked ? "Y" : "N");
+			$("#editOssDistributionSite").attr("disabled", !checked);
+		});
+		
+		$("#email").click(function(e){
+			var checked = $(this).prop("checked");
+			$("#editEmailYn").val(checked ? "Y" : "N");
+			$("#editEmail").attr("disabled", !checked);
+		});
+		
+		$("#hideOssVersion").click(function(e){
+			var checked = $(this).prop("checked");
+			$("#hideOssVersionYn").val(checked ? "Y" : "N");
+		});
+
+		// noticePreview 버튼 
+		$('#noticePreview').click(function(e){
+			e.preventDefault();
+			
+			if (unconfirmedLicenseList.length > 0) {
+				fn.showUnconfirmedLicense();
+			} else {
+				fn.saveOrGetNotice('preview');
+			}
+		});
+
+		$('#packageDocDownload').click(function(e){
+			if (unconfirmedLicenseList.length > 0) {
+				fn.showUnconfirmedLicense();
+			} else { 
+				var type = $('#docType').val();
+				
+				if(type == 'noticeDownload') {
+					fn.downloadNotice();
+				} else if(type == 'noticeTextDownload') {
+					fn.downloadNoticeText();
+				} else if(type == 'noticeSimpleDownload') {
+					fn.downloadNoticeSimple();
+				} else if(type == 'noticeTextSimpleDownload') {
+					fn.downloadNoticeTextSimple();
+				} else if(type == 'spdxSpreadSheet') {
+					fn.downloadSpdxSpreadSheetExcel();
+				} else if(type == 'spdxRdf') {
+					fn.downloadSpdxRdf();
+				} else if(type == 'spdxTag') {
+					fn.downloadSpdxTag();
+				} else if(type == 'spdxJson') {
+					fn.downloadSpdxJson();
+				} else if(type == 'spdxYaml') {
+					fn.downloadSpdxYaml();
+				}
+			}
+		});
+
+		$("#noticeSave").on("click", function(){
+			hideErrMsg();
+			fn.saveOrGetNotice('save');
+		});
+	}		
+};
+//]]>
+</script>
+</th:block>

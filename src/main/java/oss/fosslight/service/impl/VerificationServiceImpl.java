@@ -14,18 +14,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.jsonwebtoken.lang.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
@@ -61,9 +59,9 @@ import oss.fosslight.service.VerificationService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.FileUtil;
+import oss.fosslight.util.PdfUtil;
 import oss.fosslight.util.SPDXUtil2;
 import oss.fosslight.util.StringUtil;
-import oss.fosslight.util.PdfUtil;
 
 @Service
 @Slf4j
@@ -131,10 +129,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String packageFileId3 = fileSeqs.size() > 2 ? fileSeqs.get(2) : null;
 		
 		int result = verificationMapper.checkPackagingFileId(prjId,packageFileId, packageFileId2, packageFileId3);
-		
+
 		if (result > 0){
 			return false;
-		} else{
+		} else {
 			return true;
 		}
 	}
@@ -147,6 +145,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 			List<String> gridFilePaths =	(List<String>)map.get("gridFilePaths");
 			List<String> fileSeqs =	(List<String>) map.get("fileSeqs");
+			List<String> fileTypeSeqs =	(List<String>) map.get("fileTypeSeqs");
 			String prjId = (String) map.get("prjId");
 			String deleteFlag = (String) map.get("deleteFlag");
 			String verifyFlag = (String) map.get("statusVerifyYn");
@@ -184,11 +183,19 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
 				prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
 				
+				ArrayList<String> newPackagingFileTypeList = new ArrayList<String>();
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 0 ? fileTypeSeqs.get(0) : null);
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 1 ? fileTypeSeqs.get(1) : null);
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 2 ? fileTypeSeqs.get(2) : null);
+				prjParam.setPackageFileType1(newPackagingFileTypeList.get(0));
+				prjParam.setPackageFileType2(newPackagingFileTypeList.get(1));
+				prjParam.setPackageFileType3(newPackagingFileTypeList.get(2));
+				
 				if (deleteFiles.equals(CoConstDef.FLAG_YES)){
 					prjParam.setStatusVerifyYn(CoConstDef.FLAG_NO);
 				}			
 				
-				List<T2File> deleteFileList = new ArrayList<>();
+				List<T2File> deletePhysicalFileList = new ArrayList<>();
 				
 				// packaging File comment
 				try {
@@ -207,7 +214,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							fileInfo.setFileSeq(fileId);
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
-							deleteFileList.add(fileInfo);
+							
+							oss.fosslight.domain.File packageFile = verificationMapper.selectVerificationFile(fileId);
+							if (packageFile != null && CoConstDef.FLAG_NO.equals(packageFile.getReuseFlag())) {
+								deletePhysicalFileList.add(fileInfo);
+							}
 						}
 						
 						if (!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
@@ -239,10 +250,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				verificationMapper.updatePackageFile(prjParam);
 				
 				// delete physical file
-				for (T2File delFile : deleteFileList){
-					if (verificationMapper.selectVerificationFile(delFile.getFileSeq()) == null) {
-						fileService.deletePhysicalFile(delFile, "VERIFY");
-					}
+				for (T2File delFile : deletePhysicalFileList){
+					fileService.deletePhysicalFile(delFile, "VERIFY");
 				}
 				
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
@@ -1221,7 +1230,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 
 	@Override
-	public void updateVerifyFileCount(HashMap<String,Object> fileCounts) {
+	public void updateVerifyFileCount(Map<String,Object> fileCounts) {
 		for (String componentId : fileCounts.keySet()){
 			OssComponents param = new OssComponents();
 			param.setComponentId(componentId);
@@ -1232,7 +1241,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 	
 	@Override
-	public void updateVerifyFileCount(ArrayList<String> fileCounts) {
+	public void updateVerifyFileCountReset(List<String> fileCounts) {
 		for (String componentId : fileCounts){
 			OssComponents param = new OssComponents();
 			param.setComponentId(componentId);
@@ -1642,7 +1651,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			packageFileInfo = fileMapper.getFileInfo(packageFileInfo);
 			
 			if (packageFileInfo != null) {
-				String orgFileName = packageFileInfo.getOrigNm();
 				// Packaging > Confirm시 Packaging 파일명 변경 건
 				String paramSeq = (packageFileIds.size() > 1 ? Integer.toString(fileSeq++) : ""); 
 				String chgFileName = getPackageFileName(prjBean.getPrjName(), prjBean.getPrjVersion(), packageFileInfo.getOrigNm(), paramSeq);
@@ -1650,14 +1658,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				packageFileInfo.setOrigNm(chgFileName);
 				
 				fileMapper.upateOrgFileName(packageFileInfo);
-				
-				// 이력을 남긴다.
-				CommentsHistory commHisBean = new CommentsHistory();
-				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-				commHisBean.setReferenceId(prjId);
-				commHisBean.setContents("Changed File Name (\""+orgFileName+"\") to \""+chgFileName+"\"  ");
-				
-				commentService.registComment(commHisBean);
 			}
 		}
 	}
@@ -2286,13 +2286,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		for (OssComponents bean : noticeInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
@@ -2319,13 +2319,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		for (OssComponents bean : srcInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 			
 
@@ -2359,11 +2359,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		for (OssComponentsLicense bean : licenseTreeMap.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
 			}
 			
 			// 배포사이트 license text url
@@ -2386,7 +2386,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 
 			if (!isEmpty(bean.getAttribution())) {
-				bean.setAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getAttribution()))));
+				bean.setAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getAttribution()))));
 				attributionList.add(bean);
 			}
 		}
@@ -2408,8 +2408,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		if (!isEmpty(distributionSiteUrl) && !(distributionSiteUrl.startsWith("http://") || distributionSiteUrl.startsWith("https://") || distributionSiteUrl.startsWith("ftp://"))) {
 			distributionSiteUrl = "http://" + distributionSiteUrl;
 		}
+		
+		String noticeTitle = CommonFunction.getNoticeFileName(prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType());
+		String noticeFileName = "";
+		if (noticeTitle.endsWith(".txt")) {
+			noticeFileName = noticeTitle.substring(0, noticeTitle.length()-4);
+		} else {
+			noticeFileName = noticeTitle;
+		}
+		
 		model.put("noticeType", noticeType);
-		model.put("noticeTitle", CommonFunction.getNoticeFileName(prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType()));
+		model.put("noticeTitle", noticeTitle);
+		model.put("noticeFileName", noticeFileName);
 		model.put("companyNameFull", companyNameFull);
 		model.put("distributionSiteUrl", distributionSiteUrl);
 		model.put("email", email);

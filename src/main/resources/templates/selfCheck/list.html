@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:replace="selfCheck/list-header :: headerFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="selfCheck/list-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <div class="custom-layout bg-white">
+			<section class="content-header"></section>
+			<section class="content">
+                <div class="container-fluid">
+                	<form id="projectSearch" name="projectSearch">
+                		<input name="act" type="hidden" value="search"/>
+                    	<div class="row">
+                        	<div class="col-md-12">
+                            	<div class="card card-dark card-outline collapsed-card search-form mb-3">
+                                	<!-- <div class="card collapsed-card search-form"> -->
+                                	<div class="card-header" style="border-bottom: none;">
+                                        <div class="row">
+											<div class="col-md-7 d-flex">
+												<div class="row" style="width: 100%;">
+													<div class="col-12">
+														<div class="input-group">
+															<input class="save-value" name="defaultSearchType" type="hidden" th:value="SELF_CHECK"/>
+															<button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_SelfCheck', '/selfCheck/edit')|" th:text="|+ Add|"></button>
+															<input type="search" class="form-control save-value" style="border-right: 0px solid #fff;" name="prjName" placeholder="Project ID or Name" th:value="${searchBean?.prjName}"/>
+															<div class="input-group-append">
+																<span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
+																	<input class="form-check-input save-value" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == null or searchBean?.publicYn == 'N'}" type="checkbox">
+																	<label class="form-check-label text-blue-gray text-sm" for="checkbox3" th:text="'My Project'"></label>
+																</span>
+															</div>
+															<div class="input-group-append">
+																<button id="search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-3 pl-3 d-flex justify-content-start">
+												<div class="input-group-append d-flex align-items-center">
+													<a class="text-blue-gray text-center" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
+														<span class="row" th:text="'+ Advanced Search'"></span><span class="row ml-3 text-lg-red text-xs optionSelected" style="display: none;" th:text="'option selected'"></span>
+													</a>
+												</div>
+											</div>
+											<div th:if="${@environment.getProperty('fosslight.suffix') != null}" class="col-md-2 pr-3">
+												<div class="helpLink f-left dropdown float-right mt-1">
+													<a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+													<div class="dropdown-menu mt-0">
+														<a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Check_List_Main')|">How to use FossLight Hub</a>
+													</div>
+												</div>
+											</div>
+                                        </div>
+                                	</div>
+                                	<div class="card-body py-1">
+                                		<div class="row">
+<!--                                     	<div class="col-4">
+                                        		<div class="form-group">
+													<input type="text" name="prjId" class="form-control save-value" placeholder="ID" th:value="${searchBean?.prjId}"/>
+                                            	</div>
+                                      		</div> -->
+                                        	<div class="col-3">
+                                        		<div class="form-group">
+                                            		<div class="form-group">
+                                                		<input type="text" class="form-control autoComOss save-value" name="ossName" placeholder="OSS Name" th:value="${searchBean?.ossName}"/>
+                                            		</div>
+                                         		</div>
+                                  	 		</div>
+                                      		<div class="col-3">
+                                          		<div class="form-group">
+                                              		<div class="form-group">
+                                                   		<input type="text" name="licenseName" class="form-control autoComLicense save-value" placeholder="License Name" th:value="${searchBean?.licenseName}"/>
+                                               		</div>
+                                           		</div>
+                                       		</div>
+                                       		<div class="col-3">
+                                           		<div class="form-group">
+                                              		<div class="form-group">
+                                                  		<input type="text" class="form-control autoComCreatorDivision save-value" name="creator" placeholder="Creator" th:value="${searchBean?.creator}"/>
+                                               		</div>
+                                          		</div>
+                                      		</div>
+                                      		<div class="col-3">
+                                          		<div class="form-group">
+                                             		<div class="input-group" style="width: 100%;">
+                                               			<div class="input-group-prepend">
+															<span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+														</div>
+                                                    	<input type="text" class="form-control" name="schDate" placeholder="Created Date" id="schDateRange"/>
+                                                    	<input class="save-value" type="hidden" name="schStartDate"/>
+                                                    	<input class="save-value" type="hidden" name="schEndDate"/>
+                                               		</div>
+                                           		</div>
+                                      		</div>
+                                   		</div>
+                                   		<div class="row">
+                               				<div class="col-md-12">
+                               					<div class="p-2 text-center">
+                                         			<button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('projectSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-download mr-xm"></i> save conditions
+                                         			</button>
+                                           			<button class="btn btn-ivory btn-sm btn-icon ml-2" th:onclick="|resetForm('projectSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-undo mr-xm"></i> reset
+                                           			</button>
+                                       			</div>
+                               				</div>
+                               			</div>
+                                	</div>
+                            	</div>
+                        	</div>
+                    	</div>
+					</form>
+                    <div class="row px-1">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+<!--                    	<div class="row float-right">
+                              	<button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                               <button type="button" class="btn btn-lg-teal btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_SelfCheck', '/selfCheck/edit')|" th:text="Add"></button>
+                            </div> -->
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 mt-3">
+                        	<div class="col-sm-12 jqGridSet" id="selfCheckJqgridSet">
+                            	<table id="list"><tr><td></td></tr></table>
+                            	<div id="pager"></div>
+                        	</div>
+						</div>
+                    </div>
+                </div>
+                
+                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+            </section>
+        </div>
+    </div>
+</body>
+
+</html>

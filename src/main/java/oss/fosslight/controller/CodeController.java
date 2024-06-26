@@ -39,7 +39,7 @@ public class CodeController extends CoTopComponent {
 	
 	@GetMapping(value=CODE.PAGE, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return CODE.PAGE_JSP;
+		return "system/code";
 	}
 	
 	@GetMapping(value=CODE.LIST_AJAX)

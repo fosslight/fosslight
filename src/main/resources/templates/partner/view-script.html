@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="viewScript">
+<script th:inline="javascript">
+	var isSort = false;
+	var prjList = [[${prjList}]];
+
+	$(document).ready(function() {
+    	data.init();
+  	});
+	
+	var data = {
+		init : function() {
+			data.init();
+		}
+	}
+	
+	var data = {
+		init : function() {
+			fn.displayPartnerInfo();
+			
+			if (prjList == null) {
+				prjList = new Array();
+			}
+			dataTable.load();
+			
+			if ([[${detail.permission}]] > 0) {
+				grid.getPartyGridData();
+			}
+		}
+	}
+	
+	var dataTable = {
+		load : function() {
+			var prjDataList = $('#prjTable').DataTable({
+		   		paging : false,
+		   		searching : false,
+		   		info : false,
+		   		autoWidth : false,
+		   		responsive : true,
+		   		lengthChange : true,
+		   		ordering : false,
+		   		data : prjList,
+		   		columns : [ {
+		 				data : "prjId"
+		  			}, {
+		   		  		data : "prjName",
+    					render : function(data, type, row, meta){
+    					var display = data;
+    						if ("" != row.prjVersion) {
+    							display + " (" + row.prjVersion + ")";
+    						}
+    						return display;
+    					}
+		   			}],
+		    	columnDefs : [
+		        	{
+		        		targets : [0],
+		        		className : "text-center"
+		        	}
+		        ]
+		 	});
+			
+			$("#prjTable > tbody").on('dblclick', 'tr', function () {
+				var data = prjDataList.row(this).data();
+				if ("Y" != data.oldSystemFlag) {
+					var url = '/project/edit/' + data.prjId;
+					createTabInFrame(data.prjId + '_Project', url);
+				}
+			});
+		}
+	}
+	
+	var partyMainData;
+	var partySubData;
+	var partyValidMsgData_e = []; //초기화
+	var partyDiffMsgData_e = []; //초기화
+	var partyInfoMsgData_e = []; // 초기화
+	
+	var grid = {
+		getPartyGridData : function() {
+			loading.show();
+			
+			$.ajax({
+				url : '/project/identificationGrid/'+[[${detail.partnerId}]]+'/20',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {referenceId : [[${detail.partnerId}]]},
+				contentType : 'application/json',
+				success : function(data){
+					loading.hide();
+					
+					partyMainData = data.mainData;
+					partyValidMsgData_e = []; //초기화
+					partyDiffMsgData_e = []; //초기화
+					partyInfoMsgData_e = [];
+					
+					if (data.validData) {
+						partyValidMsgData_e = data.validData;
+					}
+					if (data.diffData) {
+						partyDiffMsgData_e = data.diffData;
+					}
+					if(data.infoData) {
+						partyInfoMsgData_e = data.infoData;	
+					}
+
+					// 리로드 대신 그리드 삭제 후 다시 그리기
+					$("#list").jqGrid('GridUnload');
+					
+					grid.init();
+
+					// totla record 표시
+					$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
+					
+					fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		init : function(){
+			var currentOssName = '';
+			var ondblClickRowBln = false;
+			var partnerList = $("#list");
+			
+			partnerList.jqGrid({
+				datatype: 'local',
+				data : partyMainData,
+				colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
+						   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction','customBinaryYn'],
+				colModel: [
+					{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
+					{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
+					{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false},
+					{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
+					{name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true},
+					{name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true},
+					{name: 'binaryName', index: 'binaryName', width: 140, align: 'left', editable:true, template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									});
+								}
+						}
+					},
+					{name: 'ossName', index: 'ossName', width: 140, align: 'left', editable:true, edittype:'text', template: searchStringOptions, 
+							editoptions: {
+								dataInit:
+									function (e) { 
+										// ossName auto complete
+										$(e).autocomplete({
+											source: ossNames
+											, minLength: 3 // IE 스크립트 성능이슈로 0->3 으로 변경 yuns
+											, open: function() { $(this).attr('state', 'open');}
+											, close: function () { $(this).attr('state', 'closed');}
+										}).focus(function() {
+											if ($(this).attr('state') != 'open') {
+												$(this).autocomplete("search");
+											}
+										}).on('autocompletechange', function() {
+											if(e.value!=""){
+												var rowid = (e.id).split('_')[0];
+												fn_grid_com.griOssVersions($('#'+rowid+'_ossVersion')[0], e.value, 'list');
+												fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+											}
+										}).dblclick(function(){
+											var rowid = (e.id).split('_')[0];
+											var licenseName = com_fn.getLicenseName(partnerList.getRowData(rowid));
+											
+											partnerList.jqGrid("setCell", rowid, "licenseName", licenseName);
+											fn_grid_com.saveCellData(partnerList.attr("id"), rowid, "licenseName", licenseName, null, null);
+											partnerList.jqGrid('saveRow',rowid);
+											
+											fn_grid_com.mvOssPage(partnerList, rowid);
+										});
+										
+										currentOssName = e.value;
+									}
+							}
+					},
+					{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center', editable:true, edittype:'text', template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									fn_grid_com.griOssVersions(e, currentOssName, 'list');
+									
+									$(e).on( "autocompletechange", function() {
+										var rowid = (e.id).split('_')[0];
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									});
+								}
+						}
+					},
+					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
+					{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
+						editoptions: {
+							dataInit: function (e) {
+									var licenseNameId = $(e).attr("id").split('_')[0];
+									var licenseNameTd = $(e).parent();
+
+									var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
+									displayLicenseNameCell += '</div>';
+						
+									$(licenseNameTd).empty();
+									$(licenseNameTd).html(displayLicenseNameCell);
+									$('#'+licenseNameId+'_licenseNameDiv').append(e);
+								
+									// licenseName auto complete
+									$(e).autocomplete({
+										source: licenseNames
+										, minLength: 0
+										, open: function() { $(this).attr('state', 'open'); }
+										, close: function () { $(this).attr('state', 'closed'); }
+									}).focus(function() {
+										if ($(this).attr('state') != 'open') {
+											$(this).autocomplete("search");
+										}
+									});
+									
+									// set license data
+									$(e).on( "autocompletechange", function() {
+										var rowid = (e.id).split('_')[0];
+										var mult = null;
+										var multText = null;
+										
+										for(var i in licenseNames){
+											if("" != e.value && e.value == licenseNames[i].value){
+												var licenseIds = $('#'+rowid+'_licenseId').val();
+												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+												multText = licenseNames[i].value;
+												break;
+											}
+										}
+										
+										if (mult == null) {
+											mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+											multText = e.value;
+										}
+										
+										var rowLicenseNames = [];
+										$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
+											rowLicenseNames.push($(this).text());
+										});
+										
+										if (multText != null){
+											if(rowLicenseNames.length > 0){
+												var duplicateFlag = false;
+												for(var i in rowLicenseNames){
+													if(multText == rowLicenseNames[i]){
+														duplicateFlag = true;
+														break;
+													}
+												}
+												
+												if(!duplicateFlag){
+													$('#'+rowid+'_licenseNameBtn').append(mult);
+												}
+											} else {
+												$('#'+rowid+'_licenseNameBtn').append(mult);
+											}
+										}
+										
+										$('#'+rowid+'_licenseName').val("");
+										
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									}).on("keypress", function(evt){
+										if(evt.keyCode == 13){
+											var rowid = (e.id).split('_')[0];
+											var mult = null;
+											var multText = null;
+											
+											for(var i in licenseNames){
+												if("" != e.value && e.value == licenseNames[i].value){
+													var licenseIds = $('#'+rowid+'_licenseId').val();
+													mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + licenseNames[i].value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+													multText = licenseNames[i].value;
+													break;
+												}
+											}
+											
+											if(mult == null && "" != e.value){
+												mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + e.value + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+												multText = e.value;
+											}
+											
+											var rowLicenseNames = [];
+											$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
+												rowLicenseNames.push($(this).text());
+											});
+											
+											if (multText != null){
+												if(rowLicenseNames.length > 0){
+													var duplicateFlag = false;
+													for(var i in rowLicenseNames){
+														if(multText == rowLicenseNames[i]){
+															duplicateFlag = true;
+															break;
+														}
+													}
+													
+													if(!duplicateFlag){
+														$('#'+rowid+'_licenseNameBtn').append(mult);
+													}
+												} else {
+													$('#'+rowid+'_licenseNameBtn').append(mult);
+												}
+											}
+											
+											$('#'+rowid+'_licenseName').val("");
+
+											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+										}
+									});
+								}
+						}
+					},
+					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+rowid+"_downloadLocation").val(value);
+										}
+										
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									}).on("blur", function() {
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+e.id).val(value);
+										}
+									});
+								}
+						}
+					},
+					{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									$(e).on("change", function() {
+										var rowid = (e.id).split('_')[0];
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+rowid+"_homepage").val(value);
+										}
+										
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									}).on("blur", function() {
+										var value = e.value;
+										
+										if(value.charAt(value.length-1) == "/"){
+											value = value.slice(0, -1); // 마지막 문자열 제거
+											$("#"+e.id).val(value);
+										}
+									});
+								}
+						}
+					},
+					{name: 'copyrightText', index: 'copyrightText', width: 140, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+									
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e);
+								});
+							}
+						}
+					},
+					
+					{name: 'cveId', index: 'cveId', hidden:true},
+					{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : true, sorttype:'float', template: searchNumberOptions},
+					{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false},
+					{name: 'comments', index: 'comments', width: 150, align: 'left', editable:true, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
+						dataInit:
+							function (e) {
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+								});
+							}
+						}
+					},
+					{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
+					{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
+					{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
+					{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : false, search : false},
+					{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : false, search : false},
+					{name: 'restriction', index: 'restriction', width: 70, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
+					{name: 'customBinaryYn', index: 'customBinaryYn', editable:false, hidden:true}
+				],
+				autoencode: true,
+				editurl:'clientArray',
+				autowidth: true,
+				height: 'auto',
+				gridview: true,
+				pager: '#pager',
+				rowNum: 200,
+				rowList: [200, 500, 1000, 5000],
+				recordpos:'right',
+				toppager:true,
+				loadonce:true,
+				cellEdit : true,
+				cellsubmit : 'clientArray',
+				ignoreCase: true,
+				onSortCol: function (index, columnIndex, sortOrder) {
+					isSort = true;
+				},
+				loadComplete: function(data) {
+					_mainLastsel = -1;
+					
+					if(data.records > 0) {
+						var multRowIds = []; 
+						var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+						for(var _idx=0;_idx<rowsCount;_idx++) {
+							row = rows[_idx];
+							className = row.className;
+							if (className.indexOf('jqgrow') !== -1) {
+								rowid = row.id;
+								rowData = data.rows[rowIdx++];
+								
+								if(rowData.licenseDiv != "M") {
+									className = className + ' singleLicenseClass';
+									
+									$("#" + rowid).next("tr.ui-subgrid").hide();
+								} else {
+									multRowIds.push(rowid);
+								}
+								
+								if(rowData.excludeYn == "Y" && className.indexOf('excludeRow') === -1) {
+									className= className + ' excludeRow';
+								}
+								
+								row.className = className;
+								
+							} else if(className.indexOf('ui-subgrid') !== -1){
+								rowIdx++;
+							}
+
+							// checkbox click event
+							$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+						}
+						
+						// 한번에 처리
+						$("#list tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
+					}
+					
+					if(isSort){
+						isSort = false;
+					}
+					
+					// append button event
+					if ($("#list_toppager_left").find('button').length == 0) {
+		            	var appendBtn = "<button type=\"button\" id=\"exportDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+		            	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
+		            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+		            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span>";
+		            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('Spreadsheet_sub')\">SPDX (Spreadsheet)</span>";
+		            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('RDF_sub')\">SPDX (RDF)</span>";
+		            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('TAG_sub')\">SPDX (TAG)</span>";
+		            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('JSON_sub')\">SPDX (JSON)</span>";
+		            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML_sub')\">SPDX (YAML)</span></div>";
+		                	                
+		                $("#list_toppager_left").append(appendBtn);
+		            }
+				},
+				onSelectRow: function(rowid,status,eventObject) {
+				},
+				beforeSelectRow: function(rowid, e) {
+					var $self = $(this), iCol, cm,
+				    $td = $(e.target).closest("tr.jqgrow>td"),
+				    $tr = $td.closest("tr.jqgrow"),
+				    p = $self.jqGrid("getGridParam");
+
+				    if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+				       iCol = $.jgrid.getCellIndex($td[0]);
+				       cm = p.colModel[iCol];
+				       if (cm != null && cm.name === "cb") {
+				           // multiselect checkbox is clicked
+				           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+				       }
+				    }
+					// 경고 클래스 설정
+				    fn_grid_com.setWarningClass(partnerList,rowid,["ossName","licenseName"]);
+				    return false;
+				},
+				onCellSelect: function(rowid,iCol,cellcontent,e) {
+					
+				},
+				ondblClickRow: function(rowid,iRow,iCol,e) {
+					
+				},
+				onPaging: function(action) {
+					cleanErrMsg("list");
+					fn_grid_com.totalGridSaveMode('list');
+				},
+				gridComplete : function() {
+					cleanErrMsg("list");
+
+					if (partyValidMsgData_e) {
+						gridValidMsgNew(partyValidMsgData_e, "list");
+					}
+
+					if (partyDiffMsgData_e) {
+						gridDiffMsg(partyDiffMsgData_e, "list");
+					}
+					
+					if (partyInfoMsgData_e) {
+						gridInfoMsg(partyInfoMsgData_e, "list");
+					}
+					
+					var arr = [];
+					arr = partnerList.jqGrid('getDataIDs');
+
+					for (var i in arr){
+						if(partnerList.jqGrid('getCell',arr[i],'obligationType') == 90) {
+							$("#"+arr[i]+"_source").parent().css("background", "CornflowerBlue");
+							$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
+						}
+					}
+				},
+				removeHighLight : true
+			});
+			
+			partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+			$('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+		}
+	}
+	
+	var fn = {
+		displayPartnerInfo : function () {
+			var display = "";
+			
+			var softwareName = [[${detail.softwareName}]];
+			var softwareVersion = [[${detail.softwareVersion}]];
+			if ("" != softwareVersion && softwareVersion != null) {
+				softwareName += " (" + softwareVersion + ")";
+			}
+			
+			var partnerName = "<span class=\"text-dark-gray text-bold hover-line goToEditLink\">" + softwareName + "</span>";
+			display += partnerName
+			
+			var status = "<span class=\"ml-2\"> | </span>";
+			var partnerStatus = [[${detail.status}]];
+			
+			switch(partnerStatus){
+				case "REQ" :
+					status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
+					
+					break;
+				case "REV" :
+					status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
+
+					break;
+				case "CONF" :
+					status += "<span class=\"text-dark text-bold ml-2\">Confirm</span>";
+					
+					break;
+				default :
+					status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
+					
+					break;
+			}
+			
+			display += status;
+			
+			$("#displayPartnerInfo").html(display);
+				
+			if ($(".goToEditLink").width() > 300) {
+				$(".goToEditLink").addClass("ellipsis");
+			}
+		},
+		displayNotify : function(cellvalue, options, rowObject){
+			var display = "";
+			var obligationLicense = rowObject["obligationLicense"];
+			var obligationType = rowObject["obligationType"];
+				
+			if(obligationLicense == 10 || obligationLicense == 11) {
+				display="<span class=\"iconSet ops\"></span>";
+			} else if(obligationLicense == 90) {
+				display = '<select id="'+options.rowId+'_notify" onchange="fn.onNotifyCboxClick(' + options.rowId + ')">'
+					+ '<option value=""></option>'
+					+ '<option value="Y" '+((rowObject["obligationType"]=='10' || rowObject["obligationType"]=='11') ? ' selected="selected"' : '') +'>O</option>'
+					+ '<option value="N" '+((rowObject["obligationType"]=='99') ? ' selected="selected"' : '') +'>X</option>'
+					+ '</select>';
+			}
+				
+			return display;
+		},
+		displaySource : function(cellvalue, options, rowObject){
+			var display = "";
+			var obligationLicense = rowObject["obligationLicense"];
+			var obligationType = rowObject["obligationType"];
+			
+			if(obligationLicense == 11) {
+				display="<span class=\"iconSet man\"></span>";
+			} else if(obligationLicense == 90) {
+				display = '<select id="'+options.rowId+'_source" onchange="fn.onSourceCboxClick(' + options.rowId + ')">'
+					+ '<option value=""></option>'
+					+ '<option value="Y" '+((rowObject["obligationType"]=='11') ? ' selected="selected"' : '') +'>O</option>'
+					+ '<option value="N" '+((rowObject["obligationType"]=='99' || rowObject["obligationType"]=='10') ? ' selected="selected"' : '') +'>X</option>'
+					+ '</select>';
+			}
+			
+			return display;
+		},
+		unDisplayNotify : function(cellvalue, options, rowObject){
+			var display = $("#"+options.rowId+"_notify").val();
+
+			return display;
+		},
+		unDisplaySource : function(cellvalue, options, rowObject){
+			var display = $("#"+options.rowId+"_source").val();
+
+			return display;
+		},
+		selectDownloadFile : function(target) {
+			if ([[${detail.statusPermission}]] == 0) {
+				alertify.alert([[#{msg.common.not.permission}]], function(){});
+				return false;
+			}
+			
+	    	// download file
+	    	if ("report_sub" === target) {
+	    		fn.downloadExcel();
+	    	} else {
+	    		var status = [[${detail.status}]];
+	        	if ('CONF' != status) {
+	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+	    				if (e) {
+	    					fn.selectDownloadFileValidation(target);
+	    				} else {
+	    					return false;
+	    				}
+	    			});
+	        	} else {
+	        		fn.selectDownloadFileValidation(target);
+	        	}
+	    	}
+	    },
+	    selectDownloadFileValidation : function(target) {
+	    	if (fn.checkSelectDownloadFile()) {
+	    		if (target === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
+		        else if (target === "RDF_sub") fn.downloadSpdxRdf();
+		        else if (target === "TAG_sub") fn.downloadSpdxTag();
+		        else if (target === "JSON_sub") fn.downloadSpdxJson();
+		        else if (target === "YAML_sub") fn.downloadSpdxYaml();
+		        else if (target === "YAML") fn.downloadYaml();
+			} else {
+	    		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+	    	}
+	    },
+		checkSelectDownloadFile : function() {
+			var checkEmptyFlag = false;
+			
+			$.ajax({
+	    		type: "POST",
+				url: '/partner/checkSelectDownloadFile',
+				data: JSON.stringify({"partnerId":[[${detail.partnerId}]]}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if (data.isValid) {
+						checkEmptyFlag = true;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+	    	});
+	    	
+	    	return checkEmptyFlag;
+		},
+		downloadSpdxSpreadSheetExcel : function(){
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdx", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		downloadSpdxRdf : function() {
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdxRdf", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		downloadSpdxTag : function() {
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",				   
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdxTag", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		downloadSpdxJson : function() {
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdxJson", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		downloadSpdxYaml : function() {
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdxYaml", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		}
+	}
+</script>
+</th:block>

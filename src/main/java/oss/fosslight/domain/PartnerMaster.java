@@ -202,6 +202,10 @@ public class PartnerMaster extends ComBean implements Serializable{
 	
 	private String copyWatcherLocation;
 	
+	private int permission;
+	
+	private int statusPermission;
+	
 	/*
 	 * Gets the partner id.
 	 *
@@ -1211,6 +1215,22 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setCopyWatcherLocation(String copyWatcherLocation) {
 		this.copyWatcherLocation = copyWatcherLocation;
+	}
+
+	public int getPermission() {
+		return permission;
+	}
+
+	public void setPermission(int permission) {
+		this.permission = permission;
+	}
+
+	public int getStatusPermission() {
+		return statusPermission;
+	}
+
+	public void setStatusPermission(int statusPermission) {
+		this.statusPermission = statusPermission;
 	}
 	
 }

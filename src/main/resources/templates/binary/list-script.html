@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="script">
+    <script th:inline="javascript">
+        //<![CDATA[
+        /*global $ */
+        /*jslint browser: true, nomen: true */
+        //	var subGridUrl = true;
+
+        let ossNames = [];
+        let objs = [];
+        let licenseNames = [];
+        let isAdmin = [[ ${@CommonFunction.isAdmin() }]];
+        let totalRow = 0;
+        let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) }]];
+        let selectedRow = new Array();
+        let multiSelectFlag = false;
+        let confirmFlag = false;
+        let listData = [];
+
+        $(window).load(function () {
+            'use strict';
+            setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
+            binary_evt.init();
+            binary_grid.load();
+        });
+
+        const binary_data = {
+            load: function (data) {
+                getAjaxData(data, "/binary/listAjax", 'json', function (data) {
+                    $("#list").jqGrid('GridUnload');
+
+                    listData = data.rows;
+                    binary_grid.load();
+                }, function(){
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                })
+            }
+        }
+
+        const binary_evt = {
+            init: function () {
+                $('#updateRange').daterangepicker({
+        			autoUpdateInput: false
+        		}).on('apply.daterangepicker', function(ev, picker) {
+        		    $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+        		    $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+        		    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+        		}).on('cancel.daterangepicker', function(ev, picker) {
+        			$(this).val("");
+        			$("input[name='schStartDate']").val("");
+        		    $("input[name='schEndDate']").val("");
+        		});
+
+                $('#btnSaveBat').click(function(){
+                    binary_fn.saveBat();
+                });
+
+                $('#search').on('click', function (e) {
+                    e.preventDefault();
+                    var postData = binary_fn.serializeObjectHelper();
+                    binary_data.load(postData);
+                });
+
+                // licenseNames auto complete
+                commonAjax.getLicenseTags().success(function(data, status, headers, config){
+                    if(data != null){
+                        var tag = "";
+
+                        data.forEach(function(obj){
+                            if(obj!=null) {
+                                tag = {
+                                    value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
+                                    label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
+                                    type : obj.licenseType,
+                                    obligation : obj.obligation,
+                                    obligationChecks : obj.obligationChecks
+                                }
+
+                                licenseNames.push(tag);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        const binary_fn = {
+            // 저장된 rowid로 rowdata 가져와서 저장
+            saveBat: function(){
+                var modifyRowList = [];	// 수정된 LIST
+                var modifyRow = {};
+
+                binary_fn.saveLastRow();
+
+                binary_grid.modifyRowId.forEach(function(val){
+                    if(val){
+                        modifyRowList.push($("#list").jqGrid("getRowData",val));
+                    }
+                });
+
+                // {newRowList: [], modifyRowList: []} 형식으로 변환
+                modifyRow['modifyRowList'] = modifyRowList;
+
+                var data = JSON.stringify(modifyRowList);
+                binary_ajax.setBat(data);
+            },
+            saveLastRow: function(){
+                $("#list").jqGrid("editCell", 0, 0, false);		// $("#list").jqGrid("editCell", row, col, false); 반드시 edit focus를 해제시킨다. 해제 시키지 않을 경우 값이 <input ....>으로 저장된다.
+                $("#list").jqGrid("saveRow", binary_grid.lastEditRowId);
+
+                // 수정된 rowid 저장
+                if(binary_grid.modifyRowId.length == 0) {
+                    binary_grid.modifyRowId.push(binary_grid.lastEditRowId);
+                } else {
+                    binary_grid.modifyRowId.forEach(function() {		// 중복제외
+                        if(binary_grid.modifyRowId.indexOf(binary_grid.lastEditRowId) == -1) {
+                            binary_grid.modifyRowId.push(binary_grid.lastEditRowId);
+                        }
+                    });
+                }
+            },
+            serializeObjectHelper: function () {
+                var postData = $('#batSearch').serializeObject();
+
+                if(postData.ossTypeSearch != null) {
+                    postData.ossTypeSearch = JSON.stringify(postData.ossTypeSearch);
+                    postData.ossTypeSearch = postData.ossTypeSearch.replace(/\"|\[|\]|\,/gi, "");
+                } else {
+                    postData.ossTypeSearch = "";
+                }
+
+                return postData;
+            },
+            getMaxIdNo: function(){
+                var ids = [];
+                ids = $("#list").jqGrid('getDataIDs');
+
+                return (ids.length == 0) ? 0 : Math.max.apply(Math, ids);
+            },
+            // oss_name 가져오기
+            griOssNames : function(data){
+                return $.ajax({
+                    type: 'GET',
+                    url: "/project/getOssNames",
+                    data: data,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            },
+            // oss_version 가져오기
+            griOssVersions : function(e, ossName, target){
+                var ossVersions = [];
+
+                if(ossName=="") {
+                    return false;
+                }
+
+                return $.ajax({
+                    type: 'GET',
+                    url: "/project/getOssVersions",
+                    data: {ossName : ossName },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    success: function(data, status, headers, config){
+                        if(data != null){
+                            data.forEach(function(obj){
+                                ossVersions.push(obj.ossVersion);
+                            });
+
+                            $(e).autocomplete({
+                                source: ossVersions
+                                , minLength: 0
+                                , open: function() { $(this).attr('state', 'open');}
+                                , close: function () { $(this).attr('state', 'closed');}
+                            }).focus(function() {
+                                if ($(this).attr('state') != 'open') {
+                                    $(this).autocomplete("search");
+                                }
+                            }).on('autocompletechange', function() {
+                                var rowid = (e.id).split('_')[0];
+                            });
+
+                            ossVersions = [];
+
+                            $(e).focus();
+                        }
+                    }
+                });
+            },
+            downloadExcel : function(){
+                if(isMaximumRowCheck(totalRow)){
+                    var filters = $("#list").getGridParam("postData").filters;
+                    $("#filters").val(filters);
+                    var data = $('#batSearch').serializeObject();
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/exceldownload/getExcelPost",
+                        data: JSON.stringify({"type":"binaryDB", "parameter":JSON.stringify(data)}),
+                        dataType : 'json',
+                        cache : false,
+                        contentType : 'application/json',
+                        success: function (data) {
+                            if("false" == data.isValid) {
+                                if(data.validMsg == "overflow"){
+                                    alertify.error(getMsgMaxRowCnt(), 0);
+                                }else{
+                                    alertify.error([[#{msg.common.valid2}]], 0);
+                                }
+                            } else {
+                                window.location =  '<c:url value="/exceldownload/getFile?id='+data.validMsg+'"/>';
+                            }
+                        },
+                        error: function(data){
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        }
+                    });
+                }
+            },
+            getSelectedRowCnt : function(){
+                selectedRow = new Array();
+                selectedRow = $('#list').jqGrid('getGridParam', 'selarrrow');
+                multiSelectFlag = selectedRow.length > 1 ? true : false;
+            }
+        }
+
+        const binary_ajax = {
+            //코드 저장
+            setBat: function(param) {
+                $.ajax({
+                    type: 'POST',
+                    url: "/binary/modAjax",
+                    data: param,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                }).success(function (data, status, headers, config) {
+                    alertify.success([[ #{msg.common.success}]]);
+                    $("#list").jqGrid().trigger('reloadGrid');
+                }).error(function (data, status, headers, config) {
+                    alertify.success(String([[ #{msg.common.valid2}]]));
+                });
+            }
+        };
+
+        const binary_grid = {
+            modifyRowId: [],		//수정된 모든 rowID
+            lastEditRowId: '',		//마지막 수정된 rowId 저장 변수
+            lastIdNo: '',			//서버에서 가져온 마지막 ID
+            load: function () {
+                binary_grid.modifyRowId = [];
+                binary_grid.lastEditRowId = "";
+
+                if(isAdmin) {
+                    var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_BINARYDB_PAGENATION_LIST_STR')}]];
+                } else {
+                    var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
+                }
+                var rowList = rowStr.split(",");
+                var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
+                var colNameArr = ['batId', 'Binary File name', 'Binary location', 'Source path (Android models only)', 'OSS Name', 'OSS Version', 'License', 'Download Location', 'Project Name', 'Platform Name', 'Platform Version', 'Checksum', 'Tlsh', 'Update Date', 'Comment'];
+                var colModelArr = [];
+                var colModelObj = {name: 'batId', index: 'batId', hidden: true, key: true };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'fileName', index: 'fileName', width: 150, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj =  {name: 'pathName', index: 'pathName', width: 150, allign: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'sourcePath', index: 'sourcePath', width: 150, allign: 'left',editable: true, template: searchStringOptions};
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'ossName', index: 'ossName', width: 150, allign: 'left', editable: true, template: searchStringOptions,
+                    editoptions: {
+                        dataInit:
+                            function (e) {
+                                // ossName auto complete
+                                $(e).autocomplete({
+                                    source: ossNames
+                                    , minLength: 3
+                                    , open: function () {
+                                        $(this).attr('state', 'open');
+                                    }
+                                    , close: function () {
+                                        $(this).attr('state', 'closed');
+                                    }
+                                }).focus(function () {
+                                    if ($(this).attr('state') != 'open') {
+                                        $(this).autocomplete("search");
+                                    }
+                                }).on('autocompletechange', function () {
+                                    if (e.value != "") {
+                                        var rowid = (e.id).split('_')[0];
+                                        fn.griOssVersions($('#ossVersion'), e.value, 'list');
+                                    }
+                                });
+
+                                currentOssName = e.value;
+                            }
+                    }
+                };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'ossVersion', index: 'ossVersion', width: 80, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'license', index: 'license', width: 150, align: 'left', editable: true, template: searchStringOptions,
+                    editoptions: {
+                        dataInit: function (e) {
+                            // licenseName auto complete
+                            $(e).autocomplete({
+                                source: licenseNames
+                                , minLength: 0
+                                , open: function () {
+                                    $(this).attr('state', 'open');
+                                }
+                                , close: function () {
+                                    $(this).attr('state', 'closed');
+                                }
+                            }).focus(function () {
+                                if ($(this).attr('state') != 'open') {
+                                    $(this).autocomplete("search");
+                                }
+                            });
+
+                            // set license data
+                            $(e).on("autocompletechange", function () {
+                            });
+                        }
+                    }
+                };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'downloadlocation', index: 'downloadlocation', width: 100, align: 'left', formatter: 'link', formatoptions: {target: '_blank'}, editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'parentName', index: 'parentName', width: 100, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'platformName', index: 'platformName', width: 100, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'platformVersion', index: 'platformVersion', width: 100, align: 'left', editable: true, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'checkSum', index: 'checkSum', width: 150, allign: 'center', editable: true, hidden: true };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'tlshCheckSum', index: 'tlshCheckSum', width: 150, allign: 'center', editable: true, hidden: true };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'updateDate', index: 'updateDate', width: 100, align: 'left', editable: false, formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, template: searchDateOptions };
+                colModelArr.push(colModelObj);
+                colModelObj = {name: 'comment', index: 'comment', width: 150, editable: true, hidden: true, edittype: 'textarea', editoptions: {maxlength: 2048, rows: 5}, editrules: {edithidden: true}, template: searchStringOptions };
+                colModelArr.push(colModelObj);
+
+                //그리드 생성
+                $('#list').jqGrid({
+                    datatype: 'local'
+                    , data : listData
+                    , jsonReader: {
+                        repeatitems: false,
+                        id: 'batId',
+                        root: function (obj) {
+                            return obj.rows;
+                        },
+                        page: function (obj) {
+                            return obj.page;
+                        },
+                        total: function (obj) {
+                            return obj.total;
+                        },
+                        records: function (obj) {
+                            return obj.records;
+                        }
+                    }
+                    , colNames: colNameArr
+                    , colModel: colModelArr
+                    , editurl: 'clientArray'
+                    , rowNum: rowNum
+                    , rowList: rowList
+                    , autowidth: true
+                    , pager: '#pager'
+                    , gridview: true
+                    , sortable: function (permutation) {
+                    }
+                    , sortname: 'fileName'
+                    , sortorder: 'asc'
+                    , loadonce: false
+                    , toppager:true
+                    , height: 'auto'
+                    , multiselect: true
+                    , multiselectWidth: 35
+                    , onSelectRow: function (rowid, iRow, iCol, e) {
+                        // 마지막 수정된 row 저장
+                        if (binary_grid.lastEditRowId && rowid != binary_grid.lastEditRowId) {
+                            binary_fn.saveLastRow();
+                        }
+                        binary_grid.lastEditRowId = rowid;
+                    }
+                    , loadComplete: function (data) {
+                        totalRow = data.records;
+                        // id(key값)의 max값을 lastIdNo에 설정
+                        binary_grid.lastIdNo = binary_fn.getMaxIdNo();
+                        confirmFlag = false;
+                        
+                        if ($("#list_toppager_left").find('button').length == 0) {
+                        	var appendIcon = "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"binary_fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+                            $("#list_toppager_left").append(appendIcon);
+                        }
+                    }
+                    , ondblClickRow: function (rowid, iRow, iCol, e) {
+                    }
+                    , gridComplete:function (){ updateGridRowCount('list', 'pager'); }
+                });
+
+                $("#list").jqGrid('navGrid', "#pager", {edit: isAdmin, add: false, del: isAdmin, search: false, refresh: false}, binaryUpdateDialogEdit, null, binaryUpdateDialogDel);
+                $("#list").jqGrid('filterToolbar', {stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+            }
+        }
+
+        const binaryUpdateDialogEdit = {
+            url:"/binary/modAjax"
+            , closeAfterEdit: true
+            , width : 450
+            , reloadAfterSubmit: true
+            , modal: true
+            , serializeEditData : function(postdata) {
+                if(multiSelectFlag){
+                    var postdataArr = new Array();
+
+                    for( var i in selectedRow) {
+                        var obj = $('#list').getRowData(selectedRow[i]);
+                        var editRowId = $("#FrmGrid_list  #filename").attr("rowid");
+                        var editRowData = $("#list").getRowData(editRowId);
+
+                        if(postdata["ossName"] != editRowData["ossName"]){
+                            obj["ossName"] 	= postdata["ossName"];
+                        }
+
+                        if(postdata["ossVersion"] != editRowData["ossVersion"]){
+                            obj["ossVersion"] = postdata["ossVersion"];
+                        }
+
+                        if(postdata["license"] != editRowData["license"]){
+                            obj["license"] 	= postdata["license"];
+                        }
+
+                        if(postdata["comment"] != editRowData["comment"]){
+                            obj["comment"] 	= postdata["comment"];
+                        }
+
+                        obj["updateDate"]	= postdata["updateDate"];
+                        obj["oper"]			= postdata["oper"];
+                        // id => concat( filename , '-' , checksum, '-', COALESCE(ossname,''), '-', COALESCE(ossversion,''), '-', COALESCE(license,'') )
+                        obj["id"]			= selectedRow[i];
+
+                        postdataArr.push(obj);
+                    }
+
+                    return {"parameter":JSON.stringify(postdataArr)};
+                } else {
+                    return postdata;
+                }
+            }
+            , beforeShowForm: function(formid) {
+                binary_fn.getSelectedRowCnt();
+
+                if(multiSelectFlag){
+                    $("#pathName", formid).attr("disabled","disabled");
+                    $("#sourcePath", formid).attr("disabled","disabled");
+                    $("#parentName", formid).attr("disabled","disabled");
+                    $("#platformName", formid).attr("disabled","disabled");
+                    $("#platformVersion", formid).attr("disabled","disabled");
+                }
+
+                $("#fileName", formid).attr("disabled","disabled");
+                $("#checkSum", formid).attr("disabled","disabled");
+                $("#tlshCheckSum", formid).attr("disabled","disabled");
+                $("#downloadlocation", formid).attr("disabled","disabled");
+            }
+            , afterSubmit: function(response, postdata) {
+                if("false" == response.responseJSON.isValid) {
+                    alertify.error([[ #{msg.common.valid} ]], 0);
+                    createValidMsg('FrmGrid_list', response.responseJSON);
+
+                    return [false, [[ #{msg.common.valid} ]], ""]
+                } else {
+                    alertify.error([[ #{msg.common.success} ]], 0);
+
+                    return [true,"",""]
+                }
+            }
+            , beforeSubmit: function(postdata, formid) {
+                $("span.retxt", formid).remove();
+
+                if(multiSelectFlag && !confirmFlag){
+                    var result = "";
+
+                    alertify.confirm("More than one binary information will be modified.<br>Would you like to continue?"
+                        , function(){
+                            confirmFlag = true;
+                            $("#sData").trigger("click");
+                            result = [true];
+                        }
+                        , function(){
+                            $("#cData").trigger("click");
+                            result = [false];
+                        });
+
+                    return result;
+                } else {
+                    return [true];
+                }
+            }
+        }
+
+        const binaryUpdateDialogDel = {
+            url:"/binary/modAjax"
+            , closeAfterDel: true
+            , reloadAfterSubmit: true
+            , modal: true
+            , onclickSubmit: function(params, rowid) {
+                var ajaxData = {};
+                var list = $("#list");
+                var selectedRow = list.jqGrid("getGridParam", "selarrrow");
+                //ajaxData = {ids: selectedRow};
+                return ajaxData;
+            }
+            , afterSubmit: function(response, postdata) {
+                if("false" == response.responseJSON.isValid) {
+                    alertify.error([[ #{msg.common.valid2} ]], 0);
+
+                    return [false, [[ #{msg.common.valid} ]], ""]
+                } else {
+                    alertify.success([[ #{msg.common.success} ]], 0);
+                    $("#list").jqGrid().trigger('reloadGrid');
+
+                    return [true,"",""]
+                }
+            }
+        };
+        //]]>
+    </script>
+</th:block>

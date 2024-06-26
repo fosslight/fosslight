@@ -166,10 +166,7 @@ public class FileUtil {
 			if (!dir.exists()) {
 				dir.mkdirs();
 			}
-
-			ByteArrayInputStream inputStream = PdfUtil.html2pdf(contents);
-
-			FileUtils.copyInputStreamToFile(inputStream, new File(filePath + "/" + fileName));
+			PdfUtil.html2pdf(contents, filePath + "/" + fileName);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 

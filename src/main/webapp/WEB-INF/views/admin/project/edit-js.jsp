@@ -554,7 +554,7 @@
 		addHtml : function(target, str, division, userId){
 			var rlt = division+((userId!="") ? "/"+userId : "");
 			var html  = '<span id="'+userId+'"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
-			html += '<strong>'+str+'</strong>';
+			html += str;
 			if('${project.viewOnlyFlag}' != "Y") {
 				html += '<input type="button" value="Delete" class="smallDelete" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\');" /></span>';
 			}

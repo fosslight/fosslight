@@ -214,9 +214,6 @@
                 dataValidCheck(mainData)
                 makePostData()
 
-                console.log("postdata")
-                console.log(postData)
-
                 $.ajax({
                     type: "POST",
                     contentType: 'application/json',

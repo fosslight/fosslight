@@ -65,4 +65,27 @@
             UPDATED_TIME = NOW()
     </insert>
 
+    <select id="selectUserColumns" resultType="java.lang.String">
+        SELECT COLUMNS
+        FROM USER_COLUMNS
+        WHERE USER_ID = #{userId} AND LIST_TYPE = #{listType}
+    </select>
+
+    <insert id="insertUserColumns">
+        INSERT INTO USER_COLUMNS
+        (
+            COLUMNS,
+            LIST_TYPE,
+            USER_ID
+        )
+        VALUES
+        (
+            #{columns},
+            #{listType},
+            #{userId}
+        )
+        ON DUPLICATE KEY UPDATE
+            COLUMNS = #{columns},
+            UPDATED_DATE = NOW()
+    </insert>
 </mapper>

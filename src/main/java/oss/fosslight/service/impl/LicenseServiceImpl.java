@@ -124,6 +124,12 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			if (!isEmpty(item.getRestriction())){
 				item.setRestriction(CommonFunction.setLicenseRestrictionList(item.getRestriction()));
 			}
+
+			if(!isEmpty(item.getWebpage())) {
+				if (!item.getWebpage().contains("http://") && !item.getWebpage().contains("https://")) {
+					item.setWebpage("http://" + item.getWebpage());
+				}
+			}
 		}
 		
 		map.put("page", licenseMaster.getCurPage());
@@ -146,13 +152,21 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		
 		List<LicenseMaster> licenseWebPageList = licenseMapper.selectLicenseWebPageList(licenseMaster);
 		List<String> webPage = new ArrayList<>();
+		if (!isEmpty(licenseMaster.getWebpage())) {
+			webPage.add(licenseMaster.getWebpage().trim());
+		}
+		
 		for (LicenseMaster bean : licenseWebPageList) {
-			webPage.add(bean.getWebpage());
+			String webpageString = bean.getWebpage();
+			if (!isEmpty(webpageString)) {
+				webpageString = webpageString.trim();
+				if (!webPage.contains(webpageString)) webPage.add(webpageString);
+			}
 		}
 
 		// 일반 user 화면 일 경우 restriction을 full name으로 화면 출력
 		// admin 화면 일 경우 restriction code를 사용하여 체크박스로 구성
-		if (!"ROLE_ADMIN".equals(loginUserRole())) {
+		// if (!"ROLE_ADMIN".equals(loginUserRole())) {
 			if (licenseMaster.getRestriction() != null) {
 				T2CodeDtl t2CodeDtl = new T2CodeDtl();
 				List<T2CodeDtl> t2CodeDtlList = new ArrayList<>(); 
@@ -163,17 +177,20 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 					log.error(e.getMessage());
 				}
 				List<String> restrictionList = Arrays.asList(licenseMaster.getRestriction().split(","));
+				List<String> restrictionCdNoList = new ArrayList<>();
 				String restrictionStr = "";
 				
 				for (T2CodeDtl item: t2CodeDtlList){
 					if (restrictionList.contains(item.getCdDtlNo())) {
 						restrictionStr += (!isEmpty(restrictionStr) ? ", " : "") + item.getCdDtlNm();
+						restrictionCdNoList.add(item.getCdDtlNo());
 					}
 				}
 				
 				licenseMaster.setRestriction(restrictionStr);
+				licenseMaster.setRestrictionCdNoList(restrictionCdNoList);
 			}
-		}
+		//}
 		
 		licenseMaster.setLicenseNicknames(nickNames.toArray(new String[nickNames.size()]));
 		licenseMaster.setWebpages(webPage.toArray(new String[webPage.size()]));
@@ -398,7 +415,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		}
 		
 		model.put("licenseText", CommonFunction.lineReplaceToBR(bean.getLicenseText()));
-		model.put("templateURL", "/template/notice/license.html");
+		model.put("templateURL", "notice/license.html");
 		
 		return CommonFunction.VelocityTemplateToString(model);
 	}
@@ -715,25 +732,5 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		resMap.put("resCd", resCd);
 		resMap.put("licenseId", result);
 		return resMap;
-	}
-
-	@Override
-	public void deleteLicenseMasterForRestriction(LicenseMaster licenseMaster) {
-		List<LicenseMaster> delRestrictionLicenseList = licenseMapper.selectLicenseList(licenseMaster);
-		if (delRestrictionLicenseList != null && !delRestrictionLicenseList.isEmpty()) {
-			List<String> delRestrictionList = Arrays.asList(licenseMaster.getArrRestriction());
-			for (LicenseMaster lm : delRestrictionLicenseList) {
-				String restrictions = lm.getRestriction();
-				String customRestriction = "";
-				for (String restriction : restrictions.split(",")) {
-					if (!delRestrictionList.contains(restriction)) {
-						customRestriction += restriction + ",";
-					}
-				}
-				if (!customRestriction.isEmpty()) customRestriction = customRestriction.substring(0, customRestriction.length()-1);
-				lm.setRestriction(customRestriction);
-				licenseMapper.updateLicenseMasterForRestriction(lm);
-			}
-		}
 	}
 }

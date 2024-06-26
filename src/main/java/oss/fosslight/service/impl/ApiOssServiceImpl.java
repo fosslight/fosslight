@@ -34,8 +34,11 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
+
 	/** The api oss mapper. */
 	@Autowired ApiOssMapper apiOssMapper;
+	@Autowired OssService ossService;
+	@Autowired HistoryService historyService;
 
 	@Autowired OssService ossService;
 

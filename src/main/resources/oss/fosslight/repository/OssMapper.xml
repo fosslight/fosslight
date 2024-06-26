@@ -11,7 +11,11 @@
     <sql id="orderby">
     	ORDER BY T1.DEACTIVATE_FLAG ASC, 
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-    		CASE WHEN T1.OSS_NAME = #{ossName} THEN 1 ELSE 2 END ASC,
+			CASE
+    	    WHEN T1.OSS_NAME = #{ossName} THEN 1
+			WHEN T1.OSS_NAME LIKE CONCAT('%', #{ossName}, '%') THEN 2
+			ELSE 3
+			END ASC,
     	</if>
     	<choose>
     		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)"> OSS_ID desc</when>
@@ -272,8 +276,8 @@
             , IFNULL(
             	(SELECT CD_DTL_EXP FROM T2_CODE_DTL WHERE CD_NO = '217' AND CD_DTL_NO = T1.OBLIGATION_TYPE) 
             	, CONCAT(
-            		IF(		T3.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>',	'') 
-            		, IF(	T3.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<span class=\"iconSet man\" title=\"Source Code\"></span>]]>',	'')
+            		IF(		T3.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>]]>',	'')
+            		, IF(	T3.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<i class=\"far fa-file-code fa-1-3x mr-1\" title=\"Source Code\"></i>]]>',	'')
          	   ) 
             ) AS OBLIGATION
 			, T1.OBLIGATION_TYPE
@@ -514,7 +518,7 @@
 			, T3.LICENSE_NAME
             , IFNULL(
             	(SELECT CD_DTL_EXP FROM T2_CODE_DTL WHERE CD_NO = '217' AND CD_DTL_NO = T1.OBLIGATION_TYPE) 
-            	, CASE WHEN T1.OBLIGATION_TYPE='10' THEN '<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>' WHEN T1.OBLIGATION_TYPE='11' THEN '<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span><span class=\"iconSet man\" title=\"Source Code\"></span>]]>' ELSE '' END
+            	, CASE WHEN T1.OBLIGATION_TYPE='10' THEN '<![CDATA[<i class=\"far fa-file-alt fa-lg mr-2\" title=\"Notice\"></i>]]>' WHEN T1.OBLIGATION_TYPE='11' THEN '<![CDATA[<i class=\"far fa-file-alt fa-lg mr-2\" title=\"Notice\"></i><i class=\"far fa-file-code fa-lg mr-2\" title=\"Source Code\"></i>]]>' ELSE '' END
             ) AS OBLIGATION
 			, T1.OBLIGATION_TYPE
             , CONCAT(
@@ -751,7 +755,7 @@
 			, T3.LICENSE_NAME
             , IFNULL(
             	(SELECT CD_DTL_EXP FROM T2_CODE_DTL WHERE CD_NO = '217' AND CD_DTL_NO = T1.OBLIGATION_TYPE) 
-            	, CASE WHEN T1.OBLIGATION_TYPE='10' THEN '<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>' WHEN T1.OBLIGATION_TYPE='11' THEN '<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span><span class=\"iconSet man\" title=\"Source Code\"></span>]]>' ELSE '' END
+            	, CASE WHEN T1.OBLIGATION_TYPE='10' THEN '<![CDATA[<i class=\"far fa-file-alt fa-lg mr-2\" title=\"Notice\"></i>]]>' WHEN T1.OBLIGATION_TYPE='11' THEN '<![CDATA[<i class=\"far fa-file-alt fa-lg mr-2\" title=\"Notice\"></i><i class=\"far fa-file-code fa-lg mr-2\" title=\"Source Code\"></i>]]>' ELSE '' END
             ) AS OBLIGATION
 			, T1.OBLIGATION_TYPE
             , CONCAT(
@@ -885,8 +889,8 @@
 			, IF(IFNULL(T2.SHORT_IDENTIFIER,'') = '',T2.LICENSE_NAME,T2.SHORT_IDENTIFIER) AS LICENSE_NAME_EX
 			, T3.CD_DTL_NM AS LICENSE_TYPE
 			, CONCAT(
-            	IF(		T2.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>',	'') 
-            	, IF(	T2.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<span class=\"iconSet man\" title=\"Source Code\"></span>]]>',	'')
+            	IF(		T2.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<i class=\"far fa-file-alt fa-lg mr-2\" title=\"Notice\"></i>]]>',	'')
+            	, IF(	T2.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<i class=\"far fa-file-code fa-lg mr-2\" title=\"Source Code\"></i>]]>',	'')
             ) AS OBLIGATION
             , CONCAT(
             	IF(		T2.OBLIGATION_NOTIFICATION_YN='Y'	,'Y',	'N') 
@@ -1229,7 +1233,7 @@
     	</if>
   		AND OSS_NAME=#{ossName} 
   		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
-  			AND OSS_VERSION=#{ossVersion}
+  			AND REPLACE(HEX(OSS_VERSION), 'E2808B', '') = HEX(#{ossVersion})
   		</if>
   		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
   			AND (OSS_VERSION = '' OR OSS_VERSION IS NULL)
@@ -1767,24 +1771,24 @@
 
 	<select id="checkOssNameTotal" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssMaster">
 		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
-		FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y'  AND DEACTIVATE_FLAG = 'N') OM
-				 LEFT JOIN OSS_DOWNLOADLOCATION DOWN
-						   ON OM.OSS_ID = DOWN.OSS_ID
+		FROM (
+			SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION
+			FROM OSS_MASTER
+			WHERE USE_YN = 'Y'  
+			AND DEACTIVATE_FLAG = 'N'
+			AND MATCH(DOWNLOAD_LOCATION) AGAINST (#{downloadLocation})
+			HAVING DOWNLOAD_LOCATION LIKE CONCAT('%', REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
+		) OM
+		LEFT JOIN (
+			SELECT OSS_ID, DOWNLOAD_LOCATION
+			FROM OSS_DOWNLOADLOCATION
+			WHERE MATCH(DOWNLOAD_LOCATION) AGAINST (#{downloadLocation})
+			HAVING DOWNLOAD_LOCATION LIKE CONCAT('%', REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
+		) DOWN
+		ON OM.OSS_ID = DOWN.OSS_ID
 		WHERE OM.OSS_NAME != #{ossName}
-		  AND (
-			OM.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
-		   	OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
-			)
+		AND (OM.DOWNLOAD_LOCATION IS NOT NULL OR DOWN.DOWNLOAD_LOCATION IS NOT NULL)
 		GROUP BY OM.OSS_NAME
-		UNION
-		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
-		FROM OSS_MASTER OM
-		WHERE OM.OSS_NAME = #{ossNickName} AND OM.USE_YN = 'Y' AND OM.DEACTIVATE_FLAG = 'N'
-		GROUP BY OM.OSS_NAME
-		UNION
-		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
-		FROM (SELECT OSS_NAME FROM OSS_NICKNAME WHERE OSS_NICKNAME = #{ossNickName}) A1
-				 INNER JOIN OSS_MASTER OM WHERE (A1.OSS_NAME=OM.OSS_NAME AND OM.USE_YN = "Y" AND OM.DEACTIVATE_FLAG = 'N') GROUP BY OM.OSS_NAME
 	</select>
 
 	<update id="updateOssCheckNameBySelfCheck" parameterType="oss.fosslight.domain.ProjectIdentification">
@@ -1899,6 +1903,10 @@
 		DELETE FROM OSS_ANALYSIS_STATUS WHERE  PRJ_ID = #{prjId}
 	</delete>
 	
+	<delete id="deleteOssAnalysis" parameterType="String">
+		DELETE FROM OSS_ANALYSIS_STATUS WHERE PRJ_ID = #{prjId}
+	</delete>
+	
 	<insert id="insertOssAnalysisList" parameterType="oss.fosslight.domain.OssMaster">
 		INSERT INTO OSS_ANALYSIS_MAP (
 				COMPONENT_ID
@@ -1995,7 +2003,7 @@
 		  , now()
 		  <choose>
 		  	<when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
-				,"oscAdmin"
+				, 'oscAdmin'
 			</when>
 			<otherwise>
 				, #{creator}
@@ -2006,7 +2014,7 @@
 		  , now()
 		  <choose>
 			  <when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			  ,"oscAdmin"
+			  , 'oscAdmin'
 			  </when>
 			  <otherwise>
 			  , #{creator}
@@ -2017,16 +2025,20 @@
 		  , ANALYSIS_START_DATE 	= now()
 		  , ANALYSIS_END_DATE		= null
 		  , MODIFIED_DATE 			= now()
-		    <choose>
-				<when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
-		    ,MODIFIER 				= "oscAdmin"
+		  <choose>
+			<when test="@oss.fosslight.util.StringUtil@isEmpty(creator)">
+		    	, MODIFIER			= 'oscAdmin'
 		    </when>
-				<otherwise>
-		    , MODIFIER 				= #{creator}
+			<otherwise>
+		    	, MODIFIER 			= #{creator}
 		    </otherwise>
-			</choose>
+		</choose>
 	</insert>
 
+	<select id="getOssAnalysisStatus" parameterType="string" resultType="string">
+		SELECT STATUS FROM OSS_ANALYSIS_STATUS WHERE PRJ_ID = #{prjId}
+	</select>
+	
 	<select id="getOssAnalysisStatus" parameterType="string" resultType="string">
 		SELECT STATUS FROM OSS_ANALYSIS_STATUS WHERE PRJ_ID = #{prjId}
 	</select>
@@ -2155,7 +2167,7 @@
 		   AND EXISTS (SELECT 1
 						 FROM OSS_COMPONENTS SUB1
 						WHERE T1.PRJ_ID = SUB1.REFERENCE_ID
-						  AND SUB1.REFERENCE_DIV IN ('10', '11', '12', '13', '14', '15', '50')
+						  AND SUB1.REFERENCE_DIV IN ('10', '11', '12', '13', '14', '15', '16', '50')
 						  AND SUB1.OSS_NAME = #{ossName}
 						  <if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
 						  AND SUB1.OSS_VERSION = #{ossVersion}
@@ -2190,7 +2202,7 @@
     			</when>
     			<otherwise>
     				AND T1.REFERENCE_ID IN (SELECT PRJ_ID FROM PROJECT_MASTER WHERE USE_YN = 'Y' AND IDENTIFICATION_STATUS = 'CONF')
-    				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
+    				AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
     				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
     				AND T1.OSS_ID = #{ossId}
     				</if>

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.reflect.TypeToken;
+import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -37,8 +37,9 @@ public class BinaryDataController extends CoTopComponent  {
 	@GetMapping(value="", produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
 		log.debug(" :: Start bat");
-		
-		return Url.TILES_ROOT + "/binary/list";
+		model.addAttribute("searchBean", new BinaryData());
+
+		return "binary/list :: content";
 	}
 	
 	/**
@@ -103,6 +104,6 @@ public class BinaryDataController extends CoTopComponent  {
 			, Model model) throws Exception{
 		
 		model.addAttribute("batInfo", vo);
-		return Url.TILES_ROOT + "/binary/binarypopup";
+		return "/binary/binarypopup";
 	}	
 }

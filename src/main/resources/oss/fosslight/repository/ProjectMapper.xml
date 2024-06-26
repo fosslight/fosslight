@@ -128,9 +128,9 @@
 							WHEN T1.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
 							WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV' 
 							WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ' 
-							WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
- 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
- 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+							WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'FREV'
+ 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
+ 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
 							ELSE 'PROG' 
 						END STATUS
 					, T1.PRIORITY
@@ -155,9 +155,13 @@
 					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER  = USER_ID), T1.MODIFIER) AS MODIFIER
 					, T1.MODIFIED_DATE
 			FROM PROJECT_MASTER T1
+			LEFT JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
 	    WHERE T1.USE_YN = 'Y'
 			<if test="@oss.fosslight.util.StringUtil@equals('10', code)">
 			AND T1.IDENTIFICATION_SUB_STATUS_PARTNER = 'Y'
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('16', code)">
+			AND T1.IDENTIFICATION_SUB_STATUS_DEP = 'Y'
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('11', code)">
 			AND T1.IDENTIFICATION_SUB_STATUS_SRC= 'Y'
@@ -188,10 +192,13 @@
 					</if>
 				)
 			</if> -->
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)"> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
-						T1.CREATOR = #{loginUserName} 
+						T1.CREATOR = #{loginUserName}	
+						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+							OR T1.REVIEWER = #{loginUserName}	
+						</if>
 						OR EXISTS (
 						SELECT 1
 						  FROM PROJECT_WATCHER A1
@@ -199,18 +206,24 @@
 						)
 					)
 				</if>
-			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
+<!-- 			</if> -->
+ 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
-				AND T1.PRJ_NAME LIKE CONCAT('%', REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%') 
-		 	</if>	
+				AND T1.PRJ_NAME LIKE CONCAT('%', REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%')
+		 	</if>
+		 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdName)">
+				AND (T1.PRJ_ID = #{prjIdName} OR T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjIdName}, '_', '\\\\_'),'%'))
+		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
 				AND T1.PRJ_VERSION LIKE CONCAT(REGEXP_REPLACE(#{prjVersion}, '_', '\\\\_'),'%')
 		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(distributionType)">
 				AND T1.DISTRIBUTION_TYPE = #{distributionType}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeType)">
+				AND T2.NOTICE_TYPE = #{noticeType}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(schStartDate)">
 				AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> #{schStartDate}
@@ -234,10 +247,10 @@
 					AND T1.PRJ_ID IN (
 					SELECT A.PRJ_ID AS WATCHER FROM PROJECT_WATCHER A WHERE T1.PRJ_ID = A.PRJ_ID AND (A.USER_ID LIKE CONCAT('%',#{watcher},'%') OR A.EMAIL LIKE CONCAT('%',#{watcher},'%')))
 				</foreach>
-			</if>	
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName) 
 					  or !@oss.fosslight.util.StringUtil@isEmpty(licenseName)
-			          or !@oss.fosslight.util.StringUtil@isEmpty(refPartnerId)">
+			          or !@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
 				AND EXISTS(SELECT 1 
 		                            FROM OSS_COMPONENTS X 
 		                   LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
@@ -260,11 +273,11 @@
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 		                         AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
 								</if>
-								<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerId)">
+								<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
 		                         AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
 		                                                    FROM PARTNER_MASTER P
 		                                                   WHERE P.USE_YN = 'Y' AND P.STATUS = 'CONF'
-		                                                     AND P.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{refPartnerId}, '_', '\\\\_'),'%'))
+		                                                     AND P.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{refPartnerName}, '_', '\\\\_'),'%'))
 								</if>
 							)
 			</if>
@@ -313,7 +326,7 @@
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
-				AND A.DIVISION = #{prjDivision}
+				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO = '200' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
 				AND
@@ -343,9 +356,9 @@
 							WHEN T1.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
 							WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV' THEN 'REV' 
 							WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y' THEN 'REQ'
-							WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
- 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
- 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+							WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'FREV'
+ 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
+ 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
 							ELSE 'PROG' 
 						END STATUS
 					, T1.PRIORITY
@@ -378,6 +391,7 @@
 					, CASE WHEN T1.VERIFICATION_STATUS = 'CONF' THEN IFNULL(T1.NOTICE_FILE_ID, '') ELSE '' END AS NOTICE_FILE_ID
 					, CASE WHEN T1.IDENTIFICATION_STATUS = 'CONF' THEN IFNULL(T1.REVIEW_REPORT_FILE_ID, '') ELSE '' END AS REVIEW_REPORT_FILE_ID
 					, T1.REVIEWER
+					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.REVIEWER  = USER_ID), T1.REVIEWER) AS REVIEWER_NAME
 					, T1.DIVISION
 					, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR  = USER_ID), T1.CREATOR) AS CREATOR
 					, T1.CREATED_DATE
@@ -410,6 +424,9 @@
 			<if test="@oss.fosslight.util.StringUtil@equals('10', code)">
 			AND T1.IDENTIFICATION_SUB_STATUS_PARTNER = 'Y'
 			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('16', code)">
+			AND T1.IDENTIFICATION_SUB_STATUS_DEP = 'Y'
+			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('11', code)">
 			AND T1.IDENTIFICATION_SUB_STATUS_SRC= 'Y'
 			</if>
@@ -441,10 +458,13 @@
 					</if>
 				)
 			</if> --> 
-			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+<!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)"> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
-						T1.CREATOR = #{loginUserName} 
+						T1.CREATOR = #{loginUserName}	
+						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+							OR T1.REVIEWER = #{loginUserName}	
+						</if>
 						OR EXISTS (
 						SELECT 1
 						  FROM PROJECT_WATCHER A1
@@ -452,12 +472,15 @@
 						)
 					)
 				</if>
-			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
+<!-- 			</if> -->
+ 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
 				AND T1.PRJ_ID = #{prjId}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
-				AND T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%') 
+				AND T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjName}, '_', '\\\\_'),'%')
+		 	</if>
+		 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdName)">
+				AND (T1.PRJ_ID = #{prjIdName} OR T1.PRJ_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{prjIdName}, '_', '\\\\_'),'%'))
 		 	</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
 				AND T1.PRJ_VERSION LIKE CONCAT(REGEXP_REPLACE(#{prjVersion}, '_', '\\\\_'),'%')
@@ -473,6 +496,9 @@
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 				AND T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%')) 
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeType)">
+				AND T5.NOTICE_TYPE = #{noticeType}
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewer)">
 				<if test='reviewer.equals("N/A")'>
@@ -490,7 +516,7 @@
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName) 
 					  or !@oss.fosslight.util.StringUtil@isEmpty(licenseName)
-			          or !@oss.fosslight.util.StringUtil@isEmpty(refPartnerId)">
+			          or !@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
 				AND EXISTS(SELECT 1 
 		                            FROM OSS_COMPONENTS X 
 		                   LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
@@ -513,11 +539,11 @@
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 		                         AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
 								</if>
-								<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerId)">
+								<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
 		                         AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
 		                                                    FROM PARTNER_MASTER P
 		                                                   WHERE P.USE_YN = 'Y' AND P.STATUS = 'CONF'
-		                                                     AND P.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{refPartnerId}, '_', '\\\\_'),'%'))
+		                                                     AND P.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{refPartnerName}, '_', '\\\\_'),'%'))
 								</if>
 							)
 			</if>
@@ -567,7 +593,7 @@
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
-				AND ( A.DIVISION = #{prjDivision} )
+				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO ='200' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
 				AND
@@ -673,6 +699,9 @@
 			, A.PACKAGE_FILE_ID
 			, A.PACKAGE_FILE_ID2
 			, A.PACKAGE_FILE_ID3
+			, A.PACKAGE_FILE_TYPE1
+			, A.PACKAGE_FILE_TYPE2
+			, A.PACKAGE_FILE_TYPE3
 			, A.PACKAGE_VUL_DOC_FILE_ID
 			, A.NOTICE_FILE_ID
 			, A.REVIEW_REPORT_FILE_ID
@@ -702,9 +731,9 @@
 					WHEN A.DROP_YN = 'Y' AND A.STATUS_REQUEST_YN = 'N' THEN 'DROP' 
 					WHEN A.IDENTIFICATION_STATUS = 'REV' OR A.VERIFICATION_STATUS = 'REV' THEN 'REV' 
 					WHEN A.IDENTIFICATION_STATUS = 'REQ' OR A.VERIFICATION_STATUS = 'REQ' OR A.STATUS_REQUEST_YN = 'Y' THEN 'REQ'
-					WHEN A.IDENTIFICATION_STATUS = 'CONF' AND A.VERIFICATION_STATUS = 'CONF' AND A.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
-					WHEN A.IDENTIFICATION_STATUS = 'CONF' AND A.VERIFICATION_STATUS = 'CONF' AND A.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
-					WHEN A.IDENTIFICATION_STATUS = 'CONF' AND A.VERIFICATION_STATUS = 'NA' AND A.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+					WHEN A.IDENTIFICATION_STATUS = 'CONF' AND A.VERIFICATION_STATUS = 'CONF' AND A.DESTRIBUTION_STATUS = 'DONE' THEN 'FREV'
+					WHEN A.IDENTIFICATION_STATUS = 'CONF' AND A.VERIFICATION_STATUS = 'CONF' AND A.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
+					WHEN A.IDENTIFICATION_STATUS = 'CONF' AND A.VERIFICATION_STATUS = 'NA' AND A.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
 					ELSE 'PROG' 
 				END STATUS
 		   , A.PRIORITY
@@ -741,8 +770,8 @@
 		       , CONCAT(A.CATEGORY, A.SUBCATEGORY) AS CATEGORY
 		       , A.MODEL_NAME 
 		       , A.RELEASE_DATE
-		       , A.MODIFIER
-		       , A.MODIFIED_DATE
+		       , IFNULL(A.MODIFIER, '') AS MODIFIER
+		       , IFNULL(A.MODIFIED_DATE, '') AS MODIFIED_DATE
 		       , A.OSDD_SYNC_YN
 		FROM   PROJECT_MODEL A, (SELECT @rownum:=0) TMP
 		WHERE  A.PRJ_ID = #{prjId} AND DEL_YN <![CDATA[<>]]> 'Y'
@@ -1258,6 +1287,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 			, REF_OSS_NAME
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+			, PACKAGE_URL
+			</if>
 			)
 			VALUES
 			(
@@ -1310,6 +1342,9 @@
 			, #{adminCheckYn}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 			, #{refOssName}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+			, #{packageUrl}
 			</if>
 			)
 	</insert>
@@ -1396,6 +1431,25 @@
 		SELECT DISTINCT T1.PRJ_VERSION
 		FROM PROJECT_MASTER T1
 		WHERE T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@equals('ADMIN', creator)">
+			AND (
+				T1.CREATOR = #{creator} 
+					OR EXISTS (
+					SELECT A1.PRJ_ID 
+					  FROM PROJECT_WATCHER A1 
+					 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{creator} -->
+					 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{creator} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{creator}) ))
+				)
+			)
+		</if>
+	</select>
+	
+	<select id="getProjectDivisionList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
+	/* getProjectDIvisionList : PROJECT DIVISION AUTO COMPLETE */
+		SELECT DISTINCT T2.CD_DTL_NM AS PRJ_DIVISION
+		  FROM T2_USERS T1
+			   LEFT JOIN (SELECT * FROM T2_CODE_DTL S WHERE S.CD_NO = '200' AND S.USE_YN = 'Y') T2 ON T1.DIVISION = T2.CD_DTL_NO
+		 WHERE T1.USE_YN = 'Y'
 		<if test="!@oss.fosslight.util.StringUtil@equals('ADMIN', creator)">
 			AND (
 				T1.CREATOR = #{creator} 
@@ -1672,8 +1726,8 @@
 					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '10' THEN 14 
 					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '16' THEN 15 
 					ELSE 99 END AS MERGE_ORDER, 
-			RTN.LICENSE_ID, RTN.LICENSE_NAME, GROUP_CONCAT(RTN.COPYRIGHT SEPARATOR '|') AS COPYRIGHT_TEXT, RTN.LICENSE_TYPE_IDX,
-			RTN.CVSS_SCORE_MAX, RTN.CVSS_SCORE_MAX1, RTN.CVSS_SCORE_MAX2, RTN.CVSS_SCORE_MAX3, RTN.LICENSE_TYPE, RTN.DEPENDENCIES, RTN.REF_OSS_NAME
+			RTN.LICENSE_ID, RTN.LICENSE_NAME, GROUP_CONCAT(DISTINCT RTN.COPYRIGHT SEPARATOR '|') AS COPYRIGHT_TEXT, RTN.LICENSE_TYPE_IDX,
+			RTN.CVSS_SCORE_MAX, RTN.CVSS_SCORE_MAX1, RTN.CVSS_SCORE_MAX2, RTN.CVSS_SCORE_MAX3, RTN.LICENSE_TYPE, RTN.DEPENDENCIES, RTN.REF_OSS_NAME, RTN.PACKAGE_URL
 		FROM  (
 			SELECT 
 				A1.REFERENCE_ID, A1.COMPONENT_ID, A1.REF_COMPONENT_ID, A1.REFERENCE_DIV, A1.COMPONENT_IDX,A1.OSS_ID, A1.OSS_NAME, A1.OSS_VERSION
@@ -1683,19 +1737,29 @@
 				, GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME
 				, IFNULL(A1.REF_DIV, (SELECT S.REFERENCE_DIV FROM OSS_COMPONENTS S WHERE S.COMPONENT_ID = A1.REF_COMPONENT_ID)) AS REF_DIV
 				, (CASE WHEN GROUP_CONCAT(A3.LICENSE_TYPE) REGEXP 'PMS|WCP|CP' THEN 1 WHEN A3.LICENSE_TYPE IS NULL THEN 1 ELSE CONCAT(GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ','), '-', 2) END) AS LICENSE_TYPE_IDX
-				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME
+				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME, A1.PACKAGE_URL
 				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
 				, CASE WHEN ((SELECT IFNULL(EXCLUDE_YN, 'N') FROM OSS_COMPONENTS WHERE COMPONENT_ID = A1.REF_COMPONENT_ID) != 'Y') THEN 
 				</if>
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
 				, CASE WHEN IFNULL(A1.EXCLUDE_YN, 'N') != 'Y' THEN 
 				</if>
-				(SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
-					FROM NVD_DATA_SCORE_V3 NVD
+				(
+				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+					FROM NVD_DATA_V3 NVD
+					INNER JOIN NVD_CVE_V3 CVE
+					ON NVD.CVE_ID = CVE.CVE_ID
 					WHERE NVD.PRODUCT != '-'
 					AND NVD.PRODUCT = REPLACE(IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)), ' ', '_')
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
 					AND NVD.VERSION = A1.OSS_VERSION
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE NVD.PRODUCT != '-'
+					AND NVD.VERSION = '-'
+					AND NVD.PRODUCT = REPLACE(IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)), ' ', '_')
 				</if>
 				) ELSE NULL END CVSS_SCORE_MAX
 				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
@@ -1704,14 +1768,26 @@
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
 				, CASE WHEN IFNULL(A1.EXCLUDE_YN, 'N') != 'Y' THEN 
 				</if>
-				(SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
-					FROM NVD_DATA_SCORE_V3 NVD
+				(
+				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+					FROM NVD_DATA_V3 NVD
+					INNER JOIN NVD_CVE_V3 CVE
+					ON NVD.CVE_ID = CVE.CVE_ID
 					WHERE NVD.VENDORPRODUCT IS NOT NULL
 					AND NVD.PRODUCT != '-'
 					AND IFNULL(A1.OSS_NAME, A4.OSS_NAME) REGEXP '[-]'
 					AND NVD.VENDORPRODUCT = REPLACE(IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)), ' ', '_')
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
 					AND NVD.VERSION = A1.OSS_VERSION
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE NVD.VENDORPRODUCT IS NOT NULL
+					AND NVD.PRODUCT != '-'
+					AND NVD.VERSION = '-'
+					AND IFNULL(A1.OSS_NAME, A4.OSS_NAME) REGEXP '[-]'
+					AND NVD.VENDORPRODUCT = REPLACE(IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)), ' ', '_')
 				</if>
 				) ELSE NULL END CVSS_SCORE_MAX1
 				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
@@ -1720,13 +1796,22 @@
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
 				, CASE WHEN IFNULL(A1.EXCLUDE_YN, 'N') != 'Y' THEN 
 				</if>
-				(SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
-					FROM NVD_DATA_SCORE_V3 NVD
-					WHERE NVD.PRODUCT != '-'
+				(
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+					FROM NVD_DATA_V3 NVD
+					INNER JOIN NVD_CVE_V3 CVE
+					ON NVD.CVE_ID = CVE.CVE_ID
+					WHERE NVD.PRODUCT != '-'
 					AND NVD.VERSION = A1.OSS_VERSION
 				</if>
-					AND NVD.PRODUCT IN (SELECT OSS_NICKNAME FROM OSS_NICKNAME WHERE OSS_NAME = IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)))
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE NVD.PRODUCT != '-'
+					AND NVD.VERSION = '-'
+				</if>
+					AND NVD.PRODUCT IN (SELECT REPLACE(OSS_NICKNAME, ' ', '_') FROM OSS_NICKNAME WHERE OSS_NAME = IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)))
 				) ELSE NULL END CVSS_SCORE_MAX2
 				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
 				, CASE WHEN ((SELECT IFNULL(EXCLUDE_YN, 'N') FROM OSS_COMPONENTS WHERE COMPONENT_ID = A1.REF_COMPONENT_ID) != 'Y') THEN 
@@ -1734,13 +1819,22 @@
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
 				, CASE WHEN IFNULL(A1.EXCLUDE_YN, 'N') != 'Y' THEN 
 				</if>
-				(SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
-					FROM NVD_DATA_SCORE_V3 NVD
-					WHERE NVD.VENDORPRODUCT IS NOT NULL
+				(
 				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+					FROM NVD_DATA_V3 NVD
+					INNER JOIN NVD_CVE_V3 CVE
+					ON NVD.CVE_ID = CVE.CVE_ID
+					WHERE NVD.VENDORPRODUCT IS NOT NULL
 					AND NVD.VERSION = A1.OSS_VERSION
 				</if>
-					AND NVD.VENDORPRODUCT IN (SELECT OSS_NICKNAME FROM OSS_NICKNAME WHERE OSS_NAME = IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)) AND OSS_NICKNAME REGEXP '[-]')
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
+					FROM NVD_DATA_SCORE_V3 NVD
+					WHERE NVD.VENDORPRODUCT IS NOT NULL
+					AND NVD.VERSION = '-'
+				</if>
+					AND NVD.VENDORPRODUCT IN (SELECT REPLACE(OSS_NICKNAME, ' ', '_') FROM OSS_NICKNAME WHERE OSS_NAME = IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)) AND OSS_NICKNAME REGEXP '[-]')
 				) ELSE NULL END CVSS_SCORE_MAX3
 			FROM OSS_COMPONENTS A1 
 				INNER JOIN PROJECT_MASTER PRJ ON A1.REFERENCE_ID = PRJ.PRJ_ID
@@ -1983,7 +2077,7 @@
 		                          AND MODEL_NAME LIKE CONCAT('%',#{modelName},'%'))
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
-				AND ( A.DIVISION = #{prjDivision} )
+				AND EXISTS (SELECT 1 FROM T2_CODE_DTL S WHERE S.CD_NO ='200' AND S.USE_YN ='Y' AND S.CD_DTL_NM LIKE CONCAT('%', #{prjDivision}, '%') AND A.DIVISION = S.CD_DTL_NO)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrStatuses)">
 				AND
@@ -2660,6 +2754,7 @@
 			</choose>
 			IFNULL(M.HOMEPAGE, '') AS HOMEPAGE,
 			IFNULL(M.FILE_PATH, '') AS FILE_PATH,
+			IFNULL(M.PACKAGE_URL, '') AS PACKAGE_URL,
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('20', referenceDiv)">IF(M.BINARY_NAME IS NOT NULL AND M.BINARY_NAME != '', M.BINARY_NAME, M.FILE_PATH) AS BINARY_NAME,</when>
 				<otherwise>IFNULL(M.BINARY_NAME, '') AS BINARY_NAME,</otherwise>
@@ -2678,41 +2773,81 @@
 			M.REF_PARTNER_ID,
 			M.OBLIGATION_TYPE,
 			M.DEPENDENCIES,
-			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' THEN 
-			(SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
-				FROM NVD_DATA_SCORE_V3 NVD
+			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' AND M.OSS_NAME != '' AND M.OSS_NAME != '-' THEN 
+			(
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+				FROM NVD_DATA_V3 NVD
+				INNER JOIN NVD_CVE_V3 CVE
+				ON NVD.CVE_ID = CVE.CVE_ID
 				WHERE NVD.PRODUCT != '-'
 				AND NVD.PRODUCT = REPLACE(IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)), ' ', '_')
-			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
 				AND NVD.VERSION = M.OSS_VERSION
 			</if>
-			) ELSE NULL END CVSS_SCORE_MAX,
-			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' THEN 
-			(SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
 				FROM NVD_DATA_SCORE_V3 NVD
+				WHERE NVD.PRODUCT != '-'
+				AND NVD.VERSION = '-'
+				AND NVD.PRODUCT = REPLACE(IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)), ' ', '_')
+			</if>
+			) ELSE NULL END CVSS_SCORE_MAX,
+			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' AND M.OSS_NAME != '' AND M.OSS_NAME != '-' THEN 
+			(
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+				FROM NVD_DATA_V3 NVD
+				INNER JOIN NVD_CVE_V3 CVE
+				ON NVD.CVE_ID = CVE.CVE_ID
 				WHERE NVD.VENDORPRODUCT IS NOT NULL
 				AND NVD.PRODUCT != '-'
 				AND IFNULL(L1.OSS_NAME, M.OSS_NAME) REGEXP '[-]'
 				AND NVD.VENDORPRODUCT = REPLACE(IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)), ' ', '_')
-			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
 				AND NVD.VERSION = M.OSS_VERSION
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
+				FROM NVD_DATA_SCORE_V3 NVD
+				WHERE NVD.VENDORPRODUCT IS NOT NULL
+				AND NVD.PRODUCT != '-'
+				AND NVD.VERSION = '-'
+				AND IFNULL(L1.OSS_NAME, M.OSS_NAME) REGEXP '[-]'
+				AND NVD.VENDORPRODUCT = REPLACE(IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)), ' ', '_')
+			</if>
 			) ELSE NULL END CVSS_SCORE_MAX1,
-			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' THEN 
-			(SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
+			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' AND M.OSS_NAME != '' AND M.OSS_NAME != '-' THEN 
+			(
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+				FROM NVD_DATA_V3 NVD
+				INNER JOIN NVD_CVE_V3 CVE
+				ON NVD.CVE_ID = CVE.CVE_ID
+				WHERE NVD.PRODUCT != '-'
+				AND NVD.VERSION = M.OSS_VERSION
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
 				FROM NVD_DATA_SCORE_V3 NVD
 				WHERE NVD.PRODUCT != '-'
-			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-				AND NVD.VERSION = M.OSS_VERSION
+				AND NVD.VERSION = '-'
 			</if>
 				AND NVD.PRODUCT IN (SELECT REPLACE(OSS_NICKNAME, ' ', '_') FROM OSS_NICKNAME WHERE OSS_NAME = IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)))
 			) ELSE NULL END CVSS_SCORE_MAX2,
-			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' THEN 
-			(SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
+			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' AND M.OSS_NAME != '' AND M.OSS_NAME != '-' THEN 
+			(
+			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+				FROM NVD_DATA_V3 NVD
+				INNER JOIN NVD_CVE_V3 CVE
+				ON NVD.CVE_ID = CVE.CVE_ID
+				WHERE NVD.VENDORPRODUCT IS NOT NULL
+				AND NVD.VERSION = M.OSS_VERSION
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
 				FROM NVD_DATA_SCORE_V3 NVD
 				WHERE NVD.VENDORPRODUCT IS NOT NULL
-			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-				AND NVD.VERSION = M.OSS_VERSION
+				AND NVD.VERSION = '-'
 			</if>
 				AND NVD.VENDORPRODUCT IN (SELECT OSS_NICKNAME FROM OSS_NICKNAME WHERE OSS_NAME = IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)) AND OSS_NICKNAME REGEXP '[-]')
 			) ELSE NULL END CVSS_SCORE_MAX3
@@ -2720,6 +2855,9 @@
 			, BAR.GUIREPORT_FLAG
 		</if>
 			, M.REF_OSS_NAME
+		<if test="@oss.fosslight.util.StringUtil@equals('14', referenceDiv) or @oss.fosslight.util.StringUtil@equals('15', referenceDiv) or @oss.fosslight.util.StringUtil@equals('20', referenceDiv)">
+			, M.TLSH, M.CHECK_SUM
+		</if>
 	   FROM OSS_COMPONENTS M
 	   LEFT OUTER JOIN OSS_MASTER L1 
 		       ON M.OSS_NAME = L1.OSS_NAME
@@ -2729,7 +2867,7 @@
 		LEFT OUTER JOIN (
 			SELECT BAT_ID, CHECK_SUM, GUIREPORT_FLAG
 			  FROM BINARY_ANALYSIS_RESULT
-			 WHERE BAT_ID = ${refBatId}
+			 WHERE BAT_ID = #{refBatId}
 		  GROUP BY CHECK_SUM, GUIREPORT_FLAG
 		) BAR
 		ON M.REFERENCE_ID = BAR.BAT_ID
@@ -3101,6 +3239,8 @@
 					, REF_DIV
 					, PRE_OBLIGATION_TYPE
 					, ADMIN_CHECK_YN
+					, REF_OSS_NAME
+					, PACKAGE_URL
 					)
 			SELECT
 					#{referenceId}
@@ -3143,6 +3283,8 @@
 					, REFERENCE_DIV
 					, PRE_OBLIGATION_TYPE
 					, ADMIN_CHECK_YN
+					, REF_OSS_NAME
+					, PACKAGE_URL
 			FROM OSS_COMPONENTS
 			WHERE COMPONENT_ID = #{refComponentId}
 	</insert>
@@ -3224,6 +3366,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 			, REF_OSS_NAME = #{refOssName}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+			, PACKAGE_URL = #{packageUrl}
+			</if>
 		WHERE
 			COMPONENT_ID = #{componentId}
 	</update>
@@ -3294,6 +3439,15 @@
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 						, REF_OSS_NAME
 						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(tlsh)">
+						, TLSH
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
+						, CHECK_SUM
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+						, PACKAGE_URL
+						</if>
 					)
 			VALUES
 					(
@@ -3357,6 +3511,15 @@
 						</if>
 						<if test="!@oss.fosslight.util.StringUtil@isEmpty(refOssName)">
 						, #{refOssName}
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(tlsh)">
+						, #{tlsh}
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(checkSum)">
+						, #{checkSum}
+						</if>
+						<if test="!@oss.fosslight.util.StringUtil@isEmpty(packageUrl)">
+						, #{packageUrl}
 						</if>
 					)
 	</insert>
@@ -3734,8 +3897,8 @@
 		WHERE 
 			PRJ_ID = #{prjId} 
 			<choose>
-				<when test="@oss.fosslight.util.StringUtil@isNotEmpty(prjEmail)"> AND EMAIL = #{prjEmail} </when>
-				<otherwise> AND USER_ID = #{prjUserId} </otherwise>
+				<when test="@oss.fosslight.util.StringUtil@isNotEmpty(prjEmail)"> AND EMAIL = #{prjEmail}</when>
+				<otherwise> AND USER_ID = #{prjUserId}</otherwise>
 			</choose>
 	</update>
 	
@@ -4385,7 +4548,7 @@
 					AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION
 			) OC
-			ON NVD.VENDORPRODUCT = REPLACE(IFNULL(OC.OSS_NAME, ''),' ', '_')
+			ON NVD.VENDORPRODUCT = IFNULL(OC.OSS_NAME, '')
 			AND NVD.VERSION = IFNULL(OC.OSS_VERSION, '')
 			WHERE NVD.CVE_ID NOT IN (SELECT CVE_ID 
 										FROM NVD_DATA_SECURITY 
@@ -4420,7 +4583,7 @@
 					AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION
 			) OC
-			ON NVD.VENDORPRODUCT = REPLACE(IFNULL(OC.OSS_NICKNAME, ''),' ', '_')
+			ON NVD.VENDORPRODUCT = IFNULL(OC.OSS_NICKNAME, '')
 			AND NVD.VERSION = IFNULL(OC.OSS_VERSION, '')
 			WHERE NVD.CVE_ID NOT IN (SELECT CVE_ID 
 										FROM NVD_DATA_SECURITY 
@@ -4455,7 +4618,7 @@
 					AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION
 			) OC
-			ON NVD.VENDORPRODUCT = REPLACE(IFNULL(OC.OSS_NICKNAME, ''),' ', '_')
+			ON NVD.VENDORPRODUCT = IFNULL(OC.OSS_NICKNAME,'')
 			AND NVD.VERSION = '-'
 			WHERE NVD.CVE_ID NOT IN (SELECT CVE_ID 
 										FROM NVD_DATA_SECURITY 
@@ -4490,7 +4653,7 @@
 					AND IFNULL(OC.EXCLUDE_YN, 'N') != 'Y'
 					GROUP BY OC.OSS_NAME, OC.OSS_VERSION
 			) OC
-			ON NVD.VENDORPRODUCT = REPLACE(IFNULL(OC.OSS_NAME, ''),' ', '_')
+			ON NVD.VENDORPRODUCT = IFNULL(OC.OSS_NAME,'')
 			AND NVD.VERSION = '-'
 			WHERE NVD.CVE_ID NOT IN (SELECT CVE_ID 
 										FROM NVD_DATA_SECURITY 
@@ -4791,9 +4954,9 @@
 							WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
 							WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV' 
 							WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ' 
-							WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV' /* 2019-10-24 */
- 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
- 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV' /* 2019-10-24 */
+							WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'FREV' /* 2019-10-24 */
+ 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV' /* 2019-10-24 */
+ 						 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV' /* 2019-10-24 */
 							ELSE 'PROG' 
 						END STATUS
 					, T1.PRIORITY
@@ -5376,7 +5539,7 @@
 	<select id="selectOssComponentsSbomList" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssComponents">
 		SELECT 
 		 	T1.PRJ_ID, T1.PRJ_NAME, T1.PRJ_VERSION , T1.DISTRIBUTE_TARGET
-			, T2.COMPONENT_ID, T2.OSS_ID, T2.OSS_NAME, T2.OSS_VERSION 
+			, T2.COMPONENT_ID, T2.OSS_ID, T2.OSS_NAME, T2.OSS_VERSION
 			, IFNULL(T2.DOWNLOAD_LOCATION, T4.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
 			, IFNULL(T2.HOMEPAGE, T4.HOMEPAGE) AS HOMEPAGE
 			, T2.OBLIGATION_TYPE, T4.ATTRIBUTION AS OSS_ATTRIBUTION
@@ -5388,6 +5551,7 @@
  			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.ATTRIBUTION) AS ATTRIBUTION
 			, T2.ADMIN_CHECK_YN
 			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.LICENSE_TYPE) AS LICENSE_TYPE
+			, T2.PACKAGE_URL
 		FROM PROJECT_MASTER T1 
 			INNER JOIN OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '13' AND T2.OSS_NAME != '-'
 			INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
@@ -5409,6 +5573,7 @@
 			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.ATTRIBUTION) AS ATTRIBUTION
 			, T2.FILE_PATH
 			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.LICENSE_TYPE) AS LICENSE_TYPE
+			, T2.REF_OSS_NAME
 		FROM PROJECT_MASTER T1 
 			INNER JOIN OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '13' AND T2.EXCLUDE_YN = 'N' AND T2.OSS_NAME = '-'
 			INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
@@ -5418,10 +5583,10 @@
 		ORDER BY LICENSE_NAME
 	</select>
 	
-	<select id="selectVulnerabilityResolutionSecurityListCnt" parameterType="oss.fosslight.domain.Project" resultType="int">
-		SELECT COUNT(1) AS CNT
+	<select id="selectVulnerabilityResolutionSecurityList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.OssComponents">
+		SELECT TBL.*
 		FROM
-		(
+		(	
 			SELECT TBL.*, IFNULL(SEC.VULNERABILITY_RESOLUTION, 'Unresolved') AS VULNERABILITY_RESOLUTION
 			FROM
 			(
@@ -5449,7 +5614,7 @@
 						INNER JOIN NVD_CVE_V3 CVE
 						ON NVD.CVE_ID = CVE.CVE_ID
 						WHERE NVD.VERSION != '-'
-						AND CVE.CVSS_SCORE >= #{standardScore}
+						AND CVE.CVSS_SCORE >= 6.0
 					) NVD
 					ON REPLACE(OC.CUSTOM_OSS_NAME, ' ', '_') = NVD.PRODUCT
 					AND OC.OSS_VERSION = NVD.VERSION
@@ -5483,7 +5648,7 @@
 						INNER JOIN NVD_CVE_V3 CVE
 						ON NVD.CVE_ID = CVE.CVE_ID
 						WHERE NVD.VERSION != '-'
-						AND CVE.CVSS_SCORE >= #{standardScore}
+						AND CVE.CVSS_SCORE >= 6.0
 					) NVD
 					ON OC.OSS_NICKNAME = NVD.PRODUCT
 					AND OC.OSS_VERSION = NVD.VERSION
@@ -5515,7 +5680,7 @@
 						INNER JOIN NVD_CVE_V3 CVE
 						ON NVD.CVE_ID = CVE.CVE_ID
 						WHERE NVD.VERSION != '-'
-						AND CVE.CVSS_SCORE >= #{standardScore}
+						AND CVE.CVSS_SCORE >= 6.0
 					) NVD
 					ON REPLACE(OC.CUSTOM_OSS_NAME, ' ', '_') = NVD.VENDORPRODUCT
 					AND OC.OSS_VERSION = NVD.VERSION
@@ -5549,7 +5714,7 @@
 						INNER JOIN NVD_CVE_V3 CVE
 						ON NVD.CVE_ID = CVE.CVE_ID
 						WHERE NVD.VERSION != '-'
-						AND CVE.CVSS_SCORE >= #{standardScore}
+						AND CVE.CVSS_SCORE >= 6.0
 					) NVD
 					ON OC.OSS_NICKNAME = NVD.VENDORPRODUCT
 					AND OC.OSS_VERSION = NVD.VERSION
@@ -5557,9 +5722,11 @@
 			) TBL
 			LEFT JOIN
 			(
-				SELECT OSS_NAME, OSS_VERSION, CVE_ID, CVSS_SCORE, VULNERABILITY_RESOLUTION
-				FROM NVD_DATA_SECURITY
-				WHERE REFERENCE_ID = #{prjId}
+				SELECT IFNULL(NICK.OSS_NAME, SEC.OSS_NAME) AS OSS_NAME, SEC.OSS_VERSION, SEC.CVE_ID, SEC.CVSS_SCORE, SEC.VULNERABILITY_RESOLUTION
+				FROM NVD_DATA_SECURITY SEC
+				LEFT JOIN OSS_NICKNAME NICK
+				ON SEC.OSS_NAME = NICK.OSS_NICKNAME
+				WHERE SEC.REFERENCE_ID = #{prjId}
 			) SEC
 			ON TBL.OSS_NAME = SEC.OSS_NAME
 			AND TBL.OSS_VERSION = SEC.OSS_VERSION
@@ -5567,16 +5734,16 @@
 			
 			UNION
 			
-			SELECT TBL1.*
+			SELECT TBL1.OSS_NAME, TBL1.OSS_VERSION, TBL1.CVE_ID, MAX(TBL1.CVSS_SCORE) AS CVSS_SCORE, TBL1.VULNERABILITY_RESOLUTION
 			FROM
 			(
-				SELECT T1.*, '' AS CVE_ID, 0.0 AS CVSS_SCORE, 'Unresolved' AS VULNERABILITY_RESOLUTION
+				SELECT T1.*, 'Unresolved' AS VULNERABILITY_RESOLUTION
 				FROM
 				(
-					SELECT OC.CUSTOM_OSS_NAME AS OSS_NAME, OC.OSS_VERSION
+					SELECT OC.OSS_NAME, OC.OSS_VERSION, NVD.CVE_ID, MAX(NVD.CVSS_SCORE) AS CVSS_SCORE
 					FROM
 					(
-						SELECT IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) AS CUSTOM_OSS_NAME, OC.OSS_VERSION
+						SELECT IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) AS OSS_NAME, OC.OSS_VERSION
 						FROM OSS_COMPONENTS OC
 						WHERE OC.REFERENCE_ID = #{prjId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
@@ -5589,21 +5756,29 @@
 										FROM NVD_DATA_V3 NVD
 										INNER JOIN NVD_CVE_V3 CVE
 										ON NVD.CVE_ID = CVE.CVE_ID
-										WHERE CVE.CVSS_SCORE >= #{standardScore}
+										WHERE CVE.CVSS_SCORE >= 6.0
 										AND NVD.PRODUCT = REPLACE(IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME), ' ', '_'))
 					) OC
-					GROUP BY OC.CUSTOM_OSS_NAME
+					INNER JOIN 
+					(
+						SELECT NVD.PRODUCT, NVD.CVE_ID, NVD.CVSS_SCORE
+						FROM NVD_DATA_SCORE_V3 NVD
+						WHERE NVD.VERSION = '-'
+						AND NVD.CVSS_SCORE >= 6.0
+					) NVD
+					ON OC.OSS_NAME = NVD.PRODUCT
+					AND OC.OSS_VERSION = ''
 				) T1
 
 				UNION
 
-				SELECT T2.*, '' AS CVE_ID, 0.0 AS CVSS_SCORE, 'Unresolved' AS VULNERABILITY_RESOLUTION
+				SELECT T2.*, 'Unresolved' AS VULNERABILITY_RESOLUTION
 				FROM
 				(
-					SELECT OC.CUSTOM_OSS_NAME AS OSS_NAME, OC.OSS_VERSION
+					SELECT OC.OSS_NAME, OC.OSS_VERSION, NVD.CVE_ID, MAX(NVD.CVSS_SCORE) AS CVSS_SCORE
 					FROM
 					(
-						SELECT IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) AS CUSTOM_OSS_NAME, OC.OSS_VERSION
+						SELECT IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) AS OSS_NAME, OC.OSS_VERSION, NICK.OSS_NICKNAME
 						FROM OSS_COMPONENTS OC
 						INNER JOIN OSS_NICKNAME NICK
 						ON IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) = NICK.OSS_NAME
@@ -5618,21 +5793,29 @@
 										FROM NVD_DATA_V3 NVD
 										INNER JOIN NVD_CVE_V3 CVE
 										ON NVD.CVE_ID = CVE.CVE_ID
-										WHERE CVE.CVSS_SCORE >= #{standardScore}
+										WHERE CVE.CVSS_SCORE >= 6.0
 										AND NVD.PRODUCT = NICK.OSS_NICKNAME)
 					) OC
-					GROUP BY OC.CUSTOM_OSS_NAME
+					INNER JOIN 
+					(
+						SELECT NVD.PRODUCT, NVD.CVE_ID, NVD.CVSS_SCORE
+						FROM NVD_DATA_SCORE_V3 NVD
+						WHERE NVD.VERSION = '-'
+						AND NVD.CVSS_SCORE >= 6.0
+					) NVD
+					ON OC.OSS_NICKNAME = NVD.PRODUCT
+					AND OC.OSS_VERSION = ''
 				) T2
 				
 				UNION
 				
-				SELECT T3.*, '' AS CVE_ID, 0.0 AS CVSS_SCORE, 'Unresolved' AS VULNERABILITY_RESOLUTION
+				SELECT T3.*, 'Unresolved' AS VULNERABILITY_RESOLUTION
 				FROM
 				(
-					SELECT OC.CUSTOM_OSS_NAME AS OSS_NAME, OC.OSS_VERSION
+					SELECT OC.OSS_NAME, OC.OSS_VERSION, NVD.CVE_ID, MAX(NVD.CVSS_SCORE) AS CVSS_SCORE
 					FROM
 					(
-						SELECT IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) AS CUSTOM_OSS_NAME, OC.OSS_VERSION
+						SELECT IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) AS OSS_NAME, OC.OSS_VERSION
 						FROM OSS_COMPONENTS OC
 						WHERE OC.REFERENCE_ID = #{prjId}
 						AND OC.REFERENCE_DIV = #{referenceDiv}
@@ -5645,21 +5828,29 @@
 										FROM NVD_DATA_V3 NVD
 										INNER JOIN NVD_CVE_V3 CVE
 										ON NVD.CVE_ID = CVE.CVE_ID
-										WHERE CVE.CVSS_SCORE >= #{standardScore}
+										WHERE CVE.CVSS_SCORE >= 6.0
 										AND NVD.VENDORPRODUCT = IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME))
 					) OC
-					GROUP BY OC.CUSTOM_OSS_NAME
+					INNER JOIN 
+					(
+						SELECT NVD.VENDORPRODUCT, NVD.CVE_ID, NVD.CVSS_SCORE
+						FROM NVD_DATA_SCORE_V3 NVD
+						WHERE NVD.VERSION = '-'
+						AND NVD.CVSS_SCORE >= 6.0
+					) NVD
+					ON OC.OSS_NAME = NVD.VENDORPRODUCT
+					AND OC.OSS_VERSION = ''
 				) T3
 
 				UNION
 
-				SELECT T4.*, '' AS CVE_ID, 0.0 AS CVSS_SCORE, 'Unresolved' AS VULNERABILITY_RESOLUTION
+				SELECT T4.*, 'Unresolved' AS VULNERABILITY_RESOLUTION
 				FROM
 				(
-					SELECT OC.CUSTOM_OSS_NAME AS OSS_NAME, OC.OSS_VERSION
+					SELECT OC.OSS_NAME, OC.OSS_VERSION, NVD.CVE_ID, MAX(NVD.CVSS_SCORE) AS CVSS_SCORE
 					FROM
 					(
-						SELECT IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) AS CUSTOM_OSS_NAME, OC.OSS_VERSION
+						SELECT IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) AS OSS_NAME, OC.OSS_VERSION, NICK.OSS_NICKNAME
 						FROM OSS_COMPONENTS OC
 						INNER JOIN OSS_NICKNAME NICK
 						ON IFNULL(OC.REF_OSS_NAME, OC.OSS_NAME) = NICK.OSS_NAME
@@ -5674,14 +5865,22 @@
 										FROM NVD_DATA_V3 NVD
 										INNER JOIN NVD_CVE_V3 CVE
 										ON NVD.CVE_ID = CVE.CVE_ID
-										WHERE CVE.CVSS_SCORE >= #{standardScore}
+										WHERE CVE.CVSS_SCORE >= 6.0
 										AND NVD.VENDORPRODUCT = NICK.OSS_NICKNAME)
 					) OC
-					GROUP BY OC.CUSTOM_OSS_NAME
+					INNER JOIN 
+					(
+						SELECT NVD.VENDORPRODUCT, NVD.CVE_ID, NVD.CVSS_SCORE
+						FROM NVD_DATA_SCORE_V3 NVD
+						WHERE NVD.VERSION = '-'
+						AND NVD.CVSS_SCORE >= 6.0
+					) NVD
+					ON OC.OSS_NICKNAME = NVD.VENDORPRODUCT
+					AND OC.OSS_VERSION = ''
 				) T4
 			) TBL1
 		) TBL
-		WHERE TBL.VULNERABILITY_RESOLUTION != 'Fixed'
+		WHERE TBL.CVSS_SCORE IS NOT NULL
 	</select>
 	
 	<select id="copySecurityDataForProjectCnt" parameterType="oss.fosslight.domain.Project" resultType="int">
@@ -5744,6 +5943,7 @@
 		SELECT T2.OSS_ID
 				, T2.OSS_NAME
 				, T2.OSS_VERSION 
+				, T2.PACKAGE_URL
 				, T2.DEPENDENCIES
 		FROM PROJECT_MASTER T1 
 			INNER JOIN OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = #{referenceDiv} AND T2.OSS_NAME != '-'
@@ -5752,5 +5952,12 @@
 		  AND IFNULL(T2.EXCLUDE_YN, 'N') = 'N'
 		  AND T2.OSS_NAME != ''
 		  AND IFNULL(T2.DEPENDENCIES, '') != ''
+	</select>
+	
+	<select id="getCvssScoreForNotFixed" parameterType="string" resultType="float">
+		SELECT MAX(CVSS_SCORE) AS CVSS_SCORE 
+		FROM NVD_DATA_SECURITY
+		WHERE REFERENCE_ID = #{prjId}
+		AND VULNERABILITY_RESOLUTION != 'Fixed'
 	</select>
 </mapper>

@@ -7,6 +7,8 @@ package oss.fosslight.common;
 
 import java.util.regex.Pattern;
 
+import oss.fosslight.config.AppConstBean;
+
 public class CoConstDef {
 	
 	/** Application의 기본 패키지 명: {@value #APP_DEFAULT_PACKAGE_NAME} */
@@ -26,7 +28,13 @@ public class CoConstDef {
 	public static final String ENCRYPT_DEFAULT_SALT_KEY = "Fosslight-System";
 	
 	/** 정적 리소스 종류 */
-	private final static String[] STATIC_RES = {"/js","/css","/images","/template", "/font", "/imageView", "/mobile", "/attach", "/sample"};
+	public final static String[] STATIC_RES = {"/js","/css","/images","/template", "/font", "/imageView", "/mobile", "/attach", "/sample"};
+	
+	public final static String[] PERMIT_UTL_PATTERNS = { "/session/**", Url.USER.SAVE_AJAX, Url.USER.RESET_PASSWORD, "/*" + Url.USER.SAVE_AJAX,
+			Url.VULNERABILITY.VULN_POPUP, Url.VULNERABILITY.VULN_POPUP, Url.NOTICE.PUBLISHED_NOTICE,
+			Url.RENDER.COMPONENT, Url.API.PATH + "/**"
+			,CoConstDef.HEALTH_CHECK_URL, "/v2/api-docs", "/swagger-resources/**",
+            "/swagger-ui/**", "/webjars/**", "/swagger/**" };
 	/**
 	 *  정적 리소스 매핑 URL 패턴 ({@code CLASSPATH_RESOURCE_LOCATIONS}와 순서 맞출 것)
 	 *  @see #CLASSPATH_RESOURCE_LOCATIONS
@@ -301,12 +309,13 @@ public class CoConstDef {
 	
 	/** 프로젝트 상태 코드 - 205 */
 	public static final String CD_PROJECT_STATUS = "205";
-	public static final String CD_DTL_PROJECT_STATUS_PROGRESS 	= "PROG";
-	public static final String CD_DTL_PROJECT_STATUS_REQUEST 	= "REQ";
-	public static final String CD_DTL_PROJECT_STATUS_REVIEW 	= "REV";
-	public static final String CD_DTL_PROJECT_STATUS_COMPLETE 	= "COMP";
+	public static final String CD_DTL_PROJECT_STATUS_PROGRESS 		= "PROG";
+	public static final String CD_DTL_PROJECT_STATUS_REQUEST 		= "REQ";
+	public static final String CD_DTL_PROJECT_STATUS_REVIEW 		= "REV";
+	public static final String CD_DTL_PROJECT_STATUS_FINAL_REVIEW 	= "FREV";
+	public static final String CD_DTL_PROJECT_STATUS_COMPLETE 		= "COMP";
 //	public static final String CD_DTL_PROJECT_STATUS_DELAY		= "DELAY";
-	public static final String CD_DTL_PROJECT_STATUS_DROP		= "DROP";
+	public static final String CD_DTL_PROJECT_STATUS_DROP			= "DROP";
 	/** status of project Identification and Packaging */
 	public static final String CD_IDENTIFICATION_STATUS		="206";
 	public static final String CD_DTL_IDENTIFICATION_STATUS_PROGRESS 	= "PROG";
@@ -401,8 +410,11 @@ public class CoConstDef {
 	public static final String CD_DTL_COMMENT_PARTNER_HIS = "20";
 	public static final String CD_DTL_COMMENT_PARTNER_USER = "21";
 	public static final String CD_DTL_COMMENT_LICENSE = "30";
+	public static final String CD_DTL_COMMENT_LICENSE_USER = "31";
 	public static final String CD_DTL_COMMENT_OSS = "40";
+	public static final String CD_DTL_COMMENT_OSS_USER = "41";
 	public static final String CD_DTL_COMMENT_SECURITY_HIS = "60";
+	public static final String CD_DTL_COMMENT_SECURITY_USER = "61";
 	
 	/** License 타입별 백그라운드 색 - 216 */
 	public static final String CD_LICENSE_BACKGROUND = "216";
@@ -493,6 +505,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_OSS_DELETE = "19";
 	
 	public static final String CD_MAIL_TYPE_OSS_MODIFIED_COMMENT = "130";
+	public static final String CD_MAIL_TYPE_OSS_ADDED_COMMENT = "131";
+	
 	/** Mail Type [FOSSLight] OSS bas been deactivated */
 	public static final String CD_MAIL_TYPE_OSS_DEACTIVATED = "813";
 	public static final String CD_MAIL_TYPE_OSS_ACTIVATED = "814";
@@ -505,7 +519,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_LICENSE_RENAME = "23";
 	public static final String CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT = "230";
 	public static final String CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT = "231";
-
+	public static final String CD_MAIL_TYPE_LICENSE_ADDED_COMMENT = "232";
+	
 	/** Mail Type [FOSSLight] Open source license has been removed */
 	public static final String CD_MAIL_TYPE_LICENSE_DELETE = "29";
 	public static final String CD_MAIL_TYPE_PROJECT_REVIEWER_ADD = "30"; // reviewer가 없는 상태에서 새로운 reviewer를 등록한 case
@@ -579,6 +594,8 @@ public class CoConstDef {
 	/** 3rd party reviewer changed */
 	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_CHANGED = "70";
 	public static final String CD_MAIL_TYPE_PARTER_REVIEWER_TO_CHANGED = "701";
+	/** 3rd party created */
+	public static final String CD_MAIL_TYPE_PARTNER_CREATED = "710";
 	/** 3rd party changed */
 	public static final String CD_MAIL_TYPE_PARTNER_CHANGED = "700";
 	/** 3rd party reviewer changed */
@@ -706,6 +723,7 @@ public class CoConstDef {
 	public static final String CD_REGIST_DOMAIN									= "703";
 	public static final String CD_DTL_DEFAULT_DOMAIN							= "100";
 	public static final String CD_DTL_ECT_DOMAIN								= "ETC";
+	public static final String CD_DTL_ECT_DOMAIN_NO								= "300";
 
 	/** 사용자별 Default Locale List 코드 **/
 	public static final String CD_DEFAULT_LOCALE 								= "704";

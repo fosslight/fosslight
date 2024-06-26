@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
 <%@ include file="/WEB-INF/constants.jsp"%>
 <script>
-var CTX_PATH = "${ctxPath}";
+var CTX_PATH = [[${ctxPath}]];
 </script>
 <%-- Add script --%>
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">

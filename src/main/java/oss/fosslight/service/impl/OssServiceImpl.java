@@ -177,11 +177,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if (CoConstDef.FLAG_YES.equals(ossMaster.getSearchFlag())) {
 					bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 					
-					if (!isEmpty(bean.getOssNickname())) {
-						bean.setOssName("<span class='iconSet nick'>Nick</span>&nbsp;" + bean.getOssName());
-					} else {
-						bean.setOssName("<span class='iconSet nick dummy'></span>&nbsp;" + bean.getOssName());
+//					if (!isEmpty(bean.getOssNickname())) {
+//						bean.setOssName("<span class=\"badge badge-warning\">Nick</span>&nbsp;" + bean.getOssName());
+//					}
+				}
+
+				List<OssMaster> ossDetectedLicense = ossMapper.selectOssDetectedLicenseList(bean);
+				if (ossDetectedLicense != null && !ossDetectedLicense.isEmpty()) {
+					StringBuilder sb = new StringBuilder(); // 초기화
+					for (OssMaster licenseInfo : ossDetectedLicense) {
+						sb.append(licenseInfo.getLicenseName()).append(",");
 					}
+					bean.setDetectedLicense(String.valueOf(sb));
 				}
 			}
 		}
@@ -296,16 +303,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public Map<String, Object> getOssPopupList(OssMaster ossMaster) {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		
-		ossMaster.setOssName(CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssName());
-		
-		int records = ossMapper.selectOssPopupTotalCount(ossMaster);
-		ossMaster.setTotListSize(records);
-		List<OssMaster> list = ossMapper.selectOssPopupList(ossMaster);
-		
-		map.put("page", ossMaster.getCurPage());
-		map.put("total", ossMaster.getTotBlockSize());
-		map.put("records", records);
-		map.put("rows", list);
+		if (!isEmpty(ossMaster.getOssId()) && CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()) != null) {
+			ossMaster.setOssName(CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId()).getOssName());
+			
+			int records = ossMapper.selectOssPopupTotalCount(ossMaster);
+			ossMaster.setTotListSize(records);
+			List<OssMaster> list = ossMapper.selectOssPopupList(ossMaster);
+			
+			map.put("page", ossMaster.getCurPage());
+			map.put("total", ossMaster.getTotBlockSize());
+			map.put("records", records);
+			map.put("rows", list);
+		}
 		
 		return map;
 	}
@@ -716,18 +725,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	private void ossNameMerge(OssMaster ossMaster, String changedOssName, String beforeOssName) {
 		String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-				"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
-				"	<tbody>\r\n" +
-				"		<tr>\r\n" +
-				"		    <th>OSS Name(OSS Version) (Written before)</th>\r\n" +
-				"                    <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
-				"		</tr>\r\n" +
-				"                <tr>\r\n" +
-				"                    <td style=\"text-align:center;\">"+ beforeOssName + " (" + avoidNull(ossMaster.getOssVersion(), "N/A") + ") </td>\r\n" +
-				"                    <td style=\"text-align:center;\">"+ changedOssName + " (" + avoidNull(ossMaster.getMergeOssVersion(), "N/A") + ") </td>\r\n" +
-				"                </tr>\r\n" +
-				"	</tbody>\r\n" +
-				"</table>";
+				"<div class=\"table-responsive\">\r\n" +
+				"	<table class=\"table comment-inner-table\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
+				"		<tbody>\r\n" +
+				"			<tr>\r\n" +
+				"		    	<th>OSS Name(OSS Version) (Written before)</th>\r\n" +
+				"               <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
+				"			</tr>\r\n" +
+				"           <tr>\r\n" +
+				"               <td style=\"text-align:center;\">"+ beforeOssName + " (" + avoidNull(ossMaster.getOssVersion(), "N/A") + ") </td>\r\n" +
+				"               <td style=\"text-align:center;\">"+ changedOssName + " (" + avoidNull(ossMaster.getMergeOssVersion(), "N/A") + ") </td>\r\n" +
+				"          	</tr>\r\n" +
+				"		</tbody>\r\n" +
+				"	</table>" +
+				"</div>";
 
 		// 3rdParty == 'CONF'
 		List<PartnerMaster> confirmPartnerList = ossMapper.getOssNameMergePartnerList(ossMaster);
@@ -786,7 +797,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			convertDataMap.put("modifierNm", makeUserNameFormat(loginUserName()));
 			convertDataMap.put("ossBeforeNm", makeOssNameFormat(ossMasterBefore));
 			convertDataMap.put("ossAftereNm", makeOssNameFormat(ossMasterAfter));
-			convertDataMap.put("templateURL", "/template/comment/ossRenamed.html");
+			convertDataMap.put("templateURL", "/comment/ossRenamed.html");
 			
 			return CommonFunction.VelocityTemplateToString(convertDataMap);
 		}
@@ -911,6 +922,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			// oss name 또는 version이 변경된 경우만 vulnerability recheck 대상으로 업데이트 한다.
 			boolean vulnRecheck = false;
+			OssMaster beforeOssInfo = null;
 			
 			// 변경전 oss name에 해당하는 oss_id 목록을 찾는다.
 			if (!isNew) {
@@ -930,10 +942,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							if (ossIdCnt == 1) {
 								ossMapper.deleteOssNickname(_orgBean);
 							}
+							
+							List<OssMaster> filteredBeforeOssInfoList = beforeOssNameList.stream().filter(e -> !e.getOssId().equals(ossMaster.getOssId())).collect(Collectors.toList());
+							if (filteredBeforeOssInfoList != null) beforeOssInfo = filteredBeforeOssInfoList.get(0);
 						}
 					}
 				}
-
 			}
 			
 			if (vulnRecheck) {
@@ -1100,6 +1114,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			// Version Flag Setting
 			updateLicenseDivDetail(ossMaster);
+			if (beforeOssInfo != null) {
+				updateLicenseDivDetail(beforeOssInfo);
+			}
 			
 			// download location이 여러건일 경우를 대비해 table을 별도로 관리함.
 			registOssDownloadLocation(ossMaster);
@@ -1170,6 +1187,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			bean.setLicenseName(CommonFunction.makeLicenseExpression(CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId()).getOssLicenses()));
 			bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, bean.getLicenseType()));
 			bean.setObligation(CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, bean.getObligationType()));
+			bean.setMergeStr("");
 			mergeMap.put(avoidNull(bean.getOssVersion(), "N/A").toUpperCase(), bean);
 		}
 		
@@ -2063,7 +2081,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		return checkName;
 	}
 
-	private String appendCheckOssName(List<OssMaster> ossNameList) {
+	private String appendCheckOssName(List<OssMaster> ossNameList, Map<String, String> ossInfoNames, String checkOssName) {
 		String checkName = "";
 
 		for (OssMaster ossBean : ossNameList) {
@@ -2072,6 +2090,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 			checkName += ossBean.getOssName();
 		}
+		
+		if (ossInfoNames.containsKey(checkOssName.toUpperCase())) {
+			String ossNameTemp = ossInfoNames.get(checkOssName.toUpperCase());
+			if (!isEmpty(checkName)) {
+				checkName += "|";
+			}
+			checkName += ossNameTemp;
+		}
+		
 		return checkName;
 	}
 
@@ -2311,6 +2338,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
 		int urlSearchSeq = -1;
 		List<String> androidPlatformList = getAndroidPlatformList();
+		Map<String, String> ossInfoNames = CoCodeManager.OSS_INFO_UPPER_NAMES;
 
 		// oss name과 download location이 동일한 oss의 componentId를 묶어서 List<ProjectIdentification>을 만듬
 		list = list.stream()
@@ -2380,10 +2408,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					int cnt = ossMapper.checkOssNameUrl2Cnt(bean);
 					if (cnt == 0) {
 						bean.setOssNickName(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p));
-						String checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean));
+						String checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean), ossInfoNames, bean.getOssNickName());
 						if (!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
-							bean.setRecommendedNickname(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p));
+							bean.setRecommendedNickname(bean.getOssNickName());
 
 						} else {
 							if (urlSearchSeq == 7) {
@@ -2408,10 +2436,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 											redirectlocationUrl = oc.getURL().toString().split("//")[1];
 											bean.setDownloadLocation(redirectlocationUrl);
 											bean.setOssNickName(generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
-											checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean));
+											checkName = appendCheckOssName(ossMapper.checkOssNameTotal(bean), ossInfoNames, bean.getOssNickName());
 											if (!isEmpty(checkName)) {
 												bean.setCheckOssList("Y");
-												bean.setRecommendedNickname(generateCheckOSSName(urlSearchSeq, downloadlocationUrl, p) + "|" + generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
+												bean.setRecommendedNickname(bean.getOssNickName() + "|" + generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p));
 											} else {
 												checkName = generateCheckOSSName(urlSearchSeq, redirectlocationUrl, p);
 											}
@@ -3235,7 +3263,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (validMap != null) {
 			for (String key : validMap.keySet()) {
 				if (key.toUpperCase().startsWith("OSSNAME") 
-						&& (validMap.get(key).equals(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG")) 
+						&& (validMap.get(key).equals(ruleMap.get("OSS_NAME.UNCONFIRMED.MSG"))
+								|| validMap.get(key).equals(ruleMap.get("OSS_NAME.DEACTIVATED.MSG"))
 								|| validMap.get(key).equals(ruleMap.get("OSS_NAME.REQUIRED.MSG")))) {
 					resultData.addAll((List<ProjectIdentification>) componentData
 																	.stream()
@@ -3661,18 +3690,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						
 						try {
 							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-									"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
-									"	<tbody>\r\n" +
-									"		<tr>\r\n" +
-									"		    <th>OSS Name(OSS Version)</th>\r\n" +
-									"                    <th>OSS Name(OSS Version)</th>\r\n" +
-									"		</tr>\r\n" +
-									"                <tr>\r\n" +
-									"                    <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") +") </td>\r\n" +
-									"                    <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") +") </td>\r\n" +
-									"                </tr>\r\n" +
-									"	</tbody>\r\n" +
-									"</table>";
+									"<div class=\"table-responsive\">\r\n" +
+									"	<table class=\"table comment-inner-table\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
+									"		<tbody>\r\n" +
+									"			<tr>\r\n" +
+									"		    	<th>OSS Name(OSS Version) (Written before)</th>\r\n" +
+									"               <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
+									"			</tr>\r\n" +
+									"           <tr>\r\n" +
+									"                <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"                <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"           </tr>\r\n" +
+									"		</tbody>\r\n" +
+									"	</table>" +
+									"</div>";
 							
 							// partner Comment Regist
 							CommentsHistory historyBean = new CommentsHistory();
@@ -3712,18 +3743,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						
 						try {
 							String contents = "<p>The following OSS Name has been changed.</p>\r\n" +
-									"<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"width:600px;\">\r\n" +
-									"	<tbody>\r\n" +
-									"		<tr>\r\n" +
-									"		    <th>OSS Name(OSS Version) (Written before)</th>\r\n" +
-									"                    <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
-									"		</tr>\r\n" +
-									"                <tr>\r\n" +
-									"                    <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
-									"                    <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
-									"                </tr>\r\n" +
-									"	</tbody>\r\n" +
-									"</table>";
+									"<div class=\"table-responsive\">\r\n" +
+									"	<table class=\"table comment-inner-table\" cellpadding=\"0\" cellspacing=\"0\">\r\n" +
+									"		<tbody>\r\n" +
+									"			<tr>\r\n" +
+									"		    	<th>OSS Name(OSS Version) (Written before)</th>\r\n" +
+									"               <th>OSS Name(OSS Version) (Changed)</th>\r\n" +
+									"			</tr>\r\n" +
+									"           <tr>\r\n" +
+									"                <td style=\"text-align:center;\">"+ beforeOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"                <td style=\"text-align:center;\">"+ afterOssName + " ("+ avoidNull(oc.getOssVersion(), "N/A") + ") </td>\r\n" +
+									"           </tr>\r\n" +
+									"		</tbody>\r\n" +
+									"	</table>" +
+									"</div>";
 							
 							// Project > Identification comment regist
 							CommentsHistory historyBean = new CommentsHistory();
@@ -3819,6 +3852,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		ossMaster.setOssNameTemp(null);
 		if (convertFlag) ossMaster.setOssNicknames(nicknameList);
+		
+		if (ossMaster.getOssVersion().equals("-")) {
+			ossMaster.setOssVersion("");
+		}
 		
 		return convertList;
 	}

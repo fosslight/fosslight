@@ -12,6 +12,9 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import oss.fosslight.domain.Project;
+import oss.fosslight.domain.ProjectIdentification;
+
 @Mapper
 public interface ApiProjectMapper {
 	int selectProjectCount(Map<String, Object> paramMap);
@@ -70,6 +73,10 @@ public interface ApiProjectMapper {
 
 	Map<String, Object> selectProjectMaster2(Map<String, Object> _tempPrjInfo);
 
+	List<Project> getProjectInfo(Project project);
+	
+	List<ProjectIdentification> selectOssComponentsList(Project project);
+
 	void updateIdentifcationProgress(Map<String, Object> _tempPrjInfo);
 
 	List<HashMap<String, Object>> getLicenseInfoInit();
@@ -91,4 +98,5 @@ public interface ApiProjectMapper {
 	void insertWatcher(Map<String, Object> paramMap);
 
 	void updateProjectSubStatus(Map<String, Object> param);
+
 }

@@ -50,6 +50,31 @@
     </resources>
   </cache-template>
   
+  <cache-template name="default-template-30min"> 
+	<expiry>
+		<!-- unit : nanos, micros, millis, seconds, minutes, hours, days -->
+		<ttl unit="minutes">30</ttl>
+    </expiry>
+    <!-- 
+    <listeners>
+        <listener>
+            <class>oss.fosslight.config.CustomCacheEventLogger</class>
+            <event-firing-mode>ASYNCHRONOUS</event-firing-mode>
+            <event-ordering-mode>UNORDERED</event-ordering-mode>
+            <events-to-fire-on>CREATED</events-to-fire-on>
+            <events-to-fire-on>UPDATED</events-to-fire-on>
+            <events-to-fire-on>EXPIRED</events-to-fire-on>
+            <events-to-fire-on>REMOVED</events-to-fire-on>
+            <events-to-fire-on>EVICTED</events-to-fire-on>
+        </listener>
+    </listeners>
+     -->
+    <resources>
+	    <heap unit="entries">5000</heap>
+	    <offheap unit="MB">20</offheap>
+    </resources>
+  </cache-template>
+  
   <cache alias="autocompleteCache" uses-template="default-template-10min" />
   <cache alias="autocompleteProjectCache" uses-template="default-template" />
   <cache alias="autocompletePartnerCache" uses-template="default-template" />
@@ -61,6 +86,7 @@
   
   <cache alias="ossInfoCache" uses-template="default-template" />
   <cache alias="licenseInfoCache" uses-template="default-template" />
+  <cache alias="identificationNvdMaxScoreCache" uses-template="default-template-10min" />
 </config>
 <!-- 
 https://www.ehcache.org/documentation/3.8/getting-started.html

@@ -78,8 +78,8 @@
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.nickname" /></th>
 							<td class="dCase">
-								<div class="multiTxtSet">	
-									<div class="required">								
+								<div class="multiTxtSet">
+									<div class="required">
 										<span><input type="text" name="licenseNicknames" style="width: 356px;"/><input type="button" value="Delete" class="smallDelete" /></span>
 										<span class="retxt"></span>
 									</div>
@@ -90,8 +90,8 @@
 						<tr>
 							<th class="dCase"><spring:message code="msg.common.field.licenseWebsite" /></th>
 							<td class="dCase">
-								<div class="multiItemSet multiWebPageSet">	
-									<div class="required">								
+								<div class="multiItemSet multiWebPageSet">
+									<div class="required">
 										<span><input type="text" name="webpages" style="width: 400px;" placeholder="http://"/><input type="button" value="Delete" class="smallDelete" /></span>
 										<span class="retxt"></span>
 									</div>
@@ -130,7 +130,7 @@
 							<td class="dCase">
 								<div class="grid-container">
 									<div class="grid-width-100">
-										<div id="editor"></div>
+										<div id="licenseCommentEditor"></div>
 									</div>
 								</div>
 							</td>
@@ -145,7 +145,7 @@
 			<input id="save" type="button" value="Save" class="btnColor red right" />
 		</div>
 		<!---->
-		<c:if test="${not empty licenseInfo.licenseId }">	
+		<c:if test="${not empty licenseInfo.licenseId }">
 		<div class="tabContent">
 	        <div class="commentList" style="width:986px">
 	            <strong class="tit">Comments</strong>
@@ -155,5 +155,5 @@
         </c:if>
 	</div>
 	<!---->
-	<!-- //wrap --> 
+	<!-- //wrap -->
 </div>

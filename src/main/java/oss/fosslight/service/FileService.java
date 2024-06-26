@@ -5,10 +5,13 @@
 
 package oss.fosslight.service;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.UploadFile;
@@ -52,4 +55,6 @@ public interface FileService {
 	public void deletePhysicalFile(T2File t2File, String flag);
 
 	public String copyPhysicalFile(String fileId);
+
+	T2File uploadSingleFile(MultipartFile mFile, String fileId ,String fileGubn, Path of, boolean useRandomFileName);
 }

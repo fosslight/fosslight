@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html lang="ko">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<style>
-			.marker{background-color: Yellow;}
-		</style>
-		<title>FOSSLight Hub</title>
-	</head>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<style>
+		.marker{background-color: Yellow;}
+	</style>
+	<title>FOSSLight Hub</title>
+</head>
 	<body>
 		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
 			<tr>
@@ -24,16 +24,13 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$contentsTitle</div>
-							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$contentsSubTitle</p>
-							#end
-								#if( $comment )
+								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle != null && contentsTitle != ''}" th:utext="${contentsTitle}"></div>
+								<p style="font-size:12px;" th:if="${contentsSubTitle != null && contentsSubTitle != ''}" th:utext="${contentsSubTitle}"></p>
+								<div th:if="${comment != null and comment != ''}">
 									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;">${comment}</div>
-								#end
+									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
+								</div>
+
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<col style="width:40%">
         							<col style="width:*">
@@ -43,101 +40,91 @@
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">3rd party Name</th>
-										<td style="padding:5px;">($!partner_basic_info.partnerId) $!partner_basic_info.partnerName</td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.partnerName}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Software Name</th>
-										<td style="padding:5px;">$!partner_basic_info.softwareName</td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.softwareName}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Software Version</th>
-										<td style="padding:5px;">$!partner_basic_info.softwareVersion</td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.softwareVersion}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Delivery Form</th>
-										<td style="padding:5px;">$!partner_basic_info.deliveryForm</td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.deliveryForm}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Description</th>
-										<td style="padding:5px;">$!partner_basic_info.description</td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.description}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Commitment</th>
-										<td style="padding:5px;">$!partner_basic_info.confirmationFileId</td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.confirmationFileId}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Checklist</th>
-										<td style="padding:5px;">$!partner_basic_info.ossFileId</td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.ossFileId}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
-										<td style="padding:5px;">$!partner_basic_info.creator</td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.creator}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Division</th>
-										<td style="padding:5px;">$!partner_basic_info.division</td>
+										<td style="padding:5px;" th:utext="${partner_basic_info.division}"></td>
 									</tr>
-									#if( $partner_basic_info.reviewer )
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
-										<td style="padding:5px;">$!partner_basic_info.reviewer</td>
+									<tr th:if="${partner_basic_info.reviewer}">
+										<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Reviewer'" th:align="'left'"></th>
+										<td th:style="'padding:5px;'" th:utext="${partner_basic_info.reviewer}"></td>
 									</tr>
-									#end
 								</table>
 
-								#if($partner_disclose_oss_info || $partner_not_disclose_oss_info)
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<th style="padding:5px;background:#f0f0f0;">License Name</th>
-										<th style="padding:5px;background:#f0f0f0;">Need to disclose</th>
-									</tr>
-									#if( $partner_disclose_oss_info )
-										#foreach( $oss in $partner_disclose_oss_info )
+								<div th:if="${partner_disclose_oss_info} or ${partner_not_disclose_oss_info}">
+									<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:text="'« OSS List »'"></h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">
 										<tr>
-											<td style="padding:5px;">$!oss.ossName</td>
-											<td style="padding:5px;">$!oss.ossVersion</td>
-											<td style="padding:5px;">$!oss.licenseName</td>
-											<td style="padding:5px; text-align: center">O</td>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'OSS Name'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'OSS Version'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'License Name'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Need to disclose'"></th>
 										</tr>
-										#end
-									#end
-									#if( $partner_not_disclose_oss_info )
-										#foreach( $oss in $partner_not_disclose_oss_info )
-										<tr>
-											<td style="padding:5px;">$!oss.ossName</td>
-											<td style="padding:5px;">$!oss.ossVersion</td>
-											<td style="padding:5px;">$!oss.licenseName</td>
-											<td style="padding:5px;"></td>
+										<tr th:each="oss : ${partner_disclose_oss_info}">
+											<td th:style="'padding:5px;'" th:utext="${oss.ossName}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.ossVersion}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.licenseName}"></td>
+											<td th:style="'padding:5px; text-align: center;'" th:text="'O'"></td>
 										</tr>
-										#end
-									#end
-								</table>
-								#end
+										<tr th:each="oss : ${partner_not_disclose_oss_info}">
+											<td th:style="'padding:5px;'" th:utext="${oss.ossName}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.ossVersion}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.licenseName}"></td>
+											<td th:style="'padding:5px;'" th:utext="''"></td>
+										</tr>
+									</table>
+								</div>
 
-								#if($partner_oss_info)
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<th style="padding:5px;background:#f0f0f0;">License Name</th>
-									</tr>
-									#foreach( $oss in $partner_oss_info  )
-									<tr>
-										<td style="padding:5px;">$!oss.ossName</td>
-										<td style="padding:5px;">$!oss.ossVersion</td>
-										<td style="padding:5px;">$!oss.licenseName</td>
-									</tr>
-									#end
-								</table>
-								#end
+								<div th:if="${partner_oss_info}">
+									<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:utext="'« OSS List »'"></h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" th:style="'font-size:12px;border-color:#ddd;'">
+										<tr>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'OSS Name'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'OSS Version'"></th>
+											<th th:style="'padding:5px;background:#f0f0f0;'" th:utext="'License Name'"></th>
+										</tr>
+										<tr th:each="oss : ${partner_oss_info}">
+											<td th:style="'padding:5px;'" th:utext="${oss.ossName}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.ossVersion}"></td>
+											<td th:style="'padding:5px;'" th:utext="${oss.licenseName}"></td>
+										</tr>
+									</table>
+								</div>
 
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+									 style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>

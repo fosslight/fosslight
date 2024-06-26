@@ -127,12 +127,21 @@
 		COMM_ID = #{comments}
 		AND USE_YN = 'Y'
 	</select>
+	
 	<select id="getUserComment" parameterType="oss.fosslight.domain.CommentsHistory" resultType="String">
 	SELECT CONTENTS FROM COMMENTS_HISTORY
 	WHERE
 		USE_YN = 'Y'
 		AND REFERENCE_ID = #{referenceId}
-		AND REFERENCE_DIV = #{referenceDiv}
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'prj')">
+				AND REFERENCE_DIV IN ('19', '10', '12', '14', '60')
+			</when>
+			<otherwise>
+				AND REFERENCE_DIV = #{referenceDiv}
+			</otherwise>
+		</choose>
+		
 		AND CREATOR = #{loginUserName}
 	ORDER BY MODIFIED_DATE DESC
 	LIMIT 1
@@ -159,7 +168,7 @@
 				AND REFERENCE_DIV IN ('20')
 			</when>
 			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
-				AND REFERENCE_DIV IN ('19', '10', '12', '14', '60')
+				AND REFERENCE_DIV = '60'
 			</when>
 			<otherwise>
 				AND REFERENCE_DIV IN ('99')
@@ -180,7 +189,9 @@
 			CASE WHEN CONTENTS LIKE CONCAT('%',#{schKeyword},'%') THEN 1 ELSE 2 END,
 		</if>
 	COMM_ID DESC
+	<if test="@oss.fosslight.util.StringUtil@equals(moreFlag, 'N')">
 	LIMIT 5
+	</if>
 	</select>
 	
 	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
@@ -230,6 +241,9 @@
 				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
 					AND T1.REFERENCE_DIV IN ('20')
 				</when>
+				<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
+					AND T1.REFERENCE_DIV = '60'
+				</when>
 				<otherwise>
 					AND T1.REFERENCE_DIV IN ('99')
 				</otherwise>
@@ -273,6 +287,9 @@
 			</when>
 			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
 				AND REFERENCE_DIV IN ('20')
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
+				AND REFERENCE_DIV = '60'
 			</when>
 			<otherwise>
 				AND REFERENCE_DIV IN ('99')

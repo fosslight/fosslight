@@ -333,7 +333,7 @@ public class T2UserServiceImpl implements T2UserService {
 		for (int i = 0;i<vo.size();i++) {
 			vo.get(i).setModifier(vo.get(i).getUserId());
 			vo.get(i).setPassword("");
-			if (vo.get(i).getDivision().trim().equals("")){
+			if (vo.get(i).getDivision() != null && vo.get(i).getDivision().trim().equals("")){
 				vo.get(i).setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
 			}
 			
@@ -514,6 +514,31 @@ public class T2UserServiceImpl implements T2UserService {
         }
 	}
 
+	@Override
+	public T2Users changeSession(String userId) {
+		T2Users params = new T2Users();
+		params.setUserId(userId);
+		params = getUser(params);
+
+		if (params == null) {
+			throw new CUserNotFoundException();
+		}
+
+		return setSession(params);
+	}
+
+	private T2Users setSession(T2Users params) {
+		List<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
+		T2Users getUser = getUserAndAuthorities(params);
+		for (T2Authorities auth : getUser.getAuthoritiesList()) {
+			roles.add(new SimpleGrantedAuthority(auth.getAuthority()));
+		}
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(params.getUserId(), null, roles);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		return getUser;
+	}
+	
 	@Override
 	public T2Users changeSession(String userId) {
 		T2Users params = new T2Users();
@@ -733,5 +758,121 @@ public class T2UserServiceImpl implements T2UserService {
 			return true;
 		}
 		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> checkByADUser(String user_id, String user_pw, Map<String, Object> rtnMap) {
+		String rtnEmail = "";
+		if (rtnMap.containsKey("email")) {
+			rtnEmail = (String) rtnMap.get("email");
+		}
+		
+		List<String[]> searchResult = null;
+		
+		if (StringUtil.isNotEmpty(user_pw)) {
+			String ldapDomain = CoCodeManager.getCodeExpString(CoConstDef.CD_LOGIN_SETTING, CoConstDef.CD_LDAP_DOMAIN);
+
+			try {
+				LdapContextSource contextSource = new LdapContextSource();
+				contextSource.setUrl(CoConstDef.AD_LDAP_LOGIN.LDAP_SERVER_URL.getValue());
+				contextSource.setBase("OU=LGE Users, DC=LGE, DC=NET");
+				contextSource.setUserDn(user_id+ldapDomain);
+				contextSource.setPassword(user_pw);
+				CommonFunction.setSslWithCert();
+				contextSource.afterPropertiesSet();
+
+				LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
+				ldapTemplate.afterPropertiesSet();
+				
+				if (ldapTemplate.authenticate("", String.format("(cn=%s)", user_id), user_pw)) {
+					searchResult = ldapTemplate.search(query().where("cn").is(user_id), new AttributesMapper() {
+						public Object mapFromAttributes(Attributes attrs) throws NamingException {
+							return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
+						}
+					});
+						
+					rtnMap.put("isAuthenticated", true);
+				} else {
+					rtnMap.put("isAuthenticated", false);
+					return rtnMap;
+				}
+			} catch (Exception e) {
+				log.error("ERROR Message :" + e.getMessage());
+				rtnMap.put("isAuthenticated", false);
+				return rtnMap;
+			}
+			
+			// 사용자 가입여부 체크
+			if (!existUserIdOrEmail(user_id)){
+				String userName = "";
+				String userEmail = "";
+				String userEmailCnt = "";
+				
+				if (searchResult != null) {
+					int cnt = 1;
+					for(int i=0;i<searchResult.size();i++) {
+						String[] userInfo = searchResult.get(i);
+						String email = userInfo[0];
+						String displayName = userInfo[1];
+						
+						if (StringUtil.isEmptyTrimmed(displayName)) {
+							userName = email.split("@")[0];
+						} else{
+							userName = displayName.replaceAll("\\("+email+"\\)", "").trim();
+						}
+						
+						if (!StringUtil.isEmptyTrimmed(rtnEmail)) {
+							if (email.equals(rtnEmail.trim())) {
+								userEmail = email;
+								userEmailCnt = String.valueOf(cnt);
+								break;
+							} else {
+								userEmail= "";
+								userEmailCnt = String.valueOf(cnt);
+							}
+						} else {
+							userEmail = email;
+							userEmailCnt = String.valueOf(cnt++);
+						}
+					}
+				}
+				
+				if (StringUtil.isEmptyTrimmed(userEmail) || StringUtil.isEmptyTrimmed(userName)) {
+					log.info("Cannot find Ldap user information : " + user_id);
+					rtnMap.put("isAuthenticated", false);
+					return rtnMap;
+				}
+				
+				if (Integer.parseInt(userEmailCnt) > 1 && StringUtil.isNotEmpty(userEmail)) {
+					log.info("ldap user email duplicate : " + user_id);
+					rtnMap.put("isAuthenticated", false);
+					rtnMap.put("msg", "enter email");
+					
+					return rtnMap;
+				}
+				
+				T2Users vo = new T2Users();
+				vo.setUserId(user_id);
+				vo.setCreatedDateCurrentTime();
+				vo.setCreator(user_id);
+				vo.setModifier(user_id);
+				vo.setEmail(rtnEmail);
+				vo.setEmail(userEmail);
+				vo.setUserName(userName);
+				vo.setDivision(CoConstDef.CD_USER_DIVISION_EMPTY);
+
+				addNewUsers(vo);
+			}
+		}
+		return rtnMap;
+	}
+
+	@Override
+	public boolean checkSystemUser(String userId, String rawPassword) {
+		T2Users param = new T2Users();
+		param.setUserId(userId);
+		
+		return checkPassword(rawPassword, param);
 	}
 }
