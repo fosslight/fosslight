@@ -65,14 +65,15 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false) String page
     ) {
         try {
-            var _page = (page == null ? 1 : Integer.parseInt(page));
-            var _countPerPage = (countPerPage == null ? 10000 : Integer.parseInt(countPerPage));
+            var _page = Integer.parseInt(page);
+            var _countPerPage = Integer.parseInt(countPerPage);
             if (_page < 0 || _countPerPage < 0 ) {
                 throw new NumberFormatException();
             }
 
             ListOssDto.Request ossQuery =
-                    ListOssDto.Request.builder().ossName(ossName)
+                    ListOssDto.Request.builder()
+                            .ossName(ossName)
                             .url(downloadLocation)
                             .ossVersion(ossVersion)
                             .ossNameExact(Objects.equals(ossNameExact, "Y"))
