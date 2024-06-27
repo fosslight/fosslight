@@ -29,6 +29,7 @@ import oss.fosslight.service.T2UserService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Api(tags = {"1. OSS & License"})
 @RequiredArgsConstructor
@@ -56,9 +57,11 @@ public class ApiOssV2Controller extends CoTopComponent {
     public @ResponseBody ResponseEntity<ListOssDto.Result> getOssInfo(
             @RequestHeader String authorization,
             @ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
+            @ApiParam(value = "OSS Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String ossNameExact,
             @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
             @ApiParam(value = "Download Location", required = false) @RequestParam(required = false) String downloadLocation,
-            @ApiParam(value = "Count Per Page (max 10000, default 10000)", required = false) @RequestParam(required = false) String countPerPage,
+            @ApiParam(value = "Download Location Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String downloadLocationExact,
+            @ApiParam(value = "Count Per Page (max: 10000, default: 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
             @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false) String page
     ) {
         try {
@@ -72,6 +75,8 @@ public class ApiOssV2Controller extends CoTopComponent {
                     ListOssDto.Request.builder().ossName(ossName)
                             .url(downloadLocation)
                             .ossVersion(ossVersion)
+                            .ossNameExact(Objects.equals(ossNameExact, "Y"))
+                            .urlExact(Objects.equals(downloadLocationExact, "Y"))
                             .build();
             ossQuery.setPage(_page);
             ossQuery.setCountPerPage(_countPerPage);
