@@ -1283,7 +1283,7 @@
 			});
 		},
 		disabledBtn : function () {
-			var tabContentButtons = $(".tabContent input[type=button]");
+			var tabContentButtons = $(".bulkEdit input[type=button]");
 			var watcherButtons = $(".tbws1.w1025.mt10 input[type=button]");
 			tabContentButtons.push(watcherButtons);
 			

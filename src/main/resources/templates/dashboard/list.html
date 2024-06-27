@@ -1,0 +1,255 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="dashboard/list-header :: headerFragment"></th:block>
+<th:block th:replace="dashboard/list-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini" style="height: 100%;">
+<div class="wrapper">
+    <div class="custom-layout dash-board">
+        <section class="content-header"></section>
+        <section class="content">
+            <div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card">
+							<div class="card-header">
+								<h3 class="card-title" th:text="'Job List'"></h3>
+								<div class="card-tools">
+									<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="row">
+									<div class="col-lg-8">
+										<div class="row" id="progressView">
+											<div class="col-md-2">
+												<div class="small-box bg-success">
+													<div class="inner height-6r"></div>
+													<div class="icon">
+														<i class="ion ion-stats-bars"></i>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-2">
+												<div class="small-box bg-pink text-white">
+													<div class="inner height-6r"></div>
+													<div class="icon">
+														<i class="ion ion-stats-bars"></i>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-2">
+												<div class="small-box bg-warning text-white">
+													<div class="inner height-6r"></div>
+													<div class="icon">
+														<i class="ion ion-stats-bars"></i>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-2">
+												<div class="small-box bg-purple text-white">
+													<div class="inner height-6r"></div>
+													<div class="icon">
+														<i class="ion ion-stats-bars"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-lg-8">
+										<div class="card">
+											<div class="card-body">
+												<table class="table table-bordered table-hover dataTable dtr-inline" id="jobListTable">
+													<thead>
+													<tr>
+														<th class="text-center" th:text="ID"></th>
+														<th class="text-center" th:text="Name"></th>
+														<th class="text-center" th:text="Status"></th>
+														<th class="text-center" th:text="Stage"></th>
+														<th class="text-center" th:text="Creator"></th>
+														<th class="text-center" th:text="Reviewer"></th>
+													</tr>
+													</thead>
+												</table>
+											</div>
+										</div>
+									</div>
+									<div class="col-lg-4">
+										<div class="card card-lg-red">
+											<div class="card-header">
+												<h3 class="card-title" th:text="Comment"></h3>
+											</div>
+											<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;max-height:30.8rem; overflow-y: auto;">
+												<div clas="row">
+													<div clas="col-md-12" id="commentList">
+														<div class="card-body">
+															<div class="row">
+																<div class="col-md-12">
+																	<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+                
+                <div class="row">
+                	<div class="col-md-12">
+                		<div class="card">
+                			<div class="card-header">
+                         		<h3 class="card-title" th:text="'Discovered Mail List'"></h3>
+                           		<div class="card-tools">
+                            		<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                          		</div>
+                       		</div>
+                       		<div class="card-body">
+                       			<div class="row">
+                       				<div class="col-md-5">
+										<table class="table table-head-fixed text-nowrap">
+											<thead>
+											<tr>
+												<th class="text-center" th:text="'Sent Date'"></th>
+												<th class="text-center" th:text="Subject"></th>
+											</tr>
+											</thead>
+											<tbody id="discoveredSndMail">
+											</tbody>
+										</table>
+                    				</div>
+                    				<div class="col-md-7">
+                        				<div class="card">
+                            				<div class="card-body" scroll=auto style="height: 30rem; overflow-x:hidden">
+                                				<div class="row">
+                                    				<div class="col-md-12 text-center" id="discoveredEmlView"></div>
+                                				</div>
+                            				</div>
+                        				</div>
+                    				</div>
+                       			</div>
+                       		</div>
+                		</div>
+                	</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title" th:text="'NVD Dashboard'"></h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12" id="nvdDashboardArea">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title" th:text="'Last 20 Scored Vulnerability'"></h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="latestVulnsArea">
+                                    <ul id="latestVulns"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                	<div class="col-md-12">
+                		<div class="card">
+                			<div class="card-header">
+                         		<h3 class="card-title" th:text="'OSS / License related'"></h3>
+                           		<div class="card-tools">
+                            		<button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse"><i class="fas fa-minus"></i></button>
+                          		</div>
+                       		</div>
+                       		<div class="card-body">
+                       			<div class="row">
+                       				<input name="schStartDate" id="startDate" type="hidden" th:value="${#calendars.format(#calendars.createNow(), 'yyyy0101')}" />
+									<input name="schEndDate" id="endDate" type="hidden" th:value="${#calendars.format(#calendars.createNow(), 'yyyy1231')}" /> 
+                       				<div class="col-md-6">
+                        				<div class="card">
+                        					<div class="card-header">
+                        						<div class="row">
+                        							<div class="col-10">
+                        								<h6 class="card-title" style="position: absolute; top: 20%;" th:text="'Most Used OSS'"></h6>
+                        							</div>
+                        							<div class="col-2">
+                										<select class="form-control select2" id="mostUsedOssChartPieSize" name="mostUsedOssChartPieSize" style="width: 100%;">
+                                    						<option th:value="10" th:text="10"></option>
+															<option th:value="30" th:text="30" th:selected="true"></option>
+															<option th:value="50" th:text="50"></option>
+                                    					</select>
+                									</div>
+                        						</div>
+                        					</div>
+                            				<div class="card-body" scroll=auto style="height: 30rem; overflow-x:hidden">
+                                				<div class="row">
+                									<div class="col-12">
+                										<div id="mostUsedOssChart"></div>
+                									</div>
+                								</div>
+                            				</div>
+                        				</div>
+                    				</div>
+                    				<div class="col-md-6">
+                        				<div class="card">
+                        					<div class="card-header">
+                        						<div class="row">
+                        							<div class="col-10">
+                        								<h6 class="card-title" style="position: absolute; top: 20%;" th:text="'Most Used License'"></h6>
+                        							</div>
+                        							<div class="col-2">
+                										<select class="form-control select2" id="mostUsedLicenseChartPieSize" name="mostUsedLicenseChartPieSize" style="width: 100%;">
+                                    						<option th:value="10" th:text="10"></option>
+															<option th:value="30" th:text="30" th:selected="true"></option>
+															<option th:value="50" th:text="50"></option>
+                                    					</select>
+                									</div>
+                        						</div>
+                        					</div>
+                            				<div class="card-body" scroll=auto style="height: 30rem; overflow-x:hidden">
+                            					<div class="row">
+                									<div class="col-12">
+                										<div id="mostUsedLicenseChart"></div>
+                									</div>
+                								</div>
+                                			</div>
+                        				</div>
+                    				</div>
+                       			</div>
+                       		</div>
+                		</div>
+                	</div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</body>
+</html>

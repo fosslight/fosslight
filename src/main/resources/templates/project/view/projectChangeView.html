@@ -1,0 +1,199 @@
+<th:block th:if="${#strings.equals(code, 'status')}">
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<body class="hold-transition sidebar-mini">
+	<div class="row custom-layout">
+		<div class="col-sm-12">
+			<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+				<input type="hidden" id="projectStatus" th:value="${status.projectStatus}"/>
+				<input type="hidden" id="identificationStatus" th:value="${status.identificationStatus}"/>
+				<input type="hidden" id="verificationStatus" th:value="${status.verificationStatus}"/>
+				<input type="hidden" id="distributionStatus" th:value="${status.distributionStatus}"/>
+				<input type="hidden" id="completeFlag" th:value="${status.completeFlag}"/>
+				<input type="hidden" id="dropFlag" th:value="${status.dropFlag}"/>
+				<input type="hidden" id="commId" th:value="${status.commId}"/>
+				<input type="hidden" id="viewOnlyFlag" th:value="${status.viewOnlyFlag}"/>
+				<div class="row">
+					<div class="col-12">
+						<div class="form-group">
+							<div class="custom-control custom-radio" id="CSIdentification">
+								<input class="custom-control-input" type="radio" id="r1" name="radioName" th:value="1">
+								<label for="r1" class="custom-control-label" th:text="'Restart Identification'"></label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-12">
+						<div class="form-group">
+							<div class="custom-control custom-radio" id="CSDrop">
+								<input class="custom-control-input" type="radio" id="r2" name="radioName" th:value="2">
+								<label for="r2" class="custom-control-label" th:text="Drop"></label>
+							</div>
+						</div>
+					</div>
+				</div>
+<!-- 			<div class="row">
+					<div class="col-12">
+						<div class="form-group">
+							<div class="custom-control custom-radio" id="CSDelete">
+								<input class="custom-control-input" type="radio" id="r3" name="radioName" th:value="3">
+								<label for="r3" class="custom-control-label" th:text="Delete"></label>
+							</div>
+						</div>
+					</div>
+				</div> -->
+				<div class="row" th:if="${@CommonFunction.isAdmin()}">
+					<div class="col-12">
+						<div class="form-group">
+							<div class="custom-control custom-radio" id="CSComplete">
+								<input class="custom-control-input" type="radio" id="r4" name="radioName" th:value="4">
+								<label for="r4" class="custom-control-label" th:text="Complete"></label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<div class="col-3 float-left">
+							<h6 id="caused" th:text="'Caused by'"></h6>
+						</div>
+						<div class="col-9 float-left">
+							<code id="warningMsg" style="display: none; color: #ff0000; font-size: .8rem;" th:text="'This field is required.'"></code>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-sm-12">
+						<div class="form-group" style="margin-bottom: 0;">
+							<textarea id="reason" rows="8" style="width: 100%;"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-12">
+			<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 ml-1 float-right" th:text="Cancel" th:onclick="|fn.closeAlertify()|"></button>
+			<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right" th:text="OK" th:onclick=|fn.changeStatusProc()|></button>
+		</div>
+	</div>
+	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+</body>
+</html>
+</th:block>
+<th:block th:if="${#strings.equals(code, 'division')}">
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div class="row">
+		<div class="col-12">
+			<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+				<table class="table table-hover text-nowrap" style="margin-top: 1rem;">
+					<tbody>
+						<tr>
+							<td class="text-center" style="vertical-align:middle;" th:text="'Division'"></td>
+							<td>
+								<select class="form-control select2" name="projectChangeDivision" style="width: 100%;">
+									<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+										<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+									</th:block>
+								</select>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="row float-right custom-layout">
+		<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|fn.closeAlertify()|"></button>
+		<button type="button" class="btn btn-dark btn-sm width-6rem px-3" th:text="OK" th:onclick="|fn.changeDivisionSave()|"></button>
+	</div>
+	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+</body>
+</html>
+</th:block>
+<th:block th:if="${#strings.equals(code, 'watcher')}">
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card card-dark custom-layout" style="background-color: #f5f4f3;">
+				<div class="card-body submit-form pb-0">
+					<label th:text="#{msg.common.field.watcher}"></label>
+					<div class="row my-1">
+						<div class="col-4">
+             	        	<select class="form-control select2" style="width: 100%;" th:id="prjDivision" th:name="prjDivision" th:onchange="|fn.selectDivision(this)|">
+          	     	         	<option th:value="''" th:text="'Select Division'"></option>
+           	        	     	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+                    	     		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                    	      	</th:block>
+                    	 	</select>
+                  		</div>
+                  		<div class="col-7">
+							<select class="form-control select2" style="width: 100%;" th:id="prjUserId" th:name="prjUserId">
+								<option th:value="''" th:text="'Select User'"></option>
+							</select>
+                  		</div>
+                 		<div class="col-1">
+                 			<button type="button" class="btn btn-outline-dark" th:text="Add" th:onclick="|fn.addWatcherClick()|"></button>
+                 		</div>
+					</div>
+					<div class="row my-1">
+						<div class="col-4">
+                    		<input class="form-control" type="text" id="adId" name="adId" placeholder="Input email" th:onKeypress="|fn.checkChar()|">
+               			</div>
+               			<div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null 
+                                        			&& #lists.size(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))) > 0) ? true : false}">
+               			<th:block th:if="${useDomainFlag}">
+                    		<select class="form-control select2" style="width: 100%;">
+                        		<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
+                            		<th:block th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
+                                		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                             		</th:block>
+                              		<th:block th:if="${!#strings.contains(option.cdDtlNm, '직접입력')}">
+                                		<option th:value="${option.cdDtlNo}" th:text="|@${option.cdDtlNm}|"></option>
+                              		</th:block>
+                        		</th:block>
+                    		</select>
+                       		<input type="text" id="emailTemp" class="w220" style="display:none;" th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
+                		</th:block>
+                  		<th:block th:if="${!useDomainFlag}">
+                    		<input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.checkChar()|">
+                 		</th:block>
+            			</div>
+               			<div class="col-1">
+                    		<button id="addEmail" type="button" class="btn btn-outline-dark" th:text="Add" th:onclick="|fn.addEmail()|"></button>
+                 		</div>
+					</div>
+					<div class="row my-1">
+						<div class="col-4">
+                   			<select id="listKind" class="form-control select2" style="width: 100%;">
+                     			<option th:value="''" th:text="'Select List'"></option>
+                     			<option th:if="${partnerFlag}" th:text="'3rd Party List'" th:value="par"></option>
+                   				<option th:if="${batFlag}" th:text="'BAT List'" th:value="bat"></option>
+                   			</select>
+                		</div>
+                  		<div class="col-7">
+                    		<input class="form-control" type="text" id="listId" name="listId" placeholder="Input ID you want to copy"/>
+               			</div>
+                 		<div class="col-1">
+                   			<button id="addList" type="button" class="btn btn-outline-dark" th:text="Add" th:onclick="|fn.addList()|"></button>
+                 		</div>
+					</div>
+					<div class="form-group mt-2 mb-3">
+                		<div id="multiDiv" class="external-events row"></div>
+              		</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row float-right custom-layout">
+		<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|fn.closeAlertify()|"></button>
+		<button type="button" class="btn btn-dark btn-sm width-6rem mr-xm px-3" th:text="Delete" th:onclick="|fn.changeWatcherDelete()|"></button>
+		<button type="button" class="btn btn-dark btn-sm width-6rem px-3" th:text="Add" th:onclick="|fn.changeWatcherAdd()|"></button>
+	</div>
+	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+</body>
+</html>
+</th:block>

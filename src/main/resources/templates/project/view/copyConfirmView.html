@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div class="copyConfirmPopup" style="display: none;">
+		<div class="row">
+			<div class="col-12">
+				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+        			<div class="row" id="copyConfirmDiv"></div>
+				</div>
+			</div>
+		</div>
+		<div class="row custom-layout">
+			<div class="col-12">
+				<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.copyConfirmClose()|"></button>
+				<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right" th:text="OK" th:onclick="|fn.copyConfirmSave()|"></button>
+			</div>
+		</div>
+		<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+	</div>
+</body>
+</html>

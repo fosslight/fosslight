@@ -1,0 +1,408 @@
+<th:block th:fragment="syncPopupFragment">
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body class="hold-transition sidebar-mini">
+    <div class="custom-layout p-2">
+        <div class="row pb-3" id="wrap">
+            <div class="col-12">
+                <div class="statisticsLayout">
+                    <input name="syncRefOssId" type="hidden"/>
+                    <input name="ossIds" type="hidden"/>
+                    <input name="initCheck" type="hidden" value=0/>
+                    <div class="row">
+                    	<div class="col-lg-6">
+                        	<div class="jqgridSet ossSyncPopup">
+                            	<table id="_ossList"><tr><td></td></tr></table>
+                            </div>
+                      	</div>
+                       	<div class="col-lg-6 mt-2">
+                          	<div class="grdItemSyncPopup">
+                              	<span><h6 class="text-bold text-blue-gray">Synchronize OSS Attributes</h6></span>
+                           		<div id="ossDetailInfo"></div>
+                         	</div>
+                      	</div>
+                  	</div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="syncPopupEditor">
+                    <textarea class="form-control" id="syncOssEditor" rows="5"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row float-right">
+            <button class="btn btn-outline-dark btn-sm px-3 mr-1" th:onclick="|sync_popup_fn.syncClose()|" type="button" th:text="Cancel"></button>
+            <button class="btn btn-dark btn-sm px-3 mr-2" th:onclick="|sync_popup_fn.syncSave()|" type="button" th:text="OK"></button>
+        </div>
+        <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+    </div>
+    <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+    <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+    <script th:inline="javascript">
+        let syncRefOssId = [[ ${ossInfo.ossId} ]];
+
+        $(document).ready(function () {
+            let _ossName = [[ ${ossInfo.ossName} ]];
+            
+            _ossName = _ossName.split("&#034;").join("\"").split("&#039;").join("\'");
+            const param = {ossName: _ossName}
+
+            getAjaxData(param, "/oss/getOssListByName", "json", function (res) {
+                $('#_ossList').jqGrid({
+                    datatype: 'local',
+                    data: res.ossList,
+                    jsonReader: {
+                        repeatitems: false,
+                        id: 'ossId',
+                    },
+                    colNames: ['ID', 'OSS Name (version)', 'OSS Version', 'Declared License'],
+                    colModel: [
+                        {name: 'ossId', index: 'ossId', key: true, hidden: true},
+                        {name: 'ossNameVerStr', index: 'ossNameVerStr', align: 'left', sortable: false},
+                        {name: 'ossVersion', index: 'ossVersion', width: 100, align: 'left', hidden: true},
+                        {name: 'licenseName', index: 'licenseName', width: 300, align: 'left', sortable: false}
+                    ],
+                    onSelectRow: function (rowid, status, e) {
+                        if (status && $("input[name=initCheck]").val() > 0) {
+                            const _param = {
+                                ossId: rowid,
+                                syncRefOssId: syncRefOssId
+                            }
+                            getAjaxData(_param, "/oss/ossSyncDetailViewAjax", "html", function (detailResult) {
+                                $("#ossDetailInfo").html(detailResult);
+                            }, function () {
+                                alertify.error(String('[[ #{msg.common.valid2} ]]'), 0);
+                            })
+                        }
+                    },
+                    onSelectAll: function (aRowids, status) {
+                        let datas = res.rows;
+                        let rows = this.rows;
+                        let className;
+                        let rowsCount = rows.length;
+                        for (var i = 0; i < rowsCount; i++) {
+                            if (rows[i].className.indexOf("excludeRow") !== -1) {
+                                rows[i].className = rows[i].className.replace("ui-state-highlight", "");
+                                $(rows[i]).find("input[type=checkbox]").prop("checked", false);
+                            }
+                        }
+                    },
+                    autowidth: true,
+                    gridview: true,
+                    viewrecords: true,
+                    loadonce: true,
+                    height: '350px',
+                    scroll: true,
+                    multiselect: true,
+                    multiselectWidth: 30,
+                    rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
+                    sortname: 'ossVersion',
+                    sortorder: 'desc',
+                    loadComplete: function (data) {
+                        let standardVersion = [[${ossInfo.ossVersion}]];
+                        let ossVersionCheckRowId = "";
+
+                        if (data.records > 0) {
+                            var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+
+                            for (var _idx = 0; _idx < rowsCount; _idx++) {
+                                row = rows[_idx];
+                                className = row.className;
+
+                                if (className.indexOf('jqgrow') !== -1) {
+                                    rowid = row.id;
+                                    rowData = data.rows[rowIdx++];
+
+                                    if (rowData.ossVersion == standardVersion) {
+                                        ossVersionCheckRowId = rowid;
+                                    }
+                                }
+                            }
+
+                            let ossIdArr = $("#_ossList").jqGrid('getDataIDs');
+                            let ossId = [[ ${ossInfo.ossId}]];
+                            $("input[name=ossIds]").val(ossIdArr);
+                            let ossIds = $("input[name=ossIds]").val();
+                            const _param = {
+                                "ossId": ossId,
+                                "ossIds": ossIds
+                            }
+
+                            postAjaxData(_param, "/oss/ossSyncListValidation", "json", function (res) {
+                                let result = res.resultData;
+
+                                let differenceList = ossIdArr.filter(function (element) {
+                                    if (result.indexOf(element) === -1) {
+                                        return element;
+                                    }
+                                });
+
+                                let sameList = ossIdArr.filter(function (element) {
+                                    if (result.indexOf(element) !== -1) {
+                                        return element;
+                                    }
+                                });
+
+                                if (sameList.length > 0) {
+                                    for (var _idx = 0; _idx < rowsCount; _idx++) {
+                                        row = rows[_idx];
+                                        className = row.className;
+                                        if (className.indexOf('jqgrow') !== -1) {
+                                            id = row.id;
+                                            for (var i = 0; i < sameList.length; i++) {
+                                                if (id == sameList[i]) {
+                                                    row.className = className + ' excludeRow';
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (differenceList.length > 0) {
+                                    for (var i = 0; i < differenceList.length; i++) {
+                                        if (i == 0) {
+                                            $("input[name=initCheck]").val(9);
+                                            $('#_ossList').jqGrid("setSelection", differenceList[i]);
+                                            $("input[name=initCheck]").val(0);
+                                        } else {
+                                            $('#_ossList').jqGrid("setSelection", differenceList[i]);
+                                        }
+                                    }
+                                } else {
+                                    $("input[name=initCheck]").val(9);
+                                    $('#_ossList').jqGrid("setSelection", ossVersionCheckRowId);
+                                    $('#_ossList').jqGrid("setSelection", ossVersionCheckRowId, false);
+                                }
+
+                                $("input[name=initCheck]").val(9);
+                            }, function () {
+                                alertify.error([[ #{msg.common.valid2} ]], 0);
+                            })
+                        }
+                    }
+                });
+            });
+
+            $("#syncOssEditor").summernote({
+                height: 150
+            });
+        });
+
+        sync_popup_fn = {
+            syncSave: function () {
+                var checkedOssList = $("#_ossList").jqGrid("getGridParam", "selarrrow");
+
+                var ossName = $("#_ossList").jqGrid("getRowData", checkedOssList[0]).ossNameVerStr;
+                ossName = ossName.substring(0, ossName.indexOf(" ("));
+
+                var checkedSyncList = $(".dCase tbody tr").find("input[type=checkbox]:checked");
+
+                if (checkedOssList.length > 0) {
+                    var dataLength = $("#syncOssEditor").summernote('code').length;
+
+                    if ((checkedSyncList.length > 0) || dataLength > 0) {
+                        // $(".loading").show();
+
+                        $("input[name=ossIds]").val(checkedOssList);
+                        let editorVal = $("#syncOssEditor").summernote('code');
+                        let ossIds = $("input[name=ossIds]").val();
+                        let items = [];
+                        checkedSyncList.each(function () {
+                            items.push($(this).attr("id"));
+                        });
+
+                        $("input[name=ossIds]").val(items);
+                        let syncItem = $("input[name=ossIds]").val();
+                        const param = {
+                            "ossId": syncRefOssId,
+                            "ossIds": ossIds,
+                            "ossName": ossName,
+                            "comment": editorVal,
+                            "syncItem": syncItem
+                        };
+
+                        postAjaxData(param, "/oss/ossSyncUpdate", "json", function (data) {
+                            // $(".loading").hide();
+                            if (data.isValid == 'true') {
+                                alertify.alert([[ #{msg.common.success} ]], function () {
+                                    self.close();
+                                    callDeleteTabInFrame("oss-edit_" +syncRefOssId);
+                                    callReloadTabInframe("/oss/list", "oss-list");
+                                });
+                            } else {
+                                alertify.alert([[ #{msg.common.valid2} ]], 0);
+                                self.close();
+                            }
+                        }, function () {
+                            alertify.alert([[ #{msg.common.valid2} ]], function () {});
+                        })
+                    } else {
+                        alertify.alert([[ #{msg.oss.select.synchronize} ]], function () {});
+                    }
+                } else {
+                    alertify.alert([[ #{msg.oss.select.project} ]], function () {});
+                }
+            },
+            syncClose : function(){
+                self.close();
+            }
+        }
+    </script>
+</body>
+</html>
+</th:block>
+<th:block th:fragment="syncDetailViewFragment">
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body class="hold-transition sidebar-mini">
+    <div class="tbws1">
+        <table class="dCase">
+            <colgroup>
+                <col width="2"/>
+                <col width="170"/>
+                <col/>
+            </colgroup>
+            <tbody>
+            <tr>
+                <th class="dCase"><input type="checkbox" id="Declared License" checked="checked"></th>
+                <th class="dCase" th:text="#{msg.common.field.declaredLicense}"></th>
+                <td class="dCase">[[${ossInfo.licenseName}]]</td>
+            </tr>
+            <tr>
+                <th class="dCase"><input type="checkbox" id="Detected License" checked="checked"></th>
+                <th class="dCase" th:text="#{msg.common.field.detectedLicense}"></th>
+                <td class="dCase">[[${ossInfo.detectedLicense}]]</td>
+            </tr>
+            <tr>
+                <th class="dCase" style="height:50px;"><input type="checkbox" id="Copyright"></th>
+                <th class="dCase" th:text="#{msg.common.field.Copyright}"></th>
+                <td class="dCase">[[${ossInfo.copyright}]]</td>
+            </tr>
+            <tr>
+                <th class="dCase"><input type="checkbox" id="Download Location"></th>
+                <th class="dCase" th:text="#{msg.common.field.downloadLocation}"></th>
+                <td class="dCase">
+                    <th:block th:each="downloadLocation, g : ${ossInfo.downloadLocations}">
+                        <span th:text="${downloadLocation}"></span><br/>
+                    </th:block>
+                </td>
+            </tr>
+            <tr>
+                <th class="dCase"><input type="checkbox" id="Home Page"></th>
+                <th class="dCase" th:text="#{msg.common.field.homepage}"></th>
+                <td class="dCase">[[${ossInfo.homepage}]]</td>
+            </tr>
+            <tr>
+                <th class="dCase" style="height:50px;"><input type="checkbox" id="Summary Description"></th>
+                <th class="dCase" th:text="#{msg.common.field.summaryDescription}"></th>
+                <td class="dCase">[[${ossInfo.summaryDescription}]]</td>
+            </tr>
+
+            <tr>
+                <th class="dCase" style="height:50px;"><input type="checkbox" id="Attribution"></th>
+                <th class="dCase" th:text="#{msg.common.field.attribution}"></th>
+                <td class="dCase">[[${ossInfo.attribution}]]</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+<!--    <div class="card" style="overflow-y: scroll; height: auto; font-size: .8rem">-->
+<!--        <div class="card-header" style="height: 80%">-->
+<!--            <strong>Synchronize OSS Attributes</strong>-->
+<!--        </div>-->
+<!--        &lt;!&ndash; /.card-header &ndash;&gt;-->
+<!--        &lt;!&ndash; form start &ndash;&gt;-->
+<!--        <div class="card-body">-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input checked="checked" id="Declared License" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.declaredLicense}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.licenseName}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input checked="checked" id="Detected License" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.detectedLicense}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.detectedLicense}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input id="Download Location" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.downloadLocation}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <th:block th:each="downloadLocation, g : ${ossInfo.downloadLocations}">-->
+<!--                            <span th:text="${downloadLocation}"></span><br/>-->
+<!--                        </th:block>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input id="Home Page" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.homepage}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.homepage}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input id="Summary Description" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.summaryDescription}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.summaryDescription}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <hr/>-->
+<!--            <div class="form-group my-1">-->
+<!--                <div class="row">-->
+<!--                    <div class="col-1">-->
+<!--                        <input id="Attribution" type="checkbox">-->
+<!--                    </div>-->
+<!--                    <div class="col-3">-->
+<!--                        <strong th:text="#{msg.common.field.attribution}"></strong>-->
+<!--                    </div>-->
+<!--                    <div class="col-7 ml-2">-->
+<!--                        <span th:text="${ossInfo.attribution}"></span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+</body>
+</html>
+</th:block>

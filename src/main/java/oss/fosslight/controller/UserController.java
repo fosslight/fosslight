@@ -16,7 +16,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -55,7 +55,7 @@ public class UserController extends CoTopComponent {
 	
 	@GetMapping(value=USER.LIST, produces = "text/html; charset=utf-8")
 	public String index(HttpServletRequest req, HttpServletResponse res, Model model){
-		return USER.LIST_JSP;
+		return "system/user";
 	}
 	
 	@GetMapping(value=USER.LIST_AJAX)

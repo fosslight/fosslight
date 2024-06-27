@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html lang="ko">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<style>
-			.marker{background-color: Yellow;}
-		</style>
-		<title>FOSSLight Hub</title>
-	</head>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<style>
+		.marker{background-color: Yellow;}
+	</style>
+	<title>FOSSLight Hub</title>
+</head>
 	<body>
 		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
 			<tr>
@@ -24,24 +24,22 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$contentsTitle</div>
-							#end
+								<div th:if="${contentsTitle != null && contentsTitle != ''}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+
 								<pre>
-#if( $mailType == "810" )							
-The file, ${fileName}, has been uploaded to Project ID ${prjId}.
-#end
-#if( $mailType == "811" )
-Failed to upload file for Project ID ${prjId}.
-<ul>
-<li>File name attempted to upload: ${fileName}</li>
-<li>Failure message: ${errorMsg}</li>
-</ul>
-#end
+								<th:block th:if="${mailType == '810'}" th:utext="|The file, ${fileName}, has been uploaded to Project ID ${prjId}.|"></th:block>
+								<th:block th:if="${mailType == '810'}" th:utext="|Failed to upload file for Project ID ${prjId}.|">
+									<ul>
+										<li th:utext="|File name attempted to upload: ${fileName}|"></li>
+										<li th:utext="|Failure message: ${errorMsg}|"></li>
+									</ul>
+								</th:block>
 								</pre>
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+									 style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>

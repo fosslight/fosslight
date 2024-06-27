@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="batScript">
+<script th:inline="javascript">
+var ossNames = [];
+var objs = [];
+var licenseNames = [];
+var identBat = true;
+var bat_evt = {
+	init : function(){
+		// ossName auto complete
+		fn_grid_com.griOssNames().success(function(data, status, headers, config){
+			if(data != null && ossNames == ""){
+				data.forEach(function(obj){
+					ossNames.push(obj.ossName);
+				})
+			}
+		});
+		
+		// licenseName auto complete
+		commonAjax.getLicenseTags().success(function(data, status, headers, config){
+			if(data != null && licenseNames == ""){
+				var tag = "";
+				data.forEach(function(obj){
+					if(obj!=null) {
+						tag ={
+							value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
+							label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
+							type : obj.licenseType,
+							obligation : obj.obligation,
+							obligationChecks : obj.obligationChecks
+						}
+						licenseNames.push(tag);
+					}
+				});
+			}
+		});
+		
+		//bat_fn.getBatGridData();
+		//Not aplicable
+		var aplicable = $('#applicableBat').is(':checked');
+		if (aplicable){
+			$('.batBtn').hide();
+		}
+		//파일업로드
+		$('#batBinaryFile').uploadFile({
+			url:'/bat/binaryFileUpload',
+			multiple:true,
+			dragDrop:true,
+			fileName:'myfile',
+			sequential:true,
+			sequentialCount:1,
+			dynamicFormData: function() {
+				var data ={ "softwareName" 		: [[${project.prjName}]]
+						  , "softwareVersion"	: [[${project.prjVersion}]]
+						  , "prjId" 			: [[${project.prjId}]]};
+				
+				return data;
+			},
+			onSubmit:function(files) {
+				onAjaxLoadingHide = true;
+			},
+			onError: function(files,status,errMsg,pd) {
+				onAjaxLoadingHide = false;
+			},
+			onCancel: function(files,pd) {
+				onAjaxLoadingHide = false;
+			},
+			onSuccess:function(files,data,xhr,pd){
+				onAjaxLoadingHide = false;
+				var result = jQuery.parseJSON(data);
+				$('.ajax-file-upload-statusbar').fadeOut('slow');
+				$('.ajax-file-upload-statusbar').remove();
+				$('#_binaryFileList').jqGrid().trigger('reloadGrid');
+				alertify.success([[#{msg.bat.ready}]]);
+				
+				// Identification status가 변경된 경우, button 표시를 다시 초기화 한다.
+				if(result.statusChangedFlag && result.statusChangedFlag != "") {
+					curIdenStatus = result.statusChangedFlag;
+					com_fn.tabInit();
+					$("#wrapIframe > div.projdecTop > div.projdecTab > div.subTab > div > a:nth-child(6)").trigger('click');
+				}
+			}
+		}); 
+		//bat 파일 리스트
+		bat_grid_list.batFileGrid();
+		
+		//wgetUrl send
+		 $('#send').on('click', function(){
+			var wgetUrl = $("#sendWgetUrl").val();
+			var obj = {
+					softwareName 		: [[${project.prjName}]],
+					softwareVersion 	: [[${project.prjVersion}]],
+					prjId 				: [[${project.prjId}]],
+					wgetUrl				: wgetUrl
+			};
+			
+			$.ajax({
+				url : '/bat/wgetUrlUpload',
+				type : 'POST',					
+				dataType : 'json',
+				contentType : 'application/json',
+				cache : false,
+				data : JSON.stringify(obj) ,
+				success : function(json){
+					var result = json;
+					$('.ajax-file-upload-statusbar').fadeOut('slow');
+					$('.ajax-file-upload-statusbar').remove();
+					$('#_binaryFileList').jqGrid().trigger('reloadGrid');
+					alertify.success([[#{msg.bat.ready}]]);
+
+					// Identification status가 변경된 경우, button 표시를 다시 초기화 한다.
+					if(result.statusChangedFlag && result.statusChangedFlag != "") {
+						curIdenStatus = result.statusChangedFlag;
+						com_fn.tabInit();
+						$("#wrapIframe > div.projdecTop > div.projdecTab > div.subTab > div > a:nth-child(6)").trigger('click');
+					}
+				},
+				error : function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		});
+		
+	}
+}
+
+var bat_data = {
+	setProjectParam1 : function(param){
+		var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
+		var rowList = rowStr.split(",");
+		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
+		
+		return {
+			url: '/project/identificationProject/12',
+			datatype: 'json',
+			postData:param,
+			jsonReader:{
+				repeatitems: false,
+				id: 'prjId',
+			},
+			colNames: ['ID','Project Name','Project Version','Distribution Type', 'Creator','Created Date', 'Comment'],
+			colModel: [
+				{name: 'prjId', index: 'prjId', width: 42, align: 'center', key:true},
+				{name: 'prjName', index: 'prjName', width: 240, align: 'left'},
+				{name: 'prjVersion', index: 'prjVersion', width: 80, align: 'left'},
+				{name: 'distributionType', index: 'distributionType', width: 150, align: 'left'},
+				{name: 'creator', index: 'creator', width: 110, align: 'center'},
+				{name: 'createdDate', index: 'createdDate', width: 110, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}},
+				{name: 'comment', index: 'comment', width: 139, align: 'left', formatter: fn_grid_com.displayComment, unformat: fn_grid_com.unFormatter}
+			],
+			onSelectRow: function(id){
+				var postData = {referenceId : id};
+				$('#_batProjectList2').jqGrid(bat_data.setProjectParam2(postData));
+				$('#_batProjectList2').jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
+				$('.bat2list').show();
+			},
+			autoencode: true,
+			autowidth: true,
+			gridview: true,
+			sortable: function(permutation){
+				
+			},
+			rowNum: rowNum,
+			rowList: rowList,
+			pager: '#batProjectPager',
+			sortname: 'prjId',
+			viewrecords: true,
+			sortorder: 'desc',
+			loadonce: false,
+			height: 'auto',
+			mtype: 'GET',
+			loadComplete: function(data){
+				$('.commentDiv').find('p').css('margin','0px 0px');
+			}
+		}
+	},
+	setProjectParam2 : function(param){
+		return {
+			url: '/project/identificationProjectSearch/12',
+			datatype: 'json',
+			postData:param,
+			jsonReader:{
+				repeatitems: false,
+				id: 'componentId',
+			},
+			colNames: ['ID','OSS Name','OSS Version','Download Location', 'Homepage','License', 'License Text', 'Copyright Text', 'Binary'],
+			colModel: [
+				{name: 'componentId', index: 'componentId', width: 40, align: 'center', key:true},
+				{name: 'ossName', index: 'ossName', width: 250, align: 'left'},
+				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center'},
+				{name: 'downloadLocation', index: 'downloadLocation', width: 70, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter},
+				{name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl},
+				{name: 'licenseName', index: 'licenseName', width: 130, align: 'left',formatter: fn_grid_com.displayLicense},
+				{name: 'licenseText', index: 'licenseText', width: 100, align: 'left',formatter: fn_grid_com.displayLicense},
+				{name: 'copyrightText', index: 'copyrightText', width: 98, align: 'left',formatter: fn_grid_com.displayLicense},
+				{name: 'binaryName', index: 'binaryName', width: 98, align: 'left'},
+			],
+			autoencode: true,
+			onSelectRow: function(id){
+			},
+			autowidth: true,
+			gridview: true,
+			sortable: function(permutation){
+			},
+			sortname: 'componentId',
+			viewrecords: true,
+			sortorder: 'desc',
+			loadonce: false,
+			height: 'auto',
+			mtype: 'GET',
+			loadComplete: function(data){
+			},
+		}
+	},
+	setProjectParam1Binary : function(param){
+		var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
+		var rowList = rowStr.split(",");
+		var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
+		
+		return {
+			url: '/project/identificationProject/30',
+			datatype: 'json',
+			postData:param,
+			jsonReader:{
+				repeatitems: false,
+				id: 'batId',
+			},
+			colNames: ['ID','Binary','Software Name','Software Version', '3rd party Name', 'Creator','Created Date'],
+			colModel: [
+				{name: 'batId', index: 'batId', width: 42, align: 'center', key:true},
+				{name: 'fileName', index: 'fileName', width: 250, align: 'left'},
+				{name: 'softwareName', index: 'softwareName', width: 150, align: 'left'},
+				{name: 'softwareVersion', index: 'softwareVersion', width: 100, align: 'left'},
+				{name: 'partnerName', index: 'partnerName', width: 100, align: 'left'},
+				{name: 'creator', index: 'creator', width: 110, align: 'center'},
+				{name: 'createdDate', index: 'createdDate', width: 110, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}}
+			],
+			onSelectRow: function(id){
+				var postData = {referenceId : id};
+				
+				$('#_batProjectList2Binary').jqGrid(bat_data.setProjectParam2Binary(postData));
+				$('#_batProjectList2Binary').jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
+				$('.bat2listBinary').show();
+			},
+			autoencode: true,
+			autowidth: true,
+			gridview: true,
+			sortable: function(permutation){
+				
+			},
+			rowNum: rowNum,
+			rowList: rowList,
+			pager: '#batProjectPagerBinary',
+			sortname: 'batId',
+			viewrecords: true,
+			sortorder: 'desc',
+			loadonce: false,
+			height: 'auto',
+			mtype: 'GET',
+			loadComplete: function(data){
+			}
+		}
+	},
+	setProjectParam2Binary : function(param){
+		return {
+			url: '/project/identificationProjectSearch/30',
+			datatype: 'json',
+			postData:param,
+			jsonReader:{
+				repeatitems: false,
+				id: 'componentId',
+			},
+			colNames: ['ID','OSS Name','OSS Version','Download Location', 'Homepage','License', 'License Text', 'Copyright Text', 'Binary'],
+			colModel: [
+				{name: 'componentId', index: 'componentId', width: 40, align: 'center', key:true},
+				{name: 'ossName', index: 'ossName', width: 250, align: 'left'},
+				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center'},
+				{name: 'downloadLocation', index: 'downloadLocation', width: 70, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter},
+				{name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl},
+				{name: 'licenseName', index: 'licenseName', width: 130, align: 'left',formatter: fn_grid_com.displayLicense},
+				{name: 'licenseText', index: 'licenseText', width: 100, align: 'left',formatter: fn_grid_com.displayLicense},
+				{name: 'copyrightText', index: 'copyrightText', width: 98, align: 'left',formatter: fn_grid_com.displayLicense},
+				{name: 'binaryName', index: 'binaryName', width: 98, align: 'left'},
+			],
+			onSelectRow: function(id){
+			},
+			autoencode: true,
+			autowidth: true,
+			gridview: true,
+			sortable: function(permutation){
+			},
+			sortname: 'componentId',
+			viewrecords: true,
+			sortorder: 'desc',
+			loadonce: false,
+			height: 'auto',
+			mtype: 'GET',
+			loadComplete: function(data){
+			},
+		}
+	}
+}
+//src 그리드 데이터 전역 변수
+var batMainData;
+var batSubData;
+var batValidMsgData;
+// BAT 함수
+var bat_fn = {
+	// src 그리드 데이터
+	getBatGridData : function(param){
+		var postParam = (param) ? param : {referenceId:[[${project.prjId}]],referenceDiv:'12'};
+		$.ajax({
+			url : suffix + '/project/identificationGridPost',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : JSON.stringify(postParam),
+			contentType : 'application/json',
+			success : function(data){
+				batMainData = data.mainData;
+				batSubData = data.subData;
+				
+				//licenseName 재구성
+				var subData = new Object();
+				$.each(batSubData,function(key,value) {
+					var strVal = "";
+					
+					for (var i=0; i < value.length; i++) {
+						if (value[i].excludeYn == "N") {
+							strVal += value[i].licenseName+",";	
+						}
+					}
+					
+					for (var j=0; j < batMainData.length; j++) {
+						if (batMainData[j]["licenseDiv"] == "M") {
+							if (key == batMainData[j]["gridId"]) {
+								batMainData[j]["licenseName"] = strVal.substring(0,strVal.length-1);
+							}
+						}
+					}
+				});
+				
+				batValidMsgData = []; //초기화
+				if (data.validData) {
+					batValidMsgData = data.validData;
+				}
+
+				// 리로드 대신 그리드 삭제 후 다시 그리기
+				$("#batList").jqGrid('GridUnload');
+				bat_grid_list.load();
+				
+				fn_grid_com.addEtcKeyDownEvent($('#batList'), batValidMsgData);
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		})
+	},
+	changeSearch : function(){
+		var searchOption = $('input[name=sukindRadio]:checked').val();
+		if(searchOption == 'projectSearch'){
+			$('.batFileUpload').hide();
+			$('.batProjectSearch').show();
+		}else{
+			$('.batProjectSearch').hide();
+			$('.batFileUpload').show();
+		}
+	},
+	changePrjFlag : function() {
+		if($('input[name=binSrcFlag]:checked').val() == "PRJ") {
+			$("#projectSearchAreaPrj").show();
+			$("#projectSearchAreaBat").hide();
+			$("div.bat1listBinary").hide();
+			$("div.bat2listBinary").hide();
+		} else {
+			$("#projectSearchAreaPrj").hide();
+			$("#projectSearchAreaBat").show();
+			$("div.bat1list").hide();
+			$("div.bat2list").hide();
+		}
+	},
+	startBinary : function(obj){
+		var id = $(obj).parent().parent().children().first().text();
+		var _url = '/bat/startAnalysis/project?batId='+id;
+		loading.show();
+		$.ajax({
+			type : 'POST',
+			url : _url,
+			headers : {
+				'Accept' : 'application/json',
+				'Content-Type' : 'application/json'
+			}
+		}).success(function(data, status, headers, config){
+			loading.hide();
+			if(data.isValid == "false") {
+				alertify.error((data.validMsg.length > 0 ? data.validMsg : [[#{msg.common.valid2}]]), 0);
+			} else {
+				alertify.success([[#{msg.bat.started}]]);
+			}
+			$('#_binaryFileList').jqGrid().trigger('reloadGrid');
+		}).error(function(data, status, headers, config){
+			loading.hide();
+			alertify.error([[#{msg.common.valid2}]], 0);
+		})
+	},
+	cancelBinary : function(obj){
+		var id = $(obj).parent().parent().children().first().text();
+		$.ajax({
+			type : 'GET',
+			url : '/bat/cancelBat',
+			headers : {
+				'Accept' : 'application/json',
+				'Content-Type' : 'application/json'
+			},
+			data : {
+				batId : id
+			}
+		}).success(function(data, status, headers, config){
+			$('#_binaryFileList').jqGrid().trigger('reloadGrid');
+		}).error(function(data, status, headers, config){
+			alertify.error([[#{msg.common.valid2}]], 0);
+		});
+	},
+	deleteBinary : function(obj) {
+		var id = $(obj).parent().parent().children().first().text();
+		$.ajax({
+			type : 'GET',
+			url : '/bat/deleteBat',
+			headers : {
+				'Accept' : 'application/json',
+				'Content-Type' : 'application/json'
+			},
+			data : {
+				batId : id
+			}
+		}).success(function(data, status, headers, config){
+			$('#_binaryFileList').jqGrid().trigger('reloadGrid');
+		}).error(function(data, status, headers, config){
+			alertify.error([[#{msg.common.valid2}]], 0);
+		});
+	},
+	applyBinary : function(obj){
+		var id = $(obj).parent().parent().children().first().text();
+		loading.show();
+		// src 그리드 데이터
+		$.ajax({
+			url : suffix + '/project/identificationGrid/'+[[${project.prjId}]]+'/30',
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : { refBatId : id },
+			contentType : 'application/json',
+			success : function(data){
+				loading.hide();
+				if(data.mainData != null && data.mainData != undefined && data.mainData.length > 0) {
+					batMainData = data.mainData;
+					batSubData = data.subData;
+					
+					//licenseName 재구성
+					var subData = new Object();
+					$.each(batSubData,function(key,value) {
+						var strVal = "";
+						for(var i=0; i < value.length; i++){
+							if(value[i].excludeYn == "N"){
+								strVal += value[i].licenseName+",";	
+							}
+						}
+						
+						for(var j=0; j < batMainData.length; j++){
+							if(batMainData[j]["licenseDiv"] == "M"){
+								if(key == batMainData[j]["gridId"]){
+									batMainData[j]["licenseName"] = strVal.substring(0,strVal.length-1);
+								}
+							}
+						}
+					});
+
+					batValidMsgData = []; //초기화
+					if(data.validData) {
+						batValidMsgData = data.validData;
+					}
+
+					// 리로드 대신 그리드 삭제 후 다시 그리기
+					$("#batList").jqGrid('GridUnload');
+					bat_grid_list.load();
+
+					fn_grid_com.addEtcKeyDownEvent($('#batList'), batValidMsgData);
+					
+				} else {
+					alertify.alert([[#{msg.bat.alert.nobinary}]], function(){});
+				}
+			},
+			error : function(){
+				loading.hide();
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	searchProject :  function(){
+		if($('input[name=binSrcFlag]:checked').val() == "PRJ") {
+			$("input[name=binaryName]").val("");
+			$("input[name=softwareName]").val("");
+			$("input[name=partnerName]").val("");
+		} else {
+			$("input[name=prjName]").val("");
+			$("input[name=prjVersion]").val("");
+		}
+		var postData = $('#batProjectForm').serializeObject();
+		
+		if($('input[name=binSrcFlag]:checked').val() == "PRJ") {
+			$('#_batProjectList1').jqGrid(bat_data.setProjectParam1(postData));
+			$('#_batProjectList1').jqGrid('setGridParam',{postData:postData, page : 1}).trigger('reloadGrid');
+			$('.bat1list').show();
+			$('.bat2list').hide();
+		} else {
+			$('#_batProjectList1Binary').jqGrid(bat_data.setProjectParam1Binary(postData));
+			$("#_batProjectList1Binary").jqGrid('setGridParam',{postData:postData, page : 1}).trigger('reloadGrid');
+			$('.bat1listBinary').show();
+			$('.bat2listBinary').hide();
+		}
+
+	},
+	reset :  function(){
+ 		alertify.confirm([[#{msg.common.confirm.reset}]], function (e) {
+			if (e) {
+				$('#batList').jqGrid('clearGridData');
+			} else {
+				return false;
+			}
+		});
+	},	
+	save : function(){
+		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+			if (e) {
+				fn_grid_com.totalGridSaveMode('batList');
+				cleanErrMsg("batList");
+				var target = $('#batList');
+				
+				var mainData = target.jqGrid('getGridParam','data');
+				
+				// 서브 그리드
+				var subData = [];
+		 		var subTable;
+		 		mainData.forEach( function(_rowData){
+		 			var _rowId = _rowData['gridId'];
+					// 메인 그리드 멀티 라이센스일 경우만 서브 그리드 데이터 넘김
+					if(_rowData['licenseDiv'] == "M"){
+						subTable = $("#batList_"+_rowId+"_t");
+						if(subTable && subTable.length > 0) {
+							subData.push(subTable.jqGrid('getRowData'));
+						} else if(batSubData[_rowId]) {
+							subData.push(batSubData[_rowId]);
+						}
+					}
+		 		});
+				
+				var finalData = { 
+					referenceId : [[${project.prjId}]],
+					identificationSubStatusBat : $("#applicableBat:checked").val(),
+					workType : 'prj',
+					mainData : JSON.stringify(mainData),
+					subData : JSON.stringify(subData)
+				}
+				
+				$.ajax({
+					url : '/bat/saveBat',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : JSON.stringify(finalData),
+					contentType : 'application/json',
+					success : function(data){
+						_mainLastsel = -1;
+						
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid}]], 0);
+							batValidMsgData = data.resultData;
+						} else {
+							if("10" == data.resCd){
+								alertify.success([[#{msg.common.success}]]);
+								bat_fn.getBatGridData();
+								$("#mergeYn").val("N");
+							} else {
+								alertify.error([[#{msg.common.valid2}]], 0);
+							}
+						}
+						
+						if(curIdenStatus == ""){
+							curIdenStatus = "PROG";
+							com_fn.btnCtl(userRole, curIdenStatus);
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			} else {
+				return false;
+			}
+		});
+	},
+	
+	// 업로드 화면 컨트롤
+	changeSelectOption : function(){
+		var value = $('input[name=batselectOption]:checked').val();
+		
+		if (value == 1) {
+			$('#binaryFile').show();
+			$('#wgetUrl').hide();
+		} else {
+			$('#binaryFile').hide();
+			$('#wgetUrl').show();
+		}
+	}
+}
+
+var bat_grid_list = {
+	load : function(){
+		var currentOssName = "";
+		var ondblClickRowBln = false;
+		var batList = $("#batList");
+		var mainGridLastId = "";
+		
+		batList.jqGrid({
+			datatype: 'local',
+			data : batMainData,
+			colNames: ['gridId'
+			           ,'ID_KEY'
+			           , 'ID'
+			           ,'ReferenceId'
+			           ,'ReferenceDiv'
+			           , 'Binary Name'
+			           ,'Path'
+			           , 'OssId'
+			           ,'OSS Name'
+			           ,'OSS Version'
+						,'LicenseId'
+			           ,'License'
+						,'Size'
+						,'Percentage'
+						,'Percentage(%)'
+						,'Score'
+				        ,'GUI Report'
+						,'<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'batList\');">Exclude'
+				        ,'batStrPlus'
+			           ,'Download Location'
+						, 'Homepage'
+						, 'License Text'
+						, 'Copyright Text'
+						,'Notice'
+			            ,'BatChecksum'
+						,'Vulnera<br/>bility'
+						,'LicenseDiv'
+						, 'customBinaryYn'],
+						colModel: [
+									{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
+									{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
+									{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', search : false, sorttype: 'int'},
+									{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
+									{name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true},
+									
+									{name: 'binaryName', index: 'binaryName', width: 200, align: 'left', editable:false, sorttype:"string", template: searchStringOptions},
+									{name: 'filePath', index: 'filePath', width: 100, align: 'left', editable:false, template: searchStringOptions},
+									{name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true},
+									{name: 'ossName', index: 'ossName', width: 100, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
+											editoptions: {
+												dataInit:
+													function (e) { 
+														// ossName auto complete
+														$(e).autocomplete({
+															source: ossNames
+															, minLength: 3 // IE 스크립트 성능이슈로 0->3 으로 변경 yuns
+															, open: function() { $(this).attr('state', 'open');}
+															, close: function () { $(this).attr('state', 'closed');}
+														}).focus(function() {
+															if ($(this).attr('state') != 'open') {
+																$(this).autocomplete("search");
+															}
+														}).on('autocompletechange', function() {
+															if(e.value!=""){
+																var rowid = (e.id).split('_')[0];
+																fn_grid_com.griOssVersions($('#'+rowid+'_ossVersion')[0], e.value, 'batList');
+																$("#batList").focus(); // 포커스 히든으로 빼기위해 
+																fn_grid_com.saveCellData("batList",rowid,e.name,e.value,batValidMsgData);
+															}
+														});
+														currentOssName = e.value;
+													}
+											}
+									},
+									{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'left', editable: false, edittype: 'text', template: searchStringOptions,
+										editoptions: {
+											dataInit:
+												function (e) { 
+													fn_grid_com.griOssVersions(e, currentOssName, 'batList');
+													$(e).on( "autocompletechange", function() {
+														var rowid = (e.id).split('_')[0];
+														fn_grid_com.saveCellData("batList",rowid,e.name,e.value,batValidMsgData);
+													});
+												}
+										}
+									},
+
+									{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
+					 				{name: 'licenseName', index: 'licenseName', width: 140, align: 'left', editable:false, edittype:'text', template: searchStringOptions, 
+					 					editoptions: {
+					 						dataInit: function (e) {
+													// licenseName auto complete
+													$(e).autocomplete({
+														source: licenseNames
+														, minLength: 0
+														, open: function() { $(this).attr('state', 'open'); }
+														, close: function () { $(this).attr('state', 'closed'); }
+													}).focus(function() {
+														if ($(this).attr('state') != 'open') {
+															$(this).autocomplete("search");
+														}
+													});
+													
+													// set license data
+													$(e).on( "autocompletechange", function() {
+														var rowid = (e.id).split('_')[0];
+														for(var i in objs){
+															if("" != e.value && e.value == objs[i].licenseName){
+																$('#'+rowid+'_licenseId').val(objs[i].licenseId);
+																$('#'+rowid+'_licenseText').val(objs[i].licenseText);
+															}
+														}
+														fn_grid_com.saveCellData("batList",rowid,e.name,e.value,batValidMsgData);
+													});
+												}
+					 					}
+					 				},		
+									{name: 'binarySize', index: 'binarySize', width: 50, align: 'right', editable:false, hidden:false},
+									{name: 'batStringMatchPercentage', index: 'batStringMatchPercentage', width: 40, align: 'center', editable:false, hidden:true},
+									{name: 'batStringMatchPercentageFloat', index: 'batStringMatchPercentageFloat', width: 40, align: 'center', editable:false, hidden:false, sorttype:"float", template: searchNumberOptions},
+									{name: 'batScore', index: 'batScore', width: 50, align: 'right', editable:false, hidden:true, sorttype:"float", template: searchNumberOptions},
+									{name: 'guireportFlag', index: 'guireportFlag', width: 50, align: 'center', editable:false, search: false, formatter:fn_grid_com.displayBatGuiReport, unformatter:fn_grid_com.unformatter},
+									{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false, hidden:true},
+									
+									{name: 'batStrPlus', index: 'batStrPlus', width: 90, align: 'left', editable:false, hidden:true, template: searchStringOptions,
+										sorttype: function (cell, rowData) {
+											var rtnVal = rowData.batStringMatchPercentage;
+											if(rtnVal) {
+												if(rtnVal.indexOf("%") > -1) {
+													rtnVal = rtnVal.replace(/\%/g, '');
+												}
+												rtnVal = LPAD(rtnVal, '0', 30);
+											} else {
+												rtnVal = '';
+											}
+											return rtnVal;
+										}	
+									}, 
+									
+									{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:false, hidden:true, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, template: searchStringOptions,
+										editoptions: {
+											dataInit:
+												function (e) { 
+													$(e).on("change", function() {
+														var rowid = (e.id).split('_')[0];
+														fn_grid_com.saveCellData("batList",rowid,e.name,e.value,batValidMsgData);
+													});
+												}
+										}
+									},
+									{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:false, hidden:true,formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+										editoptions: {
+											dataInit:
+												function (e) { 
+													$(e).on("change", function() {
+														var rowid = (e.id).split('_')[0];
+														fn_grid_com.saveCellData("batList",rowid,e.name,e.value,batValidMsgData);
+													});
+												}
+										}
+									},	
+									{name: 'licenseText', index: 'licenseText', width: 100, align: 'left', editable:false, hidden:true,template: searchStringOptions, edittype:"textarea", editoptions:{rows:"2",cols:"24", 
+										dataInit:
+											function (e) { 
+												$(e).on("change", function() {
+													var rowid = (e.id).split('_')[0];
+													fn_grid_com.saveCellData("batList",rowid,e.name,e.value,batValidMsgData);
+												});
+											}
+										}
+					 				},
+									{name: 'copyrightText', index: 'copyrightText', width: 100, align: 'left', editable:false, hidden:true,template: searchStringOptions, edittype:"textarea", editoptions:{rows:"2",cols:"24", 
+										dataInit:
+											function (e) { 
+												$(e).on("change", function() {
+													var rowid = (e.id).split('_')[0];
+													fn_grid_com.saveCellData("batList",rowid,e.name,e.value,batValidMsgData);
+												});
+											}
+										}
+					 				},
+									{name: 'binaryNotice', index: 'binaryNotice', width: 50, align: 'center', editable:false, hidden:true}, 
+									{name: 'batChecksum', index: 'batChecksum', width: 40, align: 'center', editable:false, hidden:true}, 
+									{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : false, hidden:true},
+									{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
+									{name: 'customBinaryYn', index: 'customBinaryYn', editable:false, hidden:true}
+								],
+								autoencode: true,
+								editurl:'clientArray',
+					 			autowidth: true,
+                                shrinkToFit:false,
+								height: 'auto',
+								gridview: true,
+								pager: '#batPager',
+								rowNum: 200,
+								rowList: [200, 500, 1000, 5000],
+								recordpos:'right',
+								toppager:true,
+								loadonce:true,
+								ignoreCase: true,
+								subGrid:true,
+								subGridOptions :{
+									reloadOnExpand : false
+								},
+								subGridRowExpanded: function(subgrid_id, row_id){
+									var subgrid_table_id;
+									var pager_id;
+									subgrid_table_id = subgrid_id+"_t";
+									pager_id = "p_"+subgrid_table_id;
+									$("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
+									$("#"+subgrid_table_id).jqGrid({
+										datatype: 'local',
+										data : batSubData[row_id],
+										colNames: ['gridId', 'ComponentLicenseId','ComponentId','OssLicenseComb','LicenseId','License','License Text','Copyright Text','Exclude','Editable'],
+										colModel: [
+											{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
+											{name: 'componentLicenseId', index: 'componentLicenseId', width: 70, align: 'center', hidden:true},
+											{name: 'componentId', index: 'componentId', width: 50, align: 'center', hidden:true},
+											{name: 'ossLicenseComb', index: 'ossLicenseComb', width: 100, align: 'center'},
+											{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
+							 				{name: 'licenseName', index: 'licenseName', width: 200, align: 'left', editable:true, edittype:'text', 
+							 					editoptions: {
+							 						dataInit: function (e) {
+						 								// licenseName auto complete
+														$(e).autocomplete({
+															source: licenseNames
+															, minLength: 0
+															, open: function() { $(this).attr('state', 'open'); }
+															, close: function () { $(this).attr('state', 'closed'); }
+														}).focus(function() {if ($(this).attr('state') != 'open') {$(this).autocomplete("search");}});
+						 								
+						 								// set license data
+						 								$(e).on( "autocompletechange", function() {
+						 									var rowid = (e.id).split('_')[0];
+						 									for(var i in objs){
+						 										if("" != e.value && e.value == objs[i].licenseName){
+						 											$('#'+rowid+'_licenseId').val(objs[i].licenseId);
+						 											$('#'+rowid+'_licenseText').val(objs[i].licenseText);
+						 										}
+						 									}
+						 								});
+						 							}
+							 					}
+							 				},
+											{name: 'licenseText', index: 'licenseText', width: 200, align: 'left', editable:true, edittype:"textarea", editoptions:{rows:"2",cols:"24"}},
+											{name: 'copyrightText', index: 'copyrightText', width: 200, align: 'left', editable:true, edittype:"textarea", editoptions:{rows:"2",cols:"24"}},
+											{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxSubFormatter, unformat: fn_grid_com.cboxSubUnFormatter},
+											{name: 'editable', index: 'editable', width: 50, align: 'center', editable:false, hidden:true}
+										],
+//			 							autowidth: true,
+										height: '100%',
+									    editurl:'clientArray',
+									   	pager: pager_id,
+									   	pgbuttons: false,
+									   	pgtext: false,
+									   	pginput:false,
+									   	loadonce:true,
+										loadComplete: function(data) {
+											// 서브 그리드 배경색 설정
+											fn_grid_com.makeBackGroundColor($("#"+subgrid_table_id));
+											// 전체 excludeYn 에 대한  음영 처리
+											fn_grid_com.checkExclude(data, subgrid_table_id);
+										},
+										onSelectRow: function(rowid,status,eventObject) {
+										},
+					 					beforeSelectRow: function(rowid, e) {
+					 						return true;
+					 					},
+										onCellSelect: function(rowid,iCol,cellcontent,e) {
+											// 서브 그리드 수정 모드(등록되지 않은 라이센스만 수정)
+											if($("#"+subgrid_table_id).jqGrid('getCell',rowid,'editable')=="Y"){
+												cleanErrMsg("batList", rowid);
+												$("#"+subgrid_table_id).jqGrid('editRow',rowid);
+											}
+										},
+										ondblClickRow: function(rowid,iRow,iCol,e) {
+											// 서브그리드 제외
+											ondblClickRowBln = true;
+										}
+									});
+					 				$("#"+subgrid_table_id).jqGrid('navGrid',"#"+pager_id,{add:true,edit:false,del:true,search:false,refresh:false
+					 																	 , addfunc: function () { fn_grid_com.rowAdd('batList',$("#"+subgrid_table_id),"sub", row_id);}
+					 																	 , delfunc: function () { fn_grid_com.rowDel($("#"+subgrid_table_id),"sub");}
+					 				});
+								},
+								loadComplete:function(data) {
+									_mainLastsel = -1;
+									
+									if(data.records > 0) {
+										var multRowIds = []; 
+										var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+										for(var _idx=0;_idx<rowsCount;_idx++) {
+											row = rows[_idx];
+											className = row.className;
+											if (className.indexOf('jqgrow') !== -1) {
+												rowid = row.id;
+												rowData = data.rows[rowIdx++];
+												if(rowData.licenseDiv != "M") {
+													className = className + ' singleLicenseClass';
+													$("#" + rowid).next("tr.ui-subgrid").hide();
+												} else {
+													multRowIds.push(rowid);
+													//srcList.jqGrid('expandSubGridRow',rowid);
+												}
+												if(rowData.excludeYn == "Y" && className.indexOf('excludeRow') === -1) {
+													className= className + ' excludeRow';
+												}
+												row.className = className;
+											} else if(className.indexOf('ui-subgrid') !== -1){
+												rowIdx++;
+											}
+										}
+										
+										// 한번에 처리
+										$("#batList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
+										tableRefresh();
+									}
+								},
+								onSelectRow: function(rowid,status,eventObject) {
+								},
+								beforeSelectRow : function(rowId, e) {
+									// 경고 클래스 설정
+									fn_grid_com.setWarningClass(batList,rowId,["ossName","licenseName"]);
+									return true;
+								},
+								onCellSelect: function(rowid,iCol,cellcontent,e) {
+									// 체크 박스 영역 제외
+									/* if(iCol!="17") {
+										cleanErrMsg("batList", rowid);
+										fn_grid_com.setCellEdit(batList, rowid, batValidMsgData);
+									} */
+								},
+								ondblClickRow: function(rowid,iRow,iCol,e) {
+									/*
+									cleanErrMsg("batList", rowid);
+									fn_grid_com.setCellEdit(batList, rowid, batValidMsgData);
+									// 서브 그리드 제외
+									ondblClickRowBln = false;
+									*/
+								},
+								onPaging: function(action) {
+									cleanErrMsg("batList");
+									fn_grid_com.totalGridSaveMode('batList');
+								},
+								gridComplete : function() {
+									cleanErrMsg("batList");
+									if(batValidMsgData) {
+										gridValidMsgNew(batValidMsgData, "batList");
+									}
+								},
+								removeHighLight : true
+							});
+		batList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () { updateGridRowCount('batList', 'batPager'); }});
+		batList.jqGrid('navGrid',"#batPager",{add:false,edit:false,del:false,search:false,refresh:false
+											  , addfunc: function () { fn_grid_com.rowAdd('batList',batList,"main");fn_grid_com.addEtcKeyDownEvent($('#batList'), batValidMsgData);}
+											  , delfunc: function () { fn_grid_com.rowDel(batList,"main");}
+											  , cloneToTop:true
+		});
+		$('#batList').closest(".ui-jqgrid-bdiv").css({"height":"500px"});
+	},
+	batFileGrid : function(){
+		$('#_binaryFileList').jqGrid({
+			url : '', /* '/bat/binaryFileList', */
+			datatype: 'json',
+			jsonReader:{
+				repeatitems:false,
+				id:'batId',
+				root:function(obj){return obj.rows;},
+				page:function(obj){return obj.page;},
+				total:function(obj){return obj.total;},
+				records:function(obj){return obj.records;}
+			},
+			colNames: ['ID','Binary','Status','Time Stamp',''],
+			colModel: [
+				{name: 'batId', index: 'batId', width: 54, align: 'center', key:true},
+				{name: 'fileName', index: 'fileName', width: 447, align: 'left'},
+				{name: 'batStatus', index: 'batStatus', width: 170, align: 'center'},
+				{name: 'batExecTime', index: 'batExecTime', width: 158, align: 'center'},
+				{name: 'btnArea', index: 'btnArea', width: 125, align: 'center'}
+			],
+			//autoencode: true,
+			autowidth: true,
+			gridview: true,
+			sortable: function (permutation) {
+				
+			},
+			postData : {prjId : [[${project.prjId}]]},
+			sortname: 'batId',
+			viewrecords: true,
+			sortorder: 'asc',
+			loadonce: false,
+			mtype:'GET',
+			editurl: 'clientArray',
+			height: 'auto',
+			loadui: 'disable',
+		   	rowNum: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_MAX')}]],
+			// 데이터 로딩 성공 후 호출되는 이벤트
+			loadComplete: function(data){
+				var target = $("#_binaryFileList");
+				var completeBats = [];
+				var btnStart = "<input type=\"button\" value=\"Start\" class=\"btnCLight red w55\" onclick=\"bat_fn.startBinary(this)\">";
+				var btnCancel = "<input type=\"button\" value=\"Cancel\" class=\"btnCLight darkgray w55\" onclick=\"bat_fn.cancelBinary(this)\"/>";
+				var btnDelete = "<input type=\"button\" value=\"Delete\" class=\"btnCLight brown w55\" onclick=\"bat_fn.deleteBinary(this)\"/>";
+				
+				var ready = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_READY'))}]];
+				var start = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_START'))}]];
+				var upload = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_UPLOAD'))}]];
+				var unpacking = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_UNPACKING'))}]];
+				var leaf = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_LEAF'))}]];
+				var aggregate = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_AGGREGATE'))}]];
+				var postrun = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_POSTRUN'))}]];
+				var done = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_DONE'))}]];
+				var unoccupied = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_DONE_UNOCCUPIED'))}]];
+				var notdetected = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_DONE_NOTDETECTED'))}]];
+				var canceled = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_CANCELED'))}]];
+				var error = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_BAT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_ERROR'))}]];
+				
+				for(var i=0; i<data.rows.length; i++){
+					// 조건에 따라 cell 색상 변경
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_READY')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", ready);
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnStart + btnDelete);
+						completeBats.push('Y');
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_START')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", start, {'background-color':'#a5b99d', 'color':'#fff', 'font-weight':'bold'});
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnCancel);
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_UPLOAD')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", upload, {'background-color':'#98b08c', 'color':'#fff', 'font-weight':'bold'});
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnCancel);
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_UNPACKING')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", unpacking, {'background-color':'#89a678', 'color':'#fff', 'font-weight':'bold'});
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnCancel);
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_LEAF')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", leaf, {'background-color':'#739a61', 'color':'#fff', 'font-weight':'bold'});
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnCancel);
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_AGGREGATE')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", aggregate, {'background-color':'#5a8943', 'color':'#fff', 'font-weight':'bold'});
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnCancel);
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_POSTRUN')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", postrun, {'background-color':'#3b751e', 'color':'#fff', 'font-weight':'bold'});
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnCancel);
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_DONE')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", done, {'background-color':'#1a4a00', 'color':'#fff', 'font-weight':'bold'});
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', "<input type=\"button\" value=\"View\" class=\"btnCLight blue w55\" onclick=\"bat_fn.applyBinary(this)\">" + btnDelete);
+						completeBats.push('Y');
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_DONE_UNOCCUPIED')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", unoccupied, {'background-color':'#1a4a00', 'color':'#fff', 'font-weight':'bold'});
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnDelete);
+						completeBats.push('Y');
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_DONE_NOTDETECTED')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", notdetected, {'background-color':'#1a4a00', 'color':'#fff', 'font-weight':'bold'});
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnDelete);
+						completeBats.push('Y');
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_CANCELED')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", canceled);
+						target.jqGrid("setRowData", data.rows[i].batId, false, { background : "#f5f5f5" });
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', btnStart + btnDelete);
+						completeBats.push('Y');
+					}
+					if(data.rows[i].batStatus == [[${@CommonFunction.getCoConstDefVal('CD_DTL_BAT_STATUS_ERROR')}]]){
+						target.jqGrid("setCell", data.rows[i].batId, "batStatus", error);
+						target.jqGrid("setRowData", data.rows[i].batId, false, { background : "#f5f5f5" });
+						target.jqGrid('setCell', data.rows[i].batId, 'btnArea', "<input type=\"button\" value=\"Retry\" class=\"btnCLight red w55\" onclick=\"bat_fn.startBinary(this)\">" + btnDelete);
+						completeBats.push('Y');
+					}
+				}
+				
+				
+				var batLen = completeBats.length;
+				onAjaxLoadingHide = false;
+				if(batLen != data.rows.length){
+					setTimeout(
+						function(){
+							onAjaxLoadingHide = true;
+							target.jqGrid().trigger('reloadGrid');
+						},10000
+					);
+				}
+		
+				tableRefreshNew("_binaryFileList");
+			},
+			gridComplete : function() {
+				updateGridRowCount('batList', 'batPager');
+			}
+		}).trigger('reloadGrid');
+	}
+}
+</script>
+</th:block>
+</html>

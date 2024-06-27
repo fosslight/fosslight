@@ -5,12 +5,16 @@ import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
 import com.itextpdf.io.font.FontProgram;
 import com.itextpdf.io.font.FontProgramFactory;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.IBlockElement;
+import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.font.FontProvider;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
+import org.springframework.core.io.ClassPathResource;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.*;
@@ -19,12 +23,13 @@ import oss.fosslight.repository.*;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.VulnerabilityService;
 
-import java.io.*;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static oss.fosslight.common.CoConstDef.CD_LICENSE_RESTRICTION;
+
 
 @Slf4j
 public final class PdfUtil extends CoTopComponent {
@@ -51,20 +56,28 @@ public final class PdfUtil extends CoTopComponent {
         }
         return instance;
     }
-    public static ByteArrayInputStream html2pdf(String html) throws IOException {
-        String font = "src/main/resources/static/NanumGothicBold.ttf";
 
+    public static boolean html2pdf(String contents, String file) throws IOException {
         ConverterProperties properties = new ConverterProperties();
-        FontProvider fontProvider = new DefaultFontProvider(false,false,false);
-        FontProgram fontProgram = FontProgramFactory.createFont(font);
+        FontProvider fontProvider = new DefaultFontProvider(false, false, false);
+
+        FontProgram fontProgram = FontProgramFactory.createFont(new ClassPathResource("/static/font/NanumBarunGothic.ttf").getURL().toString());
         fontProvider.addFont(fontProgram);
         properties.setFontProvider(fontProvider);
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HtmlConverter.convertToPdf(html, outputStream, properties);
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-        return inputStream;
+        List<IElement> elements = HtmlConverter.convertToElements(contents, properties);
+        PdfDocument pdf = new PdfDocument(new PdfWriter(file));
+        Document document = new Document(pdf);
+
+        document.setMargins(50, 0, 50, 0);
+        for (IElement element : elements) {
+            document.add((IBlockElement) element);
+        }
+        document.close();
+
+        return true;
     }
+
     public String getReviewReportHtml(String prjId) throws Exception
     {
         Map<String,Object> convertData = new HashMap<>();
@@ -78,6 +91,10 @@ public final class PdfUtil extends CoTopComponent {
         projectMaster.setPrjId(prjId);
 
         Project project = projectMapper.selectProjectMaster(projectMaster);
+        String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + prjId;
+        String _s = "<a href='"+url+"' target='_blank'>" + project.getPrjName() + "(" + project.getPrjVersion()+")"+ "</a>";
+        project.setPrjName(_s);
+
         convertData.put("project", project);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -97,24 +114,28 @@ public final class PdfUtil extends CoTopComponent {
             OssMaster ossMaster = new OssMaster();
             ossMaster.setOssId(projectIdentification.getOssId());
             OssMaster oss = ossMapper.selectOssOne(ossMaster);
-            if (!oss.getSummaryDescription().equals("")) {
-                ossReview.add(oss);
-            }
+            if(oss != null) {
+                if (!avoidNull(oss.getSummaryDescription()).equals("")) {
 
-            //VulnerabilityReview
-            projectIdentification.setOssName(oss.getOssName());
-            projectIdentification.setOssVersion(oss.getOssVersion());
-            ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
-            if(prjOssMaster.getCvssScore()!=null) {
-                BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
+                    ossReview.add(oss);
+                }
 
-                if (bdScore.compareTo(new BigDecimal("8.0")) >= 0) {
-                    Vulnerability vulnerability = new Vulnerability();
-                    vulnerability.setOssName(oss.getOssName());
-                    vulnerability.setVersion(oss.getOssVersion());
-                    vulnerability.setCvssScore(prjOssMaster.getCvssScore());
-                    vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
-                    vulnerabilityReview.add(vulnerability);
+                //VulnerabilityReview
+                projectIdentification.setOssName(oss.getOssName());
+                projectIdentification.setOssVersion(oss.getOssVersion());
+                ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
+                if(prjOssMaster.getCvssScore()!=null) {
+                    BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
+                    BigDecimal mailingScore = new BigDecimal(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
+
+                    if (bdScore.compareTo(mailingScore) >= 0) {
+                        Vulnerability vulnerability = new Vulnerability();
+                        vulnerability.setOssName(oss.getOssName());
+                        vulnerability.setVersion(oss.getOssVersion());
+                        vulnerability.setCvssScore(prjOssMaster.getCvssScore());
+                        vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
+                        vulnerabilityReview.add(vulnerability);
+                    }
                 }
             }
 
@@ -123,32 +144,49 @@ public final class PdfUtil extends CoTopComponent {
             licenseMaster.setLicenseId(projectIdentification.getLicenseId());
 
             LicenseMaster license = licenseMapper.selectLicenseOne(licenseMaster);
-            if (!isEmpty(license.getRestriction())) {
-                String[] arrRestrictions = license.getRestriction().split(",");
-                String str = "";
-                for (int i = 0; i < arrRestrictions.length - 2; i++) {
-                    str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[i]) + ", ";
+            if(license != null) {
+                if (!isEmpty(license.getRestriction())) {
+                    String[] arrRestrictions = license.getRestriction().split(",");
+                    String str = "";
+                    for (int i = 0; i < arrRestrictions.length - 2; i++) {
+                        str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[i]) + ", ";
+                    }
+
+                    if (arrRestrictions.length > 0) {
+                        str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[arrRestrictions.length - 1]);
+                    }
+                    license.setRestriction(str);
                 }
 
-                if (arrRestrictions.length > 0) {
-                    str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[arrRestrictions.length - 1]);
+                if (!isEmpty(avoidNull(license.getRestriction())) || (!isEmpty(avoidNull(license.getDescription())) && !license.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS)) ) {
+                    licenseMasterMap.put(license.getLicenseName(), license);
                 }
-                license.setRestriction(str);
-            }
-
-            if (license.getRestriction() != null || license.getDescription() != null) {
-                licenseMasterMap.put(license.getLicenseName(), license);
             }
         }
+
         for (LicenseMaster licenseMaster : licenseMasterMap.values()) {
             licenseReview.add(licenseMaster);
+        }
+
+        if(ossReview.size() > 0) {
+            for(OssMaster om : ossReview) {
+                om.setSummaryDescription(CommonFunction.lineReplaceToBR(om.getSummaryDescription()));
+            }
+        }
+
+        if(licenseReview.size() > 0) {
+            for(LicenseMaster lm : licenseReview) {
+                lm.setDescription(CommonFunction.lineReplaceToBR(lm.getDescription()));
+                lm.setRestriction(CommonFunction.lineReplaceToBR(lm.getRestriction()));
+            }
         }
 
         convertData.put("OssReview", ossReview);
         convertData.put("LicenseReview", licenseReview);
         convertData.put("VulnerabilityReview", vulnerabilityReview);
-        String pdfContent = getVelocityTemplateContent("/template/report/reviewReport.html", convertData);
-        return pdfContent;
+        convertData.put("templateURL", "report/reviewReport.html");
+        
+        return CommonFunction.VelocityTemplateToString(convertData);
     }
 
     /**
@@ -158,38 +196,38 @@ public final class PdfUtil extends CoTopComponent {
      * @param model the model
      * @return the string
      * */
-    private String getVelocityTemplateContent(String path, Map<String, Object> model) {
-        VelocityContext context = new VelocityContext();
-        Writer writer = new StringWriter();
-        VelocityEngine vf = new VelocityEngine();
-        Properties props = new Properties();
 
-        for (String key : model.keySet()) {
-            if (!"templateUrl".equals(key)) {
-                context.put(key, model.get(key));
-            }
-        }
-
-        context.put("domain", CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org"));
-        context.put("commonFunction", CommonFunction.class);
-
-        props.put("resource.loader", "class");
-        props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        props.put("input.encoding", "UTF-8");
-        props.put("output.encoding", "UTF-8");
-
-        vf.init(props);
-
-        try {
-            Template template = vf.getTemplate(path); // file name
-            template.merge(context, writer);
-
-            return writer.toString();
-        } catch (Exception e) {
-            log.error("Exception occured while processing velocity template:" + e.getMessage());
-        }
-        return "";
-    }
+//    private String getVelocityTemplateContent(String path, Map<String, Object> model) {
+//        VelocityContext context = new VelocityContext();
+//        Writer writer = new StringWriter();
+//        VelocityEngine vf = new VelocityEngine();
+//        Properties props = new Properties();
+//
+//        for (String key : model.keySet()) {
+//            if (!"templateUrl".equals(key)) {
+//                context.put(key, model.get(key));
+//            }
+//        }
+//
+//        context.put("domain", CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org"));
+//        context.put("commonFunction", CommonFunction.class);
+//
+//        props.put("resource.loader", "class");
+//        props.put("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+//        props.put("input.encoding", "UTF-8");
+//
+//        vf.init(props);
+//
+//        try {
+//            Template template = vf.getTemplate(path); // file name
+//            template.merge(context, writer);
+//
+//            return writer.toString();
+//        } catch (Exception e) {
+//            log.error("Exception occured while processing velocity template:" + e.getMessage());
+//        }
+//        return "";
+//    }
 
     public Map<String,Object> getPdfFilePath(String prjId) throws Exception{
         Map<String,Object> fileInfo = new HashMap<>();

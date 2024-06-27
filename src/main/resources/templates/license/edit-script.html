@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+    <script th:inline="javascript">
+        var userRole = [[${sessUserInfo.authority}]];
+        var commentsParam = {referenceDiv : 'license'};
+        var isNew = false;
+
+        $(window).load(function () {
+            lic_edit_data.init();
+
+            showHelpLink("License_Edit_Info", "heplLink_licenseEditInfo");
+        });
+
+        const lic_edit_data = {
+            detail : [[${ detail }]],
+            init: function () {
+                if (lic_edit_data.detail == null) isNew = true;
+
+                $('.select2').select2();
+
+                $("[name='commentInput']").summernote({
+                    height: 100,
+                    callbacks: {
+                        onInit: function() {
+                            $("[name='commentInput']").summernote('focus');
+
+                            var content = $(this).summernote('code');
+                            if (content === '<p><br></p>') {
+                                $(this).summernote('code', '');
+                            }
+                        }
+                    }
+                });
+
+                $('[name=\'commentInput\']').unbind('keydown').bind('keydown', function (event) {
+                    var doPrevent = false;
+
+                    if (event.keyCode === 8 && $('[name=\'commentInput\']').html() === '<p><br></p>'){
+                        event.preventDefault();
+                    }
+                });
+
+                $("#licenseNicknames").on('click', function(){
+                    let licenseNicknameHtml = '	<div class="col-lg-4" style="margin-bottom: 0.5rem;">';
+                    licenseNicknameHtml += '		<div class="form-group mb-0" >';
+                    licenseNicknameHtml += '			<input class="form-control" type="text" name="licenseNicknames" value="' + $("#input_licenseNicknames").val() + '" />';
+                    licenseNicknameHtml += '			<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this)"><i class="fas fa-times"></i></button>';
+                    licenseNicknameHtml += '			<span class="retxt"></span>';
+                    licenseNicknameHtml += '		</div>';
+                    licenseNicknameHtml += '	</div>';
+
+                    $(".multiTxtSet").append(licenseNicknameHtml);
+                    $("#input_licenseNicknames").val("");
+                });
+
+                $("#webpageAdd").on('click', function(){
+                    let webpageHtml = '		<div class="input-group card-tools mb-1">';
+                    webpageHtml 	+= '		<input class="form-control" type="text" name="webpages" value="' + $("#input_webpages").val() + '" />';
+                    webpageHtml 	+= '		<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag2(this)"><i class="fas fa-times"></i></button>';
+                    webpageHtml 	+= '		<span class="urltxt text-danger text-sm"></span>';
+                    webpageHtml 	+= '	</div>';
+
+                    $(".multiWebPageSet").append(webpageHtml);
+                    $("#input_webpages").val("");
+                });
+
+                //save license
+                $("#save").on('click',function(){
+                	fn.checkValidMsg();
+                	
+                	// prevent clicking the OK button on Enter
+    				let keyCode;
+    				$(document).on('keydown', function (event) {
+    					keyCode = event.keyCode;
+    				});
+                   	
+                   	if (typeof alertify.licenseSaveDialog === 'undefined') {
+    					alertify.dialog('licenseSaveDialog', function() {
+    						return {
+    							setup: function() {
+    								var settings = alertify.confirm().settings;
+    								
+    								for (var prop in settings) {
+    									this.settings[prop] = settings[prop];
+    								}
+    								
+    								var setup = alertify.confirm().setup();
+    								setup.focus.element = 0;
+    								
+    								return setup;
+    							},
+    						    hooks: {
+    						    	onshow: function() {
+    						        	this.elements.dialog.style.maxWidth = 'none';
+    						          	this.elements.dialog.style.width = '650px';
+    						        }
+    							}
+    						};
+    					}, false, 'confirm');
+                	}
+                	
+                	var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
+               		innerHtml 		+= '<br><textarea id="licenseSaveEditor"></textarea>';
+                	
+               		alertify.licenseSaveDialog()
+               		.set('onok', function(e) {
+               			// prevent clicking the OK button on Enter
+    					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+    						keyCode = undefined;
+    						return false;
+    					}
+               			
+               			if (e) {
+               				var editorVal = $("#licenseSaveEditor").summernote('code');
+               				if ("" != $(editorVal).text().trim()) {
+    							$("input[name='comment']").val(editorVal);
+    						}
+               				
+               				lic_edit_fn.registSubmit();
+               			} else {
+               				return false;
+               			}
+               		})
+               		.set('onshow', function(e){
+               			$("#licenseSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+               		})
+               		.set('title', 'Save').setContent(innerHtml)
+    				.show();
+                });
+
+                //delete license
+                $('#delete').on('click', function(){
+                    var innerHtml 	= [[#{msg.license.confirm.delete}]] + '<br>';
+                    innerHtml 		+= '<textarea id="delLicenseEditor"></textarea>';
+
+                    // prevent clicking the OK button on Enter
+                    let keyCode;
+                    $(document).on('keydown', function (event) {
+                        keyCode = event.keyCode;
+                    });
+
+                    if (!alertify.delLicenseDialog){
+                        alertify.dialog('delLicenseDialog', function() {
+                            return {
+                                setup: function() {
+                                    var settings = alertify.confirm().settings;
+
+                                    for (var prop in settings) {
+                                        this.settings[prop] = settings[prop];
+                                    }
+
+                                    var setup = alertify.confirm().setup();
+                                    setup.focus.element = 0;
+
+                                    return setup;
+                                },
+                                hooks: {
+                                    onshow: function() {
+                                        this.elements.dialog.style.maxWidth = 'none';
+                                        this.elements.dialog.style.width = '650px';
+                                    }
+                                }
+                            };
+                        }, false, 'confirm');
+                    }
+
+                    alertify.delLicenseDialog()
+                        .set('onok', function(e){
+                            // prevent clicking the OK button on Enter
+                            if (typeof keyCode !== 'undefined' && keyCode == 13) {
+                                keyCode = undefined;
+                                return false;
+                            }
+
+                            var editorVal = $("#delLicenseEditor").summernote('code');
+                            if ("" == $(editorVal).text().trim()){
+                                alertify.alert([[#{msg.oss.required.deletion}]], function(){});
+                                return false;
+                            }
+
+                            if (e) {
+                                $('input[name=comment]').val(editorVal);
+                                deleteSubmit();
+                            } else {
+                                return false;
+                            }
+                        })
+                        .set('onshow', function(event){
+                            $("#delLicenseEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        })
+                        .setContent(innerHtml).show();
+                });
+
+                //고지서 체크 안한상태에서 소스공개 체크 시 고지서 자동체크
+                $('input[name=obligationDisclosingSrcYn]').on('click', function(){
+                    var checked1 = $(this).attr('checked');
+                    var checked2 = $('input[name=obligationNotificationYn]').attr('checked');
+                    if (checked1 && !checked2){
+                        $('input[name=obligationNotificationYn]').trigger('click');
+                    }
+                });
+
+                $('select[name=licenseType]').on('change', function(){
+                    // The others be set to usable.
+                    $(".oblicationChk").attr("disabled", false);
+
+                    // Extracted function for 'Needs Check' check box event. hk-cho
+                    setObligationCheckBox($(this).val());
+                });
+
+                if (lic_edit_data.detail != null) {
+                    commentsParam["referenceId"] = lic_edit_data.detail.licenseId;
+                }
+
+                commentsParam["height"] = $(window).height() - 120;
+                fn_comment.getCommentList(commentsParam);
+
+                $(document).keydown(function (e) {
+                    if (e.keyCode == 13) {
+                        var activeInput = $('.form-control:focus');
+                        if (activeInput.length > 0) {
+                            var submitButton = activeInput.closest('.input-group').find('[type="button"]');
+                            if (submitButton.length > 0) {
+                                submitButton.click();
+                            }
+                        }
+                    }
+                })
+            }
+        }
+
+        const lic_edit_fn = {
+            registSubmit: function () {
+                $("#licenseType option[value='']").removeAttr('disabled');
+
+                $("#licenseForm").ajaxForm({
+                    url :"/license/validation",
+                    type : 'POST',
+                    dataType:"json",
+                    cache : false,
+                    success: lic_edit_fn.onValidSuccess,
+                    error : onError
+                }).submit();
+            },
+            onValidSuccess: function (json, status) {
+                if (json.isValid == 'false') {
+                    createValidMsgComplex(json);
+                    alertify.error([[ #{msg.common.valid} ]], 0);
+                } else if (json.isValid == 'true') {
+                    loading.show();
+
+                    var pData = $('#licenseForm').serializeObject();
+
+                    if (pData.restrictions != null) {
+                        pData.restrictions = JSON.stringify(pData.restrictions);
+                        $('input[name=restriction]').val(pData.restrictions.replace(/\"|\[|\]/gi, ""));
+                    } else {
+                        $('input[name=restriction]').val('');
+                    }
+
+                    $("#licenseForm").ajaxForm({
+                        url: "/license/saveAjax",
+                        type: 'POST',
+                        dataType: "json",
+                        cache: false,
+                        success: lic_edit_fn.onRegistSuccess,
+                        error: onError
+                    }).submit();
+                }
+            },
+            onRegistSuccess: function(json, status){
+                loading.hide();
+
+                if (json.resCd == '10') {
+                    alertify.alert([[ #{msg.common.success} ]], function(){
+                        if (isNew) {
+                            deleteTabInFrame('/license/edit/');
+                            createTabInFrame(json.licenseId + '_License', '/license/edit/' + json.licenseId);
+                        } else {
+                            deleteTabInFrame('/license/edit/' + json.licenseId);
+                            createTabInFrame(json.licenseId + '_License', '/license/edit/' + json.licenseId);
+                        }
+
+                        reloadTabInframe('/license/list');
+                    });
+                } else {
+                    alertify.error(String([[ #{msg.common.valid2} ]]), 0);
+                }
+            }
+        };
+
+        var fn = {
+        	checkValidMsg : function () {
+        		$("#licenseNameInput").removeClass("is-invalid");
+        		$("#licenseType").removeClass("is-invalid");
+        		$("#licenseTextInput").removeClass("is-invalid");
+        		$(".retxt").text("");
+        	},
+            removeTag : function(obj) {
+                $(obj).parent().parent().remove();
+            },
+            removeTag2 : function(obj) {
+                $(obj).parent().remove();
+            },
+            closeAlertifyView : function() {
+                $(".ajs-close").trigger("click");
+            },
+            handleUserCommentPopupOpen : function () {
+                // 코멘트 팝업
+                const param = {
+                    "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE_USER')}]],
+                    "referenceId" : lic_edit_data.detail.licenseId
+                }
+
+                getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+                        if (!alertify.editDialog){
+                            alertify.dialog('editDialog', function() {
+                                return {
+                                    setup: function() {
+                                        var settings = alertify.confirm().settings;
+
+                                        for (var prop in settings) {
+                                            this.settings[prop] = settings[prop];
+                                        }
+
+                                        var setup = alertify.confirm().setup();
+                                        setup.buttons = [];
+                                        setup.focus.element = 0;
+
+                                        return setup;
+                                    },
+                                    hooks: {
+                                        onshow: function() {
+                                            this.elements.dialog.style.maxWidth = 'none';
+                                            this.elements.dialog.style.width = '700px';
+                                        }
+                                    }
+                                };
+                            }, false, 'confirm');
+                        }
+
+                        alertify.editDialog(res);
+                    },
+                    null,
+                    function () {
+                        $("#modifiedCommentInPjtEditor").summernote({
+                            height: 180,
+                            callbacks: {
+                                onInit: function () {
+                                    $(this).summernote('code', $("#userContents").val());
+                                }
+                            }
+                        });
+                    });
+            },
+            sendEditor : function(type){
+                //코멘트 저장
+                var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+                if(!editorVal || editorVal == "") {
+                    alertify.alert([[#{msg.project.enter.comment}]], function(){});
+
+                    return false;
+                }
+
+                var param = {referenceId : lic_edit_data.detail.licenseId, referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE')}]], contents : replaceWithLink(editorVal), mailSendType : type};
+
+                $.ajax({
+                    url : '/license/sendComment',
+                    type : 'POST',
+                    dataType : 'json',
+                    cache : false,
+                    data : param,
+                    success : function(json){
+                        if (json.isValid == 'false'){
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        } else {
+                            alertify.success([[#{msg.project.sent.comments.success}]]);
+                            $("#modifiedCommentInPjtEditor").summernote('code', '');
+                            $("#userContents").val('');
+                            $('.ajs-close').trigger("click");
+                            fn_comment.getCommentList(commentsParam);
+                        }
+                    },
+                    error : function(){
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+            },
+            saveEditor : function(){
+                //코멘트 임시저장
+                var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+                var register = [[${sessUserInfo.userId}]];
+                var param = {referenceId : lic_edit_data.detail.licenseId, referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE_USER')}]], contents : editorVal};
+
+                $.ajax({
+                    url : '/project/saveComment',
+                    type : 'POST',
+                    dataType : 'json',
+                    cache : false,
+                    data : param,
+                    success : function(json){
+                        if(json.isValid == 'false'){
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        } else {
+                            alertify.success([[#{msg.common.success}]]);
+                            $("#userContents").val(editorVal);
+                            $('.ajs-close').trigger("click");
+                        }
+                    },
+                    error : function(){
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+            }
+        }
+
+        var fn_comment = {
+            callbackFunction : function () {
+                fn_comment.getCommentList(commentsParam);
+            },
+            getCommentList : function(param){
+                $.ajax({
+                    url : '/comment/getCusCommentList',
+                    type : 'GET',
+                    dataType : 'html',
+                    cache : false,
+                    data : param,
+                    success : function(res){
+                        if (typeof param.height !== undefined) {
+                            $(".comment-card-body").attr("style", "max-height:" + param.height + "px; overflow-y: auto;");
+                        }
+                        $("#commentList").empty();
+                        $("#commentList").html(res);
+                    },
+                    error : function(xhr, ajaxOptions, thrownError){
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+            },
+            getMoreCommentsList : function() {
+                commentsParam["moreFlag"] = "Y";
+                fn_comment.getCommentList(commentsParam);
+            },
+            editComments : function(_commId, _referenceDiv, _referenceId) {
+                $.ajax({
+                    url : '/comment/getEditPopup',
+                    type : 'POST',
+                    data : {'commId' : _commId},
+                    dataType : 'html',
+                    cache : false,
+                    success : function(res){
+                        if(!alertify.editComments){
+                            alertify.dialog('editComments', function() {
+                                return {
+                                    setup: function() {
+                                        var settings = alertify.confirm().settings;
+
+                                        for (var prop in settings) {
+                                            this.settings[prop] = settings[prop];
+                                        }
+
+                                        var setup = alertify.confirm().setup();
+                                        setup.buttons = [];
+                                        setup.focus.element = 1;
+
+                                        return setup;
+                                    },
+                                    hooks: {
+                                        onshow: function() {
+                                            this.elements.dialog.style.maxWidth = 'none';
+                                            this.elements.dialog.style.width = '750px';
+                                        }
+                                    }
+                                };
+                            }, false, 'alert');
+                        }
+
+                        alertify.editComments(res).set('title', 'Edit Comments');
+                        $("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
+                        $("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
+                    }
+                });
+            },
+            updateComments : function (_commId, _referenceDiv, _referenceId) {
+                var summernoteVal = $("#commentEdit").summernote('code');
+                if ("" == summernoteVal) {
+                    alertify.alert("Please enter a comment", function(){});
+                    return false;
+                } else {
+                    var param = {commId : _commId, contents : replaceWithLink(summernoteVal), referenceDiv: _referenceDiv, referenceId: _referenceId};
+                    $.ajax({
+                        url : '/comment/updateComment',
+                        type : 'POST',
+                        dataType : 'json',
+                        cache : false,
+                        data : param,
+                        success : function(json){
+                            alertify.success([[#{msg.common.success}]]);
+                            fn.closeAlertifyView();
+                            fn_comment.getCommentList(commentsParam);
+                        },
+                        error : function(){
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        }
+                    });
+                }
+            },
+            deleteComments : function (_commId) {
+                alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+                    if (e) {
+                        $.ajax({
+                            url : '/comment/deleteComment',
+                            type : 'POST',
+                            dataType : 'json',
+                            cache : false,
+                            data : {'commId' : _commId},
+                            success : function(data){
+                                alertify.success([[#{msg.common.success}]]);
+                                fn.closeAlertifyView();
+                                fn_comment.getCommentList(commentsParam);
+                            },
+                            error : function(){
+                                alertify.error([[#{msg.common.valid2}]], 0);
+                            }
+                        });
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            closeAlertifyView : function () {
+                fn.closeAlertifyView();
+            },
+            activateCommentArea : function () {
+                var commentRow = $("#commentList .card-body").length;
+
+                // change tab area
+                if (!$(".editInfoCommentArea").is(":visible")) {
+                    $(".editInfoAreaTop").hide();
+                    $(".editInfoAreaBottom").hide();
+                    $(".editInfoArea").removeClass("col-md-10");
+                    $(".editInfoArea").addClass("col-lg-9");
+
+                    fn_comment.getCommentList(commentsParam);
+                    $(".editInfoCommentArea").show();
+
+                } else {
+                    $(".editInfoAreaTop").show();
+                    $(".editInfoArea").removeClass("col-lg-9");
+                    $(".editInfoArea").addClass("col-md-10");
+                    $(".editInfoAreaBottom").show();
+                    $(".editInfoCommentArea").hide();
+                }
+            },
+            showCommentHistory : function () {
+                if (lic_edit_data.detail.licenseId != null) {
+                    fn_comment.activateCommentArea();
+
+                    var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE')}]];
+                    openCommentHistory('/comment/popup/license/' + _rDiv + '/' + lic_edit_data.detail.licenseId);
+                }
+            }
+        }
+
+        function deleteSubmit(){
+            $("#licenseForm").ajaxForm({
+                url : '/license/delAjax',
+                type : 'POST',
+                dataType:"json",
+                cache : false,
+                success:onDeleteSuccess,
+                error : onError
+            }).submit();
+        }
+
+        function onDeleteSuccess(json, status){
+            var licenseId = $('input[name=licenseId]').val();
+
+            if (json.isValid == 'false') {
+                alertify.alert(json.validMsg, function(){});
+            } else {
+                alertify.alert([[#{msg.common.success}]] ,function(){
+                    if (licenseId) {
+                        deleteTabInFrame('/license/edit/' + licenseId);
+                    } else {
+                        deleteTabInFrame('/license/edit');
+                    }
+                });
+            }
+        }
+
+        function onError(data, status){
+            alertify.error([[#{msg.common.valid2}]], 0);
+        }
+
+        function setObligationCheckBox(type){
+            if (type == [[${@CoCodeManager.getCodes(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))[2]}]]) {
+                $('input[name=obligationNotificationYn]').prop('checked', true);
+                $('input[name=obligationDisclosingSrcYn]').prop('checked', true);
+            } else if (type == [[${@CoCodeManager.getCodes(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))[1]}]]) {
+                $('input[name=obligationNotificationYn]').prop('checked', true);
+                $('input[name=obligationDisclosingSrcYn]').prop('checked', true);
+            } else if (type == [[${@CoCodeManager.getCodes(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))[0]}]]) {
+                $('input[name=obligationNotificationYn]').prop('checked', true);
+                $('input[name=obligationDisclosingSrcYn]').prop('checked', false);
+            }
+        };
+    </script>
+</th:block>

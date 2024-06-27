@@ -10,7 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 import oss.fosslight.config.HistoryConfig;
-import oss.fosslight.domain.*;
+import oss.fosslight.domain.CoMail;
+import oss.fosslight.domain.OssAnalysis;
+import oss.fosslight.domain.OssLicense;
+import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.Vulnerability;
 
 public interface OssService extends HistoryConfig{
 	String registOssMaster(OssMaster ossMaster);
@@ -140,6 +145,7 @@ public interface OssService extends HistoryConfig{
 	int checkOssVersionDiff(String ossName);
 
 	boolean checkOssTypeForAnalysisResult(OssAnalysis ossAnalysis);
+
 	Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName);
 
 	Map<String, Object> getCheckOssLicenseAjax(ProjectIdentification paramBean, String targetName);

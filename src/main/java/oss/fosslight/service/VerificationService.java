@@ -70,9 +70,9 @@ public interface VerificationService {
 	
 	List<String> sortByValue(Map<String, Integer> map) throws Exception;
 	
-	void updateVerifyFileCount(HashMap<String,Object> fileCounts);
+	void updateVerifyFileCount(Map<String,Object> fileCounts);
 	
-	void updateVerifyFileCount(ArrayList<String> fileCounts);
+	void updateVerifyFileCountReset(List<String> fileCounts);
 	
 	boolean getChangedPackageFile(String prjId, List<String> fileSeqs);
 	

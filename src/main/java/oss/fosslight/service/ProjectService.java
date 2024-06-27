@@ -59,7 +59,7 @@ public interface ProjectService extends HistoryConfig{
 	
 	public void checkProjectReviewer(Project project);
 	
-	public Map<String, Object> updateProjectStatus(Project project) throws Exception;
+	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm) throws Exception;
 	
 	public List<ProjectIdentification> getBomListExcel(ProjectIdentification bom);
 	
@@ -92,11 +92,13 @@ public interface ProjectService extends HistoryConfig{
 	
 	List<Project> getProjectVersionList(Project project);
 
+	List<Project> getProjectDivisionList(Project project);
+
 	void updateSubStatus(Project project);
 
 	List<UploadFile> selectAndroidFileDetail(Project project);
 	
-	void updateProjectIdentificationConfirm(Project project);
+	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm);
 	
 	public Map<String, Object> getOssIdCheck(ProjectIdentification projectIdentification);
 
@@ -211,6 +213,9 @@ public interface ProjectService extends HistoryConfig{
 	public List<OssComponents> getDependenciesDataList(Project project);
 
 	void registDepOss(List<ProjectIdentification> ossComponents, List<List<ProjectIdentification>> ossComponentsLicense, Project project);
+
+	public void setNoticeFileFormat(Project project, List<String> noticeFileFormatList);
+
 }
 
 

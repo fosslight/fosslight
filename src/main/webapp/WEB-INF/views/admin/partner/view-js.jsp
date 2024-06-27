@@ -87,7 +87,7 @@ var partnerStatus = "${detail.status}";
 			
 			$('.btnCommentHistory').on('click', function(e){
 	            e.preventDefault();
-	            openCommentHistory('<c:url value="/comment/popup/3rd/${detail.partnerId}"/>');
+	            openCommentHistory("/comment/popup/3rd/${detail.partnerId}");
 	        });
 			
 			$(window).resize(function(){
@@ -375,7 +375,7 @@ var partnerStatus = "${detail.status}";
 		addHtml : function(target, str, division, userId){
 			var rlt = division+((userId!="") ? "/"+userId : "");
 			var html  = '<span><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
-			html += '<strong>'+str+'</strong></span>';
+			html += str + '</span>';
 
 			target.append(html);
 		},

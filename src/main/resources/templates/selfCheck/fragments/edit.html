@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="editFragments">
+	<input type="hidden" id="editMode" value="Y"/>
+	<div class="card-body bg-ivory">
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="row mt-1">
+					<div class="col-lg-4">
+						<div class="icheck-secondary d-inline">
+							<input class="a1" type="radio" id="srcR1" name="srcSelectOption" value="1" th:onchange="fn.changeSelectOption(this)" th:checked="true">
+							<label for="srcR1" th:text="'Upload Analysis Result'"></label>
+						</div>
+					</div>
+					<div class="col-lg-4">
+						<div class="icheck-secondary d-inline">
+							<input class="a1" type="radio" id="2" name="srcSelectOption" value="2" th:onchange="fn.changeSelectOption(this)">
+							<label for="2" th:text="URL"></label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<hr class="my-3">
+		<div id="content_bat">
+			<form id="srcUploadForm" class="srcBtn">
+				<input type="hidden" id="srcCsvFileId" th:value="${project.srcCsvFileId}">
+				<div name="inputArea" id="inputAreaUpload" class="uploadSet" style="height: 100px;">
+					<div class="row form-group">
+						<div class="col-lg-2 pl-3 mt-1">
+							<label class="text-blue-gray" th:text="'Please select a file to upload'"></label>
+						</div>
+						<div class="col-lg-3">
+							<div class="row">
+								<div class="col-1"></div>
+								<div class="col-11" style="display: flex;">
+									<div class="fileuploader" id="srcCsvFile" th:text="Upload"></div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-7">
+							<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+								<ul class="ml-4 csvFileArea">
+									<th:block th:if="${project.csvFile != null}">
+										<th:block th:each="csvFile : ${project.csvFile}">
+											<li th:if="${csvFile.delYn == 'N'}">
+												<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+												<input type="hidden" name="uploadCsvFile" th:value="${csvFile.fileSeq}" />
+												<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|src_fn.deleteCsv(this, '1')|" th:text="X"></span>
+												<br>[[${csvFile.createdDate}]]
+											</li>
+										</th:block>
+									</th:block>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div name="inputArea" id="wgetUrl_" class="wgetUrl" style="display: none; height: 100px;">
+					<div class="row">
+						<div class="col-lg-12">
+							<div class="row">
+								<p class="text-blue-gray" style="padding: 0 0 0 1rem;" th:text="'Enter the link of the source to be analyzed'"></p>
+							</div>
+							<div class="row">
+								<div class="col-lg-5">
+									<div class="input-group input-group-md">
+										<input type="text" class="form-control" id="sendWgetUrl" name="sendWgetUrl">
+										<span class="input-group-append">
+											<input type="button" class="btn btn-primary btn-flat" th:onclick="|src_fn.uploadOSSByUrl()|" value="send"></input>
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</th:block>
+<th:block th:fragment="viewFragments">
+	<input type="hidden" id="editMode" value="N"/>
+	<div class="card-body bg-ivory">
+		<div th:if="${project.statusPermission == 1}" class="float-right align-items-center mt-2" style="margin-left: auto;">
+			<div class="row d-flex-align-right">
+				<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="|com_fn.changeMode('edit', false)|">
+					<i class="fas fa-edit customIcon2 text-gray"></i>
+				</span>
+			</div>
+		</div>
+		<th:block th:if="${project.csvFile != null and not #lists.isEmpty(project.csvFile)}">
+			<div id="content-selfCheck" th:class="${project.statusPermission != 1 ? 'mt-3 uploadCsvFileArea' : 'uploadCsvFileArea'}" style="display: none;">
+			<hr th:if="${project.statusPermission == 1}" class="mt-5 mb-3">
+				<form id="srcUploadForm" class="srcBtn">
+					<input type="hidden" id="srcCsvFileId" th:value="${project.srcCsvFileId}">
+					<div name="inputArea" id="inputAreaUpload" class="uploadSet" style="height: 100px;">
+						<div class="row">
+							<div class="col-lg-2 pl-3 mt-1">
+								<strong th:text="'FOSSLight Report'"></strong>
+							</div>
+							<div class="col-lg-9">
+								<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+									<ul class="ml-4 csvFileArea">
+										<th:block th:each="csvFile : ${project.csvFile}">
+											<li th:if="${csvFile.delYn == 'N'}">
+												<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+												<input type="hidden" name="uploadCsvFile" th:value="${csvFile.fileSeq}" />
+												<br>[[${csvFile.createdDate}]]</li>
+										</th:block>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</th:block>
+	</div>
+</th:block>
+</body>
+</html>

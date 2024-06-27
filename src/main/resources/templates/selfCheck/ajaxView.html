@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<div class="row" name="info-form">
+	<div class="col-12">
+       	<div class="p-3">
+           	<div class="row">
+				<div class="col-md-5">
+					<div class="row">
+						<div class="col-md-3">
+							<span class="text-bold" th:text="#{msg.common.field.project.name}"></span>
+						</div>
+						<div class="col-md-1">
+							<span class="text-gray text-bold mr-3">|</span>
+						</div>
+						<div class="col-md-8" th:text="${project.prjName}"></div>
+					</div>
+					<div class="row mt-2">
+						<div class="col-md-3">
+							<span class="text-bold" style="padding-right:3px;" th:text="|Comment|"></span>
+						</div>
+						<div class="col-md-1">
+							<span class="text-gray text-bold mr-3">|</span>
+						</div>
+						<div class="col-md-8">
+							<span id="comment" th:utext="${project.comment}"></span>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-5">
+					<div class="row">
+						<div class="col-md-3">
+							<span class="text-bold" th:text="Created"></span>
+						</div>
+						<div class="col-md-1">
+							<span class="text-gray text-bold mr-3">|</span>
+						</div>
+						<div class="col-md-7">
+							<span>[[${project.prjUserName}]] [[${project.prjDivisionName}]] ([[${@CommonFunction.formatDateSimple(project.createdDate)}]])</span>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-1 offset-md-1">
+					<button class="btn btn-outline-dark btn-sm px-3 float-right" id="editBtn" th:onclick="fn_self.modeChange([[${project.prjId}]], 'e')" th:text="Edit"></button>
+				</div>
+            </div>
+       	</div>
+   	</div>
+</div>
+</html>

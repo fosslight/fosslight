@@ -177,6 +177,8 @@ public interface ProjectMapper {
 	
 	List<Project> getProjectVersionList(Project project);
 
+	List<Project> getProjectDivisionList(Project project);
+	
 	void registPackageFileId(Project project);
 	
 	void updatePartnerOssList(OssComponents bean);
@@ -373,7 +375,7 @@ public interface ProjectMapper {
 
 	public List<OssComponents> selectOssComponentsListClassAppend(ProjectIdentification identification);
 
-	int selectVulnerabilityResolutionSecurityListCnt(Project project);
+	List<OssComponents> selectVulnerabilityResolutionSecurityList(Project project);
 
 	int copySecurityDataForProjectCnt(Project project);
 
@@ -386,4 +388,6 @@ public interface ProjectMapper {
 	List<OssComponents> getDependenciesDataList(Project project);
 
 	int checkProjectDistributeHis(Project project);
+
+	Float getCvssScoreForNotFixed(String prjId);
 }

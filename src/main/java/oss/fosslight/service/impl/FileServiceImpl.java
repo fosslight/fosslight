@@ -8,15 +8,28 @@ package oss.fosslight.service.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FilenameUtils;
@@ -26,6 +39,8 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import com.itextpdf.kernel.pdf.canvas.parser.clipper.Paths;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -391,6 +406,10 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			upFile.setFileName(phyFileNm);
 			upFile.setIndexNum(indexNum);
 			upFile.setRegistFileId(fileId);
+			if (!isEmpty(registFile.getActualFileNm())) {
+				upFile.setActualFilename(registFile.getActualFileNm());
+				registFile.setActualFileNm(null);
+			}
 			
 			try {
 				upFile.setContentType(mFile.getContentType());
@@ -569,8 +588,15 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		int i = originalFileName.lastIndexOf('.'); 
 	    // 마지막 .부터 나머지 문자열을 f에 저장
-		String fileName = originalFileName.substring(0,i);		//input name
-		String fileExt = FilenameUtils.getExtension(originalFileName);
+		String fileName = "";		//input name
+		String fileExt = "";
+		
+		if (i > -1) {
+			fileName = originalFileName.substring(0,i);
+			fileExt = FilenameUtils.getExtension(originalFileName);
+		} else {
+			fileName = originalFileName;
+		}
 		
 		if (originalFileName.toLowerCase().endsWith(".tgz.gz")) {
 			fileExt = "tgz.gz";
@@ -594,10 +620,15 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		FileOutputStream fileOS = null;
 		
 		try {
+			ignoreSsl();
 			readChannel = Channels.newChannel(new URL(url.replaceAll("\\s", "%20")).openStream());
 			
 			if (isOrigFile) {
-				fileOS = new FileOutputStream(uploadFilePath+"/"+fileName+"."+fileExt);
+				if (i > -1) {
+					fileOS = new FileOutputStream(uploadFilePath+"/"+fileName+"."+fileExt);
+				} else {
+					fileOS = new FileOutputStream(uploadFilePath+"/"+originalFileName+".so");
+				}
 			} else {
 				fileOS = new FileOutputStream(uploadFilePath+"/"+randomUUID+"."+fileExt);
 			}
@@ -1105,38 +1136,42 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		if ("VERIFY".equalsIgnoreCase(flag)) {
 			filePath = file.getLogiPath() + "/" + file.getLogiNm();
-		}else {
+		} else {
 			T2File T2file = fileMapper.getFileInfo2(file);
-			filePath = T2file.getLogiPath() + "/" + T2file.getLogiNm();
-			if(T2file.getLogiPath().contains("android_notice") && T2file.getExt().equals("html")) {
-				isAndroidNoticeFolder = true;
-				folderPath = T2file.getLogiPath();
+			if (T2file != null) {
+				filePath = T2file.getLogiPath() + "/" + T2file.getLogiNm();
+				if(T2file.getLogiPath().contains("android_notice") && T2file.getExt().equals("html")) {
+					isAndroidNoticeFolder = true;
+					folderPath = T2file.getLogiPath();
+				}
 			}
 		}
 		
-		try {
-			FileOutputStream to = new FileOutputStream(filePath);
-			to.flush();
-   	 		to.close();
-			if(isAndroidNoticeFolder) {
-				File folder = new File(folderPath);
-				while(folder.exists()) {
-					File[] folder_list = folder.listFiles();
-					for(int i = 0;i < folder_list.length; i++) {
-						folder_list[i].delete();
+		if (!isEmpty(folderPath)) {
+			try {
+				FileOutputStream to = new FileOutputStream(filePath);
+				to.flush();
+	   	 		to.close();
+				if(isAndroidNoticeFolder) {
+					File folder = new File(folderPath);
+					while(folder.exists()) {
+						File[] folder_list = folder.listFiles();
+						for(int i = 0;i < folder_list.length; i++) {
+							folder_list[i].delete();
+						}
+						if(folder_list.length == 0 && folder.isDirectory()) {
+							folder.delete();
+						}
 					}
-					if(folder_list.length == 0 && folder.isDirectory()) {
-						folder.delete();
+				} else{
+					File LogiFile = new File(filePath);
+					if (LogiFile.exists()) {
+						LogiFile.delete();
 					}
 				}
-			} else{
-				File LogiFile = new File(filePath);
-				if (LogiFile.exists()) {
-					LogiFile.delete();
-				}
+			} catch(Exception e) {
+				log.info(e.getMessage(), e);
 			}
-		} catch(Exception e) {
-			log.info(e.getMessage(), e);
 		}
 	}
 
@@ -1173,5 +1208,94 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		}
 		
 		return newFileId;
+	}
+	
+	private void ignoreSsl() {
+		HostnameVerifier hv = new HostnameVerifier() {
+			public boolean verify(String urlHostName, SSLSession session) {
+	    		return true;
+	    	}
+		};
+		try {
+			trustAllHttpsCertificates();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		HttpsURLConnection.setDefaultHostnameVerifier(hv);
+	}
+
+	private static void trustAllHttpsCertificates() throws Exception {
+        TrustManager[] trustAllCerts = new TrustManager[1];
+        TrustManager tm = new miTM();
+        trustAllCerts[0] = tm;
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    }
+	
+	static class miTM implements TrustManager,X509TrustManager {
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
+ 
+        public boolean isServerTrusted(X509Certificate[] certs) {
+            return true;
+        }
+ 
+        public boolean isClientTrusted(X509Certificate[] certs) {
+            return true;
+        }
+ 
+        public void checkServerTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+ 
+        public void checkClientTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+    }
+
+	@Override
+	public T2File uploadSingleFile(MultipartFile mFile, String fileId, String fileGubn, Path descFilePath, boolean useRandomFileName) {
+		T2File fileInfo = null;
+		if(mFile != null && !mFile.isEmpty()) {
+			try {
+				fileInfo = new T2File();
+				fileInfo.setCreator(loginUserName());
+				fileInfo.setGubn(fileGubn);
+				fileInfo.setOrigNm(mFile.getOriginalFilename());
+				fileInfo.setExt(FilenameUtils.getExtension(fileInfo.getOrigNm()));
+				fileInfo.setLogiNm(fileInfo.getOrigNm());
+				fileInfo.setLogiPath(descFilePath.toString());
+				fileInfo.setContentType(mFile.getContentType());
+				fileInfo.setSize(Long.toString(mFile.getSize()));
+				if(useRandomFileName) {
+					fileInfo.setLogiNm(MessageFormat.format("{0}.{1}", UUID.randomUUID(), fileInfo.getExt()));
+				}
+
+				descFilePath.toFile().mkdirs();
+				
+				Path destinationFile = descFilePath.resolve(fileInfo.getLogiNm());
+				try (InputStream inputStream = mFile.getInputStream()) {
+					Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+				}
+				
+				if(isEmpty(fileId)) {
+					fileId = fileMapper.getFileId();
+				}
+				fileInfo.setFileId(fileId);
+				fileMapper.insertFile(fileInfo);
+			} catch (IOException e) {
+				log.error("Failed upload file {}, {}", loginUserName(), mFile.getOriginalFilename());
+				log.error(e.getMessage(), e);
+				return null;
+			}
+
+		} else {
+			log.warn("MultipartFile is empty");
+		}
+		return fileInfo;
 	}
 }

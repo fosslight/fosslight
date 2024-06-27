@@ -18,4 +18,8 @@
 			DEFAULT_LOCALE = #{defaultLocale}
 		WHERE USER_ID = #{loginUserName}
 	</update>
+
+	<select id="selectDefaultLocale" parameterType="oss.fosslight.domain.Configuration" resultType="String">
+		SELECT DEFAULT_LOCALE FROM T2_USERS WHERE USER_ID = #{loginUserName}
+	</select>
 </mapper>

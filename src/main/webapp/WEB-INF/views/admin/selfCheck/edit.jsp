@@ -183,7 +183,8 @@
 											</div>
 										</div>
 										<br/>
-										<div id="wgetUrl_${i}" class="wgetUrl" style="width: 500px; display: none;"><input type="text" style="width:70%" id="sendWgetUrl" name="sendWgetUrl" /><input type="button" value="send" class="btnColor red btnExpor srcBtn" onclick=src_fn.uploadOSSByUrl() /></div>
+										<div id="wgetUrl_${i}" class="wgetUrl" style="width: 500px; display: none;"><input type="text" style="width:70%" id="sendWgetUrl" name="sendWgetUrl" />
+											<input type="button" value="send" class="btnColor red btnExpor srcBtn" onclick=src_fn.uploadOSSByUrl() /></div>
 									</div>
 								</div>
 							</dd>

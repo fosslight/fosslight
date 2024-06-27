@@ -38,6 +38,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.*;
 import oss.fosslight.common.Url.OSS;
+import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.domain.*;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
@@ -76,7 +77,7 @@ public class OssController extends CoTopComponent{
 	public String list(HttpServletRequest req, HttpServletResponse res, Model model){
 		OssMaster searchBean = null;
 		
-		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
+		if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF")) || getSessionObject(SESSION_KEY_SEARCH) == null) {
 			deleteSession(SESSION_KEY_SEARCH);
 			searchBean = searchService.getOssSearchFilter(loginUserName());
 			if (searchBean == null) {
@@ -115,7 +116,7 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return OSS.LIST_JSP;
+		return "oss/list";
 	}
 	
 	@GetMapping(value={OSS.LIST_LINK}, produces = "text/html; charset=utf-8")
@@ -140,7 +141,7 @@ public class OssController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return OSS.LIST_JSP;
+		return "oss/list";
 	}
 	
 	@GetMapping(value=OSS.LIST_AJAX)
@@ -174,11 +175,11 @@ public class OssController extends CoTopComponent{
 		// download location check
 		List<String> values = Arrays.asList("https://", "http://", "www.");
 		String homepage =req.getParameter("homepage");
-		if (!values.contains(homepage)){
-			homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
-			homepage = homepage.replaceFirst("/$", "");
-			ossMaster.setHomepage(homepage);
-		}
+//		if (!values.contains(homepage)){
+//			homepage = homepage.replaceFirst("^((http|https)://)?(www.)*", "");
+//			homepage = homepage.replaceFirst("/$", "");
+//			ossMaster.setHomepage(homepage);
+//		}
 
 		if ("search".equals(req.getParameter("act"))) {
 			// 검색 조건 저장
@@ -214,6 +215,7 @@ public class OssController extends CoTopComponent{
 		if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NEWOSS_DEFAULT_DATA, null)) != null) {
 			OssMaster bean = (OssMaster) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NEWOSS_DEFAULT_DATA, null), true);
 			
+			model.addAttribute("detail", bean);
 			model.addAttribute("ossName", avoidNull(bean.getOssName()));
 			model.addAttribute("ossVersion", avoidNull(bean.getOssVersion()));
 			model.addAttribute("downloadLocation", avoidNull(bean.getDownloadLocation()));
@@ -234,6 +236,7 @@ public class OssController extends CoTopComponent{
 					if (master != null) {
 						String shortIDentifier = isEmpty(master.getShortIdentifier()) ? master.getLicenseName() : master.getShortIdentifier();
 						result.setLicenseId(master.getLicenseId());
+						result.setLicenseType(master.getLicenseType());
 						result.setLicenseName(master.getLicenseName());
 						result.setLicenseNameEx(shortIDentifier);
 						result.setObligation(master.getObligation());
@@ -249,7 +252,7 @@ public class OssController extends CoTopComponent{
 				}
 				
 				map.put("rows", licenseList);
-				model.addAttribute("list", toJson(map));
+				model.addAttribute("list", map);
 			}
 			
 			model.addAttribute("copyright", avoidNull(bean.getCopyright()));
@@ -257,21 +260,21 @@ public class OssController extends CoTopComponent{
 			// nick name 체크
 			// oss name으로 nickname이 존재할 경우 초기 표시되어야함
 			// 표시되지 않은 상태에서 save시 기존 nickname이 모두 삭제됨
-			model.addAttribute("ossNickList", toJson(ossService.getOssNickNameListByOssName(bean.getOssName())));
+			model.addAttribute("ossNickList", ossService.getOssNickNameListByOssName(bean.getOssName()));
 			
 			List<String> downloadLocationList = new ArrayList<>();
 			downloadLocationList.add(avoidNull(bean.getDownloadLocation()));
-			model.addAttribute("downloadLocationList", toJson(downloadLocationList));
+			model.addAttribute("downloadLocationList", downloadLocationList);
 		} else {
 			// 신규 등록시에도 ossNickList 은 필수(empty array를 설정)
 			List<String> nickList = new ArrayList<>();
-			model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
+			model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
 			
 			List<String> downloadLocationList = new ArrayList<>();
-			model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
+			model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 		}
 		
-		return OSS.EDIT_JSP;
+		return "oss/edit";
 	}
 
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")
@@ -290,12 +293,12 @@ public class OssController extends CoTopComponent{
 			for (String name : detectedLicenseNames) {
 				detectedLicenseIdByName.put(name, CommonFunction.getLicenseIdByName(name));
 			}
-			model.addAttribute("detectedLicenseIdByName", toJson(detectedLicenseIdByName));
+			model.addAttribute("detectedLicenseIdByName", detectedLicenseIdByName);
 		} else {
 			model.addAttribute("detectedLicenseIdByName", null);
 		}
-		model.addAttribute("list", toJson(map));
-		model.addAttribute("detail", toJson(ossMaster));
+		model.addAttribute("list", map);
+		model.addAttribute("detail", ossMaster);
 		model.addAttribute("ossId", ossMaster.getOssId());
 		
 		// 참조 프로젝트 목록 조회
@@ -314,8 +317,8 @@ public class OssController extends CoTopComponent{
 				componentsPartner = partnerMapper.selectOssRefPartnerList(ossMaster);
 			}
 			
-			model.addAttribute("components", toJson(components));
-			model.addAttribute("componentsPartner", toJson(componentsPartner));
+			if (components != null && !components.isEmpty()) model.addAttribute("components", components);
+			if (componentsPartner != null && !componentsPartner.isEmpty()) model.addAttribute("componentsPartner", componentsPartner);
 		}
 		
 		model.addAttribute("projectListFlag", projectListFlag);
@@ -326,16 +329,16 @@ public class OssController extends CoTopComponent{
 			if (vulnInfoList.size() == 5) {
 				model.addAttribute("vulnListMore", "vulnListMore");
 			}
-			model.addAttribute("vulnInfoList", toJson(vulnInfoList));
+			model.addAttribute("vulnInfoList", vulnInfoList);
 		}
 		
 		List<String> nickList = new ArrayList<>();
-		model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
+		model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
 		
 		List<String> downloadLocationList = new ArrayList<>();
-		model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
-		
-		return CommonFunction.isAdmin() ? OSS.EDIT_JSP : OSS.VIEW_JSP;
+		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
+
+		return CommonFunction.isAdmin() ? "oss/edit" : "oss/view";
 	}
 	
 	@GetMapping(value={OSS.POPUPLIST_ID}, produces = "text/html; charset=utf-8")
@@ -378,14 +381,14 @@ public class OssController extends CoTopComponent{
 		
 		ossMaster.setOssLicenses((List<OssLicense>) map.get("rows"));
 		ossMaster.setOssId(null);
-		model.addAttribute("copyData", toJson(ossMaster));
+		model.addAttribute("copyData", ossMaster);
 		List<String> nickList = new ArrayList<>();
-		model.addAttribute("ossNickList", toJson(nickList.toArray(new String[nickList.size()])));
+		model.addAttribute("ossNickList", nickList.toArray(new String[nickList.size()]));
 		
 		List<String> downloadLocationList = new ArrayList<>();
-		model.addAttribute("downloadLocationList", toJson(downloadLocationList.toArray(new String[downloadLocationList.size()])));
+		model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 		
-		return OSS.EDIT_JSP;
+		return "oss/edit";
 	}
 	
 	@PostMapping(value=OSS.SAVE_AJAX)
@@ -827,6 +830,20 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(result);
 	}
 	
+	@PostMapping(value =OSS.SEND_COMMENT)
+	public @ResponseBody ResponseEntity<Object> sendComment(@ModelAttribute CommentsHistory commentsHistory,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		commentService.registComment(commentsHistory);
+		
+		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT);
+		mailBean.setParamOssId(commentsHistory.getReferenceId());
+		mailBean.setComment(commentsHistory.getContents());
+		
+		CoMailManager.getInstance().sendMail(mailBean);
+		
+		return makeJsonResponseHeader();
+	}
+	
 	@PostMapping(value=OSS.DELETE_COMMENT)
 	public @ResponseBody ResponseEntity<Object> deleteComment(
 			@ModelAttribute CommentsHistory commentsHistory
@@ -1079,7 +1096,7 @@ public class OssController extends CoTopComponent{
 	public String LicenseBulkRegPage(HttpServletRequest req, HttpServletResponse res, Model model, @ModelAttribute Project projectData) {
 		model.addAttribute("projectData", projectData);
 
-		return OSS.OSS_BULK_REG_JSP;
+		return "oss/ossBulkReg";
 	}
 
 	@PostMapping(value = OSS.BULK_REG_AJAX)
@@ -1403,7 +1420,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("ossInfo", bean);
 		
-		return OSS.OSS_POPUP_JSP;
+		return "oss/view/viewPopup";
 	}
 	
 	@GetMapping(value=OSS.OSS_DETAIL_VIEW_AJAX, produces = "text/html; charset=utf-8")
@@ -1414,7 +1431,7 @@ public class OssController extends CoTopComponent{
 			OssMaster _bean = ossList.get(0);
 			_bean.setOssName(StringUtil.replaceHtmlEscape(_bean.getOssName()));
 			
-			model.addAttribute("ossInfo", ossList.get(0));
+			model.addAttribute("ossInfo", _bean);
 			
 			CommentsHistory commentsHistory = new CommentsHistory();
 			commentsHistory.setReferenceId(bean.getOssId());
@@ -1424,7 +1441,7 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("ossInfo", new OssMaster());
 		}
 		
-		return OSS.OSS_DETAILS_VIEW_AJAX_JSP;
+		return "oss/view/ossDetailView";
 	}
 	
 	@GetMapping(value = OSS.CHECK_EXISTS_OSS_BY_NAME)
@@ -1433,11 +1450,22 @@ public class OssController extends CoTopComponent{
 		return makeJsonResponseHeader(ossService.checkExistsOssByname(bean) > 0, "unconfirmed oss");
 	}
 
+
+	@GetMapping(value = OSS.SELECT_OSS_POPUP)
+	public String ossSelectPopup(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
+		return "oss/fragments/ossSelectPopup";
+	}
+
+	@GetMapping(value = OSS.MERGE_OSS_CHECK_POPUP)
+	public String mergeOssCheckPopup(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
+		return "oss/fragments/mergeOssCheckPopup";
+	}
+
 	@GetMapping(value = OSS.CHECK_OSS_LICENSE)
 	public String checkOssLicense(HttpServletRequest req, HttpServletResponse res, @ModelAttribute Project bean, Model model){
 		model.addAttribute("projectInfo", bean);
 
-		return OSS.CHECK_OSS_LICENSE_JSP;
+		return "oss/checkOssLicensePopup";
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1518,10 +1546,9 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
 		
-		return OSS.CHECK_OSS_NAME_JSP;
+		return "oss/checkOssNamePopup";
 	}
 	
-	@SuppressWarnings("unchecked")
 	@GetMapping(value = OSS.CHECK_OSS_NAME_AJAX, produces = "text/html; charset=utf-8")
 	public @ResponseBody ResponseEntity<Object> getCheckOssNameAjax(
 			HttpServletRequest req, 
@@ -1531,7 +1558,7 @@ public class OssController extends CoTopComponent{
 			@PathVariable String targetName) {
 		Map<String, Object> resMap = new HashMap<>();
 		resMap = ossService.getCheckOssNameAjax(paramBean, targetName);
-		/*Map<String, Object> map = null;
+/*		Map<String, Object> map = null;
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		
 		switch(targetName.toUpperCase()) {
@@ -1589,8 +1616,8 @@ public class OssController extends CoTopComponent{
 			}
 			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
 					.collect(Collectors.toList()));
-		}*/
-		
+		} */
+
 		return makeJsonResponseHeader(resMap);
 	}
 	
@@ -1697,7 +1724,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("projectInfo", bean);
 		
-		return OSS.OSS_AUTO_ANALYSIS_JSP;
+		return "oss/ossAutoAnalysispopup";
 	}
 	
 	@GetMapping(value=OSS.AUTO_ANALYSIS_LIST)
@@ -1827,7 +1854,7 @@ public class OssController extends CoTopComponent{
 	public String analysisResultDetail(HttpServletRequest req, HttpServletResponse res, @PathVariable String groupId, Model model){
 		model.addAttribute("groupId", groupId);
 		
-		return OSS.ANALYSIS_RESULT_DETAIL_JSP;
+		return "oss/ossAnalysisResultDetailpopup";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -2070,7 +2097,7 @@ public class OssController extends CoTopComponent{
 		// oss list (oss name으로만)
 		model.addAttribute("ossInfo", bean);
 		
-		return OSS.OSS_SYNC_POPUP_JSP;
+		return "oss/fragments/syncPopup-fragments :: syncPopupFragment";
 	}
 	
 	@PostMapping(value=OSS.OSS_SYNC_LIST_VALIDATION)
@@ -2121,7 +2148,7 @@ public class OssController extends CoTopComponent{
 		}
 		model.addAttribute("syncCheckList" , syncCheckList);
 		
-		return OSS.OSS_SYNC_DETAILS_VIEW_AJAX_JSP;
+		return "oss/fragments/syncPopup-fragments :: syncDetailViewFragment";
 	}
 
 	@PostMapping(value=OSS.OSS_SYNC_UPDATE)
@@ -2302,15 +2329,20 @@ public class OssController extends CoTopComponent{
 	}
 	
 	@PostMapping(value=OSS.OSS_BULK_EDIT_POPUP)
-	public String bulkEditPopup(HttpServletRequest req, HttpServletResponse res, 
-			@RequestParam(value="rowId", required=true)String rowId,
-			@RequestParam(value="target", required=true)String target,
-			Model model){
+	public String bulkEditPopup(HttpServletRequest req, HttpServletResponse res
+			, @RequestParam Map<String, String> param
+			, Model model){
 		
-		model.addAttribute("rowId", rowId);
-		model.addAttribute("target", target);
+		model.addAttribute("rowId", (String) param.get("rowId"));
+		model.addAttribute("target", (String) param.get("target"));
 		
-		return OSS.OSS_BULK_EDIT_POPUP_JSP;
+		if (param.containsKey("menu")) {
+			model.addAttribute("menu", (String) param.get("menu"));
+		} else {
+			model.addAttribute("menu", "");
+		}
+		
+		return "oss/ossBulkEditPopup";
 	}
 	
 	@PostMapping(value = OSS.CHECK_OSS_VERSION_DIFF)

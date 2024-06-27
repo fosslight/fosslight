@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<link rel="stylesheet" th:href="@{/css/datatables/dataTables.bootstrap4.min.css}">
+<script th:src="@{/js/datatables/jquery.dataTables.min.js}"></script>
+<script th:src="@{/js/datatables/dataTables.bootstrap4.min.js}"></script>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="partner/view-script :: viewScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+    	<div class="custom-layout ml-2 mr-2" style="height: auto">
+            	<section class="content-header">
+            		<div class="container-fluid">
+            			<div class="d-flex align-items-center mt-3 ml-2" id="displayPartnerInfo"></div>
+					</div>
+            	</section>
+				<section class="content">
+					<div class="card card-secondary">
+						<div class="card-header">
+				 			<h3 class="card-title" th:text="'3rd Party Information'"></h3>
+				 		</div>
+					</div>
+					<div class="card-body">
+						<div class="row">
+							<div class="col-lg-6">
+								<div class="table-responsive">
+									<table class="table">
+										<input type="hidden" name="partnerId" th:value="${detail.partnerId}"/>
+										<tbody>
+											<tr class="text-sm">
+												<th style="width: 30%" th:text="#{msg.common.field.3rdParty.name}"></th>
+												<td th:text="${detail?.partnerName}"></td>
+											</tr>
+											<tr class="text-sm">
+												<th th:text="#{msg.common.field.3rdParty.softwareName}"></th>
+												<td th:text="${detail?.softwareName}"></td>
+											</tr>
+											<tr class="text-sm">
+												<th th:text="#{msg.common.field.3rdParty.softwareVersion}"></th>
+												<td th:text="${detail?.softwareVersion}"></td>
+											</tr>
+											<tr class="text-sm">
+												<th th:utext="#{msg.common.field.deliveryForm}"></th>
+												<td>
+													<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'))}">
+														<th:block th:if="${option.cdDtlNo == detail?.deliveryForm}">
+															<span th:text="${option.cdDtlNm}"></span>
+														</th:block>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-sm">
+												<th th:utext="#{msg.common.field.permission}"></th>
+												<td>
+													<span th:if="${detail?.publicYn != 'N'}" th:text="Everyone"></span>
+													<span th:if="${detail?.publicYn == 'N'}" th:text="'Creator & Watcher'"></span>
+												</td>
+											</tr>
+											<tr class="text-sm">
+												<th th:text="#{msg.common.field.description}"></th>
+												<td class="viewTextArea" th:utext="${detail?.description}"></td>
+											</tr>
+											<tr class="text-sm">
+												<th th:text="#{msg.common.field.watcher}"></th>
+												<td>
+													<th:block th:if="${detail.partnerWatcher != null}" th:each="watcher, status : ${detail.partnerWatcher}">
+														<th:block th:if="${watcher.parEmail != ''}">
+															<span th:text="${watcher.parEmail + ' / Email'}"></span>
+														</th:block>
+														<th:block th:unless="${watcher.parEmail != ''}">
+															<th:block th:if="${watcher.parDivisionName != ''}">
+																<span th:text="${watcher.parDivisionName}"></span>
+																<span th:if="${watcher.parUserName != ''}" th:text="${' / ' + watcher.parUserName}"></span>
+															</th:block>
+															<th:block th:unless="${watcher.parDivisionName != ''}">
+																<span th:if="${watcher.parUserName != ''}" th:text="${watcher.parUserName}"></span>
+																<span th:if="${watcher.parUserId != ''}" th:text="${' / ' + watcher.parUserId}"></span>
+															</th:block>
+														</th:block>
+														<span th:if="${status.count != status.size}" th:text="|, |"></span>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-sm">
+												<th th:text="#{msg.common.field.creator}"></th>
+												<td th:text="${detail?.creator}"></td>
+											</tr>
+											<tr class="text-sm">
+												<th th:text="#{msg.common.field.division}"></th>
+												<td th:text="${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), detail?.division)}"></td>
+											</tr>
+											<tr class="text-sm">
+												<th th:text="#{msg.common.field.reviewer}"></th>
+												<td th:text="${detail?.reviewerName}"></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<div class="col-lg-6">
+								<div class="table-responsive">
+									<table class="table">
+										<tr class="text-sm">
+											<th style="width: 30%" th:text="#{msg.common.field.Agreement}"></th>
+											<td>
+												<div th:if="${confirmationFile != null}" class="col-lg-12">
+                                                    <ul class="pl-0">
+                                                        <li>
+                                                        	<th:block th:if="${detail.statusPermission > 0}">
+                                                        		<a class="ajax-file-upload-filename" th:text="${confirmationFile.origNm}" th:href="@{'/download/' + ${confirmationFile.fileSeq} + '/' + ${confirmationFile.logiNm}}"></a>
+                                                        	</th:block>
+                                                        	<th:block th:unless="${detail.statusPermission > 0}">
+                                                        		<a class="ajax-file-upload-filename" th:text="${confirmationFile.origNm}"></a>
+                                                        	</th:block>
+                                                           	<br>[[${confirmationFile.createdDate}]]
+                                                     	</li>
+                                                  	</ul>
+                                              	</div>
+                                              	<div th:unless="${confirmationFile != null}" class="col-lg-12">
+                                              		<span th:text="'No File'"></span>
+                                              	</div>
+											</td>
+										</tr>
+										<tr class="text-sm">
+											<th th:text="#{msg.common.field.OSSChecklist} + '(Open Source List)'"></th>
+											<td>
+												<div th:if="${ossFile != null}" class="col-lg-12">
+                                                    <ul class="pl-0">
+                                                        <li>
+                                                        	<th:block th:if="${detail.statusPermission > 0}">
+                                                        		<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}" th:href="@{'/download/' + ${ossFile.fileSeq} + '/' + ${ossFile.logiNm}}"></a>
+                                                        	</th:block>
+                                                        	<th:block th:unless="${detail.statusPermission > 0}">
+                                                        		<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}"></a>
+                                                        	</th:block>
+                                                           	<br>[[${ossFile.createdDate}]]
+                                                     	</li>
+                                                  	</ul>
+                                              	</div>
+                                              	<div th:unless="${ossFile != null}" class="col-lg-12">
+                                              		<span th:text="'No File'"></span>
+                                              	</div>
+											</td>
+										</tr>
+										<tr class="text-sm">
+											<th th:text="'fosslight_binary.txt'"></th>
+											<td>
+												<div th:if="${binaryFile != null}" class="col-lg-12">
+                                                    <ul class="pl-0">
+                                                        <li>
+                                                        	<th:block th:if="${detail.statusPermission > 0}">
+                                                        		<a class="ajax-file-upload-filename" th:text="${binaryFile.origNm}" th:href="@{'/download/' + ${binaryFile.fileSeq} + '/' + ${binaryFile.logiNm}}"></a>
+                                                        	</th:block>
+                                                        	<th:block th:unless="${detail.statusPermission > 0}">
+                                                        		<a class="ajax-file-upload-filename" th:text="${binaryFile.origNm}"></a>
+                                                        	</th:block>
+                                                           	<br>[[${binaryFile.createdDate}]]
+                                                     	</li>
+                                                  	</ul>
+                                              	</div>
+                                              	<div th:unless="${binaryFile != null}" class="col-lg-12">
+                                              		<span th:text="'No File'"></span>
+                                              	</div>
+											</td>
+										</tr>
+										<tr class="text-sm">
+											<th th:text="#{msg.common.field.relatedDocuments}"></th>
+											<td>
+												<div th:if="${#lists.size(detail.documentsFile) > 0}" class="col-lg-12">
+                                                    <ul class="pl-0">
+                                                    	<th:block th:each="documentsFile : ${detail.documentsFile}">
+                                                    		<li th:if="${documentsFile.delYn == 'N'}">
+                                                    			<th:block th:if="${detail.statusPermission > 0}">
+                                                    				<a class="ajax-file-upload-filename" th:text="${documentsFile.origNm}" th:href="@{'/download/' + ${documentsFile.fileSeq} + '/' + ${documentsFile.logiNm}}"></a>
+                                                    			</th:block>
+                                                    			<th:block th:unless="${detail.statusPermission > 0}">
+                                                    				<a class="ajax-file-upload-filename" th:text="${documentsFile.origNm}"></a>
+                                                    			</th:block>
+                                                           		<br>[[${documentsFile.createdDate}]]
+                                                     		</li>
+                                                    	</th:block>
+                                                  	</ul>
+                                              	</div>
+                                              	<div th:unless="${#lists.size(detail.documentsFile) > 0}" class="col-lg-12">
+                                              		<span th:text="'No File'"></span>
+                                              	</div>
+											</td>
+										</tr>
+										<tr class="text-sm">
+											<th style="width: 30%" th:text="Project"></th>
+											<td>
+												<table class="table table-bordered table-hover dataTable dtr-inline" id="prjTable">
+													<thead>
+                                                    	<tr>
+                                                        	<th class="text-center" th:text="ID"></th>
+                                                        	<th class="text-center" th:text="'Project Name (Version)'"></th>
+                                                    	</tr>
+                                                	</thead>
+												</table>
+											</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+							<div th:if="${detail.permission > 0}" class="col-lg-12 contents-area">
+								<table id="list"><tr><td></td></tr></table>
+                            	<div id="pager"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

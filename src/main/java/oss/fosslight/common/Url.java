@@ -29,6 +29,7 @@ public final class Url {
 		
 		public static final String LOGIN_EXPIRED = PATH + "/loginExpired";
 		public static final String SESSION_SAVE_KEY_VAL = PATH + "KeyValSave/{sesKey}/**";
+
 	}
 	
 	/**
@@ -41,12 +42,18 @@ public final class Url {
 		public static final String INDEX_EMPTY			 = "/";
 		public static final String INDEX			 	   = "/index";
 		public static final String INDEX_JSP			   = TILES + PATH + "/index";
+
 	}
 	
 	public static final class AUTH {
 		public static final String LOGIN	= "";
 		public static final String LOGIN_PROC	= "";
 		public static final String LOGOUT	= "/";
+	}
+
+	public static final class RENDER {
+		public static final String INDEX 					=  "/render";
+		public static final String COMPONENT 				= INDEX + "/component";
 	}
 	
 	public static final class DASHBOARD {
@@ -60,6 +67,12 @@ public final class Url {
 		public static final String OSSLIST = PATH + "/ossListAjax";
 		public static final String LICENSELIST = PATH + "/licenseListAjax";
 		public static final String READCONFIRM_ALL = PATH + "/readConfirmAll";
+		
+		public static final String PROGPROJECTCNT = PATH + "/progProjectCnt";
+		public static final String DISCOVEREDEMLLIST = PATH + "/discoveredEmlList";
+		public static final String DISCOVEREDEMLMESSAGE = PATH + "/discoveredEmlMessage";
+		public static final String NVDDASHBOARDLIST = PATH + "/nvdDashboardList";
+		public static final String LATESTSCOREDVULNS = PATH + "/latestScoredVulns";
 	}
 	
 	public static final class LICENSE {
@@ -79,8 +92,10 @@ public final class Url {
 		public static final String VALIDATION = PATH + "/validation";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
+		public static final String SEND_COMMENT = PATH + "/sendComment";
 		public static final String DELETE_COMMENT = PATH + "/deleteComment";
 		
 		public static final String LICENSE_TEXT = PATH + "/getLicenseText";
@@ -110,17 +125,25 @@ public final class Url {
 		public static final String PATH = "/comment";
 		
 		public static final String COMMENT_LIST = PATH + "/getCommentList";
+		public static final String COMMENT_ALL_LIST = PATH + "/getCommentAllList";
+		public static final String CUS_COMMENT_LIST = PATH + "/getCusCommentList";
+		
 		public static final String MORE_COMMENT_LIST = PATH + "/getMoreCommentList";
 		public static final String COMMENT_LIST_JSP = TILES_ROOT + PATH + "/list";
 		
-		public static final String POPUP = PATH + "/popup/{rDiv}/{rId}";
+		public static final String POPUP = PATH + "/popup/{rDiv}/{_rDiv}/{rId}";
 		public static final String POPUP_JSP  = TILES_ROOT + PATH + "/popup";
+		public static final String EDIT_POPUP  = PATH + "/getEditPopup";
 		
 		public static final String DELETE_COMMENT = PATH + "/deleteComment";
 		public static final String UPDATE_COMMENT = PATH + "/updateComment";
 		
 		public static final String COMMENT_INFO_ID = PATH + "/getCommentInfo/{commId}";
 		public static final String DIV_COMMENT_LIST = PATH + "/getDivCommentList";
+
+		public static final String DIV_COMMENT_BY_ID =  PATH + "/getDivCommentByCommId";
+
+		public static final String DIV_USER_COMMENT = PATH + "/getDivUserComment";
 	}
 	
 	public static final class PROCESSGUIDE {
@@ -164,6 +187,7 @@ public final class Url {
 		public static final String CHECK_EXIST_OSS_CONF = PATH + "/checkExistOssConf";
 		public static final String CHECK_VD_DIFF = PATH + "/checkVdiff";
 		public static final String SAVE_COMMENT = PATH + "/saveComment";
+		public static final String SEND_COMMENT = PATH + "/sendComment";
 		public static final String DELETE_COMMENT = PATH + "/deleteComment";
 		public static final String OSS_MERGE_CHECK_LIST = PATH + "/ossMergeCheckList/{ossId}/{newOssId}";
 		
@@ -197,6 +221,11 @@ public final class Url {
 		public static final String SAVE_OSS_URL_NICKNAME = PATH + "/saveOssURLNickName";
 
 		public static final String CHECK_OSS_LICENSE = PATH + "/checkOssLicense";
+
+		public static final String SELECT_OSS_POPUP = PATH + "/ossSelectPopup";
+
+		public static final String MERGE_OSS_CHECK_POPUP = PATH + "/mergeOssCheckPopup";
+
 		public static final String CHECK_OSS_LICENSE_JSP = TILES_ROOT + PATH + "/checkOssLicensepopup";
 
 		public static final String CHECK_OSS_LICENSE_AJAX = PATH + "/getCheckOssLicenseAjax/{targetName}";
@@ -249,6 +278,7 @@ public final class Url {
 		
 		public static final String AUTOCOMPLETE_AJAX = PATH + "/autoCompleteAjax";
 		public static final String AUTOCOMPLETE_VERSION_AJAX = PATH + "/autoCompleteVersionAjax";
+		public static final String AUTOCOMPLETE_DIVISION_AJAX = PATH + "/autoCompleteDivisionAjax";
 		public static final String AUTOCOMPLETE_MODEL_AJAX = PATH + "/autoCompleteModelAjax";
 		public static final String AUTOCOMPLETE_ID_AJAX = PATH + "/autoCompleteIdAjax";
 		
@@ -257,6 +287,7 @@ public final class Url {
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		
 		public static final String SAVE_3RD = PATH + "/save3rd";
 		public static final String SAVE_DEP = PATH + "/saveDep";
@@ -286,6 +317,8 @@ public final class Url {
 		public static final String UPDATE_PROJECT_STATUS = PATH + "/updateProjectStatus";
 		
 		public static final String IDENTIFICATION_ID_DIV = PATH + "/identification/{prjId}/{initDiv}";
+		public static final String IDENTIFICATION_ID_DIV_MODE = PATH + "/identification/{prjId}/{initDiv}/{mode}";
+		public static final String IDENTIFICATION_ID_DIV_DELETE = PATH + "/identification/delete/{prjId}/{initDiv}";
 		public static final String IDENTIFICATION_JSP = TILES_ROOT + PATH + "/identification";
 		public static final String IDENTIFICATION_CD = PATH + "/identificationProject/{code}";
 
@@ -346,6 +379,7 @@ public final class Url {
 		public static final String PAGE_JSP = TILES_ROOT + PATH + "/bomCompare";
 		public static final String BOM_COMPARE_LIST_AJAX = PATH + "/bomCompare/listAjax";
 		
+		public static final String PROJECT_CHANGE_VIEW = PATH + "/getProjectChangeView/{code}";
 		public static final String PROJECT_STATUS = PATH + "/getProjectStatus";
 		public static final String PROJECT_BINARY_FILE = PATH + "/getProjectBinaryFile";
 		public static final String PROJECT_BINARY_DB_SAVE = PATH + "/binaryDBSave";
@@ -370,6 +404,9 @@ public final class Url {
 		public static final String AUTO_REVIEW = PATH + "/autoReview/{startNow}";
 		public static final String AUTO_REVIEW_STATUS = PATH + "/autoReviewStatus";
 		public static final String AUTO_REVIEW_STOP = PATH + "/autoReviewStop";
+
+		public static final String SHARE_URL = PATH + "/shareUrl/{prjId}";
+
 	}
 	
 	public static final class VERIFICATION {
@@ -409,25 +446,27 @@ public final class Url {
 
 		public static final String DOWNLOAD_PACKAGING_MULTI = PATH + "/downloadPackageMulti";
 		public static final String DELETE_FILE = PATH + "/deleteFile";
+
+		public static final String DEFAULT_NOTICE_INFO = PATH + "/getDefaultNoticeInfo";
 	}
 	
-//	public static final class DISTRIBUTION {
-//		public static final String PATH = "/project/distribution";
-//		
-//		public static final String PAGE_ID = PATH + "/{prjId}";
-//		public static final String PAGE_JSP = TILES_ROOT + PATH + "";
-//		
-//		public static final String AVAILABLE_CHECK = PATH + "/availableCheck";
-//		public static final String SAVE_AJAX = PATH + "/saveAjax";
-//		public static final String DISTRIBUTE_ACT = PATH + "/distribute/{action}";
-//		
-//		public static final String ACTION_LOG_HIS_LIST = PATH + "/getActionLogHisList";
-//		public static final String ACTION_LOG_HIS_LIST_JSP = TILES_AJAX_ROOT +  PATH + "/logHis";
-//		
-//		// complete 이후 packaging file upload, verify, distribution 처리 url 
-//		public static final String REGIST_FILE = PATH + "/registFile";
-//		public static final String VERIFY = PATH + "/verify";
-//	}
+	public static final class DISTRIBUTION {
+		public static final String PATH = "/project/distribution";
+		
+		public static final String PAGE_ID = PATH + "/{prjId}";
+		public static final String PAGE_JSP = TILES_ROOT + PATH + "";
+		
+		public static final String AVAILABLE_CHECK = PATH + "/availableCheck";
+		public static final String SAVE_AJAX = PATH + "/saveAjax";
+		public static final String DISTRIBUTE_ACT = PATH + "/distribute/{action}";
+		
+		public static final String ACTION_LOG_HIS_LIST = PATH + "/getActionLogHisList";
+		public static final String ACTION_LOG_HIS_LIST_JSP = TILES_AJAX_ROOT +  PATH + "/logHis";
+		
+		// complete 이후 packaging file upload, verify, distribution 처리 url 
+		public static final String REGIST_FILE = PATH + "/registFile";
+		public static final String VERIFY = PATH + "/verify";
+	}
 	
 	public static final class PARTNER {
 		public static final String PATH = "/partner";
@@ -438,14 +477,19 @@ public final class Url {
 		public static final String EDIT = PATH + "/edit";
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
 		public static final String EDIT_ID =  PATH + "/edit/{partnerId}";
+		public static final String MODE_CONVERSION = PATH + "/{mode}/{partnerId}";
 		
 		public static final String VIEW_ID =  PATH + "/view/{partnerId}";
 		public static final String VIEW_JSP = TILES_ROOT + PATH + "/view";
 		
 		public static final String LIST_AJAX = PATH + "/listAjax";
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
+		
+		public static final String CHANGE_DIVISION_VIEW = PATH + "/changePartnerView/{code}";
+		
 		public static final String CHANGE_DIVISION_AJAX = PATH + "/changeDivisionAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		
 		public static final String AUTOCOMPLETE_CONF_NM_AJAX = PATH + "/autoCompleteConfNmAjax";
 		public static final String AUTOCOMPLETE_CONF_ID_AJAX = PATH + "/autoCompleteConfIdAjax";
@@ -497,6 +541,8 @@ public final class Url {
 		public static final String UPDATE_DESCRIPTION = PATH + "/updateDescription";
 		
 		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
+		
+		public static final String SHARE_URL = PATH + "/shareUrl/{partnerId}";
 	}
 	
 	public static final class USER {
@@ -570,6 +616,7 @@ public final class Url {
 		
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
 		public static final String DEL_AJAX = PATH + "/delAjax";
+		public static final String MULTI_DEL_AJAX = PATH + "/multiDelAjax";
 		
 		public static final String LICENSE_USERGUIDE_HTML_NM = PATH + "/getLicenseUserGuideHtml/{licenseName}";
 		public static final String ADD_WATCHER = PATH + "/addWatcher";
@@ -587,6 +634,10 @@ public final class Url {
 			
 		public static final String MAKE_YAML = PATH + "/makeYaml";
 		public static final String CHECK_SELECT_DOWNLOAD_FILE = PATH + "/checkSelectDownloadFile";
+		
+		public static final String CHANGE_MODE = PATH + "/changeMode/{prjId}/{mode}";
+		
+		public static final String SHARE_URL = PATH + "/shareUrl/{prjId}";
 	}
 	
 	public static final class COMPLIANCE {
@@ -658,13 +709,16 @@ public final class Url {
 		
 		public static final String EDIT = PATH + "/edit";
 		public static final String EDIT_JSP = TILES_ROOT + PATH + "/edit";
-		
+
 		public static final String SAVE_AJAX = PATH + "/saveAjax";
+
+		public static final String UPDATE_LOCALE_AJAX = PATH + "/updateDefaultLocale";
 
 		public static final String VIEW_SEARCH_CONDITION_AJAX = PATH + "/loadDefaultSearchCondition";
 		public static final String VIEW_SEARCH_CONDITION_JSP = TILES_AJAX_ROOT + PATH + "/searchConditionArea";
 		
 		public static final String UPDATE_SEARCH_CONDITION_AJAX = PATH + "/updateDefaultSearchCondition";
+
 	}
 	
 	public static final class SENT_MAIL {
@@ -797,6 +851,7 @@ public final class Url {
 			public static final String FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH	= "/downloadlocation_search";
 			public static final String FOSSLIGHT_API_AUTOANALYSIS_REGISTER				= "/autoAnalysis_register";
 			
+
 		/** LICENSE */
 			/** API License List 조회 */
 			public static final String FOSSLIGHT_API_LICENSE_SEARCH			= "/license_search";
@@ -824,9 +879,12 @@ public final class Url {
 			/** API Project BOM Tab Export JSON*/
 			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON	    = "/prj_bom_export_json";
 
+			/** API Project Security Tab Export JSON (LGE Only)*/
+			public static final String FOSSLIGHT_API_PROJECT_Security_EXPORT_JSON	    = "/prj_security_export_json";
+
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/prj_bom_compare";
-			
+
 			/** API Project Add Watcher */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/prj_watcher_add";
 			
@@ -871,6 +929,12 @@ public final class Url {
 		/** CODE */
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/code_search";
+			
+			public static final String FOSSLIGHT_API_OSS_LOAD_SRC 				= "/oss_load_src";
+
+			public static final String FOSSLIGHT_API_OSS_LOAD_BIN 				= "/oss_load_bin";
+
+			public static final String FOSSLIGHT_API_OSS_LOAD_DEP 				= "/oss_load_dep";
 	}
 
 	public static final class APIV2 {
@@ -984,7 +1048,8 @@ public final class Url {
 		public static final String SELFCHECK = PATH + "/selfcheck";
 		public static final String PARTNER = PATH + "/partner";
 		public static final String VULNERABILITY = PATH + "/vulnerability";
-
+		public static final String SAVE_USER_COLUMNS_AJAX = PATH + "/saveUserColumns";
+		public static final String GET_USER_COLUMNS_AJAX = PATH + "/getUserColumns";
 	}
 
 }

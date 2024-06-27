@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:replace="project/list-header :: headerFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="project/list-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <div class="custom-layout">
+            <!-- Content Header (Page header) -->
+            <section class="content-header"></section>
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                	<form id="projectSearch" name="projectSearch">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card card-dark card-outline collapsed-card search-form mb-3">
+                                <div class="card-header" style="border-bottom: none;">
+                                    <div class="row">
+                                        <div class="col-md-7 d-flex">
+                                        	<div class="row" style="width: 100%;">
+                                        		<div class="col-12">
+                                        			<div class="input-group">
+                                        				<button type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="|+ Add|"></button>
+                                                        <input class="save-value" name="defaultSearchType" type="hidden" th:value="PROJECT"/>
+                                                		<input type="text" class="form-control autoComProjectNm save-value" style="border-right: 0px solid #fff;" name="prjIdName" placeholder="Project ID or Name" th:value="${searchBean?.prjIdName}">
+                                                		<div class="input-group-append">
+                                                			<span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
+                                                				<input class="form-check-input save-value" id="checkbox3" name="publicYn" th:checked="${searchBean?.publicYn == null or searchBean?.publicYn == 'N'}" type="checkbox">
+                                                				<label class="form-check-label text-blue-gray text-sm" for="checkbox3" th:text="'My Project'"></label>
+                                                			</span>
+                                                		</div>
+                                                		<div class="input-group-append">
+                                                    		<button id="search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                                                		</div>
+                                            		</div>
+                                        		</div>
+                                        	</div>
+                                   		</div>
+                                        <div class="col-md-3 pl-3 d-flex justify-content-start">
+                                            <div class="input-group-append d-flex align-items-center">
+                                             	<a class="text-blue-gray text-center" data-card-widget="collapse" style="font-size: 1rem;" title="Collapse">
+                                             		<span class="row" th:text="'+ Advanced Search'"></span><span class="row ml-3 text-lg-red text-xs optionSelected" style="display: none;" th:text="'option selected'"></span>
+                                             	</a>
+                                         	</div>
+                                        </div>
+                                        <div th:if="${@environment.getProperty('fosslight.suffix') != null}" class="col-md-2 pr-3">
+                                            <div class="helpLink f-left dropdown float-right mt-1">
+                                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+                                                <div class="dropdown-menu mt-0">
+                                                    <a class="dropdown-item" href="#" th:onclick="|openHelpGuideLink('Project_List_Main')|">How to use FossLight Hub</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body py-1">
+										<div class="row">
+                                            <!-- <div class="col-4">
+                                                <div class="form-group mb-2">
+                                                    <input type="text" name="prjId" class="form-control save-value" placeholder="ID" th:value="${searchBean?.prjId}">
+                                                </div>
+                                            </div> -->
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
+                                                        <select class="form-control select2 save-value" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
+                                                            <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}">
+                                                            	<option th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}" th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}"></option>
+                                                            </th:block>
+                                                     	</select>
+                                                    </th:block>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group mb-2">
+                                                    <div class="input-group" style="width: 100%;">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">
+                                                                <i class="far fa-calendar-alt"></i>
+                                                            </span>
+                                                        </div>
+                                                        <input type="text" class="form-control" placeholder="Created Date" id="createdDate">
+                                                        <input class="save-value" name="schStartDate" id="schStartDate" type="hidden" th:value="${searchBean?.schStartDate}" />
+														<input class="save-value" name="schEndDate" id="schEndDate" type="hidden" th:value="${searchBean?.schEndDate}" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+												<div class="form-group mb-2">
+                                                	<div class="input-group">
+                                                    	<input type="text" class="form-control autoComProjectDivision save-value" placeholder="Divsion" name="prjDivision" th:value="${searchBean?.prjDivision}" />
+                                                	</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <div class="form-group mb-2">
+                                                	<div class="input-group">
+                                                    	<input type="text" class="form-control autoComCreatorDivision save-value" placeholder="Creator" name="creator" th:value="${searchBean?.creator}" />
+                                                	</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group mb-2">
+                                                	<div class="input-group">
+                                                    	<input type="text" class="form-control autoComReviewer save-value" placeholder="Reviewer" name="reviewer" th:value="${searchBean?.reviewer}" />
+                                                	</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="form-group mb-2">
+                                                	<div class="input-group">
+                                                    	<input type="text" class="form-control save-value" placeholder="Watcher" name="watchers" th:value="${searchBean.watchers != null} ? ${searchBean.watchers[0]}" />
+                                                	</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <select class="select2 save-value" name="networkServerType" id="networkServerTypeSelect"
+                                                            style="width: 100%;">
+                                                        <option value=""></option>
+                                                        <option value="Y" th:selected="${#strings.equals(searchBean.networkServerType, 'Y')}" th:text="|Yes|"></option>
+                                                        <option value="N" th:selected="${#strings.equals(searchBean.networkServerType, 'N')}" th:text="|No|"></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                          	<!-- <div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
+                                                        <select class="form-control select2 save-value" multiple="multiple" id="prjStatusSelect" name="statuses" style="width: 100%;">
+                                                            <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}">
+                                                            	<option th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}" th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}"></option>
+                                                            </th:block>
+                                                     	</select>
+                                                    </th:block>
+                                                </div>
+                                            </div> -->
+                                          	<div class="col-md-4">
+                                                <div class="form-group mb-2">
+                                                    <select class="form-control select2 save-value" style="width: 100%;" id="priority" name="priority">
+                                                    	<option th:value="''"></option>
+                                                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                                                            <option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.priority != null and option.cdDtlNo == searchBean?.priority}"></option>
+                                                       	</th:block>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                       			<div class="form-group mb-2">
+                                               		<input type="type" name="schBinaryName" class="form-control save-value" th:placeholder="|Binary Name|" th:value="${searchBean?.schBinaryName}">
+                                            	</div>
+                                       		</div>
+                                        </div>
+                                        <div class="row">
+                                        	<div class="col-4">
+                                                <div class="form-group mb-2">
+                                                	<div class="input-group">
+                                                    	<input type="text" class="form-control save-value" placeholder="Model Name" name="modelName" th:value="${searchBean?.modelName}"/>
+                                                	</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <select class="select2 save-value" name="distributionType" id="distributionTypeSelect" style="width: 100%;">
+                                                    <option value=""></option>
+                                                    <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'))}">
+                                                    	<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${searchBean?.distributionType != null && option.cdDtlNo == searchBean?.distributionType}"></option>
+                                                    </th:block>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                           		<div class="form-group mb-2">
+													<select class="select2 save-value" name="noticeType" id="noticeTypeSelect" style="width: 100%;">
+														<option></option>
+														<th:block th:each="code, status : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_NOTICE_TYPE'))}">
+															<option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+														</th:block>
+													</select>
+												</div>
+                                         	</div>
+                                        </div>
+                                       	<div class="row">
+                                       		<div class="col-md-4">
+                                           		<div class="form-group mb-2">
+                                              		<input type="type" name="ossName" class="form-control autoComOss save-value" th:placeholder="|OSS Name|" th:value="${searchBean?.ossName}">
+                                          		</div>
+                                        	</div>
+                                       		<div class="col-md-4">
+                                          		<div class="form-group mb-2">
+                                               		<input type="type" name="ossVersion" class="form-control autoComOssVersion save-value" th:placeholder="|OSS Version|" th:value="${searchBean?.ossVersion}">
+                                            	</div>
+                                        	</div>
+                                        	<div class="col-md-4">
+                                        		<div class="form-group mb-2">
+                                               		<input type="type" name="licenseName" class="form-control autoComLicense save-value" th:placeholder="|License Name|" th:value="${searchBean?.licenseName}">
+                                               	</div>
+                                        	</div>
+                                    	</div>
+                                    	<div class="row">
+                                       		<div class="col-md-4">
+                                            	<div class="form-group mb-2">
+                                                 	<textarea class="form-control save-value" name="comment" th:placeholder="|Additional Information|" rows="3" th:utext="${searchBean?.comment}"></textarea>
+                                            	</div>
+                                          	</div>
+                                       		<div class="col-md-4">
+                                          		<div class="form-group mb-2">
+                                              		<textarea class="form-control save-value" name="userComment" th:placeholder="|Comment|" rows="3" th:utext="${searchBean?.userComment}"></textarea>
+                                            	</div>
+                                         	</div>
+											<div class="col-md-4">
+												<div th:if="${partnerFlag}" class="form-group mb-2">
+													<input type="search" name="refPartnerName" class="form-control save-value" th:placeholder="|3rd Party Name|" th:value="${searchBean?.refPartnerName}">
+												</div>
+											</div>
+                                    	</div>
+                                   		<div class="row">
+                               				<div class="col-md-12">
+                               					<div class="p-2 text-center">
+                                         			<button class="btn btn-ivory btn-sm btn-icon" th:onclick="|updateSearchCondition('projectSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-download mr-xm"></i> save conditions
+                                         			</button>
+                                           			<button class="btn btn-ivory btn-sm btn-icon ml-2" th:onclick="|resetForm('projectSearch')|" data-toggle="tooltip" data-placement="right" type="button">
+                                              			<i class="fa fa-undo mr-xm"></i> reset
+                                           			</button>
+                                       			</div>
+                               				</div>
+                               			</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+					</form>
+
+                    <div class="row px-1">
+                        <div class="col-md-6">
+                            <div class="row">
+                            	<button type="button" class="btn btn-outline-dark btn-sm width-10rem mr-xm px-3" th:onclick="|fn.copy()|" th:text="Copy"></button>
+                                <div class="btn-group btn-group-sm width-10rem mr-xm" id="ChangeContainer">
+                                    <button type="button" class="btn btn-outline-dark px-3" th:text="Change"></button>
+                                    <button type="button" class="btn btn-outline-dark dropdown-toggle dropdown-icon" data-toggle="dropdown">
+                                        <span class="sr-only" th:text="'Toggle Dropdown'"></span>
+                                    </button>
+                                    <div class="dropdown-menu" id="ChangeList" role="menu">
+                                        <a class="dropdown-item" href="#" th:onclick="|fn.checkProjectStatus()|" th:text="Status"></a>
+                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeDivision()|" th:text="Division"></a>
+                                        <a class="dropdown-item" href="#" th:onclick="|fn.changeWatcher()|" th:text="Watcher"></a>
+                                    </div>
+                                </div>
+                            	<button type="button" class="btn btn-outline-dark btn-sm width-10rem mr-xm px-3" th:onclick="|fn.bomCompare()|" th:text="'BOM Compare'"></button>
+                            </div>
+                        </div>
+<!--                    <div class="col-md-6">
+                            <div class="row float-right">
+                           		<button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                                <button type="button" class="btn btn-lg-teal btn-sm width-6rem mr-xm px-3" th:onclick="|createTabInFrame('New_Project', '/project/edit')|" th:text="Add"></button>
+                            </div>
+                        </div> -->
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 mt-3">
+                            <div class="col-sm-12 jqGridSet" id="projectGrid">
+                                <table id="list"><tr><td></td></tr></table>
+                                <div id="pager"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- loading bar -->
+                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+                <!-- /. loading bar -->
+            </section>
+        </div>
+    </div>
+    </div>
+</body>
+</html>

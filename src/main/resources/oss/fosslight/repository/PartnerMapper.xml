@@ -22,7 +22,22 @@
 				LEFT JOIN OSS_COMPONENTS_LICENSE t5  ON t4.COMPONENT_ID = t5.COMPONENT_ID
 	   		WHERE
 				t1.USE_YN = 'Y'
-				<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
+					AND (
+						t1.CREATOR = #{loginUserName}	
+						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+							OR t1.REVIEWER = #{loginUserName}	
+						</if>
+							OR EXISTS (
+							SELECT 1
+							  FROM PARTNER_WATCHER A1
+						     WHERE A1.PARTNER_ID = t1.PARTNER_ID 
+						     AND A1.USER_ID = #{loginUserName}
+						     OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}))
+							)
+						)
+				</if>
+<!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 					AND (t1.CREATOR = #{loginUserName} 
 						OR EXISTS (
 						SELECT 1
@@ -35,10 +50,10 @@
                 		OR t1.PUBLIC_YN = 'Y'
            		 	</if>
                 	)
-				</if>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+				</if> -->
+<!-- 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 					AND t1.PARTNER_ID = #{partnerId}
-				</if>
+				</if> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 					AND t4.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
 				</if>
@@ -57,7 +72,7 @@
 						</foreach>
 				</if>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerName)">
-					AND t1.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{partnerName}, '_', '\\\\_'),'%')
+					AND (t1.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{partnerName}, '_', '\\\\_'),'%') OR t1.PARTNER_ID = #{partnerName})
 				</if>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareName)">
 					AND t1.SOFTWARE_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{softwareName}, '_', '\\\\_'),'%')
@@ -176,7 +191,22 @@
 				  LEFT JOIN T2_FILE t10 ON t10.FILE_SEQ = t1.BINARY_FILE_ID
 			   ) A		
 		 WHERE A.USE_YN = 'Y'
-		<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
+			AND (
+				A.CREATOR_ID = #{loginUserName}	
+				<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
+					OR A.REVIEWER = #{loginUserName}	
+				</if>
+					OR EXISTS (
+					SELECT 1
+					  FROM PARTNER_WATCHER A1
+				     WHERE A1.PARTNER_ID = A.PARTNER_ID 
+				     AND A1.USER_ID = #{loginUserName}
+				     OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{loginUserName}))
+					)
+				)
+		</if>
+<!-- 	<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)">
 			AND (A.CREATOR_ID = #{loginUserName} 
 					OR EXISTS (
 					SELECT 1
@@ -189,10 +219,10 @@
                 	OR A.PUBLIC_YN = 'Y'
            		</if>
         	)
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+		</if> -->
+<!-- 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 		   AND A.PARTNER_ID = #{partnerId}
-		</if>
+		</if> -->
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 		   AND A.OSS_NAME LIKE CONCAT('%',#{ossName},'%')
 		</if>
@@ -211,7 +241,7 @@
 			</foreach>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerName)">
-		   AND A.PARTNER_NAME LIKE CONCAT('%',#{partnerName},'%')
+		   AND (A.PARTNER_ID = #{partnerName} OR A.PARTNER_NAME LIKE CONCAT('%',#{partnerName},'%'))
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(softwareName)">
 		   AND A.SOFTWARE_NAME LIKE CONCAT('%',#{softwareName},'%')
@@ -626,10 +656,11 @@
 	
 	<select id="selectPartnerWatcher" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.PartnerWatcher">
 	SELECT T1.PARTNER_ID
-		 , T1.DIVISION
-		 , T1.USER_ID
-		 , T2.USER_NAME
-		 , T1.EMAIL
+		 , T1.DIVISION PAR_DIVISION
+		 , T3.CD_DTL_NM PAR_DIVISION_NAME 
+		 , T1.USER_ID PAR_USER_ID
+		 , T2.USER_NAME PAR_USER_NAME
+		 , T1.EMAIL PAR_EMAIL
 		 , T2.USE_YN AS USER_USE_YN
 	     , T3.USE_YN AS DEPT_USE_YN
 	  FROM PARTNER_WATCHER T1 

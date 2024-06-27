@@ -1,55 +1,18 @@
 <table cellpadding="0" cellspacing="0" border="0">
-#foreach ($mapEntry in $noticeData.entrySet())
-#set ($binaryPathList = $mapEntry.key.split(","))
-<tr id="id$velocityCount"><td class="same-license">
+<th:block th:each="mapEntry : ${noticeData.entrySet()}"><th:block th:with="binaryPathList=${mapEntry.key.split(',')}"><tr id="id$velocityCount"><td class="same-license">
 <div class="label">Notices for file(s):</div>
-<div class="file-list">
-#foreach ($binaryPath in $binaryPathList)
-$binaryPath<br/>
-#end
-</div><!-- file-list -->
-<!-- license-text -->
-<pre class="license-text">
-#foreach ($!{ossInfo} in $!{mapEntry.value})
-$!{ossInfo.ossName}($!{ossInfo.licenseName})
-$!{ossInfo.copyrightText}
-#end
-
-#set ($attributionCnt = 0)
-#foreach ($!{ossInfo} in $!{mapEntry.value})
-#foreach ($!{licenseInfo} in $!{ossInfo.componentLicenseList})
-#if($!{licenseInfo.attribution} != "")
-#set ($attributionCnt = $attributionCnt + 1)
+<div class="file-list"><th:block th:each="binaryPath : ${binaryPathList}">
+<th:block th:text="${binaryPath}"></th:block></th:block></div>
+<pre class="license-text"><th:block th:each="ossInfo : ${mapEntry.value}">
+<th:block th:text="${ossInfo.ossName} + '(' + ${ossInfo.licenseName} + ')'"></th:block>
+<th:block th:utext="${ossInfo.copyrightText}"></th:block></th:block><th:block th:with="attributionCnt=0"><th:block th:each="ossInfo : ${mapEntry.value}"><th:block th:each="licenseInfo : ${ossInfo.componentLicenseList}"><th:block th:if="${licenseInfo.attribution != null and licenseInfo.attribution != ''}"><th:block th:with="attributionCnt=${attributionCnt + 1}"></th:block>
 ------------------------
-$!{licenseInfo.licenseName} Attribution
-$!{licenseInfo.attribution}
-#end
-#end
-#end
-#foreach ($!{ossInfo} in $!{mapEntry.value})
-#if($!{ossInfo.attribution} != "")
-#set ($attributionCnt = $attributionCnt + 1)
+<th:block th:text="${licenseInfo.licenseName} + ' Attribution'"></th:block>
+<th:block th:utext="${licenseInfo.attribution}"></th:block></th:block></th:block></th:block><th:block th:each="ossInfo : ${mapEntry.value}"><th:block th:if="${ossInfo.attribution != null and ossInfo.attribution != ''}"><th:block th:with="attributionCnt=${attributionCnt + 1}"></th:block>
 ------------------------
-$!{ossInfo.ossName} Attribution
-$!{ossInfo.attribution}
-#end
-#end
-#if($attributionCnt > 0)
-------------------------
-#end
-#set($duplicateLicense = [])
-#foreach ($!{ossInfo} in $!{mapEntry.value})
-#foreach ($!{licenseInfo} in $!{ossInfo.componentLicenseList})
-#if($!{licenseInfo.licenseText} != "" && $!{licenseInfo.obligationType} == "10" && !$duplicateLicense.contains($!{licenseInfo.licenseName}))
-#set($swallow = $duplicateLicense.add($!{licenseInfo.licenseName}))
-
-$!{licenseInfo.licenseName}
-
-$!{licenseInfo.licenseText}
-#end
-#end
-#end
-</pre><!-- license-text --> 
-</td></tr><!-- same-license -->
-#end
+<th:block th:text="${ossInfo.ossName} + ' Attribution'"></th:block>
+<th:block th:utext="${ossInfo.attribution}"></th:block></th:block></th:block><th:block th:if="${attributionCnt > 0}">
+------------------------</th:block></th:block><th:block th:each="ossInfo : ${mapEntry.value}"><th:block th:each="licenseInfo : ${ossInfo.deduplicatedComponentLicenseList}"><th:block th:if="${licenseInfo.licenseText != '' and licenseInfo.obligationType == '10'}">
+<th:block th:text="${licenseInfo.licenseName}"></th:block>
+<th:block th:utext="${licenseInfo.licenseText}"></th:block></th:block></th:block></th:block><br/><br/><br/></pre></td></tr></th:block></th:block>
 </table>

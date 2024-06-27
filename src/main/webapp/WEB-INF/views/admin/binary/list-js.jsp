@@ -467,7 +467,7 @@ var batList = {
 			}, ondblClickRow: function(rowid,iRow,iCol,e) {}
 		});
 		
-		$("#list").jqGrid('navGrid',"#pager",{edit:isAdmin,add:false,del:isAdmin,search:false,refresh:false},updateDialogEdit, null, updateDialogDel);
+		$("#list").jqGrid('navGrid',"#pager",{edit:isAdmin, add:false, del:isAdmin, search:false, refresh:false}, updateDialogEdit, null, updateDialogDel);
 		$("#list").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
 	}
 }

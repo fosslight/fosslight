@@ -23,6 +23,9 @@ public class LicenseMaster extends ComBean implements Serializable {
 	/** The license id. */
 	private String licenseId;					//라이센스 ID
 	
+	/** The license ids. */
+	private String[] licenseIds;					//라이센스 ID
+	
 	/** The license name. */
 	private String licenseName;					//라이센스 이름
 	
@@ -134,6 +137,9 @@ public class LicenseMaster extends ComBean implements Serializable {
 	
 	/** The restrictionList. */
 	private String restrictionList;
+
+	/** The restriction cdNo. */
+	private List<String> restrictionCdNoList;
 	
 	private String licenseNameAllSearchFlag;
 	
@@ -803,6 +809,10 @@ public class LicenseMaster extends ComBean implements Serializable {
 		this.restrictionList = restrictionList;
 	}
 
+	public List<String> getRestrictionCdNoList() { return restrictionCdNoList; }
+
+	public void setRestrictionCdNoList(List<String> restrictionCdNoList) { this.restrictionCdNoList = restrictionCdNoList; }
+
 	public String getRestrictionStr() {
 		return restrictionStr;
 	}
@@ -849,6 +859,14 @@ public class LicenseMaster extends ComBean implements Serializable {
 
 	public void setDefaultSearchFlag(String defaultSearchFlag) {
 		this.defaultSearchFlag = defaultSearchFlag;
+	}
+
+	public String[] getLicenseIds() {
+		return licenseIds;
+	}
+
+	public void setLicenseIds(String[] licenseIds) {
+		this.licenseIds = licenseIds;
 	}
 	
 }

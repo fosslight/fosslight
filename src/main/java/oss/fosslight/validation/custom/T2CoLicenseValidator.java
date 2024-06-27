@@ -20,11 +20,13 @@ public class T2CoLicenseValidator extends T2CoValidator {
 	
 	private LicenseService 	licenseService 	= (LicenseService) getWebappContext().getBean(LicenseService.class);
 	private String licenseId = null;
+	private String licenseName = null;
 	private String VALID_TYPE = null;
 	public final String VALID_LICNESELIST_BULK = "LICENSELIST_BULK";
 
 	private String PROC_TYPE = null;
 	public final String PROC_TYPE_DELETE				 		= "DEL";
+	public final String PROC_TYPE_MULTY_DELETE				 	= "MUL_DEL";
 	
 	@Override
 	protected void customValidation(Map<String, String> map, Map<String, String> errMap, Map<String, String> diffMap, Map<String, String> infoMap) {
@@ -39,6 +41,26 @@ public class T2CoLicenseValidator extends T2CoValidator {
 					if (ossCnt > 40) {
 						errMsg += "<br>...";
 						
+						break;
+					}
+					
+					errMsg += "<br>" + MessageFormat.format(getCustomMessage("LICENSE_NAME.OSSUSEDEXP"), bean.getOssId(), bean.getOssId(), bean.getOssName() + (!isEmpty(bean.getOssVersion()) ? " " : "") + avoidNull(bean.getOssVersion()));
+					ossCnt ++;
+				}
+				
+				errMap.put("LICENSE_NAME", errMsg);
+			}
+		} else if (PROC_TYPE_MULTY_DELETE.equals(PROC_TYPE)) {
+			List<OssMaster> result = licenseService.checkExistsUsedOss(licenseId);
+			
+			if (result != null && !result.isEmpty()) {
+				String errMsg = MessageFormat.format(getCustomMessage("LICENSE_NAME.OSSUSED"), result.size());
+				int ossCnt = 1;
+				
+				for (OssMaster bean : result) {
+					if (ossCnt > 5) {
+						errMsg += "<br><button class=\"btn btn-outline-dark btn-xs width-4rem mr-xm px-1 mt-1\" type=\"button\" onclick=\"fn.onMoreLicenseDisplay('" + licenseName + "')\">More +</button>";
+
 						break;
 					}
 					
@@ -150,6 +172,10 @@ public class T2CoLicenseValidator extends T2CoValidator {
 	public void setAppendix(String key, Object obj) {
 		if ("licenseId".equals(key)) {
 			this.licenseId = (String) obj;
+		}
+		
+		if ("licenseName".equals(key)) {
+			this.licenseName = (String) obj;
 		}
 	}
 

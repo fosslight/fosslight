@@ -29,6 +29,7 @@ import oss.fosslight.service.T2UserService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Api(tags = {"1. OSS & License"})
 @RequiredArgsConstructor
@@ -56,22 +57,27 @@ public class ApiOssV2Controller extends CoTopComponent {
     public @ResponseBody ResponseEntity<ListOssDto.Result> getOssInfo(
             @RequestHeader String authorization,
             @ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
+            @ApiParam(value = "OSS Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String ossNameExact,
             @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
             @ApiParam(value = "Download Location", required = false) @RequestParam(required = false) String downloadLocation,
-            @ApiParam(value = "Count Per Page (max 10000, default 10000)", required = false) @RequestParam(required = false) String countPerPage,
+            @ApiParam(value = "Download Location Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String downloadLocationExact,
+            @ApiParam(value = "Count Per Page (max: 10000, default: 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
             @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false) String page
     ) {
         try {
-            var _page = (page == null ? 1 : Integer.parseInt(page));
-            var _countPerPage = (countPerPage == null ? 10000 : Integer.parseInt(countPerPage));
+            var _page = Integer.parseInt(page);
+            var _countPerPage = Integer.parseInt(countPerPage);
             if (_page < 0 || _countPerPage < 0 ) {
                 throw new NumberFormatException();
             }
 
             ListOssDto.Request ossQuery =
-                    ListOssDto.Request.builder().ossName(ossName)
+                    ListOssDto.Request.builder()
+                            .ossName(ossName)
                             .url(downloadLocation)
                             .ossVersion(ossVersion)
+                            .ossNameExact(Objects.equals(ossNameExact, "Y"))
+                            .urlExact(Objects.equals(downloadLocationExact, "Y"))
                             .build();
             ossQuery.setPage(_page);
             ossQuery.setCountPerPage(_countPerPage);
@@ -91,26 +97,30 @@ public class ApiOssV2Controller extends CoTopComponent {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_LICENSE_SEARCH_TEST})
-    public @ResponseBody ResponseEntity<ListLicenseDto.Result> getLicenseInfoTest(
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_LICENSE_SEARCH})
+    public @ResponseBody ResponseEntity<ListLicenseDto.Result> getLicenseInfo(
             @RequestHeader String authorization,
             @ApiParam(value = "License Name", required = false) @RequestParam(required = false) String licenseName,
-            @ApiParam(value = "Count Per Page (max 10000, default 10000)", required = false) @RequestParam(required = false) String countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false) String page) {
+            @ApiParam(value = "License Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String licenseNameExact,
+            @ApiParam(value = "Count Per Page (max 10000, default 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
+            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page) {
 
         // 사용자 인증
         userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         try {
-            var _page = (page == null ? 1 : Integer.parseInt(page));
-            var _countPerPage = (countPerPage == null ? 10000 : Integer.parseInt(countPerPage));
+            var _page = Integer.parseInt(page);
+            var _countPerPage = Integer.parseInt(countPerPage);
             if (_page < 0 || _countPerPage < 0 ) {
                 throw new NumberFormatException();
             }
+
             ListLicenseDto.Request licenseQuery =
-                    ListLicenseDto.Request.builder().licenseName(licenseName)
-                                    .build();
+                    ListLicenseDto.Request.builder()
+                            .licenseName(licenseName)
+                            .licenseNameExact(Objects.equals(licenseNameExact, "Y"))
+                            .build();
             licenseQuery.setPage(_page);
             licenseQuery.setCountPerPage(_countPerPage);
 
@@ -158,32 +168,32 @@ public class ApiOssV2Controller extends CoTopComponent {
 //                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
 //        }
 //    }
-
-    @ApiOperation(value = "Search License Info", notes = "License Info 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_LICENSE_SEARCH})
-    public ResponseEntity<Map<String, Object>> getLicenseInfo(
-            @RequestHeader String authorization,
-            @ApiParam(value = "License Name", required = false) @RequestParam(required = false) String licenseName) {
-
-        // 사용자 인증
-        userService.checkApiUserAuth(authorization);
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-
-        try {
-            List<Map<String, Object>> content = apiOssService.getLicenseInfo(licenseName);
-            if (content.size() == 0) {
-                return responseService.errorResponse(HttpStatus.NOT_FOUND, "license not found");
-            }
-            resultMap.put("content", content);
-            return ResponseEntity.ok(resultMap);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
-        }
-    }
+//
+//    @ApiOperation(value = "Search License Info", notes = "License Info 조회")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
+//    })
+//    @GetMapping(value = {APIV2.FOSSLIGHT_API_LICENSE_SEARCH})
+//    public ResponseEntity<Map<String, Object>> getLicenseInfo(
+//            @RequestHeader String authorization,
+//            @ApiParam(value = "License Name", required = false) @RequestParam(required = false) String licenseName) {
+//
+//        // 사용자 인증
+//        userService.checkApiUserAuth(authorization);
+//        Map<String, Object> resultMap = new HashMap<String, Object>();
+//
+//        try {
+//            List<Map<String, Object>> content = apiOssService.getLicenseInfo(licenseName);
+//            if (content.size() == 0) {
+//                return responseService.errorResponse(HttpStatus.NOT_FOUND, "license not found");
+//            }
+//            resultMap.put("content", content);
+//            return ResponseEntity.ok(resultMap);
+//        } catch (Exception e) {
+//            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+//                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
+//        }
+//    }
 
     @ApiOperation(value = "Register New OSS", notes = "신규 OSS 등록")
     @ApiImplicitParams({

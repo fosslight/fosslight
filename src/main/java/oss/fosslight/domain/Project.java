@@ -29,9 +29,9 @@ public class Project extends ComBean implements Serializable {
 				+ ", completeYn=" + completeYn + ", reviewer=" + reviewer + ", useYn=" + useYn + ", prjIds="
 				+ Arrays.toString(prjIds) + ", category=" + category + ", subcategory=" + subcategory + ", modelName="
 				+ modelName + ", releaseDate=" + releaseDate + ", prjDivision=" + prjDivision + ", prjDivisionName="
-				+ prjDivisionName + ", prjUserId=" + prjUserId + ", prjUserName=" + prjUserName + ", watchers="
-				+ Arrays.toString(watchers) + ", watcherList=" + watcherList + ", modelList=" + modelList + ", copy="
-				+ copy + ", oldId=" + oldId + ", lastModifiedTime=" + lastModifiedTime + ", distributeTarget="
+				+ prjDivisionName + ", prjUserId=" + prjUserId + ", prjUserName=" + prjUserName + ", prjEmail=" + prjEmail 
+				+ ", watchers=" + Arrays.toString(watchers) + ", watcherList=" + watcherList + ", modelList=" + modelList 
+				+ ", copy=" + copy + ", oldId=" + oldId + ", lastModifiedTime=" + lastModifiedTime + ", distributeTarget="
 				+ distributeTarget + ", destributionStatus=" + destributionStatus + ", distributeMasterCategory="
 				+ distributeMasterCategory + ", distributeName=" + distributeName + ", distributeSoftwareType="
 				+ distributeSoftwareType + ", distributeDeployYn=" + distributeDeployYn + ", distributeDeployTime="
@@ -60,6 +60,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The prj name. */
 	private String prjName;
+	
+	/** The prj id name. */
+	private String prjIdName;
 	
 	/** The prj version. */
 	private String prjVersion;
@@ -356,11 +359,13 @@ public class Project extends ComBean implements Serializable {
 	private int statusPermission;
 	
 	private String secCode;
+	private String secCvssScore;
 	
 	private String vulDocInst;
 	private String vulDocInfo;
-	
+
 	private Float standardScore;
+	
 	private String copyWatcherLocation;
 	/** add watcher list. */
 	private ArrayList<Map<String, String>> changeWatcherList;
@@ -423,7 +428,11 @@ public class Project extends ComBean implements Serializable {
 	private String packageFileId2; // 오픈소스 파일ID
 	private String packageFileId3; // 오픈소스 파일ID
 	private String packageVulDocFileId;
-	
+
+	private String packageFileType1; // 오픈소스 파일type
+	private String packageFileType2; // 오픈소스 파일type
+	private String packageFileType3; // 오픈소스 파일type
+
 	/** The notice file. */
 	private List<T2File> noticeFile; // 라이센스 파일객체
 
@@ -519,6 +528,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The ref partner id. */
 	private String refPartnerId;
+	
+	/** The ref partner name. */
+	private String refPartnerName;
 
 	/** The readme content. */
 	// README 파일 용
@@ -689,6 +701,9 @@ public class Project extends ComBean implements Serializable {
 	private String userRole;
 	
 	private String reuseKeyword;
+	private String reuseRefPrjId1;
+	private String reuseRefPrjId2;
+	private String reuseRefPrjId3;
 	
 	private String ossAnalysisStatus;
 	
@@ -705,6 +720,8 @@ public class Project extends ComBean implements Serializable {
 	/** The cyclonedx file id. */
 	private String cdxJsonFileId;
 	private String cdxXmlFileId;
+	
+	private String[] noticeFileFormat;
 	
 	/**
 	 * Gets the upd vuln.
@@ -4419,5 +4436,85 @@ public class Project extends ComBean implements Serializable {
 
 	public void setChangeWatcherList(ArrayList<Map<String, String>> changeWatcherList) {
 		this.changeWatcherList = changeWatcherList;
+	}
+
+	public String[] getNoticeFileFormat() {
+		return noticeFileFormat;
+	}
+
+	public void setNoticeFileFormat(String[] noticeFileFormat) {
+		this.noticeFileFormat = noticeFileFormat;
+	}
+
+	public String getSecCvssScore() {
+		return secCvssScore;
+	}
+
+	public void setSecCvssScore(String secCvssScore) {
+		this.secCvssScore = secCvssScore;
+	}
+
+	public String getRefPartnerName() {
+		return refPartnerName;
+	}
+
+	public void setRefPartnerName(String refPartnerName) {
+		this.refPartnerName = refPartnerName;
+	}
+
+	public String getReuseRefPrjId1() {
+		return reuseRefPrjId1;
+	}
+
+	public void setReuseRefPrjId1(String reuseRefPrjId1) {
+		this.reuseRefPrjId1 = reuseRefPrjId1;
+	}
+
+	public String getReuseRefPrjId2() {
+		return reuseRefPrjId2;
+	}
+
+	public void setReuseRefPrjId2(String reuseRefPrjId2) {
+		this.reuseRefPrjId2 = reuseRefPrjId2;
+	}
+
+	public String getReuseRefPrjId3() {
+		return reuseRefPrjId3;
+	}
+
+	public void setReuseRefPrjId3(String reuseRefPrjId3) {
+		this.reuseRefPrjId3 = reuseRefPrjId3;
+	}
+	
+	public String getPackageFileType1() {
+		return packageFileType1;
+	}
+
+	public void setPackageFileType1(String packageFileType1) {
+		this.packageFileType1 = packageFileType1;
+	}
+
+	public String getPackageFileType2() {
+		return packageFileType2;
+	}
+
+	public void setPackageFileType2(String packageFileType2) {
+		this.packageFileType2 = packageFileType2;
+	}
+
+	public String getPackageFileType3() {
+		return packageFileType3;
+	}
+
+	public void setPackageFileType3(String packageFileType3) {
+		this.packageFileType3 = packageFileType3;
+	}
+
+	public String getPrjIdName() {
+		return prjIdName;
+	}
+
+	public void setPrjIdName(String prjIdName) {
+		this.prjIdName = prjIdName;
 	}
 }

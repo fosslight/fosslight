@@ -1,37 +1,50 @@
-					<table cellspacing="0" cellpadding="0" border="0">
-						<tr>
-							<td width="1" style="background:#ddd"></td>
-							<td style="padding:40px;">
-							<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!modifierNm "$!ossBeforeNm" renamed to "$!ossAftereNm"</div>
-							
-							<div style="padding:10px;font-size:12px;">$!comment</div>
-							<div style="padding-bottom:5px;font-size:12px;font-weight:bold;">$!ossBeforeNm used in the projects below</div>
-								#if( $projectList )
-									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Project List &raquo;</h2>
-									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-										<tr>
-											<th style="padding:5px;background:#f0f0f0;">ID</th>
-											<th style="padding:5px;background:#f0f0f0;">Project Name</th>
-											<th style="padding:5px;background:#f0f0f0;">Project Version</th>
-											<th style="padding:5px;background:#f0f0f0;">Distribution Type</th>
-											<th style="padding:5px;background:#f0f0f0;">Creator</th>
-											<th style="padding:5px;background:#f0f0f0;">Created Date</th>
-											<th style="padding:5px;background:#f0f0f0;">Reviewer</th>
-										</tr>
-										#foreach( $project in $projectList )
-										<tr>
-											<td style="padding:5px;">$!project.prjId</td>
-											<td style="padding:5px;">$!project.prjName</td>
-											<td style="padding:5px;">$!project.prjVersion</td>
-											<td style="padding:5px;">$!project.distributionType</td>
-											<td style="padding:5px;">$!project.creator</td>
-											<td style="padding:5px;">$!project.createdDate</td>
-											<td style="padding:5px;">$!project.reviewer</td>
-										</tr>
-										#end
-									</table>
-								#end
-							</td>
-							<td width="1" style="background:#ddd"></td>
-						</tr>
-					</table>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <style>
+        .marker {
+            background-color: Yellow;
+        }
+    </style>
+    <title>FOSSLight Hub</title>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td style="background:#ddd" width="1"></td>
+		<td th:style="'padding:40px;'">
+			<div th:style="'padding-bottom:10px;font-size:16px;font-weight:bold;'" th:text="${modifierNm + ' ' + ossBeforeNm + ' renamed to ' + ossAftereNm}"></div>
+			<div th:style="'padding:10px;font-size:12px;'" th:text="${comment}"></div>
+			<div th:style="'padding-bottom:5px;font-size:12px;font-weight:bold;'" th:text="${ossBeforeNm + ' used in the projects below'}"></div>
+			<div th:if="${projectList}">
+				<h2 th:style="'margin:20px 0 0;padding:10px;font-size:16px;'" th:text="'« Project List »'"></h2>
+				<table border="1" cellpadding="0" cellspacing="0" th:style="'font-size:12px;border-color:#ddd;'" width="100%">
+					<tr>
+						<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'ID'"></th>
+						<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Project Name'"></th>
+						<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Project Version'"></th>
+						<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Distribution Type'"></th>
+						<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Creator'"></th>
+						<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Created Date'"></th>
+						<th th:style="'padding:5px;background:#f0f0f0;'" th:text="'Reviewer'"></th>
+					</tr>
+					<tr th:each="project : ${projectList}">
+						<td th:style="'padding:5px;'" th:text="${project.prjId}"></td>
+						<td th:style="'padding:5px;'" th:text="${project.prjName}"></td>
+						<td th:style="'padding:5px;'" th:text="${project.prjVersion}"></td>
+						<td th:style="'padding:5px;'" th:text="${project.distributionType}"></td>
+						<td th:style="'padding:5px;'" th:text="${project.creator}"></td>
+						<td th:style="'padding:5px;'" th:text="${project.createdDate}"></td>
+						<td th:style="'padding:5px;'" th:text="${project.reviewer}"></td>
+					</tr>
+				</table>
+			</div>
+		</td>
+
+		<td style="background:#ddd" width="1"></td>
+    </tr>
+</table>
+</body>
+
+</html>

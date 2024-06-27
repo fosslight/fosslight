@@ -28,7 +28,7 @@ import oss.fosslight.repository.CodeManagerMapper;
 import oss.fosslight.repository.LicenseMapper;
 import oss.fosslight.repository.OssMapper;
 
-@Component
+@Component("CoCodeManager")
 @Slf4j
 public class CoCodeManager extends CoTopComponent {
 
@@ -824,4 +824,20 @@ public class CoCodeManager extends CoTopComponent {
             
         return returnStr;
     }
+    
+    public static Vector<CoCodeDtl> getCodeDtls(String s) {
+    	CoCode code = getCodeInstance(s);
+    	if (code != null) {
+    		Vector<CoCodeDtl> codeDtls = new Vector<>();
+    		for (CoCodeDtl dtl : code.getCodeDtls()) {
+    			if (!dtl.getUseYn().equals(CoConstDef.FLAG_NO)) {
+    				codeDtls.add(dtl);
+    			}
+    		}
+    		return codeDtls;
+    	} else {
+    		return null;
+    	}
+    }
+
 }

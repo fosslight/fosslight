@@ -1,0 +1,398 @@
+<!DOCTYPE HTML>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/header :: headFragment"></th:block>
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<style>
+.note-editable { background-color: #fff!important; }
+</style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/icheck-bootstrap/3.0.1/icheck-bootstrap.min.css" rel="stylesheet">
+<body class="hold-transition login-page custom-layout">
+<div class="login-box">
+    <div class="login-logo">
+        <a class="brand-link" href="./index.html" style="font-size:2.25rem;">
+            <img alt="FOSSLight hub Logo" class="brand-image img-circle" src="/images/logo_s.png"
+                 style="opacity: .5;max-height:50px;"><b>FOSSLight</b></a>
+    </div>
+    <div class="card">
+        <div class="card-body mx-3 my-1" id="authenticationAreaFragment">
+            <div class="replaceable-content"></div>
+        </div>
+    </div>
+</div>
+<div class="pops" style="width: 750px;">
+</div>
+<script th:inline="javascript">
+    //<![CDATA[
+    /*global $ */
+    $(window).load(function () {
+        login_fn.renderPage();
+    });
+
+    /* login page */
+    const login_fn = {
+        renderPage: function () {
+            const data = {
+                category: "session/fragments",
+                templateName: "authentication-fragments",
+                fragmentName: "loignFragment"
+            };
+
+            postAjaxJsonData(JSON.stringify(data), "/render/component", 'html', function (res) {
+                $("#authenticationAreaFragment .replaceable-content").replaceWith(res);
+                login_fn.setSaveIdChecked();
+            });
+
+            $(document).keypress(function(event) {
+                if (event.key === "Enter") {
+                    login_fn.excSubmit();
+                }
+            });
+
+
+            getAjaxData(null, "/system/notice/getPublishedNotice", "json", function (data) {
+                if (data.noticeList) {
+                    for (var i = 0; i < data.noticeList.length; i++) {
+                        var seq = data.noticeList[i].seq;
+                        var title = data.noticeList[i].title;
+                        var notice = data.noticeList[i].notice;
+
+                        if (getCookie("noticeYn_" + seq) != "N") {
+                            addPopup(title, notice, seq);
+                        }
+                    }
+                }
+            })
+        },
+        excSubmit: function () {
+            formAjaxData("#loginForm", "/session/login-proc",
+                function (res) {
+                    if ("false" == res.isValid) {
+                        alertify.error(res.validMsg, 0);
+                    } else {
+                        location.href = "/index?lang=" + res.resultData.locale;
+                        return;
+                    }
+                });
+        },
+        setSaveIdChecked() {
+            const userInputId = getCookie("userInputId");
+            $("input[name=userId]").val("");
+
+            if (userInputId) {
+                $("#saveID").prop("checked", true);
+                $("input[name=userId]").val(userInputId);
+            }
+        },
+        handleSaveIdCheckboxChange(checkbox) {
+            if (checkbox.checked) {
+                const _userInputId = $("input[name='userId']").val();
+                setCookie("userInputId", _userInputId, 7);
+            } else {
+                deleteCookie("userInputId");
+            }
+        },
+        handleSaveIdInputKeyUp() {
+            if($("#saveID").is(":checked")){
+                const _userInputId= $("input[name='userId']").val();
+                setCookie("userInputId", _userInputId, 180);
+            }
+        }
+    };
+
+    /* signup page */
+    const signup_fn = {
+        renderPage: function () {
+            const data = {
+                category: "session/fragments",
+                templateName: "authentication-fragments",
+                fragmentName: "signUpFragment"
+            };
+
+            postAjaxJsonData(JSON.stringify(data), "/render/component", 'html', function (res) {
+                $("#authenticationAreaFragment .replaceable-content").replaceWith(res);
+            });
+        },
+        excSubmit: function () {
+            const dFlag = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))} ]];
+
+            if(dFlag) {
+                const domain = $("#emailTemp").val();
+                const userId = $("input[name=userId]").val();
+
+                if(userId != ""){
+                    $("#email").val(userId+"@"+domain);
+                }
+            } else {
+                $("#email").val($("#emailTemp").val());
+            }
+
+            formAjaxData("#signupForm", "/system/user/saveAjax", signup_fn.onRegistSuccess);
+        },
+        onRegistSuccess: function(json, status) {
+            hideErrMsg();
+
+            if ("false" == json.isValid) {
+                alertify.error([[#{msg.common.valid}]]);
+
+                $('.retxt').text('');
+
+                showErrMsg();
+
+                if (json.userId) {
+                    $('.userId').text(json.userId);
+                }
+
+                if (json.userPw) {
+                    $('.userPw').text(json.userPw);
+                }
+
+                if (json.email) {
+                    $('.email').text(json.email);
+                }
+
+                if (json.division) {
+                    $('.division').text(json.division);
+                }
+
+                if (json.userName) {
+                    $('.userName').text(json.userName);
+                }
+            } else {
+                alertify.alert([[ #{msg.common.success} ]], function () {
+                    location.reload();
+                });
+            }
+        },
+        cancelWithBack: function () {
+            login_fn.renderPage();
+        },
+        emailChange(){
+            const value = $("#emailSelect option:selected").val();
+            const text = $("#emailSelect option:selected").text();
+            const etcDomain = [[ ${@CommonFunction.getCoConstDefVal("CD_DTL_ECT_DOMAIN_NO")} ]];
+
+            if(value == etcDomain){
+                $("#directEmailInput").val("").show();
+            } else {
+                $("#directEmailInput").val(text).hide();
+            }
+        }
+    }
+
+    /* reset password page */
+    const resetPw_fn = {
+        renderPage: function () {
+            const data = {
+                category: "session/fragments",
+                templateName: "authentication-fragments",
+                fragmentName: "resetPasswordFragment"
+            };
+
+            postAjaxJsonData(JSON.stringify(data), "/render/component", 'html',
+                function (res) {
+                    $("#authenticationAreaFragment .replaceable-content").replaceWith(res);
+                });
+        },
+        excSubmit: function () {
+            if(resetPw_fn.validResetPassword()) {
+                const _param = {
+                    'userId' : $('#resetPwdForm #userId').val(),
+                    'email' : $('#resetPwdForm #email').val()
+                }
+                postAjaxJsonData(JSON.stringify(_param), "/system/user/resetPassword", "json", resetPw_fn.onResetPasswordSuccess, onError);
+            }
+        },
+        validResetPassword() {
+            if ($('#resetPwdForm #userId').isValueEmpty()) {
+                $('#resetPwdForm #userIdRequired').show();
+                return false;
+            }
+
+            if ($('#resetPwdForm #email').isValueEmpty()) {
+                $('#resetPwdForm #emailRequired').show();
+                return false;
+            }
+
+            return true;
+        },
+        cancelWithBack: function () {
+            login_fn.renderPage();
+        },
+        onResetPasswordSuccess: function (data, status) {
+            if (data.resCd == '10') {
+                alertify.alert([[ #{msg.login.resetPassword.success} ]], function () {
+                    location.reload();
+                });
+            } else if (data.resCd == '21') {
+                alertify.alert([[ #{msg.login.resetPassword.failureToFindUser} ]], function () {
+                    location.reload();
+                });
+            } else {
+                alertify.alert([[ #{msg.common.valid2} ]], function () {
+                    location.reload();
+                });
+            }
+        }
+    }
+
+
+    function addPopup(title, content, seq) {
+        appendChild();
+
+        $("#noticeEdit_" + seq).summernote({ height: 200,  toolbar: [], disable: true});
+        $("#noticeEdit_" + seq).summernote('disable');
+
+        $("#btnNotice_"+ seq).click(function () {
+            var checkbox = document.getElementById("chkday_" + seq);
+            if (checkbox.checked) {
+                setCookie("noticeYn_" + seq, "N", 1);
+            }
+
+            $("#modalContainer_" + seq).hide();
+        });
+
+        $("#modalContainer_" + seq).show();
+
+        // function createPopRegistPop() {
+        //     var popRegistPop = document.createElement("div");
+        //     popRegistPop.classlrdmList.add("pop", "registPop");
+        //     popRegistPop.style.width = "600px";
+        //     popRegistPop.style.position = "absolute";
+        //     return popRegistPop;
+        // }
+        //
+        // function createPopData() {
+        //     var popData = document.createElement("div");
+        //     popData.className = "popdata";
+        //     popData.style.padding = "10px 10px 10px";
+        //     return popData;
+        // }
+        //
+        // function createNoticeTitle() {
+        //     var noticeTitle = document.createElement("div");
+        //     noticeTitle.id = "noticeTitle";
+        //     noticeTitle.style.textAlign = "center";
+        //     noticeTitle.style.fontSize = "12pt";
+        //     noticeTitle.style.fontWeight = "bold";
+        //     noticeTitle.style.paddingBottom = "15px";
+        //     noticeTitle.innerHTML = "[Notice] " + title;
+        //     return noticeTitle;
+        // }
+        //
+        // function createNoticeContent() {
+        //     var noticeContent = document.createElement("div");
+        //     noticeContent.id = "noticeContent";;
+        //     noticeContent.innerHTML = '<div id="noticeEdit_' + seq + '" style="width:300px; height:150px;">' + content + '</div>';
+        //     return noticeContent;
+        // }
+        //
+        // function createCheckboxLabel() {
+        //     var checkboxLabel = document.createElement("label");
+        //     checkboxLabel.htmlFor = "chkday_" + seq;
+        //     checkboxLabel.innerHTML = '<input type="checkbox" value="checkbox" name="chkbox" id="chkday_' + seq + '" />&nbsp;Do not show this message again';
+        //     return checkboxLabel;
+        // }
+        //
+        // function createOkButton() {
+        //     var okButton = document.createElement("input");
+        //     okButton.id = "btnNotice";
+        //     okButton.type = "button";
+        //     okButton.value = "OK";
+        //     okButton.className = "okRegister";
+        //     okButton.style.height = "40px";
+        //     okButton.style.cursor = "pointer";
+        //     return okButton;
+        // }
+
+        function createLargeModal() {
+            var modalDiv = document.createElement("div");
+            modalDiv.classList.add("modal", "fade", "show");
+            modalDiv.id = "modalContainer_" + seq;
+            modalDiv.setAttribute("aria-modal", "true");
+            modalDiv.setAttribute("role", "dialog");
+            modalDiv.style.paddingRight = "14px";
+            modalDiv.style.display = "block";
+
+            var modalDialogDiv = document.createElement("div");
+            modalDialogDiv.classList.add("modal-dialog");
+            modalDialogDiv.setAttribute("style", "top: 200px; min-width: 700px;");
+
+            var modalContentDiv = document.createElement("div");
+            modalContentDiv.classList.add("modal-content");
+
+            var modalHeaderDiv = document.createElement("div");
+            modalHeaderDiv.classList.add("modal-header");
+
+            var modalTitle = document.createElement("h4");
+            modalTitle.classList.add("modal-title");
+            modalTitle.textContent = "[Notice] " + title;;
+
+            var closeButton = document.createElement("button");
+            closeButton.type = "button";
+            closeButton.classList.add("close");
+            closeButton.setAttribute("data-dismiss", "modal");
+            closeButton.setAttribute("aria-label", "Close");
+
+            var closeSpan = document.createElement("span");
+            closeSpan.setAttribute("aria-hidden", "true");
+            closeSpan.textContent = "×";
+
+            closeButton.appendChild(closeSpan);
+            modalHeaderDiv.appendChild(modalTitle);
+            modalHeaderDiv.appendChild(closeButton);
+
+            var modalBodyDiv = document.createElement("div");
+            modalBodyDiv.classList.add("modal-body");
+            modalBodyDiv.innerHTML = '<div id="noticeEdit_' + seq + '" style="width:300px; height:150px;">' + content + '</div>';
+
+            var modalFooterDiv = document.createElement("div");
+            modalFooterDiv.classList.add("modal-footer", "justify-content-between");
+
+            var checkboxLabel = document.createElement("label");
+            checkboxLabel.setAttribute("for", "chkday_" + seq);
+
+            var checkboxInput = document.createElement("input");
+            checkboxInput.type = "checkbox";
+            checkboxInput.value = "checkbox";
+            checkboxInput.name = "chkbox";
+            checkboxInput.id = "chkday_" + seq;
+
+            var labelText = document.createTextNode("Do not show this message again");
+
+            checkboxLabel.appendChild(checkboxInput);
+            checkboxLabel.appendChild(document.createTextNode("\u00A0")); // Add non-breaking space
+            checkboxLabel.appendChild(labelText);
+
+            var saveChangesButton = document.createElement("button");
+            saveChangesButton.type = "button";
+            saveChangesButton.id = "btnNotice_" + seq;
+            saveChangesButton.type = "button";
+            saveChangesButton.value = "OK";
+            saveChangesButton.className = "okRegister";
+            saveChangesButton.classList.add("btn", "btn-danger");
+            saveChangesButton.textContent = "OK";
+
+            modalFooterDiv.appendChild(checkboxLabel);
+            modalFooterDiv.appendChild(saveChangesButton);
+
+            modalContentDiv.appendChild(modalHeaderDiv);
+            modalContentDiv.appendChild(modalBodyDiv);
+            modalContentDiv.appendChild(modalFooterDiv);
+
+            modalDialogDiv.appendChild(modalContentDiv);
+            modalDiv.appendChild(modalDialogDiv);
+
+            return modalDiv;
+        }
+
+
+        function appendChild() {
+            var modal= createLargeModal();
+            var pops = document.querySelector(".pops");
+            pops.appendChild(modal);
+        }
+    }
+    //]]>
+</script>
+</html>

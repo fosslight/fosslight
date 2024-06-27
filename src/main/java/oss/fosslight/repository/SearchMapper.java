@@ -7,6 +7,8 @@ package oss.fosslight.repository;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Map;
+
 @Mapper
 public interface SearchMapper {
 
@@ -22,5 +24,6 @@ public interface SearchMapper {
 
 	String selectPartnerSearchFilter(String userId);
 	String selectSelfCheckSearchFilter(String userId);
-
+    String selectUserColumns(Map<String, Object> params);
+    void insertUserColumns(Map<String, Object> params);
 }

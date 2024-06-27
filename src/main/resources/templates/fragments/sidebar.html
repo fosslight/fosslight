@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="sidebarFragment">
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a class="brand-link" style="cursor: pointer;" th:onclick="|fn.showSiteInfo()|">
+      <img th:src="@{/images/logo_s.png}" alt="FOSSLight hub Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light" th:text="'FOSSLight'"></span>
+    </a>
+    <!-- Sidebar -->
+    <div class="sidebar index">
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-2 pb-1 mb-3 text-center">
+        <div class="info" style="width: 100%;">
+          <div class="row">
+            <div class="col-9">
+              <span class="text-right">
+                <i class="fas fa-user-circle text-light mr-1 fa-xs"></i>
+                <a style="cursor: pointer;" th:text="${@CommonFunction.loginUserName()}" th:onclick="|fn.moveToUserSetting()|"></a>
+              </span>
+              <input type="hidden" id="defaultTabAnchorArr" th:value="${sessUserInfo.defaultTabAnchor}" />
+            </div>
+            <div class="col-1">
+              <span class="text-center"><a href="#">|</a></span>
+            </div>
+            <div class="col-2">
+              <span class="text-left">
+                <i class="fas fa-sign-out-alt text-light mr-1 fa-xs pointer" th:onclick="|fn.logoutProc()|"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SidebarSearch Form -->
+<!--      <div class="form-inline">-->
+<!--        <div class="input-group" data-widget="sidebar-search">-->
+<!--          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">-->
+<!--          <div class="input-group-append">-->
+<!--            <button class="btn btn-sidebar">-->
+<!--              <i class="fas fa-search fa-fw"></i>-->
+<!--            </button>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul id="sidebar" class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li th:if="${dashboardFlag}" class="nav-item">
+            <a th:href="@{/dashboard/list}" class="nav-link">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              	<p th:text="'Dashboard'"></p>
+            </a>
+          </li>
+          <li class="nav-item">
+          	<a th:href="@{/license/list}" class="nav-link" id="license-list">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="'License'"></p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a th:href="@{/oss/list}" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="'Open Source'"></p>
+            </a>
+          </li>
+          <li class="nav-item" th:if="${projectFlag}">
+            <a th:href="@{/project/list}" class="nav-link project">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="'Project'"></p>
+            </a>
+          </li>
+          <li th:if="${partnerFlag}" class="nav-item">
+            <a th:href="@{/partner/list}" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="'3rd Party'"></p>
+            </a>
+          </li>
+          <li th:if="${batFlag}" class="nav-item">
+            <a th:href="@{/bat/list}" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="'BAT List'"></p>
+            </a>
+          </li>
+          <li th:if="${binarydbFlag}" class="nav-item">
+            <a th:href="@{/binary}" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="'Binary DB'"></p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a th:href="@{/vulnerability/list}" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="Vulnerability"></p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a th:href="@{/selfCheck/list}" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="'Self-Check'"></p>
+            </a>
+          </li>
+          <li class="nav-item" th:if="${complianceStatusFlag and (projectFlag or partnerFlag)}">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+              	<p th:text="'Compliance Status'"></p></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item" th:if="${projectFlag}">
+                <a th:href="@{/compliance/modelStatus}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="'MODEL(S/W) OSC Status'"></p>
+                </a>
+              </li>
+              <li class="nav-item" th:if="${partnerFlag}">
+                <a th:href="@{/compliance/3rdList}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p th:text="'3rd Party Status'"></p>
+                </a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item" th:if="${externalLinkFlag and @CoCodeManager.getCodeValues(@CommonFunction.getCoConstDefVal('CD_EXTERNAL_LINK')) != null}">
+            <a th:href="@{/external/external}" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+	          	<p th:text="'External Link'"></p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a th:href="@{/configuration/edit}" class="nav-link userSettings">
+              <i class="nav-icon fas fa-user-cog"></i>
+	          	<p th:text="'User Settings'"></p>
+            </a>
+          </li>
+          <li class="nav-item" th:if="${@CommonFunction.isAdmin()}">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-cog"></i>
+              	<p th:text="System"><i class="fas fa-angle-left right"></i></p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item" th:if="${statisticsFlag}">
+                <a th:href="@{/statistics/view}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="Statistics"></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/system/code}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="'Code management'"></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/system/user}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="'User management'"></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/system/history}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="'History List'"></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/system/notice}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="Notification"></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/system/sentMail}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="'Sent Mail List'"></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/system/processGuide}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="'Help & Guide'"></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/system/vulnerabilityHistory}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="'Vulnerability Log'"></p>
+                </a>
+              </li>
+              <li class="nav-item" th:if="${binarydbFlag}">
+                <a th:href="@{/system/binaryDataHistory}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  	<p th:text="'BinaryDB Log'"></p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a th:href="@{/system/configuration}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p th:text="'Server Setting'"></p>
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+<!--<div class="sidebar copyright p-3">
+      Copyright &copy; 2021 LG Electronics.<br />
+      All rights reserved.
+    </div> -->
+  </aside>
+  	<script th:inline="javascript">
+  	var _initTabs = new Array();
+  	
+  	window.onload = function() {
+  		try {
+  			initTab();
+  		} finally {
+  			var config = { attributes: true, childList: true, characterData: true };
+  			var sidebar = $("#sidebar").find(".nav-link");
+  			
+  			$(sidebar).each(function () {
+  			  	var target = this;
+  			  	var observer = new MutationObserver(function(mutations) {
+  			    	mutations.forEach(function(mutation) {
+  			      		if ($(mutation.target).attr("class").indexOf("active") > -1) {
+  			      			var src = $(mutation.target).attr("href");
+  			      			var pId = $("iframe[src='"+src+"']").parent().attr("id");
+  			      			if (typeof pId !== "undefined") {
+  			      				var tabName = "#tab--" + pId.substring(7, pId.length);
+  			      				$(tabName).focus();
+  			      			}
+  			      		}
+  			    	});
+  				});
+  			  	observer.observe(target, config);
+  			});
+  		}
+  	}
+
+  	var fn = {
+  	  	logoutProc : function () {
+  	  		window.location.href = "/session/logout-proc";
+  	  	},
+  	  	moveToUserSetting : function() {
+  	  		$('.userSettings').get(0).click();
+  	  	},
+  	  showSiteInfo : function () {
+			var innerHtml = "<div class=\"d-flex d-flex-align\"><img src=\"/images/logo_s.png\" alt=\"FOSSLight Logo\" class=\"brand-image img-circle elevation-3\" style=\"width: 80px;\"></div>";
+			innerHtml += "<br><div class=\"brand-text d-flex d-flex-align\"><strong>FOSSLIGHT</strong></div>";
+//			innerHtml += "<div class=\"brand-text d-flex d-flex-align\">osc-team@lge.com</div>";
+			innerHtml += "<br><span class=\"ml-3\"><strong>Version " + [[${@CommonFunction.getProperty('project.version')}]] + "</strong></span>";
+			innerHtml += "<br><span class=\"ml-3\">Copyright © 2021 LG Electronics.</span>";
+			innerHtml += "<br><span class=\"ml-3\">All Rights Reserved. <span class=\"text-orange\">PRIVACY LEGAL</span></span>";
+			
+			
+			if (!alertify.siteShowInfoDialog){
+				alertify.dialog('siteShowInfoDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.alert().settings;
+						
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+						
+							var setup = alertify.alert().setup();
+							setup.buttons = [];
+						
+							return setup;
+						},
+						hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '350px';
+					        }
+						}
+					};
+				}, false, 'alert');
+      	}
+			
+			alertify.siteShowInfoDialog().set('title', 'FOSSLight Info').setContent(innerHtml).show();
+		}
+  	}
+  	
+  	function initTab() {
+  		var query = window.location.search;
+  	   	var param = new URLSearchParams(query);
+  	   	var id = param.get("id");
+  	   	var menu = param.get("menu");
+  	   	var viewFlag = param.get("view");
+  	   	
+  	   	if (id != null && menu != null) {
+  	    	var page = (viewFlag == "false") ? "edit" : "view";
+			
+			switch(menu) {
+			    case 'prj':
+			    	createTabNew(id + "_Project", "/project/" + page + "/" + id);			        
+			        break;
+			    case 'par':
+			       	createTabNew(id + "_3rdParty", "/partner/" + page + "/" + id);	
+			        break;
+			    case 'self':
+			        createTabNew(id + "_selfCheck", "/selfCheck/" + page + "/" + id);
+			        break;
+			}
+  	   	} else {
+          var _defaultTabStr = $("#defaultTabAnchorArr").val() || "";
+          var _sidebar = $("#sidebar").find(".nav-link");
+          var _defaultTabs = _defaultTabStr.split(',');
+
+          if(_defaultTabs.length > 0) {
+            $('.tab-empty').hide();
+
+            _defaultTabs.forEach(function(tabUrl, index) {
+              if (tabUrl.includes('/license/list')) {
+                createTab_new('License', '/license/list', 'license-list', true);
+              } else if (tabUrl.includes('/oss/list')) {
+                createTab_new('Open Source', '/oss/list', 'oss-list', true);
+              } else if (tabUrl.includes('/project/list')) {
+                createTab_new('Project', '/project/list', 'project-list', true);
+              } else if (tabUrl.includes('/partner/list')) {
+                createTab_new('3rd Party', '/partner/list', 'partner-list', true);
+              } else if (tabUrl.includes('/system/bat')) {
+                createTab_new('Binary DB', '/binary', 'binary', true);
+              } else if (tabUrl.includes('/vulnerability/list')) {
+                createTab_new('Vulnerability', '/vulnerability/list', 'vulnerability-list', true);
+              } else if (tabUrl.includes('/selfCheck/list')) {
+                createTab_new('Self-Check', '/selfCheck/list', 'selfCheck-list', true);
+              }
+
+              /* the last default tab gives an open event when the sidebar is clicked */
+              if (index === _defaultTabs.length - 1) {
+                	$.each(_sidebar, function(idx, val){
+                  		var _href = $(this).attr("href");
+                  		if ("#" != _href && !_href.startsWith("/system")) {
+                    		if (tabUrl.indexOf(_href) != -1) {
+                      			$(this).trigger("click");
+                    		}
+                  		}
+                	});
+              	}
+            });
+          }
+  		}
+  	}
+  	</script>
+</th:block>
+</html>
