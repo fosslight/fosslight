@@ -2082,24 +2082,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	private String appendCheckOssName(List<OssMaster> ossNameList, Map<String, String> ossInfoNames, String checkOssName) {
-		String checkName = "";
+		List<String> checkName = new ArrayList<>();
 
 		for (OssMaster ossBean : ossNameList) {
-			if (!isEmpty(checkName)) {
-				checkName += "|";
-			}
-			checkName += ossBean.getOssName();
+			checkName.add(ossBean.getOssName());
 		}
 		
 		if (ossInfoNames.containsKey(checkOssName.toUpperCase())) {
 			String ossNameTemp = ossInfoNames.get(checkOssName.toUpperCase());
-			if (!isEmpty(checkName)) {
-				checkName += "|";
-			}
-			checkName += ossNameTemp;
+			checkName.add(ossNameTemp);
 		}
 		
-		return checkName;
+		return checkName.stream().distinct().map(v->v.toString()).collect(Collectors.joining("|"));
 	}
 
 	private Pattern generatePattern(int urlSearchSeq, String downloadlocationUrl) {
