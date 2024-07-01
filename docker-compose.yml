@@ -31,7 +31,7 @@ services:
       TZ: Asia/Seoul
     command: sh -c "./wait-for db:3306 -t 120 && java -jar FOSSLight.war --root.dir=${ROOT_DIR:-/data/fosslight}
       --server.port=${SERVICE_PORT:-8180}
-      --spring.datasource.url=${DATABASE_SOURCE:-db:3306/fosslight}
+      --spring.datasource.url=${DATABASE_SOURCE:-jdbc:mariadb://db:3306/fosslight}
       --spring.datasource.username=${DATABASE_USER:-fosslight}
       --spring.datasource.password=${DATABASE_PASSWORD:-fosslight}
       --logging.path=${LOGGING_PATH:-/data/fosslight/logs}
