@@ -62,7 +62,7 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiParam(value = "Download Location", required = false) @RequestParam(required = false) String downloadLocation,
             @ApiParam(value = "Download Location Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String downloadLocationExact,
             @ApiParam(value = "Count Per Page (max: 10000, default: 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false) String page
+            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page
     ) {
         try {
             var _page = Integer.parseInt(page);
