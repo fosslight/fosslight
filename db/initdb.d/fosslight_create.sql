@@ -2011,6 +2011,7 @@ CREATE TABLE IF NOT EXISTS `T2_CODE_DTL` (
 DELETE FROM `T2_CODE_DTL`;
 /*!40000 ALTER TABLE `T2_CODE_DTL` DISABLE KEYS */;
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES
+	('100', '100', '100', '', '', 4, 'Y'),
 	('100', '15', '15', '', '', 1, 'Y'),
 	('100', '30', '30', '', '', 2, 'Y'),
 	('100', '50', '50', '', '', 3, 'Y'),
@@ -2103,7 +2104,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('102', '93', '[FOSSLight] Vulnerability Recalculated', '', '', 93, 'Y'),
 	('102', '99', '[FOSSLight][PRJ-${Project ID}] ${User} changed a reviewer from ${Reviewer} to ${ReviewerTo} : "${Project Name}"', '', 'Reviewer has been changed to ${Reviewer Info}', 99, 'Y'),
 	('102', '100', '[FOSSLight][PRJ-${Project ID}] Packaging, ${User} requested : " ${Project Name}"', '', '', 100, 'Y'),
-    ('102', '231', '[FOSSLight][LIC] Invalid License Identified', '', '', 231, 'Y'),
+    ('102', '232', '[FOSSLight][LIC] Invalid License Identified', '', '', 232, 'Y'),
 	('103', '10', 'OSS 등록(OSS기본정보)', '', '100', 10, 'Y'),
 	('103', '11', 'OSS 변경정보', '', '', 11, 'Y'),
 	('103', '12', 'OSS 변경정보(LICENSE TYPE이 변경된 경우)', '', '', 12, 'Y'),
@@ -2355,11 +2356,11 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('217', '10', 'Notice', NULL, '<span class="iconSet ops" title="Notice"></span>', 1, 'Y'),
 	('217', '11', 'Notice & Distribute', NULL, '<span class="iconSet ops" title="Notice"></span><span class="iconSet man" title="Source Code"></span>', 2, 'Y'),
 	('218', 'NA', 'N/A', '', '', 3, 'Y'),
-	('219', '1', 'Company Full Name', 'FOSSLight', '', 1, 'Y'),
+	('219', '1', 'Company Full Name', '', 'FOSSLight', 1, 'Y'),
 	('219', '2', 'Company Short Name', '', '', 2, 'Y'),
-	('219', '3', 'DistributeSite URL', 'http://fosslight.org', '', 3, 'Y'),
-	('219', '4', 'email', 'opensource@fosslight.org', '', 4, 'Y'),
-	('219', '5', 'template path', '', '/template/notice/notice.html', 5, 'Y'),
+    ('219', '3', 'DistributeSite URL', '', 'http://fosslight.org', 3, 'Y'),
+    ('219', '4', 'email', '', 'opensource@fosslight.org', 4, 'Y'),
+    ('219', '5', 'template path', '', '/template/notice/notice.html', 5, 'Y'),
 	('219', '6', 'template Text path', '', '/template/notice/notice.txt', 6, 'Y'),
 	('219', '7', 'appended', '', '', 7, 'Y'),
 	('219', '8', 'supplement notice.html template', '', '/template/notice/supplement_notice.html', 8, 'Y'),
