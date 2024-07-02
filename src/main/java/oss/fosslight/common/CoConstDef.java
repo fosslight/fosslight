@@ -518,8 +518,8 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_LICENSE_UPDATE_TYPE = "22";
 	public static final String CD_MAIL_TYPE_LICENSE_RENAME = "23";
 	public static final String CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT = "230";
-	public static final String CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT = "231";
-	public static final String CD_MAIL_TYPE_LICENSE_ADDED_COMMENT = "232";
+	public static final String CD_MAIL_TYPE_LICENSE_ADDED_COMMENT = "231";
+	public static final String CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT = "232";
 	
 	/** Mail Type [FOSSLight] Open source license has been removed */
 	public static final String CD_MAIL_TYPE_LICENSE_DELETE = "29";
