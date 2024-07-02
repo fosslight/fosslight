@@ -6,6 +6,24 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+# [2.0.0.pre-release] (2024-07-02)
+### New
+* UI 2.0 릴리즈
+  - UI 프레임워크를 Thymeleaf로 변경
+  - 보다 직관적인 사용자 인터페이스로 개선
+  - 업데이트된 UX 시나리오
+  - UI 2.0에 대한 상세 정보는 [여기](https://fosslight.org/)에서 확인할 수 있습니다.
+
+* Lite 릴리즈 (Thanks to @hjcdg1)
+  - FOSSLight 시스템용 Lite 웹이 출시되었습니다.
+  - 개인 사용자가 자가 점검을 위해 사용할 수 있도록 설계되었습니다.
+  - 간단한 UI로 모바일 호환성을 지원합니다.
+
+* **API v2 릴리즈** (Thanks to @cobaltblu27)
+  - FOSSLight 시스템용 API v2가 출시되었습니다.
+  - RESTful API 아키텍처로 전환되었습니다.
+  - 응답 일관성이 개선되었습니다.
+
 # [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
 ### New
 * oss report API 들에 'sheetNames' parameter가 추가
