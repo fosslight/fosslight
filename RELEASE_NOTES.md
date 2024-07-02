@@ -6,6 +6,22 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+# [2.0.0.pre-release] (2024-07-02)
+### New
+* UI 2.0 release 
+  - Switched UI Framework to Thymeleaf
+  - Enhanced with a more intuitive user interface
+  - Updated UX scenarios
+  - Detailed information about UI 2.0 will be available at https://fosslight.org/
+* Lite release (Thanks to @hjcdg1)
+  - Released Lite web for the FOSSLight system
+  - Designed for personal users to perform self-checks
+  - Features a simple UI and is mobile-compatible
+* API v2 release (Thanks to @cobaltblu27)
+  - Released API v2 for the FOSSLight system.
+  - Transitioned to RESTful API architecture.
+  - Improved response consistency.
+
 # [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
 ### New
 * Add 'sheetNames' parameter in oss report upload APIs
