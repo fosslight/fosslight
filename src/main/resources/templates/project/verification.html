@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="project/verification-header :: headerFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="project/verification-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <div class="custom-layout">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
+                        <div class="float-right align-items-center mt-2" style="margin-left: auto;">
+<!--                       	<div class="helpLink f-left dropdown float-right px-1">
+                                <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+                                <div class="dropdown-menu mt-0">
+                                    <a class="dropdown-item text-dark" th:onclick="|openHelpGuideLink('Project_List_Packaging')|" th:text="'How to use FossLight Hub'"></a>
+                                    <a class="dropdown-item text-dark" th:onclick="|popUpHelpGuide('Role_Of_Creator_Reviewer_Package', 'P')|" th:text="'Role of Creator & Reviewer'"></a>
+                                </div>
+                            </div> -->
+                            <div class="float-right">
+                            	<span th:if="${@CommonFunction.isAdmin()}" class="px-1 icheck-danger center-atom projdecBtn" style="margin-left: 2.5rem; font-size: .85rem">
+                                    <input class="form-check-input text-orange" id="approve" name="approve" th:value="Y" type="checkbox">
+                                    <label class="form-check-label text-lg-gray mt-1 mr-2" for="approve" th:text="'Bypass'"></label>
+                                </span>
+                                <th:block th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.verificationStatus != 'NA' and project.distributeDeployYn != 'Y'}">
+                                    <button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" id="verConfirm" th:text="Confirm"></button>
+                                    <button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 reject" id="verReject" th:text="Reject"></button>
+                                    <button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 review" id="verRequest" th:text="Request"></button>
+                                    <button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 restart" id="verReviewStart" th:text="'Review Start'"></button>
+                                </th:block>
+                                <button th:if="${!@CommonFunction.isAdmin() and (project.completeYn == 'Y' or project.verificationStatus == 'NA' or project.distributeDeployYn == 'Y' or project.verificationStatus == 'REV') and project.statusRequestYn == 'N'}"
+                                            type="button" class="btn btn-default disabled btn-sm width-6rem px-1 reject" id="verReject" th:text="Reject"></button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                <div class="row">
+                <div class="contents-area col-lg-9">
+                    <div class="card card-secondary card-tabs">
+                        <div class="d-flex card-header p-0 pt-1">
+                        	<div class="d-flex align-items-center">
+                            	<ul class="nav nav-tabs" id="menu-tab" role="tablist">
+                                	<li class="nav-item">
+                                    	<a class="nav-link active" id="tabMenuPackaging" rel="packaging" data-toggle="pill" href="#menu-packaging" role="tab" aria-controls="menu-packaging" aria-selected="true" th:text="Packaging"></a>
+                                	</li>
+                                	<li class="nav-item">
+                                    	<a class="nav-link" id="tabMenuNotice" rel="notice" data-toggle="tab" href="#menu-notice" role="tab" aria-controls="notice" aria-selected="false" th:text="Notice"></a>
+                                	</li>
+                            	</ul>
+                      		</div>
+                      		<div class="d-flex-align" style="margin-left: auto;">
+                      			<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF'}" class="badge px-2" id="verify" name="verify" type="button" title="Verify">
+                      				<i class="fas fa-check-circle customIcon2"></i>
+                      			</span>
+                        		<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF'}" class="badge mr-2 px-2" type="button" title="Save" id="btnSavePath" name="btnSavePath" th:onclick="|fn.savePath()|">
+                        			<i class="fas fa-save customIcon2"></i>
+                        		</span>
+                        		<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF'}" class="badge mr-2 px-2" type="button" title="Save" id="save" th:onclick="|fn.save()|" style="display: none;">
+                       				<i class="fas fa-save customIcon2"></i>
+                       			</span>
+                      		</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="custom-tabs-four-tabContent">
+                                <div class="tab-pane fade show active" id="menu-packaging" role="tabpanel" aria-labelledby="packing-tab">
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <span class="text-bold" th:text="'Upload OSS Package'"></span>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group clearfix">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="autoVerify" name="autoVerify" th:checked="true">
+                                                    <label for="autoVerify" th:text="'Verify when file is uploaded'"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mr-3" style="margin-left: auto;" th:text="'* ' + #{msg.project.packaging.upload.fileSize}"></div>
+                                    </div>
+                                    <div id="packageFileArea">
+                                        <div class="card card-widget bg-ivory mb-3">
+                                            <div class="card-body multiSet">
+                                            <th:block th:each="i : ${#numbers.sequence(1,3)}">
+                                            <div th:id="fileUploader_+${i}">
+                                            	<th:block th:if="${i > 1}">
+                                        			<hr class="my-3">
+                                        		</th:block>
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <span class="text-bold text-lg-gray" th:text="'Package File ' + ${i}"></span>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                        	<input type="hidden" name="packageFileType1" th:value="${project.packageFileType1}"/>
+                                                        	<input type="hidden" name="packageFileType2" th:value="${project.packageFileType2}"/>
+                                                        	<input type="hidden" name="packageFileType3" th:value="${project.packageFileType3}"/>
+                                                        	
+                                                            <select class="custom-select package text-center packageSelect" id="packagefile_select" th:name="selectOption_+${i}" th:onchange="|fn.changeSelectOption(this, true)|">
+                                                            	<th:block th:if="${i == 1}">
+                                                            		<option value="1" th:selected="${project.reuseRefPrjId1 == null or project.packageFileType1 == '1'}" th:text="Upload"></option>
+                                                            		<option value="2" th:selected="${project.packageFileType1 == '2'}" th:text="URL"></option>
+                                                                	<option value="3" th:selected="${project.reuseRefPrjId1 != null or project.packageFileType1 == '3'}" th:text="'Project Search'"></option>
+                                                            	</th:block>
+                                                            	<th:block th:if="${i == 2}">
+                                                            		<option value="1" th:selected="${project.reuseRefPrjId2 == null or project.packageFileType2 == '1'}" th:text="Upload"></option>
+                                                            		<option value="2" th:selected="${project.packageFileType2 == '2'}" th:text="URL"></option>
+                                                                	<option value="3" th:selected="${project.reuseRefPrjId2 != null or project.packageFileType2 == '3'}" th:text="'Project Search'"></option>
+                                                            	</th:block>
+                                                            	<th:block th:if="${i == 3}">
+                                                            		<option value="1" th:selected="${project.reuseRefPrjId3 == null or project.packageFileType3 == '1'}" th:text="Upload"></option>
+                                                            		<option value="2" th:selected="${project.packageFileType3 == '2'}" th:text="URL"></option>
+                                                                	<option value="3" th:selected="${project.reuseRefPrjId3 != null or project.packageFileType3 == '3'}" th:text="'Project Search'"></option>
+                                                            	</th:block>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-7">
+                                                        <div class="row">
+                                                        	<div class="col-lg-12">
+                                                        		<th:block th:unless="${#lists.isEmpty(files)}">
+                                                        			<th:block th:each="file, stat : ${files}">
+                                                        				<th:block th:if="${stat.count == i}">
+                                                        					<th:block th:if="${file != null}">
+                                                        						<input type="hidden" th:name="fileSeq_+${i}" th:value="${file.fileSeq}" />
+                                                        					</th:block>
+                                                        					<th:block th:unless="${file != null}">
+                                                        						<input type="hidden" th:name="fileSeq_+${i}" />
+                                                        					</th:block>
+                                                        				</th:block>
+                                                        			</th:block>
+                                                        		</th:block>
+                                                        		<th:block th:if="${#lists.isEmpty(files)}">
+                                                        			<input type="hidden" th:name="fileSeq_+${i}" />
+                                                        		</th:block>
+                                                        		<div class="col-md-10 ml-4" th:classappend="verifyFile_+${i}" th:id="registFileDiv_+${i}" th:style="${!existsFileFlag} ? 'display: block;' : 'display: none;'">
+                                                               		<div th:id="registFile_+${i}"></div>
+                                                               	</div>
+                                                        	</div>
+                                                            <div class="col-md-10" th:id="wgetUrl_+${i}" style="display: none;">
+                                                                <div class="input-group mb-3">
+                                                                    <input th:id="sendWgetUrl_+${i}" th:name="sendWgetUrl_+${i}" type="text" class="form-control">
+                                                                    <div class="input-group-append">
+                                                                        <button th:id="send_+${i}" type="button" class="btn btn-outline-dark" th:text="send"></button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12" th:id="projectSearch_+${i}" style="display: none;">
+                                                                <div class="input-group mb-3">
+                                                                	<span class="d-flex-align mr-4" th:text="'Project Name / Model / Creator'"></span>
+                                                                    <input type="text" class="form-control verifyProjectSearch" th:id="verifyProjectSearch_+${i}">
+                                                                    <div class="input-group-append">
+                                                                        <button th:id="verificationProjectSearch_+${i}" type="button" class="btn btn-outline-dark" th:text="Search" th:onclick="|fn.reuseSearch(this)|"></button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row mt-1">
+                                                                	<div class="pl-1 py-2">
+																		<i class="fas fa-caret-square-right pr-1"></i>
+																		<span>Search Results</span>
+																	</div>
+                                                                	<div class="col-lg-12 px-2 pt-1" th:id="searchResult+${i}">
+																		<table th:id="projectList_+${i}"><tr><td></td></tr></table>
+																		<div th:id="pager_+${i}"></div>
+																	</div>
+                                                                </div>
+                                                                <div th:id="packaging_+${i}" class="row mt-3" style="display:none;">
+                                                                	<div class="col-4 pr-3">
+																		<i class="fas fa-caret-square-right pr-1"></i>
+																		<span>Detail Preview</span>
+																	</div>
+                                                                	<div class="col-lg-12">
+																		<table th:id="packagingList_+${i}"><tr><td></td></tr></table>
+																	</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12">
+                                                            <div th:class="uploadList_+${i}" th:style="${existsFileFlag} ? 'display: block;' : 'display: none;'">
+                                                            	<div class="ajax-file-upload-container" style="margin-top:0px; width:100%;">
+                                                        			<ul>
+                                                        			<th:block th:if="${not #lists.isEmpty(files)}">
+                                                        				<th:block th:each="file, stat : ${files}">
+                                                        					<th:block th:if="${stat.count == i}">
+                                                        						<li th:if="${file != null and file.delYn == 'N'}">
+                                                                        			<a class="ajax-file-upload-filename" th:text="${file.origNm}" th:href="@{'/download/' + ${file.fileSeq} + '/' + ${file.logiNm}}"></a>
+                                                                        			<span th:if="${project.statusPermission > 0 and project.verificationStatus != 'CONF'}" th:class="'badge bg-danger uploadFile'+${i}" style="cursor:pointer;" th:onclick="fn.deleteFile(this, [[${file.fileSeq}]], [[${i}]])">X</span>
+                                                                        			<br>[[${file.createdDate}]]
+                                                                   				</li>
+                                                        					</th:block>
+                                                        				</th:block>
+                                                        			</th:block>
+                                                        			</ul>
+                                                        		</div>
+                                                        	</div>
+                                                        	</div>
+                                                        </div>
+                                                    </div>
+                                                    <div th:if="${project.verificationStatus != 'CONF'}" class="col-md-1" th:id="BtnSetDynamicCreate_+${i}">
+                                                        <button th:if="${i < 3}" type="button" class="btn btn-outline-danger btn-sm float-right" th:id="uploadAdd_+${i}" th:text="Add" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm float-right" th:id="uploadRemove_+${i}" th:text="Remove" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
+                                                    </div>
+                                                </div>
+                                        	</div>
+                                        	</th:block>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="menu-notice" role="tabpanel" aria-labelledby="cnotice-tab">
+                                	<div class="d-flex align-items-center">	
+                                     	<div class="icheck-primary">
+                                        	<input type="radio" name="btnEditOssNotice" id="r1" value="N" th:checked="${ossNotice.editNoticeYn == 'N'} ? 'checked'" th:disabled="${project.verificationStatus == 'CONF'} ? 'disabled'">
+                                            <label for="r1" th:text="'Request to generate a default OSS Notice. (Select this in most cases.)'"></label>
+                                       	</div>
+                                  	</div>
+                                  	<div class="d-flex align-items-center my-3">
+                                        <div class="icheck-primary">
+                                        	<input type="radio" name="btnEditOssNotice" id="r2" value="Y" th:checked="${ossNotice.editNoticeYn == 'Y'} ? 'checked'" th:disabled="${project.verificationStatus == 'CONF'} ? 'disabled'">
+                                         	<label for="r2" th:text="'Request to generate a modified OSS Notice. (Select this only in exceptional cases.)'"></label>
+                                      	</div>
+                                    </div>
+                                    <div class="card card-widget bg-ivory mt-1">
+                                        <div class="card-body">
+                                        	<form id="noticeForm">
+                                			<input type="hidden" id="editNoticeYn" name="editNoticeYn" th:value="${ossNotice.editNoticeYn}"/>
+											<input type="hidden" id="editCompanyYn" name="editCompanyYn" th:value="${ossNotice.editCompanyYn}"/>
+											<input type="hidden" id="editDistributionSiteUrlYn" name="editDistributionSiteUrlYn" th:value="${ossNotice.editDistributionSiteUrlYn}"/>
+											<input type="hidden" id="editEmailYn" name="editEmailYn" th:value="${ossNotice.editEmailYn}"/>
+											<input type="hidden" id="hideOssVersionYn" name="hideOssVersionYn" th:value="${ossNotice.hideOssVersionYn}"/>
+											<input type="hidden" id="editAppendedYn" name="editAppendedYn" th:value="${ossNotice.editAppendedYn}"/>
+											<input type="hidden" name="prjId" th:value="${project.prjId}"/>
+											<input type="hidden" id="useCustomNoticeYn" name="useCustomNoticeYn" th:value="${project.useCustomNoticeYn}"/>
+											<input type="hidden" id="noticeHtml" name="noticeHtml" value=""/>
+											<input type="hidden" name="noticeType" th:value="${project.noticeType}" />
+											<input type="hidden" name="packageJson"/>
+											<input type="hidden" name="packageFileId" id="packageFileId"/>
+											<input type="hidden" name="userComment" />
+											<input type="hidden" name="withoutVerifyYn" th:value="${project.withoutVerifyYn}"/>
+											<input type="hidden" name="ignoreBinaryDbFlag" value=""/>
+											<input type="hidden" id="appended" name="appended" value="" />
+											<input type="hidden" id="appendedTEXT" name="appendedTEXT" value="" />
+											<!-- 다운로드 허용 플래그 -->
+											<input type="hidden" id="allowDownloadNoticeHTMLYn" name="allowDownloadNoticeHTMLYn" th:value="${project.allowDownloadNoticeHTMLYn}" />
+											<input type="hidden" id="allowDownloadNoticeTextYn" name="allowDownloadNoticeTextYn" th:value="${project.allowDownloadNoticeTextYn}" />
+											<input type="hidden" id="allowDownloadSimpleHTMLYn" name="allowDownloadSimpleHTMLYn" th:value="${project.allowDownloadSimpleHTMLYn}" />
+											<input type="hidden" id="allowDownloadSimpleTextYn" name="allowDownloadSimpleTextYn" th:value="${project.allowDownloadSimpleTextYn}" />
+											<input type="hidden" id="allowDownloadSPDXSheetYn" name="allowDownloadSPDXSheetYn" th:value="${project.allowDownloadSPDXSheetYn}" />
+											<input type="hidden" id="allowDownloadSPDXRdfYn" name="allowDownloadSPDXRdfYn" th:value="${project.allowDownloadSPDXRdfYn}" />
+											<input type="hidden" id="allowDownloadSPDXTagYn" name="allowDownloadSPDXTagYn" th:value="${project.allowDownloadSPDXTagYn}" />
+											<input type="hidden" id="allowDownloadSPDXJsonYn" name="allowDownloadSPDXJsonYn" th:value="${project.allowDownloadSPDXJsonYn}" />
+											<input type="hidden" id="allowDownloadSPDXYamlYn" name="allowDownloadSPDXYamlYn" th:value="${project.allowDownloadSPDXYamlYn}" />
+											<input type="hidden" id="isSimpleNotice" name="isSimpleNotice">
+											<input type="hidden" name="previewOnly" id="previewOnly" th:value="N"/>
+											
+                                            <div class="row">
+                                                <div class="col-md-2 d-flex-align-left">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox" name="companyName" id="companyName" th:value="${ossNotice?.editCompanyYn}"/>
+                                                        <label for="companyName" class="custom-control-label" th:text="'Company Name'"></label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input type="text" class="form-control" id="editCompanyName" name="companyNameFull" th:value="${ossNotice?.companyNameFull}" disabled/>
+                                                    <p class="text-lg-gray text-bold mb-0" style="font-size: .8rem;" th:text="'* Deselect if the company name must be removed.'"></p>
+                                                </div>
+                                            </div>   
+                                            <div class="row mt-3">
+                                                <div class="col-md-2 d-flex-align-left">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox" name="ossDistributionSite" id="ossDistributionSite" th:value="${ossNotice?.editDistributionSiteUrlYn}"/>
+                                                        <label for="ossDistributionSite" class="custom-control-label" th:text="'OSS Distribution Site'"></label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input type="text" class="form-control" id="editOssDistributionSite" name="distributionSiteUrl" th:value="${ossNotice?.distributionSiteUrl}" disabled>
+                                                    <p class="text-lg-gray text-bold mb-0" style="font-size: .8rem;" th:text="'* Deselect if both OSS Package and OSS Notice are not registered on the OSS Distribution site.'"></p>
+                                                </div>
+                                            </div> 
+                                            <div class="row mt-3">
+                                                <div class="col-md-2 d-flex-align-left">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox" id="email" th:value="${ossNotice?.editEmailYn}"/>
+                                                        <label for="email" class="custom-control-label" th:text="'Email (Written Offer)'"></label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input type="text" class="form-control" id="editEmail" name="email" th:value="${ossNotice?.email}" disabled/>
+                                                    <span class="retxt"></span>
+                                                    <p class="mb-0 text-lg-gray text-bold" style="font-size: .8rem;" th:text="'* Deselect if the written offer is not required(OSS Package is delivered directly to the recipient).'"></p>
+                                                </div>
+                                            </div>
+                                            <div class="row my-4">
+                                                <div class="col-md-2">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox" name="hideOssVersion" id="hideOssVersion" th:value="${ossNotice?.hideOssVersionYn}"/>
+                                                        <label for="hideOssVersion" class="custom-control-label" th:text="'Hide OSS Version'"></label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 text-lg-gray text-bold">
+                                                    <p style="font-size: .8rem;" th:text="'* Select if all OSS version information must be removed.'"></p>
+                                                </div>
+                                            </div>
+                                            <div class="row my-4">
+                                                <div class="col-md-2">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox" id="append" th:value="${ossNotice?.editAppendedYn}"/>
+                                                        <label for="append" class="custom-control-label" th:text="Append"></label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 text-lg-gray text-bold">
+                                                    <p style="font-size: .8rem;" th:text="'* Select if there is something to add to the OSS Notice.'"></p>
+                                                    <div id ="editAppend">
+                                                    	<textarea id="editor2" row="3" th:utext="${ossNotice.appended}"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-3">
+                                                <div class="col-md-2 d-flex-align-left">
+                                                    <label id="fileFormatLabel" th:text="'OSS Notice File Format'" style="color: #6c757d;"></label>
+                                                </div>
+                                                <div class="col-md-6 unremovable-first-item-select">
+                                                    <select class="select2" multiple="multiple" id="noticeFileFormat" name="noticeFileFormat" style="width: 100%;">
+                                                    	<option value="chkAllowDownloadNoticeHTML" th:text="'Notice HTML (default)'" selected disabled></option>
+                                                        <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
+                                                        		value="chkAllowDownloadNoticeText" th:text="'Notice Text'" th:selected="${project.allowDownloadNoticeTextYn == 'Y'}"
+                                                        		th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        <option value="chkAllowDownloadSimpleHTML" th:text="'Simple HTML'" th:selected="${project.allowDownloadSimpleHTMLYn == 'Y'}"
+                                                        		th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}"
+                                                        		value="chkAllowDownloadSimpleText" th:text="'Simple Text'" th:selected="${project.allowDownloadSimpleTextYn == 'Y'}"
+                                                        		th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) == 'Y'}">
+                                                        	<option value="chkAllowDownloadSPDXSheet" th:text="'SPDX(SpreadSheet)'" th:selected="${project.allowDownloadSPDXSheetYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        	<option value="chkAllowDownloadSPDXRdf" th:text="'SPDX(RDF)'" th:selected="${project.allowDownloadSPDXRdfYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        	<option value="chkAllowDownloadSPDXTag" th:text="'SPDX(TAG)'" th:selected="${project.allowDownloadSPDXTagYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        	<option value="chkAllowDownloadSPDXJson" th:text="'SPDX(JSON)'" th:selected="${project.allowDownloadSPDXJsonYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        	<option value="chkAllowDownloadSPDXYaml" th:text="'SPDX(YAML)'" th:selected="${project.allowDownloadSPDXYamlYn == 'Y'}"
+                                                        			th:disabled="${ossNotice.editNoticeYn == 'N' or project.verificationStatus == 'CONF'}"></option>
+                                                        </th:block>
+                                                  	</select>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-3" th:if="${project.useCustomNoticeYn == 'Y'}">
+                                            	<div class="col-md-2"></div>
+                                            	<div class="col-lg-10">
+                                            		<span class="useCustomNotice" th:utext="#{msg.project.verification.use.custom.notice}"></span>
+                                            	</div>
+                                            </div>
+                                            </form>
+                                      	</div>
+                                   	</div>
+                                   	<div th:if="${@CommonFunction.isAdmin()}" class="card card-widget bg-ivory mt-1">
+                                      	<div class="card-body">
+                                            <div class="row" th:with="isAllowDownload=${project.allowDownloadBitFlag > 0}">
+                                                <div class="col-md-12">
+                                                    <div class="row d-flex">
+                                                        <div class="d-flex align-items-center">
+                                                            <button type="button" id="noticePreview" class="btn btn-outline-lg-red btn-xm px-3 mr-1" th:text="Preview"></button>
+                                                        </div>
+                                                        <div class="d-flex" style="border: 1px solid darkred">
+                                                            <select class="custom-select rounded-0 pr-7" id="docType" name="docType">
+                                                                <option th:value="noticeDownload" th:text="'Default (html)'"></option>
+                                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}" 
+                                                                		th:value="noticeTextDownload" th:text="'Default (text)'"></option>
+                                                                <option value="noticeSimpleDownload" th:text="'Simple (html)'"></option>
+                                                                <option th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_TEXT')) == 'Y'}" 
+                                                                		th:value="noticeTextSimpleDownload" th:text="'Simple (text)'"></option>
+                                                     			<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_NOTICE_INFO'), @CommonFunction.getCoConstDefVal('CD_DTL_NOTICE_SPDX')) == 'Y'}">
+                                                               		<option th:value="spdxSpreadSheet" th:text="'SPDX (spreadsheet)'"></option>
+                                                                	<option th:value="spdxRdf" th:text="'SPDX (RDF)'"></option>
+																	<option th:value="spdxTag" th:text="'SPDX (TAG)'"></option>
+																	<option th:value="spdxJson" th:text="'SPDX (JSON)'"></option>
+																	<option th:value="spdxYaml" th:text="'SPDX (YAML)'"></option>
+                                                     			</th:block>
+                                                            </select>
+                                                        </div>
+                                                       	<div class="d-flex align-items-center">
+                                                        	<button type="button" id="packageDocDownload" class="btn btn-outline-lg-red btn-xm px-3 ml-1 mr-1" th:text="download"></button>
+                                                        </div>
+                                                        <div th:if="${project.verificationStatus == 'REV' or project.verificationStatus == 'CONF'}" class="d-flex align-items-center ml-5">
+                                                            <div class="form-check float-right">
+                                                                <input type="checkbox" class="form-check-input" id="chkUseCustomNotice" th:checked="${project.useCustomNoticeYn == 'Y'}">
+                                                                <label class="form-check-label" for="chkUseCustomNotice" th:text="'Use the html editor'"></label>
+                                                            </div>
+                                                        </div>
+                                                        <div th:if="${project.verificationStatus == 'REV' or project.verificationStatus == 'CONF'}" class="d-flex align-items-center ml-2">
+                                                            <button type="button" id="noticeEditor" class="btn btn-block btn-default btn-xm" th:text="Editor" th:disabled="${project.useCustomNoticeYn != 'Y'}"></button>
+                                                        </div> 
+                                                    </div>
+                                                </div>
+                                                <div class="row col-md-12" th:if="${@CommonFunction.isAdmin() == false and isAllowDownload and project.verificationStatus == 'CONF'}">
+                                                	<div class="col-md-2">
+                                                    	<label th:text="'Download'"></label>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadNoticeHTMLYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'Notice HTML'" th:onclick="|fn.downloadNotice()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadNoticeTextYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'Notice Text'" th:onclick="|fn.downloadNoticeText()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSimpleHTMLYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'Simple HTML'" th:onclick="|fn.downloadNoticeSimple()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSimpleTextYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'Simple Text'" th:onclick="|fn.downloadNoticeTextSimple()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXSheetYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(SpreadSheet)'" th:onclick="|fn.downloadSpdxSpreadSheetExcel()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXRdfYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(RDF)'" th:onclick="|fn.downloadSpdxRdf(()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXTagYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(TAG)'" th:onclick="|fn.downloadSpdxTag(()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXJsonYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(JSON)'" th:onclick="|fn.downloadSpdxJson(()|"></button>
+                                                	</div>
+                                                	<div class="col-md-1" th:if="${project.allowDownloadSPDXYamlYn == 'Y'}">
+                                                		<button type="button" class="btn btn-block btn-default btn-xm ml-0 mr-1" th:text="'SPDX(YAML)'" th:onclick="|fn.downloadSpdxYaml(()|"></button>
+                                                	</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div name="gridArea" id="girdAreaPackaging">
+                        <div class="row mt-3 mb-1">
+                            <div class="col-md-6 ml-2">
+                                <span class="text-bold" th:text="'Open Source List to disclose source code'"></span>
+                            </div>
+                            <div class="col-md-6">
+                            
+                            </div>
+                        </div>
+                        <div>
+                            <div class="row">
+                                <div class="col-sm-12 jqGridSet">
+                                    <table id="list"><tr><td></td></tr></table>
+                                    <div id="pager"></div>
+                                </div>
+                            </div>
+                            <div class="row" id="verifyBtnSet">
+                                <div class="col-lg-12 mt-2">
+                                	<input type="hidden" id="verifyFlag" th:value="${project.statusVerifyYn}"/>
+									<input type="hidden" id="readmeFile" th:value="${project.readmeFileName}" />
+									<input type="hidden" id="exceptFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_PROPRIETARY')}" />
+									<input type="hidden" id="verifyFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_FILE_LIST')}" />
+									<span id="verifyBtnSet">
+										<button type="button" th:class="'btn btn-sm width-6rem float-left' +  ${#strings.isEmpty(project.readmeFileName) ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnReadme" th:text="README"></button>
+                                    	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${#strings.isEmpty(project.verifyFileContent) ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnVerifyFileContent" th:text="'File List'"></button>
+                                    	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${#strings.isEmpty(project.exceptFileContent) ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnProprietary" th:text="'Banned List'"></button>
+									</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 comment-area">
+                	<div class="card card-lg-red" style="position:sticky;top:10px;">
+                     	<div class="card-header">
+                           	<h3 class="card-title" th:text="Comment"></h3>
+                           	<div class="card-tools">
+                           		<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
+                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
+                            	<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
+                           	</div>
+                      	</div>
+                      	<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
+                           	<div clas="row">
+                               	<div clas="col-md-12" id="commentList">
+                               		<div class="card-body">
+										<div class="row">
+											<div class="col-md-12">
+												<strong class="text-lg-gray" th:text="'No comments were registered.'"></strong>
+											</div>
+										</div>
+									</div>
+                               	</div>
+                         	</div>
+                  		</div>
+                    </div>
+               	</div>
+                </div>
+                </div>
+                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+                <div id="blind_wrap"></div>
+            </section>
+        </div>
+    </div>
+    <th:block th:replace="project/view/userGuideLicenseView"></th:block>
+    <th:block th:replace="project/view/changePathView"></th:block>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html lang="ko">
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
 	<head>
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 		<style>
@@ -24,85 +24,95 @@
 						<tr>
 							<td width="1" style="background:#ddd"></td>
 							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!contentsTitle</div>
-							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$!contentsSubTitle</p>
-							#end
-								#if( $comment )
+								<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+								<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+								<div th:if="${comment != null and comment != ''}">
 									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-									<div style="padding:10px;font-size:12px;">$!comment</div>
-								#end
+									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
+								</div>
+								<!--<div style="margin:20px 0;border:1px dashed #666;"></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+									 style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>-->
+							</td>
+							<td width="1" style="background:#ddd"></td>
+						</tr>
+						<!-- <tr>
+							<td colspan="3" height="1" style="background:#ddd"></td>
+						</tr> -->
+						<tr>
+							<td width="1" style="background:#ddd"></td>
+							<td style="padding:40px;">
 								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 									<col style="width:40%">
-        							<col style="width:*">
+									<col style="width:*">
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
 										<th style="padding:5px;background:#f0f0f0;">Registered Data</th>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Project Name</th>
-										<td style="padding:5px;">(${project_basic_info.prjId}) ${project_basic_info.prjName}</td>
+										<td style="padding:5px;" th:utext="${project_basic_info.prjName}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Project Version</th>
-										<td style="padding:5px;">$!project_basic_info.prjVersion</td>
+										<td style="padding:5px;" th:utext="${project_basic_info?.prjVersion}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
-										<td style="padding:5px;">$!project_basic_info.osType</td>
+										<td style="padding:5px;" th:utext="${project_basic_info?.osType}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Type / Network Service Only? </th>
-										<td style="padding:5px;">$!project_basic_info.distributionType / $!project_basic_info.networkServerType</td>
+										<td style="padding:5px;" th:utext="|${project_basic_info?.distributionType} / ${project_basic_info?.networkServerType}|"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Distribution Site</th>
-										<td style="padding:5px;">$!project_basic_info.distributeTarget</td>
+										<td style="padding:5px;" th:utext="${project_basic_info?.distributeTarget}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Notice</th>
-										<td style="padding:5px;">$!project_basic_info.noticeType</td>
+										<td style="padding:5px;" th:utext="${project_basic_info?.noticeType}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Priority</th>
-										<td style="padding:5px;">$!project_basic_info.priority</td>
+										<td style="padding:5px;" th:utext="${project_basic_info?.priority}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Additional Information</th>
-										<td style="padding:5px;">$!project_basic_info.comment</td>
+										<td style="padding:5px;" th:utext="${project_basic_info?.comment}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Creator</th>
-										<td style="padding:5px;">$!project_basic_info.creator</td>
+										<td style="padding:5px;" th:utext="${project_basic_info?.creator}"></td>
 									</tr>
-									<tr>
+									<tr th:if="${project_basic_info.reviewer}">
 										<th align="left" style="padding:5px;background:#f0f0f0;">Reviewer</th>
-										<td style="padding:5px;">$!project_basic_info.reviewer</td>
+										<td style="padding:5px;" th:utext="${project_basic_info?.reviewer}"></td>
 									</tr>
 								</table>
-								#if ($disclosure_oss_info)
-								<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List to Disclose &raquo;</h2>
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<th style="padding:5px;background:#f0f0f0;">License Name</th>
-									</tr>
-									#foreach( $oss in $disclosure_oss_info )
-									<tr>
-										<td style="padding:5px;">$!oss.ossName</td>
-										<td style="padding:5px;">$!oss.ossVersion</td>
-										<td style="padding:5px;">$!oss.licenseName</td>
-									</tr>
-									#end
-								</table>
-								#end 
+								<th:block th:if="${disclosure_oss_info}">
+									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; OSS List to Disclose &raquo;</h2>
+									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
+										<tr>
+											<th style="padding:5px;background:#f0f0f0;">OSS Name</th>
+											<th style="padding:5px;background:#f0f0f0;">OSS Version</th>
+											<th style="padding:5px;background:#f0f0f0;">License Name</th>
+										</tr>
+										<tr th:each="oss : ${disclosure_oss_info}">
+											<td style="padding:5px;" th:utext="${oss?.ossName}"></td>
+											<td style="padding:5px;" th:utext="${oss?.ossVersion}"></td>
+											<td style="padding:5px;" th:utext="${oss?.licenseName}"></td>
+										</tr>
+									</table>
+								</th:block>
 								<br />
 								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain" target="_blank">$shortDomain</a></div>
+								<div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+									 style="font-size:12px;">
+									* This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+								</div>
 							</td>
 							<td width="1" style="background:#ddd"></td>
 						</tr>

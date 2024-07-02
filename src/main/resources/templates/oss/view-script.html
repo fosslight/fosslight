@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="viewScript">
+<script th:inline="javascript">
+	$(document).ready(function () {
+		data.init();
+	});
+	
+	var data = {
+		detail : [[${detail}]],
+		list : [[${list}]],
+		components : [[${components}]],
+		componentsPartner : [[${componentsPartner}]],
+		vulnInfoList : [[${vulnInfoList}]],
+		init : function(){
+			if (data.list == null) {
+				data.list = new Array();
+            } else {
+            	list = data.list.rows;
+            	dataTable.declaredLicense();
+            }
+            if (typeof data.list.rows === "undefined") {
+				data.list.rows = new Array();
+			}
+			if (data.detail != null) {
+				data.initData(data.detail);
+			}
+			if (data.components != null) {
+				dataTable.projectLoad();
+			}
+			if (data.vulnInfoList != null) {
+				dataTable.vulnerabilityLoad();
+			}
+		},
+		initData : function (initData) {
+			$.each(initData, function(k, v){
+				switch(k){
+					case 'licenseDiv':
+						if (v == 'S') {
+							initData.ossLicenses.forEach(function(item){
+								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-light btn-sm">' + item.licenseType + '</span>');
+								$('#obDiv').html('');
+								$(item.obligation).appendTo('#obDiv');
+							});
+						} else if (v == 'M') {
+							var licenseType = autoLicense(data.list.rows);
+							var obligationHtml = autoObligation(data.list.rows);
+							if ('' != licenseType) {
+								$('#ltDiv').html('<span style="cursor: none; width: 150px;" class="btn btn-block btn-light btn-sm">' + licenseType + '</span>');
+							} else {
+								$('#ltDiv').html('');
+							}
+							$('#obDiv').html('');
+							$(obligationHtml).appendTo('#obDiv');
+						}
+					
+						break;
+					case 'ossType':
+						var colOssType = '';
+						if (v.toUpperCase().indexOf('M') > -1) {
+							colOssType += '<span class="badge badge-primary mr-1 text-sm">Multi</span>';
+						}
+						
+						if (v.toUpperCase().indexOf('D') > -1) {
+                            colOssType += '<span class="badge badge-purple mr-1 text-sm">Dual</span>';
+						}
+						
+						if (v.toUpperCase().indexOf('V') > -1) {
+							colOssType += '<span class="badge badge-yellow mr-1 text-sm">v-Diff</span>';
+						}
+						
+						if ('' != colOssType) {
+							$("#ossType").html(colOssType);
+						}
+
+                        break;
+				}
+			});
+		}
+	}
+	
+	var dataTable = {
+		declaredLicense : function () {
+			var licenseData = $('#_licenseChoice').DataTable({
+		    	paging : false,
+		    	searching : false,
+		    	info : false,
+		    	autoWidth : false,
+		    	responsive : true,
+		    	lengthChange : true,
+		    	ordering : false,
+		    	data : list,
+		    	columns : [ {
+		    		data : "ossLicenseComb"
+		    	}, {
+		      		data : "licenseNameEx"
+		    	}, {
+		      		data : "ossCopyright"
+		    	}],
+			  	columnDefs : [
+			      	{
+			      		targets : [0],
+			      		className : "text-center",
+			      		width: "7%"
+			      	},
+			      	{
+			      		targets : [1],
+			      		className : "text-center",
+			      		width: "30%"
+			      	},
+			      	{
+			      		targets : [2],
+			      		className : "text-left"
+			      	}
+			    ]
+		    });
+		},
+		projectLoad : function () {
+			var prjDataList = $('#_projectList').DataTable({
+		    	paging : false,
+		    	searching : false,
+		    	info : false,
+		    	autoWidth : false,
+		    	responsive : true,
+		    	lengthChange : true,
+		    	ordering : false,
+		    	data : data.components,
+		    	columns : [ {
+		    		data : "prjId"
+		    	}, {
+		      		data : "prjName",
+    				render : function(data, type, row, meta){
+    					var display = data;
+    					if ("" != row.prjVersion) {
+    						display += " (" + row.prjVersion + ")";
+    					}
+    					return display;
+    				}
+		    	}],
+			  	columnDefs : [
+			      	{
+			      		targets : [0],
+			      		className : "text-center"
+			      	}
+			    ]
+		    });
+			
+			$("#_projectList > tbody").on('dblclick', 'tr', function () {
+				var data = prjDataList.row(this).data();
+				if ("Y" != data.oldSystemFlag) {
+					var url = '/project/edit/' + data.prjId;
+					createTabInFrame(data.prjId + '_Project', url);
+				}
+			});
+		},
+		vulnerabilityLoad : function() {
+			var vulnDataList = $('#_vulnInfoList').DataTable({
+		    	paging : false,
+		    	searching : false,
+		    	info : false,
+		    	autoWidth : false,
+		    	responsive : true,
+		    	lengthChange : true,
+		    	ordering : false,
+		    	data : data.vulnInfoList,
+		    	columns : [ {
+		    		data : "cveId"
+		    	}, {
+		      		data : "cvssScore",
+					render : function(data, type, row, meta){
+						var display = "";
+						if (parseFloat(data) >= 9.0) {
+							display = "<span class=\"badge badge-dark\" title=\""+ data +"\">CRITICAL</span>";
+						} else if (parseFloat(data) >= 7.0 && parseFloat(data) < 9.0) {
+							display = "<span class=\"badge badge-danger\" title=\""+ data +"\">HIGH</span>";
+						} else if (parseFloat(data) >= 4.0 && parseFloat(data) < 7.0) {
+							display = "<span class=\"badge badge-orange\" title=\""+ data +"\">MEDIUM</span>";
+						} else {
+							display = "<span class=\"badge badge-yellow2\" title=\""+ data +"\">LOW</span>";
+						}
+						return display;
+					}
+		    	}, {
+		      		data : "vulnSummary",
+		    	}, {
+		      		data : "modiDate",
+		    	}],
+			  	columnDefs : [
+			      	{
+			      		targets : [0],
+			      		className : "text-center",
+			      		width: "10%"
+			      	},
+			      	{
+			      		targets : [1],
+			      		className : "text-center",
+			      		width: "7%"
+			      	},
+			      	{
+			      		targets : [2],
+			      		className : "text-left"
+			      	},
+			      	{
+			      		targets : [3],
+			      		className : "text-center",
+			      		width: "12%"
+			      	}
+			    ]
+		    });
+		}
+	}
+	
+	var fn = {
+		showOssViewPage : function (obj) {
+			var ossName = $(obj).parent().next().find('input').val();
+			var ossVersion = $(obj).parent().parent().next().find('input').val();
+			fn.showDetailPopup(ossName, ossVersion);
+		},
+		showDetailPopup : function (ossName, ossVersion) {
+			if ("" != ossName) {
+				var _popup = null;
+				
+				if ("N/A" == ossVersion) {
+					ossVersion = "";
+				}
+				
+				$.ajax({
+					url : '/oss/checkExistsOssByname',
+					type : 'GET',
+					dataType : 'json',
+					cache : false,
+					data : {ossName : ossName},
+					contentType : 'application/json',
+					success : function(data){
+						if(data.isValid == 'true') {
+							if(_popup == null || _popup.closed) {
+								_popup = window.open('/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion, 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+
+								if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+									alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+								}
+							} else {
+								_popup.close();
+								_popup = window.open('/oss/osspopup?ossName='+ossName+'&ossVersion='+ossVersion, 'ossViewPopup_'+ossName, 'width=900, height=700, toolbar=no, location=no, left=100, top=100');
+							}
+						} else {
+							alertify.alert([[#{msg.selfcheck.info.unconfirmed.oss}]], function(){});
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		vulnListMore : function () {
+			var product = $("input[name=ossName]").val();
+	        var version = $("input[name=ossVersion]").val() == "" ? "-" : $("input[name=ossVersion]").val();
+	        var url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=N&ossName=' + product + '&ossVersion=' + version;
+
+	        var _popup = null;
+
+	        if(_popup == null || _popup.closed){
+	            _popup = window.open(url, "vulnListMorePopup", "width=950, height=600, toolbar=no, location=no, left=100, top=100");
+
+	            if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+	                alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+	            }
+	        } else {
+	            _popup.close();
+	            _popup = window.open(url, "vulnListMorePopup", "width=950, height=600, toolbar=no, location=no, left=100, top=100");
+	        }
+		}
+	}
+	
+	function autoLicense(data){
+		var licenseCount = 0;
+		data.forEach(function(data){
+			if(data.licenseName){
+				licenseCount += 1;
+			}
+		})
+		
+		var result = '';
+		if(licenseCount != 0){
+			//1. 그룹별 분류하기
+			var groups = distributeGroups(data);
+			var numbers = getLicenseGroup(groups);
+			
+			//2. 각 그룹끼리 비교하기(OR 비교)
+			if(numbers.length != 1){
+ 				var min = getMin(numbers);
+ 				switch(min){
+					case 1:
+						result = 'Permissive';
+						break;
+					case 2:
+						result = 'Weak Copyleft';
+						break;
+					case 3:
+						result = 'Copyleft';
+						break;
+					case 4:
+						result = 'Proprietary Free';
+						break;
+					case 5:	
+						result = 'Proprietary';
+						break;
+				}
+			} else {
+ 				var min = numbers[0];
+ 				switch(min){
+					case 1:
+						result = 'Permissive';
+						break;
+					case 2:
+						result = 'Weak Copyleft';
+						break;
+					case 3:
+						result = 'Copyleft';
+						break;
+					case 4:
+						result = 'Proprietary Free';
+						break;
+					case 5:	
+						result = 'Proprietary';
+						break;
+				}
+			}
+		}
+		return result;
+	}
+	
+	function autoObligation(data){
+		var licenseCount = 0;
+		data.forEach(function(data){
+			if(data.licenseName){
+				licenseCount += 1;
+			}
+		})
+		var result = '';
+		if(licenseCount != 0){
+			//1. 그룹별 분류하기
+			var groups = distributeGroups(data);
+			var numbers = getLicenseGroup(groups);
+			
+			//2. 각 그룹끼리 비교하기(OR 비교)
+			if(numbers.length != 1) {
+ 				var min = getMin(numbers);
+ 				var number = compareObligationGroupMax(groups[numbers.indexOf(min)]);
+ 				switch(number){
+					case 1:
+						result = '<span></span>';
+						break;
+					case 2:
+						result = '<i class="far fa-file-alt fa-1-3x mr-1" title="Notice"></i>';
+						break;
+					case 3:
+						result = '<i class="far fa-file-alt fa-1-3x mr-1" title="Notice"></i><i class="far fa-file-code fa-1-3x ml-3 mr-1" title="Source Code"></i>';
+						break;
+				}
+			} else {
+ 				var min = numbers[0];
+ 				var number = compareObligationGroupMax(groups[0]);
+ 				
+ 				switch(number){
+					case 1:
+						result = '<span></span>';
+						break;
+					case 2:
+						result = '<i class="far fa-file-alt fa-1-3x mr-2" title="Notice"></i>';
+						break;
+					case 3:
+						result = '<i class="far fa-file-alt fa-1-3x mr-2" title="Notice"></i><i class="far fa-file-code fa-1-3x" title="Source Code"></i>';
+						break;
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	function distributeGroups(data){
+		var type='A';
+		var groups =[];
+		var groupA =[];
+		var groupB =[];
+		
+		data.forEach(function(item,index,ref){
+			if(item.ossLicenseComb == 'AND' || item.ossLicenseComb =="") {
+				if(groupA.length > 0) {	//AND - AND 배열 결속
+					
+				}
+				
+				if(groupB.length > 0) {	//OR - AND 배열 결속
+					groupA.push(groupB[0]);
+					groupB = [];
+				}
+				
+				groupA.push(item);	
+			} else if(item.ossLicenseComb == 'OR') {
+				if(groupA.length > 0){	//AND - OR 배열 변경 (이전까지 등록된 배열을 그룹에 등록후 배열 초기화)
+					groups.push(groupA);
+					groupA = [];
+				}
+				
+				if(groupB.length > 0){  //OR - OR 배열 변경 (바로 전 등록된 배열을 그룹에 등록후 배열 초기화)
+					groups.push(groupB);
+					groupB = [];
+				}
+				
+				groupB.push(item);
+			}
+			
+			if(index == ref.length-1){	//마지막 순서일 때 최종 등록
+				if(groupA.length > 0){
+					groups.push(groupA);
+				}
+				
+				if(groupB.length > 0){
+					groups.push(groupB);
+				}
+			}
+		});
+		
+		return groups;
+	}
+	
+	function getLicenseGroup(groups){
+		var numbers = [];
+		
+		groups.forEach(function(group){
+			var number = compareLicenseGroupMax(group);
+			numbers.push(number);
+		});
+
+		return numbers;
+	}
+	
+	function compareLicenseGroupMax(group){
+		var max = 0;
+		var constant = {
+			'Permissive' 		: 1,
+			'Weak Copyleft' 	: 2,
+			'Copyleft'  		: 3,
+			'Proprietary Free' 	: 4,
+			'Proprietary' 		: 5
+		};
+        var constant2 = {
+            'PMS' 	: 1,
+            'WCP' 	: 2,
+            'CP'  	: 3,
+            'NA' 	: 4,
+            'PF' 	: 5
+        };
+		group.forEach(function(item,index,ref){
+			if(max < constant[item.licenseType]){
+				max = constant[item.licenseType];
+			}
+		});
+        if (max == 0) {
+            group.forEach(function(item,index,ref){
+                if(max < constant2[item.licenseType]){
+                    max = constant2[item.licenseType];
+                }
+            });
+        }
+		return max;
+	}
+	
+	function compareObligationGroupMax(group){
+		var max = 0;
+		var constant = {
+			'NNY' : 1,
+			'NNN' : 1,
+			'YNY' : 2,
+			'YNN' : 2,
+			'YYY' : 3,
+			'YYN' : 3
+		};
+		group.forEach(function(item,index,ref){
+			if(max < constant[item.obligationChecks]){
+				max = constant[item.obligationChecks];
+			}
+		});
+		return max;
+	}
+</script>
+</th:block>

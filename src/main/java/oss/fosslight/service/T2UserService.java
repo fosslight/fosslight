@@ -56,7 +56,7 @@ public interface T2UserService extends UserDetailsService {
 	public T2Users checkApiUserAuthAndSetSession(String _token);
 
 	public T2Users changeSession(String userId);
-	
+
 	public boolean procToken(T2Users vo);
 	
 	public boolean checkPassword(String rawPassword, T2Users bean);
@@ -66,4 +66,7 @@ public interface T2UserService extends UserDetailsService {
 	public String[] checkUserInfo(T2Users userInfo);
 
 	public boolean isAdmin(String _token);
+	
+	public Map<String, Object> checkByADUser(String user_id, String user_pw, Map<String, Object> rtnMap);
+	public boolean checkSystemUser(String userId, String rawPassword);
 }

@@ -22,6 +22,12 @@ public class PartnerWatcher extends ComBean implements Serializable{
 	private String userName;
 	private String email;
 	
+	private String parDivision;
+	private String parDivisionName;
+	private String parUserId;
+	private String parUserName;
+	private String parEmail;
+	
 	public String getPartnerId() {
 		return partnerId;
 	}
@@ -40,8 +46,6 @@ public class PartnerWatcher extends ComBean implements Serializable{
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-	
-	
 	public String getUserName() {
 		return userName;
 	}
@@ -54,7 +58,36 @@ public class PartnerWatcher extends ComBean implements Serializable{
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+	public String getParDivision() {
+		return parDivision;
+	}
+	public void setParDivision(String parDivision) {
+		this.parDivision = parDivision;
+	}
+	public String getParDivisionName() {
+		return parDivisionName;
+	}
+	public void setParDivisionName(String parDivisionName) {
+		this.parDivisionName = parDivisionName;
+	}
+	public String getParUserId() {
+		return parUserId;
+	}
+	public void setParUserId(String parUserId) {
+		this.parUserId = parUserId;
+	}
+	public String getParUserName() {
+		return parUserName;
+	}
+	public void setParUserName(String parUserName) {
+		this.parUserName = parUserName;
+	}
+	public String getParEmail() {
+		return parEmail;
+	}
+	public void setParEmail(String parEmail) {
+		this.parEmail = parEmail;
+	}
 	@Override
 	public String toString() {
 		return "PartnerWatcher [partnerId=" + partnerId + ", division=" + division + ", userId=" + userId + "]";

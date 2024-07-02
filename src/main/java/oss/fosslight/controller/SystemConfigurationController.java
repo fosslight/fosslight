@@ -47,8 +47,7 @@ public class SystemConfigurationController extends CoTopComponent {
 		model.addAttribute("complianceStatusFlag", CommonFunction.propertyFlagCheck("menu.compliancestatus.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("externalLinkFlag", CommonFunction.propertyFlagCheck("menu.externallink.use.flag", CoConstDef.FLAG_YES));
 
-
-		return SYSTEM_CONFIGURATION.PAGE_JSP;
+		return "system/configuration";
 	}
 	
 	@SuppressWarnings("unchecked")

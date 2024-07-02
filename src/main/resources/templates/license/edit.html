@@ -1,0 +1,215 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="license/edit-script :: contentScript"></th:block>
+
+<body class="hold-transition sidebar-mini">
+	<div class="wrapper">
+		<div class="custom-layout ml-2 mr-2" style="height: auto">
+			<!-- Content Header (Page header) -->
+			<section class="content-header">
+				<div class="container-fluid">
+					<div class="row" th:if="${detail?.licenseId != null}">
+						<div class="col-sm-9 text-left mt-2"></div>
+						<div class="col-sm-3 float-right mt-1">
+							<div class="float-right">
+								<button class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments"></i>Comment</button>
+							</div>
+						</div>
+					</div>
+				</div><!-- /.container-fluid -->
+			</section>
+			<section class="content">
+				<form action="" id="licenseForm" method="post" name="licenseForm">
+					<input name="licenseId" th:value="${detail?.licenseId}" type="hidden" />
+					<input name="comment" type="hidden" />
+					<input name="restriction" type="hidden" />
+
+					<div class="row">
+						<div class="col-md-1 editInfoAreaTop" th:style="${detail != null} ? 'display: none;'"></div>
+						<div th:class="${detail != null} ? 'col-md-9 editInfoArea' : 'col-md-10 editInfoArea'">
+							<div class="card card-secondary submit-form">
+								<div class="card-header">
+									<h3 class="card-title" th:text="'License Information'"></h3>
+									<div class="card-tools">
+										<button th:if="${detail != null}" class="btn btn-tool" data-toggle="tooltip" data-placement="right" title="Delete" type="button" id="delete">
+											<i class="fas fa-trash-alt customIcon2"></i>
+										</button>
+										<button class="btn btn-tool" data-toggle="tooltip" data-placement="right" title="Save" type="button" id="save">
+											<i class="fas fa-save customIcon2"></i>
+										</button>
+									</div>
+								</div>
+								<div class="card-body">
+									<div class="row">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label for="licenseNameInput" th:text="#{msg.common.field.licenseName}"></label><span class="text-orange">*</span>
+												<i sec:authorize="hasRole('ROLE_ADMIN')" class="fas fa-info-circle fa-lg icon-orange ml-1" id="heplLink_licenseEditInfo" data-html="true" data-placement="right"></i>
+												<input class="form-control autoComLicenseLong" id="licenseNameInput" name="licenseName" th:value="${detail?.licenseName}" type="text" th:disabled="${isReadOnly}" />
+												<span class="retxt text-danger text-sm"></span>
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group">
+												<label for="shortIdentifierInput" th:text="#{msg.common.field.SPDX}"></label>
+												<input type="text" class="form-control" id="shortIdentifierInput" name="shortIdentifier" th:value="${detail?.shortIdentifier}" th:disabled="${isReadOnly}">
+												<span class="retxt text-danger text-sm"></span>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-6">
+											<div class="row form-group">
+												<div class="col-12">
+													<label for="licenseType" th:text="#{msg.common.field.licenseType}"></label><span class="text-orange">*</span>
+													<select class="form-control select2" id="licenseType" name="licenseType" style="width: 100%;" th:disabled="${isReadOnly}">
+														<option value="" disabled selected> </option>
+														<th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+															<option th:selected="${code.cdDtlNo == detail?.licenseType}"
+																th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}">
+															</option>
+														</th:block>
+													</select>
+													<span class="col-12 retxt text-danger text-sm"></span>
+												</div>
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group clearfix">
+												<div class="row">
+													<div class="col-md-12">
+														<label th:text="#{msg.common.field.obligation}"></label>
+													</div>
+													<div class="row">
+														<div class="col-md-12 ml-3 mt-2">
+															<div class="icheck-primary d-inline mx-3">
+																<input id="obligationNotificationYn" class="oblicationChk" name="obligationNotificationYn" th:checked="${detail?.obligationNotificationYn == 'Y'}"
+																	type="checkbox" value="Y" th:disabled="${isReadOnly}">
+																<label class="text-lg-gray" for="obligationNotificationYn" th:text="Notice"></label>
+															</div>
+															<div class="icheck-primary d-inline  mx-3">
+																<input id="obligationDisclosingSrcYn" class="oblicationChk" name="obligationDisclosingSrcYn" type="checkbox" value="Y"
+																	th:checked="${detail?.obligationDisclosingSrcYn == 'Y'}" th:disabled="${isReadOnly}">
+																<label class="text-lg-gray" for="obligationDisclosingSrcYn" th:text="'Source Code'"></label>
+															</div>
+														</div>
+													</div>
+
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="row form-group">
+										<div class="col-12">
+											<label th:text="#{msg.common.field.restriction}"></label>
+											<select class="select2" id="restrictionSelect" multiple="multiple" name="restriction" style="width: 100%;" th:disabled="${isReadOnly}">
+												<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+													th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"
+													th:selected="${detail?.restrictionCdNoList != null and #arrays.contains(detail.restrictionCdNoList, code.cdDtlNo)}"
+													th:disabled="${isReadOnly}">
+												</option>
+											</select>
+										</div>
+										<span class="col-12 retxt text-danger text-sm"></span>
+									</div>
+									<div class="row">
+										<div class="col-lg-6">
+											<div class="form-group tag-form">
+												<label th:text="#{msg.common.field.nickname}"></label>
+												<div class="input-group" th:unless="${isReadOnly}">
+													<input type="text" class="form-control" id="input_licenseNicknames">
+													<div class="input-group-append">
+														<button class="btn btn-default" id="licenseNicknames" name="addTagButton" type="button" th:text="Add"></button>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="row form-group">
+										<div class="col-md-12">
+											<div class="row multiTxtSet">
+												<div class="col-lg-4" th:each="licenseNickname : ${detail?.licenseNicknames}" th:if="${!#strings.isEmpty(licenseNickname)}">
+													<div class="form-group mb-0">
+														<input class="form-control" type="type" name="licenseNicknames" th:value="${licenseNickname}" th:disabled="${isReadOnly}" />
+														<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-tool xbox" th:onclick="|fn.removeTag(this)|">
+															<i class="fas fa-times"></i>
+														</button>
+														<span class="retxt text-danger text-sm"></span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="form-group tag-form" name="append-stag-form">
+										<label th:text="#{msg.common.field.licenseWebsite}"></label>
+										<div class="input-group" th:unless="${isReadOnly}">
+											<input class="form-control" id="input_webpages" type="text" placeholder="http://">
+											<div class="input-group-append">
+												<button class="btn btn-default" id="webpageAdd" type="button" th:text="Add"></button>
+											</div>
+										</div>
+									</div>
+									<div class="row form-group">
+										<div class="col-12 multiWebPageSet">
+											<div class="input-group card-tools mb-1" th:each="webpage : ${detail?.webpages}" th:if="${!#strings.isEmpty(webpage)}">
+												<input class="form-control" name="webpages" th:value="${webpage}" type="text" placeholder="http://" />
+												<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-tool xbox" th:onclick="|fn.removeTag2(this)|">
+													<i class="fas fa-times"></i></button>
+												<span class="urltxt text-danger text-sm"></span>
+											</div>
+										</div>
+									</div>
+									<th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_NOTICE_INTERNAL_URL')) == 'Y'}">
+										<div th:if="${licenseInfo?.internalUrl != null}" class="form-group">
+											<label th:text="#{msg.common.field.internalURL}"></label>
+											<div class="input-group">
+												<a class="ml-1" th:href="${licenseInfo.internalUrl}" target="_blank" th:text="${licenseInfo.internalUrl}"></a>
+											</div>
+										</div>
+									</th:block>
+									<div class="form-group">
+										<label for="licenseUserGuide" th:text="#{msg.common.field.userGuide}"></label>
+										<textarea class="form-control" id="licenseUserGuide" name="description" rows="4" th:text="${detail?.description}" th:disabled="${isReadOnly}"></textarea>
+									</div>
+									<div class="form-group">
+										<label for="licenseTextInput" th:text="#{msg.common.field.licenseText}"></label><span class="text-orange">*</span>
+										<textarea class="form-control" id="licenseTextInput" name="licenseText" rows="4" th:text="${detail?.licenseText}" th:disabled="${isReadOnly}"></textarea>
+										<span class="retxt text-danger text-sm"></span>
+									</div>
+									<div class="form-group">
+										<label for="attributionInput" th:text="#{msg.common.field.attribution}"></label>
+										<textarea class="form-control" id="attributionInput" name="attribution" rows="4" th:text="${detail?.attribution}" th:disabled="${isReadOnly}"></textarea>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-1 editInfoAreaBottom" th:style="${detail != null} ? 'display: none;'"></div>
+						<div class="col-md-3 editInfoCommentArea" th:style="${detail == null} ? 'display: none;'">
+							<div class="card card-lg-red" style="position:sticky; top:10px;">
+								<div class="card-header">
+									<h3 class="card-title" th:text="Comment"></h3>
+									<div class="card-tools">
+										<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
+										<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
+										<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
+									</div>
+								</div>
+								<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
+									<div clas="row">
+										<div clas="col-md-12" id="commentList"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</section>
+			<!-- loading bar -->
+			<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+			<!-- /. loading bar -->
+		</div>
+	</div>
+</body>
+
+</html>

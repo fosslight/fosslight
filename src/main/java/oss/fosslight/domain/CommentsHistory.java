@@ -7,6 +7,7 @@ package oss.fosslight.domain;
 
 import java.io.Serializable;
 
+import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 
 /**
@@ -74,6 +75,8 @@ public class CommentsHistory extends ComBean implements Serializable{
 	
 	/** The delOsdd. */
 	private String delOsdd;
+	
+	private String moreFlag = CoConstDef.FLAG_NO;
 	
 	/**
 	 * Gets the comm id.
@@ -388,6 +391,14 @@ public class CommentsHistory extends ComBean implements Serializable{
 
 	public void setDelOsdd(String delOsdd) {
 		this.delOsdd = delOsdd;
+	}
+
+	public String getMoreFlag() {
+		return moreFlag;
+	}
+
+	public void setMoreFlag(String moreFlag) {
+		this.moreFlag = moreFlag;
 	}
 	
 }

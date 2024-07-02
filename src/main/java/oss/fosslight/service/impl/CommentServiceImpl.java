@@ -17,6 +17,7 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.CommentsHistory;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.util.StringUtil;
@@ -53,6 +54,8 @@ public class CommentServiceImpl implements CommentService {
 		boolean isNew = StringUtil.isEmpty(bean.getCommId());
 		
 		if (!StringUtil.isEmpty(bean.getContents()) || !StringUtil.isEmpty(bean.getStatus())){
+			String updatedContents = CommonFunction.addBlankTargetToLink(bean.getContents());
+			bean.setContents(updatedContents);
 			commentMapper.registComment(bean);
 		}
 		
@@ -60,8 +63,12 @@ public class CommentServiceImpl implements CommentService {
 		
 		if (deleteUserComment && isNew && (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_PARTNER_HIS.equals(bean.getReferenceDiv()) 
-				|| CoConstDef.CD_DTL_COMMENT_PROJECT_HIS.equals(bean.getReferenceDiv()))) {
+				|| CoConstDef.CD_DTL_COMMENT_PROJECT_HIS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_SECURITY_HIS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_LICENSE.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_OSS.equals(bean.getReferenceDiv()))) {
 			switch (bean.getReferenceDiv()) {
 				case CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS:
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICATION_USER);
@@ -79,8 +86,20 @@ public class CommentServiceImpl implements CommentService {
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_USER);
 					
 					break;
+				case CoConstDef.CD_DTL_COMMENT_SECURITY_HIS:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_SECURITY_USER);
+					
+					break;
 				case CoConstDef.CD_DTL_COMMENT_PARTNER_HIS:
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
+					
+					break;
+				case CoConstDef.CD_DTL_COMMENT_LICENSE:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_LICENSE_USER);
+					
+					break;
+				case CoConstDef.CD_DTL_COMMENT_OSS:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS_USER);
 					
 					break;
 				default:
@@ -142,6 +161,9 @@ public class CommentServiceImpl implements CommentService {
 		
 		return result;
 	}
+
+	@Override
+	public String getContents(String commId) { return commentMapper.getContent(commId); }
 
 	@Override
 	public int updateComment(CommentsHistory bean) {

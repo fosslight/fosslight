@@ -114,8 +114,8 @@
 			, T1.LICENSE_NAME
 			, T2.CD_DTL_NM AS LICENSE_TYPE
             , CONCAT(
-            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>',	'') 
-            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<span class=\"iconSet man\" title=\"Source Code\"></span>]]>',	'')
+            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<i class=\"far fa-file-alt fa-1-3x\" title=\"Notice\"></i>]]>',	'')
+            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\"></i>]]>',	'')
             ) AS OBLIGATION
             , CONCAT(
             	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'Y',	'N') 
@@ -633,8 +633,8 @@
 			, T2.CD_DTL_NM AS LICENSE_TYPE 
 			, T1.LICENSE_TYPE AS LICENSE_TYPE_VAL
 			, CONCAT(
-            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<span class=\"iconSet ops\" title=\"Notice\"></span>]]>',	'') 
-            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<span class=\"iconSet man\" title=\"Source Code\"></span>]]>',	'')
+            	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<i class=\"far fa-file-alt fa-1-3x\" title=\"Notice\"></i>]]>',	'')
+            	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\"></i>]]>',	'')
             ) AS OBLIGATION
             , CONCAT(
             	IFNULL(T1.OBLIGATION_NOTIFICATION_YN, 'N')
@@ -748,15 +748,4 @@
 	<delete id="deleteLicenseWebPages" parameterType="oss.fosslight.domain.LicenseMaster">
 		DELETE FROM LICENSE_WEBPAGE WHERE LICENSE_ID = #{licenseId}
 	</delete>
-	
-	<update id="updateLicenseMasterForRestriction" parameterType="oss.fosslight.domain.LicenseMaster">
-		UPDATE LICENSE_MASTER 
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(restriction)">
-			SET RESTRICTION = #{restriction} 
-		</if>
-		<if test="@oss.fosslight.util.StringUtil@isEmpty(restriction)">
-			SET RESTRICTION = null
-		</if>
-		WHERE LICENSE_ID = #{licenseId}
-	</update>
 </mapper>

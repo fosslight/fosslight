@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="commentAreaFragment">
+    <div>
+        <div class="row" id="commentAreaFragment">
+            <th:block th:if="${!#lists.isEmpty(commentList)}">
+                <div class="col-md-12 custom-layout">
+                    <table class="table">
+                        <tbody>
+                        <th:block th:each="comment, status : ${commentList}">
+                            <tr>
+                                <td>
+                                    <div class="post">
+                                        <div class="row mb-1">
+                                            <th:block th:if="${not #strings.isEmpty(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment?.referenceDiv))}">
+                                                <span th:if="${comment.referenceDiv != '20'}" class="pt-1 pl-2 hashtag" th:text="${'#'+#strings.toLowerCase(@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'), comment.referenceDiv))}"></span><span th:if="${comment.referenceDiv != '20' and not #strings.isEmpty(comment.expansion1)}" class="pt-1 hashtag" th:text="${'(' + #strings.toLowerCase(comment.expansion1) + ')'}"></span>
+                                                <th:block th:if="${not #strings.isEmpty(comment.status)}">
+                                               		<span th:if="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#request reopen'"></span>
+													<span th:unless="${comment.status == 'Request to open'}" class="ml-1 pt-1 hashtag" th:text="${'#' + #strings.toLowerCase(comment.status)}"></span>
+                                             	</th:block>
+                                            </th:block>
+                                        </div>
+                                        <div class="user-block mt-1" style="display: flex;">
+                                            <span class="username" th:text="${comment.creator}"></span><span class="ml-2 text-sm" style="margin-top: .1rem;" th:text="${comment.createdDate}"></span>
+                                        </div>
+                                        <div th:utext="${comment.contents}"></div>
+                                    </div>
+                                </td>
+                                <td class="text-right py-0 align-middle">
+                                <td class="text-right py-0 align-middle">
+                                    <div class="btn-group btn-group-sm" th:if="${comment.creator == comment.loginUserName}">
+                                        <button class="btn btn-sm" type="button" th:data-commId="${comment.commId}" th:data-referenceDiv="${comment.referenceDiv}" th:onclick="|fn_comment.commentModify(this)|" name="commentModifyBtn">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </button>
+                                        <button class="btn btn-sm" th:data-commId="${comment.commId}" name="commentDeleteBtn" type="button" th:onclick="|fn_comment.commentDelete(this)|">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+            </th:block>
+            <th:block th:if="${#lists.isEmpty(commentList)}">
+                <div class="col-md-12 mt-3">
+                    <strong class="text-lg-gray">No comments were registered.</strong>
+                </div>
+            </th:block>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            const commentCnt = [[ ${commentListCnt} ]];
+            const moreYn = [[ ${moreYn} ]];
+
+            if (commentCnt > 5 && !moreYn) {
+                $("#moreListDiv").show();
+            } else {
+                $("#moreListDiv").hide();
+            }
+        });
+    </script>
+</th:block>
+<th:block th:fragment="commentHistoryAreaFragment">
+    <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+    <div class="custom-layout" id="commentHistoryAreaFragment">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row">
+                    <th:block th:if="${#strings.equals(basicInfo.referenceDiv, 'prj')}">
+                        <div class="card card-outline card-dark col-sm-12 text-left mt-3 p-2 mb-0 ml-1">
+                        	<div class="row">
+                        		<div class="col-lg-12">
+                        			<span class="text-dark-gray text-smaller pt-2 pl-2" th:text="'Project : '"></span><span th:text="${'[' + project.prjId + ']'}"></span><span class="ml-1" th:text="${project.prjName}"></span>
+                        		</div>
+<!--                      		<div class="col-lg-10">
+                        			<span class="description-percentage text-lg text-blue-gray text-bold">
+                                		<b><span th:text="${'[' + project.prjId + ']'}"></span><span class="ml-1" th:text="${project.prjName}"></span></b>
+                            		</span>
+                          			<span class="text-lg-gray text-smaller ml-2">
+                            			<span class="badge badge-info text-sm px-2 py-1 callOpener pointer" id="basicInfoPrj">Basic Information</span>
+                              			<span th:if="${project.prjId != null}" class="badge badge-orange text-sm px-2 py-1 callOpener pointer" id="identification">Identification</span>
+                              			<th:block th:if="${project.identificationStatus == 'CONF' and project.verificationStatus != 'NA'}">
+                                			<span class="badge badge-success text-sm px-2 py-1 callOpener pointer" id="packaging">Packaging</span>
+                              			</th:block>
+                              			<th:block th:if="${project.verificationStatus == 'CONF' and project.destributionStatus != 'NA'}">
+                                 			<span class="badge badge-danger text-sm px-2 py-1 callOpener pointer" id="distribution" >Distribution</span>
+                               			</th:block>
+                            		</span>
+                        		</div> -->
+                        	</div>
+                        </div>
+                    </th:block>
+                    <th:block th:if="${#strings.equals(basicInfo.referenceDiv, '3rd')}">
+                        <div class="card card-outline card-dark col-sm-12 text-left mt-3 p-2 mb-0 ml-1">
+                        	<div class="row">
+                        		<div class="col-lg-12">
+                        			<span class="text-dark-gray text-smaller pt-2 pl-2" th:text="'3rd Party : '"></span><span th:text="${'[' + partner.partnerId + ']'}"></span><span class="ml-1" th:text="${partner.partnerName}"></span><span th:text="${' (' + partner.softwareName + ')'}"></span>
+                        		</div>
+ <!--                      		<div class="col-lg-9 pt-1">
+                        			<span class="description-percentage text-md text-blue-gray text-bold">
+                                		<span th:text="${'[' + partner.partnerId + ']'}"></span><span class="ml-1" th:text="${partner.partnerName}"></span>
+                            		</span>
+                            		<span class="text-lg-gray text-smaller ml-2">
+                                    	<span class="btn btn-teal-01 btn-sm text-smaller ml-1" style="padding: 1px; width: 35px;" th:text="3rd"></span>
+                                	</span>
+                        		</div> -->
+                        	</div>
+<!--                       	<div class="row">
+                        		<div class="col-lg-3 text-center">
+									<h3 class="text-dark-gray text-smaller pt-2" th:text="'3rd Party Software Name'"></h3>
+                            	</div>
+                            	<div class="col-lg-9 pt-1">
+                            		<span class="description-percentage text-md text-bold text-blue-gray ml-1">
+                            			<span th:text="${partner.softwareName}"></span>
+                                		<span th:if="${partner.softwareVersion != '' and partner.softwareVersion != null}">
+                                    		(<span th:text="${partner.softwareVersion}"></span>)
+                                		</span>
+                            		</span>
+                            	</div>
+                        	</div>  -->
+                        </div>
+                    </th:block>
+                    <th:block th:if="${basicInfo.referenceDiv == 'oss'}">
+                    	<div class="card card-outline card-dark col-sm-12 text-left mt-3 p-2 mb-0 ml-1">
+                        	<div class="row">
+                        		<div class="col-lg-12">
+                        			<span class="text-dark-gray text-smaller pt-2 pl-2" th:text="'Opensource : '"></span><span th:text="${'[' + ossInfo.ossId + ']'}"></span><span class="ml-1" th:text="${ossInfo.ossName}"></span>
+                        		</div>
+<!--                       		<div class="col-lg-10">
+                        			<span class="description-percentage text-lg text-blue-gray text-bold">
+                                		<span class="ml-1 text-smaller" th:text="${ossInfo.ossName}"></span><span th:if="${ossInfo.ossVersion != null and ossInfo.ossVersion != ''}" class="text-smaller" th:text="${' (' + ossInfo.ossVersion + ')'}"></span>
+                            		</span>
+                        		</div> -->
+                        	</div>
+                        </div>
+                    </th:block>
+                    <th:block th:if="${basicInfo.referenceDiv == 'license'}">
+                    	<div class="card card-outline card-dark col-sm-12 text-left mt-3 p-2 mb-0 ml-1">
+                        	<div class="row">
+                        		<div class="col-lg-12">
+                        			<span class="text-dark-gray text-smaller pt-2 pl-2" th:text="'License : '"></span><span th:text="${'[' + licenseInfo.licenseId + ']'}"></span><span class="ml-1" th:text="${licenseInfo.licenseName}"></span>
+                        		</div>
+<!--                        	<div class="col-lg-10 mt-2">
+                        			<h3 class="description-percentage text-md text-blue-gray text-bold" th:text="${licenseInfo.licenseName}"></h3>
+                        		</div> -->
+                        	</div>
+                        </div>
+                    </th:block>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="mb-0" id="commentSchForm">
+                            <div class="row mt-3">
+                            	<th:block th:if="${basicInfo.referenceDiv == 'prj'}">
+                                	<div class="col-md-3 px-1">
+                                        <select class="custom-select float-right" data-placeholder="Section" id="schReferenceDiv" name="schReferenceDiv">
+                                            <option value="" th:text="Section"></option>
+                                            <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_HIS')}">
+                                                [[
+                                                    ${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'),
+                                                    @CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_HIS'))}
+                                                ]]
+                                            </option>
+                                            <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}">
+                                                [[
+                                                    ${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'),
+                                                    @CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS'))}
+                                                ]]
+                                            </option>
+                                            <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}">
+                                                [[
+                                                    ${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'),
+                                                    @CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS'))}
+                                                ]]
+                                            </option>
+                                            <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_DISTRIBUTION_HIS')}">
+                                                [[
+                                                    ${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'),
+                                                    @CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_DISTRIBUTION_HIS'))}
+                                                ]]
+                                            </option>
+                                            <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_HIS')}">
+                                                [[
+                                                    ${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_COMMENT_DIVISION'),
+                                                    @CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_HIS'))}
+                                                ]]
+                                            </option>
+                                        </select>
+                                	</div>
+                                	<div class="col-md-9 px-0">
+                                    	<div class="input-group">
+                                        	<input class="form-control" type="text" id="schKeyword" name="schKeyword" autocomplete="off">
+                                        	<div class="input-group-append">
+                                            	<button class="btn btn-default" id="search" type="button"><i class="fa fa-search"></i></button>
+                                        	</div>
+                                        	<button class="btn btn-ivory btn-md px-2 ml-1 width-7rem commentBtn" type="button">
+                                            	<i class="fas fa-plus mr-2"></i>Add
+                                        	</button>
+                                    	</div>
+                                    	<input name="referenceDiv" id="referenceDiv" th:value="${basicInfo.referenceDiv}" type="hidden">
+                                    	<input name="referenceId" id="referenceId"  th:value="${basicInfo.referenceId}" type="hidden">
+                                	</div>
+                             	</th:block>
+                               	<th:block th:if="${basicInfo.referenceDiv == '3rd' or basicInfo.referenceDiv == 'oss' or basicInfo.referenceDiv == 'license'}">
+                                    <div class="col-md-12 px-0">
+                                    	<div class="input-group ml-1">
+                                        	<input class="form-control" type="text" id="schKeyword" name="schKeyword" autocomplete="off">
+                                        	<div class="input-group-append">
+                                            	<button class="btn btn-default" id="search" type="button"><i class="fa fa-search"></i></button>
+                                        	</div>
+                                        	<button class="btn btn-ivory btn-md px-2 ml-1 width-7rem commentBtn" type="button">
+                                            	<i class="fas fa-plus mr-2"></i>Add
+                                        	</button>
+                                    	</div>
+                                    	<input name="referenceDiv" id="referenceDiv" th:value="${basicInfo.referenceDiv}" type="hidden">
+                                    	<input name="referenceId" id="referenceId"  th:value="${basicInfo.referenceId}" type="hidden">
+                                	</div>
+                               	</th:block>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-1">
+
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="content mt-1">
+            <div class="container-fluid">
+                <div class="card card-lg-red">
+                    <div class="card-header">
+                        <h3 class="card-title">Comment</h3>
+                        <!-- <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                            title="Collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div> -->
+                    </div>
+                    <div class="card-body pt-0" scroll="auto" style="height: auto">
+                        <div class="commentBack" id="commentListArea"><div></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script th:inline="javascript">
+        //<![CDATA[
+        /*global $ */
+        let basicReferenceDiv;
+        let userCommentReferenceDiv;
+
+        $(document).ready(function () {
+            fn_comment.getReferenceDiv();
+            fn_comment.getCommentList();
+
+            $('#search').on('click', function (e) {
+                event.preventDefault();
+                fn_comment.getCommentList();
+            });
+
+            $(document).keydown(function(event) {
+                if (event.key === 'Enter') {
+                    $('#search').click();
+                }
+            });
+
+            $('.callOpener').on('click', function (e) {
+                try {
+                    var paramId = "";
+
+                    if ([[${basicInfo.referenceDiv}]] == 'prj') {
+                        paramId = [[ ${project?.prjId} ]];
+                    } else if ([[${basicInfo.referenceDiv}]] == '3rd') {
+                        paramId = [[ ${partner?.partnerId} ]];
+                    }
+
+                    opener.moveTabInFrameByCommentPopup2(paramId, $(this).attr('id'));
+                    window.focus();
+                } catch (e) {
+                }
+            });
+        });
+		
+        function callbackFunction () {
+        	$("#modifiedCommentInPjtEditor").summernote('code', '');
+        	fn_comment.getCommentList();
+        }
+        
+        const fn_comment = {
+        	commentModify : function (obj) {
+            	const commId = $(obj).attr("data-commId");
+            	const referenceDiv = $(obj).attr("data-referenceDiv");
+            	fn_comment.handleCommentPopupOpen(commId, referenceDiv);
+        	},
+        	commentDelete : function (obj) {
+        		const commId = $(obj).attr("data-commId");
+                fn_comment.deleteComment(commId);
+        	},
+            getReferenceDiv: function () {
+                basicReferenceDiv = [[${basicReferenceDiv}]];
+
+                switch (basicReferenceDiv) {
+                	case [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_HIS')}]]:
+                    	userCommentReferenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_USER')}]];
+                    	break;
+                    case [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]]:
+                        userCommentReferenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICATION_USER')}]];
+                        break;
+                    case [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_DISTRIBUTION_HIS')}]]:
+                        userCommentReferenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_DISTRIBUTION_USER')}]];
+                        break;
+                    case [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]]:
+                        userCommentReferenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_USER')}]];
+                        break;
+                    case [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]]:
+                        userCommentReferenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]];
+                        break;
+                    case [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}]]:
+                        userCommentReferenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS_USER')}]];
+                        break;
+                    case [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE')}]]:
+                        userCommentReferenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_LICENSE_USER')}]];
+                        break;
+                    case [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_HIS')}]]:
+                        userCommentReferenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_USER')}]];
+                        break;
+                    default:
+                        break;
+                }
+            },
+            getCommentList: function () {
+                $.ajax({
+                    url: "/comment/getCommentAllList",
+                    type: 'GET',
+                    dataType: 'html',
+                    cache: false,
+                    data: $('#commentSchForm').serialize(),
+                    success: function (res) {
+                    	$('#commentListArea div').empty();
+                        $('#commentListArea div').replaceWith(res);
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        alertify.error([[ #{msg.common.valid2} ]], 0);
+                    }
+                });
+            },
+            deleteComment: function (_commId) {
+                if (!confirm(String([[#{msg.oss.confirm.delete.comment} ]]))) {
+                    return;
+                }
+
+                postAjaxData({'commId': _commId}, "/comment/deleteComment", "json", function (data) {
+                    alertify.confirm(String([[ #{msg.common.success}]]));
+                    fn_comment.getCommentList();
+                    opener.fn_comment.callbackFunction();
+                }, function () {
+                    alertify.error(String([[ #{msg.common.valid2} ]]), 0);
+                });
+            },
+            handleCommentPopupOpen: function (_commId, _referenceDiv)  {
+                getAjaxJsonData({commId : _commId, referenceDiv: _referenceDiv}, "/comment/getDivCommentByCommId", "html", function (res) {
+                    let eFlag = false;
+                    document.addEventListener('keydown', function(event) {
+                        if (event.keyCode === 13) { eFlag = true; };
+                    }, true);
+
+                    if (typeof alertify.editCommentDialog === 'undefined') {
+    					alertify.dialog('editCommentDialog', function() {
+    						return {
+    							setup: function() {
+    								var settings = alertify.confirm().settings;
+    								
+    								for (var prop in settings) {
+    									this.settings[prop] = settings[prop];
+    								}
+    								
+    								var setup = alertify.confirm().setup();
+    								setup.focus.element = 1;
+    								
+    								return setup;
+    							},
+    						    hooks: {
+    						    	onshow: function() {
+    						        	this.elements.dialog.style.maxWidth = 'none';
+    						          	this.elements.dialog.style.width = '680px';
+    						        }
+    							}
+    						};
+    					}, false, 'confirm');
+                	}
+                    
+                    alertify.editCommentDialog(res, function (e) {
+                        if(e) {
+                            if(eFlag) {
+                                eFlag = false;
+                                return false;
+                            } else {
+                                fn_comment.editComment();
+                            }
+                        } else {
+                            return false;
+                        }
+                    });
+                }, null, function () {
+                    if ($("#modifiedCommentEditor").summernote('code')) {
+                        $("#modifiedCommentEditor").summernote('destroy');
+                    }
+
+                    fn_comment.createSummernote();
+                });
+            },
+            createSummernote: function () {
+                $("#modifiedCommentEditor").summernote({
+                    height: 180,
+                    callbacks: {
+                        onInit: function() {
+                            const contents = $("#contents").val();
+                            $(this).summernote('code', contents);
+                        }
+                    }
+                });
+            },
+            editComment: function () {
+                const commId = $("#modifiedCommentId").val();
+                const referenceId = $('input[name=ossId]').val();
+                const referenceDiv = $("#referenceDiv").val();
+                const contents = $('#modifiedCommentEditor').summernote('code');
+                const param = {
+                    'commId': commId,
+                    'contents': contents,
+                    'referenceDiv': referenceDiv,
+                    'referenceId': referenceId
+                };
+
+                postAjaxData(param, "/comment/updateComment", "json", function () {
+                    alertify.success(String([[ #{msg.common.success} ]]), 0);
+                    
+                }, function () {
+                    alertify.error(String([[ #{msg.common.valid2} ]]), 0);
+                }, function () {
+                    fn_comment.getCommentList();
+                    opener.fn_comment.callbackFunction();
+                });
+            }
+        }
+
+        const fn = {
+            handleUserCommentPopupOpen: function () {
+                // 코멘트 팝업
+                const param = {
+                    "referenceDiv" : userCommentReferenceDiv,
+                    "referenceId" : [[${basicInfo.referenceId}]]
+                }
+                getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+                        if (!alertify.addBtnDialog) {
+                            alertify.dialog('addBtnDialog', function () {
+                                return {
+                                	setup: function() {
+        								var settings = alertify.confirm().settings;
+        								
+        								for (var prop in settings) {
+        									this.settings[prop] = settings[prop];
+        								}
+        								
+        								var setup = alertify.confirm().setup();
+        								setup.buttons = [];
+        								setup.focus.element = 0;
+        								
+        								return setup;
+        							},
+        						    hooks: {
+        						    	onshow: function() {
+        						        	this.elements.dialog.style.maxWidth = 'none';
+        						          	this.elements.dialog.style.width = '680px';
+        						        }
+        							}
+                                };
+                            }, false, 'confirm');
+                        }
+
+                        alertify.addBtnDialog(res);
+                    },
+                    null,
+                    function () {
+                        $("#modifiedCommentInPjtEditor").summernote({
+                            height: 180,
+                            callbacks: {
+                                onInit: function () {
+                                    $(this).summernote('code', $("#userContents").val());
+                                }
+                            }
+                        });
+                    });
+            },
+            sendEditor: function (type) {
+                //코멘트 저장
+                var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+                if (!editorVal || editorVal == "") {
+                    alertify.alert([[#{msg.project.enter.comment}]], function () {
+                    });
+                    return false;
+                }
+                var referenceId = [[${basicInfo.referenceId}]];
+                var param = {referenceId: referenceId, referenceDiv: basicReferenceDiv, contents: editorVal, mailSendType: type, expansion1 : $(".nav-link.active").text()};
+
+                $.ajax({
+                    url: '/project/sendComment',
+                    type: 'POST',
+                    dataType: 'json',
+                    cache: false,
+                    data: param,
+                    success: function (json) {
+                        if (json.isValid == 'false') {
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        } else {
+                            alertify.success([[#{msg.project.sent.comments.success}]]);
+                            $("#modifiedCommentInPjtEditor").summernote('code', '');
+                            $("#userContents").val('');
+                            $(".ajs-close").trigger("click");
+                            fn_comment.getCommentList();
+                            opener.fn_comment.callbackFunction();
+                        }
+                    },
+                    error: function () {
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+            },
+            saveEditor: function () {
+                //코멘트 임시저장
+                var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+				
+                var referenceId = [[${basicInfo.referenceId}]]
+                var param = {
+                    referenceId: referenceId
+                    , referenceDiv: userCommentReferenceDiv
+                    , contents: editorVal
+                };
+                
+                $.ajax({
+                    url: "/project/saveComment",
+                    type: "POST",
+                    dataType: "json",
+                    cache: false,
+                    data: param,
+                    success: function (json) {
+                        if (json.isValid == 'false') {
+                            alertify.error([[#{msg.common.valid2}]], 0);
+                        } else {
+                            alertify.success([[#{msg.common.success}]]);
+                        }
+                        $("#userContents").val(editorVal);
+                        $(".ajs-close").trigger("click");
+                    },
+                    error: function () {
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+            }
+        }
+        //]]>
+    </script>
+</th:block>
+<th:block th:fragment="commentPopupFragment">
+    <div class="comment-popup">
+        <div class="row mt-2">
+            <div class="col-12">
+                <input type="hidden" id="modifiedCommentId" th:value="${commId}">
+                <input type="hidden" id="contents" th:value="${contents}">
+                <input type="hidden" id="referenceDiv" th:value="${referenceDiv}">
+                <textarea class="form-control" id="modifiedCommentEditor" name="commentInput" rows="3" style="height: 800px"></textarea>
+            </div>
+        </div>
+    </div>
+</th:block>
+<th:block th:fragment="userCommentPopupFragment">
+    <div class="comment-popup">
+        <div class="row mt-2">
+            <div class="col-12">
+                <input type="hidden" id="userContents" th:value="${contents}">
+                <textarea class="form-control" id="modifiedCommentInPjtEditor" name="commentInput" rows="3" style="margin:0 auto;"></textarea>
+                <div class="row">
+                    <div class="col-12 my-2">
+                        <input type="button" value="Save draft" class="btn btn-outline-dark btn-md float-right" onclick="fn.saveEditor();"/>
+                        <input type="button" value="Save & Send comment" class="btn btn-dark btn-md float-right mx-1" onclick="fn.sendEditor('WR');"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</html>

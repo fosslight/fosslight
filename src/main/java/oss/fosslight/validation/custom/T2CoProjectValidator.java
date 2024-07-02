@@ -24,6 +24,7 @@ import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.BinaryAnalysisResult;
 import oss.fosslight.domain.BinaryData;
 import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
@@ -53,6 +54,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 	@SuppressWarnings("unused")
 	private List<String> noticeBinaryList = null;
 	private List<String> existsResultBinaryNameList = null;
+	private List<OssComponents> ossComponetSecurityList = null;
 
 	// validation check level (일반사용자 or Admin)
 	private boolean checkForAdmin = false;
@@ -74,6 +76,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 	public final String PROC_TYPE_PACKAGING = "PACKAGING";
 	public final String PROC_TYPE_DISTRBUTE = "DISTRIBUTE";
 	public final String PROC_TYPE_VERIFIY = "VERIFY";
+	public final String PROC_TYPE_SECURITY = "SECURITY";
 
 	public final int VALID_LEVEL_BASIC = 1;
 	public final int VALID_LEVEL_REQUEST = 2;
@@ -83,7 +86,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 		// 기본적인 유효성 체크만 필요한 경우
 		if (VALID_LEVEL_BASIC == LEVEL) {
 			if (!isEmpty(PROC_TYPE)) {
-				validateIdentificationBasic(map, errMap);
+				if (PROC_TYPE.equals(PROC_TYPE_SECURITY)) {
+					validateSecurityBasic(map, errMap);
+				} else {
+					validateIdentificationBasic(map, errMap);
+				}
 			}
 		} else if (VALID_LEVEL_REQUEST == LEVEL) {
 			if (!isEmpty(PROC_TYPE)) {
@@ -140,6 +147,24 @@ public class T2CoProjectValidator extends T2CoValidator {
 		}
 	}
 	
+	private void validateSecurityBasic(Map<String, String> map, Map<String, String> errMap) {
+		if (ossComponetSecurityList != null) {
+			String basicKey = "";
+			String gridKey = "";
+
+			for (OssComponents bean : ossComponetSecurityList) {
+				{
+					basicKey = "SECURITY_OSS_VERSION";
+					gridKey = StringUtil.convertToCamelCase(basicKey);
+					String errCd = checkBasicError(basicKey, gridKey, bean.getOssVersion(), false);
+					if (!isEmpty(errCd)) {
+						errMap.put("OSS_VERSION" + "." + bean.getGridId(), errCd);
+					}
+				}
+			}
+		}
+	}
+
 	private void validatePartnerRequest(Map<String, String> map, Map<String, String> errMap, Map<String, String> diffMap) {
 		//ossComponetList==> grid 데이터(사용자 등록 데이터)
 		if (ossComponetList != null) {
@@ -1652,6 +1677,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 		String prjId = map.get("PRJ_ID");
 		String prjName = map.get("PRJ_NAME");
 		String prjVersion = map.get("PRJ_VERSION");
+		String networkServerType = map.get("NETWORK_SERVER_TYPE");
 		//String prjDate = map.get("OSS_NOTICE_DUE_DATE");
 		
 		// -- 프로젝트 기본정보 유효성 체크 start --------------------------------
@@ -1725,6 +1751,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 			}
 		}
 		
+		// 6. network server type
+		targetName = "NETWORK_SERVER_TYPE";
+		if (!errMap.containsKey(targetName)) {
+			if (isEmpty(networkServerType)) errMap.put(targetName, targetName + ".REQUIRED");
+		}
+		
 		if (CommonFunction.isAdmin()) {
 			targetName = "CREATOR_NM";
 			
@@ -1771,8 +1803,26 @@ public class T2CoProjectValidator extends T2CoValidator {
 			List<String> deactivateOssList = ossService.getDeactivateOssList();
 			deactivateOssList.replaceAll(String::toUpperCase);
 			
+			Map<String, String[]> checkSumInfoMap = new HashMap<>();
+			
 			// checkBasicError : REQUIRED, LENGTH, FORMAT 만 체크!
 			for (ProjectIdentification bean : ossComponetList) {
+				if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(bean.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(bean.getReferenceDiv())) {
+					if (!isEmpty(bean.getBinaryName()) && !isEmpty(bean.getCheckSum())) {
+						checkSumInfoMap.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), avoidNull(bean.getTlsh(), "0")});
+					}
+				} else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(bean.getReferenceDiv())) {
+					if (!isEmpty(bean.getBinaryName()) && !isEmpty(bean.getCheckSum()) && !isEmpty(bean.getTlsh())) {
+						String binaryName = bean.getBinaryName();
+						if (binaryName.endsWith("/") || binaryName.endsWith("\\")) {
+						} else {
+							if (!isEmpty(binaryName)) {
+								checkSumInfoMap.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), bean.getTlsh(), avoidNull(bean.getFilePath())});
+							}
+						}
+					}
+				}
+				
 				boolean hasError = false;
 				boolean hasMultiError = false; // multi license용
 				
@@ -2435,10 +2485,9 @@ public class T2CoProjectValidator extends T2CoValidator {
 			} // end of loop
 			
 			Map<String, List<BinaryData>> checkBinaryInfoMap = new HashMap<>();
-			boolean isAndroid = false;
 			if ((PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE) || PROC_TYPE_IDENTIFICATION_BIN.equals(PROC_TYPE) || PROC_TYPE_IDENTIFICATION_PARTNER.equals(PROC_TYPE)) && !isEmpty(projectId)) {
 				Project projectInfo = projectService.getProjectBasicInfo(projectId);
-				checkBinaryInfoMap = binaryDataService.getBinaryListFromBinaryDB(isAndroid, projectInfo);
+				checkBinaryInfoMap = binaryDataService.getBinaryListFromBinaryDB(PROC_TYPE_IDENTIFICATION_ANDROID.equals(PROC_TYPE), projectInfo, checkSumInfoMap);
 			}
 			
 			if(checkBinaryInfoMap != null) {
@@ -2957,6 +3006,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 	public void setAppendix(String key, Object obj) {
 		if (!isEmpty(key)) {
 			switch (key) {
+				case "totalList":
+				case "fixedList":
+				case "notFixedList":
+					ossComponetSecurityList = (List<OssComponents>) obj;
+				break;
 				case "mainList":
 				case "bomList":
 					ossComponetList = CommonFunction.replaceOssVersionNA((List<ProjectIdentification>) obj);

@@ -1,7 +1,6 @@
 <%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@ include file="/WEB-INF/constants.jsp"%>
 <script>
-	
 	$(document).ready(function(){
 		'use strict';
 		initSample();
@@ -17,6 +16,7 @@
 		});
 		
 		showHelpLink("License_Edit_Info", "heplLink_licenseEditInfo");
+;
 	});
 	
 	var commentTemp = '';

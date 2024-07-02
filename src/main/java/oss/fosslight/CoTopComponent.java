@@ -29,11 +29,11 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -46,6 +46,7 @@ import com.google.gson.Gson;
 
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.config.AppConstBean;
+import oss.fosslight.config.JwtTokenProvider;
 import oss.fosslight.domain.ComBean;
 import oss.fosslight.domain.T2Authorities;
 import oss.fosslight.domain.T2Users;
@@ -53,16 +54,27 @@ import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoAdminValidator;
 
-@Component
+@Component("CoTopComponent")
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 public class CoTopComponent {
 	
 	protected static WebApplicationContext applicationContext;
+	protected static ResourceLoader resourceLoader;
 	
 	/* Separation by log type_20210802 */
 	protected static final Logger scheduler_log = LoggerFactory.getLogger("SCHEDULER_LOG");
 	protected static final Logger oss_history_log = LoggerFactory.getLogger("OSS_HISTORY_LOG");
 	protected static final Logger oss_auto_analysis_log = LoggerFactory.getLogger("OSS_AUTO_ANALYSIS_LOG");
+	
+	@SuppressWarnings("static-access")
+	@Autowired
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		this.resourceLoader = resourceLoader;
+	}
+	
+	protected static ResourceLoader getResourceLoader() {
+		return resourceLoader;
+	}
 	
 	@SuppressWarnings("static-access")
 	@Autowired
@@ -87,6 +99,14 @@ public class CoTopComponent {
 		this.appEnv = env;
 	}
 
+	protected static JwtTokenProvider jwtTokenProvider;
+	
+	@SuppressWarnings("static-access")
+	@Autowired
+	public void setJwtTokenProvider(JwtTokenProvider jwtTokenProvider) {
+		this.jwtTokenProvider = jwtTokenProvider;
+	}
+	
     public static Boolean isEmpty(String s) {
 		return StringUtil.isEmptyTrimmed(s);
 	}
@@ -155,13 +175,11 @@ public class CoTopComponent {
     }
     
     protected static boolean isLogin() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (auth != null && !"anonymousUser".equalsIgnoreCase(auth.getName()) && auth.isAuthenticated()) { 
-        	return true;
+		if (jwtTokenProvider.validateToken()) {
+			return true;
+        } else {
+        	return false;
         }
-        
-    	return false;
     }
     
     protected static String encodePassword(String rawPassword) {
@@ -243,7 +261,7 @@ public class CoTopComponent {
 		
 		responseHeaders.set("Content-Type", MediaType.APPLICATION_JSON_VALUE + "; charset=utf-8");
 		
-		return new ResponseEntity<Object>(resultMap, responseHeaders, HttpStatus.OK); 
+		return new ResponseEntity<>(resultMap, responseHeaders, HttpStatus.OK); 
 	}
 	
 	protected static Map<String, Object> getGridPagerMap(ComBean vo) {

@@ -46,6 +46,14 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateTo)">
 				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{updateDateTo},'%Y%m%d')
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+	                AND T1.PRJ_NAME = #{prjName}
+	            </if>
+				<if test="!@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+					AND T1.PRJ_NAME LIKE CONCAT('%', #{prjName}, '%')
+				</if>
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 				AND (
 						T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
@@ -107,9 +115,9 @@
 						WHEN T1.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
 						WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV' 
 						WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ' 
-						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
-					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
-					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'FREV'
+					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
+					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
 						ELSE 'PROG'
 					END STATUS
 				 , T1.PRIORITY
@@ -141,6 +149,14 @@
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateTo)">
 				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{updateDateTo},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+				 <if test="@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+					 AND T1.PRJ_NAME = #{prjName}
+				 </if>
+				 <if test="!@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+					 AND T1.PRJ_NAME LIKE CONCAT('%', #{prjName}, '%')
+				 </if>
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 				AND (
@@ -990,6 +1006,38 @@
 		 WHERE T1.USE_YN = 'Y'
 		   AND T1.PRJ_ID = #{prjId}
 	</select>
+
+	<select id="getProjectInfo"  parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
+		SELECT T1.*
+			, T2.NOTICE_TYPE
+			, T2.NOTICE_TYPE_ETC
+		FROM PROJECT_MASTER T1
+		LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
+		WHERE USE_YN ='Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(identificationStatus)">
+			AND T1.IDENTIFICATION_STATUS = #{identificationStatus}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
+			AND T1.PRJ_ID = #{prjId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+			AND T1.PRJ_NAME = #{prjName} 
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
+			AND T1.PRJ_VERSION = #{prjVersion}
+		</if>
+	</select>
+
+	<select id="selectOssComponentsList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.ProjectIdentification">
+		SELECT
+			*
+		FROM
+			OSS_COMPONENTS
+		WHERE
+			REFERENCE_ID = #{referenceId}
+			AND REFERENCE_DIV = #{referenceDiv}
+		ORDER BY COMPONENT_ID
+	</select>
 	
 	<update id="updateIdentifcationProgress" parameterType="hashMap">
 		UPDATE PROJECT_MASTER SET IDENTIFICATION_STATUS = #{identificationStatus} WHERE PRJ_ID = #{prjId}
@@ -1233,4 +1281,6 @@
 		WHERE
 			PRJ_ID = #{prjId}
 	</update>
+	
+	
 </mapper>

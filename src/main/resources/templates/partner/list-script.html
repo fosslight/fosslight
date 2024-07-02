@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+//<![CDATA[
+/*global $ */
+/*jslint browser: true, nomen: true */
+var lastsel;
+var userIdList;
+var adminUserList;
+var totalRow = 0;
+var refreshParam = {};
+const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT'))}]];
+var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+var changeWatcherArr = [];
+var role = [[${#authentication.authorities[0].authority}]];
+
+$(document).ready(function () {
+	'use strict';
+	setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
+	evt.init();
+	ajax.getUserIdList("Y", "REVIEWER"); // 근무자
+	ajax.getUserIdList("N", "ADMIN_USER"); // 관리자(퇴사자 포함)
+	
+	if ("ROLE_VIEWER" == role){
+		$(".btnAdd").hide();
+	}
+	
+	var startDate;
+    var endDate;
+	
+    $("#schDateRange").daterangepicker({
+        autoUpdateInput: false
+    }).on('apply.daterangepicker', function(ev, picker) {
+        $("input[name='createdDate1']").val(picker.startDate.format('YYYYMMDD'));
+        $("input[name='createdDate2']").val(picker.endDate.format('YYYYMMDD'));
+        $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+    })
+   	.on('cancel.daterangepicker', function(ev, picker) {
+    	$(this).val("");
+      	$("input[name='createdDate1']").val("");
+      	$("input[name='createdDate2']").val("");
+     	$('#schDateRange').attr('placeholder', 'Created Date');
+  	});
+    
+    var input = ["partnerName", "publicYn", "createdDate1", "createdDate2", "softwareName", "softwareVersion", "creator", "reviewer", "watchers", "ossName", "ossVersion", "licenseName"];
+	var singleSelect = ["division"];
+	var multiSelect = ["status"];
+	var textarea = ["binaryName", "userComment", "description"];
+    
+    var optionSelectedFlag = false;
+	if (typeof localStorage.partnerSearchConditions !== "undefined") {
+		var localStorageSearchConditions = JSON.parse(localStorage.partnerSearchConditions);
+		
+		if (Date.now() > localStorageSearchConditions.expire) {
+    		localStorage.removeItem("partnerSearchConditions");
+    	} else {
+    		Object.keys(localStorageSearchConditions).forEach(function(key) {
+    			if (input.includes(key)) {
+    				if ("publicYn" == key) {
+    					var publicYn = localStorageSearchConditions[key];
+    					if ("" == publicYn || "N" == publicYn) $("#checkbox3").prop("checked", true);
+    				} else {
+    					var searchValue = localStorageSearchConditions[key];
+    					if ("partnerName" != key && "" != searchValue) optionSelectedFlag = true;
+    					
+    					$("input[name='"+key+"']").val(searchValue);
+        				if ("createdDate1" == key) {
+        					startDate = localStorageSearchConditions[key];
+        				} else if ("createdDate2" == key) {
+        					endDate = localStorageSearchConditions[key];
+        				}
+    				}
+    			} else if (singleSelect.includes(key)) {
+    				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+    				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+    			} else if (multiSelect.includes(key)) {
+    				var statuses = localStorageSearchConditions[key];
+    				if ("" != statuses) {
+    					optionSelectedFlag = true;
+    					statuses = statuses.split(",");
+    					$("select[name='"+key+"']").val(statuses).trigger('change');
+    				} else {
+    					$("select[name='"+key+"']").val(statuses).trigger('change');
+    					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
+    				}
+    			} else if (textarea.includes(key)) {
+    				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+    				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+    			}
+    		});
+    	}
+	} else {
+		for (var i in input) {
+			if ("partnerName" != input[i] && "publicYn" != input[i]) {
+				var inputValue = $("input[name='"+input[i]+"']").val();
+				if ("" != inputValue) {
+					optionSelectedFlag = true;
+					break;
+				}
+			}
+		}
+		
+		if (!optionSelectedFlag) {
+			for (var i in singleSelect) {
+				var selectedValue = $("select[name='"+singleSelect[i]+"'] option:selected").val();
+				if ("" != selectedValue) {
+					optionSelectedFlag = true;
+					break;
+				}
+			}
+		}
+		
+		if (!optionSelectedFlag) {
+			var multiSelectedValue = $("select[name='status']").select2("val");
+			if (multiSelectedValue != null) optionSelectedFlag = true;
+		}
+		
+		if (!optionSelectedFlag) {
+			for (var i in textarea) {
+				var textareaValue = $("textarea[name='"+textarea[i]+"']").val();
+				if ("" != textareaValue) {
+					optionSelectedFlag = true;
+					break;
+				}
+			}
+		}
+		
+		startDate = String([[${searchBean?.createdDate1}]]);
+		endDate = String([[${searchBean?.createdDate2}]]);
+	}
+	
+	if (optionSelectedFlag) {
+		$(".optionSelected").show();
+	} else {
+		$(".optionSelected").hide();
+	}
+	
+	refreshParam = fn.setGridParam();
+	
+	$('#search').on('click',function(e){
+		e.preventDefault();
+		var postData = fn.setGridParam();
+		
+		var localStorageData = fn.setGridParam();
+		localStorageData.expire = Date.now() + 300000;
+        localStorage.setItem("partnerSearchConditions", JSON.stringify(localStorageData));
+		
+        optionSelectedFlag = false;
+        Object.keys(localStorageData).forEach(function(key) {
+			if (input.includes(key)) {
+				if ("partnerName" != key && "publicYn" != key && "" != localStorageData[key]) optionSelectedFlag = true;
+			} else if (singleSelect.includes(key)) {
+				if ("" != localStorageData[key]) optionSelectedFlag = true;
+			} else if (multiSelect.includes(key)) {
+				if ("" != localStorageData[key]) optionSelectedFlag = true;
+			} else if (textarea.includes(key)) {
+				if ("" != localStorageData[key]) optionSelectedFlag = true;
+			}
+		});
+        
+        if (optionSelectedFlag) {
+			$(".optionSelected").show();
+		} else {
+			$(".optionSelected").hide();
+		}
+        
+		$("#list").jqGrid('setGridParam', {postData:postData, page : 1}).trigger('reloadGrid');
+	});
+	
+	if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+        var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+        var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+        $("#schDateRange").val(formattedStartDate + ' - ' + formattedEndDate);
+    }
+});
+
+var gridTooltip = {
+    typeCodes : [],
+	tooltipCont : "<div class=\"tooltipData\">"
+		+"<dl><dt><span class=\"iconSt progress\">Progress</span>Progress</dt></dl><br>"
+		+"<dl><dt><span class=\"iconSt request\">Request</span>Request</dt></dl><br>"
+		+"<dl><dt><span class=\"iconSt review\">Review</span>Review</dt></dl><br>"
+		+"<dl><dt><span class=\"iconSt confirm\">Confirm</span>Confirm</dt></dl><br>"
+		+"</div>",
+	existTooltip : false,
+	init : function(){
+        list.load();	// Grid Load
+	}
+};
+
+//event
+var evt = {
+	init : function(){
+		$('select[name=division]').select2({placeholder: "Division", allowClear: true});
+		$('select[name=status]').select2({placeholder: "Status", allowClear: true});
+		
+		var selectNames = ["parDivision"];
+		for (var i in selectNames) {
+			$("select[name=" + selectNames[i] + "] option:eq(0)").prop("selected", true);
+		}
+	}
+}
+
+var fn = {
+	displaySoftwareName : function (cellvalue, options, rowObject) {
+		var display = "<span class='urlLink' style=\"cursor: pointer;\" onclick=\"fn.mvEditTab('"+options.rowId+"')\">" + cellvalue + "</span>";
+	   	return display;
+	},
+	mvEditTab : function (partnerId) {
+		createTabInFrame(partnerId+'_3rdParty', '/partner/edit/'+partnerId);
+	},
+	unformatter : function(cellvalue, options, rowObject){
+		return cellvalue;
+	},
+	downloadExcel : function(){
+		if(isMaximumRowCheck(totalRow)){
+			var data = $('#3rdSearch').serializeObject();
+			
+			//public 값 넣어주기
+			if($('#checkbox3').is(':checked')){
+				data.publicYn = 'N';
+			}else{
+				data.publicYn = 'Y';
+			}
+
+			if(data.status) {
+				data.status = JSON.stringify(data.status);
+				data.status = data.status.replace(/\"|\[|\]/gi, "");
+			}
+			
+			$.ajax({
+				type: "POST",
+				url: '/exceldownload/getExcelPost',
+				data: JSON.stringify({"type":"3rd", "parameter":JSON.stringify(data)}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						if(data.validMsg == "overflow"){
+							alertify.error(getMsgMaxRowCnt(), 0);
+						}else{
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					} else {
+						window.location = '/exceldownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	displayComment : function(cellvalue, options, rowObject){
+		var display = "";
+		
+		if(cellvalue !="" && cellvalue != undefined){
+			var tmpStr = new RegExp();
+			tmpStr = /[<][^>]*[>]/gi;
+			display ="<div style=\"height : 29px; overflow: hidden;\">"+cellvalue.replace(tmpStr , "")+"</div>";
+		}
+		
+		return display;
+	},
+	// Grid vulnerability cell display
+	displayVulnerability : function(cellvalue, options, rowObject){
+		var display = "";
+
+		if (parseInt(cellvalue) >= 9.0 ) {
+			display = "<span class=\"badge badge-dark pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">CRITICAL</span>";
+		} else if(parseInt(cellvalue) >= 7.0 ) {
+			display = "<span class=\"badge badge-danger pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">HIGH</span>";
+		} else if(parseInt(cellvalue) >= 4.0) {
+			display = "<span class=\"badge badge-orange pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">MEDIUM</span>";
+		} else if(parseInt(cellvalue) > 0) {
+			display = "<span class=\"badge badge-warning pointer\" title=\"" + cellvalue + "\" onclick=\"openNVD('" + rowObject.cveId + "')\">LOW</span>";
+		} else {
+			display="<span style=\"font-size:0;\"></span>";
+		}
+
+		return display;
+	},
+	reviewerChg : function(){
+		var partnerId = (this.id).replace(/[^0-9]/g,'');
+		var reviewer = Object.keys(userIdList)[Object.keys(userIdList)
+													.map(function(e) {
+														  return userIdList[e]
+													})
+													.indexOf(this.value)];
+		var data = {"partnerId" : partnerId, "reviewer" : reviewer};
+		
+		$.ajax({
+			url : '/partner/updateReviewer',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				$("#list").jqGrid('saveRow',partnerId);
+				$("#list").jqGrid('setCell', partnerId, "reviewer", reviewer);
+				
+				alertify.success([[#{msg.common.success}]]);
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		})
+	}, getUserName : function(cellvalue, options, rowObject){
+		return adminUserList[cellvalue] || "";
+	},
+	displayStatus: function (cellvalue, options, rowObject) {
+		var display = "";
+		
+		switch (cellvalue) {
+			case [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REQUEST'))}]] :
+				display = "<span class=\"text-pink text-bold\">Request</span>";
+				break;
+			case [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REVIEW'))}]] :
+				display = "<span class=\"text-yellow text-bold\">Review</span>";
+				break;
+			case [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_CONFIRM'))}]] :
+				display = "<span class=\"text-dark text-bold\">Confirm</span>";
+				break;
+			case [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS'))}]] :
+				display = "<span class=\"text-success text-bold\">Progress</span>";
+				break;
+		}
+		return display;
+	},
+	displayDeliveryForm: function (cellvalue, options, rowObject) {
+		var display = "";
+		switch (cellvalue) {
+			case [[${@CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_SRC')}]] :
+				display = "<span class=\"badge badge-orange pointer source\" title=\"" + [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'), @CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_SRC'))}]] + "\">S</span>";
+				break;
+			case [[${@CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_BIN')}]] :
+				display = "<span class=\"badge badge-orange pointer binary\" title=\"" + [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'), @CommonFunction.getCoConstDefVal('CD_DTL_PARTNER_DELIVERY_FORM_BIN'))}]] + "\">B</span>";
+				break;
+		}
+		return display;
+	},
+	setGridParam: function() {
+		var paramData=$('#3rdSearch').serializeObject();
+		
+		//public 값 넣어주기
+		if ($('#checkbox3').is(':checked')){
+			paramData.publicYn = 'N';
+		}else{
+			paramData.publicYn = 'Y';
+		}
+		
+		if (paramData.status) {
+			paramData.status = JSON.stringify(paramData.status);
+			paramData.status = paramData.status.replace(/\"|\[|\]/gi, "");
+		} else {
+			paramData.status = "";
+		}
+		
+		return paramData;
+	},
+	changeDivision : function(){
+		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+
+		if (chk > 0) {
+			$.ajax({
+				url : '/partner/changePartnerView/division',
+				type : 'POST',
+				data : JSON.stringify({"partnerId" : ""}),
+				dataType : 'html',
+				cache : false,
+				contentType : 'application/json',
+				success: function(res){
+					if(!alertify.changeDivisionDialog){
+						alertify.dialog('changeDivisionDialog', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+								hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							          	this.elements.content.style.height = '215px';
+							        }
+								}
+							};
+						}, false, 'confirm');
+                	}
+					
+					alertify.changeDivisionDialog(res).set('title', 'Change Division');
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+		}
+	}, 
+	changeDivisionSave : function(){
+		var changeDivisionArr = $("#list").jqGrid("getGridParam", "selarrrow");
+		var division = $("select[name=partnerDivision]").val();
+
+		alertify.confirm([[#{msg.common.change.division}]], function (e) {
+			if (e) {
+				$.ajax({
+					type: 'POST',
+					url :'/partner/updatePartnerDivision',
+					data: JSON.stringify({'partnerIds':changeDivisionArr, 'parDivision':division}),
+					contentType : 'application/json',
+					success: function (data) {
+						if ("true" == data.isValid){
+							alertify.alert([[#{msg.common.success}]], function(){
+								reloadTabInframe('/partner/list');
+								activeTabInFrameList("PARTNER");
+							});
+						} else {
+							var list = [];
+							list = data.resultData;
+							
+							var msg = [[#{msg.partner.check.division.permissions}]];
+							msg += '<br/> - '
+
+							for(var i=0; i<list.length; i++){
+								msg += '3rd-' + list[i];
+								if(i < list.length - 1){
+									msg += ', ';
+								}
+							}
+							
+							alertify.alert(msg, function(){});
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			} else {
+				return false;
+			}
+		});
+	}, 
+	changeDivisionCancel : function(){
+		$('#partnerChangeDivisionPop').hide();
+	},
+	changeWatcher : function() {
+		var chk = $("#list").jqGrid("getGridParam", "selarrrow").length;
+		if (parseInt(chk) > 0) {
+			$.ajax({
+				url : '/partner/changePartnerView/watcher',
+				type : 'POST',
+				data : JSON.stringify({"partnerId" : ""}),
+				dataType : 'html',
+				cache : false,
+				contentType : 'application/json',
+				success: function(res){
+					if(!alertify.changeWatcherDialog){
+						alertify.dialog('changeWatcherDialog', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.content.style.top = "60px";
+							        	this.elements.dialog.style.maxWidth = 'none';
+							        }
+								}
+							};
+						}, false, 'confirm');
+                	}
+					
+					alertify.changeWatcherDialog(res).set('title', 'Change Watcher').set('resizable', true).resizeTo('1000', '400');
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+		}
+	},
+	changeWatcherCanCel : function() {
+		fn.resetChangeWatcherPop();
+	},
+	changeWatcherAdd : function() {
+		var msg = "";
+		var notPermissionPartnerIds = [];
+		var permissionPartnerIds = [];
+		var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		for (var i in partnerIds) {
+			var gridData = $('#list').jqGrid('getRowData', partnerIds[i]);
+			if ("1" == gridData.statusPermission) {
+				permissionPartnerIds.push(partnerIds[i]);
+			} else {
+				notPermissionPartnerIds.push(partnerIds[i]);
+			}
+		}
+		
+		if (notPermissionPartnerIds.length > 0) {
+			msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]];
+			msg += '<br/> - '
+			for (var i in notPermissionPartnerIds) {
+				msg += '3rd Party-' + notPermissionPartnerIds[i];
+				if(i < notPermissionPartnerIds.length-1){
+					msg += ', ';
+				}
+			}
+		}
+		
+		if (permissionPartnerIds.length == 0) {
+			alertify.alert(msg, function(){});
+			return false;
+		}
+		
+		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
+			if (e) {
+				if (changeWatcherArr.length == 0) {
+					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+					return false;
+				}
+				
+				var data = {"partnerIds" : permissionPartnerIds, "changeWatcherList" : changeWatcherArr};
+
+				$.ajax({
+					url : '/partner/addWatchers',
+					type : 'POST',
+					data : JSON.stringify(data),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(resultData){
+						if (resultData.isValid == "true") {
+							if ("" == msg) {
+								alertify.success([[#{msg.common.success}]]);
+								fn.resetChangeWatcherPop();
+							} else {
+								alertify.alert(msg, function(){
+									fn.resetChangeWatcherPop();
+								});
+							}
+						} else {
+							alertify.error([[#{msg.common.valid2}]], 0);
+							fn.closeAlertify();
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+						fn.closeAlertify();
+					}
+				});
+			} else {
+				return false;
+			}
+		});
+	},
+	changeWatcherDelete : function() {
+		var msg = "";
+		var notPermissionPartnerIds = [];
+		var permissionPartnerIds = [];
+		var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		for (var i in partnerIds) {
+			var gridData = $('#list').jqGrid('getRowData', partnerIds[i]);
+			if ("1" == gridData.statusPermission) {
+				permissionPartnerIds.push(partnerIds[i]);
+			} else {
+				notPermissionPartnerIds.push(partnerIds[i]);
+			}
+		}
+		
+		if (notPermissionPartnerIds.length > 0) {
+			msg = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]];
+			msg += '<br/> - '
+			for (var i in notPermissionPartnerIds) {
+				msg += '3rd Party-' + notPermissionPartnerIds[i];
+				if(i < notPermissionPartnerIds.length-1){
+					msg += ', ';
+				}
+			}
+		}
+		
+		if (permissionPartnerIds.length == 0) {
+			alertify.alert(msg, function(){});
+			return false;
+		}
+		
+		alertify.confirm([[#{msg.common.change.watcher}]], function (e) {
+			if (e) {
+				if (changeWatcherArr.length == 0) {
+					alertify.alert([[#{msg.common.change.watcher.add}]], function(){});
+					return false;
+				}
+				
+				var data = {"partnerIds" : permissionPartnerIds, "changeWatcherList" : changeWatcherArr};
+				
+				$.ajax({
+					url : '/partner/removeWatchers',
+					type : 'POST',
+					data : JSON.stringify(data),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(resultData){
+						if(resultData.isValid == "true") {
+							alertify.success([[#{msg.common.success}]]);
+						} else {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+				
+				fn.resetChangeWatcherPop();
+			} else {
+				return false;
+			}
+		});
+	},
+	selectDivision : function(obj) {
+		var division = $(obj).val();
+		$('#parUserId').children().remove();
+		
+		if (division == "") {
+			$('#parUserId').val("").prev().text("select User").change();
+			return false;
+		}
+		$('#parUserId').attr('disabled', false);
+		
+		$.ajax({
+			url : '/partner/getUserList',
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'division' : division},
+			success : function(data){
+				data.forEach(function(obj){
+					$('#parUserId').append('<option value='+obj.userId+'>'+obj.userName+'('+obj.userId+')</option>');
+				});
+				
+				$('#parUserId').change();
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	addWatcherClick : function() {
+		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		var $divSel	= $("#parDivision"),
+			divVal	= $divSel.val(),
+			divTxt	= $divSel.find("option[value='"+divVal+"']").text();
+		
+		var $userSel	= $("#parUserId"),
+			userVal		= $userSel.val()||"",
+			userTxt		= $userSel.find("option[value='"+userVal+"']").text();
+		
+		if (divVal == "" || userVal == "") {
+			return alertify.error([[#{msg.project.required.selectDivision}]], 0);
+		}
+		
+		var isNew = true;
+		
+		$(".watcherTags").each(function(i, tag){
+			var tagDiv = $(tag).val().split("/")[0]
+			  , tagUid = $(tag).val().split("/")[1];
+			
+			if(divVal == tagDiv) {
+				if(tagUid == 'all') {
+					isNew = false;
+
+					return false;
+				}
+				
+				if(userVal == 'all') {
+					$(tag).closest('span').remove();
+				} else if(tagUid == userVal) {
+					isNew = false;
+				}
+			}
+		});
+		
+		if(isNew) {
+			var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
+			fn.addWatcherData(divVal, userVal, '');
+			fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+		}
+	},
+	addWatcherData : function (uDiv, uId, uEmail) {
+		var dataObj = {};
+		dataObj["parDivision"] = uDiv;
+		dataObj["parUserId"] = uId;
+		dataObj["parEmail"] = uEmail;
+		changeWatcherArr.push(dataObj);
+	},
+	removeWatcher : function (uDiv, uId, obj) {
+		var uEmail = "";
+		if("Email" == uId) {
+			uEmail = uDiv;
+			uId = "";
+			uDiv = "";
+		}
+		
+		changeWatcherArr.forEach(function(cur, index){
+			var object = cur;
+			if (uId === object["parUserId"] && uDiv === object["parDivision"] && uEmail === object["parEmail"]) {
+				$(obj).parent().remove();
+				changeWatcherArr.splice(index, 1);
+			}
+		});
+	},
+	addHtml : function(target, str, division, userId){
+		var rlt = division+((userId!="") ? "/"+userId : "");
+		var html  = '<span class="external-event pl-3"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		html += str;
+		if ("Y" != [[${searchBean.viewOnlyFlag}]]) {
+			html += '<i class="fas fa-times float-right mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
+		}
+		html += '</div>';
+		target.append(html);
+	},
+	addEmail : function() {
+		var prjIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		
+		var adId = $("#adId").val();
+		var domain = $("#emailTemp").val();
+
+		if(adId == "") {
+			$("#adId").focus();
+			return alertify.error([[#{enter.watcher.error}]], 0);
+		}
+		
+		if ("" == domain) {
+			return alertify.error([[#{select.watcher.domain.error}]], 0);
+		}
+		
+		var _email = adId + "@" + domain;
+		var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
+
+		if (regEmail.test(_email) == false) {
+			$("#adId").focus();
+
+			return alertify.error([[#{invalid.email.error}]], 0);
+		}
+		
+		var duplicateFlag = changeWatcherArr.filter(function(a){ 
+			return a.parEmail == _email;
+		}).length > 0;
+		
+		$.ajax({
+			type: "POST",
+			url: '/system/user/checkEmail', 
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'email' : _email},
+			success: function (data) {
+				var obj = {};
+				if("true" == data.isValid) {
+					var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
+					obj["parDivision"] = data.division;
+					obj["parUserId"] = data.userId;
+					obj["parEmail"] = '';
+					
+					fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
+				} else {
+					obj["parDivision"] = '';
+					obj["parUserId"] = '';
+					obj["parEmail"] = _email;
+					
+					fn.addHtml($("#multiDiv"), _email, _email, "Email");
+				}
+				
+				changeWatcherArr.push(obj);
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+		
+		$("#adId").val('');
+		$("#emailTemp").val('');
+		$("#domain").val([[${@CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN')}]]).trigger('change');
+	},
+	addList : function() {
+		var partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+		var listKind = $("#listKind").val(),
+		listId = $("#listId").val();
+		
+		if(fn.chkListValidation(listKind, listId)) {
+			var obj = {};
+			obj["listKind"] = listKind;
+			obj["listId"] = listId;
+		
+			fn.copyWatcher(obj, partnerIds);
+		}
+	},
+	chkListValidation : function(listKind, listId){
+		if(listKind == ""){
+			alertify.error([[#{msg.project.watcher.selectlist}]], 0);
+			return false;
+		}
+		
+		if(listId == ""){
+			alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
+			return false;
+		}
+		
+		return true;
+	},
+	copyWatcher : function(obj, partnerIds) {
+		for (var i in partnerIds) {
+			var partnerId = partnerIds[i];
+			obj["partnerId"] = partnerId;
+			obj["copyWatcherLocation"] = "list";
+			
+			$.ajax({
+				url : '/partner/copyWatcher',
+				type : 'POST',
+				data : JSON.stringify(obj),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(resultData){
+					var copyWatcher = resultData.copyWatcher;
+					
+					if(copyWatcher.length){
+						for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+							var isNew = true
+							  , division = copyWatcher[i].division || ""
+							  , divisionName = copyWatcher[i].parDivisionName || ""
+							  , userId = copyWatcher[i].parUserId || ""
+							  , userName = copyWatcher[i].parUserName || ""
+							  , email = copyWatcher[i].parEmail || ""
+							  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+							  , userUseYn = copyWatcher[i].userUseYn || "Y";
+							
+							$(".watcherTags").each(function(idx, tag){
+								var tagDiv = $(tag).val().split("/")[0]
+								  , tagUid = $(tag).val().split("/")[1];
+								  
+								if(division == tagDiv) {
+									if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+										isNew = false;
+										
+										return false;
+									} else if(tagUid == userId) {
+										isNew = false;	// 이미 등록된 watcher가 있을경우
+									}
+								}
+								
+								if(tagUid == "Email") {
+									if(email == tagDiv) {
+										isNew = false;
+									}
+								}
+							});
+							
+							if(isNew){
+								var obj = {};
+								if(email != ""){
+									obj["parDivision"] = '';
+									obj["parUserId"] = '';
+									obj["parEmail"] = _email;
+									
+									fn.addHtml($("#multiDiv"), email, email, "Email");
+								} else {
+									var str = "";
+									
+									if(userName == "") {
+										str = divisionName;
+									} else {
+										str = '<b';
+
+										if(divisionEmptyCd != division) {
+											if(deptUseYn == "N"){
+												str += ' class="deleteUser"';
+											}
+											
+											str += '>'+divisionName+'</b>/<b';
+										}
+										
+										if(userUseYn == "N"){
+											str += ' class="deleteUser"';
+										}
+										
+										str += '>'+userName+'</b>';
+									}
+									
+									obj["parDivision"] = division;
+									obj["parUserId"] = userId;
+									obj["parEmail"] = '';
+									
+									fn.addHtml($("#multiDiv"), str, division, userId);
+								}
+								
+								changeWatcherArr.push(obj);
+							}
+						}
+					}
+				},
+				error : fn.onError
+			});
+		}
+	},
+	checkChar : function(){
+		if(event.keyCode == 64){//@ 특수문자 체크
+			alertify.alert([[#{msg.login.check.char}]], function(){});
+    		
+			event.returnValue = false;
+    	}
+	},
+	selectDomain : function() {
+		var adIdDomain = $("select[name=parDomain] option:checked").text();
+		if ("Select Domain" == adIdDomain) adIdDomain = "";
+		$("input[name=emailTemp]").val(adIdDomain);
+	},
+	resetChangeWatcherPop : function() {
+		changeWatcherArr = [];
+		$("#multiDiv").children().remove();
+		$("select[name=parDivision]").val("").trigger('change');
+		$("select[name=parUserId]").html("<option value=''>Select User</option>");
+		$("select[name=parDomain]").val("").trigger('change');
+		$("select[name=listKind]").val("").trigger('change');
+		$("input[name=listId]").val("");
+		fn.closeAlertify();
+	},
+	closeAlertify : function() {
+		$(".ajs-close").trigger("click");
+	},
+	onUpdateSuccess : function(json, status){
+        loading.hide();
+        if (json.resCd == '10'){
+            alertify.success([[#{msg.common.success}]]);
+        } else {
+            alertify.error([[#{msg.common.valid2}]], 0);
+        }
+    },
+    deletePartner : function () {
+    	var partnerIds = new Array();
+    	partnerIds = $("#list").jqGrid("getGridParam", "selarrrow");
+    	
+    	if (partnerIds.length > 0) {
+    		var notPermissions = new Array();
+			var permissions = new Array();
+    		
+			for (var i in partnerIds) {
+				var rowData = $('#list').jqGrid('getRowData', partnerIds[i]);
+				if (rowData.statusPermission > 0) {
+					permissions.push(partnerIds[i]);
+				} else {
+					notPermissions.push(partnerIds[i]);
+				}
+			}
+			
+			if (permissions.length > 0) {
+				permissions.sort();
+				if (notPermissions.length > 0) notPermissions.sort();
+				
+				var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
+	           	innerHtml 		+= '<textarea id="delParEditor"></textarea>';
+	           	
+	           	// prevent clicking the OK button on Enter
+				let keyCode;
+				$(document).on('keydown', function (event) {
+					keyCode = event.keyCode;
+				});
+					
+	           	if (!alertify.delParDialog){
+	    			alertify.dialog('delParDialog', function() {
+	    				return {
+	    					setup: function() {
+	    						var settings = alertify.confirm().settings;
+	    						
+	    						for (var prop in settings) {
+	    							this.settings[prop] = settings[prop];
+	    						}
+	    						
+	    						var setup = alertify.confirm().setup();
+	    						setup.focus.element = 0;
+	    						
+	    						return setup;
+	    					},
+	    				    hooks: {
+	    				    	onshow: function() {
+	    				        	this.elements.dialog.style.maxWidth = 'none';
+	    				          	this.elements.dialog.style.width = '650px';
+	    				        }
+	    					}
+	    				};
+	    			}, false, 'confirm');
+	        	}
+	           	
+	           	alertify.delParDialog()
+           		.set('onok', function(e) {
+           			// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
+					
+				   	if (e) {
+				   		var editorVal = $("#delParEditor").summernote('code');
+				   		if ("" == $(editorVal).text().trim()) {
+							alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+							return false;
+						} else {
+							fn.deleteSubmit(permissions, notPermissions);
+						}
+				   	} else {
+				   		return false;
+				   	}
+           		})
+           		.set('onshow', function(e){
+           			$("#delParEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           		})
+           		.setContent(innerHtml)
+				.show();
+			} else {
+				var notPermissionsLength = notPermissions.length;
+				if (notPermissionsLength > 0) notPermissions.sort();
+				
+				var message = [[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]];
+				message += "<br>&emsp;- ";
+				notPermissions.forEach (function (el, index) {
+					message += "3RD-" + el;
+					if (index < notPermissionsLength-1) {
+						message += ", ";
+					}
+				});
+				
+				alertify.alert(message, function(){});
+				return false;
+			}
+    	} else {
+    		alertify.alert([[#{msg.project.watcher.selectlist}]], function(){});
+			return false;
+    	}
+    },
+    deleteSubmit : function (partnerIds, notPermissions) {
+    	$.ajax({
+			url : '/partner/multiDelAjax',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : {'partnerIds' : partnerIds, userComment : replaceWithLink($("#delParEditor").summernote('code'))},
+			success: function(data){
+				if ("10" == data.resCd) {
+					var message = "";
+					var notPermissionsLength = notPermissions.length;
+					var permissionsLength = partnerIds.length;
+					
+					if (notPermissionsLength > 0) {
+						message = [[${@CommonFunction.getCustomMessage('msg.common.check.delete.success', '3rd parties')}]];
+						message += "<br>&emsp;- ";
+						partnerIds.forEach (function (el, index) {
+							message += "3RD-" + el;
+							if (index < permissionsLength-1) {
+								message += ", ";
+							}
+						});
+						
+						message += "<br><br>";
+						message += [[${@CommonFunction.getCustomMessage('msg.common.check.delete.fail', '3rd parties')}]];
+						message += "<br>&emsp;- ";
+						notPermissions.forEach (function (el, index) {
+							message += "3RD-" + el;
+							if (index < notPermissionsLength-1) {
+								message += ", ";
+							}
+						});
+					} else {
+						message = [[${@CommonFunction.getCustomMessage('msg.common.delete.success', '3rd parties')}]];
+						message += "<br>&emsp;- ";
+						partnerIds.forEach (function (el, index) {
+							message += "3RD-" + el;
+							if (index < permissionsLength-1) {
+								message += ", ";
+							}
+						});
+					}
+					
+					if (typeof alertify.mulDelPartnerDialog === 'undefined') {
+						alertify.dialog('mulDelPartnerDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.alert().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.alert().setup();
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '550px';
+							        }
+								}
+							};
+						}, false, 'alert');
+	            	}
+					
+					alertify.mulDelPartnerDialog(message, function(e) {
+						reloadTabInframe('/partner/list');
+					});
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			},
+			error: function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+    }
+}
+
+//http
+var ajax = {
+	getUserIdList : function(reviewerFlag, type){
+		return $.ajax({
+			type: 'GET',
+			url: '/project/getUserIdList',
+			data: {reviewerFlag : reviewerFlag},
+			success : function(data){
+				temp = data.split(";").reduce(function(obj, cur){
+				    var keys = Object.keys(obj);
+				    var pairData = cur.split(":");
+
+				    if(keys.indexOf(pairData[0]) == -1 && pairData[0].trim() != ""){
+				        obj[pairData[0]] = pairData[1];
+				    }
+
+				    return obj;
+				}, {});
+				
+				if(type == "REVIEWER") {
+					userIdList = temp;
+				} else {
+					adminUserList = temp;
+					partnerList.load();
+				}
+			}
+		});
+	}
+};
+
+//3rdParty 그리드
+var partnerList = {
+		modifyRowId: [],		//수정된 모든 rowID
+		lastEditRowId: '',		//마지막 수정된 rowId 저장 변수
+		lastIdNo: '',			//서버에서 가져온 마지막 ID
+		load : function(){
+			var rowStr = [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_LIST_STR')}]];
+			var rowList = rowStr.split(",");
+			var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
+			
+			var colModelArr = [];
+	        var colModelObj = {name: 'partnerId', index: 'partnerId', width: 30, align: 'center', key:true, sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'partnerName', index: 'partnerName', width: 120, align: 'left', sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'softwareName', index: 'softwareName', width: 170, align: 'left', formatter: fn.displaySoftwareName, sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'softwareVersion', index: 'softwareVersion', width: 40, align: 'left', sortable : true, hidden:true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'status', index: 'status', width: 50, align: 'center', formatter: fn.displayStatus, sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'deliveryForm', index: 'deliveryForm', width: 50, align: 'center', formatter: fn.displayDeliveryForm, sortable : true, hidden: true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'description', index: 'description', width: 100, align: 'left', sortable : true, formatter:fn.displayComment, unformatter:fn.unformatter, hidden: true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'cveId', index: 'cveId', hidden:true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:fn.displayVulnerability, unformatter:fn.unformatter, sortable : false};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'division', index: 'division', width: 80, align: 'left', sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'creator', index: 'creator', width: 80, align: 'center', sortable : true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'createdDate', index: 'createdDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
+	        if ("ROLE_ADMIN" != role) {
+	        	colModelObj["hidden"] = true;
+	        }
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'modifiedDate', index: 'modifiedDate', width: 80, align: 'center', formatter:'date', formatoptions: {srcformat: 'Y-m-d H:i:s.t', newformat: 'Y-m-d'}, sortable : true};
+	        if ("ROLE_ADMIN" != role) {
+	        	colModelObj["hidden"] = true;
+	        }
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'reviewer', index: 'reviewer', width: 80, align: 'left', formatter: 'select', edittype:'text', formatter:fn.getUserName 
+					  , editoptions: {
+							dataInit:
+								function (e) {
+									$(e).autocomplete({
+										source: function(req, res){
+											res(
+												$.grep(Object.keys(userIdList)
+														.map(function(e) {
+															  return userIdList[e]
+														}), function(cur){
+												    return cur;
+												})
+											);
+										}
+										, minLength: 0
+										, open: function() { $(this).attr('state', 'open');}
+										, close: function () { $(this).attr('state', 'closed');}
+									}).focus(function() {
+										if ($(this).attr('state') != 'open') {
+											$(this).autocomplete("search");
+										}
+									}).blur(function(){
+										$(this).attr('state', 'closed');
+									}).on('autocompletechange', fn.reviewerChg);
+									
+									currentOssName = e.value;
+								}
+						}
+						, sortable : true
+					};
+	        if ("ROLE_ADMIN" == role) {
+	        	colModelObj["editable"] = true;
+	        } else {
+	        	colModelObj["editable"] = false;
+	        }
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'comment', index: 'comment', width: 100, align: 'left', formatter:fn.displayComment, sortable : true, hidden:true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'fileName', index: 'fileName', width: 70, align: 'left', hidden:true};
+	        colModelArr.push(colModelObj);
+	        colModelObj = {name: 'permission', index: 'permission', width: 50, hidden:true};
+			colModelArr.push(colModelObj);
+			colModelObj = {name: 'statusPermission', index: 'statusPermission', width: 50,hidden:true};
+			colModelArr.push(colModelObj);
+	     			
+			// apply user columns setting 
+			var listType = 'THIRD_PARTY';
+			var totalColInfos = [
+				{'ID': 'partnerId'},
+				{'3rd Party Name': 'partnerName'},
+				{'Software Name (Version)': 'softwareName'},
+				{'Status': 'status'},
+				{'Vulnerability': 'cvssScore'},
+				{'Division': 'division'},
+				{'Creator': 'creator'},
+				{'Created Date': 'createdDate'},
+				{'Updated Date': 'modifiedDate'},
+				{'Reviewer': 'reviewer'}
+			];
+			var defaultColNames = ['partnerId', 'partnerName', 'softwareName', 'status'];
+		
+			applyUserSettings(colModelArr, colModelObj, totalColInfos, defaultColNames, listType);   
+
+		$('#list').jqGrid({
+			url: '/partner/listAjax',
+			datatype: 'json',
+			jsonReader:{
+				repeatitems: false,
+				id: 'partnerId',
+				root:function(obj){return obj.rows;},
+				page:function(obj){return obj.page;},
+				total:function(obj){return obj.total;},
+				records:function(obj){return obj.records;}
+			},
+		  	colNames: ['ID','3rd Party Name','Software Name (Version)','Software<br/>Version', 'Status', 'Delivery<br/>Form','Description'
+			  	, 'CVE ID', 'Vulnerability', 'Division', 'Creator', 'Created Date', 'Updated Date', 'Reviewer', 'Comment', 'fileName', 'permission', 'statusPermission'],
+            colModel: colModelArr,
+			onSelectRow: function(id){},
+			rowNum: rowNum,
+			rowList: rowList,
+			editurl:'clientArray',
+			autowidth: true,
+			pager: '#pager',
+			gridview: true,
+			sortable: function(permutation){
+			},
+			sortname: 'partnerId',
+			sortorder: 'desc',
+			toppager:true,
+			loadonce: false,
+			height: 'auto',
+			multiselect : true,
+            multiselectWidth: 35,
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				if (role == "ROLE_ADMIN"){
+					$("#list").jqGrid('saveRow',lastsel);
+					$("#list").jqGrid('editRow',rowid);
+					lastsel=rowid;
+				}
+			},
+			loadComplete: function(data){
+				if (data != null) {
+					totalRow = data.records;
+					data = data.rows;
+
+					var target = $("#list");
+					var arr = target.jqGrid('getDataIDs');
+					var rowid;
+
+					for(var idx in arr) {
+						rowid = arr[idx];
+
+						//prjName prjVersion 데이터 join
+						var swNmVer = data[idx].softwareName;
+
+						if(data[idx].softwareVersion != ""){
+							swNmVer += " ("+data[idx].softwareVersion+")";
+						}
+
+						$("#list").jqGrid("setCell",rowid,"softwareName",swNmVer,"");
+					}
+
+					if (totalRow == 0){
+						var startDate = $("#createdDate1").val()||0;
+						var endDate = $("#createdDate2").val()||0;
+						var diffNum = +startDate - +endDate;
+						
+						if(diffNum > 0 && endDate > 0){
+							alertify.alert([[#{msg.common.search.check.date}]], function(){});
+						}
+					}
+					for(var i=0; i<data.length; i++){
+						if(data[i].status){
+							if(data[i].status.indexOf("PROG") != -1){
+								$("#list").jqGrid("setCell", data[i].partnerId, "status", 'Progress');
+							}
+							
+							if(data[i].status.indexOf("REV") != -1){
+								$("#list").jqGrid("setCell", data[i].partnerId, "status", 'Review');
+							}
+							
+							if(data[i].status.indexOf("REQ") != -1){
+								$("#list").jqGrid("setCell", data[i].partnerId, "status",'Request');
+							}
+							
+							if(data[i].status.indexOf("CONF") != -1){
+								$("#list").jqGrid("setCell", data[i].partnerId, "status",'Confirm');
+							}							
+						}
+					}
+					
+                    var pageButtonArea = $('#list_toppager_left');
+                    if (pageButtonArea.find('button').length == 0) {
+	               		var appendIcon = "";
+	               		appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add Partner\" onclick=\"createTabInFrame('New_3rdParty', '/partner/edit')\"><i class=\"fas fa-plus\"></i></button>";
+	                	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"delete license\" onclick=\"fn.deletePartner()\"><i class=\"far fa-trash-alt\"></i></button>";
+	                 	appendIcon += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"export list\" onclick=\"fn.downloadExcel()\"><i class=\"fas fa-download\"></i></button>";
+	                            
+	                  	pageButtonArea.append(appendIcon);
+	            	}
+	            	
+	            	var setUpColumnButton = $('#setUpColumnButton');
+					/* columns licalization */
+					if (setUpColumnButton.length === 0) {
+						var savedColNames = [];
+						var userColumnsSettingMenuOptions = {
+							_listType: listType,
+							_totalColInfos: totalColInfos,
+							_defaultColNames: defaultColNames,
+							_savedColNames: savedColNames
+						};
+						pageButtonArea.append(createUserCoulmnsSettingButton(userColumnsSettingMenuOptions));
+
+						// Check for click events occurring inside the menu area
+						$("#setUpColumnMenu").on("click", function (event) {
+							event.stopPropagation();
+						});
+
+						$('#setUpColumnButton').on("click", function (event) {
+							event.stopPropagation();
+							$('#setUpColumnMenu').toggleClass("show");
+							$(this).toggleClass("show");
+						})
+					}
+					adjustPageGridSize();
+				}
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+//				createTabInFrame(rowid+'_3rdParty', '/partner/edit/'+rowid);
+			},
+            gridComplete:function (){ updateGridRowCount('list', 'pager'); },
+			postData : refreshParam
+		})
+	}
+}
+//]]>
+</script>
+</th:block>

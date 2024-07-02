@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="bomScript">
+<script th:inline="javascript">
+var bomValidMsgData;
+var bomDiffMsgData;
+var bomInfoMsgData;
+var _popupOssAutoAnalysis = null;
+var ossAnalysisStatus = [[${project.ossAnalysisStatus}]];
+var analysisStartDate = [[${project.analysisStartDate}]];
+
+var bom_evt = {
+	commentIdx : [[${project.commentIdx}]],
+	commentTemp : '',
+	init : function(){
+		if (curIdenStatus == "REV" && $("#binaryDB")) {
+			$("#binaryDB").show();
+		}
+		
+		bom_evt.commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
+		$('dl[name=commentClone]').remove();
+		
+		bom_data.getJqGrid();
+		
+		if ([[${autoAnalysisFlag}]]) {
+			if (ossAnalysisStatus != null && ossAnalysisStatus.toUpperCase() == "SUCCESS" && curIdenStatus != "CONF"){
+				$(".idenAnalysisResult").show();
+			}
+		}
+	}
+}
+
+var bom_fn = {
+	reset : function () {
+		fn_grid_com.totalGridSaveMode('bomList');
+		
+		alertify.confirm([[#{msg.common.confirm.reset}]], function (e) {
+			if (e) {
+				$("#bomList").jqGrid('clearGridData');
+			} else {
+				return false;
+			}
+		});
+	},
+	beforeSave : function () {
+		if (com_fn.checkStatus()) {
+ 			alertify.confirm([[#{msg.common.confirm.bomSave}]], function (e) {
+				if (e) {
+					$("#mergeYn").val("Y");
+					Bom_Save_Flg = false;
+					
+					// 메인, 서브 그리드 세이브 모드
+					fn_grid_com.totalGridSaveMode('bomList');
+					
+					bom_fn.save();
+				} else {
+					return false;
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.project.warn.project.status}]], function(){});
+		}
+	},
+	save : function(){
+		cleanErrMsg("bomList");
+		
+		var bomList = $("#bomList");
+		var str = "";
+		arr = bomList.jqGrid('getDataIDs');
+		var gridData = new Array();
+		var checkGridData = new Array();
+		
+ 		for(var i in arr){
+ 			// mergePreDiv 설정
+ 			str = bomList.jqGrid('getCell',arr[i],'referenceDiv').split("/");
+ 			
+ 			if(str[0] =="3rd") {
+ 				bomList.jqGrid('setCell',arr[i],'referenceDiv', "10");
+
+ 				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99") {
+ 	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "10");
+ 				}
+ 			} else if(str[0] =="SRC") {
+ 				bomList.jqGrid('setCell',arr[i],'referenceDiv', "11");
+
+ 				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
+ 	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "11");
+ 				}
+ 			} else if(str[0] =="BIN") {
+ 				bomList.jqGrid('setCell',arr[i],'referenceDiv', "15");
+
+ 				if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
+ 	 				bomList.jqGrid('setCell',arr[i],'mergePreDiv', "15");
+ 				}
+ 			} else if(str[0] =="DEP") {
+                bomList.jqGrid('setCell',arr[i],'referenceDiv', "16");
+
+                if(bomList.jqGrid('getCell',arr[i],'mergePreDiv')=="99")  {
+                    bomList.jqGrid('setCell',arr[i],'mergePreDiv', "16");
+                }
+            }
+ 			
+ 			// obligationType 설정
+ 			if(bomList.jqGrid('getCell',arr[i],'notify')=="Y") {
+ 				if(bomList.jqGrid('getCell',arr[i],'source')=="Y") {
+ 					bomList.jqGrid('setCell',arr[i],'obligationType', "11");
+ 				} else {
+ 					bomList.jqGrid('setCell',arr[i],'obligationType', "10");
+ 				}
+ 			} else {
+ 				bomList.jqGrid('setCell',arr[i],'obligationType', "");
+ 			}
+ 			
+ 			if(bomList.jqGrid('getCell',arr[i],'adminCheck') == "Y") {
+ 				bomList.jqGrid('setCell',arr[i],'adminCheckYn', 'Y');
+ 				
+ 				var adminCheckData = bomList.getRowData(arr[i]);
+ 				var data = adminCheckData["downloadLocation"];
+ 				
+ 				if (data.includes("http://") || data.includes("https://")) {
+					data = data.replace(/http/g, ",http");
+				}
+				if (data.includes("ftp://")) {
+					data = data.replace(/ftp/g, ",ftp");
+				}
+				if (data.includes("git://")) {
+					data = data.replace(/git/g, ",git");
+				}
+				
+				data = data.substr(1);
+				bomList.jqGrid('setCell', arr[i], 'downloadLocation', data + "[Collectionofstoreddata]");
+ 				
+		 		gridData.push(bomList.getRowData(arr[i]));
+			} else {
+				checkGridData.push(bomList.getRowData(arr[i]));
+			}
+ 		}
+ 		
+ 		gridData.reverse();
+ 		checkGridData.reverse();
+ 		
+		var finalData = {
+			referenceId : [[${project.prjId}]],
+			merge : 'Y',
+			gridData : JSON.stringify(gridData),
+			checkGridData : JSON.stringify(checkGridData)
+		};
+		
+		$.ajax({
+			url : '/project/saveBom',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				curIdenStatus = data.identificationStatus;
+				
+				var param = {referenceId : [[${project.prjId}]], merge : 'N'};
+				bom_data.getJqGrid(param);
+				
+				Bom_Save_Flg = true;
+				
+				alertify.success([[#{msg.common.success}]]);
+				
+				var checkObligationFlag = false;
+				var arr = [];
+				arr = bomList.jqGrid('getRowData');
+		 		
+		 		for(var i in arr){
+		 			if(arr[i].obligationType == "90") {
+		 				checkObligationFlag = true;
+
+		 				break;
+		 			}
+		 		}
+		 		
+				if(checkObligationFlag) {
+					alertify.alert([[#{msg.info.include.needcheck.license.guide}]], function(){});
+				}
+				
+				if("" == [[${project.identificationStatus}]] && $(".projdecBtn").css("display") == "none" ) {
+					$(".confirm").hide();
+					$(".reject").hide();
+					$(".restart").hide();
+					$(".review").show();
+					$(".projdecBtn").show();
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	downloadExcel : function(){
+		loadingIden.show();
+		
+		$.ajax({
+			type: "POST",
+			url: '/exceldownload/getExcelPost',
+			data: JSON.stringify({"type":"bom", "parameter":[[${project.prjId}]]}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				loadingIden.hide();
+				
+				if ("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+				    window.location = '/exceldownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	displayNotify : function(cellvalue, options, rowObject){
+		var display = "";
+		var obligationLicense = rowObject["obligationLicense"] || rowObject[20];
+		var preObligationType = rowObject["preObligationType"] || rowObject[21];
+		var obligationType = rowObject["obligationType"] || rowObject[22];
+		var rowId = options.rowId;
+		var adminCheck = $("#"+rowId+"_adminCheck").prop("checked");
+		
+		if (adminCheck == undefined){
+			adminCheck = rowObject.adminCheckYn == "Y";
+		}
+		
+		if (adminCheck == false) {
+			if (preObligationType == 10 || preObligationType == 11){
+				display="<i class=\"far fa-circle fa-1x\"></i>";
+			}
+
+			if (preObligationType == undefined && (obligationType == 10 || obligationType == 11)){
+				display="<i class=\"far fa-circle fa-1x\"></i>";
+			}
+		} else if(obligationLicense == 90 || adminCheck == true) {
+			display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
+				+ '<option value="Y" '+((obligationType=='10' || obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'
+				+ '<option value="N" '+((obligationType!='10' && obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
+				+ '</select>';
+		} else if(obligationLicense == 10 || obligationLicense == 11) {
+			display = "<i class=\"far fa-circle fa-1x\"></i>";
+		}
+		
+		return display;
+	},
+	displaySource : function(cellvalue, options, rowObject){
+		var display = "";
+		var obligationLicense = rowObject["obligationLicense"] || rowObject[20];
+		var preObligationType = rowObject["preObligationType"] || rowObject[21];
+		var obligationType = rowObject["obligationType"] || rowObject[22];
+		var rowId = options.rowId;
+		var adminCheck = $("#"+rowId+"_adminCheck").prop("checked");
+		
+		if(adminCheck == undefined){
+			adminCheck = rowObject.adminCheckYn == "Y";
+		}
+		
+		if(adminCheck == false) {
+			if (preObligationType == 11) {
+				display = "<i class=\"far fa-circle fa-1x\"></i>";
+			}
+
+			if (preObligationType == undefined && obligationType == 11){
+				display = "<i class=\"far fa-circle fa-1x\"></i>";
+			}
+		} else if(obligationLicense == 90 || adminCheck == true) {
+			display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
+				+ '<option value="Y" '+((obligationType=='11') ? ' selected="selected"' : '') +'>O</option>'
+				+ '<option value="N" '+((obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
+				+ '</select>';
+		} else if(obligationLicense == 11) {
+			display = "<i class=\"far fa-circle fa-1x\"></i>";
+		}
+		
+		return display;
+	},
+	displayAdminCheck : function(cellvalue, options, rowObject){
+		var adminCheckYn = rowObject["adminCheckYn"];
+		var display = '<input id="'+options.rowId+'_adminCheck" type="checkbox" value="'+adminCheckYn+'"';
+
+		if(adminCheckYn == "Y"){
+			display += 'checked '
+		}
+
+		if(userRole != "ROLE_ADMIN" || curIdenStatus == "CONF"){
+			display += 'disabled ';
+		}
+		
+		display += 'onclick="bom_fn.onAdminCheckClick('+options.rowId+')">';
+		
+		return display;
+	},
+	onCboxClickAll : function(allChk, target) {
+		if(event.stopPropagation) {
+	    	event.stopPropagation(); //MOZILLA
+    	} else {
+	    	event.cancelBubble = true; //IE
+    	}
+		
+		var dataArray = $("#"+target).jqGrid("getRowData");
+    	
+        if($(allChk).is(":checked")) {
+            $("#"+target+" input[id*='_adminCheck']").each(function (idx){
+                $(this).attr('value','Y');
+                $(this).prop('checked',true);
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","Y");
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+            });
+        } else {
+        	$("#"+target+" input[id*='_adminCheck']").each(function (idx){
+                $(this).attr('value','N');
+                $(this).prop('checked',false);
+                fn_grid_com.saveCellData(target,dataArray[idx].componentId,"adminCheckYn","N");
+                bom_fn.onAdminCheckClick(dataArray[idx].componentId);
+            });
+        }
+	},
+	unDisplayNotify : function(cellvalue, options, rowObject){
+		var display = $("#"+options.rowId+"_notify").val();
+		
+		return display;
+	},
+	unDisplaySource : function(cellvalue, options, rowObject){
+		var display = $("#"+options.rowId+"_source").val();
+
+		return display;
+	},
+	unDisplayAdminCheck : function(cellvalue, options, rowObject){
+		var display = $("#"+options.rowId+"_adminCheck").val();
+
+		return display;
+	},
+	onNotifyCboxClick : function(rowId){
+		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
+		var selectedVal = $("#"+id+"_notify").prop("selected", true).val();
+		
+		if(selectedVal) {
+			if(selectedVal == "N") {
+				$("#"+id+"_source").val("N");
+			}
+			
+			$("#"+id+"_notify").parent().css("background", "");
+			
+			if($("#"+id+"_source").val()) {
+				$("#"+id+"_source").parent().css("background", "");
+			}
+		} else {
+			$("#"+id+"_source").val("");
+			$("#"+id+"_notify").parent().css("background", "CornflowerBlue");
+			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
+		}
+	},
+	onSourceCboxClick : function(rowId){
+		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
+		var selectedVal = $("#"+id+"_source").prop("selected", true).val();
+		
+		if(selectedVal) {
+			if(selectedVal == "Y") {
+				$("#"+id+"_notify").val("Y");
+			}
+			
+			$("#"+id+"_source").parent().css("background", "");
+			
+			if($("#"+id+"_notify").val()) {
+				$("#"+id+"_notify").parent().css("background", "");
+			}
+		} else {
+			$("#"+id+"_notify").val("");
+			$("#"+id+"_notify").parent().css("background", "CornflowerBlue");
+			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
+		}
+	},
+	onAdminCheckClick : function(rowId){
+		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
+		var adminCheckYn = $("#"+id+"_adminCheck").prop("checked");
+		
+		$("#bomList").jqGrid('setCell', id, 'notify', "10");
+		$("#bomList").jqGrid('setCell', id, 'source', "10");
+		
+		if (adminCheckYn && "ROLE_ADMIN" == userRole) {
+			var checkList = ["downloadLocation", "homepage", "copyrightText"];
+			
+			var rowData = $("#bomList").getRowData(id);
+			var componentId = rowData["componentId"];
+			
+			$("#bomList").jqGrid('setColProp','homepage', {editable: true});
+			$("#bomList").jqGrid('setColProp','copyrightText', {editable: true});
+			$("#bomList").jqGrid('setColProp','downloadLocation', {editable: true});
+			$("#bomList").jqGrid('editRow', id);
+			
+			Object.keys(rowData).forEach(function(value){
+				if(checkList.includes(value)) {
+					var data = rowData[value];
+					if ("downloadLocation" == value){
+						if(data.indexOf("Not the same as property") > -1){
+							data = data.split("Not the same as property")[0];
+						} else if(data.indexOf("The address should be") > -1){
+							data = data.split("The address should be")[0];
+						}
+						
+						if (data.includes("http://") || data.includes("https://")) {
+							data = data.replace(/http/g, ",http");
+						}
+						if (data.includes("ftp://")) {
+							data = data.replace(/ftp/g, ",ftp");
+						}
+						if (data.includes("git://")) {
+							data = data.replace(/git/g, ",git");
+						}
+						
+						data = data.substr(1);
+					} else if ("homepage" == value) {
+						if(data.indexOf("Not the same as property") > -1){
+							data = data.split("Not the same as property")[0];
+						} else if(data.indexOf("The address should be") > -1){
+							data = data.split("The address should be")[0];
+						}
+					} else {
+						if(data.indexOf("<div class") > -1){
+							data = data.split("<div")[0];
+						}
+					}
+					
+					data = data.replace(/<[^>]*>?/g, '');
+					$("#" + id + "_" + value).val(data);
+				}
+			});
+		} else {
+			$("#bomList").jqGrid('saveRow', id);
+		}
+
+		if (adminCheckYn) {
+			$("#"+id+"_adminCheck").val("Y");
+		} else {
+			$("#"+id+"_adminCheck").val("N");
+		}
+	},
+	adminCheck : function(rows, validArr, target){
+		var result = false;
+		var success = true;
+		
+		for(var idx in rows){
+			var refComponentIds = rows[idx].refComponentId.split(",");
+			
+			for(var refIdx in refComponentIds) {
+				if(refComponentIds[refIdx] == validArr[1]) {
+					var msgData = Object.keys(bomValidMsgData).filter(function(cur){
+					    return cur.indexOf(rows[0].componentId) > -1;
+					});
+
+					for(var i in msgData){
+					    if(bomValidMsgData[msgData[i]].toUpperCase() == "UNCONFIRMED LICENSE"){
+					        success = false;
+
+					        break;
+					    }
+					}
+
+					if(success){
+						result = true;
+
+						break;
+					}
+				}
+			}
+		}
+
+		if(!result) {
+			var checkData = target.getRowData(validArr[1]);
+
+			if(Object.keys(checkData).length > 0){
+				var key = (checkData.ossName + "|" + checkData.ossVersion).replace(/(<([^>]+)>)/ig,"");
+
+				var adminCheckCnt = rows
+										.filter(function(cur){
+													return (cur.ossName+"|"+cur.ossVersion).replace(/(<([^>]+)>)/ig,"") == key; 
+												})
+										.length;
+				
+				if(adminCheckCnt > 0){
+					result = true;
+				}
+			}
+		}
+		
+		return result;
+	},
+	analysisValidation : function(){
+		if (com_fn.checkStatus()){
+			if("Y"!= $("#mergeYn").val()){
+				alertify.alert([[#{msg.project.required.bomSave}]], function(){});
+
+				return false;
+			}
+			
+			var alertMsg = "";
+			
+			switch(ossAnalysisStatus.toUpperCase()){
+				case "PROGRESS":
+					if(analysisStartDate != "") {
+						alertMsg = "This analysis has been started at " + analysisStartDate + "<br>It has not been completed yet";
+						alertify.alert(alertMsg, function(){});
+					} else {
+						bom_fn.showOssAutoAnalysis(ossAnalysisStatus);
+					}
+					
+					break;
+				case "SUCCESS":
+					if(!alertify.commentDialog) {
+						//define a new dialog
+						alertify.dialog('commentDialog',function factory(){
+							return {
+								main:function(message){
+									this.message = message;
+								},
+								setup:function(){
+									return { 
+										focus: { element:0 }
+									};
+								},
+								prepare:function(){
+										this.setContent(this.message);
+								}
+							}
+						});
+					}
+					
+					// status가 success일때 다시 자동분석을 할때? -> 기존 list를 활용할 것인지? or 기존 list는 제거 이후 새로 list를 만들 것인지?
+					alertMsg = [[#{msg.project.confirm.bom}]];
+
+					var btnHtml = 	'<div class="row">';
+					btnHtml 	+= 	'	<div class="col-md-12">';
+					btnHtml 	+= 	'		<label style="font-size: .9rem; font-weight: 500;">'+alertMsg+'</label>';
+					btnHtml 	+= 	'	</div>';
+					btnHtml 	+= 	'</div>';
+					btnHtml 	+= 	'<div class="row custom-layout mt-3 mr-3" style="align-items: right; justify-content: right;">';
+					btnHtml 	+= 	'	<button type="button" class="btn btn-dark btn-sm width-8rem px-3" onclick="bom_fn.showOssAutoAnalysis(\''+ossAnalysisStatus+'-reset\')">Reset & Load</button>';
+					btnHtml 	+= 	'	<button type="button" class="btn btn-outline-dark btn-sm width-6rem px-3 ml-1" onclick="$(\'.ajs-close\').trigger(\'click\')">Cancel</button>';
+					btnHtml 	+=	'</div>';
+					
+					alertify.commentDialog(btnHtml);
+					$(".ajs-dialog").css("height", "");
+					
+					break;
+				case "FAIL":
+					if(!alertify.commentDialog){
+						//define a new dialog
+						alertify.dialog('commentDialog',function factory(){
+							return {
+								main:function(message){
+									this.message = message;
+								},
+								setup:function(){
+									return { 
+										focus: { element:0 }
+									};
+								},
+								prepare:function(){
+										this.setContent(this.message);
+								}
+							}
+						});
+					}
+					
+					// status가 success일때 다시 자동분석을 할때? -> 기존 list를 활용할 것인지? or 기존 list는 제거 이후 새로 list를 만들 것인지?
+					var btnHtml = 	'<div class="row">';
+					btnHtml 	+= 	'	<div class="col-md-12">';
+					btnHtml 	+= 	'		<label style="font-size: .9rem; font-weight: 500;">The Auto analysis of this project was recently failed.</label>';
+					btnHtml 	+= 	'	</div>';
+					btnHtml 	+= 	'	<div class="col-md-12">';
+					btnHtml 	+= 	'		<label style="font-size: .9rem; font-weight: 500;">If you want to restart the Auto Analysis. click the \'Restart\' button</label>';
+					btnHtml 	+= 	'	</div>';
+					btnHtml 	+= 	'</div>';
+					btnHtml 	+= 	'<div class="row custom-layout mt-3 mr-3" style="align-items: right; justify-content: right;">';
+					btnHtml 	+= 	'	<button type="button" class="btn btn-yellow-04 btn-sm width-6rem px-3" onclick="bom_fn.showOssAutoAnalysis(\''+ossAnalysisStatus+'\')">Restart</button>';
+					btnHtml 	+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem px-3 ml-1" onclick="$(\'.ajs-close\').trigger(\'click\')">Cancel</button>';
+					btnHtml 	+=	'</div>';
+					
+					alertify.commentDialog(btnHtml);
+					$(".ajs-dialog").css("height", "245px");
+					
+					break;
+				default:
+					bom_fn.showOssAutoAnalysis("NEW");
+				
+					break;
+			}	
+		} else {
+			alertify.alert([[#{msg.project.warn.project.status}]], function(){});
+		}	
+	},
+	showOssAutoAnalysis : function(status){
+		if(status.toUpperCase().indexOf("SUCCESS") > -1 || status.toUpperCase().indexOf("FAIL") > -1){
+			$('.ajs-close').trigger('click');
+		}
+
+		if(status.toUpperCase().indexOf("LOAD") > -1){ // status : success & load
+			_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId='+[[${project.prjId}]], 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
+
+			if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		}
+
+		// status : (success & reset), progress 
+		if(status.toUpperCase().indexOf("RESET") > -1 
+				|| status.toUpperCase().indexOf("PROGRESS") > -1 
+				|| status.toUpperCase().indexOf("FAIL") > -1
+				|| status.toUpperCase().indexOf("NEW") > -1) {
+			// unconfirmed OssName & OssVersion의 Data추출
+			var componentIdList = Object.keys(bomValidMsgData).reduce(function(arr, cur){
+			    if(arr.indexOf(cur) == -1 && (cur.indexOf("ossName") == 0 || cur.indexOf("ossVersion") == 0)){
+			        arr.push(cur);
+			    }
+	
+			    return arr;
+			}, []).reduce(function(arr, cur){
+			    var componentId = cur.split(".")[1];
+
+				if(arr.indexOf(componentId) == -1 && bomValidMsgData[cur].indexOf("Unconfirmed") > -1){
+			        arr.push(componentId);
+			    }
+	
+			    return arr;
+			}, []);
+	
+			var data = {
+					'componentIdList' : componentIdList
+				  , 'prjId' : [[${project.prjId}]]
+				  , 'referenceDiv' : '13'
+			};
+			
+			$.ajax({
+				url : '/oss/saveOssAnalysisList/view',
+				dataType : 'json',
+				type : 'POST',
+				cache : false,
+				data : JSON.stringify(data),
+				contentType : 'application/json',
+				success : function(data){
+					_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId='+[[${project.prjId}]], 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
+
+					if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
+						alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+					}
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	showAnalysisResult : function(){
+		if (com_fn.checkStatus()){
+			var rdm = Math.random().toString(36).substring(2, 12);
+			_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId='+[[${project.prjId}]]+'&ossAnalysisStatus=result', 'OSS Auto Analysis' + rdm, 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
+
+			if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		} else {
+			alertify.alert([[#{msg.project.warn.project.status}]], function(){});
+		}
+	},
+	binaryDBSave : function(prjId) {
+		var param = {
+			"prjId" : prjId,
+			"referenceDiv" : "13"
+		};
+
+		$.ajax({
+			url : '/project/binaryDBSave',
+			type : 'POST',
+			data : JSON.stringify(param),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success : function(data){
+				if("false" == data.isValid) {
+					alertify.alert('Nothing to store in Binary DB', function(){});
+				}else{
+					alertify.alert([[#{msg.common.success}]], function(){});
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+    },
+    displayReferenceDiv : function(cellvalue, options, rowObject){
+		var displayReferenceDiv = "";
+		
+		if (typeof rowObject.ossName != "undefined" && typeof rowObject.refDiv != "undefined" && typeof rowObject.refComponentId != "undefined") {
+			var booleanFlag = false;
+			var refComponentId = "";
+			var refDiv = "";
+			
+			if (rowObject.refComponentId.indexOf(",") > -1 && rowObject.refDiv.indexOf(",") > -1) {
+				refComponentId = rowObject.refComponentId.split(",").sort();
+				refDiv = rowObject.refDiv.split(",").sort();
+				booleanFlag = true;
+			} else if (rowObject.refComponentId.indexOf(",") > -1 && rowObject.refDiv.indexOf(",") == -1) {
+				refComponentId = rowObject.refComponentId.split(",").sort()[0];
+				refDiv = rowObject.refDiv;
+			} else {
+				refComponentId = rowObject.refComponentId;
+				refDiv = rowObject.refDiv;
+			}
+
+			if (booleanFlag) {
+				for (var idx in refDiv) {
+					if (displayReferenceDiv != "") {
+						displayReferenceDiv += ",";
+					}
+				
+					if (refDiv[idx] == "10") {
+						displayReferenceDiv += "<span style=\"cursor:pointer;\" onclick=\"bom_fn.moveTab('"+refDiv[idx]+"','"+refComponentId[idx]+"')\">3rd</span>";
+					} else if (refDiv[idx] == "11") {
+						displayReferenceDiv += "<span style=\"cursor:pointer;\" onclick=\"bom_fn.moveTab('"+refDiv[idx]+"','"+refComponentId[idx]+"')\">SRC</span>";
+					} else if (refDiv[idx] == "15") {
+						displayReferenceDiv += "<span style=\"cursor:pointer;\" onclick=\"bom_fn.moveTab('"+refDiv[idx]+"','"+refComponentId[idx]+"')\">BIN</span>";
+					} else if (refDiv[idx] == "13") {
+						displayReferenceDiv += "BOM";
+					} else if (refDiv[idx] == "16") {
+						displayReferenceDiv += "<span style=\"cursor:pointer;\" onclick=\"bom_fn.moveTab('"+refDiv[idx]+"','"+refComponentId[idx]+"')\">DEP</span>";
+					}
+				}
+			} else {
+				if (refDiv == "10") {
+					displayReferenceDiv += "<span style=\"cursor:pointer;\" onclick=\"bom_fn.moveTab('"+refDiv+"','"+refComponentId+"')\">3rd</span>";
+				} else if (refDiv == "11") {
+					displayReferenceDiv += "<span style=\"cursor:pointer;\" onclick=\"bom_fn.moveTab('"+refDiv+"','"+refComponentId+"')\">SRC</span>";
+				} else if (refDiv == "15") {
+					displayReferenceDiv += "<span style=\"cursor:pointer;\" onclick=\"bom_fn.moveTab('"+refDiv+"','"+refComponentId+"')\">BIN</span>";
+				} else if (refDiv == "13") {
+					displayReferenceDiv += "BOM";
+				} else if (refDiv == "16") {
+					displayReferenceDiv += "<span style=\"cursor:pointer;\" onclick=\"bom_fn.moveTab('"+refDiv+"','"+refComponentId+"')\">DEP</span>";
+				}
+			}
+		}
+		
+		return displayReferenceDiv;
+    },
+    displayDependencies : function (cellvalue, options, rowObject) {
+    	var displayDependencies = "";
+    	if (typeof cellvalue !== 'undefined') {
+    		displayDependencies = "<span class=\"iconSt drop\" style=\"cursor:pointer;\" onclick=\"bom_fn.showDependenciesInfo('"+rowObject.dependencies+"')\">"+cellvalue+"</span>";
+    	}
+    	return displayDependencies;
+    },
+    showDependenciesInfo : function (dependencies) {
+    	var bomList = $("#bomList").jqGrid('getGridParam','data');
+    	var dependenciesInfo = [];
+    	var dependenciesSplit = dependencies.split(",");
+    	
+    	for (var i in dependenciesSplit) {
+    		var depObj = {};
+    		var depData = dependenciesSplit[i];
+     		var depDataSplit = depData.split("(");
+     		var depOssName = depDataSplit[0].trim();
+         	var depOssVersion = depDataSplit[1].trim();
+         	depOssVersion = depOssVersion.substring(0, depOssVersion.length-1);
+    		var licenseName = "";
+         	
+    		var filteredList = bomList.filter(function(cur){
+    			var bomOssName = cur.ossName;
+    			var bomOssVersion = cur.ossVersion;
+    			return (bomOssName == depOssName && bomOssVersion == depOssVersion);
+			});
+    		
+    		for (var j in filteredList) {
+    			licenseName += filteredList[j].licenseName + ",";
+    		}
+    		
+    		licenseName = licenseName.substring(0, licenseName.length-1);
+    		
+        	depObj['ossName'] = depOssName;
+        	depObj['ossVersion'] = depOssVersion;
+        	depObj['licenseName'] = licenseName;
+        	dependenciesInfo.push(depObj);
+    	}
+    	
+    	var height = 0;
+    	let depDiv = document.createElement('div');
+    	depDiv.id = 'depDiv';
+		let h1 = document.createElement('h1');
+		h1.innerHTML = "Dependencies Info";
+		depDiv.appendChild(h1);
+		depDiv.appendChild(document.createElement('br'));
+		height += 30;
+		
+		let table = document.createElement('table');
+		table.style.width = '100%';
+		$(table).css('border-collapse','collapse');
+		let thead = document.createElement('thead');
+		let tbody = document.createElement('tbody');
+		
+		let row_1 = document.createElement('tr');
+		$(row_1).css('background-color','#a39d9b');
+		row_1.style.height = "30";
+		height += 30;
+		
+		let heading_1 = document.createElement('th');
+		heading_1.style.border = '1px solid #444444';
+		$(heading_1).css('font-weight','bold');
+		$(heading_1).css('color','white');
+		heading_1.innerHTML = "OSS name";
+		
+		let heading_2 = document.createElement('th');
+		heading_2.style.border = '1px solid #444444';
+		$(heading_2).css('font-weight','bold');
+		$(heading_2).css('color','white');
+		heading_2.innerHTML = "OSS version";
+		
+		let heading_3 = document.createElement('th');
+		heading_3.style.border = '1px solid #444444';
+		$(heading_3).css('font-weight','bold');
+		$(heading_3).css('color','white');
+		heading_3.innerHTML = "License";
+		
+		row_1.appendChild(heading_1);
+		row_1.appendChild(heading_2);
+		row_1.appendChild(heading_3);
+		thead.appendChild(row_1);
+		
+		table.appendChild(thead);
+		
+		for (var j in dependenciesInfo) {
+			let row_2 = document.createElement('tr');
+			row_2.style.height = "30";
+			height += 30;
+			
+			let row_2_data_1 = document.createElement('td');
+			row_2_data_1.style.border = '1px solid #444444';
+			row_2_data_1.innerHTML = '&nbsp;' + dependenciesInfo[j].ossName;
+			
+			let row_2_data_2 = document.createElement('td');
+			row_2_data_2.style.border = '1px solid #444444';
+			row_2_data_2.innerHTML = '&nbsp;' + dependenciesInfo[j].ossVersion;
+			
+			let row_2_data_3 = document.createElement('td');
+			row_2_data_3.style.border = '1px solid #444444';
+			row_2_data_3.innerHTML = '&nbsp;' + dependenciesInfo[j].licenseName;
+			
+			row_2.appendChild(row_2_data_1);
+			row_2.appendChild(row_2_data_2);
+			row_2.appendChild(row_2_data_3);
+			tbody.appendChild(row_2);
+		}
+		
+		table.appendChild(tbody);
+		depDiv.appendChild(table);
+		
+		height = (height + 160) < 750 ? (height + 160) : 750;
+		
+		if (!alertify.dependenciesDialog) {
+			alertify.dialog('dependenciesDialog',function factory(){
+				return {
+					main:function(message){
+						this.message = message;
+					},
+					setup:function(){
+						return {
+							focus: { element:0 }
+						};
+					},
+					prepare:function(){
+							this.setContent(this.message);
+					},
+					hooks: {
+						onshow: function() {
+							this.elements.dialog.style.height = height;
+						}
+					}
+				}
+			});
+			
+			alertify.dependenciesDialog(depDiv);
+		} else {
+			alertify.dependenciesDialog(depDiv).set('resizable', true).resizeTo('25%', height);
+		}
+    },
+    moveTab : function(tabSeq, componentId){
+    	switch(tabSeq){
+    		case "10" :
+				tabSeq = "0"
+				$("#tabMenuParty").trigger("click");
+				$("#list3 #" +componentId).focus();
+
+				break;
+			case "11" :
+				tabSeq = "2"
+				$("#tabMenuSrc").trigger("click");
+				$("#srcList #" +componentId).focus();
+
+				break;
+			case "15" :
+				tabSeq = "3"
+				$("#tabMenuBin").trigger("click");
+				$("#binList #" +componentId).focus();
+
+				break;
+			case "16" :
+				tabSeq = "1"
+				$("#tabMenuDep").trigger("click");
+				$("#depList #" +componentId).focus();
+
+				break;
+		}
+    },
+    selectDownloadFile : function(target) {
+    	// download file
+    	if (target === "report_sub") {
+        	bom_fn.downloadExcel();
+        } else {
+        	var identificationStatus = [[${project.identificationStatus}]];
+        	if ("CONF" != identificationStatus) {
+        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+    				if (e) {
+    					bom_fn.selectDownloadFileValidation(target);
+    				} else {
+    					return false;
+    				}
+    			});
+        	} else {
+        		bom_fn.selectDownloadFileValidation(target);
+        	}
+        }
+    },
+    selectDownloadFileValidation : function(target) {
+    	if (com_fn.checkSelectDownloadFile('BOM')) {
+    		if (target === "Spreadsheet_sub") bom_fn.downloadSpdxSpreadSheetExcel();
+            else if (target === "RDF_sub") bom_fn.downloadSpdxRdf();
+            else if (target === "TAG_sub") bom_fn.downloadSpdxTag();
+            else if (target === "JSON_sub") bom_fn.downloadSpdxJson();
+            else if (target === "YAML_sub") bom_fn.downloadSpdxYaml();
+            else if (target === "YAML") com_fn.downloadYaml('BOM');
+            else if (target === "cdxJSON") com_fn.downloadCycloneDXJson('BOM');
+            else if (target === "cdxXML") com_fn.downloadCycloneDXXml('BOM');
+    	} else {
+    		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+    	}
+    },
+    downloadSpdxSpreadSheetExcel : function(){
+    	loadingIden.show();
+    	
+		$.ajax({
+			type: "POST",
+			url: '/spdxdownload/getSPDXPost',
+			data: JSON.stringify({"type":"spdx", "prjId":[[${project.prjId}]], "dataStr":"spdx_sbom"}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				loadingIden.hide();
+				
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	downloadSpdxRdf : function() {
+		loadingIden.show();
+		
+		$.ajax({
+			type: "POST",
+			url: '/spdxdownload/getSPDXPost',
+			data: JSON.stringify({"type":"spdxRdf", "prjId":[[${project.prjId}]], "dataStr":"spdx_sbom"}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				loadingIden.hide();
+				
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	downloadSpdxTag : function() {
+		loadingIden.show();
+		
+		$.ajax({
+			type: "POST",				   
+			url: '/spdxdownload/getSPDXPost',
+			data: JSON.stringify({"type":"spdxTag", "prjId":[[${project.prjId}]], "dataStr":"spdx_sbom"}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				loadingIden.hide();
+				
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	downloadSpdxJson : function() {
+		loadingIden.show();
+		
+		$.ajax({
+			type: "POST",
+			url: '/spdxdownload/getSPDXPost',
+			data: JSON.stringify({"type":"spdxJson", "prjId":[[${project.prjId}]], "dataStr":"spdx_sbom"}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				loadingIden.hide();
+				
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	downloadSpdxYaml : function() {
+		loadingIden.show();
+		
+		$.ajax({
+			type: "POST",
+			url: '/spdxdownload/getSPDXPost',
+			data: JSON.stringify({"type":"spdxYaml", "prjId":[[${project.prjId}]], "dataStr":"spdx_sbom"}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				loadingIden.hide();
+				
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/spdxdownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	displayVulnerability : function (cellvalue, options, rowObject) {
+		var display = "";
+		var _url = "";
+		var prjId = [[${project.prjId}]];
+		var ossName = "";
+		if (typeof rowObject.refOssName !== "undefined") {
+			ossName = rowObject.refOssName.replace(' ','_');
+		} else {
+			ossName = rowObject.ossName;
+			if (typeof ossName !== "undefined" && "" != ossName) {
+				ossName = ossName.replace(' ', '_');
+			}
+		}
+		
+		if (prjId) {
+			_url = '/vulnerability/vulnpopup?vulnerabilityCheckFlag=Y&prjId='+prjId+'&ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType=';
+		} else {
+			_url = '/vulnerability/vulnpopup?ossName='+ossName+'&ossVersion='+rowObject.ossVersion+'&vulnType=';
+		}
+		
+		if (parseInt(cellvalue) >= 9.0 ) {
+			display = "<span class=\"badge badge-dark\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">CRITICAL</span>";
+		} else if(parseInt(cellvalue) >= 7.0 ) {
+			display = "<span class=\"badge badge-danger\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">HIGH</span>";
+		} else if(parseInt(cellvalue) >= 4.0) {
+			display = "<span class=\"badge badge-orange\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">MEDIUM</span>";
+		} else if(parseInt(cellvalue) > 0) {
+			display = "<span class=\"badge badge-warning\" style=\"cursor: pointer; font-size: .7rem;\" title=\"" + cellvalue + "\" onclick=\"openNVD2('"+ossName+"','"+_url+"')\">LOW</span>";
+		} else if(parseInt(cellvalue) == 0 || cellvalue == undefined) {
+			display = "<span style=\"font-size:0;\"></span>";
+		} else {
+			display = cellvalue;
+		}
+		
+		return display;
+	},
+	loadAnalysisUrl : function (target, url) {
+		createTabInFrame(target, url);
+	}
+}
+
+var bom_data = {
+		getJqGrid : function(param){
+			var data = typeof param !== "undefined" ? param : {referenceId : [[${project.prjId}]], merge : 'N'};
+				
+			$.ajax({
+				url : '/project/identificationGrid/'+[[${project.prjId}]]+'/13',
+				dataType : 'json',
+				type : 'GET',
+				cache : false,
+				data : data,
+				contentType : 'application/json',
+				success : function(data){
+					$('.ajs-close').trigger("click");
+					
+					bomMainData = data.rows;
+					bomValidMsgData = []; //초기화
+					bomDiffMsgData = []; //초기화
+					bomInfoMsgData = []; //초기화
+					conflictMsg = "";
+					
+					if(data.validData) {
+						bomValidMsgData = data.validData;
+					}
+					
+					if(data.diffData) {
+						bomDiffMsgData = data.diffData;
+					}
+					
+					if(data.infoData) {
+						bomInfoMsgData = data.infoData;
+					}
+					
+					conflictMsg = data.conflictMsg ? data.conflictMsg : "";
+					
+					// 리로드 대신 그리드 삭제 후 다시 그리기
+					$("#bomList").jqGrid('GridUnload');
+					
+					bom_data.loadBomGrid();
+					
+					fn_grid_com.addEtcKeyDownEvent($('#bomList'), bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
+					
+					// merge and save시 errorMessage가 발견되면 출력함.
+					if (param) {
+						if ("" != conflictMsg) {
+							alertify.alert(conflictMsg);
+						}
+					}
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		loadBomGrid : function(){
+			var bomList = $('#bomList');
+			bomList.jqGrid({
+				  datatype: 'local'
+				, data : bomMainData
+				, colNames: ['','ID','ID_KEY','groupingColumn','refComponentId','refComponentIdx','refDiv','ReferenceId','MergePreDiv','ReferenceDiv','OSS ID','OSS Name','OSS Version','License'
+		             ,'Download Location','Homepage','LicenseId','Copyright Text'
+		             ,'CVE ID' ,'Vulnera<br/>bility','Depends On','obligationLicense','ObligationType','preObligationType','Notify','Source','Restriction','licenseTypeIdx','adminCheckYn'
+		             ,'admin<br>check<br><input type="checkbox" onclick="bom_fn.onCboxClickAll(this,\'bomList\');">', 'refOssName']
+				, colModel : [
+					{name: 'componentIdx', index: 'componentIdx', width: 20, align: 'center', search : false, sorttype: 'number',
+					    cellattr: function(rowId, tv, rawObject, cm, rdata) {
+					        return ' style="display:none;"';
+					    }
+					},
+					{name: 'group', width: 40, align: 'center', search : false, sorttype: 'number',
+					    cellattr: function(rowId, tv, rawObject, cm, rdata) {
+					        return ' colspan=2';
+					    }
+					},
+					{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true, key:true},
+					{name: 'groupingColumn', width: 20, align: 'center', hidden:true},
+					{name: 'refComponentId', width: 20, align: 'center', hidden:true},
+					{name: 'refComponentIdx', width: 20, align: 'center', hidden:true},
+					{name: 'refDiv', width: 20, align: 'center', hidden:true},
+					{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
+					{name: 'mergePreDiv', index: 'mergePreDiv', width: 29, align: 'center', hidden:true},
+					{name: 'referenceDiv', index: 'referenceDiv', width: 50, align: 'center', formatter: bom_fn.displayReferenceDiv, hidden:false, search : false, sortable : false},
+					{name: 'ossId', index: 'ossId', width: 29, align: 'center', hidden:true},
+					{name: 'ossName', index: 'ossName', width: 100, align: 'left', template: searchStringOptions},
+					{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'left', template: searchStringOptions},
+					{name: 'licenseName', index: 'licenseName', width: 100, align: 'left', template: searchStringOptions},
+					{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, template: searchStringOptions},
+					{name: 'homepage', index: 'homepage', width: 70, align: 'left', formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions},
+					{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', hidden:true},
+					{name: 'copyrightText', index: 'copyrightText', width: 170, align: 'left', template: searchStringOptions},
+					{name: 'cveId', index: 'cveId', hidden:true},
+					{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', sorttype:'float', formatter:bom_fn.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions},
+					{name: 'dependencies', index: 'dependencies', width: 60, align: 'center', formatter: bom_fn.displayDependencies, unformatter:fn_grid_com.unformatter, search : false, hidden: true},
+					{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
+					{name: 'preObligationType', index: 'preObligationType', width: 40, align: 'center', hidden:true},
+					{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
+					{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: bom_fn.displayNotify, unformat: bom_fn.unDisplayNotify, sortable : false, search : false},
+					{name: 'source', index: 'source', width: 40, align: 'center', formatter: bom_fn.displaySource, unformat: bom_fn.unDisplaySource, sortable : false, search : false},
+					{name: 'restriction', index: 'restriction', width: 60, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
+					{name: 'licenseTypeIdx', index: 'licenseTypeIdx', width: 60, align: 'center', hidden:true},
+					{name: 'adminCheckYn', index: 'adminCheckYn', width: 50, align: 'center', hidden:true},
+					{name: 'adminCheck', index: 'adminCheck', width: 50, align: 'center', formatter: bom_fn.displayAdminCheck, unformat: bom_fn.unDisplayAdminCheck, sortable:false, search:false},
+					{name: 'refOssName', index: 'refOssName', width: 50, hidden:true}
+				]
+				, rowNum: 200
+				, rowList: [200, 500, 1000, 5000]
+				, autoencode: true
+				, editurl:'clientArray'
+	 			, autowidth: true
+                , height: 'auto'
+                , shrinkToFit: false
+				, gridview: true
+			   	, pager: '#bomPager'
+				, recordpos:'right'
+				, loadonce:false
+				, ignoreCase: true
+				, toppager: true
+			    , onSortCol: function (index, columnIndex, sortOrder) {
+			    	isSort = true;
+			    }
+				, loadComplete: function(data) {
+					$("#bomList_source").css({'border-right': '1px solid #cbc7bd'}); // restriction 을 추가하면서 css에서 마지막 th의 border를 삭제하는 처리의 차선책
+					var str= "";
+			 		var arr = [];
+                    arr = bomList.jqGrid('getDataIDs');
+
+					for(var i in arr){
+
+						if(bomList.jqGrid('getCell',arr[i],'refComponentId')==""){ // MERGE 상태
+							bomList.jqGrid('setCell',arr[i],'group',bomList.jqGrid('getCell',arr[i],'componentIdx'));
+							bomList.jqGrid('setCell',arr[i],'refComponentId',bomList.jqGrid('getCell',arr[i],'componentId'));
+						} else { // BOM 상태
+							bomList.jqGrid('setCell',arr[i],'group',bomList.jqGrid('getCell',arr[i],'refComponentIdx'));
+						}
+
+						// 하위색 설정
+						if(i!=0
+						   && bomList.jqGrid('getCell',arr[i],'ossName') == bomList.jqGrid('getCell',arr[i-1],'ossName')
+						   && bomList.jqGrid('getCell',arr[i],'ossVersion') == bomList.jqGrid('getCell',arr[i-1],'ossVersion')){
+						   bomList.jqGrid('setCell',arr[i],'mergePreDiv', "99"); // 하위 referenceDiv 구분 임의 99 설정
+						}
+
+						if(bomList.jqGrid('getCell',arr[i],'obligationType') == 90) {
+							$("#"+arr[i]+"_source").parent().css("background", "CornflowerBlue");
+							$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
+						}
+					}
+					
+					// 그리드 클릭 해제
+					bomList.jqGrid("resetSelection");
+					
+					//------- 로드 된후 그룹 헤더 설정을 해야 사이즈가 깨지지 않음
+                    // 2024.02.26 버튼 클릭시 헤더가 반복 생성되는 이슈로 getJqGrid 함수에서 호출
+
+					if(bomValidMsgData) {
+						gridValidMsgNew(bomValidMsgData, "bomList");
+					}
+					
+					if(bomDiffMsgData) {
+						gridDiffMsg(bomDiffMsgData, "bomList");
+					}
+
+					if (bomInfoMsgData) {
+						gridInfoMsg(bomInfoMsgData, "bomList");
+					}
+					
+					var datas = data.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
+					var strBomValidMsgData = Object.keys(bomValidMsgData||{}).join("");
+					var strBomDiffMsgData = Object.keys(bomDiffMsgData||{}).join("");
+					
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						className = row.className;
+						
+						if (className.indexOf('jqgrow') !== -1) {
+							rowid = row.id;
+							rowData = data.rows[rowIdx++];
+							var dataObject = datas.filter(function(a){
+								return a.componentId==rowid}
+							)[0];
+							
+							if(dataObject.licenseTypeIdx != "1" && className.indexOf('excludeRow') === -1) {
+								if(strBomValidMsgData.indexOf(rowid) == -1 /*&& strBomDiffMsgData.indexOf(rowid) == -1*/){
+									className= className + ' excludeRow';
+									bomList.jqGrid('setCell', rowid, 'cvssScore', null);
+								}
+							}
+							
+							row.className = className;
+						} else if(className.indexOf('ui-subgrid') !== -1){
+							rowIdx++;
+						}
+					}
+					
+					// append button event
+					if (arr.length > 0 && $("#bomList_toppager_left").find('button').length == 0) {
+	                	var appendBtn = "";
+	                    
+	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('bom', 'bomList', true)\"><i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('bom', 'bomList', '_bomAddList', 'main', true)\"><i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
+	                	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('bom')\"><i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+	                	appendBtn += "<button id=\"bomDropTop\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download customGridIcon\"></i></button>";
+	                	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"bomDropTop\">";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('Spreadsheet_sub')\">SPDX (Spreadsheet)</span>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('RDF_sub')\">SPDX (RDF)</span>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('TAG_sub')\">SPDX (TAG)</span>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('JSON_sub')\">SPDX (JSON)</span>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('YAML_sub')\">SPDX (YAML)</span>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxJSON')\">CycloneDX (JSON)</span>";
+	                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"bom_fn.selectDownloadFile('cdxXML')\">CycloneDX ((XML)</span></div>";
+	                                        
+	                    $("#bomList_toppager_left").append(appendBtn);
+	                }
+                }
+				, onSelectRow: function(rowid,status,eventObject) {}
+				, beforeSelectRow: function(rowid, e) {
+					return true;
+				}
+				, onCellSelect: function(rowid,iCol,cellcontent,e) {
+					if(iCol == "1"){
+						fn_grid_com.showOssViewPage(bomList, rowid, true, bomValidMsgData, bomDiffMsgData, bomInfoMsgData, com_fn.getLicenseName);
+					}
+				}
+				, ondblClickRow: function(rowid,iRow,iCol,e) {
+					// 해당 탭 이동 및 선택된 행 셀렉트
+					if (iCol != "1" && iCol != "14" && iCol != "15" && iCol != "17" && iCol != "19" && iCol != "20" && iCol != "29") {
+						var tabSeq = bomList.jqGrid('getCell',rowid,'referenceDiv');
+						if (tabSeq.indexOf(">") > -1) {
+							tabSeq = tabSeq.replace(/(<([^>]+)>)/ig,"");
+						}
+						
+						var componentId = bomList.jqGrid('getCell',rowid,'refComponentId');
+						if(tabSeq.indexOf(",") > -1){
+							tabSeq = tabSeq.split(",")[0];	
+						}
+						
+						if(componentId.indexOf(",") > -1){
+							componentId = componentId.split(",")[0];	
+						}
+						
+						switch(tabSeq){
+							case "3rd" : //list3
+								$("#tabMenuParty").trigger("click");
+								$("#list3").jqGrid("setSelection", componentId);
+								$("#list3 #" +componentId).focus();
+
+								break;
+							case "DEP" : //srcList
+								$("#tabMenuDep").trigger("click");
+								$("#depList").jqGrid("setSelection", componentId);
+								$("#depList #" +componentId).focus();
+
+								break;
+							case "SRC" : //srcList
+								$("#tabMenuSrc").trigger("click");
+								$("#srcList").jqGrid("setSelection", componentId);
+								$("#srcList #" +componentId).focus();
+
+								break;
+							case "BIN" : //binList
+								$("#tabMenuBin").trigger("click");
+								$("#binList").jqGrid("setSelection", componentId);
+								$("#binList #" +componentId).focus();
+
+								break;
+						}
+					}
+				}
+				, onPaging: function(action) {
+					cleanErrMsg("bomList");
+
+					fn_grid_com.totalGridSaveMode('bomList');
+				}
+				, gridComplete: function(){
+					bomGridCompleteFlag = true;
+					com_fn.checkGridComplete(false);
+					adjustMultiPageGridSize();
+					updateGridRowCount('bomList', 'bomPager');
+				}
+			});
+
+			// $("#bomList").jqGrid('navGrid',"#bomPager",{add:false,edit:false,del:false,search:false,refresh:false});
+			$("#bomList").jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+				beforeSearch : function () {
+					if(!this.p.postData.referenceId) {
+						this.p.postData.referenceId = [[${project.prjId}]];
+					}
+				}, afterSearch : function () { 
+					updateGridRowCount('bomList', 'bomPager') 
+				}	
+			});
+		}
+	}
+
+var spdx_fn = {
+    getSpdxDataStr : function() {
+        return {
+            "editNoticeYn":                 "",
+            "editCompanyYn":                "",
+            "editDistributionSiteUrlYn":    "",
+            "editEmailYn":                  "",
+            "hideOssVersionYn":             "",
+            "editAppendedYn":               "",
+            "prjId":                        [[${project.prjId}]],
+            "useCustomNoticeYn":            [[${project.useCustomNoticeYn}]],
+            "noticeHtml":                   "",
+            "noticeType":                   [[${project.noticeType}]],
+            "packageJson":                  "",
+            "packageFileId":                "",
+            "userComment":                  "",
+            "withoutVerifyYn":              [[${project.withoutVerifyYn}]],
+            "ignoreBinaryDbFlag":           "",
+            "appended":                     "",
+            "appendedTEXT":                 "",
+            "allowDownloadNoticeHTMLYn":    [[${project.allowDownloadNoticeHTMLYn}]],
+            "allowDownloadNoticeTextYn":    [[${project.allowDownloadNoticeTextYn}]],
+            "allowDownloadSimpleHTMLYn":    [[${project.allowDownloadSimpleHTMLYn}]],
+            "allowDownloadSimpleTextYn":    [[${project.allowDownloadSimpleTextYn}]],
+            "allowDownloadSPDXSheetYn":     [[${project.allowDownloadSPDXSheetYn}]],
+            "allowDownloadSPDXRdfYn":       [[${project.allowDownloadSPDXRdfYn}]],
+            "allowDownloadSPDXTagYn":       [[${project.allowDownloadSPDXTagYn}]],
+            "allowDownloadSPDXJsonYn":      [[${project.allowDownloadSPDXJsonYn}]],
+            "allowDownloadSPDXYamlYn":      [[${project.allowDownloadSPDXYamlYn}]],
+            "isSimpleNotice":               "",
+            "previewOnly":                  "N"
+        }
+    },
+    downloadSpdxSpreadSheetExcel : function(){
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '/spdxdownload/getSPDXPost',
+            data: JSON.stringify({"type":"spdx", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    window.location =  '/spdxdownload/getFile?id='+data.validMsg;
+                }
+            },
+            error: function(data){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+    downloadSpdxRdf : function() {
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '/spdxdownload/getSPDXPost',
+            data: JSON.stringify({"type":"spdxRdf", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    window.location = '/spdxdownload/getFile?id='+data.validMsg;
+                }
+            },
+            error: function(data){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+    downloadSpdxTag : function() {
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '/spdxdownload/getSPDXPost',
+            data: JSON.stringify({"type":"spdxTag", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    window.location =  '/spdxdownload/getFile?id='+data.validMsg;
+                }
+            },
+            error: function(data){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+    downloadSpdxJson : function() {
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '/spdxdownload/getSPDXPost',
+            data: JSON.stringify({"type":"spdxJson", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    window.location =  '/spdxdownload/getFile?id='+data.validMsg;
+                }
+            },
+            error: function(data){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        })
+    },
+    downloadSpdxYaml : function() {
+        var dataStr = JSON.stringify(this.getSpdxDataStr());
+
+        $.ajax({
+            type: "POST",
+            url: '/spdxdownload/getSPDXPost',
+            data: JSON.stringify({"type":"spdxYaml", "prjId":[[${project.prjId}]], "dataStr":dataStr}),
+            dataType : 'json',
+            cache : false,
+            contentType : 'application/json',
+            success: function (data) {
+                if("false" == data.isValid) {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    window.location = '/spdxdownload/getFile?id='+data.validMsg;
+                }
+            },
+            error: function(data){
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        })
+    }
+}
+</script>
+</th:block>
+</html>

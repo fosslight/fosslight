@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+$(document).ready(function() {
+	evt_fn.init();
+	Ctrl_fn.loadGridData();
+});
+
+var _popup = null;
+var ossValidMsg;
+var ossDiffMsg;
+var commentId = "";
+var referenceId = [[${projectInfo.prjId}]];
+var referenceDiv = [[${projectInfo.referenceDiv}]];
+var targetName = [[${projectInfo.targetName}]];
+
+var evt_fn = {
+	init : function(){
+		$("#btnChangeOss").on("click", function(){
+			Ctrl_fn.changeProc();
+		});
+	}
+};
+
+var Ctrl_fn = {
+	loadGridData : function(){
+		$('#loading_wrap_popup').show();
+		
+		var params = {};
+		params["referenceId"] = referenceId;
+		params["referenceDiv"] = referenceDiv;
+		
+		if ("identification" == targetName) {
+			params["referenceDiv"] = params["referenceDiv"].split("-")[0];
+		}
+		
+		$.ajax({
+			url : '/oss/getCheckOssLicenseAjax/' + targetName,
+			dataType : 'json',
+			cache : false,
+			data : params,
+			contentType : 'application/json',
+			success : function(resultData){
+				ossValidMsg = resultData.validMap;
+				ossDiffMsg = resultData.diffMap;
+				ossErrorMsg = resultData.error;
+
+				grid_fn.displayErrorMsg(ossErrorMsg);
+				
+				$('#ossList').jqGrid({
+						datatype: 'local',
+						data : resultData.list,
+						colNames: ['ID','Result','Download location','OSS name', 'OSS version', 'License<br>(current)', 'License<br>(to be changed)', 'Evidence', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv', 'componentIdList', 'checkedRuleType'],
+						colModel: [
+							{name: 'gridId', index: 'gridId', hidden:true, key:true},
+							{name: 'result', index: 'result', width:20, align: 'center',editable: false, formatter: grid_fn.displayStatus, unformatter: grid_fn.unformatter, sortable:false},
+							{name: 'downloadLocation', index: 'downloadLocation', width: 90, align: 'left',editable: false, formatter:grid_fn.displayDownloadLocation, sortable:false},
+							{name: 'ossName', index: 'ossName', width: 50, align: 'left',editable: false, sortable:false},
+							{name: 'ossVersion', index: 'ossVersion', width: 40, align: 'left',editable:false, sortable:false},
+							{name: 'licenseName', index: 'licenseName', width: 50, align: 'left',editable:false, sortable:false},
+							{name: 'checkLicense', index: 'checkLicense', width: 50, align: 'left',editable: false, formatter:grid_fn.displayCheckLicense, sortable:false},
+							{name: 'checkedEvidence', index: 'checkedEvidence',  width: 20, align: 'left',editable: false, formatter:grid_fn.displayCheckedEvidence, sortable:false},
+							{name: 'changeFlag', index: 'changeFlag', width: 50, hidden:true, sortable:false},
+							{name: 'addFlag', index: 'addFlag', width: 50, hidden:true, sortable:false},
+							{name: 'referenceId', index: 'referenceId', width: 50, hidden: true, sortable: false},
+							{name: 'referenceDiv', index: 'referenceDiv', width: 50, hidden: true, sortable: false},
+							{name: 'componentIdList', index: 'componentIdList', width: 50, hidden: true, sortable: false},
+							{name: 'checkedEvidenceType', index: 'checkedEvidenceType', width: 50, hidden: true, sortable: false},
+						],
+						autoencode: true,
+						autowidth: true,
+						gridview: true,
+						editurl:'clientArray',
+						loadonce: true,
+						pager: '#ossPager',
+						pgbuttons: false,
+					   	pgtext: false,
+					   	pginput:false,
+						height: 'auto',
+						rowNum: [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
+						multiselect: true,
+						multiselectWidth: 35,
+						loadComplete: function(data){
+							if(data.total > 0){
+								$("#btnChangeOss").show();
+								
+								var datas = data.rows, rows=this.rows, row, className, rowsCount=rows.length,rowIdx=0;
+								for(var _idx=0;_idx<rowsCount;_idx++) {
+									row = rows[_idx];
+									className = row.className;
+									
+									if (className.indexOf('jqgrow') !== -1) {
+										rowid = row.id;
+										rowData = data.rows[rowIdx++];
+										var dataObject = datas.filter(function(a){return a.componentId==rowid})[0];
+										
+										if(dataObject.checkLicense.indexOf("|") > -1) {
+											className= className + ' excludeRow';
+										}
+										
+										row.className = className;
+									} else if(className.indexOf('ui-subgrid') !== -1){
+										rowIdx++;
+									}
+								}
+							}
+							
+							$('#loading_wrap_popup').hide();
+
+							if(ossValidMsg) {
+								gridValidMsgNew(ossValidMsg, "ossList", "SELF");
+							}
+							
+							if(ossDiffMsg){
+								gridDiffMsg(ossDiffMsg, "ossList", "SELF");
+							}
+							
+						},
+						onSelectRow: function(rowid){},
+						gridComplete:function (){ updateGridRowCount('ossList', 'ossPager'); }
+				});
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});	
+	},
+	changeProc : function(){
+		loading.show();
+
+		var target = $("#ossList");
+		var result = [];
+		var failFlag = false;
+		var idArry = grid_fn.getCheckedRow("CHANGE");
+		
+		if(idArry.length > 0){
+			window.setTimeout(function(){
+				for(var i = 0 ; i < idArry.length ; i++){
+					var rowId = idArry[i];
+
+					cleanErrMsg("ossList", rowId);
+
+					var rowdata = target.getRowData(rowId);
+					rowdata["checkLicense"] = rowdata["checkLicense"].replace(/(<([^>]+)>)/ig,"");
+					rowdata["componentIdList"] = rowdata["componentIdList"].split(",");							
+					
+					if ("identification" == targetName) {
+						rowdata["refPrjId"] = rowdata["referenceId"];
+						rowdata["referenceId"] = commentId;
+						rowdata["referenceDiv"] = referenceDiv.split("-")[0];
+					} else if ("partner" == targetName) {
+						rowdata["referenceId"] = rowdata["referenceId"];
+						rowdata["refPrjId"] = commentId;
+						rowdata["referenceDiv"] = referenceDiv;
+					}
+
+					$.ajax({
+						url : '/oss/saveOssCheckLicense/' + targetName,
+						type : 'POST',
+						data : JSON.stringify(rowdata),
+						dataType : 'json',
+						cache : false,
+						async: false,
+						contentType : 'application/json',
+						success: function(resultData){
+							if(resultData.isValid == true){
+								$("#ossList").jqGrid('setCell', idArry[i], 'changeFlag', 'Y'); // popup grid Data change => success
+								$("#ossList").jqGrid('setCell', idArry[i], 'result', 'Y');
+							} else {
+								$("#ossList").jqGrid('setCell', idArry[i], 'changeFlag', 'N');
+								$("#ossList").jqGrid('setCell', idArry[i], 'result', 'N');
+								alertify.error([[#{msg.common.valid2}]], 0);
+								failFlag = true;
+							}
+
+							result.push(resultData);
+							if ("identification" == targetName || "partner" == targetName) {
+								commentId = resultData.commentId;
+							}
+
+							if(result.length == idArry.length){
+								if(!failFlag){
+									var successMsg = [[#{msg.project.check.license.success}]];
+
+									if ("self" == targetName) {
+										opener.location.href = '/selfCheck/edit/' + rowdata["referenceId"];
+									} else if ("partner" == targetName) {
+										opener.location.href = '/partner/edit/' + rowdata["referenceId"];
+									} else {
+										/**
+										 * identifcaiton tab order you're working on
+										 */
+										var identificationTabOrder;
+
+										/**
+										 * params["referenceDiv"] is id of identification type
+										 * 3RD, DEP, SRC, BIN, BIN-Android, BOM
+										 * 10 (3RD) -> tab index: 0
+										 * 16 (DEP) -> tab index: 1
+										 * 11 (SRC) -> tab index: 2
+										 * 15 (BIN) -> tab index: 3
+										 * 14 (ANDROID) -> tab index: 4
+										 * 13 (BOM) -> tab index: 5
+										 */
+										switch (rowdata["referenceDiv"]) {
+											case "10":    opener.party_evt.getPartGridData();			break;
+											case "16":    opener.dep_fn.getDepGridData();				break;
+										    case "11":    opener.src_fn.getSrcGridData();   			break;
+										    case "15":    opener.bin_fn.getBinGridData(); 	 			break;
+										    case "14":    opener.binAndroid_fn.getBinAndroidGridData();	break;
+										    case "13":    opener.bom_data.getJqGrid();    				break;
+										}
+									}
+									
+									alertify.success(successMsg, 5); // 5sec동안 message 출력
+								}
+
+								loading.hide();
+							}
+						},
+						error: function(resultData){}
+					});
+				}
+			}, 0);
+		} else {
+			alertify.alert([[#{msg.oss.required.select}]], function(){});
+			loading.hide();
+		}
+	}
+};
+var grid_fn = {
+		displayStatus : function(cellvalue, options, rowObject){
+			var display = "";
+			var changeFlag = rowObject.changeFlag || rowObject[9];
+			
+			if(changeFlag =="Y"){
+				display += "<a class='btnPG wAnd onAnd'>Changed</a>";
+			}
+			return display;
+		},
+		 displayDownloadlocation: function (cellvalue, options, rowObject) {
+           	var downloadLocation = rowObject["downloadLocation"];
+           	var customDownloadLocation = '';
+           	
+           	if (typeof downloadLocation !== 'undefined' && '' != downloadLocation) {
+           		var display = downloadLocation.split(",");
+           		customDownloadLocation = display.map(link => `<a class='urlLink' target='_blank' href='${link.trim()}' title='${link.trim()}'>${link.trim()}</a>`).join("");
+           	} 
+           	
+           	return customDownloadLocation;
+        },
+		unformatter : function(cellvalue, options, rowObject){
+			return cellvalue;
+		},
+		displayCheckLicense : function(cellvalue, options, rowObject){
+			var checkLicense = rowObject["checkLicense"];
+			var display = checkLicense.split("|");
+
+			return display.join("<br>");
+		},
+		displayCheckedEvidence : function(cellvalue, options, rowObject){
+			var checkedEvidenceType = rowObject["checkedEvidenceType"];
+			var display = "";
+
+			if(cellvalue != "" && cellvalue != undefined) {
+				if(checkedEvidenceType == "CD") {
+					display = "<span class=\"d-flex d-flex-align\" title=\""+cellvalue+"\" ><i class=\"fas fa-tag customIcon3\"></i></span><span class=\"d-flex d-flex-align\">CD</span>";
+				} else if(checkedEvidenceType == "GH") {
+					display = "<span class=\"d-flex d-flex-align\" title=\""+cellvalue+"\" ><i class=\"fab fa-github customIcon3\"></i></span><span class=\"d-flex d-flex-align\">GH</span>";
+				} else if(checkedEvidenceType == "DB") {
+					display = "<span class=\"d-flex d-flex-align\" title=\""+cellvalue+"\"><i class=\"fas fa-database customIcon3\"></i></span><span class=\"d-flex d-flex-align\">DB</span>";
+				}
+			}
+
+			return display;
+		},
+		displayErrorMsg : function(data) {
+			if(data != undefined && data != "") {
+				$("#errorMsg").html(data);
+				$("#errorMsg").show();
+			}
+		},
+		getCheckedRow : function(processType){
+			var seq = processType.toUpperCase() == "CHANGE" ? 8 : 9;
+			return $("#ossList").jqGrid ('getGridParam', 'selarrrow').reduce(function(arr, item) {
+				if(!$("#"+item).hasClass("excludeRow") && $("#"+item+" > td:eq("+seq+")").text() != "Y"){
+					arr.push(item);
+				}
+
+				return arr;
+			}, []);
+		}
+};
+</script>
+</th:block>
+</html>

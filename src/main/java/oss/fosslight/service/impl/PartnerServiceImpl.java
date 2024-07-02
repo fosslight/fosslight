@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -44,6 +44,7 @@ import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
+import oss.fosslight.service.CacheService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.PartnerService;
@@ -55,15 +56,16 @@ import oss.fosslight.validation.T2CoValidationResult;
 @Slf4j
 public class PartnerServiceImpl extends CoTopComponent implements PartnerService {
 	// Service
-	@Autowired ProjectService projectService;
-	@Autowired FileService fileService;
-	@Autowired OssService ossService;
+	@Autowired private ProjectService projectService;
+	@Autowired private FileService fileService;
+	@Autowired private OssService ossService;
 
 	// Mapper
-	@Autowired PartnerMapper partnerMapper;
-	@Autowired CommentMapper commentMapper;
-	@Autowired FileMapper fileMapper;
-	@Autowired ProjectMapper projectMapper;
+	@Autowired private PartnerMapper partnerMapper;
+	@Autowired private CommentMapper commentMapper;
+	@Autowired private FileMapper fileMapper;
+	@Autowired private ProjectMapper projectMapper;
+	@Autowired private CacheService cacheService;
 	
 	@Override
 	@Cacheable(value="autocompletePartnerCache", key="{#root.methodName, #partnerMaster?.creator, #partnerMaster?.status}")
@@ -76,21 +78,26 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		PartnerMaster result = new PartnerMaster();
 		//파트너 마스터
 		result = partnerMapper.selectPartnerMaster(partnerMaster);
-		result.setCommentText(commentMapper.getContent(result.getComment()));
+		if (result != null) {
+			result.setCommentText(avoidNull(commentMapper.getContent(result.getComment())));
+		}
+		
 		//파트너 와쳐
 		List<PartnerWatcher> watcher = partnerMapper.selectPartnerWatcher(partnerMaster);
 		
-		if (watcher != null){
-			result.setPartnerWatcher(watcher);	
-		}
-		String partnerId = "3rd_" + result.getPartnerId();
-		int resultCnt = partnerMapper.getOssAnalysisDataCnt(partnerId);
-		
-		if (resultCnt > 0) {
-			PartnerMaster analysisStatus = partnerMapper.getOssAnalysisData(partnerId);
+		if (result != null) {
+			if (watcher != null){
+				result.setPartnerWatcher(watcher);	
+			}
+			String partnerId = "3rd_" + result.getPartnerId();
+			int resultCnt = partnerMapper.getOssAnalysisDataCnt(partnerId);
 			
-			result.setAnalysisStartDate(analysisStatus.getAnalysisStartDate());
-			result.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
+			if (resultCnt > 0) {
+				PartnerMaster analysisStatus = partnerMapper.getOssAnalysisData(partnerId);
+				
+				result.setAnalysisStartDate(analysisStatus.getAnalysisStartDate());
+				result.setOssAnalysisStatus(analysisStatus.getOssAnalysisStatus());
+			}
 		}
 		
 		return result;
@@ -99,44 +106,37 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	@Override
 	@Transactional
 	public Map<String, Object> getPartnerMasterList(PartnerMaster partnerMaster) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		
 		int records = partnerMapper.selectPartnerMasterTotalCount(partnerMaster);
 		partnerMaster.setTotListSize(records);
 		List<PartnerMaster> list = partnerMapper.selectPartnerList(partnerMaster);
 		
 		if (list != null) {
-			Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
-			List<String> customNvdMaxScoreInfoList = new ArrayList<>();
-			for (PartnerMaster bean : list) {
-				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
-				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
-				
-				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
-					if (conversionCveInfo != null) {
-						customNvdMaxScoreInfoList.add(conversionCveInfo);
-					}
+			boolean isNumberic = false;
+			if (!isEmpty(partnerMaster.getPartnerName())) {
+				isNumberic = partnerMaster.getPartnerName().chars().allMatch(Character::isDigit);
+			}
+			if (isNumberic) {
+				List<PartnerMaster> filteredList = list.stream().filter(e -> e.getPartnerId().equalsIgnoreCase(partnerMaster.getPartnerName())).collect(Collectors.toList());
+				if (filteredList != null && !filteredList.isEmpty()) {
+					List<PartnerMaster> sortedList = new ArrayList<>();
+					sortedList.addAll(filteredList);
+					sortedList.addAll(list.stream().filter(e -> !e.getPartnerId().equalsIgnoreCase(partnerMaster.getPartnerName())).collect(Collectors.toList()));
+					list = sortedList;
 				}
-				
-				if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
-					customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
+			}
+			
+			list.forEach(bean -> {
+				String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(bean.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				if (conversionCveInfo != null) {
+					String[] conversionCveData = conversionCveInfo.split("\\@");
+					bean.setCvssScore(conversionCveData[3]);
+					bean.setCveId(conversionCveData[4]);
+					bean.setVulnYn(CoConstDef.FLAG_YES);
 				}
-				
-				if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
-						bean.setCvssScore(conversionCveData[3]);
-						bean.setCveId(conversionCveData[4]);
-						bean.setVulnYn(CoConstDef.FLAG_YES);
-					}
-					
-					customNvdMaxScoreInfoList.clear();
-				}
-			}			
+			});
 		}
-
 		
 		map.put("page", partnerMaster.getCurPage());
 		map.put("total", partnerMaster.getTotBlockSize());
@@ -560,7 +560,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		projectMapper.updateComponentsLicenseInfo(project);
 		
 		// 상태 변경
-		changeStatus(partnerMaster, false);
+		changeStatus(partnerMaster, false);	
 	}
 	
 	@Override
@@ -635,10 +635,10 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		} else {
 			// 이미 추가된 watcher 체크
 			if (partnerMapper.existsWatcherByUser(project) == 0) {
+				// watcher 추가
 				if (partnerMapper.existsWatcherByUserDivistion(project) > 0) {
 					partnerMapper.updateWatcherDivision(project);
 				} else {
-					// watcher 추가
 					partnerMapper.insertWatcher(project);
 				}
 			}
@@ -682,6 +682,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		return getPartnerValidationList(partnerMaster, false);
 	}
 	
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getPartnerValidationList(PartnerMaster partnerMaster, boolean coReview){
 		ProjectIdentification prjBean = new ProjectIdentification();
@@ -735,6 +737,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		return partnerList;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> getFilterdList(Map<String, Object> paramMap){
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
@@ -1226,13 +1229,13 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		
 		for (OssComponents bean : noticeInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
@@ -1257,13 +1260,13 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		
 		for (OssComponents bean : srcInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 			
 
@@ -1289,13 +1292,13 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		
 		for (OssComponents bean : notObligationInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {

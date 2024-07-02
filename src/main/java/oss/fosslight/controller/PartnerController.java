@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
@@ -133,7 +133,7 @@ public class PartnerController extends CoTopComponent{
 				}
 			}
 		} else {
-			if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF"))) {
+			if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF")) || getSessionObject(SESSION_KEY_SEARCH) == null) {
 				deleteSession(SESSION_KEY_SEARCH);
 				
 				searchBean = searchService.getPartnerSearchFilter(loginUserName());
@@ -147,7 +147,7 @@ public class PartnerController extends CoTopComponent{
 		
 		model.addAttribute("searchBean", searchBean);
 		
-		return PARTNER.LIST_JSP;
+		return "partner/list";
 		
 		
 	}
@@ -157,8 +157,11 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
+		PartnerMaster partnerMaster = new PartnerMaster();
+		model.addAttribute("detail", partnerMaster);
+		model.addAttribute("editMode", CoConstDef.FLAG_YES);
 		
-		return PARTNER.EDIT_JSP;
+		return "partner/edit";
 	}
 	
 	@GetMapping(value=PARTNER.EDIT_ID, produces = "text/html; charset=utf-8")
@@ -194,14 +197,33 @@ public class PartnerController extends CoTopComponent{
 		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
 		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
 		
+		CommonFunction.setPartnerService(partnerService);
+		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+		if (permissionCheckList != null) {
+			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+					&& !CommonFunction.isAdmin() 
+					&& !permissionCheckList.contains(loginUserName())) {
+				partnerMaster.setPermission(0);
+				partnerMaster.setStatusPermission(0);
+			} else {
+				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+					partnerMaster.setStatusPermission(0);
+				} else {
+					partnerMaster.setStatusPermission(1);
+				}
+				partnerMaster.setPermission(1);
+			}
+		}
+		
 		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
 		
 		if (prjList.size() > 0) {
-			model.addAttribute("prjList", toJson(prjList));
+			model.addAttribute("prjList", prjList);
 		}
 		
+		model.addAttribute("editMode", CoConstDef.FLAG_NO);
 		model.addAttribute("detail", partnerMaster);
-		model.addAttribute("detailJson", toJson(partnerMaster));
+		model.addAttribute("detailJson", partnerMaster);
 		model.addAttribute("confirmationFile", confirmationFile);
 		model.addAttribute("ossFile", ossFile);
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
@@ -209,9 +231,82 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
-		return PARTNER.EDIT_JSP;
+		return "partner/edit";
 	}
 	
+	@PostMapping(value=PARTNER.MODE_CONVERSION, produces = "text/html; charset=utf-8")
+	public String modeConversion(@PathVariable String mode, @PathVariable String partnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+		
+		T2File confirmationFile = new T2File();
+		confirmationFile.setFileSeq(partnerMaster.getConfirmationFileId());
+		confirmationFile = fileMapper.getFileInfo(confirmationFile);
+		
+		partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
+		
+		T2File ossFile = new T2File();
+		ossFile.setFileSeq(partnerMaster.getOssFileId());
+		ossFile = fileMapper.getFileInfo(ossFile);
+		
+		String binaryFileId = partnerMaster.getBinaryFileId();
+		T2File binaryFile = new T2File();
+		
+		if (!isEmpty(binaryFileId)){
+			binaryFile.setFileSeq(binaryFileId);
+			binaryFile = fileMapper.getFileInfo(binaryFile);
+			
+			model.addAttribute("binaryFile", binaryFile);
+		}
+		
+		CommentsHistory comHisBean = new CommentsHistory();
+		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
+		comHisBean.setReferenceId(partnerMaster.getPartnerId());
+		partnerMaster.setUserComment(commentService.getUserComment(comHisBean));
+		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
+		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
+		
+		CommonFunction.setPartnerService(partnerService);
+		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+		if (permissionCheckList != null) {
+			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+					&& !CommonFunction.isAdmin() 
+					&& !permissionCheckList.contains(loginUserName())) {
+				partnerMaster.setPermission(0);
+				partnerMaster.setStatusPermission(0);
+			} else {
+				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+					partnerMaster.setStatusPermission(0);
+				} else {
+					partnerMaster.setStatusPermission(1);
+				}
+				partnerMaster.setPermission(1);
+			}
+		}
+		
+		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
+		
+		if (prjList.size() > 0) {
+			model.addAttribute("prjList", prjList);
+		}
+		
+		model.addAttribute("editMode", CoConstDef.FLAG_NO);
+		model.addAttribute("detail", partnerMaster);
+		model.addAttribute("detailJson", partnerMaster);
+		model.addAttribute("confirmationFile", confirmationFile);
+		model.addAttribute("ossFile", ossFile);
+		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
+		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
+		
+		if (mode.equals("edit")) {
+			return "partner/fragments/edit :: editFragments";
+		} else {
+			return "partner/fragments/edit :: viewFragments";
+		}
+	}
 	
 	@GetMapping(value=PARTNER.VIEW_ID, produces = "text/html; charset=utf-8")
 	public String view(@PathVariable String partnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
@@ -239,8 +334,31 @@ public class PartnerController extends CoTopComponent{
 				partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
 				partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
 				
+				CommonFunction.setPartnerService(partnerService);
+				List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+				if (permissionCheckList != null) {
+					if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+							&& !CommonFunction.isAdmin() 
+							&& !permissionCheckList.contains(loginUserName())) {
+						partnerMaster.setPermission(0);
+						partnerMaster.setStatusPermission(0);
+					} else {
+						if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+							partnerMaster.setStatusPermission(0);
+						} else {
+							partnerMaster.setStatusPermission(1);
+						}
+						partnerMaster.setPermission(1);
+					}
+				}
+				
+				List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
+				
+				if (prjList.size() > 0) {
+					model.addAttribute("prjList", prjList);
+				}
+				
 				model.addAttribute("detail", partnerMaster);
-				model.addAttribute("detailJson", toJson(partnerMaster));
 				model.addAttribute("confirmationFile", confirmationFile);
 				model.addAttribute("ossFile", ossFile);
 				model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
@@ -254,9 +372,49 @@ public class PartnerController extends CoTopComponent{
 			model.addAttribute("message", "Reqeusted URL contains 3rd Party Software ID that doesn't exist. Please check the 3rd Party Software ID again.");
 		}
 		
-		return PARTNER.VIEW_JSP;
+		model.addAttribute("viewFlag", CoConstDef.FLAG_YES);
+		
+		return "partner/view";
 	}
 	
+	@GetMapping(value=PARTNER.SHARE_URL, produces = "text/html; charset=utf-8")
+	public void shareUrl(@PathVariable String partnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		
+		try {
+			partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
+			partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
+			
+			CommonFunction.setPartnerService(partnerService);
+			List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+			if (permissionCheckList != null) {
+				if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+						&& !CommonFunction.isAdmin() 
+						&& !permissionCheckList.contains(loginUserName())) {
+					partnerMaster.setPermission(0);
+					partnerMaster.setStatusPermission(0);
+				} else {
+					if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+						partnerMaster.setStatusPermission(0);
+					} else {
+						partnerMaster.setStatusPermission(1);
+					}
+					partnerMaster.setPermission(1);
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		if (CoConstDef.FLAG_NO.equals(partnerMaster.getViewOnlyFlag()) && partnerMaster.getStatusPermission() == 1) {
+			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=false");
+		} else {
+			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=true");
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
 	@GetMapping(value=PARTNER.LIST_AJAX)
 	public @ResponseBody ResponseEntity<Object> listAjax(
 			PartnerMaster partnerMaster
@@ -290,9 +448,30 @@ public class PartnerController extends CoTopComponent{
 		}
 		
 		Map<String, Object> map = null;
-		try{
+		try {
 			map = partnerService.getPartnerMasterList(partnerMaster);
-		}catch(Exception e){
+			List<PartnerMaster> list = (List<PartnerMaster>) map.get("rows");
+			CommonFunction.setPartnerService(partnerService);
+			
+			for (PartnerMaster bean : list) {
+				List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {bean.getPartnerId()}, "partner");
+				if (permissionCheckList != null) {
+					if (avoidNull(bean.getPublicYn()).equals(CoConstDef.FLAG_NO)
+							&& !CommonFunction.isAdmin() 
+							&& !permissionCheckList.contains(loginUserName())) {
+						bean.setPermission(0);
+						bean.setStatusPermission(0);
+					} else {
+						if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+							bean.setStatusPermission(0);
+						} else {
+							bean.setStatusPermission(1);
+						}
+						bean.setPermission(1);
+					}
+				}
+			}
+		} catch(Exception e){
 			log.error(e.getMessage());
 		}
 		
@@ -559,6 +738,11 @@ public class PartnerController extends CoTopComponent{
 			
 			// send invate mail
 			if (isNew) {
+				CoMail mail = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTNER_CREATED);
+				mail.setParamPartnerId(prjId);
+				mail.setParamUserId(partnerMaster.getLoginUserName());
+				CoMailManager.getInstance().sendMail(mail);
+				
 				List<String> partnerInvateWatcherList = partnerService.getInvateWatcherList(prjId);
 				
 				if (partnerInvateWatcherList != null && !partnerInvateWatcherList.isEmpty()) {
@@ -642,6 +826,12 @@ public class PartnerController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@PostMapping(value=PARTNER.CHANGE_DIVISION_VIEW)
+	public String changeDivisionView(@PathVariable String code, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
+		model.addAttribute("code", code);
+		return "partner/view/changePartnerView";
+	}
+	
 	@PostMapping(value=PARTNER.CHANGE_DIVISION_AJAX)
 	public @ResponseBody ResponseEntity<Object> saveBasicInfoOnConfirmAjax(
 			@RequestBody HashMap<String, Object> map
@@ -700,6 +890,48 @@ public class PartnerController extends CoTopComponent{
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	@PostMapping(value=PARTNER.MULTI_DEL_AJAX)
+	public @ResponseBody ResponseEntity<Object> multiDelAjax(
+			@ModelAttribute PartnerMaster partnerMaster
+			, HttpServletRequest req
+			, HttpServletResponse res
+			, Model model){
+		HashMap<String, Object> resMap = new HashMap<>();
+		String resCd = "00";
+		PartnerMaster param = new PartnerMaster();
+		param.setUserComment(partnerMaster.getUserComment());
+		
+		for (String partnerId : partnerMaster.getPartnerIds()) {
+			param.setPartnerId(partnerId);
+			
+			try{
+				History h = partnerService.work(param);
+				h.sethAction(CoConstDef.ACTION_CODE_DELETE);	
+				historyService.storeData(h);
+			} catch (Exception e){
+				log.error(e.getMessage());
+			}
+			
+			try {
+				CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PARTER_DELETED);
+				mailBean.setParamPartnerId(param.getPartnerId());
+				if (!isEmpty(param.getUserComment())) {
+					mailBean.setComment(param.getUserComment());
+				}
+				CoMailManager.getInstance().sendMail(mailBean);
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			
+			partnerService.deletePartnerMaster(param);
+			resCd="10";
+		}
+
+		resMap.put("resCd", resCd);
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
 	@GetMapping(value=PARTNER.AUTOCOMPLETE_SW_VER_AJAX)
 	public @ResponseBody ResponseEntity<Object> autoCompleteSwVerAjax(
 			PartnerMaster partnerMaster
@@ -737,7 +969,7 @@ public class PartnerController extends CoTopComponent{
 				userInfo.put("USER_ID", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_ID));
 				userInfo.put("USER_PW", CoCodeManager.getCodeExpString(CoConstDef.CD_LDAP_SEARCH_INFO, CoConstDef.CD_DTL_LDAP_SEARCH_PW));
 				
-				String filter = project.getParEmail().split("@")[0];
+				String filter = project.getParEmail();
 				
 				boolean isAuthenticated = userService.checkAdAccounts(userInfo, "USER_ID", "USER_PW", filter);
 				
@@ -973,7 +1205,7 @@ public class PartnerController extends CoTopComponent{
 			
 			partnerService.updatePartnerConfirm(partnerMaster);
 			
-			if(partnerMaster != null && !isEmpty(partnerMaster.getBinaryFileId()) &&  !(CoConstDef.FLAG_YES.equals(partnerMaster.getIgnoreBinaryDbFlag()))) {
+			if (partnerMaster != null && !isEmpty(partnerMaster.getBinaryFileId()) &&  !(CoConstDef.FLAG_YES.equals(partnerMaster.getIgnoreBinaryDbFlag()))) {
 				try {
 					ProjectIdentification paramPartner = new ProjectIdentification();
 					paramPartner.setReferenceId(partnerMaster.getPartnerId());
@@ -1141,6 +1373,12 @@ public class PartnerController extends CoTopComponent{
 			resultList.add("CSV_FILE");
 
 			return toJson(resultList);
+		} else if (fileExtension.equalsIgnoreCase("pdf")) {
+			resultList.add(list);
+			resultList.add("SRC");
+			resultList.add("PDF_FILE");
+
+			return toJson(resultList);
 		} else {
 			// sheet name
 			List<Object> sheetNameList = null;
@@ -1153,7 +1391,7 @@ public class PartnerController extends CoTopComponent{
 						sheetNameList = ExcelUtil.getSheetNames(list, RESOURCE_PUBLIC_UPLOAD_EXCEL_PATH_PREFIX);
 					}
 				}
-			
+				
 				for (Object sheet : sheetNameList) {
 					String sheetName = sheet.toString();
 					if (sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {

@@ -8,6 +8,7 @@ package oss.fosslight.controller;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Principal;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,10 +18,13 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.MAIN;
 
 @Controller
@@ -37,7 +41,7 @@ public class MainController{
 		model.addAttribute("complianceStatusFlag", CommonFunction.propertyFlagCheck("menu.compliancestatus.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("externalLinkFlag", CommonFunction.propertyFlagCheck("menu.externallink.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
-		return MAIN.INDEX_JSP;
+		return "main/index";
 	}
 	
 	@RequestMapping(value= { CoConstDef.HEALTH_CHECK_URL }, produces=MediaType.TEXT_HTML_VALUE)
@@ -51,5 +55,19 @@ public class MainController{
 		PrintWriter pw = res.getWriter();
 		pw.write(" - Client IP : " + ip);
 		pw.close();
+	}
+
+	@PostMapping(value = Url.RENDER.COMPONENT)
+	public String showPromptPopup(Model model, @RequestBody Map<String, Object> param) {
+		String category = (String) param.get("category");
+		String templateName = (String) param.get("templateName");
+		String fragmentName = (String) param.get("fragmentName");
+
+		if (param.containsKey("data")) {
+			model.addAttribute("data", param.get("data"));
+		}
+
+		String v = String.format("%s/%s :: %s", category, templateName ,fragmentName);
+		return String.format("%s/%s :: %s", category, templateName ,fragmentName);
 	}
 }

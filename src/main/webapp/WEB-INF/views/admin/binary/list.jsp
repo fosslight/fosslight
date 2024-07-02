@@ -22,12 +22,12 @@
 					</dd>
 					<dd>
 						<label>Updated Date</label>
-						<input name="schStartDate" type="text" class="cal" title="Search Start Date" maxlength="8"/> ~ 
-						<input name="schEndDate" type="text" class="cal" title="Search End Date" maxlength="8"/> 
+						<input name="schStartDate" type="text" class="cal" title="Search Start Date" maxlength="8" /> ~
+						<input name="schEndDate" type="text" class="cal" title="Search End Date" maxlength="8" />
 					</dd>
 					<dd class="centerAign">
 						<label>Platform Name</label>
-						<input type="text" name="platformName"/>
+						<input type="text" name="platformName" />
 					</dd>
 					<dd class="lastAign">
 						<label>OSS Version</label>
@@ -39,7 +39,7 @@
 					</dd>
 					<dd class="centerAign">
 						<label>Platform Version</label>
-						<input type="text" name="platformVersion"/>
+						<input type="text" name="platformVersion" />
 					</dd>
 					<dd class="lastAign">
 						<label>License Name</label>

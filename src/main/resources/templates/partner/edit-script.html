@@ -1,0 +1,3778 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+//<![CDATA[
+/*global $ */
+/*jslint browser: true, nomen: true */
+//	var subGridUrl = true;
+var userRole = [[${sessUserInfo.authority}]];
+var ossNames = [];
+var objs = [];
+var licenseNames = [];
+var isStatusChangeFlag = false;
+var isSort = false;
+var delDocumentsFile = [];
+var etcDomain = [[${@CommonFunction.getCoConstDefVal('CD_DTL_ECT_DOMAIN')}]];
+var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+var partnerData = [[${detail}]];
+var prjList = [[${prjList}]];
+var sampleFile = [[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstDefVal('CD_SAMPLE_FILE'))}]];
+var _popupCheckOssName = null;
+var _popupCheckOssLicense = null;
+var saveFlag = false;
+var commentsParam = {referenceDiv : '3rd'};
+var documentsFileCnt = 0;
+var ossFileObj;
+var partnerStatus = [[${detail.status}]];
+var partnerId = [[${detail.partnerId}]];
+
+$(document).ready(function () {
+	'use strict';
+	evt.init();
+	evt.tabInit();
+	datas.init();
+
+	if (partnerData.documentsFileCnt != null) documentsFileCnt = partnerData.documentsFileCnt;
+	if (parseInt(documentsFileCnt) >= 5) {
+		$(".documentsUploader").attr("style", "display: none !important");
+	}
+	
+	// autoConplete 문제로 인한 처리
+	$("#partnerName").val(partnerData.partnerName);
+	$("#softwareName").val(partnerData.softwareName);
+	// ossNames auto complete
+	fn_grid_com.griOssNames().success(function(data, status, headers, config){
+		if(data != null){
+			data.forEach(function(obj){
+				ossNames.push(obj.ossName);
+			});
+		}
+	});
+	
+	// licenseNames auto complete
+	commonAjax.getLicenseTags().success(function(data, status, headers, config){
+		if(data != null){
+			var tag = "";
+			
+			data.forEach(function(obj){
+				if(obj!=null) {
+					tag = {
+						value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
+						label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
+						type : obj.licenseType,
+						obligation : obj.obligation,
+						obligationChecks : obj.obligationChecks
+					}
+					
+					licenseNames.push(tag);
+				}
+			});
+		}
+	});
+	
+	if (partnerData.partnerId != null) {
+		$("input[name=creatorNm]").val(partnerData.creatorName||"");
+		fn.displayPartnerInfo();
+	}
+	
+	if (prjList != null) {
+		grid.projectList();
+	}
+	
+	$(".select2").select2();
+	
+	$("[id^=tabMenu]").on("click", function() {
+		var tabId = $(this).attr("id");
+		tabId = tabId.replace("tabMenu", "");
+		$("[name=gridArea]").hide();
+		
+		if ("Party" == tabId) {
+			$("#girdAreaParty").show();
+		}
+	});
+});
+
+var commentTemp = '';
+var modifyCommentId = [[${detail.comment}]];
+var commentIdx= [[${detail.comment}]];
+var evt = {
+	init : function(){
+		$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+		
+		commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
+		$('dl[name=commentClone]').remove();
+		
+		$('select[name=userDivision]').trigger('change');
+		$('select[name=division]').trigger('change');
+
+		$('div.multiTxtSet2 .smallDelete').on('click', function(){
+			$(this).parent().remove();
+		});
+
+		fn.confirmationUploadFile();
+		fn.ossUploadFile();
+		fn.partnerBinaryUploadFile();
+		fn.documentsUploadFile();
+		
+		// file uploader hide in CONF status
+        if ('CONF' == [[${detail.status}]]) {
+            $(".ajax-upload-dragdrop").hide();
+        }
+
+        if ([[${detail.partnerId}]] != null) {
+			fn.publicChange();
+		}
+        
+      	//프로젝트 리스트 더보기
+		$("#listMore").on("click",function(){
+			createTabInFrameWithCondition("Project List", '/project/list', 'PARTNERLISTMORE', $('input[name=partnerName]').val());
+		});
+        
+		$("#domain").on("change", function(e){
+			var value = $(this).find("option:selected").val();
+			var domain = $(this).find("option:selected").text();
+			
+			if(etcDomain == value){
+				$("#emailTemp").val("").show();
+			} else {
+				$("#emailTemp").val(domain).hide();
+			}
+		});
+
+		$("#createProject").on("click", function(){
+			if (partnerData != null) {
+				var partnerId = partnerData.partnerId||"";
+				var partnerName = partnerData.partnerName||"";
+				var softwareName = partnerData.softwareName||"";
+				if (softwareName.indexOf("/") > -1){
+					softwareName = softwareName.replace("/", "[]");
+				}
+				createTabInFrameWithCondition("New_Project", '/project/edit', 'PARTNER', encodeURIComponent(partnerId + "||" + partnerName + "||" + softwareName));
+			}
+		});
+	},
+	tabInit: function(){
+		var tabContent = $(".tabContent");
+		var tabMenuA = $(".tabMenu a");
+
+/* 		if (partnerData != null && partnerData.partnerId == null) {
+			tabMenuA.eq("1").hide();
+		} */
+		
+		tabContent.hide();
+		tabMenuA.click(function () {
+			$(".tabMenu a span").remove();
+			tabMenuA.eq("0").text("3rd party");
+			if ([[${batFlag}]]) {
+				tabMenuA.eq("1").text("BAT(Optional)");
+			}
+			
+			var tag = "<span>"+$(this).text()+"</span>";
+			$(this).html(tag);
+			
+			tabContent.hide();
+			activeTabText = $(this).text();
+			activeTab = $(this).attr("rel");
+			
+			$("#" + activeTab).show();
+
+			if(activeTab == "batDiv") {
+				$(".projdecBtn").hide();
+			} else {
+				$(".projdecBtn").show();
+			}
+			
+			// _mainLastsel 꼬이는것 방지
+			if(activeTab == "0") {
+				_mainLastsel = $('#list').jqGrid('getGridParam', "selrow" );
+			} else if(activeTab == "batDiv") {}
+			
+			// 선택된 로우가 없을경우 _mainLastsel 초기화
+			if(typeof(_mainLastsel)!="string") {
+				_mainLastsel = -1;
+			}
+		});
+		
+		tabMenuA.eq("0").click(); 
+	}
+};
+
+// party 그리드 데이터 전역 변수
+var partyMainData;
+var partySubData;
+var partyValidMsgData_e = []; //초기화
+var partyDiffMsgData_e = []; //초기화
+var partyInfoMsgData_e = []; // 초기화
+var fn = {
+	displayPartnerInfo : function () {
+		var display = "";
+		
+		var softwareName = [[${detail.softwareName}]];
+		var softwareVersion = [[${detail.softwareVersion}]];
+		if ("" != softwareVersion && softwareVersion != null) {
+			softwareName += " (" + softwareVersion + ")";
+		}
+		
+		var partnerName = "<span class=\"text-dark-gray text-bold hover-line goToEditLink\">" + softwareName + "</span>";
+		display += partnerName
+		
+		var status = "<span class=\"ml-2\"> | </span>";
+		var partnerStatus = [[${detail.status}]];
+		
+		switch(partnerStatus){
+			case "REQ" :
+				status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
+					break;
+			case "REV" :
+				status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
+					break;
+			case "CONF" :
+				status += "<span class=\"text-dark text-bold ml-2\">Confirm</span>";
+					break;
+			default :
+				status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
+					break;
+		}
+		
+		display += status;
+		
+		$("#displayPartnerInfo").html(display);
+		
+		if ($(".goToEditLink").width() > 300) {
+			$(".goToEditLink").addClass("ellipsis");
+		}
+	},
+	addWatcherFnc : function () {
+		/* division 정보 */
+		var $divSel	= $("#userDivision")
+		  , divVal	= $divSel.val()
+		  , divTxt	= $divSel.find("option[value='"+divVal+"']").text();
+						
+		/* division 정보 */
+		var $userSel	= $("#userName")
+		  , userVal		= $userSel.val()||""
+		  , userTxt		= $userSel.find("option[value='"+userVal+"']").text();
+
+		// 선택한 item이 없을 경우.
+		if(divVal == "" || userVal == "") {
+			return alertify.error([[#{msg.project.required.selectDivision}]], 0);
+		}
+		
+		/* tag 정보 */
+		var isNew = true;
+		
+		$(".watcherTags").each(function(i, tag){
+			var tagDiv = $(tag).val().split("/")[0]
+			  , tagUid = $(tag).val().split("/")[1];
+			
+			if(divVal == tagDiv) {
+				if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+					isNew = false;
+
+					return false;
+				}
+				
+				if(userVal == 'all') { // all을 선택했을 경우 기존 부서의 userId를 가진 tag를 삭제
+					$(tag).closest('span').remove();
+				} else if(tagUid == userVal) {
+					isNew = false;	// 이미 등록된 watcher가 있을경우
+				}
+			}
+		});
+		
+		if(isNew) {
+			var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
+			fn.addWatcher(divVal, userVal, '');
+			fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+		}
+	},
+	addEmailFnc : function () {
+		/* AD ID 정보 */
+		var adId = $("#adId").val();
+		var domain = $("#emailTemp").val();
+
+		if ("" == adId) {
+			$("#adId").focus();
+			// return alertify.error('Please enter watcher AD ID', 0);
+			return alertify.error([[#{enter.watcher.error}]], 0);
+		}
+		
+		var _email = adId + "@" + domain;
+		var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
+
+		if (regEmail.test(_email) == false) {
+			$("#adId").focus();
+			return alertify.error([[#{invalid.email.error}]], 0);
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: '/system/user/checkEmail', 
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'email' : _email},
+			success: function (data) {
+				if("true" == data.isValid) {
+					var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
+					fn.addWatcher(data.division, data.userId, '');
+					fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
+				} else {
+					fn.addWatcher('', '', _email);
+					fn.addHtml($("#multiDiv"), _email, _email, "Email");
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+		
+		$("#adId").val('');
+		$("#domain").val([[${@CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN')}]]).trigger('change');
+	},
+	addListFnc : function () {
+		var listKind = $("#listKind").val()
+		  , listId = $("#listId").val();
+			
+		if (fn.chkListValidation(listKind, listId)){
+			var obj = {};
+			
+			obj["listKind"] = listKind;
+			obj["listId"] = listId;
+			
+			fn.copyWatcher(obj);
+		}
+	},
+	publicChange : function () {
+		$("[name='publicYn']:checked").parent().addClass("active");
+		
+		$("[name='publicYn']").on('change',function(e){
+			var param = {partnerId : [[${detail.partnerId}]], publicYn : ($("[name='publicYn']:checked").val())};
+			
+			$.ajax({
+				url : '/partner/updatePublicYn',
+				type : 'POST',
+				data : JSON.stringify(param),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(){
+					alertify.success([[#{msg.common.success}]]);
+				},
+				error : fn.onError
+			});
+		});
+	},
+	setProjectInfo : function (cellvalue, options, rowObject) {
+		var display = cellvalue;
+		if ("" != rowObject.prjVersion) display = display + " [" + rowObject.prjVersion + "]";
+		return display;
+	},
+	confirmationUploadFile : function () {
+		//파일업로드
+		var accept1 = '';
+		var fileAccept1 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept1) {
+			if ('21' == fileAccept1[i].cdDtlNo) {
+				accept1 = fileAccept1[i].cdDtlExp;
+			}
+		}
+		
+		$('#confirmationFile').uploadFile({
+			url : '/partner/ossFile',
+			multiple:false,
+			dragDrop:true,
+			allowedTypes:accept1,
+			fileName:'myfile',
+			sequential:true,
+			sequentialCount:1,
+			onSuccess:function(files,data,xhr,pd){
+				// 161102 jy-seo 파일 업로드 에러처리
+				var result = jQuery.parseJSON(data);
+				
+				if (result == null){
+					alertify.error([[#{msg.common.valid}]], 0);
+				} else {
+					result = result[0][0];
+					if (result && result.uploadSucc) {
+						fn.makeFileTag(result, 'confirmationFile');
+					} else {
+						alert([[#{msg.common.upload.failed}]]);
+					}
+				}
+				
+				$('.ajax-file-upload-statusbar').fadeOut('slow');
+				$('.ajax-file-upload-statusbar').remove();
+			}
+		});
+	},
+	ossUploadFile : function() {
+		//파일업로드
+		var accept2 = '';
+		var fileAccept2 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept2) {
+			if ('22' == fileAccept2[i].cdDtlNo) {
+				accept2 = fileAccept2[i].cdDtlExp;
+			}
+		}
+		
+		$('#ossFile').uploadFile({
+			url : '/partner/ossFile?excel=Y',
+			multiple:false,
+			dragDrop:true,
+			allowedTypes:accept2,
+			fileName:'myfile',
+			sequential:true,
+			sequentialCount:1,
+			onSuccess:function(files,data,xhr,pd){
+				// 161102 jy-seo 파일 업로드 에러처리
+				var result = jQuery.parseJSON(data);
+				
+				if (result == null) {
+					alertify.error([[#{msg.common.valid}]], 0);
+				} else {
+					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
+						alertify.alert(result[1], function() {});
+					} else if(result[2] == "CSV_FILE") {
+						var result_ = result[0][0];
+
+						if (result && result_.uploadSucc) {
+							fn.makeFileTag(result[0][0], 'ossFile');
+							fn.getCsvData();
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+						}
+					} else if(result[2] == "EXCEL_FILE") {
+						var result_ = result[0][0];
+						
+						if (result && result_.uploadSucc) {
+							if (result[1] && result[1].length != 0) {
+								for(var i = 0; i < result[1].length; i++){
+									var num = i+1;
+									var checkedTxt = "";
+									var sheetName = result[1][i].name.toUpperCase().trim();
+
+									if (sheetName == "OSS LIST" || sheetName == "OPEN SOURCE SOFTWARE LIST") {
+										checkedTxt = "checked";
+									}
+									
+									var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+									sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+									$("#sheetBody").append(sheetTr);
+								}
+								
+								const sheetHtml = $(".sheetSelectPop").html();
+								$("#sheetBody").empty();
+								
+								if(!alertify.selectSheet){
+									alertify.dialog('selectSheet', function() {
+										return {
+											setup: function() {
+												var settings = alertify.confirm().settings;
+												
+												for (var prop in settings) {
+													this.settings[prop] = settings[prop];
+												}
+												
+												var setup = alertify.confirm().setup();
+												setup.buttons = [];
+												setup.focus.element = 1;
+												
+												return setup;
+											},
+										    hooks: {
+										    	onshow: function() {
+										        	this.elements.dialog.style.maxWidth = 'none';
+										          	this.elements.dialog.style.width = '365px';
+										        }
+											}
+										};
+									}, false, 'alert');
+			                	}
+								
+								alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
+								
+								$('.ajax-file-upload-statusbar').fadeOut('slow');
+								$('.ajax-file-upload-statusbar').remove();
+								
+								ossFileObj = result_;
+							}
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+						}
+					} else if(result[2] == "SPDX_SPREADSHEET_FILE") {
+						var result_ = result[0][0];
+						if (result && result_.uploadSucc) {
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+							
+							fn.makeFileTag(result_, 'ossFile');
+							fn.getSpdxSpreadsheetData();
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						}
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
+			}
+		});
+	},
+	partnerBinaryUploadFile : function () {
+		var accept4 = '';
+		var fileAccept4 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept4) {
+			if ('19' == fileAccept4[i].cdDtlNo) {
+				accept4 = fileAccept4[i].cdDtlExp;
+			}
+		}
+ 		
+		$('#partnerBinaryFile').uploadFile({
+			url:'/partner/noticeText?fileType=text',
+			multiple:false,
+			dragDrop:true,
+			allowedTypes:accept4,
+			fileName:"myfile",
+			sequential:true,
+			sequentialCount:1,
+			dynamicFormData: function() {
+				var data ={ "registFileId" : '' }
+
+				return data;
+			},
+			onSubmit:function(files){
+				// file ext 재확인
+				var accept4 = "";
+				var ext = files[0].split(".")[1];
+				
+				fileAccept4 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+				for (var i in fileAccept4) {
+					if ('19' == fileAccept4[i].cdDtlNo) {
+						accept4 = fileAccept4[i].cdDtlExp;
+					}
+				}
+				
+				if(accept4 != ext){
+					return false;
+				}
+			},
+			onSuccess:function(files,data,xhr,pd){
+				var result = jQuery.parseJSON(data);
+				
+				if (result == null) {
+					alertify.error([[#{msg.common.valid}]], 0);
+					
+				} else {
+					result = result[0][0];
+					fn.makeFileTag(result, 'binaryFile');
+				}
+				
+				$('.ajax-file-upload-statusbar').fadeOut('slow');
+				$('.ajax-file-upload-statusbar').remove();
+			},
+			onError:function(files,status,errMsg,pd){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	documentsUploadFile : function () {
+		$('#documentsFile').uploadFile({
+			url : '/partner/documentsFile',
+			multiple:false,
+			dragDrop:true,
+			fileName:'myfile',
+			sequential:true,
+			sequentialCount:1,
+			dynamicFormData: function() {
+				var data ={ "registFileId" :$('#documentsFileId').val() }
+
+				return data;
+			},
+			onSuccess:function(files,data,xhr,pd){
+				// 161102 jy-seo 파일 업로드 에러처리
+				var result = jQuery.parseJSON(data);
+				
+				if (result == null) {
+					alertify.error([[#{msg.common.valid}]], 0);
+				} else {
+					result = result[0];
+					
+					if (result && result.uploadSucc) {
+						fn.makeFileTag(result, 'documentsFile');
+						
+						if ($(".documentsFileArea > li").length >= 5) {
+							$(".documentsUploader").attr("style", "display: none !important");
+						}
+					} else {
+						alertify.alert([[#{msg.common.upload.failed}]], function(){});
+					}
+				}
+				
+				$('.ajax-file-upload-statusbar').fadeOut('slow');
+				$('.ajax-file-upload-statusbar').remove();
+			}
+		});
+	},
+	handleUserCommentPopupOpen : function() {
+		// 코멘트 팝업
+        const param = {
+            "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+            "referenceId" : $('input[name=partnerId]').val()
+        }
+		
+        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+        	if (!alertify.editDialog){
+				alertify.dialog('editDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+						
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+						
+							var setup = alertify.confirm().setup();
+							setup.buttons = [];
+							setup.focus.element = 0;
+						
+							return setup;
+						},
+				    	hooks: {
+				    		onshow: function() {
+				        		this.elements.dialog.style.maxWidth = 'none';
+				          		this.elements.dialog.style.width = '700px';
+				        	}
+						}
+					};
+				}, false, 'confirm');
+    		}
+		
+			alertify.editDialog(res);
+      	},
+       	null,
+      	function () {
+         	$("#modifiedCommentInPjtEditor").summernote({
+            	height: 180,
+              	callbacks: {
+                 	onInit: function () {
+                      	$(this).summernote('code', $("#userContents").val());
+                 	}
+              	}
+           	});
+     	});
+	},
+	sendEditor : function(type){
+		//코멘트 저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        if(!editorVal || editorVal == "") {
+            alertify.alert([[#{msg.project.enter.comment}]], function(){});
+            return false;
+        }
+
+		var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]], contents : editorVal, mailSendType : type};
+		
+		$.ajax({
+			url : '/partner/sendComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.success([[#{msg.project.sent.comments.success}]]);
+                	$("#modifiedCommentInPjtEditor").summernote('code', '');
+                	$("#userContents").val('');
+                	$('.ajs-close').trigger("click");
+                	fn_comment.getCommentList(commentsParam);
+                
+                	if (_popupComment == null || _popupComment.closed) {
+                	} else {
+                		_popupComment.callbackFunction();
+                	}
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	saveEditor : function(){
+		//코멘트 임시저장
+		var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+		var param = {referenceId : $('input[name=partnerId]').val(), referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]], contents : editorVal};
+		
+		$.ajax({
+			url : '/project/saveComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.success([[#{msg.common.success}]]);
+					$("#userContents").val(editorVal);
+					$('.ajs-close').trigger("click");
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+/* 	editDescription : function(){
+		var linkText = "";
+		var data = {"partnerId" : $('input[name=partnerId]').val() , "description" : linkText};
+		$.ajax({
+			url : '/partner/updateDescription',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(){
+				alertify.success([[#{msg.common.success}]]);
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	}, */
+	// party 그리드 데이터
+	getPartyGridData : function(){
+		if (partnerData.partnerId != null) {
+			loading.show();
+			
+			$.ajax({
+				url : '/project/identificationGrid/'+partnerData.partnerId+'/20',
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				data : {referenceId : partnerData.partnerId},
+				contentType : 'application/json',
+				success : function(data){
+					loading.hide();
+					
+					partyMainData = data.mainData;
+					partyValidMsgData_e = []; //초기화
+					partyDiffMsgData_e = []; //초기화
+					partyInfoMsgData_e = [];
+					
+					if(data.validData) {
+						partyValidMsgData_e = data.validData;
+					}
+					if(data.diffData) {
+						partyDiffMsgData_e = data.diffData;
+					}
+					if(data.infoData) {
+						partyInfoMsgData_e = data.infoData;	
+					}
+					
+					// 리로드 대신 그리드 삭제 후 다시 그리기
+					$("#list").jqGrid('GridUnload');
+					
+					grid.init();
+					
+					// totla record 표시
+					$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
+					
+					fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	changeDivision : function() {
+		var divisionCd = $("#division option:selected").val();
+		if ("" != divisionCd) {
+			var postData = { "partnerId" : partnerData.partnerId||"", "division" : divisionCd};
+			$.ajax({
+				url : '/partner/changeDivisionAjax',
+				type : 'POST',
+				data : JSON.stringify(postData),
+				dataType : 'json',
+				contentType : 'application/json',
+				cache : false,
+				success: function(data) {
+					if(data.isValid == "false") {
+						alertify.error([[#{msg.common.valid2}]], 0);	
+					} else {
+						alertify.success([[#{msg.common.success}]]);	
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	save : function(){
+		if (fn.checkStatus()){
+			com_fn.exitCell(_mainLastsel, "list");
+			
+			// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+			
+			if (typeof alertify.parSaveDialog === 'undefined') {
+				alertify.dialog('parSaveDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+        	}
+			
+			var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
+       		innerHtml 		+= '<br><textarea id="parSaveEditor"></textarea>';
+			
+       		alertify.parSaveDialog()
+       		.set('onok', function(e) {
+       			// prevent clicking the OK button on Enter
+				if (typeof keyCode !== 'undefined' && keyCode == 13) {
+					keyCode = undefined;
+					return false;
+				}
+       			
+       			if (e) {
+       				cleanErrMsg("list");
+					$("div.retxt").hide();
+					$("input, textarea").removeClass("is-invalid");
+					$(".permissionRadio").find(".active").find("input").prop("checked", true);
+					
+					//public 값 넣어주기
+					if($('#checkbox3').is(':checked')) {
+						$('#checkbox3').val('N');
+					} else {
+						$('#checkbox3').val('Y');
+					}
+					
+					com_fn.exitRow("list");
+					
+					fn_grid_com.totalGridSaveMode('list');
+					
+					var target = $("#list");
+					var mainData = target.jqGrid('getGridParam','data'); // 메인 그리드
+					
+			 		mainData.forEach( function(_rowData){
+			 			var _rowId = _rowData['gridId'];
+			 			
+			 			if(_rowData["obligationLicense"] == "90") {
+			 				if(_rowData["notify"] == "Y") {
+			 					if(_rowData["source"] == "Y") {
+			 						_rowData["obligationType"] = "11";
+			 					} else {
+			 						_rowData["obligationType"] = "10";
+			 					}
+			 				} else if(_rowData["notify"] == "N") {
+			 					_rowData["obligationType"] = "99";
+			 				}
+			 			}
+			 		});
+			 		
+					$('#ossComponentsStr').val(JSON.stringify(mainData));
+					var comment = $("#parSaveEditor").summernote('code');
+       				if ("" != $(comment).text().trim()) {
+						$("#userComment").val(comment);
+					} else {
+						$('#userComment').val("");
+					}
+       				var editorVal = $("#descriptionTextarea").summernote('code');
+					if ("" != $(editorVal).text().trim()){
+						$('#description').val(replaceWithLink(editorVal));
+					} else {
+						$('#description').val("");
+					}
+					
+					if ("CONF" == [[${detail.status}]]) {
+						fn.disabledComfirmedRow(false);
+					}
+					
+					var prjId = partnerData.partnerId||"";
+					var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
+					
+					$.ajax({
+						url : '/project/nickNameValid/20',
+						type : 'POST',
+						data : JSON.stringify(postData),
+						dataType : 'json',
+						cache : false,
+						contentType : 'application/json',
+						success: function(data){fn.makeNickNamePopup(data);},
+						error: function(data){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+       			} else {
+       				return false;
+       			}
+       		})
+       		.set('title', 'Save').setContent(innerHtml)
+       		.set('onshow', function(e){
+       			$("#parSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+			.show();
+		}else{
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+
+	},
+	disabledComfirmedRow : function(disabledBoolean) {
+		var diabledNameList = ['partnerName', 'softwareName', 'softwareVersion', 'publicYn', 'division', 'reviewerName'];
+		diabledNameList.forEach(function(names){
+			$('input[name='+names+']').prop('disabled', disabledBoolean);
+		});
+		
+		$("#deliveryForm").prop("disabled", disabledBoolean);
+	},
+	makeNickNamePopup : function(obj) {
+		// ajax FormSubmit 사용시 huge String 문자가 포함되면 data가 전송되지 않는 문제가 있어서 formsubmi에서 applicaton/json으로 변경
+		var postData = $("#partnerForm").serializeObject();
+		
+		if(obj.validMsg && obj.validMsg.length != 0){
+			alertify.alert(obj.validMsg, function () {
+				$.ajax({
+					url : '/partner/saveAjax',
+					type : 'POST',
+					data : JSON.stringify(postData),
+					dataType : 'json',
+					contentType : 'application/json',
+					cache : false,
+					success: fn.onRegistSuccess,
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			});
+		} else {
+			$.ajax({
+				url : '/partner/saveAjax',
+				type : 'POST',
+				data : JSON.stringify(postData),
+				dataType : 'json',
+				contentType : 'application/json',
+				cache : false,
+				success: fn.onRegistSuccess,
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	onRegistSuccess : function(data) {
+		_mainLastsel = -1;
+		
+		if("false" == data.isValid) {
+			if("99" == data.resCd) { //중복 처리
+				alertify.alert([[#{msg.value.duplicate.partner}]]);
+				fn.partnerGridValidMsg(data.dupData);
+
+				return;
+			}
+
+			if(data.validMsg != ''){
+				alertify.error([[#{msg.common.valid}]], 0);
+				fn.partnerGridValidMsg(data.resultData);
+				
+				return;
+			}
+			
+			// 폼 메세지
+			if(data.partnerName){
+				$('input[name=partnerName]').next().text(data.partnerName).show();
+			}
+			
+			if(data.softwareName){
+				$('input[name=softwareName]').next().text(data.softwareName).show();
+			}
+			
+			if(data.confirmationFileId){
+				$("div.retxt.confirmationFile").text(data.confirmationFileId).show();
+			}
+			
+			if(data.ossFileId){
+				$("div.retxt.ossFileId").text(data.ossFileId).show();
+			}
+			
+			if(data.softwareVersion){
+				$('input[name=softwareVersion]').next().text(data.softwareVersion).show();
+			}
+			
+			if(data.duplicatePartner){
+				$('input[name=partnerName]').next().text(data.duplicatePartner).show();
+				$('input[name=softwareName]').next().text(data.duplicatePartner).show();
+				$('input[name=softwareVersion]').next().text(data.duplicatePartner).show();
+			}
+			
+			partyValidMsgData_e = data;
+			
+			alertify.error([[#{msg.common.valid}]], 0);
+		} else {
+			if("10" == data.resCd){
+				if (isStatusChangeFlag) {
+					var param = {status : 'REQ', partnerId : [[${detail.partnerId}]], userComment : ""};
+					checkObligationFlag = false;
+					var _list = $("#list");
+					var mainData = _list.jqGrid('getGridParam','data');
+
+					mainData.forEach( function(_rowData){
+						if( _rowData['obligationLicense'] == "90" && _rowData['notify'] == "") {
+							checkObligationFlag = true;
+						}
+					});
+					
+					if (checkObligationFlag) {
+						alert([[#{msg.warn.include.needcheck.license}]]);
+						return false;
+					}
+					
+					isStatusChangeFlag = false;
+					$.ajax({
+						url : '/partner/changeStatus',
+						type : 'POST',
+						data : param,
+						dataType : 'json',
+						cache : false,
+						success : function(data){
+							if (data.isValid == "false") {
+								alertify.alert(com_fn.setMessage([[#{msg.project.validation.error}]]), function(){});
+								
+								gridCleanErrMsg("list");
+								partyValidMsgData_e = data.externalData;
+								partyDiffMsgData_e = data.externalData2;
+								
+								if(partyValidMsgData_e) {
+									gridValidMsgNew(partyValidMsgData_e, "list");
+								}
+								
+								if(partyDiffMsgData_e) {
+									gridDiffMsg(partyDiffMsgData_e, "list");
+								}
+								
+								alertify.error([[#{msg.common.valid}]], 0);
+							} else {
+								reloadTabInframe('/partner/list');
+								if ([[${detail.partnerId}]] != null) {
+									alertify.alert([[#{msg.common.success}]], function(){
+										deleteTabInFrame("/partner/edit/" + [[${detail.partnerId}]]);
+										createTabInFrame([[${detail.partnerId}]] + '_3rdParty', "/partner/edit/" + [[${detail.partnerId}]]);
+									});
+								}
+							}
+						},
+						error : function(){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					var partnerId = $('input[name=partnerId]').val();
+					alertify.alert([[#{msg.common.success}]], function(){
+						reloadTabInframe('/partner/list');
+						if ("CONF" == [[${detail.status}]]) {
+							fn.disabledComfirmedRow(true);
+						}
+						if(partnerId){
+							com_fn.changeMode('view', false, [[${detail.status}]]);
+							partnerStatus = [[${detail.status}]];
+							fn.getPartyGridData();
+							fn_comment.getCommentList(commentsParam);
+							saveFlag = true;
+						} else {
+							deleteTabInFrame('/partner/edit');	
+							if(data.partnerId) {
+								createTabInFrame(data.partnerId+'_3rdParty', '/partner/edit/'+data.partnerId);
+							}
+						}
+					});
+				}
+
+			}else{
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		}
+	},
+	deleteWatcher : function(obj){
+		$(obj).parent().remove();
+	},
+	deleteComment : function(obj){
+		if(!confirm([[#{msg.partner.confirm}]])) return;
+		var commId = $(obj).next().val();
+		$.ajax({
+			url : '/partner/deleteComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : {'commId' : commId},
+			success : function(data){},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	editorDialog : function(){
+		if(!alertify.myAlert){
+			//define a new dialog
+			alertify.dialog('myAlert',function factory(){
+				return{
+					main:function(message){
+						this.message = message;
+					},
+					setup:function(){
+						return { 
+							focus: { element:0 }
+						};
+					},
+					prepare:function(){
+						this.setContent(this.message);
+					}
+				}
+			});
+		}
+		//launch it.
+		var btnHtm = '<br/><b>Send an email to</b><br/>';
+		btnHtm += '<input type="button" value="Watcher Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'W\')"/>&nbsp;&nbsp;&nbsp;';
+
+		if (userRole == "ROLE_ADMIN") {
+			btnHtm += '<input type="button" value="Creator Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'C\')"/>&nbsp;&nbsp;&nbsp;';
+		} else {
+			btnHtm += '<input type="button" value="Reviewer Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'R\')"/>&nbsp;&nbsp;&nbsp;';
+		}
+		
+		btnHtm +='<input type="button" value="All" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="fn.sendEditor(\'WR\')"/>&nbsp;&nbsp;&nbsp;';
+
+		alertify.myAlert(btnHtm);
+	},
+	modifyComment : function(obj){
+		$('.commModifyPop').show();
+		$('#blind_wrap').show();
+		var commId = $(obj).next().next().val();
+		modifyCommentId = commId;
+		var contents = $(obj).parent().parent().next().html();
+//		CKEDITOR.instances.editor3.setData(contents);
+		
+		$('.closeModComment').click(function(){
+			$('.commModifyPop').hide();
+			$('#blind_wrap').hide();	
+		})
+		
+		$('.modifyComment').click(function(){
+			var editorVal = ""; // replaceWithLink(CKEDITOR.instances.editor3.getData());
+			var register = [[${sessUserInfo.userId}]];
+			var param = {commId : modifyCommentId, referenceId : $('input[name=partnerId]').val(), referenceDiv :'20', contents : editorVal};
+
+			$.ajax({
+				url : '/partner/saveComment',
+				type : 'POST',
+				dataType : 'json',
+				cache : false,
+				data : param,
+				success : function(json){
+					if(json.isValid) {
+						if(json.isValid == 'false') {
+							createValidMsgComplex(json);
+							alertify.error([[#{msg.common.valid}]], 0);
+							
+						} else if(json.isValid == 'true') {
+							alertify.alert([[#{msg.common.success}]], function(){
+							});
+						}	
+					} else {
+						//코멘트 임시저장
+						$('.modifyComment').click(function(){
+							var editorVal = ""; // replaceWithLink(CKEDITOR.instances.editor3.getData());
+							var register = [[${sessUserInfo.userId}]];
+							var param = {commId : commentIdx, referenceId : $('input[name=partnerId]').val(), referenceDiv :'13', contents : editorVal};
+
+							$.ajax({
+								url : '/partner/saveComment',
+								type : 'POST',
+								dataType : 'json',
+								cache : false,
+								data : param,
+								success : function(json){
+									if(json.isValid){
+										if(json.isValid == 'false') {
+											createValidMsgComplex(json);
+											alertify.error([[#{msg.common.valid}]], 0);
+											
+										} else if(json.isValid == 'true') {
+											alertify.alert([[#{msg.common.success}]], function(){});
+										}	
+									}else{
+										commentIdx = json.commId;
+									}
+									
+								},
+								error : function(){
+									alertify.error([[#{msg.common.valid2}]], 0);
+								}
+							});
+						});
+					}
+					
+					$('.commModifyPop').hide();
+					$('#blind_wrap').hide();
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			})
+		});
+	},
+	reset : function(){
+		if (fn.checkStatus()){
+			alertify.confirm([[#{msg.partner.check.reset}]], function (e) {
+				if (e) {
+					$('.ossUpload').empty();
+					$('.binaryUpload').empty();
+					
+					var mode = $("#mode").val();
+					if ("edit" == mode) {
+						fn.ossUploadFile();
+						fn.partnerBinaryUploadFile();
+					} else {
+						var appendHtml = "<li><span>No File</span></li>";
+						$('.ossUpload').append(appendHtml);
+						$('.binaryUpload').append(appendHtml);
+					}
+					
+					var target = $("#list");
+					target.jqGrid('clearGridData');
+
+					fn_grid_com.totalGridSaveMode('list');
+					var mainData = target.jqGrid('getGridParam','data'); // 메인 그리드
+					
+			 		mainData.forEach( function(_rowData){
+			 			var _rowId = _rowData['gridId'];
+			 			
+			 			if(_rowData["obligationLicense"] == "90") {
+			 				if(_rowData["notify"] == "Y") {
+			 					if(_rowData["source"] == "Y") {
+			 						_rowData["obligationType"] = "11";
+			 					} else {
+			 						_rowData["obligationType"] = "10";
+			 					}
+			 				} else if(_rowData["notify"] == "N") {
+			 					_rowData["obligationType"] = "99";
+			 				}
+			 			}
+			 		});
+			 		
+					$('#ossComponentsStr').val(JSON.stringify(mainData));
+					
+	 				var postData = $("#partnerForm").serializeObject();
+					$.ajax({
+						url : '/partner/saveAjax',
+						type : 'POST',
+						data : JSON.stringify(postData),
+						dataType : 'json',
+						contentType : 'application/json',
+						cache : false,
+						success: fn.onRegistSuccess,
+						error: function(data){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	delete : function(){
+		if (fn.checkStatus()){
+			var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
+           	innerHtml 		+= '<textarea id="parDelEditor"></textarea>';
+           	
+       		// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+				
+           	if(!alertify.deleteParDialog){
+				alertify.dialog('deleteParDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+        	}
+           	
+           	alertify.deleteParDialog()
+       		.set('onok', function(e) {
+       			if (e) {
+       				// prevent clicking the OK button on Enter
+    				if (typeof keyCode !== 'undefined' && keyCode == 13) {
+    					keyCode = undefined;
+    					return false;
+    				}
+    				
+    				var editorVal = $("#parDelEditor").summernote('code');
+    				
+    				if ("" == $(editorVal).text().trim()) {
+    					alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+    					return false;
+    				} else {
+    					var partnerId = $('input[name=partnerId]').val();
+    					$.ajax({
+    						url : '/partner/delAjax',
+    						type : 'POST',
+    						dataType : 'json',
+    						cache : false,
+    						data : {'partnerId' : partnerId, userComment : replaceWithLink($("#parDelEditor").summernote('code')) },
+    						success: function(data){
+    							if(partnerId) {
+    								deleteTabInFrame('/partner/edit/'+partnerId);			
+    							} else {
+    								deleteTabInFrame('/partner/edit');
+    							}
+    							
+    							reloadTabInframe('/partner/list');
+    						},
+    						error: function(){
+    							alertify.error([[#{msg.common.valid2}]], 0);
+    						}
+    					});
+    				}
+       			} else {
+       				return false;
+       			}
+       		})
+           	.set('title', 'Delete').setContent(innerHtml)
+       		.set('onshow', function(e){
+       			$("#parDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+			.show();
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	deleteConfirmationFile : function(obj){
+		$('.confirmationUpload').empty();
+		$(".confirmationUploader").attr("style", "display: flex !important");
+
+		evt.init();
+	},
+	deleteOssFile : function(obj){
+		$('.ossUpload').empty();
+		$(".ossUploader").attr("style", "display: flex !important");
+		
+		evt.init();
+	},
+	deleteBinaryFile : function(obj){
+		$('.binaryUpload').empty();
+		$(".binaryUploader").attr("style", "display: flex !important");
+		
+		evt.init();
+	},
+	makeOssList : function(data){
+		// 서브 그리드 url 전송 설정(false 전송 안함)
+		partyMainData = data.mainData;
+		partySubData = data.subData;
+		
+		// 리로드 대신 그리드 삭제 후 다시 그리기
+		$("#list").jqGrid('GridUnload');
+		
+		grid.init();
+
+		// totla record 표시
+		$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
+	},
+	displayButton : function(cellvalue){
+		var icon1 = "<input type=\"button\" value=\"Delete\" class=\"btnCLight gray wauto\" onclick=\"fn.deleteOssComponents(this)\"/>";
+
+		return icon1;
+	},
+	deleteOssComponents : function(obj){
+		var id = $(obj).parent().parent().attr('id');
+
+		$('#list').jqGrid('delRowData',id);
+	},
+	binaryTab : function(){
+		window.open('https://github.com/fosslight/fosslight_binary_scanner', '_blank');
+	},
+	selectDivision : function(){
+		var division = $('#userDivision').val();
+		$('#userName').children().remove();
+		if ("" == division) {
+			$("#userName").append("<option value=''>Select User</option>");
+			return false;
+		}
+		$('#userName').attr('disabled', false);
+		
+		$.ajax({
+			url : '/partner/getUserList',
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {'division' : division},
+			success : function(data){					
+				data.forEach(function(obj){
+					$('#userName').append('<option value='+obj.userId+'>'+obj.userName+'('+obj.userId+')</option>');
+				});
+				
+				$('#userName').change();
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	selectDomain : function() {
+		var tempDomain = $("select[name=parDomain] option:checked").text();
+		if ("Select Domain" == adIdDomain) adIdDomain = "";
+		$("input[name=emailTemp]").val(tempDomain);
+	},
+	//requestReview
+	requestReview : function(){
+		if (fn.checkStatus()){
+			isStatusChangeFlag = true;
+			
+			fn.save();
+		}else{
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	//reject
+	reject : function(){
+		if (fn.checkStatus()) {
+			var innerHtml 	= 'Are you sure you want to reject?<br><br>';
+           	innerHtml 		+= '<textarea id="partnerRejectEditor"></textarea>';
+			
+         	// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+           	
+           	if (!alertify.partnerRejectDialog){
+				alertify.dialog('partnerRejectDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+           	}
+           	
+           	alertify.partnerRejectDialog()
+       		.set('onok', function(e) {
+       			if (e) {
+       				// prevent clicking the OK button on Enter
+    				if (typeof keyCode !== 'undefined' && keyCode == 13) { 
+    					keyCode = undefined;
+    					return false;
+    				}
+       				
+					var editorVal = $("#partnerRejectEditor").summernote('code');
+    				
+    				if ("" == $(editorVal).text().trim()){
+               			alertify.alert([[#{msg.project.required.comments}]], function(){});
+
+    					return false;
+    				} else {
+    					var param = {status : 'PROG', partnerId : partnerData.partnerId||"", userComment : replaceWithLink($("#partnerRejectEditor").summernote('code'))};
+
+    					$.ajax({
+    						url : '/partner/changeStatus',
+    						type : 'POST',
+    						data : param,
+    						dataType : 'json',
+    						cache : false,
+    						success : function(data){
+    							reloadTabInframe('/partner/list');
+    							
+    							if (partnerData.partnerId != null) {
+    								alertify.alert([[#{msg.common.success}]], function() {
+    									deleteTabInFrame("/partner/edit/" + partnerId);
+    									createTabInFrame(partnerId + '_3rdParty', "/partner/edit/" + partnerId);
+    								});
+    							}
+    						},
+    						error : function(){
+    							alertify.error([[#{msg.common.valid2}]], 0);
+    						}
+    					});
+    				}
+       			} else {
+       				return false;
+       			}
+       		})
+       		.set('title', 'Reject').setContent(innerHtml)
+       		.set('onshow', function(e){
+       			$("#partnerRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+			.show();
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	//reviewStart
+	reviewStart : function(){
+		if (fn.checkStatus()){
+			var param = {status : 'REV', partnerId : partnerData.partnerId||""};
+			$.ajax({
+				url : '/partner/changeStatus',
+				type : 'POST',
+				data : param,
+				dataType : 'json',
+				cache : false,
+				success : function(data){
+					reloadTabInframe('/partner/list');
+					
+					if (partnerId != null && partnerId != ''){
+						deleteTabInFrame("/partner/edit/" + partnerId);
+						createTabInFrame(partnerId + '_3rdParty', "/partner/edit/" + partnerId);
+					}
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	//confirm
+	confirm : function(){
+		if (fn.checkStatus()){
+			cleanErrMsg();
+			checkObligationFlag = false;
+
+			var _list = $("#list");
+			var mainData = _list.jqGrid('getGridParam','data');
+			
+			mainData.forEach( function(_rowData){
+				if( _rowData['obligationLicense'] == "90" && _rowData['notify'] == "") {
+					checkObligationFlag = true;
+				}
+			});
+			
+			if (checkObligationFlag) {
+				alert([[#{msg.warn.include.needcheck.license}]]);
+				
+				return false;
+			}
+			
+			var innerHtml 	= 'Are you sure you want to confirm?<br><br>';
+           	innerHtml 		+= '<textarea id="partnerConfirmEditor"></textarea>';
+           	
+         	// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+           	
+           	if (!alertify.partnerConfirmDialog){
+				alertify.dialog('partnerConfirmDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+           	}
+			
+        	alertify.partnerConfirmDialog()
+        	.set('onok', function(e) {
+        		if (e) {
+        			// prevent clicking the OK button on Enter
+    				if (typeof keyCode !== 'undefined' && keyCode == 13) { 
+    					keyCode = undefined;
+    					return false;
+    				}
+        			
+    				var ignoreBinaryDbFlag = $("#ignoreBinaryDbFlag").val();
+               		if (typeof ignoreBinaryDbFlag === 'undefined') ignoreBinaryDbFlag = "";
+               		
+               		var editorVal = $("#partnerConfirmEditor").summernote('code');
+       				if ("" == $(editorVal).text().trim()) {
+       					editorVal = "";
+       				}
+               		
+               		var param = {status : 'CONF', partnerId : [[${detail.partnerId}]], binaryFileId : [[${detail.binaryFileId}]], "ignoreBinaryDbFlag" : ignoreBinaryDbFlag};
+               		if ("" != editorVal) {
+    					param["userComment"] = replaceWithLink(editorVal);
+    				} else {
+    					param["userComment"] = "";
+    				}
+               		
+               		$.ajax({
+        				url : '/partner/changeStatus',
+        				type : 'POST',
+        				data : param,
+        				dataType : 'json',
+        				cache : false,
+        				success : function(data){
+        					if(data.isValid == "false") {
+        						gridValidMsgNew(data, "list");
+        						
+        						alertify.error([[#{msg.common.valid}]], 0);
+        					} else {
+        						reloadTabInframe('/partner/list');
+        						
+        						if (partnerId != null && partnerId != ''){
+        							alertify.alert([[#{msg.common.success}]], function() {
+        								deleteTabInFrame("/partner/edit/" + partnerId);
+        								createTabInFrame(partnerId + '_3rdParty', "/partner/edit/" + partnerId);
+        							});
+        						}
+        					}
+        					
+        				},
+        				error : function(){
+        					alertify.error([[#{msg.common.valid2}]], 0);
+        				}
+        			});
+        		} else {
+        			return false;
+        		}
+        	})
+           	.set('title', 'Confirm').setContent(innerHtml)
+       		.set('onshow', function(e){
+       			$("#partnerConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+			.show();
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	closePop : function(){
+		$(".ajs-close").trigger("click");
+	},
+	getSheetData : function(){
+		fn.closePop();
+		
+		var sheetNum = [];
+		$('input:checkbox[name="sheetNameSelect"]').each(function(){
+			if($(this).is(':checked')){
+				sheetNum.push($(this).val());
+			}
+		});
+		
+		var fileSeq = ossFileObj.registSeq;
+		
+		if (sheetNum.length == 0) {
+			alertify.alert([[#{msg.common.check.sheet}]], function(){});
+			
+			return;
+		} else {
+			loading.show();
+			
+			fn_grid_com.totalGridSaveMode('list');
+			cleanErrMsg("list");
+			
+			var target = $("#list");
+			var mainData = target.jqGrid('getGridParam','data');
+			var finalData = {"readType":"partner","prjId" : partnerData.partnerId||"", "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+
+			fn.exeLoadReportData(finalData);
+		}
+	},
+	getCsvData : function(){
+		loading.show();
+
+		fn_grid_com.totalGridSaveMode('list');
+		cleanErrMsg("list");
+
+		var fileSeq = $('input[name=ossFileId]').val();
+		var sheetNum = ["0"];
+		var target = $("#list");
+		var mainData = target.jqGrid('getGridParam','data');
+		var finalData = {"readType":"partner","prjId" : partnerData.partnerId||"", "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+
+		fn.exeLoadReportData(finalData);
+	},
+	getSpdxSpreadsheetData : function(){
+		loading.show();
+
+		fn_grid_com.totalGridSaveMode('list');
+		cleanErrMsg("list");
+
+		var fileSeq = $('input[name=ossFileId]').val();
+		var sheetNum = ["1", "4"];
+		var target = $("#list");
+		var mainData = target.jqGrid('getGridParam','data');
+		var finalData = {"readType":"partner","prjId" : partnerData.partnerId||"", "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+
+		fn.exeLoadReportData(finalData);
+	},
+	exeLoadReportData : function(finalData){
+		try {
+			$.ajax({
+				url : '/project/getSheetData',
+				type : 'POST',
+				data : JSON.stringify(finalData),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(data){
+					loading.hide();
+				
+					if ("false" == data.isValid) {
+						if (data.validMsg) {
+							$('#ossFileId').val(ossFileObj.registSeq);
+							fn.makeFileTag(ossFileObj, 'ossFile');
+							ossFileObj = undefined;
+							
+							alertify.alert(data.validMsg, function(){});
+						} else {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					} else {
+						if (data.externalData) {
+							// validData 표시
+							partyValidMsgData_e = data.externalData;
+							//gridValidMsgNew(partyValidMsgData_e, "list");
+						}
+
+						if(data.externalData2) {
+							// validData 표시
+							partyDiffMsgData_e = data.externalData2;
+							//gridDiffMsg(partyDiffMsgData_e, "list");
+						}
+					
+						fn.makeOssList(data.resultData);
+					
+						$('input[name=ossFileId]').val(ossFileObj.registSeq);
+						fn.makeFileTag(ossFileObj, 'ossFile');
+						ossFileObj = undefined;
+					
+						if (data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
+							alertify.alert(data.resultData.systemChangeHisStr, function(){});
+						}
+					}
+				},
+				error: function(data){
+					loading.hide();
+					$('.ossUpload').children().remove();
+				
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		} finally {
+			fn.closePop();
+		}
+	},
+	modeForStatus : function(status){
+		var fileDelete = $(".uploadCase .smallDelete");
+		var addWatcher = $("#addWatcher");
+		var partyDelete = $("#partyDelete");
+		var partyReset = $("#partyReset");
+		var partySave = $("#partySave");
+		var partyBulkRegist = $(".idenBulkRegist");
+		var objArr = [];
+		
+		objArr.push($("#list"));
+		
+		if (userRole == "ROLE_VIEWER") {
+			fileDelete.hide(); addWatcher.hide();
+			partyDelete.hide(); partyReset.hide(); partySave.hide(); partyBulkRegist.hide();
+		} else {
+			switch(status){
+				case "CONF" :
+					fileDelete.hide(); addWatcher.show();
+					partyDelete.hide(); partyReset.hide(); partySave.hide(); partyBulkRegist.hide();
+
+					break;
+				// 추후 추가
+				default :
+					fileDelete.show(); addWatcher.show();
+					partyDelete.show(); partyReset.show(); partySave.show(); partyBulkRegist.show();
+
+					break;
+			}
+		}
+	},
+	
+	// 그리드 체크 메세지( gridStr 그리드 문자열 )
+	partnerGridValidMsg : function(msgData) {
+		$.each(msgData,function(key,value) {
+			if("isValid" != key) {
+				if($('input[name='+key+']').length > 0) {
+					$('input[name=' + key + ']').addClass("is-invalid");
+					$('input[name=' + key + ']').next("div.retxt").html(value).show();
+				} else if($('textarea[name='+key+']').length > 0) {
+					$('textarea[name=' + key + ']').addClass("is-invalid");
+					$('textarea[name=' + key + ']').next("div.retxt").html(value).show();
+				} 
+			}
+		});
+	},
+	
+	// 왓쳐 엘리먼트 그리기
+	addHtml : function(target, str, division, userId){
+		var emptyDivision = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+		var rlt = "";
+		if ("" != userId) {
+			if (emptyDivision != division) {
+				rlt = division + "/" + userId;
+			} else {
+				rlt = userId;
+			}
+		}
+		
+		var html  = "";
+		if ($("#multiDiv").find(".external-event").length == 0) {
+			html  = '<div class="external-event"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		} else {
+			html  = '<div class="external-event ml-1"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+		}
+		
+		html += str;
+		html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i></div>';
+		
+		target.append(html);
+	},
+	addWatcher : function(uDiv, uId, uEmail) {
+		var partnerId = [[${detail.partnerId}]];
+
+		if (partnerId == null) {
+			return true;
+		}
+		
+		var data = {"partnerId" : partnerId , "parDivision" : uDiv, "parUserId":uId, "parEmail":uEmail};
+		
+		$.ajax({
+			url : '/partner/addWatcher',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(resultData){
+				if (resultData.isValid == "true") {
+					if ('' != uEmail){
+						alertify.success([[#{msg.common.success}]]);
+					}
+				} else {
+					if ('' != uEmail){
+						alertify.error("Invalid email address.", 0);
+					}
+				}
+			},
+			error : fn.onError
+		});
+	},
+	removeWatcher : function(uDiv, uId, obj) {
+		var uEmail = "";
+
+		if ("Email" == uId) {
+			uEmail = uDiv;
+			uId = "";
+			uDiv = "";
+		}
+
+		var partnerId = partnerData.partnerId;
+
+		if ("" == partnerId || partnerId == null) {
+			return true;
+		}
+		
+		var data = {"partnerId" : partnerId , "parDivision" : uDiv, "parUserId":uId, "parEmail":uEmail};
+		
+		$.ajax({
+			url : '/partner/removeWatcher',
+			type : 'POST',
+			data : JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(resultData){
+				if ("true" == resultData.isValid) {
+					$(obj).parent().remove();
+					alertify.success([[#{msg.common.success}]]);
+				}
+			},
+			error : fn.onError
+		});
+	},
+	copyWatcher : function(obj) {
+		var partnerId = partnerData.partnerId;
+
+		if (partnerId != null) {
+			return true;
+		}
+		
+		obj["partnerId"] = partnerId;
+		
+		$.ajax({
+			url : '/partner/copyWatcher',
+			type : 'POST',
+			data : JSON.stringify(obj),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(resultData){
+				var copyWatcher = resultData.copyWatcher;
+				
+				if(copyWatcher.length){
+					for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+						var isNew = true
+						  , division = copyWatcher[i].division || ""
+						  , divisionName = copyWatcher[i].parDivisionName || ""
+						  , userId = copyWatcher[i].parUserId || ""
+						  , userName = copyWatcher[i].parUserName || ""
+						  , email = copyWatcher[i].parEmail || ""
+						  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+						  , userUseYn = copyWatcher[i].userUseYn || "Y";
+						
+						$(".watcherTags").each(function(i, tag){
+							var tagDiv = $(tag).val().split("/")[0]
+							  , tagUid = $(tag).val().split("/")[1];
+							
+							if(division == tagDiv) {
+								if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+									isNew = false;
+
+									return false;
+								} else if(tagUid == userId) {
+									isNew = false;	// 이미 등록된 watcher가 있을경우
+								}
+							}
+							
+							if(tagUid == "Email") {
+								if(email == tagDiv) {
+									isNew = false;
+								}
+							}
+						});
+						
+						if(isNew){
+							if(email != "") {
+								fn.addHtml($("#multiDiv"), email, email, "Email");
+							} else {
+								var str = "";
+								
+								if(userName == "") {
+									str = divisionName;
+								} else {
+									str = '<b';
+									
+									if (divisionEmptyCd != division) {
+										if(deptUseYn == "N"){
+											str += ' class="deleteUser"';
+										}
+
+										str += '>'+divisionName+'</b>/<b';
+									}
+									
+									if(userUseYn == "N"){
+										str += ' class="deleteUser"';
+									}
+									
+									str += '>'+userName+'</b>';
+								}
+								
+								fn.addHtml($("#multiDiv"), str, division, userId);
+							}
+						}
+					}
+					
+					if (partnerId != null) {
+						alertify.success([[#{msg.common.success}]]);
+					}
+				}
+				
+				if(!copyWatcher.length)
+					alertify.warning([[#{msg.partner.id.warning}]]);
+			},
+			error : fn.onError
+		});
+	},
+	//sample download
+	sampleDownload : function(type){
+		var logiPath = "";
+		var fileName = "";
+
+		if(sampleFile.length > 0) {
+			for(var i=0; i < sampleFile.length; i++) {
+				if(type == "arg" && sampleFile[i].cdDtlNo == '10') {
+					logiPath = sampleFile[i].cdDtlExp ;
+					fileName = sampleFile[i].cdDtlNm;
+
+					break;
+				} else if(type == "chk" && sampleFile[i].cdDtlNo == '11') {
+					logiPath = sampleFile[i].cdDtlExp ;
+					fileName = sampleFile[i].cdDtlNm;
+
+					break;
+				}
+			}
+			location.href = '/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath;
+		} else {
+			alertify.error([[#{msg.common.valid2}]], 0);
+		}
+	},
+	downloadExcel : function() {
+		$.ajax({
+			type: "POST",
+			url: '/exceldownload/getExcelPost',
+			data: JSON.stringify({"type":"partnerCheckList", "parameter":partnerData.partnerId||""}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/exceldownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+    downloadYaml: function () {
+        var params = {'partnerId': partnerData.partnerId||"", 'partnerName': partnerData.partnerName||""};
+
+        $.ajax({
+            type: "POST",
+            url: '/partner/makeYaml',
+            data: JSON.stringify(params),
+            dataType: 'json',
+            cache: false,
+            contentType: 'application/json',
+            success: function (data) {
+                if ("false" == data.isValid) {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    window.location = '/exceldownload/getFile?id='+data.validMsg;
+                }
+            },
+            error: function (data) {
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+	displayNotify : function(cellvalue, options, rowObject){
+		var display = "";
+		var obligationLicense = rowObject["obligationLicense"];
+		var obligationType = rowObject["obligationType"];
+		
+		if (obligationLicense == 10 || obligationLicense == 11) {
+			display="<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
+		} else if(obligationLicense == 90) {
+			display = '<select id="'+options.rowId+'_notify" onchange="fn.onNotifyCboxClick(' + options.rowId + ')">'
+				+ '<option value=""></option>'
+				+ '<option value="Y" '+((rowObject["obligationType"]=='10' || rowObject["obligationType"]=='11') ? ' selected="selected"' : '') +'>O</option>'
+				+ '<option value="N" '+((rowObject["obligationType"]=='99') ? ' selected="selected"' : '') +'>X</option>'
+				+ '</select>';
+		}
+		
+		return display;
+	},
+	displaySource : function(cellvalue, options, rowObject){
+		var display = "";
+		var obligationLicense = rowObject["obligationLicense"];
+		var obligationType = rowObject["obligationType"];
+		
+		if(obligationLicense == 11) {
+			display="<i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\"></i>";
+		} else if(obligationLicense == 90) {
+			display = '<select id="'+options.rowId+'_source" onchange="fn.onSourceCboxClick(' + options.rowId + ')">'
+				+ '<option value=""></option>'
+				+ '<option value="Y" '+((rowObject["obligationType"]=='11') ? ' selected="selected"' : '') +'>O</option>'
+				+ '<option value="N" '+((rowObject["obligationType"]=='99' || rowObject["obligationType"]=='10') ? ' selected="selected"' : '') +'>X</option>'
+				+ '</select>';
+		}
+		
+		return display;
+	},
+	unDisplayNotify : function(cellvalue, options, rowObject){
+		var display = $("#"+options.rowId+"_notify").val();
+
+		return display;
+	},
+	unDisplaySource : function(cellvalue, options, rowObject){
+		var display = $("#"+options.rowId+"_source").val();
+
+		return display;
+	},
+	onNotifyCboxClick : function(rowId){
+		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
+		var selectedVal = $("#"+id+"_notify").val();
+		var selectedVal2 = $("#"+id+"_source").val();
+
+		fn_grid_com.saveCellData("list",id,'notify',selectedVal,partyValidMsgData_e, partyDiffMsgData_e);
+
+		if(selectedVal) {
+			if(selectedVal == "N") {
+				selectedVal2 = "N";
+			}
+			
+			$("#"+id+"_notify").parent().css("background", "");
+			
+			if($("#"+id+"_source").val()) {
+				$("#"+id+"_source").parent().css("background", "");
+			}
+		} else {
+			selectedVal2 = "";
+			$("#"+id+"_notify").parent().css("background", "CornflowerBlue");
+			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
+		}
+		
+		if(selectedVal2 != $("#"+id+"_source").val()) {
+			$("#"+id+"_source").val(selectedVal2).trigger('change');
+		}
+	},
+	onSourceCboxClick : function(rowId){
+		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
+		var selectedVal = $("#"+id+"_source").val();
+		var selectedVal2 = $("#"+id+"_notify").val();
+		
+		fn_grid_com.saveCellData("list",id,'source',selectedVal,partyValidMsgData_e, partyDiffMsgData_e);
+		
+		if(selectedVal) {
+			if(selectedVal == "Y") {
+				selectedVal2 = "Y";
+			}
+			
+			$("#"+id+"_source").parent().css("background", "");
+			
+			if($("#"+id+"_notify").val()) {
+				$("#"+id+"_notify").parent().css("background", "");
+			}
+		} else {
+			selectedVal2 = "";
+			
+			$("#"+id+"_notify").parent().css("background", "CornflowerBlue");
+			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
+		}
+		
+		if(selectedVal2 != $("#"+id+"_notify").val()) {
+			$("#"+id+"_notify").val(selectedVal2).trigger('change');
+		}
+	},
+	chkListValidation : function(listKind, listId){
+		if(listKind == ""){
+			// TODO : 추후 문구 수정예정
+			alertify.error([[#{msg.project.watcher.selectlist}]], 0);
+
+			return false;
+		}
+		
+		if(listId == ""){
+			// TODO : 추후 문구 수정예정
+			alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
+
+			return false;
+		}
+		
+		return true;
+	},
+	deleteDocumentsFile : function(obj){
+		var fileSeq = $(obj).closest("li").find("input:last").val();
+		$(obj).closest('li').remove();
+		delDocumentsFile.push(fileSeq);
+		$("#delDocumentsFile").val(delDocumentsFile);
+		if ($(".documentsFileArea > li").length < 5) {
+			$(".documentsUploader").attr("style", "display: flex !important");
+		}
+	},
+	CheckChar : function(){
+		if(event.keyCode == 64){//@ 특수문자 체크
+    		alertify.alert([[#{msg.login.check.char}]], function(){});
+    		event.returnValue = false;
+    	}
+	},
+	CheckOssViewPage : function(){
+		if (saveFlag) {
+			if(_popupCheckOssName != null){
+				_popupCheckOssName.close();
+			}
+			
+			if (partnerData != null && partnerData.partnerId != null) {
+				var partnerId = partnerData.partnerId;
+				_popupCheckOssName = window.open("/oss/checkOssName?prjId="+partnerId+"&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+
+				if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
+					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+				}
+			}
+		} else {
+			alertify.alert([[#{msg.project.required.checkOssName}]], function(){});
+
+			return false;
+		}
+	},
+	CheckOssLicenseViewPage : function(){
+		if(saveFlag) {
+			if(_popupCheckOssLicense != null){
+				_popupCheckOssLicense.close();
+			}
+			
+			if (partnerData != null && partnerData.partnerId != null) {
+				_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId="+partnerData.partnerId+"&referenceDiv=20&targetName=partner", "Check License", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+			}
+
+			if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		} else {
+			alertify.alert([[#{msg.project.required.checkOssLicense}]], function(){});
+
+			return false;
+		}
+	},
+	checkStatus : function(){
+		var partnerId = $("input[name=partnerId]").val();
+		var returnFlag = false;
+
+		if (partnerId == "" || partnerId == null) {
+			returnFlag = true;
+		} else {
+			$.ajax({
+				url : '/partner/checkStatus/'+partnerId,
+				type : 'GET',
+				dataType : 'json',
+				cache : false,
+				async : false,
+				success : function(data){
+					var status = data.status;
+					var editStatus = $("input[name=status]").val();
+
+					returnFlag = (status == editStatus);
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+					returnFlag = false;
+				}
+			});
+		}
+
+		return returnFlag;
+	},
+	shareUrl : function(){
+		var copyUrl = "";
+		var protocol = window.location.protocol;
+		var host =  window.location.host;
+		copyUrl = protocol + "//" + host + "/partner/shareUrl/" + [[${detail.partnerId}]];
+		copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
+		
+		$("#copyUrl").val(copyUrl);
+
+		//launch it.
+		var btnHtml 	= 	'<div class="row form-group">';
+		btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
+		btnHtml 		+= 	'		<input type="text" class="form-control" value="'+copyUrl+'" disabled/>';
+		btnHtml 		+= 	'	</div>';
+		btnHtml 		+= 	'</div>';
+		btnHtml 		+= 	'<div class="row float-right custom-layout">';
+		btnHtml 		+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" onclick="fn.copyUrl(this)">Copy</button>';
+		btnHtml 		+= 	'</div>';
+
+		if(!alertify.myAlert){
+			//define a new dialog
+			alertify.dialog('myAlert',function factory(){
+				return{
+					main:function(message){
+					this.message = message;
+				},
+				setup:function(){
+					return { 
+						focus: { element:0 }
+					};
+				},
+				prepare:function(){
+					this.setContent(this.message);
+				},
+				hooks: {
+			    	onshow: function() {
+			          	this.elements.content.style.height = '220px';
+			        }
+				}
+			}});
+		}
+		
+		alertify.myAlert(btnHtml);
+	},
+	copyUrl : function(target){
+		$('#copyUrl').attr('type', 'text');
+		$('#copyUrl').select();
+        var copyFlag = document.execCommand('copy');
+        $('#copyUrl').attr('type', 'hidden');
+        
+        if (copyFlag) {
+        	$('.ajs-close').trigger("click");
+    		alertify.success([[#{msg.common.success}]]);
+        } else {
+        	alertify.error([[#{msg.common.valid}]]);
+        }
+	},
+	binaryDBSave : function() {
+		var param = {
+			"partnerId" : partnerData.partnerId,
+			"referenceDiv" : "20"
+		};
+
+		$.ajax({
+			url : '/partner/saveBinaryDB',
+			type : 'POST',
+			data : JSON.stringify(param),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success : function(data){
+				if("false" == data.isValid) {
+					alertify.alert('Nothing to store in Binary DB', function(){});
+				}else{
+					alertify.alert([[#{msg.common.success}]], function(){});
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+    },
+    bulkEdit : function(permission, status){
+    	if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		} else if ("CONF" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+			return false;
+		}
+    	
+    	var gridList = $("#list");
+        var targetGird = "list";
+
+        var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
+        var rowCheckedArr = [];
+        for(var i=0; i<selarrrow.length; i++){
+			if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+				rowCheckedArr.push(selarrrow[i]);
+			}
+        }
+
+        if(rowCheckedArr.length > 0){
+            fn_grid_com.totalGridSaveMode(targetGird);
+            
+            var _popup = null;
+
+            if(_popup == null || _popup.closed){
+                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+				$("#partnerBulkEditForm > input[name=target]").val(targetGird);
+				$("#partnerBulkEditForm").submit();
+                
+                if(!_popup || _popup.closed || typeof _popup.closed=='undefined') {
+                    alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+                }
+            } else {
+                _popup.close();
+                _popup = window.open("", "bulkEditViewPartnerPopup", "width=850, height=600, toolbar=no, location=no, left=100, top=100, resizable=yes");
+
+                $("#partnerBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+				$("#partnerBulkEditForm > input[name=target]").val(targetGird);
+				$("#partnerBulkEditForm").submit();
+            }
+        }else{
+            alertify.alert([[#{msg.oss.select.ossTable}]], function(){});
+            return false;
+        }
+	},
+	selectDownloadFile : function(target) {
+    	// download file
+    	if (target === "report_sub") {
+    		fn.downloadExcel();
+    	} else {
+    		var status = [[${detail.status}]];
+        	if ('CONF' != status) {
+        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+    				if (e) {
+    					fn.selectDownloadFileValidation(target);
+    				} else {
+    					return false;
+    				}
+    			});
+        	} else {
+        		fn.selectDownloadFileValidation(target);
+        	}
+    	}
+    },
+    selectDownloadFileValidation : function(target) {
+    	if (fn.checkSelectDownloadFile()) {
+    		if (target === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
+	        else if (target === "RDF_sub") fn.downloadSpdxRdf();
+	        else if (target === "TAG_sub") fn.downloadSpdxTag();
+	        else if (target === "JSON_sub") fn.downloadSpdxJson();
+	        else if (target === "YAML_sub") fn.downloadSpdxYaml();
+	        else if (target === "YAML") fn.downloadYaml();
+		} else {
+    		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+    	}
+    },
+	checkSelectDownloadFile : function() {
+		var checkEmptyFlag = false;
+		if (partnerData.partnerId != null) {
+			$.ajax({
+    			type: "POST",
+				url: '/partner/checkSelectDownloadFile',
+				data: JSON.stringify({"partnerId":partnerData.partnerId}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if (data.isValid) {
+						checkEmptyFlag = true;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+    		});
+		}
+    	
+    	return checkEmptyFlag;
+	},
+	downloadSpdxSpreadSheetExcel : function(){
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
+			partnerId = "3rd_" + partnerId;
+			
+			$.ajax({
+				type: "POST",
+				url: '/spdxdownload/getSPDXPost',
+				data: JSON.stringify({"type":"spdx", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					} else {
+						window.location = '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	downloadSpdxRdf : function() {
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
+			partnerId = "3rd_" + partnerId;
+			
+			$.ajax({
+				type: "POST",
+				url: '/spdxdownload/getSPDXPost',
+				data: JSON.stringify({"type":"spdxRdf", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					} else {
+						window.location = '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	downloadSpdxTag : function() {
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
+			partnerId = "3rd_" + partnerId;
+			
+			$.ajax({
+				type: "POST",				   
+				url: '/spdxdownload/getSPDXPost',
+				data: JSON.stringify({"type":"spdxTag", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					} else {
+						window.location = '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	downloadSpdxJson : function() {
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
+			partnerId = "3rd_" + partnerId;
+			
+			$.ajax({
+				type: "POST",
+				url: '/spdxdownload/getSPDXPost',
+				data: JSON.stringify({"type":"spdxJson", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					} else {
+						window.location = '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	downloadSpdxYaml : function() {
+		var partnerId = partnerData.partnerId;
+		if (partnerId != null) {
+			partnerId = "3rd_" + partnerId;
+			
+			$.ajax({
+				type: "POST",
+				url: '/spdxdownload/getSPDXPost',
+				data: JSON.stringify({"type":"spdxYaml", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if("false" == data.isValid) {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					} else {
+						window.location = '/spdxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	makeFileTag : function(obj, flag) {
+		var appendHtml = '<br>'+obj.createdDate;
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
+		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a>';
+		
+		if ("ossFile" == flag) {
+			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteOssFile(this)">X</span>'+appendHtml+'</li>';
+			uploadFileTag += '<input type="hidden" name="ossFileId" value="'+obj.registSeq+'"/>';
+			$('.ossUpload').append(uploadFileTag);
+			$(".ossUploader").attr("style", "display: none !important");
+		} else if ("confirmationFile" == flag) {
+			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteConfirmationFile(this)">X</span>'+appendHtml+'</li>';
+			uploadFileTag += '<input type="hidden" name="confirmationFileId" value="'+obj.registSeq+'"/>';
+			$('.confirmationUpload').append(uploadFileTag);
+			$(".confirmationUploader").attr("style", "display: none !important");
+		} else if ("binaryFile" == flag) {
+			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteBinaryFile(this)">X</span>'+appendHtml+'</li>';
+			uploadFileTag += '<input type="hidden" id="binaryFileId" name="binaryFileId" value="'+obj.registSeq+'"/>';
+			$('.binaryUpload').append(uploadFileTag);
+			$(".binaryUploader").attr("style", "display: none !important");
+		} else if ("documentsFile" == flag) {
+			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteDocumentsFile(this)">X</span>'+appendHtml+'</li>';
+			uploadFileTag += '<input type="hidden" value="'+obj.registSeq+'"/>';
+			if ("" == $("#documentsFileId").val()) $("#documentsFileId").val(obj.registFileId);
+			$('.documentsFileArea').append(uploadFileTag);
+		}
+	},
+	handleUserCommentPopupOpen: function () {
+        const param = {
+            "referenceDiv" : "3rd",
+            "referenceId" : [[${detail.partnerId}]]
+        }
+        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+                if (!alertify.editDialog) {
+                    alertify.dialog('editDialog', function () {
+                        return {
+                            main: function (content) {
+                                this.setContent(content);
+                            },
+                            setup: function () {
+                                var setup = alertify.confirm().setup();
+                                setup.buttons = [];
+                                setup.focus.element = 1;
+
+                                return setup;
+                            },
+                            hooks: {
+                                onshow: function() {
+                                    this.elements.dialog.style.maxWidth = 'none';
+                                    this.elements.dialog.style.width = '700px';
+                                }
+                            }
+                        };
+                    });
+                }
+
+                editDailog = alertify.editDialog(res);
+            },
+            null,
+            function () {
+                $("#modifiedCommentInPjtEditor").summernote({
+                    height: 180,
+                    callbacks: {
+                        onInit: function () {
+                            $(this).summernote('code', $("#contents").val());
+                        }
+                    }
+                });
+            });
+    },
+    saveEditor: function () {
+        //코멘트 임시저장
+        var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+        var referenceId = [[${detail.partnerId}]]
+        var param = {
+            referenceId: referenceId
+            , referenceDiv: '21'
+            , contents: editorVal
+        };
+        $.ajax({
+            url: "/project/saveComment",
+            type: "POST",
+            dataType: "json",
+            cache: false,
+            data: param,
+            success: function (json) {
+                if (json.isValid == 'false') {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    alertify.success([[#{msg.common.success}]]);
+                }
+                $("#userComment").val(editorVal);
+                editDailog.close();
+            },
+            error: function () {
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    }
+}
+
+var datas = {
+	init : function(){
+		if (partnerData.partnerId != null) {
+			fn.getPartyGridData();
+		} else {
+			grid.init();
+			partyMainData = [];
+			partySubData = [];
+		}
+		
+		var deliveryForm = partnerData.deliveryForm||'';
+		
+		if ('' == deliveryForm) {
+		} else {
+			$('select[name=deliveryForm]').val(deliveryForm).attr('selected', 'true');
+			$('select[name=deliveryForm]').trigger('change');	
+		}
+
+		var userDivision = $('#division');
+ 		if (partnerData != null) {
+ 			if (partnerData.partnerId != null && partnerData.division != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+ 				for (var i=0;i<userDivision.children().length;i++) {
+ 					if (userDivision.children()[i].value == partnerData.division||"") {
+ 						break;
+ 					}
+ 					if (userDivision.children().length - 1 == i ) {
+ 						var divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), detail.division)}]];
+ 						userDivision.append("<option value='" + partnerData.division||"" + "' >" + divisionName+ "</option>");
+ 						$('#division option:last').attr("selected", "selected");
+ 						$('#division option:last').change();
+ 					}
+ 				}
+ 			}
+ 		}
+
+		userDivision = $('#division');
+		if (partnerData != null) {
+			for (var i=0;i<userDivision.children().length;i++) {
+				if (userDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+					break;
+				}
+				if (userDivision.children().length - 1 == i ) {
+					userDivision.append("<option value='"+[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]+"'></option>");
+					if (partnerData.division == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
+						$('#division option:last').attr("selected", "selected");
+						$('#division option:last').change();
+					}
+				}
+			}
+		}
+		var prjDivision = $("#userDivision");
+		for (var i=0;i<prjDivision.children().length;i++) {
+			if (prjDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]] ) {
+				break;
+			}
+			if(prjDivision.children().length-1 == i) {
+				prjDivision.append("<option value='"+[[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]+"'></option>");
+			}
+		}
+		
+		if (partnerData != null && partnerData.partnerWatcher != null) {
+			datas.initPartnerWatcher(partnerData.partnerWatcher);
+		}
+		
+		if ([[${detail.partnerId}]] != null) {
+			commentsParam["referenceId"] = [[${detail.partnerId}]];
+		}
+		
+		commentsParam.height = $(window).height() - 120;
+		fn_comment.getCommentList(commentsParam);
+	},
+	initPartnerWatcher : function (watcherList) {
+		watcherList.forEach(function(watcher, index, obj){
+			var deptUseYn = watcher.deptUseYn || "Y";
+			var userUseYn = watcher.userUseYn || "Y";
+			
+			if (watcher!=""){
+				if (watcher.parEmail) { 
+					fn.addHtml($("#multiDiv"), watcher.parEmail, watcher.parEmail, "Email");
+				} else {
+					var str = "";
+					
+					if (watcher.parUserName == undefined){
+						str = watcher.parDivisionName;
+					} else {
+						str = '<span class="text-bold"';
+						
+						if (divisionEmptyCd != watcher.prjDivision) {
+							str += '>'+watcher.parDivisionName+'</span>/';
+						}
+						
+						str += '<span class="text-bold">';
+						str += watcher.parUserName+'</span>';
+					}
+					
+					fn.addHtml($("#multiDiv"), str, watcher.parDivision, watcher.parUserId);
+				}
+			}
+		});
+	}
+}
+var grid = {
+	projectList : function () {
+		$("#_projectList").jqGrid({
+			datatype: 'local',
+			data: prjList,
+			colNames:['ID','Project Name', 'Project Version'],
+			colModel:[
+				{name:'prjId',index:'prjId', width:70, sortable:false, align:"center", key:true},
+				{name:'prjName',index:'prjName', width:400, sortable:false, formatter: fn.setProjectInfo},
+				{name:'prjVersion',index:'prjVersion', width:100, sortable:false, align:"center"}
+			],
+			rowNum:100,
+			viewrecords: true,
+			height: 'auto',
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				var rowData = $("#_projectList").jqGrid('getRowData',rowid);
+				if("Y" != rowData.oldSystemFlag) {
+					createTabInFrame(rowData['prjId']+'_Project','/project/edit/'+rowData['prjId']);
+				}
+			},
+			loadComplete: function(data) {
+				if(data.records > 0) {
+					var multRowIds = []; 
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						className = row.className;
+						if (className.indexOf('jqgrow') !== -1) {
+							rowid = row.id;
+							rowData = data.rows[rowIdx++];
+							if(rowData.oldSystemFlag == "Y") {
+								className = className + ' excludeRow';
+							}
+							row.className = className;
+						} else if(className.indexOf('ui-subgrid') !== -1){
+							rowIdx++;
+						}
+					}
+				}
+			}
+		});
+	},
+	init : function(){
+		var currentOssName = '';
+		var ondblClickRowBln = false;
+		var partnerList = $("#list");
+		
+		partnerList.jqGrid({
+			datatype: 'local',
+			data : partyMainData,
+			colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
+					   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction', 'Tlsh', 'Check Sum'],
+			colModel: [
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
+				{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
+				{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false},
+				{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
+				{name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true},
+				{name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true},
+				{name: 'filePath', index: 'filePath', width: 140, align: 'left', editable:true, template: searchStringOptions, 
+					editoptions: {
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+								});
+							}
+					}
+				},
+				{name: 'ossName', index: 'ossName', width: 140, align: 'left', editable:true, edittype:'text', template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									// ossName auto complete
+									$(e).autocomplete({
+										source: ossNames
+										, minLength: 3 // IE 스크립트 성능이슈로 0->3 으로 변경 yuns
+										, open: function() { $(this).attr('state', 'open');}
+										, close: function () { $(this).attr('state', 'closed');}
+									}).focus(function() {
+										if ($(this).attr('state') != 'open') {
+											$(this).autocomplete("search");
+										}
+									}).on('autocompletechange', function() {
+										if(e.value!=""){
+											var rowid = (e.id).split('_')[0];
+											fn_grid_com.griOssVersions($('#'+rowid+'_ossVersion')[0], e.value, 'list');
+											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+										}
+									}).dblclick(function(){
+										var rowid = (e.id).split('_')[0];
+										var licenseName = com_fn.getLicenseName(partnerList.getRowData(rowid));
+										
+										partnerList.jqGrid("setCell", rowid, "licenseName", licenseName);
+										fn_grid_com.saveCellData(partnerList.attr("id"), rowid, "licenseName", licenseName, null, null);
+										partnerList.jqGrid('saveRow',rowid);
+										
+										fn_grid_com.mvOssPage(partnerList, rowid);
+									});
+									
+									currentOssName = e.value;
+								}
+						}
+				},
+				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center', editable:true, edittype:'text', template: searchStringOptions, 
+					editoptions: {
+						dataInit:
+							function (e) { 
+								fn_grid_com.griOssVersions(e, currentOssName, 'list');
+								
+								$(e).on( "autocompletechange", function() {
+									var rowid = (e.id).split('_')[0];
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+								});
+							}
+					}
+				},
+				{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
+				{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
+					editoptions: {
+						dataInit: function (e) {
+								var licenseNameId = $(e).attr("id").split('_')[0];
+								var licenseNameTd = $(e).parent();
+
+								var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
+								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
+								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
+								displayLicenseNameCell += '</div>';
+					
+								$(licenseNameTd).empty();
+								$(licenseNameTd).html(displayLicenseNameCell);
+								$('#'+licenseNameId+'_licenseNameDiv').append(e);
+							
+								// licenseName auto complete
+								$(e).autocomplete({
+									source: licenseNames
+									, minLength: 0
+									, open: function() { $(this).attr('state', 'open'); }
+									, close: function () { $(this).attr('state', 'closed'); }
+								}).focus(function() {
+									if ($(this).attr('state') != 'open') {
+										$(this).autocomplete("search");
+									}
+								});
+								
+								// set license data
+								$(e).on( "autocompletechange", function() {
+									var rowid = (e.id).split('_')[0];
+									var mult = null;
+									var multText = null;
+									
+									for(var i in licenseNames){
+										if("" != e.value && e.value == licenseNames[i].value){
+											var licenseIds = $('#'+rowid+'_licenseId').val();
+											mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+											multText = licenseNames[i].value;
+											break;
+										}
+									}
+									
+									if(mult == null){
+										mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+										multText = e.value;
+									}
+									
+									var rowLicenseNames = [];
+									$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
+										rowLicenseNames.push($(this).text());
+									});
+									
+									if (multText != null){
+										if(rowLicenseNames.length > 0){
+											var duplicateFlag = false;
+											for(var i in rowLicenseNames){
+												if(multText == rowLicenseNames[i]){
+													duplicateFlag = true;
+													break;
+												}
+											}
+											
+											if(!duplicateFlag){
+												$('#'+rowid+'_licenseNameBtn').append(mult);
+											}
+										} else {
+											$('#'+rowid+'_licenseNameBtn').append(mult);
+										}
+									}
+									
+									$('#'+rowid+'_licenseName').val("");
+									
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+								}).on("keypress", function(evt){
+									if(evt.keyCode == 13){
+										var rowid = (e.id).split('_')[0];
+										var mult = null;
+										var multText = null;
+										
+										for(var i in licenseNames){
+											if("" != e.value && e.value == licenseNames[i].value){
+												var licenseIds = $('#'+rowid+'_licenseId').val();
+												mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+												multText = licenseNames[i].value;
+												break;
+											}
+										}
+										
+										if(mult == null && "" != e.value){
+											mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+											multText = e.value;
+										}
+										
+										var rowLicenseNames = [];
+										$('#'+rowid+'_licenseNameBtn').find('.btnLicenseShow').each(function(i, item){
+											rowLicenseNames.push($(this).text());
+										});
+										
+										if (multText != null){
+											if(rowLicenseNames.length > 0){
+												var duplicateFlag = false;
+												for(var i in rowLicenseNames){
+													if(multText == rowLicenseNames[i]){
+														duplicateFlag = true;
+														break;
+													}
+												}
+												
+												if(!duplicateFlag){
+													$('#'+rowid+'_licenseNameBtn').append(mult);
+												}
+											} else {
+												$('#'+rowid+'_licenseNameBtn').append(mult);
+											}
+										}
+										
+										$('#'+rowid+'_licenseName').val("");
+
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+									}
+								});
+							}
+					}
+				},
+				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:true, formatter:fn_grid_com.displayDownloadLocation, unformatter:fn_grid_com.unformatter, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions,
+					editoptions: {
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+										$("#"+rowid+"_downloadLocation").val(value);
+									}
+									
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+								}).on("blur", function() {
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+										$("#"+e.id).val(value);
+									}
+								});
+							}
+					}
+				},
+				{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+					editoptions: {
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+										$("#"+rowid+"_homepage").val(value);
+									}
+									
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+								}).on("blur", function() {
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+										$("#"+e.id).val(value);
+									}
+								});
+							}
+					}
+				},
+				{name: 'copyrightText', index: 'copyrightText', width: 140, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
+					dataInit:
+						function (e) { 
+							$(e).on("change", function() {
+								var rowid = (e.id).split('_')[0];
+								
+								fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e);
+							});
+						}
+					}
+				},
+				
+				{name: 'cveId', index: 'cveId', hidden:true},
+				{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : true, sorttype:'float', template: searchNumberOptions},
+				{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false},
+				{name: 'comments', index: 'comments', width: 150, align: 'left', editable:true, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
+					dataInit:
+						function (e) {
+							$(e).on("change", function() {
+								var rowid = (e.id).split('_')[0];
+
+								fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+							});
+						}
+					}
+				},
+				{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
+				{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
+				{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
+				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : false, search : false},
+				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : false, search : false},
+				{name: 'restriction', index: 'restriction', width: 70, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
+				{name: 'tlsh', index: 'tlsh', editable:false, hidden:true},
+				{name: 'checkSum', index: 'checkSum', editable:false, hidden:true}
+			],
+			autoencode: true,
+			editurl:'clientArray',
+			autowidth: true,
+			height: 'auto',
+			gridview: true,
+			pager: '#pager',
+			rowNum: 200,
+			rowList: [200, 500, 1000, 5000],
+			recordpos:'right',
+			toppager:true,
+			loadonce:true,
+			cellEdit : true,
+			cellsubmit : 'clientArray',
+			ignoreCase: true,
+			multiselect: true,
+            multiselectWidth: 35,
+			onSortCol: function (index, columnIndex, sortOrder) {
+				isSort = true;
+			},
+			loadComplete: function(data) {
+				_mainLastsel = -1;
+				
+				if(data.records > 0) {
+					var multRowIds = []; 
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						className = row.className;
+						if (className.indexOf('jqgrow') !== -1) {
+							rowid = row.id;
+							rowData = data.rows[rowIdx++];
+							
+							if(rowData.licenseDiv != "M") {
+								className = className + ' singleLicenseClass';
+								
+								$("#" + rowid).next("tr.ui-subgrid").hide();
+							} else {
+								multRowIds.push(rowid);
+							}
+							
+							if(rowData.excludeYn == "Y" && className.indexOf('excludeRow') === -1) {
+								className= className + ' excludeRow';
+							}
+							
+							row.className = className;
+							
+						} else if(className.indexOf('ui-subgrid') !== -1){
+							rowIdx++;
+						}
+
+						// checkbox click event
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+					
+					// 한번에 처리
+					$("#list tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
+				}
+				
+				// 상태에 따른 화면 처리
+				fn.modeForStatus([[${detail.status}]]);
+				
+				if(isSort){
+					isSort = false;
+				}
+				
+				// append button event
+				if ($("#list_toppager_left").find('button').length == 0) {
+					var permission = partnerData.statusPermission == 1 || partnerData.partnerId == null;
+					var status = partnerData.status;
+					
+	            	var appendBtn = "";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('3rdParty', 'list', "+permission+", '"+status+"')\">";
+					if (!permission || "CONF" == status) {
+						appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+            		} else {
+            			appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+            		}
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('3rdParty', 'list', 'main', "+permission+", '"+status+"')\">";
+	            	if (!permission || "CONF" == status) {
+						appendBtn += "<i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
+            		} else {
+            			appendBtn += "<i class=\"far fa-trash-alt\"></i></button>";
+            		}
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"fn.bulkEdit("+permission+", '"+status+"')\">";
+	            	if (!permission || "CONF" == status) {
+						appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+            		} else {
+            			appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+            		}
+            		
+	            	appendBtn += "<button type=\"button\" id=\"exportDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+	            	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('Spreadsheet_sub')\">SPDX (Spreadsheet)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('RDF_sub')\">SPDX (RDF)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('TAG_sub')\">SPDX (TAG)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('JSON_sub')\">SPDX (JSON)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML_sub')\">SPDX (YAML)</span></div>";
+	            	
+	                $("#list_toppager_left").append(appendBtn);
+	            }
+			},
+			onSelectRow: function(rowid,status,eventObject) {
+			},
+			beforeSelectRow: function(rowid, e) {
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+
+			    if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+			       iCol = $.jgrid.getCellIndex($td[0]);
+			       cm = p.colModel[iCol];
+			       if (cm != null && cm.name === "cb") {
+			           // multiselect checkbox is clicked
+			           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+			       }
+			    }
+				// 경고 클래스 설정
+			    fn_grid_com.setWarningClass(partnerList,rowid,["ossName","licenseName"]);
+			    return false;
+			},
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				if(iCol=="3") {
+					com_fn.exitCell(_mainLastsel, "list");
+					
+					fn_grid_com.showOssViewPage(partnerList, rowid, true, partyValidMsgData_e, partyDiffMsgData_e, null, com_fn.getLicenseName);
+				}
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				var permission = partnerData.permission == 1;
+				
+				if (iCol != "17" && (permission && "CONF" != partnerStatus)) {
+					cleanErrMsg("list", rowid);
+					fn_grid_com.setCellEdit(partnerList, rowid, partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
+
+					// 서브 그리드 제외
+					ondblClickRowBln = false;
+					
+					$('#'+rowid+'_licenseName').addClass('autoCom');
+					$('#'+rowid+'_licenseName').css({'width' : '60px'});
+					var result = $('#'+rowid+'_licenseName').val().split(",");
+					
+					result.forEach(function(cur,idx){
+						if(cur != ""){
+							var mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+							
+							$('#'+rowid+'_licenseNameBtn').append(mult);
+						}
+					});
+					
+					$('#'+rowid+'_licenseName').val("");
+                    var nextCol = partnerList.jqGrid('getGridParam', 'colModel')[iCol].name;
+                    var nextRow = rowid;
+                    $('#'+nextRow+"_"+nextCol).focus();
+				}
+			},
+			onPaging: function(action) {
+				cleanErrMsg("list");
+				fn_grid_com.totalGridSaveMode('list');
+			},
+			gridComplete : function() {
+				cleanErrMsg("list");
+
+				if(partyValidMsgData_e) {
+					gridValidMsgNew(partyValidMsgData_e, "list");
+				}
+
+				if(partyDiffMsgData_e) {
+					gridDiffMsg(partyDiffMsgData_e, "list");
+				}
+				
+				if (partyInfoMsgData_e) {
+					gridInfoMsg(partyInfoMsgData_e, "list");
+				}
+				
+				var arr = [];
+				arr = partnerList.jqGrid('getDataIDs');
+
+				for(var i in arr){
+					if(partnerList.jqGrid('getCell',arr[i],'obligationType') == 90) {
+						$("#"+arr[i]+"_source").parent().css("background", "CornflowerBlue");
+						$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
+					}
+				}
+			},
+			removeHighLight : true
+
+		});
+		partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn"});
+		
+/* 		if ($("#partySave").is(":visible")) {
+			partnerList.jqGrid('navGrid',"#pager",{add:true,edit:false,del:true,search:false,refresh:false
+				  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('list',partnerList,"main", null, com_fn.getLicenseName);}
+				  , delfunc: function () { fn_grid_com.rowDelNew(partnerList,"main");}
+				  , cloneToTop:true
+			});
+		} else {
+			partnerList.jqGrid('navGrid',"#pager",{add:false,edit:false,del:false,search:false,refresh:false,cloneToTop:true});
+		} */
+		
+		$('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+	}
+}
+
+var com_fn = {
+	changeMode : function (mode, resetFlag, status) {
+		var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+		var tabDiv = targetId.split("-")[1];
+		
+		if ("menu-party" == targetId) {
+			$.ajax({
+	            url: "/partner/" + mode + "/" + partnerData.partnerId,
+	            type: 'POST',
+	            dataType: 'html',
+	            cache: false,
+	            success: function (data) {
+	            	$("#" + targetId).empty();
+					$("#" + targetId).html(data);
+					
+					if ("party" == tabDiv) {
+						fn.confirmationUploadFile();
+						fn.ossUploadFile();
+						fn.partnerBinaryUploadFile();
+						fn.documentsUploadFile();
+						callAutoCompleteFnc("autoComCreatorDivision");
+						
+						// file uploader hide in CONF status
+				        if ('CONF' == [[${detail.status}]]) {
+				            $(".ajax-upload-dragdrop").hide();
+				        }
+						
+						$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+						var description = [[${detail.description}]];
+						if ("" != description) {
+							$("#descriptionTextarea").summernote('code', description);
+						}
+						
+						var partnerWatcher = [[${detail.partnerWatcher}]];
+						if (partnerWatcher != null) {
+							datas.initPartnerWatcher(partnerWatcher);
+						}
+						
+						var prjList2 = [[${prjList}]];
+						if (prjList2 != null) {
+							prjList = prjList2;
+							$("#_projectList").jqGrid('GridUnload');
+							grid.projectList();
+						}
+							
+						if ([[${detail.partnerId}]] != null) {
+							$("input[name=creatorNm]").val([[${detail.creatorName}]]);
+							fn.publicChange();
+						}
+					}
+	            }
+			});
+		}
+	},
+	deleteLicense : function(target){
+		$(target).parent().remove();
+	},
+	deleteLicenseRenewal : function(target){
+		$(target).parent().next().remove();
+		$(target).parent().remove();
+	},
+	getLicenseName : function(obj){
+		return obj.licenseName.replace(/(<([^>]+)>)/ig, ",").split(",").reduce(function(arr, cur){
+			if(cur.toUpperCase() != "X" && cur != ""){
+				arr.push(cur);
+			}
+
+			return arr;
+		}, []).join(",");
+	},
+	exitCell : function(_mainLastsel, target){
+		if(_mainLastsel != -1){
+			var grid = $("#" + target);
+			var licenseName = com_fn.getLicenseName(grid.getRowData(_mainLastsel));
+
+			grid.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
+			fn_grid_com.saveCellData(grid.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
+			grid.jqGrid('saveRow',_mainLastsel);
+		}
+	},
+	exitRow : function(target){
+		var gridRowData = $("#" + target).jqGrid("getRowData");
+		gridRowData.forEach(function(obj){
+			var gridId = obj["gridId"];
+			var key = Object.keys(obj);
+			key.forEach(function(value){
+				if("gridId" != value){
+					var data = obj[value];
+					if(value == "downloadLocation" || value == "homepage"){
+						if(data.indexOf("Not the same as property") > -1){
+							data = data.split("Not the same as property")[0];
+						} else if(data.indexOf("The address should be") > -1){
+							data = data.split("The address should be")[0];
+						}
+					} else {
+						if(data.indexOf("<div class") > -1){
+							data = data.split("<")[0];
+						}
+					}
+					
+					fn_grid_com.saveCellData(target, gridId, value, data ,null,null);
+				}
+			});
+		});
+	},
+	showLicenseInfo : function(obj){
+		var licenseName = $(obj).text();
+
+		$.ajax({
+			url : '/license/getLicenseId',
+			type : 'POST',
+			data : {"licenseName" : licenseName},
+			dataType : 'json',
+			cache : false,
+			success : function(data){
+				var _frameId = data.licenseId + "_License";
+				var _frameTarget = "/license/edit/" + data.licenseId;
+				createTabInFrame(_frameId, _frameTarget);
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	bulkEditOssInfo : function(obj){
+		var editFlag = false;
+		try{
+			var ossArr = [];
+	        var rowId = obj["rowId"];
+	        var target = obj["target"];
+	        var param = $('#'+target).jqGrid('getGridParam','data');
+	        
+	        if(rowId.indexOf(",") > -1){
+	            ossArr = rowId.split(",");
+	            for(var idx in ossArr){
+	                com_fn.bulkEditSetCell(target, ossArr[idx], obj);
+
+	                for (var i=0; i<param.length; i++){
+	                    if(param[i]["gridId"] == ossArr[idx]){
+	                        for(var key in obj){
+	                            if(key != "rowId" && key != "target"){
+	                            	param[i][key] = obj[key];
+	                            }
+	                        }
+	                    }
+	                }
+	            }
+	        }else{
+	            com_fn.bulkEditSetCell(target, rowId, obj);
+
+	            for (var i=0; i<param.length; i++){
+	                if(param[i]["gridId"] == rowId){
+	                    for(var key in obj){
+	                        if(key != "rowId" && key != "target"){
+	                        	param[i][key] = obj[key];
+	                        }
+	                    }
+	                }
+	            }
+	        }
+
+	        $("#"+target).jqGrid('setGridParam', {data:param}).trigger('reloadGrid');
+		}catch(e){
+			alertify.error([[#{msg.common.valid2}]], 0);
+    		editFlag = true;
+    	}finally{
+    		if(!editFlag){
+	    		alertify.success([[#{msg.common.success}]]);
+    		}
+       	}
+    },
+    bulkEditSetCell : function (target, rowId, obj){
+        for(var key in obj){
+            if(key != "rowId" && key != "target"){
+            	$('#'+target).jqGrid('setCell', rowId, key, obj[key]);
+            }
+        }
+    },
+    bulkEditDelRow : function (target, rowId, flag){
+    	var delFlag = false;
+		try{
+			var selrow = "";
+			var param = $("#"+target).jqGrid('getGridParam', 'data');
+			
+	    	if(rowId.indexOf(",") > -1){
+	    		selrow = rowId.split(",");
+	    		for (var i=0; i<selrow.length; i++){
+	    			$("#"+target).jqGrid('delRowData', selrow[i]);
+	    			param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, selrow[i]);
+	        	}
+	        }else{
+	        	$("#"+target).jqGrid('delRowData', rowId);
+	        	param = com_fn.bulkEditDeleteLocalDataAfterDelRow(param, rowId);
+	        }
+
+	        if(flag == "main"){
+	        	$("#"+target).jqGrid('GridUnload');
+
+	        	partyMainData = param;
+	        	grid.init();
+
+	        	// total record 표시
+				$("#list_toppager_right, #pager_right").html('<div dir="ltr" style="text-align:right" class="ui-paging-info">Total : '+partyMainData.length+'</div>');
+	        }
+		}catch(e){
+			alertify.error([[#{msg.common.valid2}]], 0);
+			delFlag = true;
+    	}finally{
+    		if(!delFlag){
+	    		alertify.success([[#{msg.common.success}]]);
+    		}
+       	}
+    },
+    bulkEditDeleteLocalDataAfterDelRow : function (dataArray, rowId){
+    	var reMakeArrObj=[];
+    	var newIdx = 0;
+
+    	for(var idx=0; idx < dataArray.length; ++idx) {
+			if(dataArray[idx].gridId != rowId) {
+				reMakeArrObj[newIdx++] = dataArray[idx];
+			}
+		}
+		
+		return reMakeArrObj;
+    },
+    gridAddFunc : function (gubn, targetId, permission, status) {
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		} else if ("CONF" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd party')}]], function(){});
+			return false;
+		}
+		
+		var grid = $("#" + targetId);
+		saveFlag = false;
+		fn_grid_com.rowAddNew(targetId, grid, "main", null, com_fn.getLicenseName);
+	},
+	gridDelFunc : function (tab, targetId, target, permission, status) {
+		if (!permission) {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+			return false;
+		} else if ("CONF" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.jqgrid.func.no.use2', '3rd Party')}]], function(){});
+			return false;
+		}
+		
+		var grid = $("#" + targetId);
+		var selarrrow = grid.jqGrid("getGridParam", "selarrrow");
+		
+		if (selarrrow.length > 0) {
+			fn_grid_com.rowDelNew(grid, target);
+		} else {
+			alertify.confirm([[#{msg.common.confirm.delete.all}]], function (e) {
+				if (e) {
+					fn_grid_com.rowDelAll(grid, target);
+				} else {
+					return false;
+				}
+			});
+		}
+	}
+}
+
+	var fn_comment = {
+		callbackFunction : function () {
+        	fn_comment.getCommentList(commentsParam);
+        },
+		getCommentList : function(param) {
+			$.ajax({
+				type: "GET",
+				url: '/comment/getCusCommentList',
+				dataType : 'html',
+				cache : false,
+				data : param,
+				success: function (res) {
+					if (typeof param.height !== undefined) {
+						$(".comment-card-body").attr("style", "max-height:" + param.height + "px; overflow-y: auto;");
+					}
+					$("#commentList").empty();
+					$("#commentList").html(res);
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		getMoreCommentsList : function() {
+			commentsParam["moreFlag"] = "Y";
+			commentsParam["height"] = $(".comment-card-body").height();
+			fn_comment.getCommentList(commentsParam);
+		},
+		editComments : function(_commId, _referenceDiv, _referenceId) {
+			$.ajax({
+	    		url : '/comment/getEditPopup',
+				type : 'POST',
+				data : {'commId' : _commId},
+				dataType : 'html',
+				cache : false,
+				success : function(res){
+					if(!alertify.editComments){
+						alertify.dialog('editComments', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '750px';
+							        }
+								}
+							};
+						}, false, 'alert');
+                	}
+					
+					alertify.editComments(res).set('title', 'Edit Comments');
+					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
+					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
+				}
+	    	});
+		},
+		updateComments : function (_commId, _referenceDiv, _referenceId) {
+			var summernoteVal = $("#commentEdit").summernote('code');
+			if ("" == summernoteVal) {
+				alertify.alert("Please enter a comment", function(){});
+				return false;
+			} else {
+				var param = {commId : _commId, contents : replaceWithLink(summernoteVal), referenceDiv: _referenceDiv, referenceId: _referenceId};
+				$.ajax({
+					url : '/comment/updateComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						alertify.success([[#{msg.common.success}]]);
+						$('.ajs-close').trigger("click");
+						fn_comment.getCommentList(commentsParam);
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		deleteComments : function (_commId) {
+			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+				if (e) {
+					$.ajax({
+						url : '/comment/deleteComment',
+						type : 'POST',
+						dataType : 'json',
+						cache : false,
+						data : {'commId' : _commId},
+						success : function(data){
+							alertify.success([[#{msg.common.success}]]);
+							$('.ajs-close').trigger("click");
+							fn_comment.getCommentList(commentsParam);
+						},
+						error : function(){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		},
+		activateCommentArea : function () {
+			// change tab area
+			if (!$(".comment-area").is(":visible")) {
+				$(".contents-area").removeClass("col-md-12");
+				$(".contents-area").addClass("col-md-9");
+				
+				fn_comment.getCommentList(commentsParam);
+				$(".comment-area").show();
+			} else {
+				$(".contents-area").removeClass("col-md-9");
+				$(".contents-area").addClass("col-md-12");
+	 			$(".comment-area").hide();
+			}
+		},
+		showCommentHistory : function () {
+			fn_comment.activateCommentArea();
+			
+			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]];
+	        openCommentHistory('/comment/popup/3rd/' + _rDiv + '/' + [[${detail.partnerId}]]);
+		}
+	}
+//]]>
+</script>
+</th:block>

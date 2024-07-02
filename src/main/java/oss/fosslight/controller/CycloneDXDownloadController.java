@@ -134,7 +134,7 @@ public class CycloneDXDownloadController extends CoTopComponent {
 			
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
-		
+
 		if (downloadId != null) {
 			return makeJsonResponseHeader(downloadId);
 		} else {

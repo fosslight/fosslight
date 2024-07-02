@@ -1,0 +1,2863 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+	var lastsel;
+	var codeData;
+	var userRole = [[${#authentication.authorities[0].authority}]];
+	var arr = new Array();
+	var isChangeModelInfo = true;
+	var isCheckT = false;
+	var modelData;
+	var gDateKeyup = false;
+	var distributionStatus = [[${project.destributionStatus}]];
+	var etcDomain = [[${@CommonFunction.getCoConstDefVal('CD_DTL_ECT_DOMAIN')}]];
+	var osTypeEtc = [[${@CommonFunction.getCoConstDefVal('CD_OS_TYPE_ETC')}]];
+	var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+	var completeYn = [[${project.completeYn}]];
+	var verificationStatus = [[${project.verificationStatus}]];
+	var checkPartner = [[${project.refPartnerId}]];
+	var identificationStatusConfFlag = [[${project.identificationStatusConfFlag}]];
+	var verificationStatusConfFlag = [[${project.verificationStatusConfFlag}]];
+	var copyFlag = [[${project.copyFlag}]];
+	var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
+    var isReadOnly = [[${isReadOnly}]];
+	
+	$(document).ready(function() {
+		'use strict';
+		data.init();
+		evt.init();
+		
+		if ("" != [[${project.prjId}]] && 'Y' != [[${project.copyFlag}]]) {
+			$("input[name=creatorNm]").val([[${project.prjUserName}]]);
+		}
+		
+		var distributeDeployTime = [[${project.distributeDeployTime}]];
+		// distribution까지 진행되는 경우
+		if ("NA" != distributionStatus && ("" != distributionStatus || "CONF" == verificationStatus) && "" != distributeDeployTime) {
+		} else {
+			isChangeModelInfo = false;
+		}
+
+		if (!isChangeModelInfo || "false" == isChangeModelInfo) {
+			$("#tr_distribute > td > span.fileex_back").hide();
+			$("#allDelete").hide();
+		}
+		
+		showHelpLink("Project_List_BasicInfo_Distribution_type", "helpLink_distributionType");
+		showHelpLink("Project_List_BasicInfo_Distribution_Site", "helpLink_distributionSite");
+		showHelpLink("Project_List_BasicInfo_Oss_Notice", "helpLink_ossNotice");
+		showHelpLink("Project_List_BasicInfo_Priority", "helpLink_priority");
+		
+		if([[${project.destributionStatus}]] == 'NA' && [[${project.completeYn}]] == 'Y'){
+			$("#saveModel").show();
+		}
+
+		if('Y' == completeYn){
+			fn.disabledCompleteRow(true);
+			$("#tr_distribute > td > span.fileex_back").hide();
+			$("#allDelete").hide();
+		}
+
+		if ("Y" == copyFlag) {
+			$(".moveTab").hide();
+		} else {
+			if ([[${project.prjId}]] != null) {
+				fn.displayProjectInfo();
+			}
+		}
+		
+		// If packaging step equals confirmed, OSS Notice not editable
+		if('CONF' == verificationStatus){
+			fn.disabledVerificationConfirm(true);
+		}
+
+		if(checkPartner != ''){
+			$("#noticeType1").attr("disabled", true);
+			$("#noticeTypeEtc").attr("disabled", true);
+		}
+
+		if(('Y' == copyFlag || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked')){
+			$("[name='noticeType']").attr("disabled", true);
+			$("#noticeTypeEtc").attr("disabled", true);
+		}
+	});
+	
+	// 이벤트
+	var evt = {
+		init : function(){
+			$("#priority").select2({placeholder: "", allowClear: true});
+			$("#osType").select2({placeholder: "", allowClear: true});
+			$("#distributionType").select2({placeholder: "", allowClear: true});
+			$("#prjDivision").select2({placeholder: "Select Division", allowClear: true});
+			$("#prjUserId").select2({placeholder: "Select User", allowClear: true});
+			$("#listKind").select2({placeholder: "Select List", allowClear: true});
+			
+            var categoryCd = [[${@CommonFunction.getCoConstDefVal("CD_MODEL_TYPE")}]];
+			getCategoryCodeJson(categoryCd);
+			modelList.load();
+			
+			// 왓쳐 추가
+			$("#addWatcher").click(function(){
+				/* division 정보 */
+				var $divSel	= $("#prjDivision"),
+					divVal	= $divSel.val(),
+					divTxt	= $divSel.find("option[value='"+divVal+"']").text();
+				
+				/* division 정보 */
+				var $userSel	= $("#prjUserId"),
+					userVal		= $userSel.val()||"",
+					userTxt		= $userSel.find("option[value='"+userVal+"']").text();
+
+				// 선택한 item이 없을 경우.
+				if(divVal == "" || userVal == "") {
+					return alertify.error([[#{msg.project.required.selectDivision}]], 0);
+				}
+				
+				/* tag 정보 */
+				var isNew = true;
+				
+				$(".watcherTags").each(function(i, tag){
+					var tagDiv = $(tag).val().split("/")[0]
+						tagUid = $(tag).val().split("/")[1];
+					
+					if(divVal == tagDiv) {
+						if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+							isNew = false;
+
+							return false;
+						}
+						
+						if(userVal == 'all') { // all을 선택했을 경우 기존 부서의 userId를 가진 tag를 삭제
+							$(tag).closest('span').remove();
+						} else if(tagUid == userVal) {
+							isNew = false;	// 이미 등록된 watcher가 있을경우
+						}
+					}
+				});
+				
+				if(isNew) {
+					var watcherStr = divisionEmptyCd != divVal ? (divTxt + "/" + userVal) : userVal;
+					fn.addWatcher(divVal, userVal, '');
+					fn.addHtml($("#multiDiv"), watcherStr, divVal, userVal);
+				}
+			});
+			
+			// 그리드 클리어
+			$("#allDelete").click(function(){
+				$("#_modelList").jqGrid('clearGridData');
+			});
+			
+			$('#drop').on ('click', function(){
+				var innerHtml 	= 'Are you to enter a comment when drop?<br><br>';
+                innerHtml 		+= '<textarea id="dropEditor"></textarea>';
+				
+             	// prevent clicking the OK button on Enter
+				let keyCode;
+				$(document).on('keydown', function (event) {
+					keyCode = event.keyCode;
+				});
+                
+                if(!alertify.dropDialog){
+					alertify.dialog('dropDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								var buttons = setup.buttons;
+								var customButtons = [];
+								for (var i in buttons) {
+									if ('OK' == buttons[i].text) {
+										customButtons.push(buttons[i]);
+									}
+								}
+								setup.buttons = customButtons;
+								setup.focus.element = 0;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
+							}
+						};
+					}, false, 'confirm');
+            	}
+				
+                alertify.dropDialog()
+                	.set('onok', function(e) {
+                		// prevent clicking the OK button on Enter
+						if (typeof keyCode !== 'undefined' && keyCode == 13) {
+							keyCode = undefined;
+							return false;
+						}
+                		
+						if (e) {
+							var editorVal = $("#dropEditor").summernote('code');
+							if ("" == $(editorVal).text().trim()){
+		    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
+		    				} else {
+		    					if (distributionStatus == "PROC") {
+		    						var comment = [[#{msg.project.distribution.loading}]];
+		    						
+		    						alertify.error(comment, 0);
+
+		    						return false;
+		    					} else if (distributionStatus == "RSV") {
+		    						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
+
+		    						alertify.confirm(dropMessage, function (e) {
+		    							if (e) {
+		    								fn.cancelDistributeReserve();
+		    							} else {
+		    								return false;
+		    							}
+		    						});
+		    					} else if (distributionStatus == "DONE") {
+		    						var dropMessage = [[#{msg.project.warn.drop.rsv}]];
+
+		    						alertify.confirm(dropMessage, function (e) {
+		    							if (e) {
+		    								fn.deleteWithOSDD();
+		    							} else {
+		    								return false;
+		    							}
+		    						});
+		    					} else {
+		    						fn.exeProjectDrop(true);
+		    					}
+		    				}
+						} else {
+							return false;
+						}
+                	})
+                	.set('onshow', function(e){
+                		$("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+               		})
+               		.setContent(innerHtml)
+					.show();
+			});
+			
+			$("#popCopyConfirmSave").click(function(){
+				fn.saveSubmit();
+				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
+				$("#copyConfirmPopup").hide();
+			});
+
+			$("#popCopyConfirmCancel").click(function(){
+				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
+				$("#copyConfirmPopup").hide();
+			});
+			
+			// 모델 저장
+			$("#saveModel").click(function(){
+				fn.saveModelSubmit();
+			});
+			
+			// 저장
+			$("#reopen").click(function(){
+				fn.exeProjectComplete('N');
+			});
+			
+			// 삭제
+			$("#delete").click(function(){
+				if (data.detail.completeYn == 'Y' || data.detail.identificationStatus == "CONF") {
+					alertify.alert([[#{msg.project.warn.edit.delete}]], function(){});
+
+					return;
+				} else {
+					var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
+	               	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';
+					
+					// prevent clicking the OK button on Enter
+					let keyCode;
+					$(document).on('keydown', function (event) {
+						keyCode = event.keyCode;
+					});
+					
+	               	if(!alertify.deletePrjDialog){
+						alertify.dialog('deletePrjDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
+								}
+							};
+						}, false, 'confirm');
+                	}
+	               	
+	               	alertify.deletePrjDialog()
+					.set('onok', function(event){
+						// prevent clicking the OK button on Enter
+						if (typeof keyCode !== 'undefined' && keyCode == 13) {
+							keyCode = undefined;
+							return false;
+						}
+
+						var editorVal = $("#prjDelEditor").summernote('code');
+
+						if ("" == $(editorVal).text().trim()) {
+							alertify.alert([[#{msg.project.required.comments}]], function () { });
+
+							return false;
+						} else {
+							fn.deleteSubmit();
+						}
+					})
+					.set('onshow', function(event){
+						$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+					})
+					.setContent(innerHtml).show();
+				}
+			});
+			// 직접입력
+			$('#osType').change(function(){
+				$("#osType option:selected").each(function () {
+					$("#osTypeEtc").val('');
+					
+					if ($(this).val()== osTypeEtc){
+						$("#osTypeEtc").attr("disabled", false);
+						$("#osTypeEtc").show();
+					} else{
+						$("#osTypeEtc").attr("disabled", true);
+						$("#osTypeEtc").hide();
+					}
+				});
+
+				var selectTxt = $(this).find("option:selected").text();
+				var noticeTypeValue = "";
+				var noticeTypeEtcValue = "";
+				
+				// Application Android의 경우는 해당 없음.
+				if(/^ANDROID/.test(selectTxt.toUpperCase())){
+					// noticeType : platform generated, noticeTypeEtc : android
+					noticeTypeValue = [[${@CommonFunction.getCoConstDefVal("CD_NOTICE_TYPE_PLATFORM_GENERATED")}]];
+					noticeTypeEtcValue = [[${@CommonFunction.getCoConstDefVal("CD_DTL_DEFAULT_PLATFORM")}]];
+				} else {
+					// default noticeType : general, noticeTypeEtc : ""
+					noticeTypeValue = [[${@CommonFunction.getCoConstDefVal("CD_NOTICE_TYPE_GENERAL")}]];
+					noticeTypeEtcValue = "";
+				}
+
+				$("[name='noticeType'][value|='"+noticeTypeValue+"']").trigger("click");
+				$("#noticeTypeEtc").val(noticeTypeEtcValue).trigger("change");
+			});
+			
+			var code = '';
+			var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+			for (var i in fileAccept) {
+				if ('11' == fileAccept[i].cdDtlNo) {
+					code = fileAccept[i].cdDtlExp;
+				}
+			}
+			
+			$('#modelFile').uploadFile({
+				url : '/project/modelFile',
+				multiple:false,
+				dragDrop:true,
+				fileName:'myfile',
+				sequential:true,
+				allowedTypes:code,
+				sequentialCount:1,
+				dynamicFormData: function() {
+					var data ={ "distributionTarget" :$('input[name=distributeTarget]:checked').val()}
+
+					return data;
+				},
+				onSuccess:function(files,data,xhr,pd) {
+					if(data != null) {
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+						fn.makeModelList(data);	
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
+			});
+			
+			// email 왓쳐 추가
+			$("#addEmail").click(function() {
+				/* AD ID 정보 */
+				var adId = $("#adId").val();
+				var domain = $("#emailTemp").val();
+
+				if(adId == "") {
+					$("#adId").focus();
+					return alertify.error([[#{enter.watcher.error}]], 0);
+				}
+				
+				var _email = adId + "@" + domain;
+				
+				var regEmail = new RegExp('[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}');
+				
+				if (regEmail.test(_email) == false) {
+					$("#adId").focus();
+
+					return alertify.error([[#{invalid.email.error}]], 0);
+				}
+				
+				$.ajax({
+					type: "POST",
+					url: '/system/user/checkEmail', 
+					type : 'GET',
+					dataType : 'json',
+					cache : false,
+					data : {'email' : _email},
+					success: function (data) {
+						if("true" == data.isValid) {
+							var watcherStr = divisionEmptyCd != data.division ? (data.divisionName + "/" + data.userId) : data.userId;
+							fn.addWatcher(data.division, data.userId, '');
+							fn.addHtml($("#multiDiv"), watcherStr, data.division, data.userId);
+						} else {
+							fn.addWatcher('', '', _email);
+							fn.addHtml($("#multiDiv"), _email, _email, "Email");
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+				
+				$("#adId").val('');
+				$("#domain").val([[${@CommonFunction.getCoConstDefVal("CD_DTL_DEFAULT_DOMAIN")}]]).trigger('change');
+				$("select[name=prjDomain] option:eq(0)").prop("selected", true);
+				$("select[name=prjDomain]").next().find("#select2-prjDomain-container").text("Select Domain");
+			});
+			/*]]>*/
+			
+			commonAjax.getCreatorDivisionTags().success(function(data, status, headers, config){
+				data.forEach(function(obj,index){
+					arr[index] = obj.userId+":"+obj.userName;
+				});
+			});
+			
+			// project security setting 임시 처리
+			if([[${project.prjId}]] != "" && [[${project.viewOnlyFlag}]] == 'N'){
+				$("[name='publicYn']").on('change',function(e){
+					var param = {prjId : [[${project.prjId}]], publicYn : ($("[name='publicYn']:checked").val())};
+					
+					$.ajax({
+						url : '/project/updatePublicYn',
+						type : 'POST',
+						data : JSON.stringify(param),
+						dataType : 'json',
+						cache : false,
+						contentType : 'application/json',
+						success: function(){
+							alertify.success([[#{msg.common.success}]]);
+						},
+						error : fn.onError
+					});
+				});
+			}
+			
+			/* 2018-07-19 choye 추가  */
+			$("#reqToOpen").click(function(e){
+				e.preventDefault();
+				
+				//prjId로 변경하기
+				var commId = $('input[name=commId]').val();
+				var statusRequestYn = $('input[name=statusRequestYn]').val();
+				
+				if(statusRequestYn=="Y" && commId!=null && commId!="") {
+					var param = {};
+					
+					$.ajax({
+						url : '/comment/getCommentInfo/'+commId,
+						type : 'GET',
+						dataType : 'json',
+						cache : false,
+						contentType : 'application/json',
+						success: function(data){
+							if(false == [[${@CommonFunction.isAdmin()}]] && data.info.creator == [[${#authentication.name}]]) {
+								fn.requestToOpenPop(null);
+							} else {
+								fn.requestToOpenPop(data.info);
+							}
+						},
+						error : fn.onError
+					});
+				} else {
+					fn.requestToOpenPop(null);
+				}
+			});
+			
+			$('#addList').on('click', function(){
+				var listKind = $("#listKind").val(),
+					listId = $("#listId").val();
+					
+				if(fn.chkListValidation(listKind, listId)) {
+					var obj = {};
+					obj["listKind"] = listKind;
+					obj["listId"] = listId;
+					
+					fn.copyWatcher(obj);
+				}
+			});
+			
+			$("[name='creatorNm']").on("keyup", function(e) {
+				if(e.keyCode != 13) {
+					$("[name='creator']").val("");
+				}
+			});
+			
+			$(".cal").on("keyup", function(e) {
+				calValidation(this, e);
+			});
+
+			$("#noticeTypeEtc").on("click", function(e) {
+				$("[name='noticeType'][value|='80']").trigger("click");
+			});
+
+			$("#domain").on("change", function(e) {
+				var value = $(this).find("option:selected").val();
+				var domain = $(this).find("option:selected").text();
+				
+				if(etcDomain == value) {
+					$("#emailTemp").val("").show();
+				} else {
+					$("#emailTemp").val(domain).hide();
+				}
+			});
+		}
+	};
+	
+	var displayInfo;
+	
+	var fn = {
+		getProjectStatus : function () {
+			$.ajax({
+				url : "/project/getProjectStatus",
+				type : 'POST',
+				data : JSON.stringify({"prjId" : [[${project.prjId}]]}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success : function(data){
+					displayInfo = data;
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		displayProjectInfo : function() {
+			fn.getProjectStatus();
+			
+			var display = "";
+			
+			var pNm = [[${project.prjName}]];
+			var pVer = [[${project.prjVersion}]];
+			if ("" != pVer && pVer != null) pNm += " (" + pVer + ")";
+			
+			var prjName = "<span class=\"description-percentage text-dark-gray\">";
+			prjName += "<a class=\"text-dark-gray text-bold hover-line urlLink goToEditLink text-shadow\" style=\"cursor: pointer;\" onclick=\"fn.mvEditTab(" + [[${project.prjId}]] + ")\" title=\"" + pNm + "\">" + pNm + "</a></span>";
+			display += prjName;
+				
+			// status
+			var status = "<span class=\"ml-2\"> | </span>";
+			var projectStatus = [[${project.status}]];
+			var customStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), project.status)}]];
+				
+			switch(projectStatus){
+				case 'REQ':
+					status += "<span class=\"text-pink text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				case 'REV':
+					status += "<span class=\"text-yellow text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				case 'DROP':
+					status += "<span class=\"text-gray text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				case 'FREV':
+					status += "<span class=\"text-purple text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				case 'COMP':
+					status += "<span class=\"text-dark-blue text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+				default:
+					status += "<span class=\"text-success text-bold ml-2\">" + customStatus + "</span>";
+
+					break;
+			}
+			display += status;
+				
+			// osc progress
+			var identificationStatus = [[${project.identificationStatus}]];
+			identificationStatus = identificationStatus||"";
+			var verificationStatus = [[${project.verificationStatus}]];
+			verificationStatus = verificationStatus||"";
+			var statusRequestYn = [[${project.statusRequestYn}]];
+			statusRequestYn = statusRequestYn||"";
+			
+			var oscProgress = "<span class=\"ml-2\"> | </span>";
+			if ("" != identificationStatus) {
+				if ("DROP" == projectStatus) {
+					if ("CONF" == identificationStatus) {
+						oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Identification</span>';
+					} else {
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Identification</span>';
+					}
+				} else if ("FREV" == projectStatus) {
+					oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+				} else {
+					if ("CONF" == identificationStatus) {
+						oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+					} else if ("PROG" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+					} else if ("REQ" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+					} else if ("REV" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+					}
+				}
+			} else {
+				if ("DROP" == projectStatus) {
+					oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem ml-2">Identification</span>';
+				} else {
+					oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem ml-2\" style=\"cursor:pointer;\" onclick=\"fn.mvIdentification()\">Identification</span>";
+				}
+			}
+			
+			if ("CONF" != identificationStatus) {
+				oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+				oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+			} else {
+				oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+				if ("DROP" == projectStatus) {
+					if ("CONF" == verificationStatus) {
+						oscProgress += '<span class="badge badge-gray size-sm width-6rem ml-2">Packaging</span>';
+					} else {
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+					}
+				} else {
+					if ("" == verificationStatus) {
+						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+						} else if ("" != identificationStatus) {
+							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+						}
+					} else if ("PROG" == verificationStatus) {
+						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+						} else {
+							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+						}
+					} else if ("REV" == verificationStatus) {
+						oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+					} else if ("REQ" == verificationStatus) {
+						oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+					} else if ("NA" == verificationStatus || "DROP" == verificationStatus) {
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+					} else {
+						if ("CONF" == verificationStatus) {
+							oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+						} else {
+							if ("NA" == [[${project.distributeTarget}]]) {
+								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem ml-2">Packaging</span>';
+							} else {
+								if ("PROG" == projectStatus) {
+									oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+								} else if ("REQ" == projectStatus) {
+									oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+								} else if ("REV" == projectStatus) {
+									oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+								} else if ("FREV" == projectStatus) {
+									oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem ml-2' style='cursor:pointer;' onclick=\"fn.mvVerification()\">Packaging</span>";
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			display += oscProgress;
+			
+			// vulnerability score
+			var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
+			var vulnerability = "<span class=\"ml-2\"> | </span>";
+			
+			var cvssScore = displayInfo.cvssScore;
+			var secCode = displayInfo.secCode;
+			var secCvssScore = displayInfo.secCvssScore;
+			
+			if ("N" != secCvssScore && "Fixed" != secCode) {
+				cvssScore = secCvssScore;
+			}
+			
+			if ("N" != secCode) {
+				if ("Fixed" == secCode) {
+					if ("N" != cvssScore) {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Resolved(" + cvssScore + ")</span>";
+					} else {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Resolved(N/A)</span>";
+					}
+				} else {
+					if ("0" != cvssScore && "N" != cvssScore) {
+						if (cvssScore - standardScore >= 0) {
+							vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Need to resolve(" + cvssScore + ")</span>";
+						} else {
+							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Discovered(" + cvssScore + ")</span>";
+						}
+					} else {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>";
+					}
+				}
+			} else {
+				if ("0" != cvssScore && "N" != cvssScore) {
+					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered("+cvssScore+")</span>";
+				} else {
+					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered(N/A)</span>";
+				}
+			}
+			
+			display += vulnerability;
+			$("#displayProjectInfo").html(display);
+			
+			if ($(".goToEditLink").width() > 300) {
+				$(".goToEditLink").addClass("ellipsis");
+			}
+		},
+		checkValidMsg : function () {
+			$(".networkServerTypeDiv").removeClass("cus-is-invalid");
+			$("input[name='prjName']").removeClass("is-invalid");
+			$("select[name='osType']").removeClass("is-invalid");
+			$("select[name='distributionType']").removeClass("is-invalid");
+			$(".retxt").text("");
+		},
+		save : function() {
+			fn.checkValidMsg();
+			
+			var confirmMsg = "";
+			var ossNotice = $("[name='noticeType']:checked").val();
+
+			var innerHtml = '<br><textarea id="prjSaveEditor"></textarea>';
+			if(!isCheckT && ossNotice == "99"){
+				confirmMsg  = "OSS 고지문 발급이 필요한 경우에는, 'Cancel' 클릭 후 OSS Notice 및 Distribution type을 다시 확인해주시기 바랍니다.";
+				confirmMsg += "<br><br>" + "If it is necessary to generate the OSS Notice, please click 'Cancel' and check the OSS Notice and Distributio type again.";
+				confirmMsg += "<br><br>If necessary, please enter a comment.";
+				confirmMsg += innerHtml;
+			} else {
+				confirmMsg = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
+				confirmMsg += innerHtml;
+			}
+			
+			// prevent clicking the OK button on Enter
+			let keyCode;
+			$(document).on('keydown', function (event) {
+				keyCode = event.keyCode;
+			});
+			
+			if (typeof alertify.prjSaveDialog === 'undefined') {
+				alertify.dialog('prjSaveDialog', function() {
+					return {
+						setup: function() {
+							var settings = alertify.confirm().settings;
+							
+							for (var prop in settings) {
+								this.settings[prop] = settings[prop];
+							}
+							
+							var setup = alertify.confirm().setup();
+							setup.focus.element = 0;
+							
+							return setup;
+						},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '650px';
+					        }
+						}
+					};
+				}, false, 'confirm');
+        	}
+			
+			alertify.prjSaveDialog()
+       		.set('onok', function(e) {
+       			// prevent clicking the OK button on Enter
+				if (typeof keyCode !== 'undefined' && keyCode == 13) {
+					keyCode = undefined;
+					return false;
+				}
+       			
+       			if (e) {
+       				var editorVal = $("#prjSaveEditor").summernote('code');
+       				if ("" != $(editorVal).text().trim()) {
+						$("input[name='userComment']").val(editorVal);
+					}
+       				
+       				if ('Y' == identificationStatusConfFlag){
+       					fn.showCopyStatusConfirm();
+       				} else {
+       					fn.saveSubmit();
+       				}
+       			} else {
+       				return false;
+       			}
+       		})
+       		.set('onshow', function(e){
+       			$("#prjSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       		})
+       		.set('title', 'Save').setContent(confirmMsg)
+			.show();
+		},
+		tableRefresh : function() {
+            setTimeout(function() {
+                var width = $(".card-body").width();
+                $('.ui-jqgrid-btable').each(function(){
+                    var id =  $(this).attr('id');
+                    $(this).jqGrid('setGridWidth', 0, true);
+                    $(this).jqGrid('setGridWidth', width, true);
+                });
+            }, 300);
+        },
+		copy : function(){
+			var prjId = $('input[name=prjId]').val();
+			
+			activeDeleteTabInFrame();
+			
+			createTabInFrame(prjId+'copy_Project', '/project/copy/'+prjId);
+		},	
+		// 왓쳐 엘리먼트 그리기
+		addHtml : function(target, str, division, userId){
+			var rlt = division+((userId!="") ? "/"+userId : "");
+			var html  = '<div class="external-event" style="margin-right: 5px;"><input class="watcherTags" type="text" name="watchers" value="'+rlt+'" style="display: none;"/>';
+			html += str;
+			if([[${project.viewOnlyFlag}]] != "Y" && !isReadOnly) {
+				html += '<i class="fas fa-times float-right ml-3 mt-1" onclick="fn.removeWatcher(\'' + division + '\',\'' + userId + '\', this);"></i>';
+			}
+			html += '</div>';
+			target.append(html);
+		},
+		addWatcher : function(uDiv, uId, uEmail) {
+			if ($('input[name=prjId]').val() == "" || 'Y' == [[${project.copyFlag}]]) {
+				return true;
+			}
+			
+			var data = {"prjId" : $('input[name=prjId]').val() , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
+			
+			$.ajax({
+				url : '/project/addWatcher',
+				type : 'POST',
+				data : JSON.stringify(data),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(resultData){
+					if (resultData.isValid == "true") {
+						if (resultData.addWatcher !== undefined){
+							var userId = resultData.addWatcher.split("/")[1];
+							var watcher = $("#"+userId).find('input[name=watchers]').val();
+							if (watcher !== undefined && watcher != resultData.addWatcher){
+								$("#"+userId).remove();
+							}
+						}
+						
+						alertify.success([[#{msg.common.success}]]);
+					} else {
+						// email로 watcher등록을 실패할 경우 error message를 띄움.
+						if ('' != uEmail) {
+							alertify.error("Invalid email address.", 0);
+						}
+					}
+				},
+				error : fn.onError
+			});
+		},
+		removeWatcher : function(uDiv, uId, obj) {
+			if ($('input[name=prjId]').val() == "" || 'Y' == [[${project.copyFlag}]]) {
+				$(obj).parent().remove();
+			} else {
+				var uEmail = "";
+				if("Email" == uId) {
+					uEmail = uDiv;
+					uId = "";
+					uDiv = "";
+				}
+
+				var data = {"prjId" : $('input[name=prjId]').val() , "prjDivision" : uDiv, "prjUserId":uId, "prjEmail":uEmail};
+
+				$.ajax({
+					url : '/project/removeWatcher',
+					type : 'POST',
+					data : JSON.stringify(data),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function(resultData){
+						if(resultData.isValid == "true") {
+							$(obj).parent().remove();
+							alertify.success([[#{msg.common.success}]]);
+						}
+					},
+					error : fn.onError
+				});
+			}
+		},
+		copyWatcher : function(obj) {
+			var prjId = [[${project.prjId}]];
+			
+			obj["prjId"] = prjId;
+			
+			$.ajax({
+				url : '/project/copyWatcher',
+				type : 'POST',
+				data : JSON.stringify(obj),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(resultData){
+					var copyWatcher = resultData.copyWatcher;
+					
+					if(copyWatcher.length){
+						for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+							var isNew = true
+							  , division = copyWatcher[i].prjDivision || ""
+							  , divisionName = copyWatcher[i].prjDivisionName || ""
+							  , userId = copyWatcher[i].prjUserId || ""
+							  , userName = copyWatcher[i].prjUserName || ""
+							  , email = copyWatcher[i].prjEmail || ""
+							  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+							  , userUseYn = copyWatcher[i].userUseYn || "Y";
+							
+							$(".watcherTags").each(function(idx, tag){
+								var tagDiv = $(tag).val().split("/")[0]
+								  , tagUid = $(tag).val().split("/")[1];
+								  
+								if(division == tagDiv) {
+									if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+										isNew = false;
+										
+										return false;
+									} else if(tagUid == userId) {
+										isNew = false;	// 이미 등록된 watcher가 있을경우
+									}
+								}
+								
+								if(tagUid == "Email") {
+									if(email == tagDiv) {
+										isNew = false;
+									}
+								}
+							});
+							
+							if(isNew){
+								if(email != ""){
+									fn.addHtml($("#multiDiv"), email, email, "Email");
+								} else {
+									var str = "";
+									
+									if(userName == "") {
+										str = divisionName;
+									} else {
+										str = '<b';
+
+										if(divisionEmptyCd != division) {
+											if(deptUseYn == "N"){
+												str += ' class="deleteUser"';
+											}
+											
+											str += '>'+divisionName+'</b>/<b';
+										}
+										
+										if(userUseYn == "N"){
+											str += ' class="deleteUser"';
+										}
+										
+										str += '>'+userName+'</b>';
+									}
+									
+									fn.addHtml($("#multiDiv"), str, division, userId);
+								}
+							}
+						}
+						
+						if(prjId) {
+							alertify.success([[#{msg.common.success}]]);
+						}
+					}
+					
+					if(!copyWatcher.length) {
+						alertify.warning([[#{msg.project.required.id}]]);
+					}
+				},
+				error : fn.onError
+			});
+		},
+			// 그리드 삭제 버튼
+			setDelBtn : function(cellvalue, options, rowObject){
+				if(!isChangeModelInfo || "false" == isChangeModelInfo) {
+					return "";
+				} else {
+					return "<input type=\"button\" value=\"delete\" class=\"btnCLight darkgray\" onclick=\"fn.exeDelete('"+options.rowId+"')\" />";
+				}
+			},
+			// 그리드 삭제
+			exeDelete : function(rowId){
+				$("#_modelList").jqGrid('delRowData', rowId);
+			},
+			// 모델 데이터 생성
+			getModelGridRows : function(elementId){
+				var ids = $(elementId).jqGrid('getDataIDs');
+				var rows = [];
+				
+				ids.forEach(function(id){
+					$(elementId).jqGrid('saveRow', id);
+					var obj = $(elementId).jqGrid('getRowData',id);
+					
+ 					rows.push(obj);
+				});
+				return rows;
+			},
+			// 컴플리트 처리
+			exeProjectComplete : function(flag){
+				var data = {"prjId" : $('input[name=prjId]').val() , "completeYn" : flag, "userComment":""};
+				
+				$.ajax({
+					url : '/project/updateProjectStatus',
+					type : 'POST',
+					data : JSON.stringify(data),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: fn.onRegistSuccess,
+					error : fn.onError
+				});
+			},
+			// 컴플리트 처리
+			exeProjectDrop : function(commentFlag){
+				var data = {"prjId" : $('input[name=prjId]').val() , "dropYn" : "Y"};
+				if (commentFlag) {
+					data["userComment"] = $("#dropEditor").summernote('code');
+				} else {
+					data["userComment"] = "";
+				}
+				
+				$.ajax({
+					url : '/project/updateProjectStatus',
+					type : 'POST',
+					data : JSON.stringify(data),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: fn.onRegistSuccess,
+					error : fn.onError
+				});
+			},
+			cancelDistributeReserve : function(){
+				var params = {};
+				params["prjId"] = $('input[name=prjId]').val();
+				params["userComment"] = "";
+
+				$.ajax({
+					url : '/project/distribution/distribute/cancel',
+					type : "POST",
+					dataType: "json",
+					cache : false,
+					data : params,
+					success : function(data){
+						if(data.resCd=="10"){
+							alertify.alert(data.resMsg, function(){
+								this.close();
+								
+								fn.exeProjectDrop(false);
+							});
+						} else {
+							alertify.error(data.resMsg, 0);
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			},
+			deleteWithOSDD : function(){
+				var params = {};
+				params["prjId"] = $('input[name=prjId]').val();
+				params["userComment"] = "";
+				
+				$.ajax({
+					url : '/project/distribution/distribute/resetWithOSDD',
+					type : "POST",
+					dataType: "json",
+					cache : false,
+					data : params,
+					success : function(data){
+						if(data.resCd=="10"){
+							alertify.alert(data.resMsg, function(){
+								this.close();
+								
+								fn.exeProjectDrop(false);
+							});
+						} else {
+							alertify.error(data.resMsg, 0);
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			},
+			// 저장
+			saveSubmit : function(){
+				var prjName = $('input[name=prjName]').val().trim().replace(/[ ]+/g, " "); // ASCII 160 convert -> ASCII 32
+				$('input[name=prjName]').val(prjName);
+				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
+				
+				if ("" != $('#additionalInformation').summernote('code')) {
+					$('input[name=comment]').val($('#additionalInformation').summernote('code'));
+				}
+				
+				cleanErrMsg("_modelList");
+
+				var rows = fn.getModelGridRows('#_modelList');
+				$('input[name=prjModelJson]').val(JSON.stringify(rows));
+				
+				//disabled일경우 제거
+				if($("input[name=distributeTarget]").is(":disabled")){
+					$("input[name=distributeTarget]").removeAttr("disabled");
+				}
+
+				if ('Y' == completeYn){
+					fn.disabledCompleteRow(false);
+				}
+
+				if((('Y' == copyFlag || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked'))
+						|| 'CONF' == verificationStatus){
+					fn.disabledVerificationConfirm(false);
+				}
+				
+				if (true == [[${@CommonFunction.isAdmin()}]] && ("" != [[${project.prjId}]] && 'Y' != [[${project.copyFlag}]])) {
+					var creator = $("input[name=creator]").val();
+					if(creator == ""){
+						alertify.alert([[#{msg.project.required.autocomplete}]], function(){});
+						
+						return false;
+					}
+				}
+				
+				var URL = '';
+
+				var confirmStatusCopyFlag = true;
+				var confirmStatusCopyVal = "";
+				if ($('input:radio[name="confirmStatusCopyRadio"]').is(':checked')) {
+					confirmStatusCopyVal = $('input:radio[name="confirmStatusCopyRadio"]:checked').val();
+					fn.disabledVerificationConfirm(false);
+				} else {
+					confirmStatusCopyFlag = false;
+				}
+				
+				if (data.copy) {
+					if (confirmStatusCopyFlag) {
+						URL = '/project/saveAjax?copy=true&confirmStatusCopy='+confirmStatusCopyVal;
+					} else {
+						URL = '/project/saveAjax?copy=true&confirmStatusCopy=false';
+					}
+				} else {
+					URL = '/project/saveAjax?copy=false&confirmStatusCopy=false';
+				}
+				
+				//public 값 넣어주기
+				if ($('#checkbox3').is(':checked')) {
+					$('#checkbox3').val('N');
+				} else {
+					$('#checkbox3').val('Y');
+				}
+				 
+ 				$("#projectForm").ajaxForm({
+ 					url : URL,
+ 					type : 'POST',
+ 					dataType: "json",
+ 					cache : false,
+ 					success: function(data) {
+ 						fn.onRegistSuccess(data);
+ 					},
+ 					error : fn.onError
+ 				}).submit();
+			},
+			// 삭제
+			deleteSubmit : function(){
+				var editorVal = $("#prjDelEditor").summernote('code');
+				$('input[name=userComment]').val(editorVal);
+				
+				$("#projectForm").ajaxForm({
+					url :'/project/delAjax',
+					type : 'POST',
+					dataType:"json",
+					cache : false,
+					success:fn.onDeleteSuccess,
+					error : fn.onError
+				}).submit();
+			},
+			// 저장
+			saveModelSubmit : function(){
+				var rows = fn.getModelGridRows('#_modelList');
+				$('input[name=prjModelJson]').val(JSON.stringify(rows));
+				
+				//disabled일경우 제거
+				if($("input[name=distributeTarget]").is(":disabled")){
+					$("input[name=distributeTarget]").removeAttr("disabled");
+				}
+				
+				$("#projectForm").ajaxForm({
+					url : '/project/saveModelAjax',
+					type : 'POST',
+					dataType: "json",
+					cache : false,
+					success: fn.onRegistSuccess,
+					error : fn.onError
+				}).submit();
+			},
+			// 성공 콜백
+			onRegistSuccess : function(json, status){
+				if ('Y' == completeYn){
+					fn.disabledCompleteRow(true);
+				}
+
+				if((('Y' == copyFlag || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked'))
+						|| 'CONF' == verificationStatus){
+					fn.disabledVerificationConfirm(true);
+				}
+				
+				if (json.isValid == 'false') {
+					var _errMsg = [[#{msg.common.valid}]];
+					
+					if(json.validMsg && json.validMsg != "") {
+						_errMsg += "<br/>" + json.validMsg;
+					}
+					
+					alertify.error(_errMsg, 0);
+					gridListBulkEdit("_modelList", pickdates);
+					createValidMsgComplex(json);
+				} else if (json.isValid == 'true') {
+					fn_comment.getCommentList(commentsParam);
+					
+					if (typeof json.resultData !== "undefined" && typeof json.resultData.confirmCopyStatusSuccess !== "undefined") {
+						if (json.resultData.confirmCopyStatusSuccess == 'false') {
+							var msg;
+							if (typeof json.resultData.confirmCopyStatusFail !== "undefined") {
+								var confirmCopyStatusFail = json.resultData.confirmCopyStatusFail;
+								
+								if ("identification" == confirmCopyStatusFail) {
+									msg = [[#{msg.project.copy.confirm.status.fail.identification}]];
+								} else if ("verification" == confirmCopyStatusFail){
+									msg = [[#{msg.project.copy.confirm.status.fail.verification}]];
+								}
+							} else {
+								msg = [[#{msg.common.success}]];
+							}
+
+							alertify.alert(msg, function(){
+								reloadTabInframe('/project/list');
+								
+								deleteTabInFrame('/project/copy/'+data.copy.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								
+								activeTabInFrameList("PROJECT");
+							});
+						} else if (json.resultData.confirmCopyStatusSuccess == 'true') {
+							alertify.alert([[#{msg.common.success}]], function(){
+								reloadTabInframe('/project/list');
+								
+								deleteTabInFrame('/project/copy/'+data.copy.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								
+								activeTabInFrameList("PROJECT");
+							});
+						}
+					} else {
+						var prjId = $('input[name=prjId]').val();
+						
+						if (data.copy) {
+							alertify.alert([[#{msg.common.success}]], function(){
+								reloadTabInframe('/project/list');
+								
+								deleteTabInFrame('/project/copy/'+data.copy.prjId);
+								createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								
+								activeTabInFrameList("PROJECT");
+							});
+						} else {
+							alertify.alert([[#{msg.common.success}]], function(){
+								reloadTabInframe('/project/list');
+								
+								if (prjId == '') {
+									deleteTabInFrame('/project/edit');
+									createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
+								} else {
+									var status = data.detail.destributionStatus;
+									var flag = "false";
+									
+									if (json.resultData) {
+										flag = json.resultData.isAdd;
+									}
+									
+									if (status == "DONE" && flag == "true") {
+										alertify.confirm([[#{msg.project.required.only}]], function () {
+												deleteTabInFrame('/project/edit/'+prjId);
+												createTabInFrame(prjId+'_Distribute', '/project/distribution/'+prjId);
+											}, function() {
+												deleteTabInFrame('/project/edit/'+prjId);
+												activeTabInFrameList("PROJECT");
+											}
+										);
+									} else {
+										deleteTabInFrame('/project/edit' +prjId);
+										createTabInFrame(prjId + '_Project', '/project/edit/' + prjId);
+									}
+								}
+							});	
+						}
+					}
+				}
+			},
+			// 삭제 콜백
+			onDeleteSuccess : function(json, status) {
+				loading.hide();
+				var prjId = $('input[name=prjId]').val();
+				
+				if(json.resCd=='10') {
+					reloadTabInframe('/project/list');
+					
+					if(data.copy) {
+						alertify.alert([[#{msg.common.success}]], function(){
+							deleteTabInFrame('/project/copy/'+data.copy.prjId);
+						});
+					} else {
+						alertify.alert([[#{msg.common.success}]], function(){
+							if(prjId){
+								deleteTabInFrame('/project/edit/'+prjId);
+							} else {
+								deleteTabInFrame('/project/edit');
+							}
+						});
+					}
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0)
+				}
+			},
+			// 에러 콜백
+			onError : function(data, status) {
+				if ('Y' == completeYn){
+					fn.disabledCompleteRow(true);
+				}
+				
+				if((('Y' == copyFlag || 'Y' == identificationStatusConfFlag) && $("[name='noticeType'][value|='80']").is(':checked'))
+						|| 'CONF' == verificationStatus){
+					fn.disabledVerificationConfirm(true);
+				}
+				
+				alertify.error([[#{msg.common.valid2}]], 0);
+			},
+			selectDivision : function() {
+				var division = $('#prjDivision').val();
+				if(division == "") {
+					$('#prjUserId').val("").prev().text("select User").change();
+					return false;
+				}
+				
+				$('#prjUserId').children().remove();
+				$('#prjUserId').attr('disabled', false);
+				
+				$.ajax({
+					url : '/partner/getUserList',
+					type : 'GET',
+					dataType : 'json',
+					cache : false,
+					data : {'division' : division},
+					success : function(data){
+						data.forEach(function(obj){
+							$('#prjUserId').append('<option value='+obj.userId+'>'+obj.userName+'('+obj.userId+')</option>');
+						});
+						
+						$('#prjUserId').change();
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			},
+			selectCreatorDivision : function(obj) {
+				var cDivision = $(obj).val();
+				if ("" != cDivision) {
+					$("input[name='division']").val(cDivision);
+				}
+			},
+			makeModelList : function(data){
+				modelData = data.currentModelList;
+
+				// 리로드 대신 그리드 삭제 후 다시 그리기
+				$("#_modelList").jqGrid('GridUnload');
+				
+				modelList.load();
+
+			},
+			downloadModelList : function(){
+				cleanErrMsg("_modelList");
+				var data = fn.getModelGridRows('#_modelList');
+				
+				$.ajax({
+					type: "POST",
+					url: '/exceldownload/getExcelPost',
+					data: JSON.stringify({"type":"model", "parameter":JSON.stringify(data), "extParam" : $('input[name=distributeTarget]:checked').val()}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location =  '/exceldownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			},
+			checkUserId : function(userNm){
+				var userId = "";
+				
+				for(var i=0; i < arr.length; i++){
+					if(arr[i].indexOf(userNm) > 0){
+						var tmp = arr[i].split(":");
+						
+						if(tmp[1] == userNm){
+							userId = tmp[0];
+						}
+					}
+				}
+				
+				return userId;
+			},
+			handleUserCommentPopupOpen : function () {
+				// 코멘트 팝업
+		        const param = {
+		            "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_USER')}]],
+		            "referenceId" : [[${project.prjId}]]
+		        }
+				
+		        getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+		        	if (!alertify.editDialog){
+						alertify.dialog('editDialog', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+								
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+								
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 0;
+								
+									return setup;
+								},
+						    	hooks: {
+						    		onshow: function() {
+						        		this.elements.dialog.style.maxWidth = 'none';
+						          		this.elements.dialog.style.width = '700px';
+						        	}
+								}
+							};
+						}, false, 'confirm');
+		    		}
+				
+					alertify.editDialog(res);
+		      	},
+		       	null,
+		      	function () {
+		         	$("#modifiedCommentInPjtEditor").summernote({
+		            	height: 180,
+		              	callbacks: {
+		                 	onInit: function () {
+		                      	$(this).summernote('code', $("#userContents").val());
+		                 	}
+		              	}
+		           	});
+		     	});
+			},
+			sendEditor : function(type){
+				//코멘트 저장
+				var editorVal = $("#modifiedCommentInPjtEditor").summernote('code');
+				
+				if ("" != $(editorVal).text().trim()) {
+					alertify.alert([[#{msg.project.enter.comment}]], function(){});
+					
+					return false;
+				}
+				
+				var param = {referenceId : [[${project.prjId}]], referenceDiv :'19', contents : replaceWithLink(editorVal), mailSendType : type};
+				
+				$.ajax({
+					url : '/project/sendComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						if (json.isValid == 'false'){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							alertify.success([[#{msg.project.sent.comments.success}]]);
+							$("#modifiedCommentInPjtEditor").summernote('code', '');
+							$("#userContents").val('');
+							$('.ajs-close').trigger("click");
+		                    fn_comment.getCommentList(commentsParam);
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			},
+			saveEditor : function(){
+				//코멘트 임시저장
+				var editorVal = "";
+				var register = "admin";
+				var param = {referenceId : [[${project.prjId}]], referenceDiv :'09', contents : editorVal};
+				
+				$.ajax({
+					url : '/project/saveComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						if(json.isValid == 'false'){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							alertify.success([[#{msg.common.success}]]);
+							
+							$(".commentBtn.open").trigger( "click" );
+						}
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			},
+			editorDialog : function(){
+				var editorVal = "";
+				if(!editorVal || editorVal == "") {
+					alertify.alert([[#{msg.project.enter.comment}]] , function(){});
+					
+					return false;
+				}
+				//launch it.
+				var btnHtm = '<br/><b>Send an email to</b><br/>';
+				btnHtm += '<input type="button" value="Watcher Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'W\')"/>&nbsp;&nbsp;&nbsp;';
+
+				if (userRole == "ROLE_ADMIN") {
+					btnHtm += '<input type="button" value="Creator Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'C\')"/>&nbsp;&nbsp;&nbsp;';
+				} else {
+					btnHtm += '<input type="button" value="Reviewer Only" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.sendEditor(\'R\')"/>&nbsp;&nbsp;&nbsp;';
+				}
+				
+				btnHtm += '<input type="button" value="All" class="btnCancel btnColor red" style="height:30px;width:120px;" onclick="fn.sendEditor(\'WR\')"/>&nbsp;&nbsp;&nbsp;';
+
+				if(!alertify.myAlert){
+					//define a new dialog
+					alertify.dialog('myAlert',function factory(){
+						return{
+							main:function(message){
+							this.message = message;
+						},
+						setup:function(){
+							return { 
+								focus: { element:0 }
+							};
+						},
+						prepare:function(){
+							this.setContent(this.message);
+						}
+					}});
+				}
+				
+				alertify.myAlert(btnHtm);
+			},
+			requestToOpenPop : function(info){
+				var type = "";
+				var commId = "";
+				if ("N" == [[${project.viewOnlyFlag}]]) {
+					var identificationHisCode = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]];
+					var packagingHisCode = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]];
+					
+					var readOnly = false;
+					var mode = null;
+					
+					if (info == null) {
+						mode = "insert";
+					} else if ([[${@CommonFunction.isAdmin()}]]) {
+						commId = info.commId;
+						mode = "reject";
+					} else {
+						commId = info.commId;
+						mode = "update";
+					}
+					
+					let divTemp = document.createElement("div");
+					divTemp.classList.add("col-12");
+					
+					let hiddenInput = document.createElement("input");
+					hiddenInput.type = "hidden";
+					hiddenInput.id = "commentsMode";
+					hiddenInput.name = "commentsMode";
+					hiddenInput.value = mode;
+					divTemp.appendChild(hiddenInput);
+					
+					hiddenInput = document.createElement("input");
+					hiddenInput.type = "hidden";
+					hiddenInput.id = "commIdPopup";
+					hiddenInput.name = "commIdPopup";
+					hiddenInput.value = commId;
+					divTemp.appendChild(hiddenInput);
+					
+					let textarea = document.createElement("textarea");
+					textarea.id = "reqToOpenTextarea";
+					
+					divTemp.appendChild(textarea);
+					$("#reqToOpenDiv").append(divTemp);
+					
+					divTemp = document.createElement("div");
+					divTemp.classList.add("col-12");
+					
+					let col = document.createElement("div");
+					col.classList.add("col-3");
+					
+					let formGroup = document.createElement("div");
+					formGroup.classList.add("form-group");
+					
+					let formCheck = document.createElement("div");
+					formCheck.classList.add("form-check");
+					
+					let inputRadio = document.createElement("input");
+					inputRadio.classList.add("form-check-input");
+					inputRadio.type = "radio";
+					inputRadio.name = "referenceDiv";
+					inputRadio.value = identificationHisCode;
+					
+					let label = document.createElement("label");
+					label.classList.add("form-check-label");
+					label.innerText = "Identification";
+					
+					if (info != null && info.referenceDiv != null && info.referenceDiv == identificationHisCode) {
+						inputRadio.setAttribute('checked', true);
+						if ([[${@CommonFunction.isAdmin()}]]) {
+							inputRadio.setAttribute('disabled', true);
+						}
+					}
+					
+					formCheck.appendChild(inputRadio);
+					formCheck.appendChild(label);
+					formGroup.appendChild(formCheck);
+					col.appendChild(formGroup);
+					$("#reqToOpenDiv2").append(col);
+					
+					if ([[${project.verificationStatus}]] != null && [[${project.verificationStatus}]] != 'NA') {
+						col = document.createElement("div");
+						col.classList.add("col-3");
+						
+						formGroup = document.createElement("div");
+						formGroup.classList.add("form-group");
+						
+						formCheck = document.createElement("div");
+						formCheck.classList.add("form-check");
+						
+						inputRadio = document.createElement("input");
+						inputRadio.classList.add("form-check-input");
+						inputRadio.type = "radio";
+						inputRadio.name = "referenceDiv";
+						inputRadio.value = packagingHisCode;
+						
+						label = document.createElement("label");
+						label.classList.add("form-check-label");
+						label.innerText = "Packaging";
+						
+						if (info != null && info.referenceDiv != null && info.referenceDiv == packagingHisCode) {
+							inputRadio.setAttribute('checked', true);
+							if ([[${@CommonFunction.isAdmin()}]]) {
+								inputRadio.setAttribute('disabled', true);
+							}
+						}
+						
+						formCheck.appendChild(inputRadio);
+						formCheck.appendChild(label);
+						formGroup.appendChild(formCheck);
+						col.appendChild(formGroup);
+						$("#reqToOpenDiv2").append(col);
+					}
+					
+					if ([[${@CommonFunction.isAdmin()}]]) {
+						let colDiv = document.createElement("div");
+						colDiv.classList.add("col-12");
+						
+						formGroup = document.createElement("div");
+						
+						label = document.createElement("label");
+						label.innerText = "Creator";
+						
+						let span = document.createElement("span");
+						span.classList.add("ml-3");
+						span.innerText = info.creatorDivisionName + ' > ' + info.creatorName + '(' + info.creator + ')';
+						
+						formGroup.appendChild(label);
+						formGroup.appendChild(span);
+						formGroup.appendChild(document.createElement("br"));
+						
+						label = document.createElement("label");
+						label.innerText = "Create Date";
+						
+						span = document.createElement("span");
+						span.classList.add("ml-3");
+						span.innerText = info.createdDate;
+						formGroup.appendChild(label);
+						formGroup.appendChild(span);
+						colDiv.appendChild(formGroup);
+						
+						$("#reqToOpenDiv2").append(colDiv);
+						
+						let divTemp = document.createElement("div");
+						divTemp.classList.add("col-12");
+						
+						formGroup = document.createElement("div");
+						formGroup.classList.add("form-group");
+						
+						label = document.createElement("label");
+						
+						divTemp = document.createElement("div");
+						divTemp.classList.add("col-12");
+						let textarea = document.createElement("textarea");
+						textarea.id = "reqToOpenTextareaAdmin";
+						
+						span = document.createElement("span");
+						span.classList.add("mb-1");
+						span.innerText = "Are you sure you want to reject";
+						divTemp.appendChild(span);
+						divTemp.appendChild(textarea);
+						$("#reqToOpenDiv3").append(divTemp);
+					}
+					
+					const reqToOpenHtml = $(".requestToOpenPop").html();
+					$("#reqToOpenDiv").empty();
+					$("#reqToOpenDiv2").empty();
+					$("#reqToOpenDiv3").empty();
+					
+					if(!alertify.reqToOpen){
+						alertify.dialog('reqToOpen', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
+								}
+							};
+						}, false, 'alert');
+                	}
+					
+					alertify.reqToOpen().set('title', 'Request To Open').set('onshow', function(e){
+						$("#reqToOpenTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+						if (info != null && info.contents != null) {
+							$("#reqToOpenTextarea").summernote('code', info.contents);
+						}
+						if ([[${@CommonFunction.isAdmin()}]]) {
+							$("#reqToOpenTextarea").summernote("disable");
+							$("#reqToOpenTextarea").next().find(".note-editable").addClass("note-editable");
+							$('#reqToOpenTextareaAdmin').summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+						} 
+					}).setContent(reqToOpenHtml).show();
+				}
+			},
+			notRequestToOpenPop : function(){
+				var type = "";
+				var commId = "";
+				if ("N" == [[${project.viewOnlyFlag}]]) {
+					var readOnly = false;
+					var mode = "reject";
+					var identificationHisCode = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]];
+					var packagingHisCode = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]];
+					
+						var innerHtml	= 	'<div class="notRequestToOpenPop">';
+						innerHtml		+= 	'	<div class="row"><div class="col-12">';
+						innerHtml		+= 	'		<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">';
+						innerHtml		+= 	'			<div class="row col-12">';
+						innerHtml    	+= 	'				<input type="hidden" id="commentsMode" name="commentsMode" value="'+mode+'"/>';
+						innerHtml    	+= 	'				<input type="hidden" id="commIdPopup" name="commIdPopup" value="'+commId+'"/>';
+						innerHtml    	+= 	'				<textarea id="editor3"></textarea>';
+						innerHtml		+=	'			</div>';
+						innerHtml		+= 	'			<div class="row col-12">';
+						innerHtml		+= 	'				<div class="col-3">';
+						innerHtml		+= 	'					<div class="form-group">';
+						innerHtml		+= 	'						<div class="form-check">';
+						innerHtml		+= 	'							<input class="form-check-input" type="radio" name="referenceDiv" value="' + identificationHisCode + '" id="referenceDiv1"><label class="form-check-label" for="referenceDiv1">Identification</label>';
+						innerHtml		+=	'						</div>';
+						innerHtml		+=	'					</div>';
+						innerHtml		+=	'				</div>';
+					
+					if ([[${project.verificationStatus}]] != null && 'NA' != [[${project.verificationStatus}]]) {
+						innerHtml		+= 	'				<div class="col-3">';
+						innerHtml		+= 	'					<div class="form-group">';
+						innerHtml		+= 	'						<div class="form-check">';
+						innerHtml		+= 	'							<input class="form-check-input" type="radio" name="referenceDiv" value="' + packagingHisCode + '" id="referenceDiv2"><label class="form-check-label" for="referenceDiv2">Packaging</label>';
+						innerHtml		+=	'						</div>';
+						innerHtml		+=	'					</div>';
+						innerHtml		+=	'				</div>';
+					}
+					
+						innerHtml		+=	'			</div>';
+						innerHtml		+=	'		</div>';
+						innerHtml		+=	'	</div></div>';
+						innerHtml		+=	'</div>';
+					
+					if(!alertify.notReqRejectConfirm){
+						alertify.dialog('notReqRejectConfirm', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '650px';
+							        }
+								}
+							};
+						}, false, 'confirm');
+					}
+					
+					alertify.notReqRejectConfirm().set('title', 'Reopen').set('onok', function(e){
+						if (e) {
+							var referenceDiv = $(':radio[name="referenceDiv"]:checked').val();
+							var deleteOsdd = "";
+							var commentsMode = $('#commentsMode').val();
+							var commId = $('#commIdPopup').val();
+							var matilType = "";
+							
+							if (typeof referenceDiv === "undefined") {
+								alertify.alert([[#{msg.project.required.rejectDiv}]], function(){});
+
+								return false;
+							}
+							
+							var data;
+							var userComment = "";
+							var summernoteVal = $("#editor3").summernote('code');
+							
+							if ("" != $(summernoteVal).text().trim()) {
+								userComment = summernoteVal;
+							}
+							
+							if (referenceDiv == identificationHisCode) {
+								data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : userComment, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "delOsdd" : deleteOsdd, "commId" : null, "statusRequestYn" : "N"};
+							} else if (referenceDiv == packagingHisCode) {
+								data = {"prjId" : [[${project.prjId}]], "verificationStatus" : "PROG", "useCustomNoticeYn" : [[${project.useCustomNoticeYn}]], "userComment" : userComment, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "delOsdd" : deleteOsdd, "commId" : null, "statusRequestYn" : "N"};
+							} else if (referenceDiv == distributionHisCode) {
+								data = {"referenceId" : [[${project.prjId}]], "contents" : userComment, "referenceDiv": referenceDiv, "commentsMode" : commentsMode, "delOsdd" : deleteOsdd};
+							}
+							if (data) fn.commentsSave(data);
+						} else {
+							return false;
+						}
+					})
+					.set('onshow', function(e){
+           				$("#editor3").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           			})
+					.setContent(innerHtml).show();
+				}
+			},
+			commentsSave : function(data){
+				/* 2018-07-19 choye 추가  */
+				if(data.commentsMode=="insert" || data.commentsMode=="update"){
+					$.ajax({
+						url : '/project/commentsSave',
+						type : 'POST',
+						dataType : 'json',
+						cache : false,
+						data : data,
+						success : function(json){
+							if(json.isValid == 'false'){
+								alertify.error([[#{msg.common.valid2}]], 0);
+							} else {
+								alertify.alert([[#{msg.common.success}]], function(){
+									reloadTabInframe('/project/list');
+									deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
+									createTabInFrame([[${project.prjId}]] + '_Project', '/project/edit/' + [[${project.prjId}]]);
+								});
+							}
+						},
+						error : function(){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					//identification, packing reject
+					if(data.identificationStatus != null || data.verificationStatus != null) {
+						$.ajax({
+							url : '/project/updateProjectStatus',
+							type : 'POST',
+							data : JSON.stringify(data),
+							dataType : 'json',
+							cache : false,
+							contentType : 'application/json',
+							success: function(data){
+								if(data.isValid == 'false'){
+									alertify.error([[#{msg.common.valid2}]], 0);
+								} else {
+									alertify.alert([[#{msg.common.success}]], function(){
+										reloadTabInframe('/project/list');
+										deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
+										activeTabInFrameList("PROJECT");
+									});
+								}
+							},
+							error : function(){
+								alertify.error([[#{msg.common.valid2}]], 0);
+							}
+						});
+					} else {
+						$.ajax({
+							url : '/project/commentsSave',
+							type : 'POST',
+							dataType : 'json',
+							cache : false,
+							data : data,
+							success : function(json) {
+								if(json.isValid == 'false') {
+									alertify.error([[#{msg.common.valid2}]], 0);
+								} else {
+									alertify.alert([[#{msg.common.success}]], function(){
+										reloadTabInframe('/project/list');
+										deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
+										activeTabInFrameList("PROJECT");
+									});
+								}
+							},
+							error : function() {
+								alertify.error([[#{msg.common.valid2}]], 0);
+							}
+						});
+					}
+				}
+			},
+			commentsIgnore : function(){
+				/* 2018-07-30 choye 추가 */
+				var data = {"referenceId" : [[${project.prjId}]], "contents" : ""};
+
+				$.ajax({
+					url : '/project/commentsIgnore',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : data,
+					success : function(json) {
+						if(json.isValid == 'false') {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							alertify.alert([[#{msg.common.success}]], function(){
+								reloadTabInframe('/project/list');
+								deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
+								activeTabInFrameList("PROJECT");
+							});
+						}
+					},
+					error : function() {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			},
+			chkListValidation : function(listKind, listId){
+				if(listKind == ""){
+					// TODO : 추후 문구 수정예정
+					alertify.error([[#{msg.project.watcher.selectlist}]], 0);
+
+					return false;
+				}
+				
+				if(listId == ""){
+					// TODO : 추후 문구 수정예정
+					alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
+
+					return false;
+				}
+				
+				return true;
+			},
+			chgOssNotice : function(DetailCd){
+				//distribution type의 detail description이 T일 경우 check하도록 변경
+				if("T" == DetailCd){
+					isCheckT = true;
+					var noticeTypeNA = [[${@CommonFunction.getCoConstDefVal("CD_NOTICE_TYPE_NA")}]];
+					$("[name='noticeType'][value|='"+noticeTypeNA+"']").trigger("click");
+				} else {
+					isCheckT = false;
+					var noticeTypeGeneral = [[${@CommonFunction.getCoConstDefVal("CD_NOTICE_TYPE_GENERAL")}]];
+					$("[name='noticeType'][value|='"+noticeTypeGeneral+"']").trigger("click");
+				}
+			},
+			CheckChar : function(){
+				if(event.keyCode == 64){//@ 특수문자 체크
+            				alertify.alert([[#{msg.login.check.char}]], function(){});
+            		
+            				event.returnValue = false;
+            	}
+			},
+			shareUrl : function(){
+				var copyUrl = "";
+				var protocol = window.location.protocol;
+				var host =  window.location.host;
+				copyUrl = protocol + "//" + host + "/project/shareUrl/" + [[${project.prjId}]];
+				copyUrl += "?lang=" + [[${sessUserInfo.defaultLocale}]];
+				$("#copyUrl").val(copyUrl);
+				
+				//launch it.
+				var btnHtml 	= 	'<div class="row form-group">';
+				btnHtml 		+= 	'	<div class="col-12"><label>Share Link</label>';
+				btnHtml 		+= 	'		<input type="text" class="form-control" value="'+copyUrl+'" disabled/>';
+				btnHtml 		+= 	'	</div>';
+				btnHtml 		+= 	'</div>';
+				btnHtml 		+= 	'<div class="row float-right custom-layout">';
+				btnHtml 		+= 	'	<button type="button" class="btn btn-lg-gray btn-sm width-6rem mr-xm px-3" onclick="fn.copyUrl(this)">Copy</button>';
+				btnHtml 		+= 	'</div>';
+
+				if (!alertify.prjShareUrl){
+					//define a new dialog
+					alertify.dialog('prjShareUrl',function factory(){
+						return{
+							main:function(message){
+							this.message = message;
+						},
+						setup:function(){
+							return { 
+								focus: { element:0 }
+							};
+						},
+						prepare:function(){
+							this.setContent(this.message);
+						}
+					}});
+				}
+				
+				alertify.prjShareUrl(btnHtml);
+			},
+			copyUrl : function(target){
+				$('#copyUrl').attr('type', 'text');
+				$('#copyUrl').select();
+		        var copyFlag = document.execCommand('copy');
+		        $('#copyUrl').attr('type', 'hidden');
+		        
+		        if (copyFlag) {
+		        	$('.ajs-close').trigger("click");
+					alertify.success([[#{msg.common.success}]]);
+		        } else {
+		        	alertify.error([[#{msg.common.valid}]]);
+		        }
+			},
+			disabledCompleteRow : function(disabledBoolean){
+				var diabledNameList = ['prjName', 'osType', 'osTypeEtc', 'distributionType', 'networkServerType', 'distributeTarget', 'noticeType', 'noticeTypeEtc', 'priority', 'creatorNm', 'reviewer'];
+				diabledNameList.forEach(function(names){$('input[name='+names+'], select[name='+names+']').attr('disabled', disabledBoolean)});
+			},
+			disabledVerificationConfirm : function(flag){
+				$('input[name=noticeType]').attr('disabled', flag);
+				$('select[name=noticeTypeEtc]').attr('disabled', flag);
+			},
+			showCopyStatusConfirm : function(){
+				var identificationStatusConfFlag = $("#identificationStatusConfFlag").val();
+				var verificationStatusConfFlag = $("#verificationStatusConfFlag").val();
+
+				for (var i=0; i<3; i++) {
+					let col = document.createElement("div");
+					col.classList.add("col-12");
+					
+					let formGroup = document.createElement("div");
+					formGroup.classList.add("form-group");
+					
+					let formCheck = document.createElement("div");
+					formCheck.classList.add("form-check");
+					
+					let inputRadio = document.createElement("input");
+					inputRadio.classList.add("form-check-input");
+					inputRadio.type = "radio";
+					inputRadio.name = "confirmStatusCopyRadio";
+					
+					if (i == 0) {
+						inputRadio.value = "IdentificationProg";
+						inputRadio.setAttribute('checked', true);
+					} else if (i == 1) {
+						inputRadio.value = "IdentificationConf";
+						if('Y' != identificationStatusConfFlag){
+							inputRadio.setAttribute('disabled', true);
+						}
+					} else {
+						inputRadio.value = "verificationConf";
+						if('Y' != verificationStatusConfFlag){
+							inputRadio.setAttribute('disabled', true);
+						}
+					}
+					
+					let label = document.createElement("label");
+					label.classList.add("form-check-label");
+					
+					if (i == 0) {
+						label.innerText = "Identification Progress";
+					} else if (i == 1) {
+						label.innerText = "Identification Confirm";
+					} else {
+						label.innerText = "Packaging Confirm";
+					}
+					
+					formCheck.appendChild(inputRadio);
+					formCheck.appendChild(label);
+					formGroup.appendChild(formCheck);
+					col.appendChild(formGroup);
+					
+					$("#copyConfirmDiv").append(col);
+				}
+				
+				const copyConfirmHtml = $(".copyConfirmPopup").html();
+				$("#copyConfirmDiv").empty();
+				
+				if(!alertify.copyConfirm){
+					alertify.dialog('copyConfirm', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								setup.buttons = [];
+								setup.focus.element = 1;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '450px';
+						        }
+							}
+						};
+					}, false, 'alert');
+            	}
+				
+				alertify.copyConfirm(copyConfirmHtml).set('title', 'Project Copy Status');
+			},
+			rejectRegist : function() {
+				var referenceDiv = $(':radio[name="referenceDiv"]:checked').val();
+				var commentsMode = $('#commentsMode').val();
+				var commId = $('#commIdPopup').val();
+				var matilType = "";
+				
+				if ("insert" == commentsMode || "update" == commentsMode || "reject" == commentsMode) {
+					var editorVal = "";
+					if ([[${@CommonFunction.isAdmin()}]]) {
+						editorVal = $("#reqToOpenTextareaAdmin").summernote('code');
+					} else {
+						editorVal = $("#reqToOpenTextarea").summernote('code');
+					}
+					
+					if ("" == $(editorVal).text().trim()){
+						alertify.alert([[#{msg.project.required.comments.reject}]], function(){});
+						return false;
+					}
+					
+					if (referenceDiv == undefined) {
+						alertify.alert([[#{msg.project.required.rejectDiv}]], function(){});
+						return false;
+					}
+				}
+				
+				if ("reject" == commentsMode) {
+					if (referenceDiv != null) {
+						if (referenceDiv == [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICAITON_HIS')}]]) {
+							data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "PROG", "userComment" : editorVal, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "commId" : null, "statusRequestYn" : "N"};
+						} else if (referenceDiv == [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_HIS')}]]) {
+							data = {"prjId" : [[${project.prjId}]], "verificationStatus" : "PROG", "useCustomNoticeYn" : [[${project.useCustomNoticeYn}]], "userComment" : editorVal, "referenceDiv": referenceDiv, "completeYn" : 'N', "commentsMode" : commentsMode, "commId" : null, "statusRequestYn" : "N"};
+						} else if ("" == referenceDiv) {
+							data = {"referenceId" : [[${project.prjId}]], "contents" : editorVal, "referenceDiv": referenceDiv, "commentsMode" : commentsMode};
+						}
+					} else {
+						data = {"referenceId" : [[${project.prjId}]], "contents" : editorVal, "referenceDiv": referenceDiv, "commentsMode" : commentsMode};
+					}
+				} else {
+					data = {"referenceId" : [[${project.prjId}]], "contents" : editorVal, "referenceDiv" : referenceDiv, "commId" : commId, "commentsMode" : commentsMode};
+				}
+				
+				fn.commentsSave(data);
+			},
+			closeAlertifyView : function() {
+				$(".ajs-close").trigger("click");
+			},
+			copyConfirmSave : function() {
+				fn.saveSubmit();
+				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
+			},
+			copyConfirmClose : function() {
+				$('input:radio[name="confirmStatusCopyRadio"]').prop("checked", false);
+				fn.closeAlertifyView();
+			},
+            mvEditTab : function(prjId){
+                createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
+            },
+            mvIdentification : function(){
+            	if ("Y" == [[${project.androidFlag}]]) {
+    				createTabInFrame([[${project.prjId}]]+"_Identify", "/project/identification/" + [[${project.prjId}]] + "/4");
+    			} else {
+    				createTabInFrame([[${project.prjId}]]+"_Identify", "/project/identification/" + [[${project.prjId}]] + "/5");
+    			}
+            },
+            mvVerification : function(){
+            	createTabInFrame([[${project.prjId}]] + "_Packaging", "/project/verification/" + [[${project.prjId}]]);
+            },
+            mvSecurity : function(){
+            	createTabInFrame([[${project.prjId}]] + "_Security", "/project/security/" + [[${project.prjId}]]);
+            }
+		}
+	
+	var fn_comment = {
+		callbackFunction : function () {
+	       	fn_comment.getCommentList(commentsParam);
+	    },
+		getCommentList : function(param) {
+			if ([[${project.copyFlag}]] != 'Y') {
+				$.ajax({
+					type: "GET",
+					url: '/comment/getCusCommentList',
+					dataType : 'html',
+					cache : false,
+					data : param,
+					success: function (res) {
+						if (typeof param.height !== undefined) {
+							$(".comment-card-body").attr("style", "max-height:" + param.height + "px; overflow-y: auto;");
+						}
+						$("#commentList").empty();
+						$("#commentList").html(res);
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		getMoreCommentsList : function() {
+			commentsParam["moreFlag"] = "Y";
+			commentsParam["height"] = $(".comment-card-body").height();
+			fn_comment.getCommentList(commentsParam);
+		},
+		editComments : function(_commId, _referenceDiv, _referenceId) {
+			$.ajax({
+		   		url : '/comment/getEditPopup',
+				type : 'POST',
+				data : {'commId' : _commId},
+				dataType : 'html',
+				cache : false,
+				success : function(res){
+					if(!alertify.editComments){
+						alertify.dialog('editComments', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 0;
+									
+									return setup;
+								},
+							    hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '750px';
+							        }
+								}
+							};
+						}, false, 'alert');
+	               	}
+					
+					alertify.editComments(res).set('title', 'Edit Comments');
+					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
+					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
+				}
+	    	});
+		},
+		updateComments : function (_commId, _referenceDiv, _referenceId) {
+			var summernoteVal = $("#commentEdit").summernote('code');
+			if ("" == summernoteVal) {
+				alertify.alert("Please enter a comment", function(){});
+				return false;
+			} else {
+				var param = {commId : _commId, contents : replaceWithLink(summernoteVal), referenceDiv: _referenceDiv, referenceId: _referenceId};
+				$.ajax({
+					url : '/comment/updateComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						alertify.success([[#{msg.common.success}]]);
+						fn.closeAlertifyView();
+						fn_comment.getCommentList(commentsParam);
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		deleteComments : function (_commId) {
+			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+				if (e) {
+					$.ajax({
+						url : '/comment/deleteComment',
+						type : 'POST',
+						dataType : 'json',
+						cache : false,
+						data : {'commId' : _commId},
+						success : function(data){
+							alertify.success([[#{msg.common.success}]]);
+							fn.closeAlertifyView();
+							fn_comment.getCommentList(commentsParam);
+						},
+						error : function(){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		},
+		closeAlertifyView : function () {
+			fn.closeAlertifyView();
+		},
+		activateCommentArea : function () {
+			var commentRow = $("#commentList .card-body").length;
+			
+			// change tab area
+			if (!$(".basicInfoCommentArea").is(":visible")) {
+				$(".basicInfoAreaTop").hide();
+				$(".basicInfoArea").removeClass("col-md-10");
+				$(".basicInfoAreaBottom").hide();
+				$(".basicInfoArea").addClass("col-md-9");
+				
+				fn_comment.getCommentList(commentsParam);
+				$(".basicInfoCommentArea").show();
+				
+				tableRefreshGridArea('notEntire');
+			} else {
+				$(".basicInfoAreaTop").show();
+				$(".basicInfoArea").removeClass("col-md-9");
+				$(".basicInfoArea").addClass("col-md-10");
+				$(".basicInfoAreaBottom").show();
+	 			$(".basicInfoCommentArea").hide();
+	 			
+	 			tableRefreshGridArea('entire');
+			}
+		},
+		showCommentHistory : function () {
+			fn_comment.activateCommentArea();
+			
+			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_HIS')}]];
+	        openCommentHistory('/comment/popup/prj/' + _rDiv + '/' + [[${project.prjId}]]);
+		}
+	}
+	
+	// 데이타
+	var data = {
+		modelValues:'',
+		detail : [[${detail}]],
+		copy : [[${copy}]],
+		createThird : [[${createThird}]],
+		init : function(){
+			$("#comment").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			$("[name='additionalInformation']").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			
+			if(data.detail){
+				$('input[name=prjId]').val(data.detail.prjId);
+				$('input[name=prjName]').val(data.detail.prjName.trim());
+				$('input[name=prjVersion]').val(data.detail.prjVersion.trim());
+				$('select[name=osType]').val(data.detail.osType).trigger('change');
+				$('select[name=division]').trigger('change');
+				$("[name='distributionType']:checked").trigger("click");
+				$("[name='noticeType'][value|='"+data.detail.noticeType+"']").trigger("click");
+				
+				if(data.detail.osType == osTypeEtc){
+					$('#osTypeEtc').attr("disabled",false);
+					$('#osTypeEtc').val(data.detail.osTypeEtc);
+				}
+				
+				// 참조코드값이 삭제된 경우, change 이벤트 에서 val가 null로 등록되기 때문에 default로 다시 선택해준다.
+				if($('select[name=osType]').val() == null) {
+					$('select[name=osType]').val("").trigger('change');
+				}
+
+				$("[name='additionalInformation']").summernote('code', data.detail.comment);
+				
+				$('select[name=category]').val(data.detail.category).trigger('change');
+				$('select[name=prjDivision]').val(data.detail.prjDivision).trigger('change');
+				$("#priority").trigger("change");
+				$("#noticeTypeEtc").trigger("change");
+				
+				data.detail.watcherList.forEach(function(watcher, index, obj){
+					var deptUseYn = watcher.deptUseYn || "Y";
+					var userUseYn = watcher.userUseYn || "Y";
+					
+					if(watcher!=""){
+						if(watcher.prjEmail){ 
+							fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
+						} else {
+							var str = "";
+							
+							if(watcher.prjUserName == undefined){
+								str = watcher.prjDivisionName;
+							} else {
+								str = '<b';
+								
+								if (divisionEmptyCd != watcher.prjDivision) {
+									if(deptUseYn == "N"){
+										str += ' class="deleteUser"';
+									}
+									
+									str += '>'+watcher.prjDivisionName+'</b>/<b';
+								}
+								
+								if(userUseYn == "N"){
+									str += ' class="deleteUser"';
+								}
+								
+								str += '>'+watcher.prjUserName+'</b>';
+							}
+							
+							fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
+						}
+					}
+				});
+				
+				// Complete 버튼 처리 
+				var status = ["PROG","REQ","REV"];
+				var complete = false;
+				var drop = false;
+				
+				if(userRole=="ROLE_ADMIN" 
+					&& data.detail.identificationStatus=="CONF" 
+					&& (!data.detail.verificationStatus 
+							|| data.detail.verificationStatus == "" 
+							|| data.detail.verificationStatus == "PROG" 
+							|| data.detail.verificationStatus=="CONF" 
+							|| data.detail.verificationStatus=="NA") 
+					&& data.detail.completeYn != 'Y') {
+					complete = true;
+				}
+
+				if(data.detail.dropYn != 'Y' && data.detail.completeYn != 'Y') {
+					drop = true;
+				}
+
+				var date = new Date();
+				var year  = date.getFullYear();
+				var month = date.getMonth() + 1;
+				var day   = date.getDate();
+				
+				if (("" + month).length == 1) { 
+					month = "0" + month;
+				}
+				
+				if (("" + day).length   == 1) {
+					day   = "0" + day;
+				}
+				
+				var currentYmd = parseInt(""+year+month+day);
+				 
+				$("#copy").show();
+				
+				complete ? $("#complete").show() : $("#complete").hide();
+				drop ? $("#drop").show() : $("#drop").hide();
+				
+				$('input[name=distributeTarget]').each(function(){
+					var value = $(this).val();
+					
+					if(value == data.detail.distributeTarget){
+						$(this).trigger('click');
+					}
+				});
+				
+				/* 2018-07-19 choye 추가 */
+				$('input[name=commId]').val(data.detail.commId);
+				$('input[name=statusRequestYn]').val(data.detail.statusRequestYn);
+			} else if(data.copy) {
+				$('input[name=prjId]').val(data.copy.prjId);
+				$('select[name=osType]').val(data.copy.osType).trigger('change');
+				$("[name='distributionType']:checked").trigger("click");
+				$("[name='noticeType'][value|='"+data.copy.noticeType+"']").trigger("click");
+				
+				if(data.copy.osType == osTypeEtc) {
+					$('#osTypeEtc').attr("disabled",false);
+					$('#osTypeEtc').val(data.copy.osTypeEtc);
+				}
+				
+				// 참조코드값이 삭제된 경우, change 이벤트 에서 val가 null로 등록되기 때문에 default로 다시 선택해준다.
+				if($('select[name=osType]').val() == null) {
+					$('select[name=osType]').val("").trigger('change');
+				}
+
+				$("[name='additionalInformation']").summernote('code', data.copy.comment);
+				$('select[name=category]').val(data.copy.category).trigger('change');
+				$('select[name=prjDivision]').val(data.copy.prjDivision).trigger('change');
+				
+				$("#priority").trigger("change");
+				$("#noticeTypeEtc").trigger("change");
+				
+				$('input[name=distributeTarget]').each(function() {
+					var value = $(this).val();
+					if(value == data.copy.distributeTarget) {
+						$(this).trigger('click');
+					}
+				});
+				
+				$("#complete").hide();
+				$("#drop").hide();
+			} else if (data.createThird != null) {
+				$("#additionalInformation").summernote('code', data.createThird);
+			} else {
+				$("#complete").hide(); 
+				$("#copy").hide();
+				$("#priority").trigger("change");
+				$("#noticeTypeEtc").trigger("change");
+			}
+			
+			if(data.copy) {
+				var copyParam = {prjId : $('input[name=prjId]').val(), copy : 'Y'}
+				data.getModelGridData(copyParam);
+			} else {
+				data.getModelGridData();
+			}
+			
+			var _distributeTargetSelectedVal = "";
+			$('input[name=distributeTarget]').mouseup(function(){
+				_distributeTargetSelectedVal = $('input[name=distributeTarget]:checked').val();
+			});
+
+			var userDivision = $('#division');
+			if([[${project.prjId}]] != '' && [[${project.division}]] != [[${@CommonFunction.getCoConstDefVal("CD_USER_DIVISION_EMPTY")}]]) {
+				for(var i=0;i<userDivision.children().length;i++){
+					if(userDivision.children()[i].value == '${project.division}') {
+						break;
+					}
+					if(userDivision.children().length - 1 == i ) {
+						var divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), project.division)}]];
+						userDivision.append("<option value='" + [[${project.division}]] + "' >" + divisionName+ "</option>");
+						$('#division option:last').attr("selected", "selected");
+						$('#division option:last').change();
+					}
+				}
+			}
+
+			userDivision = $('#division');
+			for(var i=0;i<userDivision.children().length;i++){
+				if(userDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+					break;
+				}
+				if(userDivision.children().length - 1 == i ) {
+					userDivision.append("<option value='" + [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]] + "' ></option>");
+					if([[${project.division}]] == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
+						$('#division option:last').attr("selected", "selected");
+						$('#division option:last').change();
+					}
+				}
+			}
+
+			var prjDivision = $("#prjDivision");
+			for(var i=0;i<prjDivision.children().length;i++){
+				if(prjDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]){
+					break;
+				}
+				if(prjDivision.children().length-1 == i) {
+					prjDivision.append("<option value='" + [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]] + "'></option>");
+				}
+			}
+			
+			commentsParam.height = $(window).height() - 120;
+			fn_comment.getCommentList(commentsParam);
+		},
+		getModelGridData : function(param){
+			$.ajax({
+				url:'/project/modellistAjax',
+				dataType : 'json',
+				cache : false,
+				data : (param) ? param : {prjId : $('input[name=prjId]').val()},
+				contentType : 'application/json',
+				success : function(data){
+					modelData = data.currentModelList;
+					
+					// 리로드 대신 그리드 삭제 후 다시 그리기
+					$("#_modelList").jqGrid('GridUnload');
+					
+					modelList.load();
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	}
+	
+	// 모델 그리드
+	var modelList = {
+		load : function(){
+			var Id = '';
+			
+			$("#_modelList").jqGrid({
+				datatype: 'local',
+				data : modelData,
+				colNames: ['gridId', 'Category', 'Model Name', 'Release Date', 'Last Modified', 'Updated Date', 'Delete', 'osddSyncYn'],
+				colModel: [
+					{name: 'gridId', index: 'gridId', key:true, hidden:true},
+					{name: 'category', index: 'category', align: 'left', width:230, formatter: 'select', editable:true, edittype:"select",editoptions:{value:data.modelValues}},
+					{name: 'modelName', index: 'modelName',align: 'left', width:150, editable:true, 
+						editoptions:{maxlength:100, dataEvents:[
+	                        {
+	                        	type: 'blur',
+								fn: function(e) {
+								 	var key = e.charCode || e.keyCode; // to support all browsers
+								 	$(this).val($(this).val().toUpperCase().trim());
+							    }
+							},
+							{  
+								type: 'change',
+							    fn: function(e) {
+							    	//something if value changed
+							 		$(this).val($(this).val().toUpperCase().trim());
+							    }
+							}
+						]}
+					},
+					{name: 'releaseDate', index: 'releaseDate', align: 'center', width:100, editable:true, sorttype:'date',
+						editoptions:{maxlength:8, dataEvents:[
+							{
+								type: 'focusout',
+								fn: function(e) {
+									var result = $(this).val();
+									gDateKeyup = true;
+									
+									if(/\d+/.test(result)) {
+										result = result.match(/\d+/g).join("");
+										if (result.length == 8){
+											// 날짜 형식 체크
+											var date_pattern = /^\d{4}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[0-1])$/;
+											if (!date_pattern.test(result)){
+												alertify.error([[#{msg.common.valid}]], 0);
+												$(this).val("");
+											} else {
+												// 해당 월 말일 체크
+												var checkLastDate = new Date(result.substring(0,4), result.substring(4,6), 0);
+												if (parseInt(result.substring(6,8)) > parseInt(checkLastDate.getDate())){
+													alertify.error([[#{msg.common.valid}]], 0);
+													$(this).val("");
+												} else {
+													$(this).val(result);
+												}
+											}
+										} else {
+											alertify.error([[#{msg.common.valid}]], 0);
+											$(this).val("");
+										}
+									} else {
+										$(this).val("");
+									}
+								}
+							},
+						]}
+   					},
+					{name: 'modifier', index: 'modifier', align: 'center', width:80, editable:false, hidden:true},
+					{name: 'modifiedDate', index: 'modifiedDate', align: 'center', width:80, editable:false, sorttype:'date', hidden:true},
+					{name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: fn.setDelBtn},
+					{name: 'osddSyncYn', index: 'osddSyncYn', hidden:true},
+				],
+				autoencode: true,
+				editurl:'clientArray',
+	 			autowidth: true,
+	 			pager: '#pagerModel',
+				height: 'auto',
+				sortname: 'Category',
+				sortorder: 'asc',
+				gridview: true,
+				rownumbers: true,
+				rowNum:[[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_MAX")}]],
+				toppager: true,
+			   	pgtext: false,
+			   	pginput:false,
+				viewrecords: true,
+				loadonce:true,
+				loadComplete:function(data) {
+					lastsel=-1;
+					hidePageNav('pagerModel');
+					
+					if(isChangeModelInfo == "false") {
+						$("#pagerModel").hide();
+					}
+				},
+				onSelectRow: function(rowid) {
+					if(rowid){
+						if(isChangeModelInfo != "false") {
+							$("#_modelList").jqGrid('editRow',rowid,true,pickdates);
+						}
+						
+						lastsel=rowid;
+					}
+				},
+				// 로우 더블클릭 시 편집모드
+				ondblClickRow: function(rowid,iRow,iCol,e) {
+					if(isChangeModelInfo != "false") {
+						gridListBulkEdit("_modelList", pickdates);
+					}
+				}
+			});
+
+            if(!isReadOnly) {
+                $("#_modelList").jqGrid('navGrid',"#_modelList_toppager",{edit:false,add:true,del:false,search:false,refresh:false
+                    , addfunc: function (rowid) {
+                        var _tempRandId = $.jgrid.randId();
+                        var lastCategory = "";
+                        var rows = fn.getModelGridRows('#_modelList');
+
+                        if(rows.length > 0){
+                            lastCategory = rows[rows.length-1].category;
+                        }else{
+                            lastCategory = "";
+                        }
+
+                        $("#_modelList").jqGrid("addRowData", _tempRandId, {gridId: _tempRandId, category: lastCategory}, "last");
+                        $("#_modelList").jqGrid('editRow',_tempRandId,true,pickdates);
+                    }
+                });
+            }
+		},
+		changeTarget : function () {
+			$("#_modelList").jqGrid('clearGridData');
+			//Model Reset
+			var site = $('input[name=distributeTarget]:checked').val();
+			var siteCd = [[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTE_CODE'))}]];
+			var categoryCd = '';
+			
+			switch(site){
+				case siteCd[0].cdDtlNo:	categoryCd=[[${@CommonFunction.getCoConstDefVal('CD_MODEL_TYPE')}]];	break;
+				case siteCd[1].cdDtlNo:	categoryCd=[[${@CommonFunction.getCoConstDefVal('CD_MODEL_TYPE2')}]];	break;
+				case siteCd[2].cdDtlNo:	categoryCd=[[${@CommonFunction.getCoConstDefVal('CD_MODEL_TYPE')}]];	break;
+			}
+			
+			getCategoryCodeJson(categoryCd);
+		}
+	};
+	
+	//데이트피커
+	function pickdates(id){
+		jQuery("#"+id+"_releaseDate","#_modelList").datepicker({dateFormat:"yymmdd"});
+	}
+	
+	//ms-kwon
+	function checkDate(obj){
+		$this = $(obj);
+		var date = $this.val();
+		
+		if($.trim(date) != ""){
+			var regExp = /^(19[7-9][0-9]|20\d{2}).(0[0-9]|1[0-2]).(0[1-9]|[1-2][0-9]|3[0-1])$/;
+			
+			if(!regExp.test(date)){
+				$this.val("");
+				alert([[#{msg.project.confirm.wrong.input.date}]]);
+			}
+		}
+	}
+	
+	//2016-11-17 hk-lee
+	// 카테고리 코드 가져오기(Json Type)
+	function getCategoryCodeJson(cd){
+		return $.ajax({
+			type: 'GET',
+			data: {code:cd},
+			async:false,
+			dataType:'json',
+			url: '/project/getCategoryCodeToJson',
+			success : function(json){
+				if(json != null){
+					var str = '';
+					
+					$.each(json, function(key,value){
+						var keyArr = key.split("|");
+						str += keyArr[1]+':'+value+';';
+					});
+					
+					str = str.substring(0, str.length-1);
+					data.modelValues = str;					
+					
+					$('#_modelList').jqGrid('setColProp','category',{editoptions:{value:str}}).trigger('reloadGrid');
+				}
+			}
+		});
+	};
+//]]>
+</script>
+</th:block>
+</html>

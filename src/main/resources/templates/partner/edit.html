@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:replace="partner/edit-header :: headerFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="partner/edit-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+        <div class="custom-layout">
+            <section class="content-header">
+                <div class="container-fluid">
+                	<div class="row">
+                        <div class="d-flex align-items-center mt-2 ml-2" id="displayPartnerInfo"></div>
+                        <div class="float-right align-items-center mt-2 mr-3" style="margin-left: auto;">
+                        <div class="float-right">
+                        	<th:block th:if="${detail?.viewOnlyFlag != 'Y'}">
+                        		<th:block th:if="${detail?.loginUserRole != 'ROLE_VIEWER'}">
+                        			<button th:if="${detail.status == 'CONF'}" type="button" class="btn btn-lg-red btn-sm width-10rem px-1" id="createProject" th:text="'Create Project for OSS Notice'"></button>
+                        			<th:block th:if="${detail.loginUserRole == 'ROLE_ADMIN'}">
+                        				<button th:if="${detail.status == 'REV'}" type="button" class="btn btn-outline-lg-red  btn-sm width-6rem px-1 confirm" th:onclick="|fn.confirm()|" th:text="Confirm"></button>
+                        				<button th:if="${detail.status == 'REV'}" type="button" class="btn btn-outline-lg-red  btn-sm width-6rem px-1 reject" th:onclick="|fn.reject()|" th:text="Reject"></button>
+										<button th:if="${detail.status == 'CONF'}" type="button" class="btn btn-lg-red  btn-sm width-6rem px-1 reject" th:onclick="|fn.reject()|" th:text="Reject"></button>
+                               		 	<button th:if="${detail.status == 'REQ'}" type="button" class="btn btn-outline-lg-red  btn-sm width-6rem px-1 restart" th:onclick="|fn.reviewStart()|" th:text="'Review Start'"></button>
+                               		 	<button th:if="${detail.status =='PROG'}" type="button" class="btn btn-lg-red  btn-sm width-6rem px-1 review" th:onclick="|fn.requestReview()|" th:text="Request"></button>
+                        			</th:block>
+                        			<th:block th:if="${detail.loginUserRole != 'ROLE_ADMIN'}">
+                        				<button th:if="${detail.status == 'REQ' or detail.status == 'CONF'}" type="button" class="btn btn-lg-red btn-sm width-6rem px-1 reject" th:onclick="|fn.reject()|" th:text="Reject"></button>
+                        				<button th:if="${detail.status =='PROG'}" type="button" class="btn btn-lg-red btn-sm width-6rem px-1 review" th:onclick="|fn.requestReview()|" th:text="Request"></button>
+                        			</th:block>
+                        		</th:block>
+                        		<th:block th:if="${detail?.partnerId != null or detail?.permission > 0}">
+                        			<button type="button" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
+                        		</th:block>
+                        	</th:block>
+                        	<span th:if="${detail.loginUserRole == 'ROLE_ADMIN' and detail.status == 'REV' and binaryFile != null}" class="form-check width-8rem pl-3" style="font-size: .85rem;">
+                               	<input class="form-check-input" id="ignoreBinaryDbFlag" name="ignoreBinaryDbFlag" value="N" type="checkbox">
+                                <label class="form-check-label text-blue-gray" for="ignoreBinaryDbFlag" style="font-weight: normal;" th:text="'Do not register in binary DB'"></label>
+                          	</span>
+                        </div>
+                        </div>
+                	</div>
+                </div>
+            </section>
+            <section class="content">
+            <div class="row col-md-12">
+           	<div th:class="${detail?.partnerId != null} ? 'col-md-9 contents-area' : 'col-md-12 contents-area'">
+                <div class="container-fluid">
+                <div class="topper-content">
+                    <div class="card card-secondary card-tabs">
+                        <div class="card-header d-flex p-0 pt-1" style="display:inline-block;">
+                        	<div class="d-flex align-items-center">
+                        		<ul class="nav nav-tabs" id="menu-tab" role="tablist">
+                                	<li class="nav-item">
+                                		<a class="nav-link active" id="tabMenuParty" data-toggle="pill" href="#menu-party" role="tab" aria-controls="menu-party" aria-selected="true" th:text="'3rd party'"></a>
+                                	</li>
+<!--                                <li class="nav-item" th:if="${batFlag}">
+                                    	<a class="nav-link" id="tabMenuBat" data-toggle="pill" href="#menu-bat" role="tab" aria-controls="menu-bat" aria-selected="false" th:text="Bat"></a>
+                                	</li> -->
+                            	</ul>
+                        	</div>
+                        	<div class="d-flex-align" style="margin-left: auto;">
+                            	<span th:if="${detail.partnerId != null}" class="mr-2 px-2 pointer" th:onclick="|fn.shareUrl()|" th:title="'Share URL'">
+                            		<i class="fas fa-share-alt customIcon2"></i>
+								</span>
+								<input type="hidden" id="copyUrl"/>
+								<th:block th:if="${detail.statusPermission > 0 and detail.status != 'CONF'}">
+									<span class="mr-2 px-2 pointer" id="partyDelete" th:onclick="|fn.delete()|" title="delete">
+										<i class="far fa-trash-alt customIcon2"></i>
+									</span>
+									<span class="mr-2 px-2 pointer" id="partyReset" th:onclick="|fn.reset()|" title="reset">
+										<i class="fas fa-undo-alt customIcon2"></i>
+									</span>
+								</th:block>
+									<span th:if="${detail?.partnerId == null or (detail.statusPermission > 0 and detail.status != 'CONF')}" class="mr-2 px-2 pointer" id="partySave" th:onclick="|fn.save()|" title="save">
+										<i class="fas fa-save customIcon2"></i>
+									</span>
+                           	 	<span class="btn btn-tool mr-2 pointer" id="expandBtn" data-card-widget="collapse" title="Collapse">
+                            		<i class="fas fa-minus"></i>
+                           		</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="custom-tabs-four-tabContent">
+                                <!-- 3rd party -->
+                                <div class="tab-pane fade show active" id="menu-party" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                	<th:block th:if="${editMode == 'Y'}">
+                            			<th:block th:replace="partner/fragments/edit :: editFragments"></th:block>
+                            		</th:block>
+                            		<th:block th:unless="${editMode == 'Y'}">
+                            			<th:block th:replace="partner/fragments/edit :: viewFragments"></th:block>
+                            		</th:block>
+                                </div>
+                                
+                                <!-- <div class="tab-pane fade show" id="menu-bat" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                	<th:block th:replace="partner/fragments/edit :: batFragments"></th:block>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+					<div class="bottom-component">
+                    <div class="row pl-2 grid-area" name="gridArea" id="girdAreaParty" style="width: 100%;">
+                        <!-- buttons -->
+                        <div class="col-md-12 mb-3 pl-2">
+                            <div class="row">
+                            	<div class="float-left align-items-center" style="margin-right: auto;">
+                            		<th:block th:if="${detail.status != 'REQ' and detail.status != 'CONF' and (detail.loginUserRole == 'ROLE_ADMIN' or (detail.loginUserRole != 'ROLE_ADMIN' and detail.status != 'REV')) and detail.viewOnlyFlag != 'Y'}">
+                            			<button class="btn btn-sm dropdown-toggle btn-outline-dark px-2" type="button" data-toggle="dropdown">
+                                        	<span class="dropdown-icon"></span>Pre-Review
+                                       	</button>
+                                    	<div class="dropdown-menu" role="menu">
+                                       		<span class="dropdown-item pointer" th:onclick="|fn.CheckOssViewPage('PARTNER')|" th:text="'Open Source'"></span>
+                                         	<span class="dropdown-item pointer" th:onclick="|fn.CheckOssLicenseViewPage('PARTNER')|" th:text="'License'"></span>
+                                       	</div>
+                            		</th:block>
+                            		<button th:if="${@CommonFunction.isAdmin() and detail.partnerId != null}" type="button" class="btn btn-outline-lg-red btn-sm width-9rem px-2 idenBulkRegist"
+                            				th:onclick="fn_grid_com.ossBulkReg([[${detail.partnerId}]], '20')" th:text="'OSS bulk registration'"></button>
+                            	</div>
+                            	<div class="float-left align-items-center" style="margin-left: auto;">
+                                   	<button type="button" sec:authorize="hasRole('ROLE_ADMIN')" th:if="${detail.partnerId != null}" class="btn btn-outline-lg-red btn-sm width-10rem px-2" th:onclick="fn.binaryDBSave([[${detail.partnerId}]])" th:text="'Save (Binary DB)'"></button>
+                            	</div>
+                            </div>
+                        </div>
+                        <div th:if="${detail?.partnerId == null or detail.permission > 0}" class="col-md-12 jqGridSet">
+                            <table id="list"><tr><td></td></tr></table>
+                            <div id="pager"></div>
+                        </div>
+                    </div>
+                    <div class="row pl-2" name="gridArea" id="gridAreaBat" style="width: 100%;display: none;">
+                       
+                    </div>
+                    </div>
+                </div>
+                </div>
+                </div>
+                <div class="col-md-3 comment-area" th:style="${detail?.partnerId == null or detail?.permission == 0} ? 'display: none;'">
+            		<div class="card card-lg-red" style="position:sticky;top:10px;">
+                		<div class="card-header">
+                    		<h3 class="card-title" th:text="Comment"></h3>
+                      		<div class="card-tools">
+                         		<button type="button" class="btn btn-tool text-white commentBtn"><i class="fas fa-plus-circle"></i></button>
+                        		<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.showCommentHistory()|"><i class="fas fa-external-link-alt"></i></button>
+                         		<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
+                     		</div>
+                 		</div>
+                  		<div class="card-body comment-card-body pt-0" style="padding-bottom: 0;">
+                    		<div clas="row">
+                        		<div clas="col-md-12" id="commentList"></div>
+                      		</div>
+                  		</div>
+               		</div>
+            	</div>
+                </div>
+                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+            </section>
+        </div>
+    </div>
+    
+    <th:block th:replace="partner/view/sheetSelectView"></th:block>
+    
+</body>
+<form id="partnerBulkEditForm" method="POST" th:action="@{/oss/ossBulkEditPopup}" target="bulkEditViewPartnerPopup">
+	<input type="hidden" name="rowId" value=""/>
+	<input type="hidden" name="target" value=""/>
+</form>
+</html>

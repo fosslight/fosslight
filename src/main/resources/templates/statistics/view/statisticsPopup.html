@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="statistics/view/statisticsPopup-script :: script"></th:block>
+<body class="hold-transition sidebar-mini">
+	<!-- Site wrapper -->
+	<div class="wrapper">
+		<div class="custom-layout" style="height: auto">
+			<section class="content">
+				<div class="container-fluid">
+					<div id="wrap" style="padding-top: 10px;">
+						<div align="center">
+							<div class="jqGridSet" id="chartRawDataSet" style="overflow: auto; height: 650px;">
+								<table id="chartRawData">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+				</div>
+			</section>
+		</div>
+	</div>
+</body>
+
+
+</html>

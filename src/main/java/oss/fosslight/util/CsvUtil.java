@@ -9,6 +9,8 @@ import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -29,7 +31,7 @@ public class CsvUtil extends CoTopComponent {
 	// Service
 	private static FileService fileService 		= (FileService) 		getWebappContext().getBean(FileService.class);
 
-	public static Workbook csvFileToExcelWorkbook(File file, String readType) throws IOException{
+	public static Workbook csvFileToExcelWorkbook(File file, String readType) throws IOException, CsvValidationException{
 		CSVParser parser = new CSVParserBuilder()
 				.withSeparator('\t')
 				.build();

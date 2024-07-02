@@ -1,0 +1,78 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="system/history-script :: script"></th:block>
+<body class="hold-transition sidebar-mini" style="height: 100%;">
+    <div class="wrapper">
+        <div class="custom-layout bg-white">
+        	<section class="content-header">
+            	<div class="container-fluid">
+                	<form id="historySearch" name="historySearch">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card card-dark card-outline collapsed-card search-form mb-3">
+                                    <div class="card-header" style="border-bottom: none;">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                	<input class="form-control autoCom" placeholder="Name" type="text" name="hTitle">
+                                              	</div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                 	<input class="form-control autoCom" placeholder="Modifier" type="text" name="modifier">
+                                              	</div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                    <select class="form-control select2" id="modifyTypeSelect" name="hType" style="width: 100%;">
+                                                        <option th:value="''"></option>
+                                                        <option th:value="300" th:text="License"></option>
+                                                        <option th:value="301" th:text="'Open Source'"></option>
+                                                        <option th:value="303" th:text="Project"></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                            	<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                    <select class="form-control select2" id="actionTypeSelect" name="hAction" style="width: 100%;">
+                                                        <option th:value="''"></option>
+                                                        <option th:value="INSERT" th:text="INSERT"></option>
+                                                        <option th:value="UPDATE" th:text="UPDATE"></option>
+                                                        <option th:value="DELETE" th:text="DELETE"></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                            	<div class="input-group" style="width: 100%; margin-top: .5rem; margin-bottom: .5rem;">
+                                                	<div class="form-group">
+                                                      	<span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                 	</div>
+                                                    <input class="form-control" id="modifiedDate" name="modifiedDate" placeholder="Modified Date" type="text"/>
+                                                    <input class="form-control" name="startDate" type="hidden"/>
+                                                    <input class="form-control" name="endDate" type="hidden"/>
+                                               	</div>
+                                            </div>
+                                            <div class="col-md-1">
+                                            	<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                	<button class="btn btn-default" type="submit" id="search"><i class="fa fa-search"></i></button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                 	</form>
+                  	<div class="row mt-3 mb-2">
+                      	<div class="col-12 jqGridSet">
+                          	<table id="list"><tr><td></td></tr></table>
+                           	<div id="pager"></div>
+                      	</div>
+                  	</div>
+             	</div>
+         	</section>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<link href="//cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="//cdn.jsdelivr.net/npm/admin-lte@3.2.0/dist/css/adminlte.min.css" rel="stylesheet">
+<th:block th:fragment="loignFragment">
+    <div class="replaceable-content">
+        <form id="loginForm" name="loginForm" autocomplete="false">
+            <div class="login-userInfo form-group mt-3">
+                <label class="top-text">ID</label>
+                <input class="form-control form-control-border" name="userId" placeholder="foss.kim" type="text" autocomplete="false" onchange="login_fn.handleSaveIdInputKeyUp()">
+            </div>
+            <div class="login-userInfo form-group mt-3 mb-0">
+                <label class="top-text">Password</label>
+                <input class="form-control form-control-border" name="password"
+                       type="password" autocomplete="false">
+            </div>
+            <div class="row d-flex align-items-center px-2" style="font-size: .9rem">
+                <div class="icheck-danger icheck-md col-4">
+                    <input id="saveID" type="checkbox" onchange="login_fn.handleSaveIdCheckboxChange(this)">
+                    <label class="text-dark-gray ml-1" for="saveID" style="font-weight: normal">
+                        SAVE ID
+                    </label>
+                </div>
+                <div class="icheck-primary col-8">
+                        <span class="float-right pt-3 pb-0">
+                            <p><a class="text-right" href="javascript:void(0);"
+                                  onclick="resetPw_fn.renderPage(); return false;">ResetPassword</a></p>
+                        </span>
+                    <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG')) != 'Y'}">
+                        <span class="float-right mx-1 pt-3 pb-0" style="color: #ced4da">|</span>
+                        <span class="float-right pt-3 pb-0">
+                             <p><a class="text-right" href="javascript:void(0);"
+                                   onclick="signup_fn.renderPage(); return false;">Signup</a></p>
+                        </span>
+                    </th:block>
+                </div>
+            </div>
+        </form>
+
+        <div class="social-auth-links text-center mt-2 mb-3">
+            <button class="btn btn-block btn-lg bg-red " id="loginButton" href="#" onclick="login_fn.excSubmit()" type="button">
+                LOGIN
+            </button>
+        </div>
+    </div>
+</th:block>
+<th:block th:fragment="signUpFragment">
+    <div class="replaceable-content py-2">
+        <form id="signupForm" name="signupForm" autocomplete="false">
+            <div class="row">
+                <div class="col-12 my-1">
+                    <h5 class="text-lg-gray">REGISTER</h5>
+                </div>
+            </div>
+            <div class="login-userInfo form-group mt-2">
+                <label class="top-text">ID</label>
+                <input class="form-control form-control-border" name="userId" placeholder="foss.kim" type="text">
+                <div class="retxt text-danger text-sm userId"></div>
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="top-text">Password</label>
+                <input class="form-control form-control-border" name="userPw"
+                       type="password" autocomplete="new-password">
+                <div class="retxt text-danger text-sm userPw"></div>
+            </div>
+            <div class="login-userInfo form-group">
+                <th:block th:with="registDomainValues = ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
+                    <div class="form-group" th:style="${registDomainValues == null} ? 'display:none' : ''">
+                        <label class="top-text" for="emailSelect">e-mail</label>
+                        <select class="custom-select form-control-border" name="registDomain" id="emailSelect" onchange="signup_fn.emailChange()">
+                            <option th:each="opt : ${registDomainValues}" th:value="${opt.cdDtlNo}"
+                                    th:selected="${#strings.equals(opt.cdDtlNm, @CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN')))}">
+                                [[ ${opt.cdDtlNm} ]]
+                            </option>
+                        </select>
+                        <div class="retxt text-danger text-sm email"></div>
+                    </div>
+                    <div class="form-group" th:style="${registDomainValues != null} ? 'display:none' : ''">
+                        <label class="top-text" for="emailSelect">e-mail</label>
+                        <input class="form-control form-control-border" id="emailTemp"
+                               type="text"
+                               placeholder="example@lge.com"
+                               th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"
+                               th:style="${registDomainValues != null} ? 'display:none' : ''">
+                        <input type="hidden" id="email" name="email" value=""/>
+                        <div class="retxt text-danger text-sm email"></div>
+                    </div>
+                </th:block>
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="top-text">Name</label>
+                <input class="form-control form-control-border" name="userName"
+                       type="text" autocomplete="new-password">
+                <div class="retxt text-danger text-sm userName"></div>
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="top-text" for="s3">Division</label>
+                <select class="custom-select form-control-border" name="division" id="s3">
+                    <option value="" hidden></option>
+                    <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}"></th:block>
+                </select>
+                <div class="retxt text-danger text-sm division"></div>
+            </div>
+        </form>
+
+        <div class="social-auth-links text-center mt-4">
+        <div class="row mt-3">
+            <div class="col-6 p-1">
+                <button class="btn btn-block bg-red p-2 m-0" href="#" onclick="signup_fn.excSubmit()" type="button" style="font-size: 1rem">
+                    SIGN UP
+                </button>
+            </div>
+            <div class="col-6 p-1">
+                <button class="btn btn-block bg-lg-gray text-white p-2 m-0" href="#" onclick="signup_fn.cancelWithBack()" type="button" style="font-size: 1rem">
+                    CANCEL
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+</th:block>
+<th:block th:fragment="resetPasswordFragment">
+    <div class="replaceable-content">
+        <form class="my-3" id="resetPwdForm" name="resetPasswordForm" autocomplete="off">
+            <div class="row">
+                <div class="col-12 my-1">
+                    <h5 class="text-lg-gray">RESET PASSWORD</h5>
+                </div>
+            </div>
+            <div class="login-userInfo form-group mt-3">
+                <label class="top-text">ID</label>
+                <input class="form-control form-control-border" name="userId" id="userId" placeholder="foss.kim" type="text">
+                <div id="userIdRequired" class="text-danger text-sm" style="display: none">Required</div>
+            </div>
+            <div class="login-userInfo form-group">
+                <label class="top-text">e-mail</label>
+                <input class="form-control form-control-border" name="email" id="email"
+                       type="text">
+                <div id="emailRequired" class="text-danger text-sm" style="display: none">Required</div>
+            </div>
+        </form>
+
+        <div class="social-auth-links text-center mt-4">
+            <div class="row mt-3">
+                <div class="col-6 p-1">
+                    <button class="btn btn-block bg-red p-2 m-0" href="#" onclick="resetPw_fn.excSubmit()" type="button" style="font-size: 1rem">
+                        Reset Password
+                    </button>
+                </div>
+                <div class="col-6 p-1">
+                    <button class="btn btn-block bg-lg-gray text-white p-2 m-0" href="#" onclick="resetPw_fn.cancelWithBack()" type="button" style="font-size: 1rem">
+                        CANCEL
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</html>

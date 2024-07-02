@@ -19,20 +19,32 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import java.util.Collections;
 
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
-	private static final Set<String> DEFAULT_PRODUCES_AND_CONSUMES = new HashSet<String>(Arrays.asList("application/json"));
+	private static final Set<String> DEFAULT_PRODUCES_AND_CONSUMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("application/json")));
 	
     @Bean
-    public Docket swaggerApi() {
+    Docket swaggerApiV1() {
         return new Docket(DocumentationType.SWAGGER_2).apiInfo(swaggerInfo())
-        		.consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
+                .consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
                 .apis(RequestHandlerSelectors.basePackage(AppConstBean.APP_COMPONENT_SCAN_PACKAGE+".api.controller"))
                 .paths(PathSelectors.ant("/api/v1/**"))
                 .build()
+                .groupName("v1")
                 .useDefaultResponseMessages(false); // 기본으로 세팅되는 200,401,403,404 메시지를 표시 하지 않음
+    }
+
+    @Bean
+    Docket swaggerApiV2() {
+        return new Docket(DocumentationType.SWAGGER_2).apiInfo(swaggerInfo())
+                .consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
+                .apis(RequestHandlerSelectors.basePackage(AppConstBean.APP_COMPONENT_SCAN_PACKAGE+".api.controller"))
+                .paths(PathSelectors.ant("/api/v2/**"))
+                .build()
+                .groupName("v2");
     }
     
     private ApiInfo swaggerInfo() {

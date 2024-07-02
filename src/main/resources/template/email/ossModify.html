@@ -1,211 +1,244 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
-<html lang="ko">
-	<head>
-		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-		<style>
-			.marker{background-color: Yellow;}
-		</style>
-		<title>FOSSLight Hub</title>
-	</head>
-	<body>
-		<table cellspacing="0" cellpadding="0" border="0" style="font-family:'arial,sans-serif'">
-			<tr>
-				<td colspan="3" height="28" style="background:#f9f9f9"></td>
-			</tr>
-			<tr>
-				<td width="60" style="background:#f9f9f9"></td>
-				<td>
-					<table cellspacing="0" cellpadding="0" border="0">
-						<tr>
-							<td colspan="3" height="25" style="background:#c00c3f">
-								<h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
-							</td>
-						</tr>
-						<tr>
-							<td width="1" style="background:#ddd"></td>
-							<td style="padding:40px;">
-							#if( $contentsTitle )
-								<div style="padding-bottom:10px;font-size:16px;font-weight:bold;">$!contentsTitle</div>
-							#end
-							#if( $contentsSubTitle )
-								<p style="font-size:12px;">$!contentsSubTitle</p>
-							#end
-							
-							#if( $comment )
-								<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
-								<div style="padding:10px;font-size:12px;">$!comment</div>
-							#end
-								<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
-										<th style="padding:5px;background:#f0f0f0;">Before Change</th>
-										<th style="padding:5px;background:#f0f0f0;">After Change</th>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Name</th>
-										<td style="padding:5px;">$!before.ossName</td>
-										<td style="padding:5px;">$!after.ossName</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Nickname</th>
-										<td style="padding:5px;">#foreach( $nickName in $before.ossNicknames )$!nickName <br />#end</td>
-										<td style="padding:5px;">#foreach( $nickName in $after.ossNicknames )$!nickName <br />#end</td>
-									</tr>
-									
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
-										<td style="padding:5px;">$!before.ossVersion #if($before.ossVersion != '' && $before.ossType != '') #end
-									#if($before.ossType.contains("M")) <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADcSURBVDhPY/z//39v39o7d58zEAdUlCWLi4JZgCygHg1NK4goQXDj+jEgyQThkApQtP3+/evTp7fv3j0DkkA2GheqCAxAjoSD798/11a5QtjNbbuBJDKXlVUYwgYCFNv+/PkJZTEwAC0BIigHVQoIcPqtvyceiKAcDECNIIGDlLQ+NAYawK6Nlw/qezgDDWDXxsnJCww6IAIyoEKoAEUbCws7hAFUzccnDERwbXApCECJN4glEAYuEQhAsY2VlQ1iCZCBSwQCsPuNICA54ygrSZYUB4O0QQWIBwwMAJhcWykW5ke4AAAAAElFTkSuQmCC"/> #end
-									#if($before.ossType.contains("D")) <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAD6SURBVDhPY/z///+WnpUv7zxlIA6Iq0j7lISzAFlAPYaa+hBRguD89YtAkgnCIRWgaPv1+9fbT++evXsBQUA2UAQqhwpAjoSDz9+/uNaGQjlgsK5qgZSQOBsrG5QPAyi2/fwDNXth4ZTlZbOAjKC2hGfvXmLaid1vwnyCimKycJ1AV0DE4QBnkAAdxsvJDWHDXQEH1AhJZAD0z+fvXyFsdha8QQIHbz+9v//qcWRXGpANDExeTh6IOBygRADc1Pj+HAgDVwSgaAOaurt5NTwAgKZg1QMEKI4EqhDmE5ISkoAgIBurHiAgMyRJzzjKUj6lESBtUAHiAQMDAJyXY/B57xmtAAAAAElFTkSuQmCC"/> #end
-									#if($before.ossType.contains("V")) <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADZSURBVDhPY/z///+GWY3PH95kIA5IyqsHpNWzAFlAPYE29hBRgmD9kYNAkgnCIRWga/v56/er95+ACMhAZkOlYQBd28ev3/WiSoEIyEBmQ6VhAIttcAYyG8KAA3Rt7GysEAbEeRA2XBAO0LXxc3PunVoDZHgXdgARkAHkAgXBkgiAxTY+bi4oBwyAXMK2AQGaIkw9QIBFG9ydQIDVhUCA3TZRQX4IG8gg1jYgANpwaVk3EGG1CgiwawPaICbIB0RYrQIC7NoIApIzjoS8WmBaA0gbVIB4wMAAAOuvYrotinxoAAAAAElFTkSuQmCC"/> #end
-										</td>
-										<td style="padding:5px;">$!after.ossVersion #if($after.ossVersion != '' && $after.ossType != '') #end
-									#if($after.ossType.contains("M")) <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADcSURBVDhPY/z//39v39o7d58zEAdUlCWLi4JZgCygHg1NK4goQXDj+jEgyQThkApQtP3+/evTp7fv3j0DkkA2GheqCAxAjoSD798/11a5QtjNbbuBJDKXlVUYwgYCFNv+/PkJZTEwAC0BIigHVQoIcPqtvyceiKAcDECNIIGDlLQ+NAYawK6Nlw/qezgDDWDXxsnJCww6IAIyoEKoAEUbCws7hAFUzccnDERwbXApCECJN4glEAYuEQhAsY2VlQ1iCZCBSwQCsPuNICA54ygrSZYUB4O0QQWIBwwMAJhcWykW5ke4AAAAAElFTkSuQmCC"/> #end
-									#if($after.ossType.contains("D")) <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAD6SURBVDhPY/z///+WnpUv7zxlIA6Iq0j7lISzAFlAPYaa+hBRguD89YtAkgnCIRWgaPv1+9fbT++evXsBQUA2UAQqhwpAjoSDz9+/uNaGQjlgsK5qgZSQOBsrG5QPAyi2/fwDNXth4ZTlZbOAjKC2hGfvXmLaid1vwnyCimKycJ1AV0DE4QBnkAAdxsvJDWHDXQEH1AhJZAD0z+fvXyFsdha8QQIHbz+9v//qcWRXGpANDExeTh6IOBygRADc1Pj+HAgDVwSgaAOaurt5NTwAgKZg1QMEKI4EqhDmE5ISkoAgIBurHiAgMyRJzzjKUj6lESBtUAHiAQMDAJyXY/B57xmtAAAAAElFTkSuQmCC"/> #end
-									#if($after.ossType.contains("V")) <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADZSURBVDhPY/z///+GWY3PH95kIA5IyqsHpNWzAFlAPYE29hBRgmD9kYNAkgnCIRWga/v56/er95+ACMhAZkOlYQBd28ev3/WiSoEIyEBmQ6VhAIttcAYyG8KAA3Rt7GysEAbEeRA2XBAO0LXxc3PunVoDZHgXdgARkAHkAgXBkgiAxTY+bi4oBwyAXMK2AQGaIkw9QIBFG9ydQIDVhUCA3TZRQX4IG8gg1jYgANpwaVk3EGG1CgiwawPaICbIB0RYrQIC7NoIApIzjoS8WmBaA0gbVIB4wMAAAOuvYrotinxoAAAAAElFTkSuQmCC"/> #end
-										</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name (Type)</th>
-										<td style="padding:5px;">$!before.licenseName ($!before.licenseType)</td>
-										<td style="padding:5px;">$!after.licenseName ($!after.licenseType)</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Detected License Name</th>
-										<td style="padding:5px;">#foreach( $beforeDetectedLicense in $!before.detectedLicenses )$!beforeDetectedLicense #end</td>
-										<td style="padding:5px;">#foreach( $afterDetectedLicense in $!after.detectedLicenses )$!afterDetectedLicense #end</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Copyright</th>
-										<td style="padding:5px;">$!before.copyright</td>
-										<td style="padding:5px;">$!after.copyright</td>
-									</tr>
-									#if(($before.ossType.contains("M") || $before.ossType.contains("D")) || ($after.ossType.contains("M") || $after.ossType.contains("D")))
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
-										<td>
-											#if($before.ossType.contains("M") || $before.ossType.contains("D"))
-											<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-												#foreach( $ossLicense in $before.ossLicenses )
-												<tr>
-													<td>$!ossLicense.ossLicenseComb</td>
-													<td>$!ossLicense.licenseName</td>
-													<td>$!ossLicense.ossCopyright</td>
-												</tr>
-												#end
-											</table>
-											#end
-										</td>
-										<td>
-											#if($after.ossType.contains("M") || $after.ossType.contains("D"))
-											<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-												#foreach( $ossLicense in $after.ossLicenses )
-												<tr>
-													<td>$!ossLicense.ossLicenseComb</td>
-													<td>$!ossLicense.licenseName</td>
-													<td>$!ossLicense.ossCopyright</td>
-												</tr>
-												#end
-											</table>
-											#end
-										</td>
-									</tr>
-									#end
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
-										<td style="padding:5px;">$!before.obligation</td>
-										<td style="padding:5px;">$!after.obligation</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Homepage</th>
-										<td style="padding:5px;">$!before.homepageLinkFormat</td>
-										<td style="padding:5px;">$!after.homepageLinkFormat</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Download Location</th>
-										<td style="padding:5px;">$!before.downloadLocationLinkFormat</td>
-										<td style="padding:5px;">$!after.downloadLocationLinkFormat</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Summary Description</th>
-										<td style="padding:5px;">$!before.summaryDescription</td>
-										<td style="padding:5px;">$!after.summaryDescription</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Attribution</th>
-										<td style="padding:5px;">$!before.attribution</td>
-										<td style="padding:5px;">$!after.attribution</td>
-									</tr>
-									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Last Modified Date / Last Modifier</th>
-										<td style="padding:5px;">$!before.modifiedDate / $!before.modifier </td>
-										<td style="padding:5px;">$!after.modifiedDate / $!after.modifier </td>
-									</tr>
-								</table>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <style>
+        .marker {
+            background-color: Yellow;
+        }
+    </style>
+    <title>FOSSLight Hub</title>
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" style="font-family:'arial,sans-serif'">
+    <tr>
+        <td colspan="3" height="28" style="background:#f9f9f9"></td>
+    </tr>
+    <tr>
+        <td style="background:#f9f9f9" width="60"></td>
+        <td>
+            <table border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td colspan="3" height="25" style="background:#c00c3f">
+                        <h1 style="margin:0;padding-left:5px;font-size:14px;color:white">FOSSLight Hub Notification</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background:#ddd" width="1"></td>
+                    <td style="padding:40px;">
+                        <div style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:if="${contentsTitle}"
+                             th:utext="${contentsTitle}"></div>
+                        <p style="font-size:12px;" th:if="${contentsSubTitle}" th:utext="${contentsSubTitle}"></p>
+                        <div th:if="${comment != null && comment != ''}">
+                            <h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
+                            <div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
+                        </div>
+                        <table border="1" cellpadding="0" cellspacing="0" style="font-size:12px;border-color:#ddd;"
+                               width="100%">
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">&nbsp;</th>
+                                <th style="padding:5px;background:#f0f0f0;">Before Change</th>
+                                <th style="padding:5px;background:#f0f0f0;">After Change</th>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">OSS Name</th>
+                                <td style="padding:5px;" th:utext="${before.ossName}"></td>
+                                <td style="padding:5px;" th:utext="${after.ossName}"></td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Nickname</th>
+                                <td style="padding:5px;">
+                                    <div th:each="nickName : ${before.ossNicknames}" th:utext="${nickName}"></div>
+                                </td>
+                                <td style="padding:5px;">
+                                    <div th:each="nickName : ${after.ossNicknames}" th:utext="${nickName}"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">OSS Version</th>
+                                <td style="padding:5px;">
+                                    <span th:utext="${before.ossVersion}"></span>
+                                    <th:block th:if="${before?.ossVersion != '' && before?.ossType != '' && before?.ossType != null}">
+										<span th:if="${before.ossType.contains('M')}">
+											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADcSURBVDhPY/z//39v39o7d58zEAdUlCWLi4JZgCygHg1NK4goQXDj+jEgyQThkApQtP3+/evTp7fv3j0DkkA2GheqCAxAjoSD798/11a5QtjNbbuBJDKXlVUYwgYCFNv+/PkJZTEwAC0BIigHVQoIcPqtvyceiKAcDECNIIGDlLQ+NAYawK6Nlw/qezgDDWDXxsnJCww6IAIyoEKoAEUbCws7hAFUzccnDERwbXApCECJN4glEAYuEQhAsY2VlQ1iCZCBSwQCsPuNICA54ygrSZYUB4O0QQWIBwwMAJhcWykW5ke4AAAAAElFTkSuQmCC"/>
+										</span>
+										<span th:if="${before.ossType.contains('D')}">
+											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAD6SURBVDhPY/z///+WnpUv7zxlIA6Iq0j7lISzAFlAPYaa+hBRguD89YtAkgnCIRWgaPv1+9fbT++evXsBQUA2UAQqhwpAjoSDz9+/uNaGQjlgsK5qgZSQOBsrG5QPAyi2/fwDNXth4ZTlZbOAjKC2hGfvXmLaid1vwnyCimKycJ1AV0DE4QBnkAAdxsvJDWHDXQEH1AhJZAD0z+fvXyFsdha8QQIHbz+9v//qcWRXGpANDExeTh6IOBygRADc1Pj+HAgDVwSgaAOaurt5NTwAgKZg1QMEKI4EqhDmE5ISkoAgIBurHiAgMyRJzzjKUj6lESBtUAHiAQMDAJyXY/B57xmtAAAAAElFTkSuQmCC"/>
+										</span>
+										<span th:if="${before.ossType.contains('V')}">
+											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADZSURBVDhPY/z///+GWY3PH95kIA5IyqsHpNWzAFlAPYE29hBRgmD9kYNAkgnCIRWga/v56/er95+ACMhAZkOlYQBd28ev3/WiSoEIyEBmQ6VhAIttcAYyG8KAA3Rt7GysEAbEeRA2XBAO0LXxc3PunVoDZHgXdgARkAHkAgXBkgiAxTY+bi4oBwyAXMK2AQGaIkw9QIBFG9ydQIDVhUCA3TZRQX4IG8gg1jYgANpwaVk3EGG1CgiwawPaICbIB0RYrQIC7NoIApIzjoS8WmBaA0gbVIB4wMAAAOuvYrotinxoAAAAAElFTkSuQmCC"/>
+										</span>
+									</th:block>
+                                </td>
+                                <td style="padding:5px;">
+                                    <span th:utext="${after.ossVersion}"></span>
+                                    <th:block th:if="${after?.ossVersion != '' && after?.ossType != '' && after?.ossType != null}">
+										<span th:if="${after.ossType.contains('M')}">
+											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADcSURBVDhPY/z//39v39o7d58zEAdUlCWLi4JZgCygHg1NK4goQXDj+jEgyQThkApQtP3+/evTp7fv3j0DkkA2GheqCAxAjoSD798/11a5QtjNbbuBJDKXlVUYwgYCFNv+/PkJZTEwAC0BIigHVQoIcPqtvyceiKAcDECNIIGDlLQ+NAYawK6Nlw/qezgDDWDXxsnJCww6IAIyoEKoAEUbCws7hAFUzccnDERwbXApCECJN4glEAYuEQhAsY2VlQ1iCZCBSwQCsPuNICA54ygrSZYUB4O0QQWIBwwMAJhcWykW5ke4AAAAAElFTkSuQmCC"/>
+										</span>
+										<span th:if="${after.ossType.contains('D')}">
+											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAD6SURBVDhPY/z///+WnpUv7zxlIA6Iq0j7lISzAFlAPYaa+hBRguD89YtAkgnCIRWgaPv1+9fbT++evXsBQUA2UAQqhwpAjoSDz9+/uNaGQjlgsK5qgZSQOBsrG5QPAyi2/fwDNXth4ZTlZbOAjKC2hGfvXmLaid1vwnyCimKycJ1AV0DE4QBnkAAdxsvJDWHDXQEH1AhJZAD0z+fvXyFsdha8QQIHbz+9v//qcWRXGpANDExeTh6IOBygRADc1Pj+HAgDVwSgaAOaurt5NTwAgKZg1QMEKI4EqhDmE5ISkoAgIBurHiAgMyRJzzjKUj6lESBtUAHiAQMDAJyXY/B57xmtAAAAAElFTkSuQmCC"/>
+										</span>
+										<span th:if="${after.ossType.contains('V')}">
+											<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAIAAABfOGuuAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADZSURBVDhPY/z///+GWY3PH95kIA5IyqsHpNWzAFlAPYE29hBRgmD9kYNAkgnCIRWga/v56/er95+ACMhAZkOlYQBd28ev3/WiSoEIyEBmQ6VhAIttcAYyG8KAA3Rt7GysEAbEeRA2XBAO0LXxc3PunVoDZHgXdgARkAHkAgXBkgiAxTY+bi4oBwyAXMK2AQGaIkw9QIBFG9ydQIDVhUCA3TZRQX4IG8gg1jYgANpwaVk3EGG1CgiwawPaICbIB0RYrQIC7NoIApIzjoS8WmBaA0gbVIB4wMAAAOuvYrotinxoAAAAAElFTkSuQmCC"/>
+										</span>
+									</th:block>
+                                </td>
+                            </tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name (Type)</th>
+								<td style="padding:5px;">
+									<span th:utext="${before.licenseName} + ' (' + ${before.licenseType} + ')'"></span>
+								</td>
+								<td style="padding:5px;">
+									<span th:utext="${after.licenseName} + ' (' + ${after.licenseType} + ')'"></span>
+								</td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Detected License Name</th>
+								<td style="padding:5px;">
+									<span th:each="beforeDetectedLicense : ${before.detectedLicenses}" th:utext="${beforeDetectedLicense}"></span>
+								</td>
+								<td style="padding:5px;">
+									<span th:each="afterDetectedLicense : ${after.detectedLicenses}" th:utext="${afterDetectedLicense}"></span>
+								</td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Copyright</th>
+								<td style="padding:5px;" th:utext="${before.copyright}"></td>
+								<td style="padding:5px;" th:utext="${after.copyright}"></td>
+							</tr>
 
-								#if( $projectList )
-									<br />
-									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Project List &raquo;</h2>
-									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-										<tr>
-											<th style="padding:5px;background:#f0f0f0;">ID</th>
-											<th style="padding:5px;background:#f0f0f0;">Project Name</th>
-											<th style="padding:5px;background:#f0f0f0;">Project Version</th>
-											<th style="padding:5px;background:#f0f0f0;">Distribution Type</th>
-											<th style="padding:5px;background:#f0f0f0;">Creator</th>
-											<th style="padding:5px;background:#f0f0f0;">Created Date</th>
-											<th style="padding:5px;background:#f0f0f0;">Reviewer</th>
-										</tr>
-										#foreach( $project in $projectList )
-										<tr>
-											<td style="padding:5px;">$!project.prjId</td>
-											<td style="padding:5px;">$!project.prjName</td>
-											<td style="padding:5px;">$!project.prjVersion</td>
-											<td style="padding:5px;">$!project.distributionType</td>
-											<td style="padding:5px;">$!project.creator</td>
-											<td style="padding:5px;">$!project.createdDate</td>
-											<td style="padding:5px;">$!project.reviewer</td>
-										</tr>
-										#end
-									</table>
-								#end
-								
-								#if( $versionDiffInfoList )
-									<br />
-									<h2 style="margin:20px 0 0;padding:10px;font-size:16px;">V-Diff Declared License Info</h2>
-									<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
-										<col style="width:40%">
-										<col style="width:*">
-										<tr>
-											<td style="padding:5px;background:#f0f0f0;">OSS Name (version)</td>
-											<td style="padding:5px;background:#f0f0f0;">Declared License</td>
-										</tr>
-										#foreach ( $versionDiffInfo in $!$versionDiffInfoList )
-										<tr>
-											<td style="padding:5px;">$versionDiffInfo.ossNameInfo</td>
-											<td style="padding:5px;">$versionDiffInfo.licenseInfo</td>
-										</tr>
-										#end
-									</table>
-								#end
-								
-								<div style="margin:20px 0;border:1px dashed #666;"></div>
-								#set($shortDomain = $domain.replaceAll("(http|https)://", ""))
-								<div style="font-size:12px;">* This mail was sent by <a href="$domain">$shortDomain</a></div>
-							</td>
-							<td width="1" style="background:#ddd"></td>
-						</tr>
-						<tr>
-							<td colspan="3" height="1" style="background:#ddd"></td>
-						</tr>
-					</table>
-				</td>
-				<td width="60" style="background:#f9f9f9"></td>
-			</tr>
-			<tr>
-				<td colspan="3" height="28" style="background:#f9f9f9"></td>
-			</tr>
-		</table>
-		
-	</body>
+							<th:block th:if="${before?.ossType != null or after?.ossType != null}">
+								<tr>
+									<th align="left" style="padding:5px;background:#f0f0f0;">License Copyright</th>
+									<td>
+										<div th:if="${before?.ossType != null and (before.ossType.contains('M') || before.ossType.contains('D'))}">
+											<table border="1" cellpadding="0" cellspacing="3"
+												   style="font-size:12px;border-color:#ddd;" width="100%">
+												<tr th:each="ossLicense : ${before.ossLicenses}">
+													<td th:utext="${ossLicense.ossLicenseComb}"></td>
+													<td th:utext="${ossLicense.licenseName}"></td>
+													<td th:utext="${ossLicense.ossCopyright}"></td>
+												</tr>
+											</table>
+										</div>
+									</td>
+									<td>
+										<div th:if="${after?.ossType != null and (after.ossType.contains('M') || after.ossType.contains('D'))}">
+											<table border="1" cellpadding="0" cellspacing="3"
+												   style="font-size:12px;border-color:#ddd;" width="100%">
+												<tr th:each="ossLicense : ${after.ossLicenses}">
+													<td th:utext="${ossLicense.ossLicenseComb}"></td>
+													<td th:utext="${ossLicense.licenseName}"></td>
+													<td th:utext="${ossLicense.ossCopyright}"></td>
+												</tr>
+											</table>
+										</div>
+									</td>
+								</tr>
+							</th:block>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
+                                <td style="padding:5px;" th:utext="${before.obligation}"></td>
+                                <td style="padding:5px;" th:utext="${after.obligation}"></td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Homepage</th>
+                                <td style="padding:5px;" th:utext="${before.homepageLinkFormat}"></td>
+                                <td style="padding:5px;" th:utext="${after.homepageLinkFormat}"></td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Download Location</th>
+                                <td style="padding:5px;" th:utext="${before.downloadLocationLinkFormat}"></td>
+                                <td style="padding:5px;" th:utext="${after.downloadLocationLinkFormat}"></td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Summary Description</th>
+                                <td style="padding:5px;" th:utext="${before.summaryDescription}"></td>
+                                <td style="padding:5px;" th:utext="${after.summaryDescription}"></td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Attribution</th>
+								<td style="padding:5px;" th:utext="${before.attribution}"></td>
+								<td style="padding:5px;" th:utext="${after.attribution}"></td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Last Modified Date / Last Modifier</th>
+								<td style="padding:5px;" th:utext="|${before.modifiedDate} / ${before.modifier}|"></td>
+								<td style="padding:5px;" th:utext="|${after.modifiedDate} / ${after.modifier}|"></td>
+                            </tr>
+                        </table>
+
+                        <div th:if="${projectList}">
+                            <br/>
+                            <h2 style="margin:20px 0 0;padding:10px;font-size:16px;">&laquo; Project List &raquo;</h2>
+                            <table border="1" cellpadding="0" cellspacing="0" style="font-size:12px;border-color:#ddd;" width="100%">
+                                <thead>
+                                <tr>
+                                    <th style="padding:5px;background:#f0f0f0;">ID</th>
+                                    <th style="padding:5px;background:#f0f0f0;">Project Name</th>
+                                    <th style="padding:5px;background:#f0f0f0;">Project Version</th>
+                                    <th style="padding:5px;background:#f0f0f0;">Distribution Type</th>
+                                    <th style="padding:5px;background:#f0f0f0;">Creator</th>
+                                    <th style="padding:5px;background:#f0f0f0;">Created Date</th>
+                                    <th style="padding:5px;background:#f0f0f0;">Reviewer</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="project : ${projectList}">
+                                    <td style="padding:5px;" th:utext="${project.prjId}"></td>
+                                    <td style="padding:5px;" th:utext="${project.prjName}"></td>
+                                    <td style="padding:5px;" th:utext="${project.prjVersion}"></td>
+                                    <td style="padding:5px;" th:utext="${project.distributionType}"></td>
+                                    <td style="padding:5px;" th:utext="${project.creator}"></td>
+                                    <td style="padding:5px;" th:utext="${project.createdDate}"></td>
+                                    <td style="padding:5px;" th:utext="${project.reviewer}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div th:if="${versionDiffInfoList}">
+                            <br/>
+                            <h2 style="margin:20px 0 0;padding:10px;font-size:16px;">V-Diff Declared License Info</h2>
+                            <table border="1" cellpadding="0" cellspacing="0" style="font-size:12px;border-color:#ddd;" width="100%">
+                                <col style="width:40%">
+                                <col style="width:*">
+                                <thead>
+                                <tr>
+                                    <th style="padding:5px;background:#f0f0f0;">OSS Name (version)</th>
+                                    <th style="padding:5px;background:#f0f0f0;">Declared License</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="versionDiffInfo : ${versionDiffInfoList}">
+                                    <td style="padding:5px;" th:utext="${versionDiffInfo.ossNameInfo}"></td>
+                                    <td style="padding:5px;" th:utext="${versionDiffInfo.licenseInfo}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="margin:20px 0;border:1px dashed #666;"></div>
+                        <div th:with="shortDomain=${#strings.replace(domain, '(http|https)://', '')}"
+                             style="font-size:12px;">
+                            * This mail was sent by <a th:href="${domain}" target="_blank" th:utext="${shortDomain}"></a>
+                        </div>
+                    </td>
+                    <td style="background:#ddd" width="1"></td>
+                </tr>
+                <tr>
+                    <td colspan="3" height="1" style="background:#ddd"></td>
+                </tr>
+            </table>
+        </td>
+        <td style="background:#f9f9f9" width="60"></td>
+    </tr>
+    <tr>
+        <td colspan="3" height="28" style="background:#f9f9f9"></td>
+    </tr>
+</table>
+
+</body>
 </html>

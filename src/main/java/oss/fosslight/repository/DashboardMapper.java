@@ -5,6 +5,7 @@
 
 package oss.fosslight.repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,4 +35,16 @@ public interface DashboardMapper {
     int selectDashboardLicenseTotalCount(LicenseMaster licenseMaster);
     
     void readConfirmAll(CommentsHistory commentsHistory);
+
+	List<Map<String, Object>> selectProgProjectCnt(Map<String, Object> paramMap);
+
+	List<Map<String, Object>> getDiscoveredEmlList(Map<String, Object> paramMap);
+
+	String getDiscoveredEmlMessage(HashMap<String, Object> param);
+
+	List<Map<String, Object>> getLatestScoredVulns();
+
+	List<Map<String, Object>> getNvdDashboardList();
+
+	List<Map<String, Object>> getNvdSeverityList();
 }

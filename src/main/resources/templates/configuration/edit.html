@@ -1,0 +1,138 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="configuration/edit-script :: contentScript"></th:block>
+<body class="hold-transition sidebar-mini">
+<!-- Site wrapper -->
+<div class="wrapper">
+    <div class="content-wrapper custom-layout" style="height: auto">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card card-outline card-dark submit-form">
+                            <div class="card-header d-flex">
+                                <div class="card-title">User Info</div>
+                                <div class="d-flex-align" style="margin-left: auto;">
+                                    <span class="d-flex-align ml-1 px-2" style="cursor: pointer;" id="change" th:onclick="|fn.changePassword()|" titie="Save">
+                                        <i class="fas fa-save customIcon4"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row form-group">
+                                    <div class="col-12">
+                                        <label th:text="|User Name|"></label>
+                                        <div class="input-group">
+                                            <input class="form-control" type="text" name="userName" th:value="${userInfo?.userName}" >
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <div class="col-12">
+                                        <label th:text="|Division|"></label>
+                                        <select class="select2" id="division" name="division" style="width: 100%;">
+                                            <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), userInfo.division)}"></th:block>
+                                        </select>
+                                    </div>
+                                </div>
+                                <th:block th:if="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_LDAP_USED_FLAG')) eq 'N' }">
+                                    <div class="row form-group mb-3">
+                                        <div class="col-12 icheck-primary">
+                                            <input type="checkbox" th:id="|passwordEnabled|" th:if="${userInfo.userId eq 'admin' and 'Y' eq adminLockFlag}" onclick="alert('Changing admin information is blocked.'); return false;"/>
+                                            <input type="checkbox" th:id="|passwordEnabled|" th:unless="${userInfo.userId eq 'admin' and 'Y' eq adminLockFlag}"/>
+                                            <label th:text="|Password|" th:for="|passwordEnabled|"></label>
+                                            <div class="input-group mt-2">
+                                                <input class="form-control" type="password" th:name="password" th:id="password" value="" disabled="disabled" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th:block>
+                            </div>
+                        </div>
+                        <form name="ConfigurationForm" id="configurationLocaleForm">
+                            <div class="card card-outline card-dark submit-form">
+                                <div class="card-header d-flex">
+                                    <div class="card-title">Default Language</div>
+                                    <div class="d-flex-align" style="margin-left: auto;">
+                                        <span class="d-flex-align ml-1 px-2" style="cursor: pointer;" id="saveDefaultLocaleButton" titie="Save">
+                                            <i class="fas fa-save customIcon4"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row form-group mb-3">
+                                        <div class="col-12">
+                                            <select class="select2" name="defaultLocale" style="width: 100%;">
+                                                <option value="" disabled selected> </option>
+                                                <th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_DEFAULT_LOCALE'))}">
+                                                    <option th:value="${code[3]}"  th:selected="${code[3] == sessUserInfo.defaultLocale}" th:utext="${code[1]}"></option>
+                                                </th:block>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                    <div class="col-md-6">
+                        <form name="ConfigurationForm" id="configurationListForm">
+                            <div class="card card-outline card-dark submit-form">
+                                <div class="card-header d-flex">
+                                    <div class="card-title">Default List</div>
+                                    <div class="d-flex-align" style="margin-left: auto;">
+                                        <span class="d-flex-align ml-1 px-2" style="cursor: pointer;" id="saveDefaultListTabButton"  titie="Save">
+                                            <i class="fas fa-save customIcon4"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row form-group">
+                                        <div class="col-12">
+                                            <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_DEFAULT_TAB'))}">
+                                                <div class="icheck-warning ml-2 mb-3">
+                                                    <input type="checkbox" name="defaultTab" th:id="|defaultTab${code.cdDtlNo}|" th:value="${code.cdDtlNo}"/>
+                                                    <label th:for="|defaultTab${code.cdDtlNo}|" th:utext="${code.cdDtlNm}" style="font-weight: normal"></label>
+                                                </div>
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+<!--                        <div class="card card-outline card-dark submit-form">-->
+<!--                            <div class="card-header">-->
+<!--                                <div class="card-title">Default Search Conditions</div>-->
+<!--                            </div>-->
+<!--                            <div class="card-body">-->
+<!--                                <div class="col-12">-->
+<!--                                    <select class="select2" id="defaultSearch" name="defaultSearch" th:onchange="|fn.loadSearchCondition()|" style="width: 100%">-->
+<!--                                        <option value=""></option>-->
+<!--                                        <option value="LICENSE">License List</option>-->
+<!--                                        <option value="OSS">OSS List</option>-->
+<!--                                        <option value="PROJECT">Project List</option>-->
+<!--                                        <option value="THIRD_PARTY">3rd Party List</option>-->
+<!--                                        <option value="SELF_CHECK">Self-check List</option>-->
+<!--                                    </select>-->
+<!--                                </div>-->
+<!--                                <div id="searchConditionArea" style="display: none;"></div>-->
+<!--                            </div>-->
+
+<!--                            <div class="card-footer" id="searchConditionBtnArea" style="display: none">-->
+<!--                                <input id="saveSearchCondition" type="button" value="Save" th:onclick="|fn.updateSearchCondition()|" class="btn btn-lg-gray float-right right" />-->
+<!--                            </div>-->
+<!--                        </div>-->
+
+<!--                        <div class="btnLayout w1025" id="searchConditionBtnArea" style="display: none;">-->
+<!--                            <input id="saveSearchCondition" type="button" value="Save" onclick="fn.updateSearchCondition();" class="btnColor red right" />-->
+<!--                        </div>-->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</body>
+</html>

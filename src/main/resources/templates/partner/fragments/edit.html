@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="editFragments">
+	<input type="hidden" id="mode" value="edit"/>
+
+	<form id="partnerForm">
+    <input type="hidden" id="partnerId" name="partnerId" th:value="${detail.partnerId}"/>
+	<input type="hidden" id="status" name="status" th:value="${detail?.status != null} ? ${detail.status} : 'PROG'"/>
+	<input type="hidden" id="ossComponentsStr" name="ossComponentsStr"/>
+	<input type="hidden" id="ossComponentsLicenseStr" name="ossComponentsLicenseStr"/>
+	<input type="hidden" id="userComment" name="userComment" th:value="${detail.userComment}"/>
+	<input type="hidden" id="description" name="description"/>
+	<input type="hidden" id="delDocumentsFile" name="delDocumentsFile"/>
+		<div class="card-body bg-ivory">
+			<div class="row mt-4 submit-form">
+				<div class="col-md-5 px-5">
+					<div class="form-group">
+						<label for="partnerName">
+							[[#{msg.common.field.3rdParty.name}]]
+							<span class="text-orange">*</span>
+						</label>
+						<input type="text" id="partnerName" name="partnerName" class="form-control autoComParty" th:value="${detail?.partnerName}" th:disabled="${detail.status == 'CONF'} ? 'disabled'" />
+						<div class="retxt text-danger text-sm"></div>
+					</div>
+					<div class="form-group">
+						<label for="softwareName">
+							[[#{msg.common.field.3rdParty.softwareName}]]
+							<span class="text-orange">*</span>
+						</label>
+						<input type="text" id="softwareName" name="softwareName" class="form-control autoComSwNm" th:value="${detail?.softwareName}" th:disabled="${detail.status == 'CONF'} ? 'disabled'" />
+						<div class="retxt text-danger text-sm"></div>
+					</div>
+					<div class="form-group">
+						<label for="softwareVersion" th:text="#{msg.common.field.3rdParty.softwareVersion}"></label>
+						<input type="text" id="softwareVersion" name="softwareVersion" class="form-control" th:value="${detail?.softwareVersion}" th:disabled="${detail.status == 'CONF'} ? 'disabled'" />
+					</div>
+					<div class="form-group">
+						<label for="inputName" th:text="#{msg.common.field.deliveryForm}">
+							<br /><span class="text-smaller text-blue-gray" style="font-weight: normal;" th:text="#{msg.partner.deliveryForm.notice}"></span>
+						</label>
+						<select class="form-control select" id="deliveryForm" name="deliveryForm" style="width: 100%;" th:disabled="${detail.status == 'CONF'} ? 'disabled'">
+							<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'))}">
+								<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+							</th:block>
+						</select>
+					</div>
+					<div class="row">
+						<div class="form-group">
+							<div class="col-md-12 mb-0">
+								<label for="inputName" th:text="#{msg.common.field.permission}"></label>
+								<div class="form-group mb-0">
+									<div class="col-sm-12">
+										<div class="permissionRadio btn-group btn-group-toggle" data-toggle="buttons">
+											<label class="btn btn-sm btn-onOff px-3">
+												<input type="radio" name="publicYn" id="checkbox3" autocomplete="off" value="Y" th:text="Everyone" 
+														th:checked="${(detail != null && detail.publicYn != 'N') || detail == null}" th:disabled="${detail.status == 'CONF'}" />
+											</label>
+											<label class="btn btn-sm btn-onOff px-3">
+												<input type="radio" name="publicYn" id="checkbox3" autocomplete="off" value="N" th:text="'Creator & Watcher'"
+														th:checked="${detail != null && detail.publicYn == 'N'}" th:disabled="${detail.status == 'CONF'}" />
+											</label>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group">
+							<div class="col-12">
+								<label for="inputName" th:text="#{msg.common.field.description}"></label>
+								<textarea class="form-control" id="descriptionTextarea" name="descriptionTextarea" rows="5"></textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-7 px-5">
+					<div class="row form-group">
+						<div class="col-lg-3">
+							<label for="inputName" th:text="#{msg.common.field.Agreement}"></label>
+						</div>
+						<div class="col-lg-9">
+							<div class="col-12 mb-2 d-flex confirmationUploader" th:style="${confirmationFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
+								<div class="float-left" id="confirmationFile" style="max-width: 100%;"></div>
+							</div>
+							<div class="col-12 mb-2 d-flex">
+								<ul class="pl-0 confirmationUpload">
+									<li th:if="${confirmationFile != null}">
+										<a class="ajax-file-upload-filename" th:text="${confirmationFile.origNm}" th:href="@{'/download/' + ${confirmationFile.fileSeq} + '/' + ${confirmationFile.logiNm}}"></a>
+										<span th:if="${detail.viewOnlyFlag != 'N'}" class="badge bg-danger" style="cursor: pointer;" th:onclick="|fn.deleteConfirmationFile(this)|" th:text="X"></span>
+										<input type="hidden" id="confirmationFileId" name="confirmationFileId" th:value="${confirmationFile.fileSeq}" /> <br>[[${confirmationFile.createdDate}]]
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="row form-group">
+						<div class="col-lg-3">
+							<label for="inputName" th:text="#{msg.common.field.OSSChecklist} + '(Open Source List)'"></label>
+						</div>
+						<div class="col-lg-9">
+							<div class="col-12 mb-2 d-flex ossUploader" th:style="${ossFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
+								<div class="float-left" id="ossFile" style="max-width: 100%;"></div>
+							</div>
+							<div class="col-12 mb-2 d-flex">
+								<ul class="pl-0 ossUpload">
+									<li th:if="${ossFile != null}">
+										<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}" th:href="@{'/download/' + ${ossFile.fileSeq} + '/' + ${ossFile.logiNm}}"></a>
+										<span th:if="${detail.viewOnlyFlag != 'Y'}" class="badge bg-danger" style="cursor: pointer;" th:onclick="|fn.deleteOssFile(this)|" th:text="X"></span>
+										<input type="hidden" id="ossFileId" name="ossFileId" th:value="${ossFile.fileSeq}" /> <br>[[${ossFile.createdDate}]]
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="row form-group">
+						<div class="col-lg-3">
+							<label for="inputName" th:text="'fosslight_binary.txt'"></label>
+						</div>
+						<div class="col-lg-9">
+							<div class="col-12 mb-2 d-flex binaryUploader" th:style="${binaryFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
+								<div class="float-left" id="partnerBinaryFile" style="max-width: 100%;"></div>
+							</div>
+							<div class="col-12 mb-2 d-flex">
+								<ul class="pl-0 binaryUpload">
+									<li th:if="${binaryFile != null}">
+										<a class="ajax-file-upload-filename" th:text="${binaryFile.origNm}" th:href="@{'/download/' + ${binaryFile.fileSeq} + '/' + ${binaryFile.logiNm}}"></a>
+										<span class="badge bg-danger" th:style="${isCommited} ? 'cursor:pointer; display:none;' : 'cursor:pointer;'" th:onclick="|fn.deleteBinaryFile(this)|" th:text="X"></span>
+										<input type="hidden" id="binaryFileId" name="binaryFileId" th:value="${binaryFile.fileSeq}" /> <br>[[${binaryFile.createdDate}]]
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="row form-group">
+						<div class="col-lg-3">
+							<label for="inputName" th:text="#{msg.common.field.relatedDocuments}"></label><br />
+							<span class="text-lg-red text-smaller" th:style="${isCommited} ? 'display: none;'" th:text="'The maximum number of files that can be uploaded is 5.'"></span>
+						</div>
+						<div class="col-lg-9 documentsUploader">
+							<div class="col-12 mb-2 d-flex documentsUploader" th:style="${isCntOver} or ${isCommited} ? 'display : none;' : 'display : flex;'">
+								<div class="float-left" id="documentsFile" style="max-width: 100%;"></div>
+							</div>
+						</div>
+						<div class="col-lg-3 documentsUploader"></div>
+						<div class="col-lg-9 mb-2 d-flex">
+							<ul class="pl-0 documentsFileArea">
+								<th:block th:each="documentsFile : ${detail.documentsFile}">
+									<th:block th:if="${documentsFile.delYn == 'N'}">
+										<li>
+											<a class="ajax-file-upload-filename" th:text="${documentsFile.origNm}" th:href="@{'/download/' + ${documentsFile.fileSeq} + '/' + ${documentsFile.logiNm}}"></a>
+											<span class="badge bg-danger" th:style="${isCommited} ? 'cursor:pointer; display:none;' : 'cursor:pointer;'" th:onclick="|fn.deleteDocumentsFile(this)|" th:text="X"></span>
+											<input type="hidden" th:value="${documentsFile.fileSeq}" /> <br>[[${documentsFile.createdDate}]]
+										</li>
+									</th:block>
+								</th:block>
+							</ul>
+						</div>
+						<input type="hidden" id="documentsFileId" name="documentsFileId" th:value="${detail.documentsFileId}" />
+					</div>
+					<div class="form-group exception-grid-edit" th:if="${detail.viewOnlyFlag != 'Y' and !#lists.isEmpty(prjList)}">
+						<label for="inputName" th:text="#{msg.common.field.project}"></label>
+						<div class="row">
+							<div class="col-10 mb-2 d-flex">
+								<table id="_projectList">
+									<tr>
+										<td></td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="Watcher" th:text="#{msg.common.field.watcher}"></label>
+						<div class="row" th:if="${detail.viewOnlyFlag != 'Y'}">
+							<div class="col-4">
+								<select class="form-control select" id="userDivision" th:onchange="|fn.selectDivision()|" style="width: 100%;">
+									<option th:value="''" th:text="'Select Division'"></option>
+									<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+										<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+									</th:block>
+								</select>
+							</div>
+							<div class="col-7">
+								<select class="form-control select" id="userName" style="width: 100%;">
+									<option th:value="''" th:text="'Select User'"></option>
+								</select>
+							</div>
+							<div class="col-1">
+								<button id="addWatcher" type="button" class="btn btn-default" th:text="Add" th:onclick="|fn.addWatcherFnc()|"></button>
+							</div>
+						</div>
+						<div class="row my-1" th:if="${detail.viewOnlyFlag != 'Y'}">
+							<div class="col-4">
+								<input type="text" id="adId" name="adId" class="form-control" placeholder="Input email" th:onKeypress="|fn.CheckChar()|" />
+							</div>
+							<div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null 
+                                        												&& #lists.size(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))) > 0) ? true : false}">
+                              	<th:block th:if="${useDomainFlag}">
+                              		<select class="form-control select" name="parDomain" style="width: 100%;" th:onchange="|fn.selectDomain()|">
+										<option th:value="''" th:text="'Select Domain'"></option>
+										<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
+											<th:block th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
+                                        		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                                        	</th:block>
+                                        	<th:block th:if="${!#strings.contains(option.cdDtlNm, '직접입력')}">
+                                        		<option th:value="${option.cdDtlNo}" th:text="|@${option.cdDtlNm}|"></option>
+                                        	</th:block>
+										</th:block>
+									</select>
+									<input type="text" name="emailTemp" style="display:none;" th:onKeypress="|fn.CheckChar()|" placeholder="Input your Email Domain"
+                                    	th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}" />
+                              	</th:block>
+								<th:block th:unless="${useDomainFlag}">
+									<input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">
+								</th:block>
+							</div>
+							<div class="col-1">
+								<button id="addEmail" type="button" class="btn btn btn-default" th:text="Add" th:onclick="|fn.addEmailFnc()|"></button>
+							</div>
+						</div>
+						<div class="row" th:if="${detail.viewOnlyFlag != 'Y'}">
+							<div class="col-4">
+								<select id="listKind" class="form-control select" style="width: 100%;">
+									<option th:value="''" th:text="'Select List'"></option>
+									<option th:if="${projectFlag}" th:text="'Project List'" th:value="prj"></option>
+									<option th:value="par" th:text="'3rd Party List'"></option>
+									<option th:if="${batFlag}" th:text="'BAT List'" th:value="bat"></option>
+								</select>
+							</div>
+							<div class="col-7">
+								<input class="form-control" type="text" id="listId" name="listId" placeholder="Input ID you want to copy" />
+							</div>
+							<div class="col-1">
+								<button id="addList" type="button" class="btn btn-default" th:text="Add" th:onclick="|fn.addListFnc()|"></button>
+							</div>
+						</div>
+						<div class="form-group mt-2">
+							<div id="multiDiv" class="external-events ml-1 multiTxtSet2 row"></div>
+						</div>
+					</div>
+					<div class="form-group" th:if="${detail.partnerId != null}">
+						<label for="inputName" th:text="#{msg.common.field.creator}">
+							<span class="text-orange" th:text="'*'"></span>
+						</label> 
+						<input type="text" name="creatorNm" class="form-control autoComCreatorDivision" th:value="''" th:disabled="${!@CommonFunction.isAdmin() or detail.status == 'CONF'}? 'disabled'" />
+						<input type="hidden" name="creator" th:value="${detail?.creator}" />
+					</div>
+					<div class="form-group" th:if="${detail.partnerId != null}">
+						<label for="inputName" th:text="#{msg.common.field.division}"></label>
+						<select class="form-control select" id="division" name="division" style="width: 100%;" th:disabled="${detail.viewOnlyFlag != 'N'} ? 'disabled'">
+							<option th:value="''" th:text="'Select Division'"></option>
+							<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+								<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${option.cdDtlNo == detail?.division}"></option>
+							</th:block>
+						</select>
+					</div>
+					<div class="form-group" th:if="${detail.partnerId != null}">
+						<label for="inputName" th:text="#{msg.common.field.reviewer}"></label>
+						<input type="text" name="reviewerName" class="form-control" th:value="${detail?.reviewerName}" th:disabled="disabled">
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</th:block>
+<th:block th:fragment="viewFragments">
+	<input type="hidden" id="mode" value="view"/>
+
+	<form id="partnerForm">
+    <input type="hidden" id="partnerId" name="partnerId" th:value="${detail.partnerId}"/>
+	<input type="hidden" id="status" name="status" th:value="${detail?.status != null} ? ${detail.status} : 'PROG'"/>
+	<input type="hidden" id="ossComponentsStr" name="ossComponentsStr"/>
+	<input type="hidden" id="ossComponentsLicenseStr" name="ossComponentsLicenseStr"/>
+	<input type="hidden" id="userComment" name="userComment" th:value="${detail.userComment}"/>
+	<input type="hidden" id="delDocumentsFile" name="delDocumentsFile"/>
+		<div class="card-body bg-ivory">
+			<div th:if="${detail.statusPermission > 0}" class="row">
+				<div class="col-lg-6">
+				</div>
+				<div class="col-lg-6">
+					<div class="row d-flex-align-right float-right">
+						<span class="ml-1 px-2 pointer idenSave" title="edit" id="editIcon" th:onclick="com_fn.changeMode('edit', false, [[${detail.status}]])" >
+							<i class="fas fa-edit customIcon2 text-gray"></i>
+						</span>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-lg-5">
+					<div class="table-responsive">
+						<table class="table mb-0">
+							<tbody>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle; border-top: 0px;">
+										<span th:text="#{msg.common.field.3rdParty.name}"></span><span class="text-orange">*</span>
+									</th>
+									<td style="border-top: 0px; vertical-align: middle;">
+										<span class="text-sm" th:text="${detail?.partnerName}"></span>
+										<input type="hidden" id="partnerName" name="partnerName" class="form-control autoComParty" th:value="${detail?.partnerName}"/>
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.3rdParty.softwareName}"></span><span class="text-orange">*</span>
+									</th>
+									<td style="vertical-align: middle;">
+										<span class="text-sm" th:text="${detail?.softwareName}"></span>
+										<input type="hidden" id="softwareName" name="softwareName" th:value="${detail?.softwareName}"/>
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.3rdParty.softwareVersion}"></span>
+									</th>
+									<td style="vertical-align: middle;">
+										<span class="text-sm" th:text="${detail?.softwareVersion}"></span>
+										<input type="hidden" id="softwareVersion" name="softwareVersion" th:value="${detail?.softwareVersion}"/>
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.deliveryForm}"></span>
+									</th>
+									<td style="vertical-align: middle;">
+										<span class="text-sm" th:text="${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'), detail?.deliveryForm)}"></span>
+										<input type="hidden" id="deliveryForm" name="deliveryForm" th:value="${detail?.deliveryForm}"/>
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.permission}"></span>
+									</th>
+									<td style="vertical-align: middle;">
+										<th:block th:if="${detail?.publicYn != 'N'}">
+											<span class="text-sm" th:text="Everyone"></span>
+										</th:block>
+										<th:block th:unless="${detail?.publicYn != 'N'}">
+											<span class="text-sm" th:text="'Creator & Watcher'"></span>
+										</th:block>
+										<input type="hidden" id="publicYn" name="publicYn" th:value="${detail?.publicYn}" />
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.description}"></span>
+									</th>
+									<td style="vertical-align: middle;">
+										<span class="text-sm description" th:utext="${detail?.description}"></span>
+										<input type="hidden" name="description" th:value="${detail?.description}"/>
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.watcher}"></span>
+									</th>
+									<td style="vertical-align: middle;">
+										<th:block th:if="${detail?.partnerWatcher != null}" th:each="watcher, status : ${detail.partnerWatcher}">
+											<th:block th:if="${watcher.parEmail != ''}">
+												<span class="text-sm" th:text="${watcher.parEmail + ' / Email'}"></span>
+											</th:block>
+											<th:block th:unless="${watcher.parEmail != ''}">
+												<th:block th:if="${watcher.parDivisionName != ''}">
+													<span class="text-sm" th:text="${watcher.parDivisionName}"></span>
+													<span class="text-sm" th:if="${watcher.parUserName != ''}" th:text="${' / ' + watcher.parUserName}"></span>
+												</th:block>
+												<th:block th:unless="${watcher.parDivisionName != ''}">
+													<span class="text-sm" th:if="${watcher.parUserName != ''}" th:text="${watcher.parUserName}"></span>
+													<span class="text-sm" th:if="${watcher.parUserId != ''}" th:text="${' / ' + watcher.parUserId}"></span>
+												</th:block>
+											</th:block>
+											<span th:if="${status.count != status.size}" class="text-sm" th:text="', '"></span>
+										</th:block>
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.creator} + ' (' + #{msg.common.field.division} + ')'"></span>
+									</th>
+									<td style="vertical-align: middle;">
+										<span class="text-sm" th:text="${detail?.creatorName} + ' (' + ${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), detail?.division)} + ')'"></span>
+										<input type="hidden" name="creator" th:value="${detail?.creator}" />
+										<input type="hidden" name="creatorNm" th:value="${detail?.creatorName}"/>
+										<input type="hidden" name="division" th:value="${detail?.division}" />
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.reviewer}"></span>
+									</th>
+									<td style="vertical-align: middle;">
+										<span class="text-sm" th:text="${detail?.reviewerName}"></span>
+										<input type="hidden" name="reviewerName" th:value="${detail?.reviewerName}" />
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="col-lg-7 exception-grid-view">
+					<div class="table-responsive">
+						<table class="table mb-0">
+							<tbody>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle; border-top: 0px;">
+										<span th:text="#{msg.common.field.Agreement}"></span>
+									</th>
+									<td class="text-sm" style="vertical-align: middle; border-top: 0px;">
+										<th:block th:if="${confirmationFile != null}">
+											<th:block th:if="${detail.permission > 0}">
+												<a class="ajax-file-upload-filename" th:text="${confirmationFile.origNm}" th:href="@{'/download/' + ${confirmationFile.fileSeq} + '/' + ${confirmationFile.logiNm}}"></a>
+											</th:block>
+											<th:block th:unless="${detail.permission > 0}">
+													<span th:text="${confirmationFile.origNm}"></span>
+											</th:block>
+											<input type="hidden" id="confirmationFileId" name="confirmationFileId" th:value="${confirmationFile.fileSeq}" />
+											<br>[[${confirmationFile.createdDate}]]
+										</th:block>
+										<th:block th:unless="${confirmationFile != null}">
+											<span th:text="'No File'"></span>
+										</th:block>
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.OSSChecklist} + '(Open Source List)'"></span>
+									</th>
+									<td class="text-sm" style="vertical-align: middle;">
+										<ul class="pl-0 mb-0 ossUpload">
+											<li th:if="${ossFile != null}">
+												<th:block th:if="${detail.permission > 0}">
+													<a class="ajax-file-upload-filename" th:text="${ossFile.origNm}" th:href="@{'/download/' + ${ossFile.fileSeq} + '/' + ${ossFile.logiNm}}"></a>
+												</th:block>
+												<th:block th:unless="${detail.permission > 0}">
+													<span th:text="${ossFile.origNm}"></span>
+												</th:block>
+												<input type="hidden" id="ossFileId" name="ossFileId" th:value="${ossFile.fileSeq}" />
+												<br>[[${ossFile.createdDate}]]
+											</li>
+											<li th:unless="${ossFile != null}">
+												<span th:text="'No File'"></span>
+											</li>
+										</ul>
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="'fosslight_binary.txt'"></span>
+									</th>
+									<td class="text-sm" style="vertical-align: middle;">
+										<ul class="pl-0 mb-0 binaryUpload">
+											<li th:if="${binaryFile != null}">
+												<th:block th:if="${detail.permission > 0}">
+													<a class="ajax-file-upload-filename" th:text="${binaryFile.origNm}" th:href="@{'/download/' + ${binaryFile.fileSeq} + '/' + ${binaryFile.logiNm}}"></a>
+												</th:block>
+												<th:block th:unless="${detail.permission > 0}">
+													<span th:text="${binaryFile.origNm}"></span>
+												</th:block>
+												<input type="hidden" id="binaryFileId" name="binaryFileId" th:value="${binaryFile.fileSeq}" />
+												<br>[[${binaryFile.createdDate}]]
+											</li>
+											<li th:unless="${binaryFile != null}">
+												<span th:text="'No File'"></span>
+											</li>
+										</ul>
+									</td>
+								</tr>
+								<tr style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.relatedDocuments}"></span>
+									</th>
+									<td class="text-sm" style="vertical-align: middle;">
+										<input type="hidden" id="documentsFileId" name="documentsFileId" th:value="${detail?.documentsFileId}" />
+										<th:block th:if="${detail.documentsFile != null and !#lists.isEmpty(detail.documentsFile)}">
+											<th:block th:each="documentsFile, status : ${detail.documentsFile}">
+												<th:block th:if="${documentsFile.delYn == 'N'}">
+													<th:block th:if="${detail.permission > 0}">
+														<a class="ajax-file-upload-filename" th:text="${documentsFile.origNm}" th:href="@{'/download/' + ${documentsFile.fileSeq} + '/' + ${documentsFile.logiNm}}"></a>
+													</th:block>
+													<th:block th:unless="${detail.permission > 0}">
+														<span th:text="${documentsFile.origNm}"></span>
+													</th:block>
+													<input type="hidden" th:value="${documentsFile.fileSeq}" /> <br>[[${documentsFile.createdDate}]]
+													<th:block th:if="${status.count != status.size}"><br></th:block>
+												</th:block>
+											</th:block>
+										</th:block>
+										<th:block th:unless="${detail.documentsFile != null and !#lists.isEmpty(detail.documentsFile)}">
+											<span th:text="'No File'"></span>
+										</th:block>
+									</td>
+								</tr>
+								<tr th:if="${detail.viewOnlyFlag != 'Y' and !#lists.isEmpty(prjList)}" style="height: 60px;">
+									<th style="width: 35%; vertical-align: middle;">
+										<span th:text="#{msg.common.field.project}"></span>
+									</th>
+									<td class="text-sm" style="vertical-align: middle;">
+										<div class="jqGridSet">
+                                        	<table id="_projectList"><tr><td></td></tr></table>
+                                    	</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</th:block>
+<th:block th:fragment="batFragments">
+	<div class="card-body bg-ivory">
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="row mt-1">
+					<div class="col-md-4">
+						<div class="icheck-secondary d-inline">
+							<input type="radio" id="radio_bat-01" name="batselectOption" th:onchange="|bat_fn.changeSelectOption()|" value="1" checked>
+							<label for="radio_bat-01">Upload</label>
+						</div>
+					</div>
+					<div class="col-md-4" style="display: none;">
+						<div class="icheck-secondary d-inline">
+							<input type="radio" id="radio_bat-02" name="batselectOption" th:onchange="|bat_fn.changeSelectOption()|" value="2">
+							<label for="radio_bat-02">Url</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				
+			</div>
+		</div>
+		<hr class="my-3">
+		<div id="content_bat">
+			<div name="content_bat" id="binaryFile">
+				<div class="row">
+					<div class="col-md-10">
+						<div class="row">
+							<div class="col-5" style="display: flex;">
+								<div class="fileuploader" id="binaryFile" th:text="Upload"></div>
+								<input type="hidden" id="binaryFileId" th:value="${project?.srcCsvFileId}" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div name="content_bat" id="wgetUrl" style="display: none;">
+				<div class="row">
+					<div class="col-md-10">
+						<div class="row">
+							<div class="col-5">
+								<div class="input-group input-group-md">
+									<input type="text" class="form-control autoComConfParty">
+									<span class="input-group-append">
+										<button type="button" class="btn btn-primary btn-flat" id="send" th:text="send"></button>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row mt-3 ml-3" id="content-bat">
+			<div class="innerJqGridSet">
+				<table id="_binaryFileList">
+					<tr>
+						<td></td>
+					</tr>
+				</table>
+			</div>
+			<p class="text-sm">
+				<span style="display: block;" th:text="#{msg.partner.notice}"></span>
+				<span style="display: block;" th:text="'※' + #{msg.partner.notice.term}"></span>
+			</p>
+		</div>
+	</div>
+</th:block>
+</body>
+</html>

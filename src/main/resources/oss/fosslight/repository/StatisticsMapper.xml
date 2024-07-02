@@ -296,9 +296,16 @@
 	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
 	  			  	 , IF(
-				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = #{user}
-				  </foreach>
+					<choose>
+						<when test="noneUser != null and noneUser.size() > 0">
+							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+								STAT.CATEGORY = #{user}
+							</foreach>
+						</when>
+						<otherwise>
+							1 = 0
+						</otherwise>
+					</choose>
 				     , COUNT(1), 0) AS CATEGORY#{categorySize}
 				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
@@ -358,9 +365,16 @@
 	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
 	  			     , IF(
-				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = #{user}
-				  </foreach>
+					<choose>
+						<when test="noneUser != null and noneUser.size() > 0">
+							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+								STAT.CATEGORY = #{user}
+							</foreach>
+						</when>
+						<otherwise>
+							1 = 0
+						</otherwise>
+					</choose>
 				     , COUNT(1), 0) AS CATEGORY#{categorySize}
 				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
@@ -456,6 +470,7 @@
 				  				(SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
 								  , PM.STATUS AS CATEGORY 
 							   FROM PARTNER_MASTER PM
+							   WHERE PM.USE_YN = 'Y'
 							   <!-- 
 							  INNER JOIN T2_USERS T1
 								 ON PM.CREATOR = T1.USER_ID AND PM.USE_YN = 'Y'
@@ -466,7 +481,7 @@
 										     AND USE_YN = 'Y') T2
 								 ON T1.DIVISION = T2.CD_DTL_NO
 								  -->
-							  WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
+							  AND PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
 				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
 				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
@@ -493,7 +508,8 @@
 						 				  INNER JOIN T2_AUTHORITIES AUTH
 						    				 ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
 						        ON PM.REVIEWER = ADMIN.USER_ID
-						     WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
+						     WHERE PM.USE_YN = 'Y'
+						       AND PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
 		    	   ON A.CD_DTL_NM = STAT.CD_DTL_NM
 		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>

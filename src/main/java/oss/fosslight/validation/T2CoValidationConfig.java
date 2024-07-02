@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.config.AppConstBean;
 
-@Component
+@Component("t2CoValidationConfig")
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_VALIDATION_PROPERTIES)})
 public class T2CoValidationConfig extends CoTopComponent {
     private static T2CoValidationConfig instance = null;
@@ -44,7 +44,7 @@ public class T2CoValidationConfig extends CoTopComponent {
 		init();
 	}
 
-    private final static String RULE_TYPE_DEF = "LENGTH, REQUIRED, FORMAT, COMPOSITE, SPLIT_WHEN_INIT, COPY_WHEN_INIT, USE_SEQUENCE";
+    private static final String RULE_TYPE_DEF = "LENGTH, REQUIRED, FORMAT, COMPOSITE, SPLIT_WHEN_INIT, COPY_WHEN_INIT, USE_SEQUENCE";
     
     public T2CoValidationConfig(){}
     
@@ -75,7 +75,7 @@ public class T2CoValidationConfig extends CoTopComponent {
     }
     
     @SuppressWarnings({ "static-access", "unchecked" })
-	synchronized private void load() throws IOException{
+	private synchronized void load() throws IOException{
 
         Map<String, Map<String, String>> ruleMap = new HashMap<>();
         Map<String, String> messageConfigMap = new HashMap<>();
@@ -99,7 +99,7 @@ public class T2CoValidationConfig extends CoTopComponent {
         for (Object oKey : map.keySet()){
             String key = (String)oKey;
             
-            if (key.indexOf(".") < 0 ){
+            if (!key.contains(".") ){
                 continue;
             }
             

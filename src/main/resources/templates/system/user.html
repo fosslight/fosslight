@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="system/user-script :: script"></th:block>
+<body class="hold-transition sidebar-mini" style="height: 100%;">
+    <div class="wrapper">
+        <div class="custom-layout bg-white">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card card-dark card-outline collapsed-card search-form mb-3">
+                                <div class="card-header" style="border-bottom: none">
+                                	<form id="userSearch" >
+                                    	<div class="row">
+                                        	<div class="col-md-2">
+                                            	<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                  	<input class="form-control" placeholder="User Name" type="text" id="userName" name="userName"/>
+                                              	</div>
+                                         	</div>
+                                          	<div class="col-md-2">
+                                              	<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                               		<input class="form-control" placeholder="User Id" id="userId" name="userId" type="text"/>
+                                            	</div>
+                                          	</div>
+                                        	<div class="col-md-2">
+                                           		<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+<!--                                                <select class="form-control select2" id="division" name="division" style="width: 100%;">
+                                                        <option value=""></option>
+                                                        <th:block th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}"></th:block>
+                                                    </select> -->
+                                                    <input class="form-control autoComProjectDivision" placeholder="division" id="division" name="division" type="text"/>
+                                                </div>
+                                         	</div>
+                                      		<div class="col-md-1">
+                                          		<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                               		<div class="input-group-append">
+                                                    	<button class="btn btn-default" type="button" id="search"><i class="fa fa-search"></i></button>
+                                                   	</div>
+                                               	</div>
+                                         	</div>
+                                       	</div>
+                                 	</form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row px-1">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6">
+                            <div class="row float-right nav-item">
+                                <button class="btn btn-outline-dark btn-sm width-8rem mr-xm px-3" type="button" th:text="'Excel download'" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i></button>
+                                <button class="btn btn-dark btn-sm width-6rem mr-xm px-3 btn-transition-page" type="button" th:text="Save" th:onclick="|fn.saveUser()|"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 mt-3">
+                            <div class="jqGridSet">
+                                <table id="list"><tr><td></td></tr></table>
+                                <div id="pager"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

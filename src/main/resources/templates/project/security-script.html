@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+var lastsel;
+var totalMainData = [];
+var fixedMainData = [];
+var notfixedMainData = [];
+var saveFlag = false;
+var prevEditSel;
+var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'security'};
+var totalValidMsgData;
+var fixedValidMsgData;
+var notFixedValidMsgData;
+
+$(function () {
+	'use strict';
+	sec_com_evt.dataInit();
+	com_fn.tabInit();
+	
+	$("[id^=tabMenu]").on("click", function() {
+		var tabId = $(this).attr("id");
+		tabId = tabId.replace("tabMenu", "");
+		$("[name=gridArea]").hide();
+		$("#gridArea"+tabId).show();
+		
+		if ("Total" == tabId) {
+			$('#save').attr('onclick', "total.save()");
+		} else if ("Fixed" == tabId) {
+			$('#save').attr('onclick', "fixed.save()");
+		} else {
+			$('#save').attr('onclick', "notFixed.save()");
+		}
+	});
+});
+
+var sec_com_evt = {
+	dataInit : function(){
+		loading.show();
+		
+		var url = '/project/securityGrid/'+[[${project.prjId}]]+'/total';
+		$.ajax({
+			url : url,
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success : function(data){
+				loading.hide();
+				
+				totalMainData = data.totalGridData;
+				if (data.totalValidData) {
+					totalValidMsgData = data.totalValidData;
+				}
+				fixedMainData = data.fixedGridData;
+				if (data.fixedValidData) {
+					fixedValidMsgData = data.fixedValidData;
+				}
+				notfixedMainData = data.notFixedGridData;
+				if (data.notFixedValidData) {
+					notFixedValidMsgData = data.notFixedValidData;
+				}
+				
+				// 리로드 대신 그리드 삭제 후 다시 그리기
+				$("#totalList").jqGrid('GridUnload');
+				total.loadSecurityGrid();
+				
+				$("#fixedList").jqGrid('GridUnload');
+				fixed.loadSecurityGrid();
+				
+				$("#notFixedList").jqGrid('GridUnload');
+				notFixed.loadSecurityGrid();
+				
+				if (!saveFlag && data.hasOwnProperty('msg')){
+					alertify.alert(data.msg, function(){});
+				}
+				
+				saveFlag = false;
+			}
+		});
+		
+		commentsParam.height = $(window).height() - 120;
+		fn_comment.getCommentList(commentsParam);
+		
+		fn.displayProjectInfo();
+	}
+}
+
+var sec_com_fn = {
+	gridAddFunc : function(targetId) {
+		alertify.alert([[#{msg.common.jqgrid.func.no.use}]], function(){});
+	},
+	gridDelFunc : function(targetId) {
+		alertify.alert([[#{msg.common.jqgrid.func.no.use}]], function(){});
+	},
+	sendEditor : function(type){
+		//코멘트 저장
+		var editorVal = CKEDITOR.instances.editor.getData();
+		
+		if(!editorVal || editorVal == "") {
+			alertify.alert([[#{msg.project.enter.comment}]], function(){});
+			return false;
+		}
+		
+		var param = {referenceId : [[${project.prjId}]], referenceDiv :'10', contents : editorVal, mailSendType : type};
+		
+		$.ajax({
+			url : '/project/sendComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					$('.ajs-close').trigger("click");
+
+					alertify.success([[#{msg.project.sent.comments.success}]]);
+					resetEditor(CKEDITOR.instances.editor);
+					
+					$(".commentBtn").trigger("click");
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	saveEditor : function(){
+		//코멘트 임시저장
+		var editorVal = CKEDITOR.instances.editor.getData();
+		var register = 'admin';
+		var param = {referenceId : [[${project.prjId}]], referenceDiv :'13', contents : editorVal};
+		$.ajax({
+			url : '/project/saveComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if(json.isValid == 'false'){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.success([[#{msg.common.success}]]);
+					$(".commentBtn").trigger("click");
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	customOnCellSelect : function(target, iCol){
+		$("#" + target).jqGrid('saveRow', prevEditSel);
+		lastsel = -1;
+	},
+	customOnDblClickRow : function(target, rowid){
+		var rowData = $("#" + target).jqGrid('getRowData',rowid);
+		if ("Y" == rowData.activateFlag) {
+			var gridData = $("#" + target).jqGrid('getGridParam','data').filter(function(a){
+		    	if("Y" == a.activateFlag){
+					return a;
+			    }
+	    	});
+						
+			var msg = [[#{msg.project.security.check.version}]];
+			msg += '<br/><br/>';
+			for (var i=0; i<gridData.length; i++){
+				msg += '- ' + gridData[i].ossName;
+				if (i < gridData.length-1){
+					msg += '<br/>';
+				}
+			}
+			alertify.alert(msg, function(){});
+			$("#" + target).jqGrid("resetSelection");
+			return;
+		} else {
+			if (rowid && rowid !== lastsel){
+				$("#" + target).setColProp('vulnerabilityResolution', {editable:true});
+				$("#" + target).jqGrid('editRow',rowid);
+				lastsel=rowid;
+			}
+		}
+		
+		prevEditSel = rowid;
+	},
+	setSaveGridData : function(targetStr) {
+		var target = $("#"+targetStr);
+		var rowDatas = target.jqGrid("getRowData");
+		var totalGridData = target.jqGrid('getGridParam','data');
+		var rowDatasLength = rowDatas.length;
+		var totalGridDataLength = totalGridData.length;
+		
+		for (var i=0; i<rowDatasLength; i++) {
+			for (var j=0; j<totalGridDataLength; j++) {
+				if (rowDatas[i].gridId == totalGridData[j].gridId) {
+					totalGridData[j].vulnerabilityResolution = rowDatas[i].vulnerabilityResolution;
+					continue;
+				}
+			}
+		}
+		
+		return totalGridData;
+	},
+	identificationTab : function(){
+		var prjId = $('input[name=prjId]').val();
+		var idx = getTabIndex(prjId+"_Identify");
+		
+		if(idx != ""){
+			changeTabInFrame(idx);
+		}else{
+			createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
+		}
+	},
+	packagingTab : function(){
+		var prjId = $('input[name=prjId]').val();
+		var idx = getTabIndex(prjId+"_Packaging");
+		
+		if(idx != ""){
+			changeTabInFrame(idx);
+		}else{
+			createTabInFrame(prjId+'_Packaging', '/project/verification/'+prjId);
+		}
+	},
+	editTab : function(){
+		var prjId = $('input[name=prjId]').val();
+		var idx = getTabIndex(prjId+"_Project");
+		
+		if(idx != ""){
+			changeTabInFrame(idx);
+		}else{
+			createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
+		}
+	},
+	bulkEdit : function(tab){
+    	var gridList;
+ 		var targetGird = "";
+      
+      	switch(tab){
+          	case 'total' : 
+              	gridList = $("#totalList"); targetGird = "totalList";
+              	break;
+          	case 'fixed' : 
+              	gridList = $("#fixedList"); targetGird = "fixedList";
+              	break;
+          	case 'notFixed' : 
+              	gridList = $("#notFixedList"); targetGird = "notFixedList";
+              	break;
+      	}
+
+      	var selarrrow = gridList.jqGrid("getGridParam", "selarrrow");
+      	var rowCheckedArr = [];
+      	var rowGirdIdArr = [];
+      	var versionEmptyFlag = false;
+      
+      	for(var i=0; i<selarrrow.length; i++){
+      		if($("input:checkbox[id='jqg_" + targetGird + "_" + selarrrow[i] + "']").is(":checked")){
+      			var rowData = gridList.jqGrid("getRowData", selarrrow[i]);
+      			if ("" != rowData["ossVersion"]) {
+      				rowCheckedArr.push(selarrrow[i]);
+      				rowGirdIdArr.push(rowData["gridId"]);
+      			}
+			}
+ 		}
+		
+      	if (rowCheckedArr.length > 0) {
+          	fn_grid_com.totalGridSaveMode(targetGird);
+          	
+          	$("#secBulkEditForm > input[name=rowId]").val(rowCheckedArr);
+      		$("#secBulkEditForm > input[name=gridId]").val(rowGirdIdArr);
+			$("#secBulkEditForm > input[name=target]").val(targetGird);
+			
+			$.ajax({
+				url: "/project/secBulkEditPopup",
+                type: "POST",
+                dataType: 'html',
+                cache : false,
+                success: function (res) {
+                	if(!alertify.secBulkEdit){
+						alertify.dialog('secBulkEdit', function() {
+							var settings;
+							
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+									
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+									
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+									
+									return setup;
+								},
+								settings: {
+									oncontinue: null
+								},
+								callback: function(closeEvent) {
+									alertify.confirm().callback.call(this, closeEvent);
+								}
+							};
+						}, false, 'confirm');
+                	}
+                	
+                	alertify.secBulkEdit(res, function(){}).set('title', 'Bulk Edit Security').set('resizable', true).resizeTo('760px', '340px');
+                	$("select[name=vulnerabilityResolution] option:eq(0)").prop("selected", true);
+                },
+                error : function(){
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                }
+            });
+      	} else {
+      		alertify.alert([[#{msg.oss.select.ossTable}]], function(){});
+      		return false;
+      	}
+  	},
+  	bulkEditDataInfo : function(obj, flag){
+		var editFlag = false;
+	   	try{
+  			var ossArr = [];
+          	var gridId = obj["gridId"];
+          	var target = obj["target"];
+          	var gridParam = $('#'+target).jqGrid('getGridParam','data');
+          	var customParam = [];
+          	var param = [];
+          
+          	var limit = $('.ui-pg-selbox option:selected').val();
+          	var page = $('.ui-pg-input').val();
+          	var start = (parseInt(page) * parseInt(limit)) - parseInt(limit);
+          
+          	if (parseInt(start) > 0) {
+          		for (var i=0; i<start; i++){
+          			customParam.push(gridParam[i]);
+          		}
+          	}
+          
+          	for (var i=start; i<gridParam.length; i++) {
+          		param.push(gridParam[i]);
+          	}
+          
+          	if (gridId.indexOf(",") > -1) {
+              	var gridIdArr = gridId.split(",");
+              
+              	for (var idx in gridIdArr) {
+              		for (var i=0; i<param.length; i++) {
+                  		if (param[i]["gridId"] == gridIdArr[idx]) {
+                          	for (var key in obj) {
+                              	if ("rowId" != key && "target" != key && "gridId" != key) {
+                              		param[i][key] = obj[key];
+                              	}
+                          	}
+                      	}
+                  	}
+              	}
+          	} else {
+          		for (var i=0; i<param.length; i++) {
+                  	if (param[i]["gridId"] == gridId) {
+                      	for (var key in obj) {
+                      		if ("rowId" != key && "target" != key && "gridId" != key) {
+                      			param[i][key] = obj[key];
+                          	}
+                      	}
+                  	}
+              	}
+          	}
+          
+          	var reloadParam = [];
+          	if (customParam.length > 0) {
+          		for (var i in customParam) {
+          			reloadParam.push(customParam[i]);
+          		}
+          	}
+          
+          	for (var i in param) {
+      			reloadParam.push(param[i]);
+      		}
+          
+          	$("#"+target).jqGrid('setGridParam', {data:reloadParam}).trigger('reloadGrid');
+  		} catch(e) {
+  			alertify.error([[#{msg.common.valid2}]], 0);
+  			editFlag = true;
+  		} finally {
+  			if(!editFlag){
+      			alertify.success([[#{msg.common.success}]]);
+          	}
+  			
+  			setTimeout(function() {
+  				adjustMultiPageGridSize();
+  			}, 100);
+     	}
+  	}
+}
+
+var com_fn = {
+	tabInit : function(){
+		var prjName = [[${project.prjName}]];
+		var prjVersion = [[${project.prjVersion}]];
+		if ("" != prjVersion) prjName += "(" + prjVersion + ")";
+		var createdDate = [[${@CommonFunction.formatDateSimple(project.createdDate)}]];
+		var created = [[${project.prjUserName}]]+" "+[[${project.prjDivisionName }]]+' ('+createdDate+')';
+		
+		var bTag = document.createElement("b");
+		bTag.innerText = prjName;
+		
+		$("#prjName").html(bTag);
+		$("#creator").text(created);
+		
+		$("#tabMenuTotal").trigger("click");
+		$("#gridAreaTotal").show();
+	},
+	exeSave : function(data, target){
+		var finalData = {
+			referenceId : [[${project.prjId}]],
+			targetName : target,
+			gridData : JSON.stringify(data)
+		};
+		
+		$.ajax({
+			url : '/project/saveSecurity',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				if ("true" == data.isValid){
+					alertify.success([[#{msg.common.success}]]);
+					saveFlag = true;
+					sec_com_evt.dataInit();
+					reloadTabInframe('/project/list');
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			}
+		});
+	},
+	downloadExcel : function(target){
+		var data = {
+			"prjId" : [[${project.prjId}]],
+			"code" : target
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: '/exceldownload/getExcelPost',
+			data: JSON.stringify({"type":"security", "parameter":JSON.stringify(data)}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					if(data.validMsg == "overflow"){
+						alertify.error(getMsgMaxRowCnt(), 0);
+					} else {
+		               alertify.error([[#{msg.common.valid2}]], 0);
+					}
+			   } else {
+			       window.location = '/exceldownload/getFile?id='+data.validMsg;
+			   }
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	bulkEditChange : function(){
+		alertify.confirm([[#{msg.oss.change.bulkedit}]], function (e) {
+			if (e){
+				var obj = $("#secBulkEditForm").serializeObject();
+				obj["vulnerabilityResolution"] = $("select[name=vulnerabilityResolution] option:selected").val();
+				sec_com_fn.bulkEditDataInfo(obj, "mod");
+				com_fn.bulkEditClose();
+			} else {
+				return false;
+			}
+		});
+	},
+	bulkEditReset : function(){
+		alertify.confirm([[#{msg.project.security.check.reset}]], function (e) {
+			if (e){
+				var obj = $("#secBulkEditForm").serializeObject();
+				obj["vulnerabilityResolution"] = "Unresolved";
+				sec_com_fn.bulkEditDataInfo(obj, "reset");
+				com_fn.bulkEditClose();
+			} else {
+				return false;
+			}
+		});
+	},
+	bulkEditClose : function(){
+		$(".ajs-close").trigger("click");
+	}
+}
+
+var total = {
+	loadSecurityGrid : function(){
+		var totalList = $("#totalList");
+		totalList.jqGrid({
+			datatype: 'local',
+			data: totalMainData,
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colModel: [
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
+				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
+						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
+						, dataEvents:[{type:'change',
+							fn: function(e){
+								$("#totalList").jqGrid('saveRow', lastsel);
+								$("#totalList").jqGrid("resetSelection");
+								lastsel = -1;
+							}
+						}]
+					}
+				}
+			],
+		   	editurl:'clientArray',
+ 			autowidth: true,
+ 			multiselect: true,
+ 			multiselectWidth: 35,
+			pager: '#totalListPager',
+			rowNum: 200,
+			rowList: [200, 500, 1000, 5000],
+			gridview: true,
+			sortable: function (permutation) {
+			},
+			loadonce:true,
+			sortorder: 'desc',
+			height: 'auto',
+			toppager:true,
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				sec_com_fn.customOnCellSelect("totalList", iCol);
+			},
+			beforeSelectRow: function(rowid, e) {
+				if (rowid == prevEditSel) {
+					$("#jqg_totalList_" + rowid).prop("checked", true);
+				}
+				
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+				
+				if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+			       iCol = $.jgrid.getCellIndex($td[0]);
+			       cm = p.colModel[iCol];
+			       
+			       if (cm != null && cm.name === "cb") {
+			           // multiselect checkbox is clicked
+			           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+			       }
+				}
+				    
+				return true;
+			},
+			onSelectRow: function(rowid, status, e) {
+				var ossVersion = totalList.jqGrid("getRowData", rowid)["ossVersion"];
+			    if ("" == ossVersion) $("#jqg_totalList_" + rowid).prop("checked", false);
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				sec_com_fn.customOnDblClickRow("totalList" ,rowid);
+			},
+			loadComplete: function(data) {
+				lastsel = -1;
+				if(data.records > 0) {
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+				}
+				
+				// append button event
+				if ($("#totalList_toppager_left").find('button').length == 0) {
+	            	var appendBtn = "";
+	                
+	            	if ([[${@CommonFunction.isAdmin()}]]) {
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('total')\"><i class=\"fas fa-plus\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('total', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
+	                }
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('total')\"><i class=\"fas fa-pencil-alt\"></i></button>";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('total')\"><i class=\"fas fa-download\"></i></button>";
+	                	                
+	                $("#totalList_toppager_left").append(appendBtn);
+	            }
+			},
+			gridComplete : function() {
+				if (totalValidMsgData) {
+					gridValidMsgNew(totalValidMsgData, "totalList");
+				}
+				updateGridRowCount('totalList', 'totalListPager');
+			}
+		});
+			
+		totalList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+			beforeSearch : function () {
+				if (!this.p.postData.referenceId) {
+					this.p.postData.referenceId = [[${project.prjId}]];
+				}
+			},
+			afterSearch: function () {
+				updateGridRowCount('totalList', 'totalListPager'); 
+			}	
+		});
+			
+//		totalList.jqGrid('navGrid',"#totalListPager",{add:false,edit:false,del:false,search:false,refresh:false, cloneToTop:true});
+	},
+	save : function(){
+		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+			if (e) {
+				fn_grid_com.totalGridSaveMode('totalList');
+				var gridData = sec_com_fn.setSaveGridData('totalList');
+				com_fn.exeSave(gridData, "TOTAL");
+			} else {
+				return false;
+			}
+		});
+	}
+}
+
+var fixed = {
+	loadSecurityGrid : function(){
+		var fixedList = $("#fixedList");
+		fixedList.jqGrid({
+			datatype: 'local',  
+			data: fixedMainData,
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colModel: [
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
+				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
+						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
+						, dataEvents:[{type:'change',
+							fn: function(e){
+								$("#fixedList").jqGrid('saveRow', lastsel);
+								$("#fixedList").jqGrid("resetSelection");
+								lastsel = -1;
+							}
+						}]
+					}
+				}
+			],
+			editurl:'clientArray',
+ 			autowidth: true,
+ 			multiselect: true,
+ 			multiselectWidth: 35,
+			pager: '#fixedListPager',
+			rowNum: 200,
+			rowList: [200, 500, 1000, 5000],
+			gridview: true,
+			sortable: function (permutation) {
+			},
+			loadonce:true,
+			toppager:true,
+			sortorder: 'desc',
+			height: 'auto',
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				sec_com_fn.customOnCellSelect("fixedList", iCol);
+			},
+			beforeSelectRow: function(rowid, e) {
+				if (rowid == prevEditSel) {
+					$("#jqg_fixedList_" + rowid).prop("checked", true);
+				}
+				
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+				
+				if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+			       	iCol = $.jgrid.getCellIndex($td[0]);
+			       	cm = p.colModel[iCol];
+			       
+				  	if (cm != null && cm.name === "cb") {
+					// multiselect checkbox is clicked
+			        	$self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+				  	}
+				}
+				    
+				return true;
+			},
+			onSelectRow: function(rowid, status, e) {
+				var ossVersion = fixedList.jqGrid("getRowData", rowid)["ossVersion"];
+			    if ("" == ossVersion) $("#jqg_fixedList_" + rowid).prop("checked", false);
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				sec_com_fn.customOnDblClickRow("fixedList" ,rowid);
+			},
+			loadComplete: function(data) {
+				lastsel = -1;
+				if(data.records > 0) {
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+				}
+				
+				// append button event
+				if ($("#fixedList_toppager_left").find('button').length == 0) {
+	            	var appendBtn = "";
+	                
+	            	if ([[${@CommonFunction.isAdmin()}]]) {
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('fixed')\"><i class=\"fas fa-plus\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('fixed', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
+	                }
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('fixed')\"><i class=\"fas fa-pencil-alt\"></i></button>";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('fixed')\"><i class=\"fas fa-download\"></i></button>";
+	                	                
+	                $("#fixedList_toppager_left").append(appendBtn);
+	            }
+			},
+			gridComplete : function() {
+				if (fixedValidMsgData) {
+					gridValidMsgNew(fixedValidMsgData, "fixedList");
+				}
+				updateGridRowCount('fixedList', 'fixedListPager');
+				adjustMultiPageGridSize();
+			}
+		});
+			
+		fixedList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+			beforeSearch : function () {
+				if(!this.p.postData.referenceId) {
+					this.p.postData.referenceId = [[${project.prjId}]];
+				}
+			},
+			afterSearch: function () {
+				updateGridRowCount('fixedList', 'fixedListPager'); 
+			}		
+		});
+	},
+	save : function(){
+		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+			if (e) {
+				fn_grid_com.totalGridSaveMode('fixedList');
+				var gridData = sec_com_fn.setSaveGridData('fixedList');
+				com_fn.exeSave(gridData, "FIXED");
+			} else {
+				return false;
+			}
+		});
+	}
+}
+
+var notFixed = {
+	loadSecurityGrid : function(){
+		var notFixedList = $("#notFixedList");
+		notFixedList.jqGrid({ 
+			datatype: 'local',
+			data: notfixedMainData,
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colModel: [
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
+				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
+				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false},
+				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
+						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
+						, dataEvents:[{type:'change',
+							fn: function(e){
+								$("#notFixedList").jqGrid('saveRow', lastsel);
+								$("#notFixedList").jqGrid("resetSelection");
+								lastsel = -1;
+							}
+						}]
+					}
+				}
+			],
+			editurl:'clientArray',
+ 			autowidth: true,
+ 			multiselect: true,
+ 			multiselectWidth: 35,
+			pager: '#notFixedListPager',
+			rowNum: 200,
+			rowList: [200, 500, 1000, 5000],
+			gridview: true,
+			sortable: function (permutation) {
+			},
+			loadonce:true,
+			toppager:true,
+			sortorder: 'desc',
+			height: 'auto',
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				sec_com_fn.customOnCellSelect("notFixedList", iCol);
+			},
+			beforeSelectRow: function(rowid, e) {
+				if (rowid == prevEditSel) {
+					$("#jqg_notFixedList_" + rowid).prop("checked", true);
+				}
+				
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+
+				if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+					iCol = $.jgrid.getCellIndex($td[0]);
+				    cm = p.colModel[iCol];
+				       
+				    if (cm != null && cm.name === "cb") {
+				    	// multiselect checkbox is clicked
+				        $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+				  	}
+				}
+				    
+				return true;
+			},
+			onSelectRow: function(rowid, status, e) {
+				var ossVersion = notFixedList.jqGrid("getRowData", rowid)["ossVersion"];
+			    if ("" == ossVersion) $("#jqg_notFixedList_" + rowid).prop("checked", false);
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				sec_com_fn.customOnDblClickRow("notFixedList" ,rowid);
+			},
+			loadComplete: function(data) {
+				lastsel = -1;
+				if(data.records > 0) {
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+				}
+				
+				// append button event
+				if ($("#notFixedList_toppager_left").find('button').length == 0) {
+	            	var appendBtn = "";
+	                
+	            	if ([[${@CommonFunction.isAdmin()}]]) {
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('notFixed')\"><i class=\"fas fa-plus\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('notFixed', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
+	                }
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('notFixed')\"><i class=\"fas fa-pencil-alt\"></i></button>";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('notFixed')\"><i class=\"fas fa-download\"></i></button>";
+	                	                
+	                $("#notFixedList_toppager_left").append(appendBtn);
+	            }
+			},
+			gridComplete : function() {
+				if (notFixedValidMsgData) {
+					gridValidMsgNew(notFixedValidMsgData, "notFixedList");
+				}
+				
+				adjustMultiPageGridSize();
+				
+				updateGridRowCount('notFixedList', 'notFixedListPager');
+			}
+		});
+		
+		notFixedList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+			beforeSearch : function () {
+				if(!this.p.postData.referenceId) {
+					this.p.postData.referenceId = [[${project.prjId}]];
+				}
+			},
+			afterSearch: function () {
+				updateGridRowCount('notFixedList', 'notFixedListPager'); 
+			}			
+		});
+		
+//		notFixedList.jqGrid('navGrid',"#notFixedListPager",{add:false,edit:false,del:true,search:false,refresh:false, cloneToTop:true});
+	},
+	save: function(){
+		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+			if (e) {
+				fn_grid_com.totalGridSaveMode('notFixedList');
+				var gridData = sec_com_fn.setSaveGridData('notFixedList');
+				com_fn.exeSave(gridData, "NOTFIXED");
+			} else {
+				return false;
+			}
+		});
+	}
+}
+
+var displayInfo;
+var fn = {
+		getProjectStatus : function () {
+			$.ajax({
+				url : "/project/getProjectStatus",
+				type : 'POST',
+				data : JSON.stringify({"prjId" : [[${project.prjId}]]}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success : function(data){
+					displayInfo = data;
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		displayProjectInfo : function() {
+			fn.getProjectStatus();
+			
+			var display = "";
+			
+			var pNm = [[${project.prjName}]];
+			var pVer = [[${project.prjVersion}]];
+			if ("" != pVer && pVer != null) pNm += " (" + pVer + ")";
+			
+			// project name
+			var prjName = "<span class=\"description-percentage text-dark-gray\">";
+			prjName += "<a class=\"text-dark-gray text-bold hover-line urlLink goToEditLink\" style=\"cursor: pointer;\" onclick=\"fn.mvEditTab(" + [[${project.prjId}]] + ")\" title=\"" + pNm + "\">" + pNm + "</a></span>";
+			display += prjName;
+			
+			// status
+			var status = "<span class=\"ml-2\"> | </span>";
+			var projectStatus = [[${project.status}]];
+			var customStatus = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), project.status)}]];
+			
+			switch(projectStatus){
+			case 'REQ':
+				status += "<span class=\"text-pink text-bold ml-2\">" + customStatus + "</span>";
+
+				break;
+			case 'REV':
+				status += "<span class=\"text-yellow text-bold ml-2\">" + customStatus + "</span>";
+
+				break;
+			case 'DROP':
+				status += "<span class=\"text-gray text-bold ml-2\">" + customStatus + "</span>";
+
+				break;
+			case 'FREV':
+				status += "<span class=\"text-purple text-bold ml-2\">" + customStatus + "</span>";
+
+				break;
+			case 'COMP':
+				status += "<span class=\"text-dark-blue text-bold ml-2\">" + customStatus + "</span>";
+
+				break;
+			default:
+				status += "<span class=\"text-success text-bold ml-2\">" + customStatus + "</span>";
+
+				break;
+			}
+			display += status;
+			
+			// osc progress
+			var identificationStatus = [[${project.identificationStatus}]];
+			identificationStatus = identificationStatus||"";
+			var verificationStatus = [[${project.verificationStatus}]];
+			verificationStatus = verificationStatus||"";
+			var statusRequestYn = [[${project.statusRequestYn}]];
+			statusRequestYn = statusRequestYn||"";
+			
+			var oscProgress = "<span class=\"ml-2\"> | </span>";
+			if ("" != identificationStatus) {
+				if ("DROP" == projectStatus) {
+					if ("CONF" == identificationStatus) {
+						oscProgress += '<span class="badge badge-gray size-sm width-6rem px-1 ml-2">Identification</span>';
+					} else {
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Identification</span>';
+					}
+				} else if ("FREV" == projectStatus) {
+					oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" ";
+					if ("Y" == [[${project.androidFlag}]]) {
+						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
+					} else {
+						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
+					}
+				} else {
+					var initDiv = "";
+					if ("Y" == [[${project.androidFlag}]]) {
+						initDiv = "4";
+					} else {
+						initDiv = "5";
+					}
+					
+					if ("CONF" == identificationStatus) {
+						oscProgress += "<span class=\"badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" ";
+						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+					} else if ("PROG" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" ";
+						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+					} else if ("REQ" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" ";
+						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+					} else if ("REV" == projectStatus) {
+						oscProgress += "<span class=\"badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" ";
+						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/" + initDiv + "')\">Identification</span>";
+					}
+				}
+			} else {
+				if ("DROP" == projectStatus) {
+					oscProgress += '<span class="badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2">Identification</span>';
+				} else {
+					oscProgress += "<span class=\"badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2\" style=\"cursor:pointer;\" ";
+					if ("Y" == [[${project.androidFlag}]]) {
+						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/4')\">Identification</span>";
+					} else {
+						oscProgress += "onclick=\"createTabInFrame('"+[[${project.prjId}]]+"_Identify', '/project/identification/" + [[${project.prjId}]] + "/5')\">Identification</span>";
+					}
+				}
+			}
+			
+			if ("CONF" != identificationStatus) {
+				oscProgress += '<span class="text-gray-white text-bold text-md ml-2">&gt;</span>';
+				oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
+			} else {
+				oscProgress += '<span class="text-blue-gray text-bold text-md ml-2">&gt;</span>';
+				if ("DROP" == projectStatus) {
+					if ("CONF" == verificationStatus) {
+						oscProgress += '<span class="badge badge-gray size-sm width-6rem px-1 ml-2">Packaging</span>';
+					} else {
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
+					}
+				} else {
+					if ("" == verificationStatus) {
+						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
+						} else if ("" != identificationStatus) {
+							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+						}
+					} else if ("PROG" == verificationStatus) {
+						if ("COMP" == projectStatus || "Y" == statusRequestYn) {
+							oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
+						} else {
+							oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+						}
+					} else if ("REV" == verificationStatus) {
+						oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+					} else if ("REQ" == verificationStatus) {
+						oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+					} else if ("NA" == verificationStatus || "DROP" == verificationStatus) {
+						oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
+					} else {
+						if ("CONF" == verificationStatus) {
+							oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+						} else {
+							if ("NA" == [[${project.distributeTarget}]]) {
+								oscProgress += '<span class="badge badge-outline-gray-white size-sm width-6rem px-1 ml-2">Packaging</span>';
+							} else {
+								if ("PROG" == projectStatus) {
+									oscProgress += "<span class='badge badge-success hover-success-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+								} else if ("REQ" == projectStatus) {
+									oscProgress += "<span class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+								} else if ("REV" == projectStatus) {
+									oscProgress += "<span class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+								} else if ("FREV" == projectStatus) {
+									oscProgress += "<span class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2' style='cursor:pointer;' onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Packaging', '/project/verification/" + [[${project.prjId}]] + "')\">Packaging</span>";
+								}
+							}
+						}
+					}
+				}
+			}
+						
+			display += oscProgress;
+			
+			// vulnerability score
+			var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
+			var vulnerability = "<span class=\"ml-2\"> | </span>";
+			
+			var cvssScore = displayInfo.cvssScore;
+			var secCode = displayInfo.secCode;
+			var secCvssScore = displayInfo.secCvssScore;
+			
+			if ("N" != secCvssScore && "Fixed" != secCode) {
+				cvssScore = secCvssScore;
+			}
+			
+			if ("N" != secCode) {
+				if ("Fixed" == secCode) {
+					if ("N" != cvssScore) {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Resolved(" + cvssScore + ")</span>";
+					} else {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Resolved(N/A)</span>";
+					}
+				} else {
+					if ("0" != cvssScore && "N" != cvssScore) {
+						if (cvssScore - standardScore >= 0) {
+							vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Need to resolve(" + cvssScore + ")</span>";
+						} else {
+							vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Discovered(" + cvssScore + ")</span>";
+						}
+					} else {
+						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2 customShadow\" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>";
+					}
+				}
+			} else {
+				if ("0" != cvssScore && "N" != cvssScore) {
+					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered("+cvssScore+")</span>";
+				} else {
+					vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered(N/A)</span>";
+				}
+			}
+			
+			display += vulnerability;
+			$("#displayProjectInfo").html(display);
+			
+			if ($(".goToEditLink").width() > 300) {
+				$(".goToEditLink").addClass("ellipsis");
+			}
+	},
+	handleUserCommentPopupOpen: function () {
+		const param = {
+	    	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_USER')}]],
+	        "referenceId" : [[${project.prjId}]]
+	   	}
+	    getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+	  		if (!alertify.editDialog) {
+	           	alertify.dialog('editDialog', function () {
+	            	return {
+	           			main: function (content) {
+	                  		this.setContent(content);
+	              		},
+	             		setup: function () {
+	             			var setup = alertify.confirm().setup();
+							setup.buttons = [];
+							setup.focus.element = 1;
+						
+							return setup;
+	            		},
+					    hooks: {
+					    	onshow: function() {
+					        	this.elements.dialog.style.maxWidth = 'none';
+					          	this.elements.dialog.style.width = '700px';
+					        }
+						}
+	           		};
+	     		});
+	  		}
+	  		
+	     	editDailog = alertify.editDialog(res);
+	   	},
+	   	null,
+	 	function () {
+	     	$("#modifiedCommentInPjtEditor").summernote({
+	          	height: 180,
+	           	callbacks: {
+	              	onInit: function () {
+	               		$(this).summernote('code', $("#userContents").val());
+	            	}
+	           	}
+	      	});
+	  	});
+	},
+	sendEditor: function (type) {
+		//코멘트 저장
+	  	var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+	   	if (!editorVal || editorVal == "") {
+	     	alertify.alert([[#{msg.project.enter.comment}]], function () {});
+	    	return false;
+	   	}
+	 	var referenceId = [[${project.prjId}]]
+	  	var param = {referenceId: referenceId, referenceDiv: [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_HIS')}]], contents: editorVal, mailSendType: type};
+
+	  	$.ajax({
+	     	url: '/project/sendComment',
+	      	type: 'POST',
+	     	dataType: 'json',
+	    	cache: false,
+	      	data: param,
+	      	success: function (json) {
+	          	if (json.isValid == 'false') {
+	             	alertify.error([[#{msg.common.valid2}]], 0);
+	           	} else {
+	             	alertify.success([[#{msg.project.sent.comments.success}]]);
+	             	$("#modifiedCommentInPjtEditor").summernote('code', '');
+	             	$("#userContents").val('');
+	             	$('.ajs-close').trigger("click");
+                    fn_comment.getCommentList(commentsParam);
+	          	}
+	     	},
+	       	error: function () {
+	          	alertify.error([[#{msg.common.valid2}]], 0);
+	      	}
+	 	});
+	},
+	saveEditor: function () {
+		//코멘트 임시저장
+	 	var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+
+	  	var referenceId = [[${project.prjId}]]
+		var param = {
+	     	referenceId: referenceId
+	    	, referenceDiv: [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_USER')}]]
+	       	, contents: editorVal
+	  	};
+	   	$.ajax({
+	      	url: "/project/saveComment",
+	      	type: "POST",
+	       	dataType: "json",
+	     	cache: false,
+	      	data: param,
+	       	success: function (json) {
+	        	if (json.isValid == 'false') {
+	              	alertify.error([[#{msg.common.valid2}]], 0);
+	          	} else {
+	             	alertify.success([[#{msg.common.success}]]);
+	             	$("#userContents").val(editorVal);
+		         	$('.ajs-close').trigger("click");
+	          	}
+	    	},
+	     	error: function () {
+	         	alertify.error([[#{msg.common.valid2}]], 0);
+	   		}
+		});
+	},
+    mvEditTab : function(prjId){
+        createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
+    }
+}
+
+	var fn_comment = {
+		callbackFunction : function () {
+	    	fn_comment.getCommentList(commentsParam);
+	    },
+		getCommentList : function(param) {
+			$.ajax({
+				type: "GET",
+				url: '/comment/getCusCommentList',
+				dataType : 'html',
+				cache : false,
+				data : param,
+				success: function (res) {
+					if (typeof param.height !== undefined) {
+						$(".comment-card-body").attr("style", "max-height:" + param.height + "px; overflow-y: auto;");
+					}
+					$("#commentList").empty();
+					$("#commentList").html(res);
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		getMoreCommentsList : function() {
+			commentsParam["moreFlag"] = "Y";
+			fn_comment.getCommentList(commentsParam);
+		},
+		editComments : function(_commId, _referenceDiv, _referenceId) {
+			$.ajax({
+				url : '/comment/getEditPopup',
+				type : 'POST',
+				data : {'commId' : _commId},
+				dataType : 'html',
+				cache : false,
+				success : function(res){
+					if(!alertify.editComments){
+						alertify.dialog('editComments', function() {
+							return {
+								setup: function() {
+									var settings = alertify.confirm().settings;
+								
+									for (var prop in settings) {
+										this.settings[prop] = settings[prop];
+									}
+								
+									var setup = alertify.confirm().setup();
+									setup.buttons = [];
+									setup.focus.element = 1;
+								
+									return setup;
+								},
+						    	hooks: {
+						    		onshow: function() {
+						        		this.elements.dialog.style.maxWidth = 'none';
+						          		this.elements.dialog.style.width = '700px';
+						        	}
+								}
+							};
+						}, false, 'confirm');
+	        		}
+				
+					alertify.editComments(res).set('title', 'Edit Comments');
+					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
+					$("#commentEdit").summernote({minHeight: 180, maxHeight: 800, lang: "ko-KR"});
+				}
+			});
+		},
+		updateComments : function (_commId, _referenceDiv, _referenceId) {
+			if ("" == $("#commentEdit").next().find(".note-editable").text()) {
+				alertify.alert("Please enter a comment", function(){});
+				return false;
+			} else {
+				var param = {commId : _commId, contents : replaceWithLink($("#commentEdit").summernote('code')), referenceDiv: _referenceDiv, referenceId: _referenceId};
+					$.ajax({
+					url : '/comment/updateComment',
+					type : 'POST',
+					dataType : 'json',
+					cache : false,
+					data : param,
+					success : function(json){
+						alertify.success([[#{msg.common.success}]]);
+						$(".ajs-close").trigger("click");
+						fn_comment.getCommentList(commentsParam);
+					},
+					error : function(){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		deleteComments : function (_commId) {
+			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+				if (e) {
+					$.ajax({
+						url : '/comment/deleteComment',
+						type : 'POST',
+						dataType : 'json',
+						cache : false,
+						data : {'commId' : _commId},
+						success : function(data){
+							alertify.success([[#{msg.common.success}]]);
+							$(".ajs-close").trigger("click");
+							fn_comment.getCommentList(commentsParam);
+						},
+						error : function(){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					return false;
+				}
+			});
+		},
+		closeAlertifyView : function () {
+			fn.closeAlertifyView();
+		},
+		activateCommentArea : function () {
+			// change tab area
+			if (!$(".comment-area").is(":visible")) {
+				$(".contents-area").removeClass("col-12");
+				$(".contents-area").addClass("col-lg-9");
+				
+				fn_comment.getCommentList(commentsParam);
+				$(".comment-area").show();
+			} else {
+	 			$(".contents-area").removeClass("col-lg-9");
+	 			$(".contents-area").addClass("col-12");
+	 			$(".comment-area").hide();
+			}
+		},
+		showCommentHistory : function () {
+			fn_comment.activateCommentArea();
+			
+			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_HIS')}]];
+	        openCommentHistory('/comment/popup/security/' + _rDiv + '/' + [[${project.prjId}]]);
+		}
+	}
+</script>
+</th:block>
