@@ -85,12 +85,19 @@ public final class PdfUtil extends CoTopComponent {
         List<LicenseMaster> licenseReview = new ArrayList<>();
         List<Vulnerability> vulnerabilityReview = new ArrayList<>();
         Map<String,LicenseMaster> licenseMasterMap = new HashMap<>();
-        String type = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+        String type = "";
 
         Project projectMaster = new Project();
         projectMaster.setPrjId(prjId);
 
-        Project project = projectMapper.selectProjectMaster(projectMaster);
+        Project project = projectMapper.selectProjectMaster2(projectMaster);
+        if(project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+            type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
+        } else {
+            type = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+        }
+
+        project = projectMapper.selectProjectMaster(projectMaster);
         String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + prjId;
         String _s = "<a href='"+url+"' target='_blank'>" + project.getPrjName() + "(" + project.getPrjVersion()+")"+ "</a>";
         project.setPrjName(_s);
@@ -108,58 +115,51 @@ public final class PdfUtil extends CoTopComponent {
         _param.setMerge(CoConstDef.FLAG_NO);
 
         Map<String, Object> map = projectService.getIdentificationGridList(_param, true);
-        List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("rows");
+        List<ProjectIdentification> list = new ArrayList<ProjectIdentification>();
+        if(type.equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID))      {
+            list = (List<ProjectIdentification>) map.get("mainData");
+        } else{
+            list = (List<ProjectIdentification>) map.get("rows");
+        }
         for (ProjectIdentification projectIdentification : list) {
-            //OssMasterReview
-            OssMaster ossMaster = new OssMaster();
-            ossMaster.setOssId(projectIdentification.getOssId());
-            OssMaster oss = ossMapper.selectOssOne(ossMaster);
-            if(oss != null) {
-                if (!avoidNull(oss.getSummaryDescription()).equals("")) {
+            if (projectIdentification.getExcludeYn().equals("N")) {
+                //OssMasterReview
+                OssMaster ossMaster = new OssMaster();
+                ossMaster.setOssId(projectIdentification.getOssId());
+                OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(projectIdentification.getOssId());
+                if (oss != null) {
+                    if (!avoidNull(oss.getSummaryDescription()).equals("")) {
 
-                    ossReview.add(oss);
-                }
-
-                //VulnerabilityReview
-                projectIdentification.setOssName(oss.getOssName());
-                projectIdentification.setOssVersion(oss.getOssVersion());
-                ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
-                if(prjOssMaster.getCvssScore()!=null) {
-                    BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
-                    BigDecimal mailingScore = new BigDecimal(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
-
-                    if (bdScore.compareTo(mailingScore) >= 0) {
-                        Vulnerability vulnerability = new Vulnerability();
-                        vulnerability.setOssName(oss.getOssName());
-                        vulnerability.setVersion(oss.getOssVersion());
-                        vulnerability.setCvssScore(prjOssMaster.getCvssScore());
-                        vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
-                        vulnerabilityReview.add(vulnerability);
-                    }
-                }
-            }
-
-            //LisenseReview
-            LicenseMaster licenseMaster = new LicenseMaster();
-            licenseMaster.setLicenseId(projectIdentification.getLicenseId());
-
-            LicenseMaster license = licenseMapper.selectLicenseOne(licenseMaster);
-            if(license != null) {
-                if (!isEmpty(license.getRestriction())) {
-                    String[] arrRestrictions = license.getRestriction().split(",");
-                    String str = "";
-                    for (int i = 0; i < arrRestrictions.length - 2; i++) {
-                        str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[i]) + ", ";
+                        ossReview.add(oss);
                     }
 
-                    if (arrRestrictions.length > 0) {
-                        str += codeMapper.getCodeDtlNm(CD_LICENSE_RESTRICTION, arrRestrictions[arrRestrictions.length - 1]);
+                    //VulnerabilityReview
+                    projectIdentification.setOssName(oss.getOssName());
+                    projectIdentification.setOssVersion(oss.getOssVersion());
+                    ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
+                    if (prjOssMaster.getCvssScore() != null) {
+                        BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
+                        BigDecimal mailingScore = new BigDecimal(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
+
+                        if (bdScore.compareTo(mailingScore) >= 0) {
+                            Vulnerability vulnerability = new Vulnerability();
+                            vulnerability.setOssName(oss.getOssName());
+                            vulnerability.setVersion(oss.getOssVersion());
+                            vulnerability.setCvssScore(prjOssMaster.getCvssScore());
+                            vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
+                            vulnerabilityReview.add(vulnerability);
+                        }
                     }
-                    license.setRestriction(str);
                 }
 
-                if (!isEmpty(avoidNull(license.getRestriction())) || (!isEmpty(avoidNull(license.getDescription())) && !license.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS)) ) {
-                    licenseMasterMap.put(license.getLicenseName(), license);
+                LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(projectIdentification.getLicenseName().toUpperCase());
+                if(license != null) {
+                    if (!isEmpty(avoidNull(license.getRestrictionStr())) || (!isEmpty(avoidNull(license.getDescription())) && !license.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS))) {
+                        if(!isEmpty(avoidNull(license.getShortIdentifier()))) {
+                            license.setLicenseName(license.getShortIdentifier());
+                        }
+                        licenseMasterMap.put(license.getLicenseName(), license);
+                    }
                 }
             }
         }

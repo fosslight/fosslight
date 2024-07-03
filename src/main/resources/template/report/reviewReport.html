@@ -123,16 +123,14 @@
         <table border="1">
             <thead>
             <th width="150">License Name</th>
-            <th width="50">License Type</th>
             <th width="330">User Guide</th>
             <th width="70">Restriction</th>
             </thead>
             <tbody>
             <tr th:each="licenseReview : ${LicenseReview}">
                 <td th:text="|${licenseReview.licenseName}|"></td>
-                <td th:text="|${licenseReview.licenseType}|"></td>
                 <td th:utext="|${licenseReview.description}|"></td>
-                <td th:utext="|${licenseReview.restriction}|"></td>
+                <td th:utext="|${licenseReview.restrictionStr}|"></td>
             </tr>
             </tbody>
         </table>
