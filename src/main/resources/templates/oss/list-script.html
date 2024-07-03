@@ -707,7 +707,30 @@
                             $('[data-toggle="tooltip"]').tooltip({html: true});
                             oss_lst_data.existTooltip = true;
                         }
-                        updateGridRowCount('list', 'pager'); 
+                        updateGridRowCount('list', 'pager');
+                        
+                        // grid complete 후 oss name auto complete 처리
+                        commonAjax.getOssTags().success(function (data, status, headers, config) {
+                            if (data != null) {
+                                data.forEach(function (obj) {
+                                    if (obj != null) {
+                                        autoComplete.ossTags.push(obj.ossName);
+                                    }
+                                })
+                            }
+                        });
+                        
+                        $('input[name="ossName"]').autocomplete({
+                            source : autoComplete.ossTags,
+                            select : function(event, ui) {
+                            	$(this).val(ui.item.value);
+                            },
+                            focus : function(event, ui) {return false;},
+                            minLength : 1,
+                            autoFocus : true,
+                            disable : false,
+                            close : function(event) {}
+                        });
                     },
                     loadComplete: function (result) {
                         totalRow = result.records;

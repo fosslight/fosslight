@@ -24,7 +24,7 @@
                                             	<div class="col-12">
                                             		<div class="input-group">
                                                 		<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-lg-red btn-sm width-5rem text-md fw-4 mr-xm" th:onclick="|createTabInFrame('New_OpenSource', '/oss/edit')|" th:text="|+ Add|"></button>
-                                                    	<input class="form-control autoComOss save-value" style="border-right: 0px solid #fff;" name="ossName" placeholder="OSS Name" th:value="${searchBean.ossName}" type="text">
+                                                    	<input class="form-control save-value" style="border-right: 0px solid #fff;" name="ossName" placeholder="OSS Name" th:value="${searchBean.ossName}" type="text">
                                                     	<div class="input-group-append">
                                                     		<span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
                                                     			<input class="form-check-input" id="ossNameAllSearchFlag" th:checked="${searchBean.ossNameAllSearchFlag == 'Y' }" type="checkbox">
