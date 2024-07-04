@@ -70,9 +70,9 @@
 														<td style="padding:5px;" th:utext="${license_basic_info?.licenseNickname}"></td>
 													</tr>
 													<tr>
-														<th align="left" style="padding:5px;background:#f0f0f0;">Web site for the license</th>
+														<th align="left" style="padding:5px;background:#f0f0f0;">Website for the license</th>
 														<td style="padding:5px;">
-															<a th:if="${license_basic_info?.webpage != null}" th:href="${license_basic_info.webpage}" th:text="${license_basic_info.webpage}"></a>
+															<span th:if="${license_basic_info?.webpage != null}" th:utext="${license_basic_info.webpage}"></span>
 														</td>
 													</tr>
 													<tr>

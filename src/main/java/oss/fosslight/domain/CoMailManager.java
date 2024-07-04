@@ -3148,6 +3148,7 @@ public class CoMailManager extends CoTopComponent {
 			if (!isEmpty(bean.getWebpage()) && !(bean.getWebpage().startsWith("http://") || bean.getWebpage().startsWith("https://"))) {
 				bean.setWebpage("http://" + bean.getWebpage());
 			}
+			if (!isEmpty(bean.getWebpage())) bean.setWebpage(appendChangeStyleLinkFormatArray(bean.getWebpage()));
 			
 			bean.setDescription(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("DESCRIPTION")))); 
 			bean.setLicenseText(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("LICENSE_TEXT")))); 
