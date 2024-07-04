@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
-# [2.0.0.pre-release] (2024-07-02)
+# [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
 ### New
 * UI 2.0 릴리즈
   - UI 프레임워크를 Thymeleaf로 변경
