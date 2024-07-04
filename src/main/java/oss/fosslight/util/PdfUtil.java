@@ -85,6 +85,7 @@ public final class PdfUtil extends CoTopComponent {
         List<LicenseMaster> licenseReview = new ArrayList<>();
         List<Vulnerability> vulnerabilityReview = new ArrayList<>();
         Map<String,LicenseMaster> licenseMasterMap = new HashMap<>();
+        Map<String,OssMaster> ossMasterMap = new HashMap<>();
         String type = "";
 
         Project projectMaster = new Project();
@@ -129,8 +130,7 @@ public final class PdfUtil extends CoTopComponent {
                 OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(projectIdentification.getOssId());
                 if (oss != null) {
                     if (!avoidNull(oss.getSummaryDescription()).equals("")) {
-
-                        ossReview.add(oss);
+                        ossMasterMap.put(oss.getOssName().toUpperCase() + "_" + oss.getOssVersion().toUpperCase(), oss);
                     }
 
                     //VulnerabilityReview
@@ -162,6 +162,10 @@ public final class PdfUtil extends CoTopComponent {
                     }
                 }
             }
+        }
+
+        for(OssMaster ossMaster : ossMasterMap.values()) {
+            ossReview.add(ossMaster);
         }
 
         for (LicenseMaster licenseMaster : licenseMasterMap.values()) {
