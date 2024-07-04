@@ -202,20 +202,6 @@ var com_evt = {
                         	}
                         
                         	loading.show();
-    						$.ajax({
-    							url :'/project/verification/reviewReportAjax?prjId='+[[${project.prjId}]],
-    							type : 'POST',
-    							cache : false,
-                            	async : false,
-    							success: function(data){
-    								loading.hide();
-    							},
-    							error : function(data){
-    								loading.hide();
-    								alertify.error([[#{msg.common.valid2}]], 0);
-    							}
-    						});
-
      						com_fn.checkSave(data, "CONF");	
     					} else {
     						alertify.alert([[#{msg.project.check.save}]], function(){});
