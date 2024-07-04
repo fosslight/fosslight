@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
-# [2.0.0.pre-release] (2024-07-02)
+# [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
 ### New
 * UI 2.0 release 
   - Switched UI Framework to Thymeleaf
