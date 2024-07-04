@@ -111,7 +111,7 @@
             <tr th:each="ossReview : ${OssReview}">
                 <td th:text="|${ossReview.ossName}|"></td>
                 <td th:text="|${ossReview.ossVersion}|"></td>
-                <td th:text="|${ossReview.summaryDescription}|"></td>
+                <td th:utext="|${ossReview.summaryDescription}|"></td>
             </tr>
             </tbody>
         </table>

@@ -100,7 +100,11 @@ public final class PdfUtil extends CoTopComponent {
 
         project = projectMapper.selectProjectMaster(projectMaster);
         String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + prjId;
-        String _s = "<a href='"+url+"' target='_blank'>" + project.getPrjName() + "(" + project.getPrjVersion()+")"+ "</a>";
+        String _s = "<a href='"+url+"' target='_blank'>" + project.getPrjName();
+        if(!isEmpty(project.getOssVersion())) {
+            _s += "(" + project.getPrjVersion()+")";
+        }
+        _s += "</a>";
         project.setPrjName(_s);
 
         convertData.put("project", project);
@@ -185,12 +189,15 @@ public final class PdfUtil extends CoTopComponent {
             }
         }
 
-        convertData.put("OssReview", ossReview);
-        convertData.put("LicenseReview", licenseReview);
-        convertData.put("VulnerabilityReview", vulnerabilityReview);
-        convertData.put("templateURL", "report/reviewReport.html");
-        
-        return CommonFunction.VelocityTemplateToString(convertData);
+        if(ossReview.size() == 0 && licenseReview.size() == 0 && vulnerabilityReview.size() == 0 ) {
+            return null;
+        } else {
+            convertData.put("OssReview", ossReview);
+            convertData.put("LicenseReview", licenseReview);
+            convertData.put("VulnerabilityReview", vulnerabilityReview);
+            convertData.put("templateURL", "report/reviewReport.html");
+            return CommonFunction.VelocityTemplateToString(convertData);
+        }
     }
 
     /**

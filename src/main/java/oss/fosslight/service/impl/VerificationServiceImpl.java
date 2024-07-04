@@ -299,6 +299,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		try {
 			contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(prjId));
+			if(contents == null) {
+				Project projectParam = new Project();
+				projectParam.setPrjId(prjId);
+				projectParam.setReviewReportFileId(null);
+				verificationMapper.updateReviewReportFileInfo(projectParam);
+				return false;
+			}
 		}catch(Exception e){
 			log.error(e.getMessage());
 			return false;
