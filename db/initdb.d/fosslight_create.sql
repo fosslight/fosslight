@@ -1245,7 +1245,8 @@ CREATE TABLE IF NOT EXISTS `OSS_MASTER_LICENSE_FLAG` (
   `DUAL_LICENSE_FLAG` char(1) DEFAULT 'N',
   `VERSION_DIFF_FLAG` char(1) DEFAULT 'N',
   PRIMARY KEY (`OSS_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='To manage sorting and display for the OSS list, only manage whether it's MULTI / DUAL / V-DIFF.';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='To manage sorting and display for the OSS list,\
+	    only manage whether it\'s MULTI / DUAL / V-DIFF.';
 
 -- 테이블 데이터 fosslight.OSS_MASTER_LICENSE_FLAG:~27 rows (대략적) 내보내기
 DELETE FROM `OSS_MASTER_LICENSE_FLAG`;
@@ -1470,8 +1471,8 @@ CREATE TABLE IF NOT EXISTS `PACKAGING_TEMP_MAP` (
   `PACKAGING_FILE_SEQ` int(1) NOT NULL,
   `DEL_YN` char(1) DEFAULT 'N',
   `COMPLETE_YN` char(1) DEFAULT 'N'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='To enable changing the packaging file after Distribution DONE and when complete, ' ||
-	    'use packaging file management table\r\n* batch, which is good for file deletion'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='To enable changing the packaging file after Distribution DONE and when complete,\
+	     use packaging file management table\r\n* batch, which is good for file deletion';
 
 -- 테이블 데이터 fosslight.PACKAGING_TEMP_MAP:~0 rows (대략적) 내보내기
 DELETE FROM `PACKAGING_TEMP_MAP`;
