@@ -3,6 +3,7 @@
 ## v2.0.0.pre-release (05/07/2024)
 ## Features
 - UI 2.0 release @FOSSLight-dev (#1047)
+  - Detailed information about UI 2.0 will be available at https://fosslight.org/
 - API v2 release @cobaltblu27 (#1047)
 - Lite web release @hjcdg1 (#1047)
 
