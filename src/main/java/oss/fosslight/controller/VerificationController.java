@@ -626,28 +626,6 @@ public class VerificationController extends CoTopComponent {
 		return makeJsonResponseHeader(true, null, resultHtml);
 	}
 
-	@PostMapping(value = VERIFICATION.REVIEW_REPORT_AJAX)
-	public @ResponseBody ResponseEntity<Object>  getReviewReportPdf(HttpServletRequest req,HttpServletResponse res, Model model,
-			@RequestParam(value="prjId") String prjId
-			) throws IOException {
-		log.info("URI: "+ "/project/verification/reportAjax");
-		log.debug("PARAM: "+ "prjId="+prjId);
-
-		String resultHtml = "";
-
-		try {
-			// create review file
-			if (!verificationService.getReviewReportPdfFile(prjId)) {
-				return makeJsonResponseHeader(false, getMessage("msg.common.valid2"));
-			}
-
-		} catch (Exception e) {
-			return makeJsonResponseHeader(false, e.getMessage());
-		}
-
-		return makeJsonResponseHeader(true, null, resultHtml);
-	}
-
 	@ResponseBody
 	@GetMapping(value = VERIFICATION.DOWNLOAD_FILE,  produces = {
 			MimeTypeUtils.TEXT_HTML_VALUE+"; charset=utf-8", 

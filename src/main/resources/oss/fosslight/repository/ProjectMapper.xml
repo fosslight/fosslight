@@ -2342,7 +2342,6 @@
 					, SPDX_TAG_FILE_ID = NULL
 					, SPDX_JSON_FILE_ID = NULL
 					, SPDX_YAML_FILE_ID = NULL
-					, REVIEW_REPORT_FILE_ID = NULL
 					, ZIP_FILE_ID = NULL
 					, CDX_JSON_FILE_ID = NULL
 					, CDX_XML_FILE_ID = NULL
@@ -2451,6 +2450,9 @@
 				, SRC_ANDROID_NOTICE_XML_ID = #{srcAndroidNoticeXmlId}
 				</if>
 				, SRC_ANDROID_RESULT_FILE_ID = #{srcAndroidResultFileId}
+		        <if test="!@oss.fosslight.util.StringUtil@isEmpty(reviewReportFileId)">
+				, REVIEW_REPORT_FILE_ID = #{reviewReportFileId}
+				</if>>
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('15', referenceDiv)">
 				, BIN_CSV_FILE_ID = #{binCsvFileId}
@@ -2645,7 +2647,6 @@
 						, SPDX_TAG_FILE_ID = NULL
 						, SPDX_JSON_FILE_ID = NULL
 						, SPDX_YAML_FILE_ID = NULL
-						, REVIEW_REPORT_FILE_ID = NULL
 						, ZIP_FILE_ID = NULL
 					</if>
 				</when>

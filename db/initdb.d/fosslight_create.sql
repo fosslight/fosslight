@@ -21,8 +21,8 @@ USE `fosslight`;
 -- 테이블 fosslight.COMMENTS_HISTORY 구조 내보내기
 DROP TABLE IF EXISTS `COMMENTS_HISTORY`;
 CREATE TABLE IF NOT EXISTS `COMMENTS_HISTORY` (
-  `COMM_ID` int(11) NOT NULL AUTO_INCREMENT COMMENT '코멘트 이력 ID',
-  `REFERENCE_ID` int(11) NOT NULL COMMENT '코멘트 등록 ID',
+  `COMM_ID` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Comment history ID',
+  `REFERENCE_ID` int(11) NOT NULL COMMENT 'Comment registration ID',
   `REFERENCE_DIV` varchar(6) NOT NULL,
   `STATUS` varchar(100) DEFAULT NULL,
   `CONTENTS` longtext DEFAULT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `COMMENTS_HISTORY` (
   `CREATED_DATE` datetime DEFAULT current_timestamp(),
   `MODIFIER` varchar(50) DEFAULT NULL,
   `MODIFIED_DATE` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `STATUS_CODE` varchar(20) DEFAULT NULL COMMENT 'Distribution Action구분 코드',
+  `STATUS_CODE` varchar(20) DEFAULT NULL COMMENT 'Distribution Action classification code',
   PRIMARY KEY (`COMM_ID`),
   KEY `REFERENCE_ID` (`REFERENCE_ID`,`REFERENCE_DIV`),
   KEY `CREATOR` (`CREATOR`)
@@ -63,29 +63,30 @@ DELETE FROM `COMMENTS_HISTORY_READ`;
 -- 테이블 fosslight.EMAIL_SND_HIS 구조 내보내기
 DROP TABLE IF EXISTS `EMAIL_SND_HIS`;
 CREATE TABLE IF NOT EXISTS `EMAIL_SND_HIS` (
-  `SND_SEQ` bigint(22) NOT NULL AUTO_INCREMENT COMMENT '발송이력순번',
-  `MSG_TYPE` varchar(6) NOT NULL COMMENT '메시지구분',
-  `RCR_NAME` varchar(100) DEFAULT NULL COMMENT '수신자명',
-  `EML_TO` varchar(5000) NOT NULL COMMENT '수신자 이메일 주소',
-  `SND_NAME` varchar(100) DEFAULT NULL COMMENT '발신자명',
-  `EML_FROM` varchar(100) NOT NULL COMMENT '발신자 이메일 주소',
-  `EML_CC` varchar(5000) DEFAULT NULL COMMENT '참조자',
-  `EML_BCC` varchar(5000) DEFAULT NULL COMMENT '숨은참조자',
-  `EML_TITLE` varchar(200) NOT NULL COMMENT '이메일 제목',
-  `EML_MESSAGE` longtext NOT NULL COMMENT '이메일 내용',
-  `SND_STATUS` varchar(3) NOT NULL COMMENT '발송 상태\nS	전송(Send)	\nC	완료(Complete)	\nG 	전송 시간 초과(Gone)\nF	전송실패(Failure)',
-  `USE_FLAG` char(1) NOT NULL COMMENT '사용여부',
-  `CREATION_DATE` datetime NOT NULL COMMENT '등록일',
-  `CREATION_USER_ID` varchar(30) NOT NULL COMMENT '등록자',
-  `LAST_UPDATE_DATE` datetime NOT NULL COMMENT '수정일',
-  `LAST_UPDATE_USER_ID` varchar(30) NOT NULL COMMENT '수정자',
-  `FILE_SEQ` bigint(22) DEFAULT NULL COMMENT '파일순번',
-  `IQR_SEQ` bigint(22) DEFAULT NULL COMMENT 'Inquiry순번',
-  `IQR_HIS_SEQ` bigint(22) DEFAULT NULL COMMENT '문의 이력 순번',
-  `USER_SEQ` bigint(22) DEFAULT NULL COMMENT '사용자 순번',
+  `SND_SEQ` bigint(22) NOT NULL AUTO_INCREMENT COMMENT 'Email shipment history sequence number',
+  `MSG_TYPE` varchar(6) NOT NULL COMMENT 'Message classification',
+  `RCR_NAME` varchar(100) DEFAULT NULL COMMENT 'Recipient name',
+  `EML_TO` varchar(5000) NOT NULL COMMENT 'Recipient email address',
+  `SND_NAME` varchar(100) DEFAULT NULL COMMENT 'Sender name',
+  `EML_FROM` varchar(100) NOT NULL COMMENT 'Sender email address',
+  `EML_CC` varchar(5000) DEFAULT NULL COMMENT 'CC',
+  `EML_BCC` varchar(5000) DEFAULT NULL COMMENT 'BCC (Blind Carbon Copy)',
+  `EML_TITLE` varchar(200) NOT NULL COMMENT 'Email subject',
+  `EML_MESSAGE` longtext NOT NULL COMMENT 'Email content',
+  `SND_STATUS` varchar(3) NOT NULL COMMENT 'Email sending status\nS	Send(Send)	\nC	Complete(Complete)	\nG 	Transmission timeout(Gone)\nF	Transmission failure(Failure)',
+  `USE_FLAG` char(1) NOT NULL COMMENT 'Availability',
+  `CREATION_DATE` datetime NOT NULL COMMENT 'Registration date',
+  `CREATION_USER_ID` varchar(30) NOT NULL COMMENT 'Registrant',
+  `LAST_UPDATE_DATE` datetime NOT NULL COMMENT 'Modification date',
+  `LAST_UPDATE_USER_ID` varchar(30) NOT NULL COMMENT 'Modifier',
+  `FILE_SEQ` bigint(22) DEFAULT NULL COMMENT 'File sequence number',
+  `IQR_SEQ` bigint(22) DEFAULT NULL COMMENT 'Inquiry sequence number',
+  `IQR_HIS_SEQ` bigint(22) DEFAULT NULL COMMENT 'Inquiry history sequence number',
+  `USER_SEQ` bigint(22) DEFAULT NULL COMMENT 'User sequence number',
   `ERROR_MSG` text DEFAULT NULL,
   PRIMARY KEY (`SND_SEQ`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='eMail 발송 Queue(이력) 정보 테이블';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Email sending queue history table';
+
 
 -- 테이블 데이터 fosslight.EMAIL_SND_HIS:~0 rows (대략적) 내보내기
 DELETE FROM `EMAIL_SND_HIS`;
@@ -141,23 +142,23 @@ DELETE FROM `HISTORY`;
 -- 테이블 fosslight.LICENSE_MASTER 구조 내보내기
 DROP TABLE IF EXISTS `LICENSE_MASTER`;
 CREATE TABLE IF NOT EXISTS `LICENSE_MASTER` (
-  `LICENSE_ID` int(11) NOT NULL AUTO_INCREMENT COMMENT '라이선스ID',
-  `LICENSE_NAME` varchar(200) NOT NULL COMMENT '라이선스 명',
-  `LICENSE_TYPE` varchar(6) NOT NULL COMMENT '라이선스 종류',
-  `OBLIGATION_DISCLOSING_SRC_YN` char(1) DEFAULT 'N' COMMENT '소스코드공개여부',
-  `OBLIGATION_NOTIFICATION_YN` char(1) DEFAULT 'N' COMMENT '고지여부',
-  `OBLIGATION_NEEDS_CHECK_YN` char(1) DEFAULT 'N' COMMENT '추후확인필요여부',
-  `SHORT_IDENTIFIER` varchar(100) DEFAULT NULL COMMENT '라이선스 약어(SPDX기준인 경우만 설정)',
-  `WEBPAGE` varchar(2000) DEFAULT NULL COMMENT '라이선스를 만든 기관에서 제공하는 WEB PAGE 주소',
-  `DESCRIPTION` text DEFAULT NULL COMMENT '부가설명 및 collab link등',
-  `LICENSE_TEXT` mediumtext DEFAULT NULL COMMENT '라이선스 원문',
-  `ATTRIBUTION` text DEFAULT NULL COMMENT '고지문구 추가 사항',
-  `USE_YN` char(1) DEFAULT 'Y' COMMENT '사용여부',
-  `CREATOR` varchar(50) DEFAULT NULL COMMENT '등록자',
-  `CREATED_DATE` datetime DEFAULT current_timestamp() COMMENT '등록일',
-  `MODIFIER` varchar(50) DEFAULT NULL COMMENT '수정자',
-  `MODIFIED_DATE` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT '수정일',
-  `REQ_LICENSE_TEXT_YN` char(1) DEFAULT 'N' COMMENT 'LICENSE TEXT 필수 입력 여부, MIT LIKE, BSD LIKE만 적용',
+  `LICENSE_ID` int(11) NOT NULL AUTO_INCREMENT COMMENT 'License ID',
+  `LICENSE_NAME` varchar(200) NOT NULL COMMENT 'License name',
+  `LICENSE_TYPE` varchar(6) NOT NULL COMMENT 'License type',
+  `OBLIGATION_DISCLOSING_SRC_YN` char(1) DEFAULT 'N' COMMENT 'Source code disclosure flag',
+  `OBLIGATION_NOTIFICATION_YN` char(1) DEFAULT 'N' COMMENT 'Notification flag',
+  `OBLIGATION_NEEDS_CHECK_YN` char(1) DEFAULT 'N' COMMENT 'Needs future checking flag',
+  `SHORT_IDENTIFIER` varchar(100) DEFAULT NULL COMMENT 'License abbreviation (SPDX standard only)',
+  `WEBPAGE` varchar(2000) DEFAULT NULL COMMENT 'Web page URL provided by the organization that created the license',
+  `DESCRIPTION` text DEFAULT NULL COMMENT 'Additional description and collab link',
+  `LICENSE_TEXT` mediumtext DEFAULT NULL COMMENT 'License full text',
+  `ATTRIBUTION` text DEFAULT NULL COMMENT 'Attribution additional notes',
+  `USE_YN` char(1) DEFAULT 'Y' COMMENT 'Availability flag',
+  `CREATOR` varchar(50) DEFAULT NULL COMMENT 'Creator',
+  `CREATED_DATE` datetime DEFAULT current_timestamp() COMMENT 'Creation date',
+  `MODIFIER` varchar(50) DEFAULT NULL COMMENT 'Modifier',
+  `MODIFIED_DATE` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Modification date',
+  `REQ_LICENSE_TEXT_YN` char(1) DEFAULT 'N' COMMENT 'Required input for LICENSE TEXT, applicable only for MIT LIKE, BSD LIKE',
   `RESTRICTION` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`LICENSE_ID`),
   KEY `idx_LICENSE_NAME` (`LICENSE_NAME`),
@@ -364,8 +365,8 @@ INSERT INTO `LICENSE_MASTER` (`LICENSE_ID`, `LICENSE_NAME`, `LICENSE_TYPE`, `OBL
 -- 테이블 fosslight.LICENSE_NICKNAME 구조 내보내기
 DROP TABLE IF EXISTS `LICENSE_NICKNAME`;
 CREATE TABLE IF NOT EXISTS `LICENSE_NICKNAME` (
-  `LICENSE_NAME` varchar(200) NOT NULL COMMENT '라이선스 NAME',
-  `LICENSE_NICKNAME` varchar(200) NOT NULL COMMENT '라이선스 닉네임',
+  `LICENSE_NAME` varchar(200) NOT NULL COMMENT 'License name',
+  `LICENSE_NICKNAME` varchar(200) NOT NULL COMMENT 'License nickname',
   PRIMARY KEY (`LICENSE_NAME`,`LICENSE_NICKNAME`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -752,7 +753,7 @@ DELETE FROM `NVD_CPE_MATCH`;
 DROP TABLE IF EXISTS `NVD_CPE_MATCH_NAMES`;
 CREATE TABLE IF NOT EXISTS `NVD_CPE_MATCH_NAMES` (
   `MATCH_CRITERIA_ID` varchar(128) NOT NULL,
-  `IDX` int(11) NOT NULL COMMENT 'Version 정렬 순서를 위한 sub index',
+  `IDX` int(11) NOT NULL COMMENT 'Sub-index for version sorting',
   `CPE23URI` varchar(256) NOT NULL,
   PRIMARY KEY (`MATCH_CRITERIA_ID`,`IDX`),
   KEY `CPE23URI` (`CPE23URI`(255))
@@ -766,13 +767,13 @@ DELETE FROM `NVD_CPE_MATCH_NAMES`;
 -- 테이블 fosslight.NVD_CVE_V3 구조 내보내기
 DROP TABLE IF EXISTS `NVD_CVE_V3`;
 CREATE TABLE IF NOT EXISTS `NVD_CVE_V3` (
-  `CVE_ID` varchar(16) NOT NULL COMMENT 'CVE(Common Vulnerabilities and Exposures 미 정부 취약점 식별자 체계)',
+  `CVE_ID` varchar(16) NOT NULL COMMENT 'CVE (Common Vulnerabilities and Exposures identifier system)',
   `PUBL_DATE` datetime DEFAULT NULL COMMENT 'Published Datetime',
   `MODI_DATE` datetime DEFAULT NULL COMMENT 'Last Modified Datetime',
-  `CVSS_SCORE` float(3,1) DEFAULT NULL COMMENT '취약 점수',
-  `VULN_SUMMARY` text DEFAULT NULL COMMENT '취약점 개요',
+  `CVSS_SCORE` float(3,1) DEFAULT NULL COMMENT 'Vulnerability score',
+  `VULN_SUMMARY` text DEFAULT NULL COMMENT 'Vulnerability summary',
   `BASE_METRIC` varchar(10) DEFAULT NULL COMMENT 'CVSS Score Version',
-  `REG_DATE` timestamp NULL DEFAULT current_timestamp() COMMENT '데이터 등록일자',
+  `REG_DATE` timestamp NULL DEFAULT current_timestamp() COMMENT 'Data registration date',
   PRIMARY KEY (`CVE_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
@@ -785,7 +786,7 @@ DELETE FROM `NVD_CVE_V3`;
 DROP TABLE IF EXISTS `NVD_DATA_SCORE_V3`;
 CREATE TABLE IF NOT EXISTS `NVD_DATA_SCORE_V3` (
   `PRODUCT` varchar(128) NOT NULL COMMENT 'Product Name(OSS Name)',
-  `VERSION` varchar(128) NOT NULL COMMENT 'Major.Minor.Point 형식',
+  `VERSION` varchar(128) NOT NULL COMMENT 'Major.Minor.Point Format',
   `CVE_ID` varchar(16) NOT NULL,
   `CVSS_SCORE` float(3,1) NOT NULL,
   `VULN_SUMMARY` text NOT NULL,
@@ -806,7 +807,7 @@ DELETE FROM `NVD_DATA_SCORE_V3`;
 DROP TABLE IF EXISTS `NVD_DATA_TEMP_V3`;
 CREATE TABLE IF NOT EXISTS `NVD_DATA_TEMP_V3` (
   `PRODUCT` varchar(128) NOT NULL COMMENT 'Product Name(OSS Name)',
-  `VERSION` varchar(128) NOT NULL COMMENT 'Major.Minor.Point 형식',
+  `VERSION` varchar(128) NOT NULL COMMENT 'Major.Minor.Point Format',
   `CVE_ID` varchar(16) NOT NULL,
   `CVSS_SCORE` float(3,1) NOT NULL,
   `VULN_SUMMARY` text NOT NULL,
@@ -824,9 +825,9 @@ DELETE FROM `NVD_DATA_TEMP_V3`;
 -- 테이블 fosslight.NVD_DATA_V3 구조 내보내기
 DROP TABLE IF EXISTS `NVD_DATA_V3`;
 CREATE TABLE IF NOT EXISTS `NVD_DATA_V3` (
-  `CVE_ID` varchar(16) NOT NULL COMMENT 'CVE(Common Vulnerabilities and Exposures 미 정부 취약점 식별자 체계)',
+  `CVE_ID` varchar(16) NOT NULL COMMENT 'CVE (Common Vulnerabilities and Exposures identifier system)',
   `PRODUCT` varchar(128) NOT NULL COMMENT 'Product Name(OSS Name)',
-  `VERSION` varchar(128) NOT NULL COMMENT 'Major.Minor.Point 형식',
+  `VERSION` varchar(128) NOT NULL COMMENT 'Major.Minor.Point Format',
   `VENDOR` varchar(128) NOT NULL,
   `VENDORPRODUCT` varchar(255) NULL,
   PRIMARY KEY (`CVE_ID`,`PRODUCT`,`VERSION`),
@@ -851,9 +852,9 @@ CREATE TABLE IF NOT EXISTS `NVD_META` (
   `ZIP_SIZE` int(11) DEFAULT NULL COMMENT 'ZIP File Size',
   `GZ_SIZE` int(11) DEFAULT NULL COMMENT 'GZ File Size',
   `SHA256` varchar(128) DEFAULT NULL,
-  `USE_YN` varchar(1) DEFAULT 'N' COMMENT '사용유무',
-  `REG_DATE` timestamp NULL DEFAULT current_timestamp() COMMENT '데이터 등록일자',
-  `JOB_STATUS` varchar(1) DEFAULT 'W' COMMENT 'JOB 상태 값\n- W(Wait): I/F JOB 대기상태\n- C(Complete): I/F JOB 완료상태',
+  `USE_YN` varchar(1) DEFAULT 'N' COMMENT 'Usage status',
+  `REG_DATE` timestamp NULL DEFAULT current_timestamp() COMMENT 'Data registration date',
+  `JOB_STATUS` varchar(1) DEFAULT 'W' COMMENT 'JOB Status\n- W(Wait): I/F JOB Waiting\n- C(Complete): I/F JOB Complete',
   PRIMARY KEY (`IDX`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -1012,8 +1013,8 @@ DELETE FROM `OSS_ANALYSIS_STATUS`;
 DROP TABLE IF EXISTS `OSS_COMPONENTS`;
 CREATE TABLE IF NOT EXISTS `OSS_COMPONENTS` (
   `COMPONENT_ID` int(11) NOT NULL AUTO_INCREMENT,
-  `REFERENCE_ID` int(11) NOT NULL COMMENT 'MAPPING_DIV에 따라서 FK가 달라진다.',
-  `REFERENCE_DIV` varchar(6) NOT NULL COMMENT '공통코드 : Project Identification(3rd,src,bat) / 3rd party / bat 등',
+  `REFERENCE_ID` int(11) NOT NULL COMMENT 'Depending on the MAPPING_DIV, the foreign key (FK) varies.',
+  `REFERENCE_DIV` varchar(6) NOT NULL COMMENT 'Common Code : Project Identification(3rd,src,bat) / 3rd party / bat etc',
   `COMPONENT_IDX` int(11) DEFAULT NULL,
   `OSS_ID` int(11) DEFAULT NULL,
   `OSS_NAME` varchar(200) DEFAULT NULL,
@@ -1031,7 +1032,7 @@ CREATE TABLE IF NOT EXISTS `OSS_COMPONENTS` (
   `REF_PARTNER_ID` int(11) DEFAULT NULL COMMENT '3rd load reference',
   `REF_PRJ_ID` int(11) DEFAULT NULL COMMENT '3rd project load reference',
   `REF_BAT_ID` int(11) DEFAULT NULL COMMENT 'BINARY MASTER REF',
-  `REF_COMPONENT_ID` int(11) DEFAULT NULL COMMENT 'BOM 또는 Packaging에서 참조 대상 component id 를 격납',
+  `REF_COMPONENT_ID` int(11) DEFAULT NULL COMMENT 'Store the referenced component ID in BOM or packaging.',
   `REPORT_FILE_ID` int(11) DEFAULT NULL,
   `MERGE_PRE_DIV` varchar(6) DEFAULT NULL COMMENT 'BOM MERGE LAST RESULT FLAG',
   `PRE_OBLIGATION_TYPE` varchar(6) DEFAULT NULL COMMENT '10:notice, 11:notice&source disclose, 90:notice by checked, 91:notice and source disclose by checked',
@@ -1042,7 +1043,7 @@ CREATE TABLE IF NOT EXISTS `OSS_COMPONENTS` (
   `BAT_SCORE` varchar(200) DEFAULT NULL,
   `BAT_CHECKSUM` text DEFAULT NULL,
   `VERIFY_FILE_COUNT` varchar(50) DEFAULT NULL,
-  `VERIFIED_YN` char(50) DEFAULT 'N' COMMENT 'packaging verify 수행결과 통과한 경우 Y',
+  `VERIFIED_YN` char(50) DEFAULT 'N' COMMENT 'If packaging verification passes, mark it as "Y".',
   `CREATED_DATE` datetime DEFAULT current_timestamp(),
   `MODIFIED_DATE` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `COMMENTS` text DEFAULT NULL,
@@ -1177,22 +1178,22 @@ CREATE TABLE IF NOT EXISTS `OSS_LICENSE_DETECTED` (
 DROP TABLE IF EXISTS `OSS_MASTER`;
 CREATE TABLE IF NOT EXISTS `OSS_MASTER` (
   `OSS_ID` int(11) NOT NULL AUTO_INCREMENT COMMENT 'OSS ID',
-  `OSS_NAME` varchar(200) NOT NULL COMMENT 'OSS 명',
-  `OSS_VERSION` varchar(100) DEFAULT NULL COMMENT 'OSS 버전',
-  `LICENSE_DIV` varchar(6) DEFAULT NULL COMMENT 'OSS 라이선스 구분(Single, Multi/Dual)',
-  `DOWNLOAD_LOCATION` varchar(2000) DEFAULT NULL COMMENT 'download URL or VCS(Version Control System)',
-  `HOMEPAGE` varchar(2000) DEFAULT NULL COMMENT 'oss 공식 홈페이지',
-  `SUMMARY_DESCRIPTION` text DEFAULT NULL COMMENT 'SUMMARY DESCRIPTION',
-  `USE_YN` char(1) DEFAULT 'Y' COMMENT '사용여부',
-  `CREATOR` varchar(50) DEFAULT NULL COMMENT '등록자',
-  `CREATED_DATE` datetime DEFAULT current_timestamp() COMMENT '등록일',
-  `MODIFIER` varchar(50) DEFAULT NULL COMMENT '수정자',
-  `MODIFIED_DATE` datetime DEFAULT current_timestamp() COMMENT '수정일',
+  `OSS_NAME` varchar(200) NOT NULL COMMENT 'OSS name',
+  `OSS_VERSION` varchar(100) DEFAULT NULL COMMENT 'OSS version',
+  `LICENSE_DIV` varchar(6) DEFAULT NULL COMMENT 'OSS license type (Single, Multi/Dual)',
+  `DOWNLOAD_LOCATION` varchar(2000) DEFAULT NULL COMMENT 'Download URL or Version Control System (VCS)',
+  `HOMEPAGE` varchar(2000) DEFAULT NULL COMMENT 'Official homepage of OSS',
+  `SUMMARY_DESCRIPTION` text DEFAULT NULL COMMENT 'Summary description',
+  `USE_YN` char(1) DEFAULT 'Y' COMMENT 'Usage status',
+  `CREATOR` varchar(50) DEFAULT NULL COMMENT 'Creator',
+  `CREATED_DATE` datetime DEFAULT current_timestamp() COMMENT 'Creation date',
+  `MODIFIER` varchar(50) DEFAULT NULL COMMENT 'Modifier',
+  `MODIFIED_DATE` datetime DEFAULT current_timestamp() COMMENT 'Modification date',
   `VULN_CPE_NM` varchar(128) DEFAULT NULL COMMENT 'OSS CPE Name',
-  `CVSS_SCORE` varchar(32) DEFAULT NULL COMMENT 'OSS 취약 점수',
+  `CVSS_SCORE` varchar(32) DEFAULT NULL COMMENT 'OSS vulnerability score',
   `CVE_ID` varchar(16) DEFAULT NULL,
-  `VULN_YN` varchar(1) DEFAULT NULL COMMENT '취약점 검사 결과',
-  `VULN_RECHECK` varchar(1) DEFAULT 'N' COMMENT 'OSS 정보 변경시, 다음 BATCH대상으로 설정',
+  `VULN_YN` varchar(1) DEFAULT NULL COMMENT 'Vulnerability scan result',
+  `VULN_RECHECK` varchar(1) DEFAULT 'N' COMMENT 'Set as next BATCH target if OSS information changes',
   `VULN_DATE` datetime DEFAULT NULL,
   `LICENSE_TYPE` varchar(6) DEFAULT NULL,
   `OBLIGATION_TYPE` varchar(6) DEFAULT NULL,
@@ -1244,7 +1245,8 @@ CREATE TABLE IF NOT EXISTS `OSS_MASTER_LICENSE_FLAG` (
   `DUAL_LICENSE_FLAG` char(1) DEFAULT 'N',
   `VERSION_DIFF_FLAG` char(1) DEFAULT 'N',
   PRIMARY KEY (`OSS_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='OSS LIST 정렬 및 표시를 위해 MULTI / DUAL / V-DIFF 여부만 별도 관리';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='To manage sorting and display for the OSS list,\
+	    only manage whether it\'s MULTI / DUAL / V-DIFF.';
 
 -- 테이블 데이터 fosslight.OSS_MASTER_LICENSE_FLAG:~27 rows (대략적) 내보내기
 DELETE FROM `OSS_MASTER_LICENSE_FLAG`;
@@ -1283,7 +1285,7 @@ INSERT INTO `OSS_MASTER_LICENSE_FLAG` (`OSS_ID`, `MULTI_LICENSE_FLAG`, `DUAL_LIC
 DROP TABLE IF EXISTS `OSS_NICKNAME`;
 CREATE TABLE IF NOT EXISTS `OSS_NICKNAME` (
   `OSS_NAME` varchar(200) NOT NULL,
-  `OSS_NICKNAME` varchar(200) NOT NULL COMMENT 'OSS 닉네임',
+  `OSS_NICKNAME` varchar(200) NOT NULL COMMENT 'OSS nickname',
   PRIMARY KEY (`OSS_NAME`,`OSS_NICKNAME`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -1469,7 +1471,8 @@ CREATE TABLE IF NOT EXISTS `PACKAGING_TEMP_MAP` (
   `PACKAGING_FILE_SEQ` int(1) NOT NULL,
   `DEL_YN` char(1) DEFAULT 'N',
   `COMPLETE_YN` char(1) DEFAULT 'N'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Distribution DONE 이후 complete일 때 packaging file을 변경 가능하도록 하기 위해 packaging file 관리 table\r\n* 배치로 file 삭제처리에도 사용함.';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='To enable changing the packaging file after Distribution DONE and when complete,\
+	     use packaging file management table\r\n* batch, which is good for file deletion';
 
 -- 테이블 데이터 fosslight.PACKAGING_TEMP_MAP:~0 rows (대략적) 내보내기
 DELETE FROM `PACKAGING_TEMP_MAP`;
@@ -1540,8 +1543,8 @@ DELETE FROM `PROJECT_PARTNER_MAP`;
 -- 테이블 fosslight.PRE_OSS_COMPONENTS 구조 내보내기
 DROP TABLE IF EXISTS `PRE_OSS_COMPONENTS`;
 CREATE TABLE IF NOT EXISTS `PRE_OSS_COMPONENTS` (
-  `REFERENCE_ID` int(11) NOT NULL COMMENT 'MAPPING_DIV에 따라서 FK가 달라진다.',
-  `REFERENCE_DIV` varchar(6) NOT NULL COMMENT '공통코드 : Project Identification(3rd,src,bat) / 3rd party / bat 등',
+  `REFERENCE_ID` int(11) NOT NULL COMMENT 'Depending on the MAPPING_DIV, the foreign key (FK) varies.',
+  `REFERENCE_DIV` varchar(6) NOT NULL COMMENT 'Common code : Project Identification(3rd,src,bat) / 3rd party / bat etc',
   `COMPONENT_IDX` int(11) NOT NULL,
   `OSS_ID` int(11) DEFAULT NULL,
   `OSS_NAME` varchar(200) DEFAULT NULL,
@@ -1558,7 +1561,7 @@ CREATE TABLE IF NOT EXISTS `PRE_OSS_COMPONENTS` (
   `REF_PARTNER_ID` int(11) DEFAULT NULL COMMENT '3rd load reference',
   `REF_PRJ_ID` int(11) DEFAULT NULL COMMENT '3rd project load reference',
   `REF_BAT_ID` int(11) DEFAULT NULL COMMENT 'BINARY MASTER REF',
-  `REF_COMPONENT_ID` int(11) DEFAULT NULL COMMENT 'BOM 또는 Packaging에서 참조 대상 component id 를 격납',
+  `REF_COMPONENT_ID` int(11) DEFAULT NULL COMMENT 'Store the referenced component ID from BOM or packaging.',
   `REPORT_FILE_ID` int(11) DEFAULT NULL,
   `MERGE_PRE_DIV` varchar(6) DEFAULT NULL COMMENT 'BOM MERGE LAST RESULT FLAG',
   `OBLIGATION_TYPE` varchar(6) DEFAULT NULL COMMENT '10:notice, 11:notice&source disclose, 90:notice by checked, 91:notice and source disclose by checked',
@@ -1567,7 +1570,7 @@ CREATE TABLE IF NOT EXISTS `PRE_OSS_COMPONENTS` (
   `BAT_SCORE` varchar(200) DEFAULT NULL,
   `BAT_CHECKSUM` text DEFAULT NULL,
   `VERIFY_FILE_COUNT` varchar(50) DEFAULT NULL,
-  `VERIFIED_YN` char(50) DEFAULT 'N' COMMENT 'packaging verify 수행결과 통과한 경우 Y',
+  `VERIFIED_YN` char(50) DEFAULT 'N' COMMENT 'If the packaging verification passes, mark it as "Y".',
   `CREATED_DATE` datetime DEFAULT current_timestamp(),
   `MODIFIED_DATE` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`COMPONENT_IDX`,`REFERENCE_ID`,`REFERENCE_DIV`),
@@ -1630,8 +1633,8 @@ DELETE FROM `PRE_PROJECT_MASTER`;
 DROP TABLE IF EXISTS `PRE_PROJECT_WATCHER`;
 CREATE TABLE IF NOT EXISTS `PRE_PROJECT_WATCHER` (
   `PRJ_ID` int(11) NOT NULL,
-  `DIVISION` varchar(6) DEFAULT NULL COMMENT '부서전체일 경우 부서코드만 설정',
-  `USER_ID` varchar(50) DEFAULT NULL COMMENT '사용자 개별 추가인 경우, 사용자 ID만 설정',
+  `DIVISION` varchar(6) DEFAULT NULL COMMENT 'If it applies to the entire department, set only the department code.',
+  `USER_ID` varchar(50) DEFAULT NULL COMMENT 'For individual user additions, set only the user ID.',
   `EMAIL` varchar(200) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
 
@@ -1646,7 +1649,7 @@ CREATE TABLE IF NOT EXISTS `STATISTICS_MOSTUSED` (
   `PRJ_ID` int(11) DEFAULT NULL,
   `COMPONENT_NAME` varchar(200) CHARACTER SET utf8 DEFAULT NULL,
   `CREATED_DATE` datetime DEFAULT CURRENT_TIMESTAMP,
-  `DIV_NO` varchar(6) CHARACTER SET utf8 DEFAULT NULL COMMENT '상세코드번호',
+  `DIV_NO` varchar(6) CHARACTER SET utf8 DEFAULT NULL COMMENT 'Detailed code number',
   `CHART_TYPE` varchar(10) DEFAULT NULL,
   KEY `STATISTICS_MOSTUSED_CREATED_DATE` (`CREATED_DATE`) USING BTREE,
   KEY `STATISTICS_MOSTUSED_DIV_NO` (`DIV_NO`) USING BTREE,
@@ -1694,18 +1697,19 @@ DELETE FROM `PROJECT_ADDLIST`;
 DROP TABLE IF EXISTS `PROJECT_DISTRIBUTE_HIS`;
 CREATE TABLE IF NOT EXISTS `PROJECT_DISTRIBUTE_HIS` (
   `PRJ_ID` int(11) NOT NULL,
-  `ACT_TYPE` varchar(10) NOT NULL COMMENT '[배포시 동작 구분]\r\nI : 즉시배포\r\nM : 모델만 배포\r\nDD : Description 변경\r\nDS : softwareType 변경\r\nDA : Description & softwareType 변경\r\nDP : packaging file 변경\r\nDNC : DO NOT CHANGE',
-  `BEFORE_DISTRIBUTION_STATUS` varchar(6) NOT NULL COMMENT '배포 상태(신규 건인지 아닌지 판단하기 위한 용도)',
+  `ACT_TYPE` varchar(10) NOT NULL COMMENT '[Distribution Action]\r\nI: Immediate Distribution\r\nM: Model-only Distribution\r\nDD: Description Change\r\nDS: Software Type Change\r\nDA: Description & Software Type Change\r\nDP: Packaging File Change\r\nDNC: Do Not Change',
+  `BEFORE_DISTRIBUTION_STATUS` varchar(6) NOT NULL COMMENT 'Distribution status (to determine if it is a new case or not)',
   `DISTRIBUTE_MASTER_CATEGORY` varchar(100) NOT NULL,
-  `DISTRIBUTE_NAME` varchar(100) NOT NULL COMMENT '배포될 DESCRIPTION',
-  `BEFORE_DISTRIBUTE_NAME` varchar(100) DEFAULT 'NEW' COMMENT '배포된 DESCRIPTION\r\nDESTRIBUTION_STATUS가 Done일 경우에만 존재 함. \r\n그 외의 case는 NEW',
-  `DISTRIBUTE_SOFTWARE_TYPE` varchar(6) DEFAULT NULL COMMENT '배포될 SOFTWARE type',
-  `BEFORE_DISTRIBUTE_SOFTWARE_TYPE` varchar(6) DEFAULT 'NEW' COMMENT '배포될 SOFTWARE type\r\nDESTRIBUTION_STATUS가 Done일 경우에만 존재함.\r\n그 외의 case는 NEW',
-  `VERIFY_YN` varchar(6) NOT NULL DEFAULT 'N' COMMENT 'PACKAGING FILE 변경 flag',
-  `MODEL_ONLY_YN` varchar(6) NOT NULL DEFAULT 'N' COMMENT 'model만 배포 flag',
-  `DISTRIBUTE_DEPLOY_USER` varchar(50) DEFAULT NULL COMMENT '배포자',
-  `DISTRIBUTE_YN` varchar(6) NOT NULL DEFAULT 'N' COMMENT '배포시작시 N / 완료시 Y',
-  `CREATED_DATE` datetime DEFAULT current_timestamp()
+  `DISTRIBUTE_NAME` varchar(100) NOT NULL COMMENT 'Name of the distributed DESCRIPTION',
+  `BEFORE_DISTRIBUTE_NAME` varchar(100) DEFAULT 'NEW' COMMENT 'Previously distributed DESCRIPTION\r\nExists only when DISTRIBUTION_STATUS is Done.\r\nOtherwise, it is NEW.',
+  `DISTRIBUTE_SOFTWARE_TYPE` varchar(6) DEFAULT NULL COMMENT 'Software type of the distribution',
+  `BEFORE_DISTRIBUTE_SOFTWARE_TYPE` varchar(6) DEFAULT 'NEW' COMMENT 'Previously distributed software type\r\nExists only when DISTRIBUTION_STATUS is Done.\r\nOtherwise, it is NEW.',
+  `VERIFY_YN` varchar(6) NOT NULL DEFAULT 'N' COMMENT 'Packaging file change flag',
+  `MODEL_ONLY_YN` varchar(6) NOT NULL DEFAULT 'N' COMMENT 'Model-only distribution flag',
+  `DISTRIBUTE_DEPLOY_USER` varchar(50) DEFAULT NULL COMMENT 'Deployer',
+  `DISTRIBUTE_YN` varchar(6) NOT NULL DEFAULT 'N' COMMENT 'N when distribution starts, Y when complete',
+  `CREATED_DATE` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`PRJ_ID`, `CREATED_DATE`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- 테이블 데이터 fosslight.PROJECT_DISTRIBUTE_HIS:~0 rows (대략적) 내보내기
@@ -1727,13 +1731,13 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `OS_TYPE` varchar(6) NOT NULL,
   `OS_TYPE_ETC` varchar(100) DEFAULT NULL,
   `DIVISION` varchar(100) DEFAULT NULL,
-  `IDENTIFICATION_STATUS` varchar(6) DEFAULT NULL COMMENT '프로젝트 단계별 상태 null, N/A, Progress, Request, Revuew, Confirm',
-  `VERIFICATION_STATUS` varchar(6) DEFAULT NULL COMMENT '프로젝트 단계별 상태 null, N/A, Progress, Request, Revuew, Confirm',
-  `DESTRIBUTION_STATUS` varchar(6) DEFAULT NULL COMMENT '프로젝트 단계별 상태 null, N/A, Progress, Request, Revuew, Confirm',
-  `IDENTIFICATION_SUB_STATUS_PARTNER` char(1) DEFAULT NULL COMMENT '프로젝트 3rd 상태 null, Y, N',
-  `IDENTIFICATION_SUB_STATUS_DEP` char(1) DEFAULT NULL COMMENT '프로젝트 DEP 상태 null, Y, N',
-  `IDENTIFICATION_SUB_STATUS_SRC` char(1) DEFAULT NULL COMMENT '프로젝트 SRC 상태 null, Y, N',
-  `IDENTIFICATION_SUB_STATUS_BAT` char(1) DEFAULT NULL COMMENT '프로젝트 BAT 상태 null, Y, N',
+  `IDENTIFICATION_STATUS` varchar(6) DEFAULT NULL COMMENT 'Project stage status: null, N/A, Progress, Request, Review, Confirm',
+  `VERIFICATION_STATUS` varchar(6) DEFAULT NULL COMMENT 'Project stage status: null, N/A, Progress, Request, Review, Confirm',
+  `DISTRIBUTION_STATUS` varchar(6) DEFAULT NULL COMMENT 'Project stage status: null, N/A, Progress, Request, Review, Confirm',
+  `IDENTIFICATION_SUB_STATUS_PARTNER` char(1) DEFAULT NULL COMMENT 'Project 3rd party status: null, Y, N',
+  `IDENTIFICATION_SUB_STATUS_DEP` char(1) DEFAULT NULL COMMENT 'Project DEP status: null, Y, N',
+  `IDENTIFICATION_SUB_STATUS_SRC` char(1) DEFAULT NULL COMMENT 'Project SRC status: null, Y, N',
+  `IDENTIFICATION_SUB_STATUS_BAT` char(1) DEFAULT NULL COMMENT 'Project BAT status: null, Y, N',
   `IDENTIFICATION_SUB_STATUS_BIN` char(1) DEFAULT NULL,
   `IDENTIFICATION_SUB_STATUS_ANDROID` char(1) DEFAULT NULL,
   `WITHOUT_VERIFY_YN` char(1) DEFAULT 'N',
@@ -1744,11 +1748,11 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `DISTRIBUTE_DEPLOY_TIME` datetime DEFAULT NULL,
   `DISTRIBUTE_DEPLOY_MODEL_YN` char(1) DEFAULT NULL COMMENT 'Y:model only',
   `DISTRIBUTE_DEPLOY_USER` varchar(50) DEFAULT NULL,
-  `DISTRIBUTE_LAST_MODIFIED` varchar(30) DEFAULT NULL COMMENT 'OSD 연동시 record lock 체크용',
+  `DISTRIBUTE_LAST_MODIFIED` varchar(30) DEFAULT NULL COMMENT 'Record lock check for OSD integration',
   `DISTRIBUTE_OSD_KEY` varchar(30) DEFAULT NULL,
-  `DISTRIBUTE_DEPLOY_ERROR_MSG` text DEFAULT NULL COMMENT 'Batch job 에러 발생시',
-  `DISTRIBUTE_TARGET` varchar(6) DEFAULT NULL COMMENT '배포대상 시스템',
-  `DISTRIBUTE_RESERVED_USER` varchar(50) DEFAULT NULL COMMENT '배포 예약자',
+  `DISTRIBUTE_DEPLOY_ERROR_MSG` text DEFAULT NULL COMMENT 'Error message when batch job fails',
+  `DISTRIBUTE_TARGET` varchar(6) DEFAULT NULL COMMENT 'Target system for distribution',
+  `DISTRIBUTE_RESERVED_USER` varchar(50) DEFAULT NULL COMMENT 'Reserved user for distribution',
   `DISTRIBUTE_REJECTOR` varchar(50) DEFAULT NULL,
   `DISTRIBUTE_REJECTED_TIME` datetime DEFAULT NULL,
   `DEP_CSV_FILE_ID` int(11) DEFAULT NULL,
@@ -1778,9 +1782,9 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `CDX_JSON_FILE_ID` int(11) DEFAULT NULL,
   `CDX_XML_FILE_ID` int(11) DEFAULT NULL,
   `ZIP_FILE_ID` int(11) DEFAULT NULL,
-  `USE_CUSTOM_NOTICE_YN` char(1) DEFAULT 'N' COMMENT '사용자 편집 NOTICE 사용여부',
-  `COMPLETE_YN` char(1) DEFAULT NULL COMMENT 'COMPLETE 여부',
-  `DROP_YN` char(1) DEFAULT NULL COMMENT 'DROP 여부(complete와 동작이 완전 일치하지만 권한 check를하지 않고 on/off를 할 수 있음)',
+  `USE_CUSTOM_NOTICE_YN` char(1) DEFAULT 'N' COMMENT 'Whether to use custom notice for users',
+  `COMPLETE_YN` char(1) DEFAULT NULL COMMENT 'Completion status',
+  `DROP_YN` char(1) DEFAULT NULL COMMENT 'Drop status (behaves same as Complete status, but can be toggled on/off without permission check)',
   `REVIEWER` varchar(50) DEFAULT NULL,
   `USE_YN` char(1) DEFAULT 'Y',
   `CREATOR` varchar(50) DEFAULT NULL,
@@ -1788,13 +1792,13 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `MODIFIER` varchar(50) DEFAULT NULL,
   `MODIFIED_DATE` datetime NOT NULL DEFAULT current_timestamp(),
   `COPY_PRJ_ID` int(11) DEFAULT NULL,
-  `README_YN` char(1) DEFAULT NULL COMMENT 'Verification결과 ReadMe여부',
+  `README_YN` char(1) DEFAULT NULL COMMENT 'Whether the verification result includes a ReadMe file',
   `README_CONTENT` text DEFAULT NULL,
   `README_FILE_NAME` varchar(512) DEFAULT NULL,
   `EXCEPT_FILE_CONTENT` longtext DEFAULT NULL,
   `VERIFY_FILE_CONTENT` longtext DEFAULT NULL,
-  `SENT_OSDD_DEL_MAIL` char(1) DEFAULT 'N' COMMENT '메일 중복 발송 방지용',
-  `SENT_OSDD_DIFF_FILE_MAIL` char(1) DEFAULT 'N' COMMENT '메일 중복 발송 방지용',
+  `SENT_OSDD_DEL_MAIL` char(1) DEFAULT 'N' COMMENT 'To prevent duplicate email sending',
+  `SENT_OSDD_DIFF_FILE_MAIL` char(1) DEFAULT 'N' COMMENT 'To prevent duplicate email sending',
   `OSDD_NOTICE_FILE_NAME` varchar(512) DEFAULT 'N',
   `OSDD_SOURCE_FILE_NAME` varchar(512) DEFAULT 'N',
   `OSDD_SOURCE_FILE_NAME2` varchar(512) DEFAULT 'N',
@@ -1803,10 +1807,10 @@ CREATE TABLE IF NOT EXISTS `PROJECT_MASTER` (
   `OSDD_SOURCE_FILE_ETAG` varchar(512) DEFAULT 'N',
   `OSDD_SOURCE_FILE_ETAG2` varchar(512) DEFAULT 'N',
   `OSDD_SOURCE_FILE_ETAG3` varchar(512) DEFAULT 'N',
-  `ALLOW_DOWNLOAD_BIT_FLAG` int(11) DEFAULT 1 COMMENT '다운로드 허용 플래그',
+  `ALLOW_DOWNLOAD_BIT_FLAG` int(11) DEFAULT 1 COMMENT 'Download permission flag',
   `PUBLIC_YN` char(1) DEFAULT 'Y',
-  `COMM_ID` int(11) DEFAULT NULL COMMENT 'COMMENTS_HISTORY 키 > USER가 Reject요청시 ADMIN이 OPEN처리시',
-  `STATUS_REQUEST_YN` char(1) DEFAULT 'N' COMMENT 'USER가 Reject요청시 ADMIN이 OPEN처리시 ''Y''',
+  `COMM_ID` int(11) DEFAULT NULL COMMENT 'COMMENTS_HISTORY key > When a USER requests Reject, and when the ADMIN processes it as OPEN',
+  `STATUS_REQUEST_YN` char(1) DEFAULT 'N' COMMENT 'When a USER requests Reject, and when the ADMIN processes it as OPEN, Y',
   `STATUS_VERIFY_YN` char(1) DEFAULT 'N',
   `CHANGED_NOTICE_YN` char(1) DEFAULT 'N',
   PRIMARY KEY (`PRJ_ID`),
@@ -1868,8 +1872,8 @@ DELETE FROM `PRE_PROJECT_MODEL`;
 DROP TABLE IF EXISTS `PROJECT_WATCHER`;
 CREATE TABLE IF NOT EXISTS `PROJECT_WATCHER` (
   `PRJ_ID` int(11) NOT NULL,
-  `DIVISION` varchar(6) DEFAULT NULL COMMENT '부서전체일 경우 부서코드만 설정',
-  `USER_ID` varchar(50) DEFAULT NULL COMMENT '사용자 개별 추가인 경우, 사용자 ID만 설정',
+  `DIVISION` varchar(6) DEFAULT NULL COMMENT 'If it''s for the entire department, set only the department code.',
+  `USER_ID` varchar(50) DEFAULT NULL COMMENT 'For individual user additions, set only the user ID.',
   `EMAIL` varchar(200) DEFAULT NULL,
   KEY `PRJ_ID` (`PRJ_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1898,10 +1902,10 @@ INSERT INTO `T2_AUTHORITIES` (`USER_ID`, `AUTHORITY`) VALUES
 -- 테이블 fosslight.T2_CODE 구조 내보내기
 DROP TABLE IF EXISTS `T2_CODE`;
 CREATE TABLE IF NOT EXISTS `T2_CODE` (
-  `CD_NO` varchar(3) NOT NULL COMMENT '코드번호',
-  `CD_NM` varchar(100) NOT NULL COMMENT '코드명',
-  `CD_EXP` varchar(255) DEFAULT NULL COMMENT '코드설명',
-  `SYS_CD_YN` char(1) DEFAULT 'N' COMMENT '시스템코드여부',
+  `CD_NO` varchar(3) NOT NULL COMMENT 'Code number',
+  `CD_NM` varchar(100) NOT NULL COMMENT 'Code name',
+  `CD_EXP` varchar(255) DEFAULT NULL COMMENT 'Code description',
+  `SYS_CD_YN` char(1) DEFAULT 'N' COMMENT 'System code flag',
   PRIMARY KEY (`CD_NO`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -1996,12 +2000,12 @@ INSERT INTO `T2_CODE` (`CD_NO`, `CD_NM`, `CD_EXP`, `SYS_CD_YN`) VALUES
 DROP TABLE IF EXISTS `T2_CODE_DTL`;
 CREATE TABLE IF NOT EXISTS `T2_CODE_DTL` (
   `CD_NO` varchar(3) NOT NULL,
-  `CD_DTL_NO` varchar(6) NOT NULL COMMENT '상세코드번호',
+  `CD_DTL_NO` varchar(6) NOT NULL COMMENT 'Detailed code number',
   `CD_DTL_NM` varchar(200) DEFAULT NULL,
-  `CD_SUB_NO` varchar(3) DEFAULT NULL COMMENT '하위코드',
-  `CD_DTL_EXP` varchar(2000) DEFAULT NULL COMMENT '상세코드설명',
-  `CD_ORDER` int(11) NOT NULL COMMENT '표시순',
-  `USE_YN` char(1) NOT NULL DEFAULT 'Y' COMMENT '사용여부',
+  `CD_SUB_NO` varchar(3) DEFAULT NULL COMMENT 'Sub-code',
+  `CD_DTL_EXP` varchar(2000) DEFAULT NULL COMMENT 'Detailed code description',
+  `CD_ORDER` int(11) NOT NULL COMMENT 'Display order',
+  `USE_YN` char(1) NOT NULL DEFAULT 'Y' COMMENT 'Usage flag',
   PRIMARY KEY (`CD_NO`,`CD_DTL_NO`),
   KEY `fk_T2_CODE_DTL_T2_CODE_idx` (`CD_NO`),
   CONSTRAINT `fk_T2_CODE_DTL_T2_CODE` FOREIGN KEY (`CD_NO`) REFERENCES `T2_CODE` (`CD_NO`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -2221,7 +2225,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('110', '60', 'vulnerabilityInfo.html', '', '91,93', 9, 'Y'),
 	('110', '70', 'binaryDBDataCommitInfo.html', '', '47,470', 17, 'Y'),
 	('110', '71', 'resetUserPassword.html', '', '817', 18, 'Y'),
-	('110', '231', 'licenseInvalidNotify.html', '', '231', 20, 'Y'),
+	('110', '232', 'licenseInvalidNotify.html', '', '232', 20, 'Y'),
 	('111', '35', 'project complete default contents', '', '<p> <strong>Project 에 대한 Open Source Compliance Process가 모두 수행되어 Complete 처리합니다. </strong><br />OSS 고지문이나 Packaging 파일에 대한 수정이 필요하신 경우, Basic Information탭 우측하단의 "Request to Open" 버튼을 클릭하여 Status 변경 요청하시기 바랍니다.<br />단, Distribution에서 Model 추가/삭제는 Status 변경 없이 가능합니다.</p> <p><strong>The Open Source Compliance Process for the Project is completed.</strong><br />If you need to modify the OSS Notice or the Packaging file, please request the status change to re-perform the Identification or Packaging by clicking "Request to Open" button on Basic Information Tab.<br />However, you can add or delete models in the distribution without changing the status.</p>', 35, 'Y'),
 	('111', '812', 'project drop default contents', '', '<p><Strong>Open Source Compliance Process 수행 완료하지 않고, Drop 처리됩니다.</strong><br />다시 Open Source Compliance Process를 진행하고자 하시는 경우, Basic Informatoin탭 우측하단의 "Open" 버튼을 클릭 후 진행하시기 바랍니다.</p> <p><strong>The status of the project changes to \'Drop\', so you don\'t need to complete the Open Source Compliance process.</strong><br />If you want to proceed the Open Source Compliance Process again, please click "Open" button on Basic information Tab.</p>', 812, 'Y'),
 	('111', '33', 'Project Created', '', '<p>Identification 탭에 Open Source 목록을 작성 후 BOM 탭에서 Request를 클릭하여 리뷰 요청하십시오.<br />Fill out the Open Source list in the Identification  and request a review by clicking Request in the BOM tab.<br /><br />- Guide : https://fosslight.org/fosslight-guide-en/tutorial/1_project.html#2-identification</p>', 33, 'Y'),
@@ -2550,23 +2554,23 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 -- 테이블 fosslight.T2_FILE 구조 내보내기
 DROP TABLE IF EXISTS `T2_FILE`;
 CREATE TABLE IF NOT EXISTS `T2_FILE` (
-  `FILE_SEQ` int(11) NOT NULL AUTO_INCREMENT COMMENT '파일순번',
-  `FILE_ID` int(11) NOT NULL DEFAULT 0 COMMENT '파일 ID',
-  `GUBN` varchar(2) NOT NULL DEFAULT 'A' COMMENT '파일 타입 [A:All, R:Role, U:Login USER, P: Password]',
-  `GUBN_CHK` varchar(512) DEFAULT NULL COMMENT 'GUBN 필드값에 따른 체크값 [A:NULL, R:권한명, U:NULL, P: 암호]',
-  `ORIG_NM` varchar(512) DEFAULT NULL COMMENT '오리지널 파일명',
-  `LOGI_NM` varchar(512) DEFAULT NULL COMMENT '물리파일명',
-  `LOGI_PATH` varchar(1024) DEFAULT NULL COMMENT '물리경로',
-  `LOGI_THUMB_NM` varchar(512) DEFAULT NULL COMMENT '물리파일명(썸네일)',
-  `LOGI_THUMB_PATH` varchar(1024) DEFAULT NULL COMMENT '물리경로(썸네일)',
+  `FILE_SEQ` int(11) NOT NULL AUTO_INCREMENT COMMENT 'File sequence number',
+  `FILE_ID` int(11) NOT NULL DEFAULT 0 COMMENT 'File ID',
+  `GUBN` varchar(2) NOT NULL DEFAULT 'A' COMMENT 'File type [A:All, R:Role, U:Login USER, P: Password]',
+  `GUBN_CHK` varchar(512) DEFAULT NULL COMMENT 'Check value based on GUBN field [A:NULL, R:Role name, U:NULL, P: Password]',
+  `ORIG_NM` varchar(512) DEFAULT NULL COMMENT 'Original file name',
+  `LOGI_NM` varchar(512) DEFAULT NULL COMMENT 'Physical file name',
+  `LOGI_PATH` varchar(1024) DEFAULT NULL COMMENT 'Physical path',
+  `LOGI_THUMB_NM` varchar(512) DEFAULT NULL COMMENT 'Physical file name (thumbnail)',
+  `LOGI_THUMB_PATH` varchar(1024) DEFAULT NULL COMMENT 'Physical path (thumbnail)',
   `CONTENT_TYPE` varchar(1024) DEFAULT NULL,
-  `EXT` varchar(100) DEFAULT NULL COMMENT '확장자',
-  `SIZE` bigint(20) DEFAULT NULL COMMENT '사이즈',
-  `REG_ID` varchar(20) DEFAULT NULL COMMENT '등록자',
-  `REG_DT` datetime DEFAULT current_timestamp() COMMENT '등록일',
-  `UPD_ID` varchar(20) DEFAULT NULL COMMENT '수정자',
-  `UPD_DT` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT '수정일',
-  `DEL_YN` char(1) DEFAULT 'N' COMMENT '사용여부(Y/N)',
+  `EXT` varchar(100) DEFAULT NULL COMMENT 'Extension',
+  `SIZE` bigint(20) DEFAULT NULL COMMENT 'Size',
+  `REG_ID` varchar(20) DEFAULT NULL COMMENT 'Registrar',
+  `REG_DT` datetime DEFAULT current_timestamp() COMMENT 'Registration date',
+  `UPD_ID` varchar(20) DEFAULT NULL COMMENT 'Updater',
+  `UPD_DT` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Update date',
+  `DEL_YN` char(1) DEFAULT 'N' COMMENT 'Usage flag (Y/N)',
   PRIMARY KEY (`FILE_SEQ`),
   KEY `FILE_SEQ_FILE_ID` (`FILE_SEQ`,`FILE_ID`),
   KEY `T2_FILE_FILE_ID` (`FILE_ID`)
@@ -2642,7 +2646,7 @@ INSERT INTO `T2_SECURED_RESOURCES` (`RESOURCE_ID`, `RESOURCE_NAME`, `RESOURCE_PA
 DROP TABLE IF EXISTS `T2_SECURED_RESOURCES_ROLE`;
 CREATE TABLE IF NOT EXISTS `T2_SECURED_RESOURCES_ROLE` (
   `RESOURCE_ID` varchar(20) NOT NULL,
-  `AUTHORITY` varchar(50) NOT NULL COMMENT '권한',
+  `AUTHORITY` varchar(50) NOT NULL COMMENT 'Permission',
   PRIMARY KEY (`RESOURCE_ID`,`AUTHORITY`),
   KEY `fk_T2_SECURED_RESOURCES_ROLE_T2_SECURED_RESOURCES1_idx` (`RESOURCE_ID`),
   CONSTRAINT `fk_T2_SECURED_RESOURCES_ROLE_T2_SECURED_RESOURCES1` FOREIGN KEY (`RESOURCE_ID`) REFERENCES `T2_SECURED_RESOURCES` (`RESOURCE_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
