@@ -101,7 +101,7 @@ public final class PdfUtil extends CoTopComponent {
         project = projectMapper.selectProjectMaster(projectMaster);
         String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + prjId;
         String _s = "<a href='"+url+"' target='_blank'>" + project.getPrjName();
-        if(!isEmpty(project.getOssVersion())) {
+        if(!isEmpty(project.getPrjVersion())) {
             _s += "(" + project.getPrjVersion()+")";
         }
         _s += "</a>";
