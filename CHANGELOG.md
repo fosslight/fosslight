@@ -1,5 +1,16 @@
 # Changelog
 
+## v2.0.0.pre-release (05/07/2024)
+## Features
+- UI 2.0 release @FOSSLight-dev (#1047)
+- API v2 release @cobaltblu27 (#1047)
+- Lite web release @hjcdg1 (#1047)
+
+## Changes
+- fosslight_create.sql is changed @hyeinlee00 (#1048)
+
+---
+
 ## v1.6.3 (21/05/2024)
 ## Changes
 - Change Distribution Type Name @hyeinlee00 (#1038)
@@ -709,21 +720,3 @@
 - Add vulnerability Score to 3rd party list @FOSSLight-dev (#421)
 - Change self-check unclear obligation message @FOSSLight-dev (#420)
 - Add division info to project/3rd Party mail @FOSSLight-dev (#419)
-
----
-
-## v1.2.31 (25/02/2022)
-## Changes
-## 🚀 Features
-
-- Add Division to Project, 3rd Party. @FOSSLight-dev (#417)
-
-## 🐛 Hotfixes
-
-- Fix the bug where the notification doesn't pop up. @FOSSLight-dev (#416)
-- Fix the Unconfirmed Version OSS registration bug @FOSSLight-dev (#412)
-
-## 🔧 Maintenance
-
-- Check Oss Name > npm > registered OSS Name @FOSSLight-dev (#415)
-- Add default comments to the Project mails @soimkim (#413)
