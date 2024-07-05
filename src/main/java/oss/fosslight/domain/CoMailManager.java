@@ -1467,7 +1467,7 @@ public class CoMailManager extends CoTopComponent {
 				_s += ossInfo.getOssName();
 				// Admin에게만 발송되는 oss 관련 메일의 경우 바로가기 link 형식으로 발송
 				if (isMailBodySubject || isMailBodySubjectFlag
-						&& (
+						|| (
 								CoConstDef.CD_MAIL_TYPE_OSS_REGIST.equals(bean.getMsgType()) 
 								|| CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
