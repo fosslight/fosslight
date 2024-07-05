@@ -141,7 +141,7 @@ public final class PdfUtil extends CoTopComponent {
                     projectIdentification.setOssName(oss.getOssName());
                     projectIdentification.setOssVersion(oss.getOssVersion());
                     ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
-                    if (prjOssMaster.getCvssScore() != null) {
+                    if (prjOssMaster != null && prjOssMaster.getCvssScore() != null) {
                         BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
                         BigDecimal mailingScore = new BigDecimal(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD));
 
