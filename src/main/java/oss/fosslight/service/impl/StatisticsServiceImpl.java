@@ -28,7 +28,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	// Mapper
 	@Autowired StatisticsMapper statisticsMapper;
 	
-	final String[] colorArray = new String[] {"#70ad47", "#ed7d31", "#a5a5a5", "#ffc000", "#5b9bd5", "#5bd597", "#d55bab", "#6f5bd5"};
+	final String[] colorArray = new String[] {"#70ad47", "#ed7d31", "#a5a5a5", "#ffc000", "#5b9bd5", "#5bd597", "#d55bab", "#6f5bd5", "#544fc5"};
 	
 	@Override
 	public History work(Object param) {
@@ -122,6 +122,10 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 				
 				if (data.getCategory8Cnt() > -1) {
 					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
+				}
+				
+				if (data.getCategory9Cnt() > -1) {
+					chartData.addCategoryCnt(data.getCategory9Cnt(), categoryIdx++);
 				}
 			}
 			
