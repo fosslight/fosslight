@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static oss.fosslight.common.CoConstDef.CD_LICENSE_RESTRICTION;
 
@@ -155,14 +156,18 @@ public final class PdfUtil extends CoTopComponent {
                         }
                     }
                 }
+                List<String> licenseList = Arrays.asList(projectIdentification.getLicenseName().split(","));
+                licenseList = licenseList.stream().distinct().collect(Collectors.toList());
 
-                LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(projectIdentification.getLicenseName().toUpperCase());
-                if(license != null) {
-                    if (!isEmpty(avoidNull(license.getRestrictionStr())) || (!isEmpty(avoidNull(license.getDescription())) && !license.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS))) {
-                        if(!isEmpty(avoidNull(license.getShortIdentifier()))) {
-                            license.setLicenseName(license.getShortIdentifier());
+                for(String license : licenseList) {
+                    LicenseMaster lm = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
+                    if(lm != null) {
+                        if (!isEmpty(avoidNull(lm.getRestrictionStr())) || (!isEmpty(avoidNull(lm.getDescription())) && !lm.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS))) {
+                            if(!isEmpty(avoidNull(lm.getShortIdentifier()))) {
+                                lm.setLicenseName(lm.getShortIdentifier());
+                            }
+                            licenseMasterMap.put(lm.getLicenseName(), lm);
                         }
-                        licenseMasterMap.put(license.getLicenseName(), license);
                     }
                 }
             }
