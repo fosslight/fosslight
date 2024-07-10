@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -47,6 +48,7 @@ import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.DateUtil;
+import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.PdfUtil;
 import oss.fosslight.util.StringUtil;
 
@@ -751,6 +753,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED:
     		case CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED:
+			case CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED:
     			// Set creator to sender and cc the other Admin users
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
@@ -3488,6 +3491,25 @@ public class CoMailManager extends CoTopComponent {
 				}catch(Exception e){
 					// Don't Exist Pdf
 					log.debug(e.getMessage(), e);
+				}
+			}
+
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
+				if(ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()).equals("SUCCESS")){
+					String analysisResultListPath = CommonFunction.emptyCheckProperty("autoanalysis.output.path", "");
+					if(!isEmpty(analysisResultListPath)){
+						analysisResultListPath += "/" + coMail.getParamPrjId();
+
+						File file = FileUtil.getAutoAnalysisFile("LOG", analysisResultListPath);
+						DataSource dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
+						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+
+						analysisResultListPath += "/result";
+						file = FileUtil.getAutoAnalysisFile("XLSX", analysisResultListPath);
+						dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
+						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+
+					}
 				}
 			}
 
