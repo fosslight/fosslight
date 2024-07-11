@@ -104,43 +104,39 @@
                 if (typeof localStorage.licenseSearchConditions !== "undefined") {
                     var localStorageSearchConditions = JSON.parse(localStorage.licenseSearchConditions);
 
-                    if (Date.now() > localStorageSearchConditions.expire) {
-                        localStorage.removeItem("licenseSearchConditions");
-                    } else {
-                        Object.keys(localStorageSearchConditions).forEach(function(key) {
-                            if (input.includes(key)) {
-                                $("input[name='"+key+"']").val(localStorageSearchConditions[key]);
-                                if ("licenseName" != key && "licenseNameAllSearchFlag" != key && "" != localStorageSearchConditions[key]) optionSelectedFlag = true;
-                                if ("cStartDate" == key) {
-                                    cStartDate = localStorageSearchConditions[key];
-                                } else if ("cEndDate" == key) {
-                                    cEndDate = localStorageSearchConditions[key];
-                                } else if ("mStartDate" == key) {
-                                    mStartDate = localStorageSearchConditions[key];
-                                } else if ("mEndDate" == key) {
-                                    mEndDate = localStorageSearchConditions[key];
-                                } else if ("licenseNameAllSearchFlag" == key) {
-                                    if ("Y" == localStorageSearchConditions[key]) $("#" + key).prop("checked", true);
-                                }
-                            } else if (singleSelect.includes(key)) {
-                                $("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
-                                if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
-                            } else if (multiSelect.includes(key)) {
-                                var restrictions = localStorageSearchConditions[key];
-                                if ("" != restrictions) {
-                                    optionSelectedFlag = true;
-                                    restrictions = restrictions.split(",");
-                                    $("select[name='"+key+"']").val(restrictions).trigger('change');
-                                } else {
-                                    $("select[name='"+key+"']").val(restrictions).trigger('change');
-                                    $("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
-                                }
-                            } else if (textarea.includes(key)) {
-                                $("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
-                                if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                    Object.keys(localStorageSearchConditions).forEach(function(key) {
+                        if (input.includes(key)) {
+                            $("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+                            if ("licenseName" != key && "licenseNameAllSearchFlag" != key && "" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                            if ("cStartDate" == key) {
+                                cStartDate = localStorageSearchConditions[key];
+                            } else if ("cEndDate" == key) {
+                                cEndDate = localStorageSearchConditions[key];
+                            } else if ("mStartDate" == key) {
+                                mStartDate = localStorageSearchConditions[key];
+                            } else if ("mEndDate" == key) {
+                                mEndDate = localStorageSearchConditions[key];
+                            } else if ("licenseNameAllSearchFlag" == key) {
+                                if ("Y" == localStorageSearchConditions[key]) $("#" + key).prop("checked", true);
                             }
-                        });
-                    }
+                        } else if (singleSelect.includes(key)) {
+                            $("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+                            if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                        } else if (multiSelect.includes(key)) {
+                            var restrictions = localStorageSearchConditions[key];
+                            if ("" != restrictions) {
+                                optionSelectedFlag = true;
+                                restrictions = restrictions.split(",");
+                                $("select[name='"+key+"']").val(restrictions).trigger('change');
+                            } else {
+                                $("select[name='"+key+"']").val(restrictions).trigger('change');
+                                $("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
+                            }
+                        } else if (textarea.includes(key)) {
+                            $("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+                            if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+                        }
+                    });
                 } else {
                     for (var i in input) {
                         if ("licenseName" != input[i] && "licenseNameAllSearchFlag" != input[i]) {
@@ -220,7 +216,6 @@
 
                     var localStorageData = fn.setGridParam();
                     localStorageData.ignoreSearchFlag = "N";
-                    localStorageData.expire = Date.now() + 300000;
                     localStorage.setItem("licenseSearchConditions", JSON.stringify(localStorageData));
 
                     optionSelectedFlag = false;
