@@ -651,7 +651,13 @@ var deleteTabByName = function (tabLk) {
 }
 
 var deleteTab = function (tabLk) {
-    $(".nav-link.active").prev().trigger("click");
+    var $iframe = $('iframe[src*="' + tabLk + '"]');
+    var $div = $iframe.closest('div.tab-pane.fade.active.show');
+    var ariaLabelledBy = $div.attr('aria-labelledby');
+    $div.remove();
+    if(ariaLabelledBy) {
+		$('#' + ariaLabelledBy).closest('.nav-item').remove();
+	}
 }
 
 var activeDeleteTab = function () {
@@ -3703,7 +3709,6 @@ function createButton(text, className, clickFunction) {
 }
 
 function restoreDefaults() {
-	console.log("?????")
 	event.preventDefault();
 	$('.custom-control-input').each(function() {
 		const id = $(this).attr('id').replace('col_option_', '');
