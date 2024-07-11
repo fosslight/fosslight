@@ -1376,8 +1376,7 @@ var fn = {
     							} else {
     								deleteTabInFrame('/partner/edit');
     							}
-    							
-    							reloadTabInframe('/partner/list');
+    							callCreateTabInFrame('3rd Party', '/partner/list', 'partner-list', true);
     						},
     						error: function(){
     							alertify.error([[#{msg.common.valid2}]], 0);

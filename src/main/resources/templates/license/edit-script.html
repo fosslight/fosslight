@@ -275,7 +275,7 @@
                 if (json.resCd == '10') {
                     alertify.alert([[ #{msg.common.success} ]], function(){
                         if (isNew) {
-                            deleteTabInFrame('/license/edit/');
+                            deleteTabInFrame('/license/edit');
                             createTabInFrame(json.licenseId + '_License', '/license/edit/' + json.licenseId);
                         } else {
                             deleteTabInFrame('/license/edit/' + json.licenseId);
@@ -587,6 +587,7 @@
                     } else {
                         deleteTabInFrame('/license/edit');
                     }
+                    callCreateTabInFrame("License", "/license/list", 'license-list', true);
                 });
             }
         }

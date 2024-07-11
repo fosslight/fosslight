@@ -1746,7 +1746,7 @@
 				if (json.resCd == '10') {
 					alertify.alert([[#{msg.common.success}]],function(){
 						deleteTabInFrame('/oss/edit/'+ossId);
-						reloadTabInframe('/oss/list');
+						callCreateTabInFrame('Open Source', '/oss/list', 'oss-list', true);
 					});
 				} else {
 					alertify.error([[#{msg.common.valid}]], 0);
@@ -2155,7 +2155,7 @@
                         deleteTabInFrame('/oss/edit/'+json.ossId);
                         createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
                     } else {
-                        deleteTabInFrame('/oss/edit/');
+                        deleteTabInFrame('/oss/edit');
                         createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
                     }
 

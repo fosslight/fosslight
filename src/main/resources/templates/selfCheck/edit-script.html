@@ -523,7 +523,8 @@ var fn = {
 					deleteTabInFrame('/selfCheck/edit/'+prjId);
 				} else {
 					deleteTabInFrame('/selfCheck/edit');
-				}
+				}					
+				callCreateTabInFrame('Self-Check', '/selfCheck/list', 'selfCheck-list', true);
 			});
 		} else {
 			alertify.error([[#{msg.common.valid2}]], 0)

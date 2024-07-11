@@ -1556,6 +1556,7 @@
                         alertify.alert([[#{msg.common.success}]], function () {
                         	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
 							createTabInFrame([[${project.prjId}]] + '_Packaging', "/project/verification/1/" + [[${project.prjId}]]);
+							callCreateTabInFrame("Project", "/project/list", 'project-list', true);
                         });
                     }
                 }
