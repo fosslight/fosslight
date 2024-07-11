@@ -242,9 +242,7 @@ var userList = {
 
         var colNameArr = [];
         colNameArr.push('AD ID');
-        if ("Y" != [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_HIDE_EMAIL_FLAG'))}]]) {
-            colNameArr.push('E-mail');
-        }
+        colNameArr.push('E-mail');
         colNameArr.push('Name');
         colNameArr.push('Division');
         colNameArr.push('Registered Date');
@@ -260,10 +258,11 @@ var userList = {
 		var colModelArr = [];
 		var colModelObj = {name: 'userId', index: 'userId', width: 150, allign: 'center'};
 		colModelArr.push(colModelObj);
-		if ("Y" != [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_HIDE_EMAIL_FLAG'))}]]) {
-            colModelObj = {name: 'email', index: 'email', width: 200, allign: 'center'};
-            colModelArr.push(colModelObj);
+		colModelObj = {name: 'email', index: 'email', width: 200, allign: 'center'};
+		if ("Y" == [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SYSTEM_SETTING'), @CommonFunction.getCoConstDefVal('CD_HIDE_EMAIL_FLAG'))}]]) {
+			colModelObj["hidden"] = true;
 		}
+		colModelArr.push(colModelObj);
 		colModelObj = {name: 'userName', index: 'userName', width: 100, allign: 'center', editable: true};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'division', index: 'division', width: 150, allign: 'right', editable: true, formatter: 'select', edittype:"select",
