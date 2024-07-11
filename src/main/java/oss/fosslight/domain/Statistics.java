@@ -43,6 +43,7 @@ public class Statistics extends ComBean implements Serializable {
 	private int category6Cnt = -1;
 	private int category7Cnt = -1;
 	private int category8Cnt = -1;
+	private int category9Cnt = -1;
 	private int total;
 	
 	public void addCategoryCnt(int categoryCnt, int idx) {
@@ -84,6 +85,7 @@ public class Statistics extends ComBean implements Serializable {
 		total += this.category6Cnt > 0 ? this.category6Cnt : 0;
 		total += this.category7Cnt > 0 ? this.category7Cnt : 0;
 		total += this.category8Cnt > 0 ? this.category8Cnt : 0;
+		total += this.category9Cnt > 0 ? this.category9Cnt : 0;
 		
 		this.total = total;
 	}
