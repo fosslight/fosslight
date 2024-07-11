@@ -223,6 +223,8 @@
                 $('#search').on('click', function (e) {
                     e.preventDefault();
 
+                    $("input[name=ossName]").autocomplete("close");
+                    
                     const searchOSSName = $("input[type=text][name=ossName]").val();
                     $("input[type=text][name=ossName]").val(searchOSSName.trim());
 
