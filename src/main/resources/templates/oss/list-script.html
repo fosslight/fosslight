@@ -731,7 +731,9 @@
                         	minLength : 1,
                         	autoFocus : false,
                         	disable : false,
-                        	close : function(event) {}
+                        	close : function(event) {
+                        		$(".search-field").val("");
+                        	}
                         });
                     },
                     loadComplete: function (result) {
