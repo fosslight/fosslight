@@ -51,19 +51,25 @@ $(document).ready(function () {
     });
     $(document).ajaxStart(function (event, jqxhr, settings) {
         var _targetUrl = event.target.URL;
-
         if (_targetUrl && "function" != typeof (_targetUrl)) {
 			loading.show();
 			
-            onAjaxLoadingHide = false;
-        }
-    }).ajaxStop(function () {
-		loading.hide();
-    }).ajaxError(function (event, jqxhr, ssettings, exception) {
-        doNotUseAutoLoadingHideFlag = "N";
+			onAjaxLoadingHide = false;
+		}
+	}).ajaxSend(function(event, jqxhr, settings) {
+		var url = settings.url;
+		var lastSegment = url.substring(url.lastIndexOf('/') + 1).toLowerCase();
 
-        loading.hide();
-    });
+		if (lastSegment.includes('file')) {
+			loading.hide();
+		}
+	}).ajaxStop(function() {
+		loading.hide();
+	}).ajaxError(function(event, jqxhr, ssettings, exception) {
+		doNotUseAutoLoadingHideFlag = "N";
+
+		loading.hide();
+	});
 
     $('.headerHandle').click(function () {
         $('#wrapBack').toggleClass('headerHide');
