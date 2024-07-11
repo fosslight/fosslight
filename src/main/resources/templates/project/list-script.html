@@ -74,43 +74,40 @@ var evt = {
 		var optionSelectedFlag = false;
 		if (typeof localStorage.projectSearchConditions !== "undefined") {
 			var localStorageSearchConditions = JSON.parse(localStorage.projectSearchConditions);
-			if (Date.now() > localStorageSearchConditions.expire) {
-				localStorage.removeItem("projectSearchConditions");
-			} else {
-				Object.keys(localStorageSearchConditions).forEach(function(key) {
-        			if (input.includes(key)) {
-        				if ("publicYn" == key) {
-        					var publicYn = localStorageSearchConditions[key];
-        					if ("" == publicYn || "N" == publicYn) $("#checkbox3").prop("checked", true);
-        				} else {
-        					var searchValue = localStorageSearchConditions[key];
-        					if ("prjIdName" != key && "" != searchValue) optionSelectedFlag = true;
-        					$("input[name='"+key+"']").val(searchValue);
-            				if ("schStartDate" == key) {
-            					startDate = localStorageSearchConditions[key];
-            				} else if ("schEndDate" == key) {
-            					endDate = localStorageSearchConditions[key];
-            				}
+			
+			Object.keys(localStorageSearchConditions).forEach(function(key) {
+    			if (input.includes(key)) {
+    				if ("publicYn" == key) {
+    					var publicYn = localStorageSearchConditions[key];
+    					if ("" == publicYn || "N" == publicYn) $("#checkbox3").prop("checked", true);
+    				} else {
+    					var searchValue = localStorageSearchConditions[key];
+    					if ("prjIdName" != key && "" != searchValue) optionSelectedFlag = true;
+    					$("input[name='"+key+"']").val(searchValue);
+        				if ("schStartDate" == key) {
+        					startDate = localStorageSearchConditions[key];
+        				} else if ("schEndDate" == key) {
+        					endDate = localStorageSearchConditions[key];
         				}
-        			} else if (singleSelect.includes(key)) {
-        				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
-        				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
-        			} else if (multiSelect.includes(key)) {
-        				var statuses = localStorageSearchConditions[key];
-        				if ("" != statuses) {
-        					optionSelectedFlag = true;
-        					statuses = statuses.split(",");
-        					$("select[name='"+key+"']").val(statuses).trigger('change');
-        				} else {
-        					$("select[name='"+key+"']").val(statuses).trigger('change');
-        					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
-        				}
-        			} else if (textarea.includes(key)) {
-        				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
-        				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
-        			}
-        		});
-			}
+    				}
+    			} else if (singleSelect.includes(key)) {
+    				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+    				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+    			} else if (multiSelect.includes(key)) {
+    				var statuses = localStorageSearchConditions[key];
+    				if ("" != statuses) {
+    					optionSelectedFlag = true;
+    					statuses = statuses.split(",");
+    					$("select[name='"+key+"']").val(statuses).trigger('change');
+    				} else {
+    					$("select[name='"+key+"']").val(statuses).trigger('change');
+    					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
+    				}
+    			} else if (textarea.includes(key)) {
+    				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+    				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+    			}
+    		});
 		} else {
 			for (var i in input) {
 				if ("prjIdName" != input[i] && "publicYn" != input[i]) {
@@ -166,7 +163,6 @@ var evt = {
 			var postData = fn.setGridParam();
 			
 			var localStorageData = fn.setGridParam();
-            localStorageData.expire = Date.now() + 300000;
             localStorage.setItem("projectSearchConditions", JSON.stringify(localStorageData));
 			
             optionSelectedFlag = false;
