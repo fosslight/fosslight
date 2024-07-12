@@ -86,6 +86,7 @@ public final class PdfUtil extends CoTopComponent {
         List<LicenseMaster> licenseReview = new ArrayList<>();
         List<Vulnerability> vulnerabilityReview = new ArrayList<>();
         Map<String,LicenseMaster> licenseMasterMap = new HashMap<>();
+        Map<String,Vulnerability> vulnerabilityMap = new HashMap<>();
         Map<String,OssMaster> ossMasterMap = new HashMap<>();
         String type = "";
 
@@ -152,7 +153,7 @@ public final class PdfUtil extends CoTopComponent {
                             vulnerability.setVersion(oss.getOssVersion());
                             vulnerability.setCvssScore(prjOssMaster.getCvssScore());
                             vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
-                            vulnerabilityReview.add(vulnerability);
+                            vulnerabilityMap.put(oss.getOssName().toUpperCase() + "_" + oss.getOssVersion().toUpperCase(), vulnerability);
                         }
                     }
                 }
@@ -179,6 +180,10 @@ public final class PdfUtil extends CoTopComponent {
 
         for (LicenseMaster licenseMaster : licenseMasterMap.values()) {
             licenseReview.add(licenseMaster);
+        }
+
+        for(Vulnerability vulnerability : vulnerabilityMap.values()){
+            vulnerabilityReview.add(vulnerability);
         }
 
         if(ossReview.size() > 0) {
