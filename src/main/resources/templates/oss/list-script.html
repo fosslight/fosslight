@@ -88,7 +88,7 @@
         		var textarea = ["copyrights", "summaryDescription"];
                 
         		var optionSelectedFlag = false;
-                if (typeof localStorage.ossSearchConditions !== "undefined") {
+                if ("Y" != linkFlag &&  typeof localStorage.ossSearchConditions !== "undefined") {
                 	var localStorageSearchConditions = JSON.parse(localStorage.ossSearchConditions);
                 	
                 	Object.keys(localStorageSearchConditions).forEach(function(key) {
