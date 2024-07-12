@@ -190,7 +190,7 @@ public final class PdfUtil extends CoTopComponent {
         if(licenseReview.size() > 0) {
             for(LicenseMaster lm : licenseReview) {
                 lm.setDescription(CommonFunction.lineReplaceToBR(lm.getDescription()));
-                lm.setRestriction(CommonFunction.lineReplaceToBR(lm.getRestriction()));
+                lm.setRestrictionStr(CommonFunction.lineReplaceToBR(lm.getRestrictionStr()));
             }
         }
 
