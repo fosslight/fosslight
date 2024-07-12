@@ -51,7 +51,7 @@ var Ctrl_fn = {
 				$('#ossList').jqGrid({
 						datatype: 'local',
 						data : resultData.list,
-						colNames: ['ID','Result','Download location','OSS name', 'OSS version', 'License<br>(current)', 'License<br>(to be changed)', 'Evidence', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv', 'componentIdList', 'checkedRuleType'],
+						colNames: ['ID', 'Result','Download location','OSS name', 'OSS version', 'License<br>(current)', 'Red<br>Warning<br>Only<br><input type="checkbox" onclick="grid_fn.checkWarningCheckboxes(this)">',  'License<br>(to be changed)', 'Evidence', 'changeFlag', 'addFlag', 'referenceId', 'referenceDiv', 'componentIdList', 'checkedRuleType'],
 						colModel: [
 							{name: 'gridId', index: 'gridId', hidden:true, key:true},
 							{name: 'result', index: 'result', width:20, align: 'center',editable: false, formatter: grid_fn.displayStatus, unformatter: grid_fn.unformatter, sortable:false},
@@ -59,6 +59,7 @@ var Ctrl_fn = {
 							{name: 'ossName', index: 'ossName', width: 50, align: 'left',editable: false, sortable:false},
 							{name: 'ossVersion', index: 'ossVersion', width: 40, align: 'left',editable:false, sortable:false},
 							{name: 'licenseName', index: 'licenseName', width: 50, align: 'left',editable:false, sortable:false},
+							{name: 'warningCheck', width: 20, sortable : false},
 							{name: 'checkLicense', index: 'checkLicense', width: 50, align: 'left',editable: false, formatter:grid_fn.displayCheckLicense, sortable:false},
 							{name: 'checkedEvidence', index: 'checkedEvidence',  width: 20, align: 'left',editable: false, formatter:grid_fn.displayCheckedEvidence, sortable:false},
 							{name: 'changeFlag', index: 'changeFlag', width: 50, hidden:true, sortable:false},
@@ -290,7 +291,25 @@ var grid_fn = {
 
 				return arr;
 			}, []);
-		}
+		},
+		checkWarningCheckboxes: function(allChk) {
+			if (event.stopPropagation) {
+                event.stopPropagation(); //MOZILLA
+            } else {
+                event.cancelBubble = true; //IE
+            }
+                
+			var rowIds = $('#ossList').getDataIDs();
+		    
+		    for (var i = 0; i < rowIds.length; i++) {
+		        var rowId = rowIds[i];
+		        var licenseNameCell = $('#ossList').getCell(rowId, 'licenseName');
+
+		        if (/retxt/.test(licenseNameCell) && !/retxtb/.test(licenseNameCell)) {
+		             $('#ossList').jqGrid('setSelection', rowId, false)
+		        }
+		    }
+		},
 };
 </script>
 </th:block>
