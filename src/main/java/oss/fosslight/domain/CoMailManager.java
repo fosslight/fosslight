@@ -3480,7 +3480,8 @@ public class CoMailManager extends CoTopComponent {
 			helper.setText(coMail.getEmlMessage(), true);
 
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF.equals(coMail.getMsgType())
-					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(coMail.getMsgType())){
+					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(coMail.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF.equals(coMail.getMsgType())){
 				try {
 					Map<String, Object> fileInfo = PdfUtil.getInstance().getPdfFilePath(coMail.getParamPrjId());
 					String fileName = (String) fileInfo.get("fileName");
