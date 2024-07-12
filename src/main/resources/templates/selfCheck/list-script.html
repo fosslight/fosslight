@@ -66,18 +66,19 @@ var evt = {
         	
         	Object.keys(localStorageSearchConditions).forEach(function(key) {
     			if (input.includes(key)) {
-    				var searchValue = localStorageSearchConditions[key];
-    				$("input[name='"+key+"']").val(searchValue);
-    				
-    				if ("prjName" != key && "publicYn" != key && "" != searchValue) optionSelectedFlag = true;
-    				if ("schStartDate" == key) {
-    					startDate = localStorageSearchConditions[key];
-    				} else if ("schEndDate" == key) {
-    					endDate = localStorageSearchConditions[key];
-    				} else if ("publicYn" == key) {
-    					if ("" == localStorageSearchConditions[key] || "N" == localStorageSearchConditions[key]) {
-    						$("#checkbox3").prop("checked", true);
-    					}
+    				if ("publicYn" == key) {
+    					var publicYn = localStorageSearchConditions[key];
+    					$("#checkbox3").prop("checked", false);
+    					if ("" == publicYn || "N" == publicYn) $("#checkbox3").prop("checked", true);
+    				} else {
+    					var searchValue = localStorageSearchConditions[key];
+    					if ("prjName" != key && "" != searchValue) optionSelectedFlag = true;
+    					$("input[name='"+key+"']").val(searchValue);
+    					if ("schStartDate" == key) {
+        					startDate = localStorageSearchConditions[key];
+        				} else if ("schEndDate" == key) {
+        					endDate = localStorageSearchConditions[key];
+        				}
     				}
     			}
     		});

@@ -57,7 +57,12 @@ $(document).ready(function () {
 			
             onAjaxLoadingHide = false;
         }
-    }).ajaxStop(function () {
+    }).ajaxSend(function(event, jqxhr, settings) {
+		var uploadProgress = settings.uploadProgress;
+		if (typeof uploadProgress !== "undefined") {
+			loading.hide();
+		}
+	}).ajaxStop(function () {
 		loading.hide();
     }).ajaxError(function (event, jqxhr, ssettings, exception) {
         doNotUseAutoLoadingHideFlag = "N";
@@ -3703,7 +3708,6 @@ function createButton(text, className, clickFunction) {
 }
 
 function restoreDefaults() {
-	console.log("?????")
 	event.preventDefault();
 	$('.custom-control-input').each(function() {
 		const id = $(this).attr('id').replace('col_option_', '');
