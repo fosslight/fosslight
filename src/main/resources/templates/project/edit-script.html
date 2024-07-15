@@ -1135,7 +1135,7 @@
 				$('input[name=prjVersion]').val($('input[name=prjVersion]').val().trim());
 				
 				if ("" != $('#additionalInformation').summernote('code')) {
-					$('input[name=comment]').val($('#additionalInformation').summernote('code'));
+					$('input[name=comment]').val(replaceWithLink($('#additionalInformation').summernote('code')));
 				}
 				
 				cleanErrMsg("_modelList");
