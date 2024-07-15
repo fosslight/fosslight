@@ -51,9 +51,9 @@
            		 	</if>
                 	)
 				</if> -->
-<!-- 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+	 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 					AND t1.PARTNER_ID = #{partnerId}
-				</if> -->
+				</if> 
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 					AND t4.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
 				</if>
@@ -214,9 +214,9 @@
            		</if>
         	)
 		</if> -->
-<!-- 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+	 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 		   AND A.PARTNER_ID = #{partnerId}
-		</if> -->
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 		   AND A.OSS_NAME LIKE CONCAT('%',#{ossName},'%')
 		</if>

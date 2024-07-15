@@ -2485,6 +2485,19 @@ var com_fn = {
 		} else if ("Bom" == tab) {
 			bom_fn.reset();
 		}
+	},
+	updateProjectFields: function (selectElement, sort) {
+	  	var selectedValue = $(selectElement).val();
+	    var projectVersionInputArea = $('#' + sort + 'ProjectVersionInputArea');
+	    var projectIdInputArea = $('#' + sort + 'ProjectIdInputArea');
+	    
+	    if (selectedValue === 'pNm') {
+	        projectVersionInputArea.show();
+	        projectIdInputArea.hide();
+	    } else if (selectedValue === 'pId') {
+	        projectVersionInputArea.hide();
+	        projectIdInputArea.show();
+	    }
 	}
 }
 

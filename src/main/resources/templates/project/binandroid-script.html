@@ -72,21 +72,20 @@ var binAndroid_evt = {
 		$('#binAndroidProjectSearchBtn').click(function(e){
 			e.preventDefault();
 			var searchSelect = $("select[name='binAndroidProjectSelect'] option:selected").val();
-			var searchText = $("input[name='binAndroidPrjSearchText']").val();
-			switch(searchSelect){
-				case "pNm" : $("#binAndroidProjectForm input[name='prjName']").val(searchText);
-					break;
-				case "pVer" : $("#binAndroidProjectForm input[name='prjVersion']").val(searchText);
-					break;
-				case "pId" : $("#binAndroidProjectForm input[name='prjId']").val(searchText);
-					break;
-			}
 			var postData = $('#binAndroidProjectForm').serializeObject();
-			
-			$('#_binAndroidProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
-			tableRefreshNew("_binAndroidProjectList1");
-			$('div.binAndroidProject1').show();
-			$('div.binAndroidProject2').hide();
+			switch(searchSelect){
+			case "pNm" : 
+				postData.prjId = "";
+				break;
+			case "pId" :
+				postData.prjVersion = "";
+				postData.prjName = "";
+				break;
+		}
+		
+		$('#_binAndroidProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
+		$('div.binAndroidProject1').show();
+		$('div.binAndroidProject2').hide();
 		});
 		
 		// csv파일 업로드

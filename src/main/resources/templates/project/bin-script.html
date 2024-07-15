@@ -1021,25 +1021,17 @@ var bin_fn = {
 	},
 	projectSearch : function () {
 		var searchSelect = $("select[name='binProjectSelect'] option:selected").val();
-		var searchText = $("input[name='binPrjSearchText']").val();
+		var postData = $('#binProjectForm').serializeObject();
+		
 		switch(searchSelect){
 			case "pNm" : 
-					$("#binProjectForm input[name='prjName']").val(searchText);
-					$("#binProjectForm input[name='prjVersion']").val("");
-					$("#binProjectForm input[name='prjId']").val("");
+				postData.prjId = "";
 				break;
-			case "pVer" : 
-					$("#binProjectForm input[name='prjVersion']").val(searchText);
-					$("#binProjectForm input[name='prjName']").val("");
-					$("#binProjectForm input[name='prjId']").val("");
-				break;
-			case "pId" : 
-					$("#binProjectForm input[name='prjId']").val(searchText);
-					$("#binProjectForm input[name='prjVersion']").val("");
-					$("#binProjectForm input[name='prjName']").val("");
+			case "pId" :
+				postData.prjVersion = "";
+				postData.prjName = "";
 				break;
 		}
-		var postData = $('#binProjectForm').serializeObject();
 		
 		$('#_binProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
 		$('.binProject1').show();

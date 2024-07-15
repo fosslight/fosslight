@@ -59,25 +59,34 @@
 			</form>
 				<form id="projectSearchForm" class="partyBtn" th:object="${project}">
 					<input type="hidden" name="publicYn" value="Y">
-					<input type="hidden" name="prjName" />
-					<input type="hidden" name="prjVersion" />
-					<input type="hidden" name="prjId" />
 					<div class="partyProjectSearch" style="display: none;">
 						<div class="row mt-5">
 							<div class="col-md-2">
 								<div class="form-group">
-									<select class="custom-select custom-narrow-item" name="3rdProjectSelect">
-										<option th:value="pNm" th:text="'Project Name'"></option>
-										<option th:value="pVer" th:text="'Project Version'"></option>
+									<select class="custom-select custom-narrow-item" name="3rdProjectSelect" id="projectSelect" onchange="com_fn.updateProjectFields(this, '3rd')">
+										<option th:value="pNm" th:text="'Project Name + Version'"></option>
 										<option th:value="pId" th:text="'Project Id'"></option>
 									</select>
 								</div>
 							</div>
-							<div class="col-md-5">
+							<div class="col-md-7" id="3rdProjectVersionInputArea">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjName" placeholder="Name" style="width:30%">	
+											<input type="text" class="form-control custom-narrow-item ui-autocomplete-input resetAutoComp" name="prjVersion" placeholder="Version">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|party_evt.projectSearch()|" name="partnerProjectSearch" id="partnerProjectSearch" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-5" id="3rdProjectIdInputArea" style="display: none;">
 								<div class="input-group input-group-md">
-									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjSearchText">
+									<input type="text" class="form-control ui-autocomplete-input autoComProjectIdConf custom-narrow-item" name="prjId">
 									<span class="input-group-append">
-										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|party_evt.projectSearch()|" id="partnerProjectSearch" th:text="Search"></button>
+										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|party_evt.projectSearch()|" name="partnerProjectSearch" id="partnerProjectSearch" th:text="Search"></button>
 									</span>
 								</div>
 							</div>
@@ -252,25 +261,34 @@
 			<div id="depProjectSearch" style="display: none;">
 				<form id="depProjectForm" class="depBtn">
 					<input type="hidden" name="publicYn" value="Y">
-					<input type="hidden" name="prjName" />
-					<input type="hidden" name="prjVersion" />
-					<input type="hidden" name="prjId" />
 					<div name="content_dep">
 						<div class="row mt-5">
 							<div class="col-md-2">
 								<div class="form-group">
-									<select class="custom-select custom-narrow-item custom-narrow-item" name="depProjectSelect">
-										<option th:value="pNm" th:text="'Project Name'"></option>
-										<option th:value="pVer" th:text="'Project Version'"></option>
+									<select class="custom-select custom-narrow-item" name="depProjectSelect" onchange="com_fn.updateProjectFields(this, 'dep')">
+										<option th:value="pNm" th:text="'Project Name + Version'"></option>
 										<option th:value="pId" th:text="'Project Id'"></option>
 									</select>
 								</div>
 							</div>
-							<div class="col-md-5">
+							<div class="col-md-7" id="depProjectVersionInputArea">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control ui-autocomplete-input autoComProjectNmConf custom-narrow-item" name="prjName" placeholder="Name" style="width:30%">	
+											<input type="text" class="form-control custom-narrow-item ui-autocomplete-input resetAutoComp" name="prjVersion" placeholder="Version">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|dep_fn.projectSearch()|" name="depProjectSearchBtn" id="depProjectSearchBtn" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-5" id="depProjectIdInputArea" style="display: none;">
 								<div class="input-group input-group-md">
-									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="depPrjSearchText">
+									<input type="text" class="form-control custom-narrow-item ui-autocomplete-input autoComProjectIdConf" name="prjId">
 									<span class="input-group-append">
-										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|dep_fn.projectSearch()|" id="depProjectSearchBtn" th:text="Search"></button>
+										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|dep_fn.projectSearch()|" name="depProjectSearchBtn" id="depProjectSearchBtn" th:text="Search"></button>
 									</span>
 								</div>
 							</div>
@@ -406,25 +424,34 @@
 			<div id="srcProjectSearch" style="display: none;">
 				<form id="srcProjectForm" class="srcBtn">
 					<input type="hidden" name="publicYn" value="Y">
-					<input type="hidden" name="prjName" />
-					<input type="hidden" name="prjVersion" />
-					<input type="hidden" name="prjId" />
 					<div name="content_src">
 						<div class="row mt-5">
 							<div class="col-md-2">
 								<div class="form-group">
-									<select class="custom-select custom-narrow-item" name="srcProjectSelect">
-										<option th:value="pNm" th:text="'Project Name'"></option>
-										<option th:value="pVer" th:text="'Project Version'"></option>
+									<select class="custom-select custom-narrow-item" name="srcProjectSelect" id="projectSelect" onchange="com_fn.updateProjectFields(this, 'src')">
+										<option th:value="pNm" th:text="'Project Name + Version'"></option>
 										<option th:value="pId" th:text="'Project Id'"></option>
 									</select>
 								</div>
 							</div>
-							<div class="col-md-5">
+							<div class="col-md-7" id="srcProjectVersionInputArea">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control ui-autocomplete-input autoComProjectNmConf custom-narrow-item" name="prjName" placeholder="Name"style="width:30%">	
+											<input type="text" class="form-control custom-narrow-item" name="prjVersion" placeholder="Version">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|src_fn.projectSearch()|" name="srcProjectSearch" id="srcProjectSearch" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-5" id="srcProjectIdInputArea" style="display: none;">
 								<div class="input-group input-group-md">
-									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="srcPrjSearchText">
+									<input type="text" class="form-control autoComConfPartyId custom-narrow-item" name="prjId">
 									<span class="input-group-append">
-										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|src_fn.projectSearch()|" id="srcProjectSearch" th:text="Search"></button>
+										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|src_fn.projectSearch()|" name="srcProjectSearch" id="srcProjectSearch" th:text="Search"></button>
 									</span>
 								</div>
 							</div>
@@ -596,25 +623,34 @@
 			<div id="binProjectSearch" style="display: none;">
 				<form id="binProjectForm" class="binBtn">
 					<input type="hidden" name="publicYn" value="Y">
-					<input type="hidden" name="prjName" />
-					<input type="hidden" name="prjVersion" />
-					<input type="hidden" name="prjId" />
 					<div name="content_bin">
 						<div class="row mt-5">
 							<div class="col-md-2">
 								<div class="form-group">
-									<select class="custom-select custom-narrow-item" name="binProjectSelect">
-										<option th:value="pNm" th:text="'Project Name'"></option>
-										<option th:value="pVer" th:text="'Project Version'"></option>
+									<select class="custom-select custom-narrow-item" name="binProjectSelect" id="projectSelect" onchange="com_fn.updateProjectFields(this, 'bin')">
+										<option th:value="pNm" th:text="'Project Name + Version'"></option>
 										<option th:value="pId" th:text="'Project Id'"></option>
 									</select>
 								</div>
 							</div>
-							<div class="col-md-5">
+							<div class="col-md-7" id="binProjectVersionInputArea">
+								<div class="row">
+									<div class="col-lg-12">
+										<div class="input-group input-group-md">
+											<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjName" placeholder="Name" style="width:30%">	
+											<input type="text" class="form-control custom-narrow-item" name="prjVersion" placeholder="Version">
+											<span class="input-group-append">
+												<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|bin_fn.projectSearch()|" name="binProjectSearch" id="binProjectSearch" th:text="Search"></button>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-5" id="binProjectIdInputArea" style="display: none;">
 								<div class="input-group input-group-md">
-									<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="binPrjSearchText">
+									<input type="text" class="form-control autoComConfPartyId custom-narrow-item" name="prjId">
 									<span class="input-group-append">
-										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|bin_fn.projectSearch()|" id="binProjectSearch" th:text="Search"></button>
+										<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|bin_fn.projectSearch()|" name="binProjectSearch" id="binProjectSearch" th:text="Search"></button>
 									</span>
 								</div>
 							</div>
@@ -806,25 +842,36 @@
 			
 			<form id="binAndroidProjectForm" class="binAndroidBtn">
 				<input type="hidden" name="publicYn" value="Y">
-				<input type="hidden" name="prjName" />
-				<input type="hidden" name="prjVersion" />
-				<input type="hidden" name="prjId" />
 				<div name="content_android" id="binAndroidProjectSearch" style="display: none;">
-					<div class="row mt-3">
+					<div class="row mt-5">
 						<div class="col-md-2">
 							<div class="form-group">
-								<select class="custom-select" name="binAndroidProjectSelect">
-									<option th:value="pNm" th:text="'Project Name'"></option>
-									<option th:value="pVer" th:text="'Project Version'"></option>
+								<select class="custom-select custom-narrow-item" name="binAndroidProjectSelect" id="projectSelect" onchange="com_fn.updateProjectFields(this, 'binAndroid')">
+									<option th:value="pNm" th:text="'Project Name + Version'"></option>
 									<option th:value="pId" th:text="'Project Id'"></option>
 								</select>
 							</div>
 						</div>
-						<div class="col-md-5">
+						<div class="col-md-7" id="binAndroidProjectVersionInputArea">
+							<div class="row">
+								<div class="col-lg-12">
+									<div class="input-group input-group-md">
+										<input type="text" class="form-control autoComProjectNmConf custom-narrow-item" name="prjName"
+											placeholder="Name" style="width:30%">
+										<input type="text" class="form-control custom-narrow-item" name="prjVersion" placeholder="Version">
+										<span class="input-group-append">
+											<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item"
+												th:onclick="|binAndroid_fn.projectSearch()|" id="binAndroidProjectSearch" th:text="Search"></button>
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-5" id="binAndroidProjectIdInputArea" style="display: none;">
 							<div class="input-group input-group-md">
-								<input type="text" class="form-control autoComProjectNmConf" name="binAndroidPrjSearchText">
+								<input type="text" class="form-control autoComConfPartyId custom-narrow-item" name="prjId">
 								<span class="input-group-append">
-									<button type="button" class="btn btn-outline-dark btn-flat" th:onclick="|binAndroid_fn.projectSearch()|" id="binAndroidProjectSearch" th:text="Search"></button>
+									<button type="button" class="btn btn-outline-dark btn-flat custom-narrow-item" th:onclick="|binAndroid_fn.projectSearch()|" id="binAndroidProjectSearch" th:text="Search"></button>
 								</span>
 							</div>
 						</div>

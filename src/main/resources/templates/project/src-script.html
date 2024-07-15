@@ -69,16 +69,18 @@ var src_fn = {
 	},
 	projectSearch : function () {
 		var searchSelect = $("select[name='srcProjectSelect'] option:selected").val();
-		var searchText = $("input[name='srcPrjSearchText']").val();
+		var postData = $('#srcProjectForm').serializeObject();
+		
 		switch(searchSelect){
-			case "pNm" : $("#srcProjectForm input[name='prjName']").val(searchText);
+			case "pNm" : 
+				postData.prjId = "";
 				break;
-			case "pVer" : $("#srcProjectForm input[name='prjVersion']").val(searchText);
-				break;
-			case "pId" : $("#srcProjectForm input[name='prjId']").val(searchText);
+			case "pId" :
+				postData.prjVersion = "";
+				postData.prjName = "";
 				break;
 		}
-		var postData = $('#srcProjectForm').serializeObject();
+		
 		$('#_srcProjectList1').jqGrid('setGridParam', {postData:postData}).trigger("reloadGrid");
 		$('.srcProject1').show();
 		$('.srcProject2').hide();

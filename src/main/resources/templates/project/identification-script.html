@@ -76,19 +76,19 @@ $(document).ready(function () {
 				party_evt.partnerSearch();
 				return false;
 			}
-			if ($("#partnerProjectSearch").is(":visible")) {
+			if ($("button[name='partnerProjectSearch']").is(":visible")) {
 				party_evt.projectSearch();
 				return false;
 			}
-			if ($("#depProjectSearchBtn").is(":visible")) {
+			if ($("button[name='depProjectSearchBtn']").is(":visible")) {
 				dep_fn.projectSearch();
 				return false;
 			}
-			if ($("#srcProjectSearch").is(":visible")) {
+			if ($("button[name='srcProjectSearch']").is(":visible")) {
 				src_fn.projectSearch();
 				return false;
 			}
-			if ($("#binProjectSearch").is(":visible")) {
+			if ($("button[name='binProjectSearch']").is(":visible")) {
 				bin_fn.projectSearch();
 				return false;
 			}

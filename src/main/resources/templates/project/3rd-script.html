@@ -52,16 +52,16 @@ var party_evt = {
 		$('#3rdProjectSearchBtn').on('click', function(e){
 			e.preventDefault();
 			var searchSelect = $("select[name='3rdProjectSelect'] option:selected").val();
-			var searchText = $("input[name='prjSearchText']").val();
+			var postData = $('#projectSearchForm').serializeObject();
 			switch(searchSelect){
-				case "pNm" : $("#projectSearchForm input[name='prjName']").val(searchText);
+				case "pNm" : 
+					postData.prjId = "";
 					break;
-				case "pVer" : $("#projectSearchForm input[name='prjVersion']").val(searchText);
-					break;
-				case "pId" : $("#projectSearchForm input[name='prjId']").val(searchText);
+				case "pId" :
+					postData.prjVersion = "";
+					postData.prjName = "";
 					break;
 			}
-			var postData = $('#projectSearchForm').serializeObject();
 			
 			$('#_list-1').jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
 			$('.three3list').show();
