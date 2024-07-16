@@ -2908,14 +2908,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 				
 				for (OssComponents oss : dependenciesDataList) {
-					String key = (oss.getOssName() + "(" + oss.getOssVersion() + ")").toUpperCase();
+					String key = oss.getPackageUrl(); // (oss.getOssName() + "(" + oss.getOssVersion() + ")").toUpperCase();
 					if (relationshipsMap.containsKey(key)) {
 						String spdxElementId = (String) relationshipsMap.get(key);
 						String[] dependencies = oss.getDependencies().split(",");
 						for (String dependency : dependencies) {
-							String relatedSpdxElementKey = dependency.toUpperCase();
-							if (relationshipsMap.containsKey(relatedSpdxElementKey)) {
-								String relatedSpdxElement = (String) relationshipsMap.get(relatedSpdxElementKey);
+//							String relatedSpdxElementKey = dependency.toUpperCase();
+							if (relationshipsMap.containsKey(dependency)) {
+								String relatedSpdxElement = (String) relationshipsMap.get(dependency);
 								int cellIdx = 0;
 
 								Row row = sheetRelationships.getRow(rowIdx);
