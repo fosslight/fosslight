@@ -871,6 +871,12 @@
                         }
 
                         adjustPageGridSize();
+                        
+                        if(linkFlag == 'Y') {
+							$('.groupBtns').each(function () {
+								$(this).click();
+							});
+						}
                     },
                 });
 
