@@ -2907,15 +2907,22 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					rowIdx++;
 				}
 				
+				List<String> duplicateChecklist = new ArrayList<>();
 				for (OssComponents oss : dependenciesDataList) {
 					String key = oss.getPackageUrl(); // (oss.getOssName() + "(" + oss.getOssVersion() + ")").toUpperCase();
 					if (relationshipsMap.containsKey(key)) {
 						String spdxElementId = (String) relationshipsMap.get(key);
 						String[] dependencies = oss.getDependencies().split(",");
 						for (String dependency : dependencies) {
-//							String relatedSpdxElementKey = dependency.toUpperCase();
 							if (relationshipsMap.containsKey(dependency)) {
 								String relatedSpdxElement = (String) relationshipsMap.get(dependency);
+								String duplicateKey = spdxElementId + "|" + relatedSpdxElement;
+								if (duplicateChecklist.contains(duplicateKey)) {
+									continue;
+								} else {
+									duplicateChecklist.add(duplicateKey);
+								}
+								
 								int cellIdx = 0;
 
 								Row row = sheetRelationships.getRow(rowIdx);
