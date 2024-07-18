@@ -32,37 +32,83 @@
     </div>
   <script>
 	
-    /* scroll the navi item to the left whenever navi item is created */
-    var observer = new MutationObserver(function(mutationsList) {
-      var navLinks = document.querySelectorAll('.nav-link');
-      navLinks.forEach(function(navLink) {
-        navLink.addEventListener('click', function(event) {
-          moveNaviBar();
-        });
-      });
+  var observer = new MutationObserver(function (mutationsList) {
+		for (var mutation of mutationsList) {
+			if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+				handleTabShown();
+				break;
+			}
+		}
+	});
 
-      for (var mutation of mutationsList) {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          var navbarNav = document.getElementById("navbarNav");
-          navbarNav.scrollLeft = navbarNav.scrollWidth - navbarNav.clientWidth;
-          break;
-        }
-      }
-    });
+	var targetNode = document.getElementById('navbarNav');
+	observer.observe(targetNode, {childList: true});
 
-    var targetNode = document.getElementById('navbarNav');
-    observer.observe(targetNode, { childList: true });
+	function handleTabShown() {
+		$('#navbarNav').off('shown.bs.tab').on('shown.bs.tab', function (e) {
+			tabNumber = $(e.target).closest('li').index();
 
-    function moveNaviBar() {
-      var navbarNav = document.getElementById("navbarNav");
-      var activeElement = navbarNav.querySelector('.active');
-      if (activeElement) {
-        var navbarRect = navbarNav.getBoundingClientRect();
-        var activeRect = activeElement.getBoundingClientRect();
-        var scrollLeft = activeRect.left - navbarRect.left - (navbarRect.width - activeRect.width) / 2;
-        navbarNav.scrollLeft = scrollLeft;
-      }
-    }
+			if (selectTab != tabNumber) {
+				lastTab = selectTab;
+				selectTab = tabNumber;
+				moveNavbar();
+			}
+		});
+	}
+
+	$(document).on('click', '.btn-iframe-close', function (e) {
+		var tabItem = $(e.target).closest('li');
+		var tabIndex = tabItem.index();
+
+		// 1. When closing the active tab -> activate lastTab.
+		if (tabIndex === selectTab) {
+			e.stopPropagation();
+			e.preventDefault();
+
+			if (lastTab !== null) {
+				// 1-1. If lastTab exists, activate lastTab
+				const lastTabElement = $('#navbarNav').find('.nav-link').eq(lastTab);
+
+				if (lastTabElement.length) {
+					setTimeout(() => {
+						lastTabElement.trigger('click');
+						selectTab = $('#navbarNav').find('.nav-link.active').closest('li').index();
+					}, 0);
+				} else {
+					// 1-2. If lastTab no longer exists, activate the tab immediately before lastTab. -> according to the admin LTE event
+					console.log("lastTab no longer exists");
+				}
+			}
+		} else {
+			e.stopPropagation();
+			e.preventDefault();
+
+			// 2. When closing an inactive tab -> keep the current page
+			// If a tab with a number greater than the current page is closed, decrement selectTab by 1
+			// If a tab with a number less than the current page is closed, keep selectTab unchanged
+			if (tabIndex < selectTab) {
+				selectTab -= 1;
+			} else {
+				selectTab = lastTab;
+			}
+
+			setTimeout(() => {
+				$('#navbarNav').find('.nav-link').eq(selectTab).trigger('click');
+				selectTab = $('#navbarNav').find('.nav-link.active').closest('li').index();
+			}, 0);
+		}
+	});
+
+	function moveNavbar() {
+		var navbarNav = document.getElementById("navbarNav");
+		var activeElement = navbarNav.querySelector('.active');
+		if (activeElement) {
+			var navbarRect = navbarNav.getBoundingClientRect();
+			var activeRect = activeElement.getBoundingClientRect();
+			var scrollLeft = activeRect.left - navbarRect.left - (navbarRect.width - activeRect.width) / 2;
+			navbarNav.scrollLeft = scrollLeft;
+		}
+	}
 
     $("#navbarNav").on("click", ".btn-iframe-close", function() {
     	var tabNm = $(this).next().text();

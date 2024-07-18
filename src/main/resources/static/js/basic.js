@@ -656,7 +656,13 @@ var deleteTabByName = function (tabLk) {
 }
 
 var deleteTab = function (tabLk) {
-    $(".nav-link.active").prev().trigger("click");
+    var $iframe = $('iframe[src*="' + tabLk + '"]');
+    var $div = $iframe.closest('div.tab-pane.fade.active.show');
+    var ariaLabelledBy = $div.attr('aria-labelledby');
+    $div.remove();
+    if(ariaLabelledBy) {
+		$('#' + ariaLabelledBy).closest('.nav-item').remove();
+	}
 }
 
 var activeDeleteTab = function () {
