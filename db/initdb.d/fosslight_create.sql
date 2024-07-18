@@ -2510,6 +2510,7 @@ INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_D
 	('908', '320', 'The number of projects and self-checks that can be created has been exceeded. (Up to 3 per day)', '', 'project, selfcheck의 create건수가 초과된 경우(일일 최대 3건)', 5, 'Y'),
 	('908', '330', 'There is an error in the data written in the file.', '', 'oss report등을 등록할 경우 작성된 data가 validation check시 오류가 발생한 경우', 6, 'Y'),
 	('908', '400', 'The file to upload is missing.', '', 'oss report, notice.html, result.txt, packaging등의 file을 누락하여 호출을 한 경우', 7, 'Y'),
+	('908', '404', 'The resource does not exist or User does not have permissions for the resource (resource example: project)', '', '존재하지 않는 resource를 호출하거나 해당 resource에 접근 권한이 없는 경우', 14, 'Y'),
 	('908', '410', 'File size exceeded. (Max size: 5MB for oss report, 4GB for packaging file)', '', 'oss report, packaging file이 file size가 초과된 경우(oss report는 5MB, packaging file은 4GB)', 8, 'Y'),
 	('908', '420', 'The registered files are extensions that are not supported.', '', '등록한 file들이 지원하지 않은 확장자인 경우', 9, 'Y'),
 	('908', '430', 'The tab you are trying to upload is not active.', '', '업로드할 Tab이 활성화되지 않음.', 13, 'Y'),

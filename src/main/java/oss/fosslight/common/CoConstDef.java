@@ -829,6 +829,7 @@ public class CoConstDef {
 	public static final String CD_OPEN_API_DATA_VALIDERROR_MESSAGE				= "330";
 	public static final String CD_OPEN_API_CREATE_PROJECT_DUPLICATE_MESSAGE		= "340";
 	public static final String CD_OPEN_API_FILE_NOTEXISTS_MESSAGE				= "400";
+	public static final String CD_OPEN_API_NOT_FOUND_MESSAGE					= "404";
 	public static final String CD_OPEN_API_FILE_SIZEOVER_MESSAGE				= "410";
 	public static final String CD_OPEN_API_EXT_UNSUPPORT_MESSAGE				= "420";
 	public static final String CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE			= "430";
