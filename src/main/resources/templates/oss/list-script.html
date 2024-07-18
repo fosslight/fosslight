@@ -870,13 +870,11 @@
                             })
                         }
 
-                        adjustPageGridSize();
-                        
-                        if(linkFlag == 'Y') {
-							$('.groupBtns').each(function () {
-								$(this).click();
-							});
+                        if ("Y" == linkFlag) {
+                        	$('span.groupBtns').trigger('click');
 						}
+                        
+                        adjustPageGridSize();
                     },
                 });
 
