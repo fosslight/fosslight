@@ -44,6 +44,9 @@ public class RestResponseService {
             case FORBIDDEN:
                 CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE);
                 break;
+            case NOT_FOUND:
+                CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_NOT_FOUND_MESSAGE);
+
             default:
         }
 
