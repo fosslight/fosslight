@@ -820,7 +820,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 boolean sheetNamesEmptyFlag = isEmpty(sheetNames) ? true : false;
                 try {
                     if (sheetNamesEmptyFlag) {
-                        sheet = ExcelUtil.getSheetNoStartsWith("SRC", Arrays.asList(ossReportBean), CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+                        sheet = ExcelUtil.getSheetNoStartsWith("BIN", Arrays.asList(ossReportBean), CommonFunction.emptyCheckProperty("upload.path", "/upload"));
                     } else {
                         List<UploadFile> list = new ArrayList<UploadFile>();
                         list.add(ossReportBean);
