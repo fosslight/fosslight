@@ -760,6 +760,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED:
     		case CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED:
 			case CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED:
+			case CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED:
     			// Set creator to sender and cc the other Admin users
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
@@ -1315,13 +1316,11 @@ public class CoMailManager extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
-    			
-    			
     			mailManagerMapper.insertEmailHistory(bean);
         		// 발송처리
         		new Thread(() -> sendEmail(bean)).start();
     		}
-			
+
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			procResult = false;
@@ -3509,11 +3508,20 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
-			if(CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
-				if(ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()).equals("SUCCESS")){
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED.equals(coMail.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
+				if((ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()).equals("SUCCESS"))
+				    || (ossMapper.getOssAnalysisStatus(coMail.getParamPartnerId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPartnerId()).equals("SUCCESS"))){
+
+					String prjId = "";
+					if(ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null) {
+						prjId = coMail.getParamPrjId();
+					} else {
+						prjId = "3rd-"+coMail.getParamPartnerId();
+					}
 					String analysisResultListPath = CommonFunction.emptyCheckProperty("autoanalysis.output.path", "");
 					if(!isEmpty(analysisResultListPath)){
-						analysisResultListPath += "/" + coMail.getParamPrjId();
+						analysisResultListPath += "/" + prjId;
 
 						File file = FileUtil.getAutoAnalysisFile("LOG", analysisResultListPath);
 						DataSource dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
