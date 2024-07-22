@@ -1,5 +1,20 @@
 # Changelog
 
+## v2.0.1.pre-release (22/07/2024)
+## 🐛 Hotfixes
+
+- Bug fix in v2.0.0.pre-release and Update to v2.0.1.pre-release @hyeinlee00 @FOSSLight-dev @Min-Kyungsun  (#1052)
+  - Fix wrong column name in fosslight_create.sql
+  - Bug fix in API V2
+    - Change 3rd party search API return value type
+    - Fix the bug that source code analysis result was uploaded to BIN tab
+  - Bug fix in email format
+  - Bug fix in review report
+  - Bug fix in search bar in Opensource menu
+  - Bug fix in SPDX document 
+
+---
+
 ## v2.0.0.pre-release (05/07/2024)
 ## Features
 - UI 2.0 release @FOSSLight-dev (#1047)
@@ -711,13 +726,3 @@
 ## 🔧 Maintenance
 
 - Change the condition Obligation: unclear in self-check. @FOSSLight-dev (#422)
-
----
-
-## v1.2.32 (04/03/2022)
-## Changes
-## 🔧 Maintenance
-
-- Add vulnerability Score to 3rd party list @FOSSLight-dev (#421)
-- Change self-check unclear obligation message @FOSSLight-dev (#420)
-- Add division info to project/3rd Party mail @FOSSLight-dev (#419)
