@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'oss.fosslight'
-version = '2.0.0.pre-release'
+version = '2.0.1.pre-release'
 
 sourceCompatibility = '11'
 
