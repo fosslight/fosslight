@@ -6,6 +6,35 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+# [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
+* fosslight_create.sql에서 잘못된 column 수정
+* API V2의 버그 수정
+  - 3rd party search API 반환 값 유형 변경
+  - 소스 코드 분석 결과가 BIN 탭에 업로드되는 버그 수정
+* 이메일 형식의 버그 수정
+* 검토 보고서의 버그 수정
+* 오픈소스 메뉴의 검색창 버그 수정
+* SPDX 문서의 버그 수정
+
+
+# [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
+## UI 2.0 릴리즈
+- UI 프레임워크를 타임리프로 변경
+- 더 직관적인 사용자 인터페이스로 개선
+- UX 시나리오 업데이트
+- UI 2.0에 대한 자세한 정보는 [FOSSLight](https://fosslight.org/)에서 확인할 수 있습니다.
+
+## 라이트 릴리즈 (Thanks to@hjcdg1)
+- FOSSLight 시스템을 위한 라이트 웹 릴리즈
+- 개인 사용자가 셀프 체크를 수행할 수 있도록 설계
+- 간단한 UI와 모바일 호환 가능
+
+## API v2 릴리즈 (Thanks to@cobaltblu27)
+- FOSSLight 시스템을 위한 API v2 릴리즈
+- RESTful API 아키텍처로 전환
+- 응답 일관성 개선
+
+
 # [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
 ### New
 * oss report API 들에 'sheetNames' parameter가 추가
