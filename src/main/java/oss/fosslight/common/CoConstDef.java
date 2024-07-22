@@ -576,6 +576,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_INVATED = "63";
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED = "64";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED = "815";
+	public static final String CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED = "818";
 
 	/** changed USER Info */
 	public static final String CD_MAIL_TYPE_CHANGED_USER_INFO = "816";

@@ -6,6 +6,17 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+# [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
+### Changed
+* Fix wrong column name in fosslight_create.sql
+* Bug fix in API V2
+  - Change 3rd party search API return value type
+  - Fix the bug that source code analysis result was uploaded to BIN tab
+* Bug fix in email format
+* Bug fix in review report
+* Bug fix in search bar in Opensource menu
+* Bug fix in SPDX document 
+
 # [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
 ### New
 * UI 2.0 release 

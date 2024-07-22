@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static oss.fosslight.common.CoConstDef.CD_LICENSE_RESTRICTION;
 
@@ -85,6 +86,7 @@ public final class PdfUtil extends CoTopComponent {
         List<LicenseMaster> licenseReview = new ArrayList<>();
         List<Vulnerability> vulnerabilityReview = new ArrayList<>();
         Map<String,LicenseMaster> licenseMasterMap = new HashMap<>();
+        Map<String,Vulnerability> vulnerabilityMap = new HashMap<>();
         Map<String,OssMaster> ossMasterMap = new HashMap<>();
         String type = "";
 
@@ -151,18 +153,22 @@ public final class PdfUtil extends CoTopComponent {
                             vulnerability.setVersion(oss.getOssVersion());
                             vulnerability.setCvssScore(prjOssMaster.getCvssScore());
                             vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
-                            vulnerabilityReview.add(vulnerability);
+                            vulnerabilityMap.put(oss.getOssName().toUpperCase() + "_" + oss.getOssVersion().toUpperCase(), vulnerability);
                         }
                     }
                 }
+                List<String> licenseList = Arrays.asList(projectIdentification.getLicenseName().split(","));
+                licenseList = licenseList.stream().distinct().collect(Collectors.toList());
 
-                LicenseMaster license = CoCodeManager.LICENSE_INFO_UPPER.get(projectIdentification.getLicenseName().toUpperCase());
-                if(license != null) {
-                    if (!isEmpty(avoidNull(license.getRestrictionStr())) || (!isEmpty(avoidNull(license.getDescription())) && !license.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS))) {
-                        if(!isEmpty(avoidNull(license.getShortIdentifier()))) {
-                            license.setLicenseName(license.getShortIdentifier());
+                for(String license : licenseList) {
+                    LicenseMaster lm = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
+                    if(lm != null) {
+                        if (!isEmpty(avoidNull(lm.getRestrictionStr())) || (!isEmpty(avoidNull(lm.getDescription())) && !lm.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS))) {
+                            if(!isEmpty(avoidNull(lm.getShortIdentifier()))) {
+                                lm.setLicenseName(lm.getShortIdentifier());
+                            }
+                            licenseMasterMap.put(lm.getLicenseName(), lm);
                         }
-                        licenseMasterMap.put(license.getLicenseName(), license);
                     }
                 }
             }
@@ -176,6 +182,10 @@ public final class PdfUtil extends CoTopComponent {
             licenseReview.add(licenseMaster);
         }
 
+        for(Vulnerability vulnerability : vulnerabilityMap.values()){
+            vulnerabilityReview.add(vulnerability);
+        }
+
         if(ossReview.size() > 0) {
             for(OssMaster om : ossReview) {
                 om.setSummaryDescription(CommonFunction.lineReplaceToBR(om.getSummaryDescription()));
@@ -185,7 +195,7 @@ public final class PdfUtil extends CoTopComponent {
         if(licenseReview.size() > 0) {
             for(LicenseMaster lm : licenseReview) {
                 lm.setDescription(CommonFunction.lineReplaceToBR(lm.getDescription()));
-                lm.setRestriction(CommonFunction.lineReplaceToBR(lm.getRestriction()));
+                lm.setRestrictionStr(CommonFunction.lineReplaceToBR(lm.getRestrictionStr()));
             }
         }
 

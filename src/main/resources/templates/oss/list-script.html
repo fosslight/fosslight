@@ -88,50 +88,46 @@
         		var textarea = ["copyrights", "summaryDescription"];
                 
         		var optionSelectedFlag = false;
-                if (typeof localStorage.ossSearchConditions !== "undefined") {
+                if ("Y" != linkFlag &&  typeof localStorage.ossSearchConditions !== "undefined") {
                 	var localStorageSearchConditions = JSON.parse(localStorage.ossSearchConditions);
                 	
-                	if (Date.now() > localStorageSearchConditions.expire) {
-                		localStorage.removeItem("ossSearchConditions");
-                	} else {
-                		Object.keys(localStorageSearchConditions).forEach(function(key) {
-                			if (input.includes(key)) {
-                				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
-                				if ("ossName" != key && "" != localStorageSearchConditions[key]) {
-                					optionSelectedFlag = true;
-                				}
-                				if ("cStartDate" == key) {
-                					cStartDate = localStorageSearchConditions[key];
-                				} else if ("cEndDate" == key) {
-                					cEndDate = localStorageSearchConditions[key];
-                				} else if ("mStartDate" == key) {
-                					mStartDate = localStorageSearchConditions[key];
-                				} else if ("mEndDate" == key) {
-                					mEndDate = localStorageSearchConditions[key];
-                				}
-                			} else if (checkbox.includes(key)) {
-                				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
-                				if ("Y" == localStorageSearchConditions[key]) $("#" + key).prop("checked", true);
-                				if ("ossNameAllSearchFlag" != key && "" != localStorageSearchConditions[key]) optionSelectedFlag = true;
-                			} else if (singleSelect.includes(key)) {
-                				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
-                				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
-                			} else if (multiSelect.includes(key)) {
-                				var ossType = localStorageSearchConditions[key];
-                				if ("" != ossType) {
-                					optionSelectedFlag = true;
-                					ossType = ossType.split("");
-                					$("select[name='"+key+"']").val(ossType).trigger('change');
-                				} else {
-                					$("select[name='"+key+"']").val(ossType).trigger('change');
-                					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
-                				}
-                			} else if (textarea.includes(key)) {
-                				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
-                				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
-                			}
-                		});
-                	}
+                	Object.keys(localStorageSearchConditions).forEach(function(key) {
+            			if (input.includes(key)) {
+            				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+            				if ("ossName" != key && "" != localStorageSearchConditions[key]) {
+            					optionSelectedFlag = true;
+            				}
+            				if ("cStartDate" == key) {
+            					cStartDate = localStorageSearchConditions[key];
+            				} else if ("cEndDate" == key) {
+            					cEndDate = localStorageSearchConditions[key];
+            				} else if ("mStartDate" == key) {
+            					mStartDate = localStorageSearchConditions[key];
+            				} else if ("mEndDate" == key) {
+            					mEndDate = localStorageSearchConditions[key];
+            				}
+            			} else if (checkbox.includes(key)) {
+            				$("input[name='"+key+"']").val(localStorageSearchConditions[key]);
+            				if ("Y" == localStorageSearchConditions[key]) $("#" + key).prop("checked", true);
+            				if ("ossNameAllSearchFlag" != key && "" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+            			} else if (singleSelect.includes(key)) {
+            				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+            				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+            			} else if (multiSelect.includes(key)) {
+            				var ossType = localStorageSearchConditions[key];
+            				if ("" != ossType) {
+            					optionSelectedFlag = true;
+            					ossType = ossType.split("");
+            					$("select[name='"+key+"']").val(ossType).trigger('change');
+            				} else {
+            					$("select[name='"+key+"']").val(ossType).trigger('change');
+            					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
+            				}
+            			} else if (textarea.includes(key)) {
+            				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+            				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+            			}
+            		});
                 } else {
                 	for (var i in input) {
         				if ("ossName" != input[i]) {
@@ -223,6 +219,8 @@
                 $('#search').on('click', function (e) {
                     e.preventDefault();
 
+                    $("input[name=ossName]").autocomplete("close");
+                    
                     const searchOSSName = $("input[type=text][name=ossName]").val();
                     $("input[type=text][name=ossName]").val(searchOSSName.trim());
 
@@ -236,7 +234,6 @@
                     postData.ignoreSearchFlag = "N";
                     
                     var localStorageData = oss_lst_fn.serializeObjectHelper();
-                    localStorageData.expire = Date.now() + 300000;
                     localStorage.setItem("ossSearchConditions", JSON.stringify(localStorageData));
                     
                     optionSelectedFlag = false;
@@ -710,27 +707,31 @@
                         updateGridRowCount('list', 'pager');
                         
                         // grid complete 후 oss name auto complete 처리
-                        commonAjax.getOssTags().success(function (data, status, headers, config) {
-                            if (data != null) {
-                                data.forEach(function (obj) {
-                                    if (obj != null) {
-                                        autoComplete.ossTags.push(obj.ossName);
-                                    }
-                                })
-                            }
-                        });
-                        
-                        $('input[name="ossName"]').autocomplete({
-                        	source : autoComplete.ossTags,
-                        	select : function (event, ui) {
-                        		$(this).val(ui.item.value);
-                        	},
-                        	focus : function(event, ui) {return false;},
-                        	minLength : 1,
-                        	autoFocus : false,
-                        	disable : false,
-                        	close : function(event) {}
-                        });
+                        if (autoComplete.ossTags.length == 0) {
+                        	commonAjax.getOssTags().success(function (data, status, headers, config) {
+                                if (data != null) {
+                                    data.forEach(function (obj) {
+                                        if (obj != null) {
+                                            autoComplete.ossTags.push(obj.ossName);
+                                        }
+                                    })
+                                }
+                            });
+                            
+                            $('input[name="ossName"]').autocomplete({
+                            	source : autoComplete.ossTags,
+                            	select : function (event, ui) {
+                            		$(this).val(ui.item.value);
+                            	},
+                            	focus : function(event, ui) {return false;},
+                            	minLength : 1,
+                            	autoFocus : false,
+                            	disable : false,
+                            	close : function(event) {
+                            		$(".search-field").val("");
+                            	}
+                            });
+                        }
                     },
                     loadComplete: function (result) {
                         totalRow = result.records;
@@ -869,6 +870,10 @@
                             })
                         }
 
+                        if ("Y" == linkFlag) {
+                        	$('span.groupBtns').trigger('click');
+                        }
+                        
                         adjustPageGridSize();
                     },
                 });

@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -21,14 +22,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
+import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
+import javax.mail.util.ByteArrayDataSource;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -47,6 +52,7 @@ import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.util.DateUtil;
+import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.PdfUtil;
 import oss.fosslight.util.StringUtil;
 
@@ -78,7 +84,9 @@ public class CoMailManager extends CoTopComponent {
 
 	/** The conn pw. */
 	private static String connPw;
-		
+	
+	private static final Pattern imgRegExp  = Pattern.compile( "<img[^>]+src\\s*=\\s*['\"]([^'\"]+)['\"][^>]*>" );
+	
 	/**
 	 * Instantiates a new co mail manager.
 	 */
@@ -751,6 +759,7 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED:
     		case CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED:
+			case CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED:
     			// Set creator to sender and cc the other Admin users
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
@@ -1467,7 +1476,7 @@ public class CoMailManager extends CoTopComponent {
 				_s += ossInfo.getOssName();
 				// Admin에게만 발송되는 oss 관련 메일의 경우 바로가기 link 형식으로 발송
 				if (isMailBodySubject || isMailBodySubjectFlag
-						&& (
+						|| (
 								CoConstDef.CD_MAIL_TYPE_OSS_REGIST.equals(bean.getMsgType()) 
 								|| CoConstDef.CD_MAIL_TYPE_OSS_REGIST_NEWVERSION.equals(bean.getMsgType())
 								|| CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType())
@@ -3474,10 +3483,19 @@ public class CoMailManager extends CoTopComponent {
 			helper.setCc(coMail.getCcIds() != null ? coMail.getCcIds() : new String[]{});
 			helper.setBcc(coMail.getBccIds() != null ? coMail.getBccIds() : new String[]{});
 			helper.setSubject(coMail.getEmlTitle());
-			helper.setText(coMail.getEmlMessage(), true);
+			
+			// emlMessage base64 to cid
+            Map<String, String> inlineImage = new HashMap<String, String>();
+			helper.setText(conversionBase64ToContentId(coMail.getEmlMessage(), inlineImage), true);
 
+			for (String key : inlineImage.keySet()) {
+				byte[] imageBytes = javax.xml.bind.DatatypeConverter.parseBase64Binary(inlineImage.get(key));
+				helper.addInline(key, new ByteArrayDataSource(imageBytes, "image/png"));
+			}
+			
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONF.equals(coMail.getMsgType())
-					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(coMail.getMsgType())){
+					|| CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_CONFIRMED_ONLY.equals(coMail.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_BIN_PROJECT_IDENTIFICATION_CONF.equals(coMail.getMsgType())){
 				try {
 					Map<String, Object> fileInfo = PdfUtil.getInstance().getPdfFilePath(coMail.getParamPrjId());
 					String fileName = (String) fileInfo.get("fileName");
@@ -3488,6 +3506,25 @@ public class CoMailManager extends CoTopComponent {
 				}catch(Exception e){
 					// Don't Exist Pdf
 					log.debug(e.getMessage(), e);
+				}
+			}
+
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
+				if(ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()).equals("SUCCESS")){
+					String analysisResultListPath = CommonFunction.emptyCheckProperty("autoanalysis.output.path", "");
+					if(!isEmpty(analysisResultListPath)){
+						analysisResultListPath += "/" + coMail.getParamPrjId();
+
+						File file = FileUtil.getAutoAnalysisFile("LOG", analysisResultListPath);
+						DataSource dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
+						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+
+						analysisResultListPath += "/result";
+						file = FileUtil.getAutoAnalysisFile("XLSX", analysisResultListPath);
+						dataSource = new FileDataSource(analysisResultListPath + "/" + file.getName());
+						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
+
+					}
 				}
 			}
 
@@ -3505,6 +3542,29 @@ public class CoMailManager extends CoTopComponent {
 		}		
 	}
 
+	private String conversionBase64ToContentId(String emlMessage, Map<String, String> inlineImage) throws MessagingException {
+		String conversionEmlMessage = emlMessage;
+		final Matcher matcher = imgRegExp.matcher(conversionEmlMessage);
+		int i = 0;
+		
+		while (matcher.find()) {
+			String src = matcher.group();
+			if (conversionEmlMessage.indexOf( src ) != -1) {
+				String srcToken = "src=\"";
+				int x = src.indexOf( srcToken );
+		        int y = src.indexOf( "\"", x + srcToken.length());
+		        String srcText = src.substring(x + srcToken.length(), y);
+		        String cid = "image" + i;
+		        String newSrc = src.replace(srcText, "cid:" + cid);
+		        inlineImage.put(cid, srcText.split("[,]")[1]);
+		        conversionEmlMessage = conversionEmlMessage.replace(src, newSrc);
+		        i++;
+			}
+		}
+		
+		return conversionEmlMessage;
+	}
+	
 	public void sendErrorMail(CoMail bean) {
 		boolean isProd = "REAL".equals(avoidNull(CommonFunction.getProperty("server.mode")));
 		if (isProd) {

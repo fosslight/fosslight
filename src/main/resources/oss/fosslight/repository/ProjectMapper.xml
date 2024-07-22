@@ -1450,17 +1450,6 @@
 		  FROM T2_USERS T1
 			   LEFT JOIN (SELECT * FROM T2_CODE_DTL S WHERE S.CD_NO = '200' AND S.USE_YN = 'Y') T2 ON T1.DIVISION = T2.CD_DTL_NO
 		 WHERE T1.USE_YN = 'Y'
-		<if test="!@oss.fosslight.util.StringUtil@equals('ADMIN', creator)">
-			AND (
-				T1.CREATOR = #{creator} 
-					OR EXISTS (
-					SELECT A1.PRJ_ID 
-					  FROM PROJECT_WATCHER A1 
-					 <!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{creator} -->
-					 WHERE A1.PRJ_ID = T1.PRJ_ID AND (A1.USER_ID = #{creator} OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{creator}) ))
-				)
-			)
-		</if>
 	</select>
 	
 	<select id="getProjectModelNameList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">

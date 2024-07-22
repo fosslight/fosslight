@@ -155,4 +155,6 @@ public interface OssService extends HistoryConfig{
 	void deleteOssAnalysis(String prjId);
 
 	void setVdiffInfoForSentMail(String ossName, CoMail mailBean);
+
+	void setOssAnalysisStatus(String prjId);
 }

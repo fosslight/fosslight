@@ -6,6 +6,18 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+
+# [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
+* fosslight_create.sql에서 잘못된 column 수정
+* API V2의 버그 수정
+  - 3rd party search API 반환 값 유형 변경
+  - 소스 코드 분석 결과가 BIN 탭에 업로드되는 버그 수정
+* 이메일 형식의 버그 수정
+* 검토 보고서의 버그 수정
+* 오픈소스 메뉴의 검색창 버그 수정
+* SPDX 문서의 버그 수정
+
+
 # [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
 ### New
 * UI 2.0 릴리즈
@@ -23,6 +35,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   - FOSSLight 시스템용 API v2가 출시되었습니다.
   - RESTful API 아키텍처로 전환되었습니다.
   - 응답 일관성이 개선되었습니다.
+
 
 # [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
 ### New

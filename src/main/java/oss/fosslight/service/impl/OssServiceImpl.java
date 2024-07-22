@@ -3058,10 +3058,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			prjInfo.setPrjId(prjId);
 
 			// script가 success일때 status를 progress로 변경함.
-			OssMaster ossBean = new OssMaster();
-			ossBean.setPrjId(prjId);
-			ossBean.setCreator(loginUserName());
-			ossMapper.setOssAnalysisStatus(ossBean);
+			setOssAnalysisStatus(prjId);
 
 			prjInfo = projectMapper.getOssAnalysisData(prjInfo);
 
@@ -4178,4 +4175,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public void deleteOssAnalysis(String prjId) {
 		ossMapper.deleteOssAnalysis(prjId);
 	}
+
+	@Override
+	public void setOssAnalysisStatus(String prjId) {
+		OssMaster ossBean = new OssMaster();
+		ossBean.setPrjId(prjId);
+		ossBean.setCreator(loginUserName());
+		ossMapper.setOssAnalysisStatus(ossBean);
+	}
 }
+

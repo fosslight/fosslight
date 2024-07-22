@@ -52,44 +52,40 @@ $(document).ready(function () {
 	if (typeof localStorage.partnerSearchConditions !== "undefined") {
 		var localStorageSearchConditions = JSON.parse(localStorage.partnerSearchConditions);
 		
-		if (Date.now() > localStorageSearchConditions.expire) {
-    		localStorage.removeItem("partnerSearchConditions");
-    	} else {
-    		Object.keys(localStorageSearchConditions).forEach(function(key) {
-    			if (input.includes(key)) {
-    				if ("publicYn" == key) {
-    					var publicYn = localStorageSearchConditions[key];
-    					if ("" == publicYn || "N" == publicYn) $("#checkbox3").prop("checked", true);
-    				} else {
-    					var searchValue = localStorageSearchConditions[key];
-    					if ("partnerName" != key && "" != searchValue) optionSelectedFlag = true;
-    					
-    					$("input[name='"+key+"']").val(searchValue);
-        				if ("createdDate1" == key) {
-        					startDate = localStorageSearchConditions[key];
-        				} else if ("createdDate2" == key) {
-        					endDate = localStorageSearchConditions[key];
-        				}
+		Object.keys(localStorageSearchConditions).forEach(function(key) {
+			if (input.includes(key)) {
+				if ("publicYn" == key) {
+					var publicYn = localStorageSearchConditions[key];
+					if ("" == publicYn || "N" == publicYn) $("#checkbox3").prop("checked", true);
+				} else {
+					var searchValue = localStorageSearchConditions[key];
+					if ("partnerName" != key && "" != searchValue) optionSelectedFlag = true;
+					
+					$("input[name='"+key+"']").val(searchValue);
+    				if ("createdDate1" == key) {
+    					startDate = localStorageSearchConditions[key];
+    				} else if ("createdDate2" == key) {
+    					endDate = localStorageSearchConditions[key];
     				}
-    			} else if (singleSelect.includes(key)) {
-    				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
-    				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
-    			} else if (multiSelect.includes(key)) {
-    				var statuses = localStorageSearchConditions[key];
-    				if ("" != statuses) {
-    					optionSelectedFlag = true;
-    					statuses = statuses.split(",");
-    					$("select[name='"+key+"']").val(statuses).trigger('change');
-    				} else {
-    					$("select[name='"+key+"']").val(statuses).trigger('change');
-    					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
-    				}
-    			} else if (textarea.includes(key)) {
-    				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
-    				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
-    			}
-    		});
-    	}
+				}
+			} else if (singleSelect.includes(key)) {
+				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+				$("select[name='"+key+"']").val(localStorageSearchConditions[key]).trigger('change');
+			} else if (multiSelect.includes(key)) {
+				var statuses = localStorageSearchConditions[key];
+				if ("" != statuses) {
+					optionSelectedFlag = true;
+					statuses = statuses.split(",");
+					$("select[name='"+key+"']").val(statuses).trigger('change');
+				} else {
+					$("select[name='"+key+"']").val(statuses).trigger('change');
+					$("select[name='"+key+"']").next().find(".select2-selection__rendered").find("span").remove();
+				}
+			} else if (textarea.includes(key)) {
+				if ("" != localStorageSearchConditions[key]) optionSelectedFlag = true;
+				$("textarea[name='"+key+"']").val(localStorageSearchConditions[key]);
+			}
+		});
 	} else {
 		for (var i in input) {
 			if ("partnerName" != input[i] && "publicYn" != input[i]) {
@@ -143,8 +139,7 @@ $(document).ready(function () {
 		var postData = fn.setGridParam();
 		
 		var localStorageData = fn.setGridParam();
-		localStorageData.expire = Date.now() + 300000;
-        localStorage.setItem("partnerSearchConditions", JSON.stringify(localStorageData));
+		localStorage.setItem("partnerSearchConditions", JSON.stringify(localStorageData));
 		
         optionSelectedFlag = false;
         Object.keys(localStorageData).forEach(function(key) {

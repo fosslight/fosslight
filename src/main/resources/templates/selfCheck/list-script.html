@@ -64,27 +64,24 @@ var evt = {
         if (typeof localStorage.selfCheckSearchConditions !== "undefined") {
         	var localStorageSearchConditions = JSON.parse(localStorage.selfCheckSearchConditions);
         	
-        	if (Date.now() > localStorageSearchConditions.expire) {
-        		localStorage.removeItem("selfCheckSearchConditions");
-        	} else {
-        		Object.keys(localStorageSearchConditions).forEach(function(key) {
-        			if (input.includes(key)) {
-        				var searchValue = localStorageSearchConditions[key];
-        				$("input[name='"+key+"']").val(searchValue);
-        				
-        				if ("prjName" != key && "publicYn" != key && "" != searchValue) optionSelectedFlag = true;
-        				if ("schStartDate" == key) {
+        	Object.keys(localStorageSearchConditions).forEach(function(key) {
+    			if (input.includes(key)) {
+    				if ("publicYn" == key) {
+    					var publicYn = localStorageSearchConditions[key];
+    					$("#checkbox3").prop("checked", false);
+    					if ("" == publicYn || "N" == publicYn) $("#checkbox3").prop("checked", true);
+    				} else {
+    					var searchValue = localStorageSearchConditions[key];
+    					if ("prjName" != key && "" != searchValue) optionSelectedFlag = true;
+    					$("input[name='"+key+"']").val(searchValue);
+    					if ("schStartDate" == key) {
         					startDate = localStorageSearchConditions[key];
         				} else if ("schEndDate" == key) {
         					endDate = localStorageSearchConditions[key];
-        				} else if ("publicYn" == key) {
-        					if ("" == localStorageSearchConditions[key] || "N" == localStorageSearchConditions[key]) {
-        						$("#checkbox3").prop("checked", true);
-        					}
         				}
-        			}
-        		});
-        	}
+    				}
+    			}
+    		});
 		} else {
 			for (var i in input) {
 				if ("prjName" != input[i] && "publicYn" != input[i]) {
@@ -137,8 +134,7 @@ var evt = {
 			} else {
 				localStorageData.publicYn = 'Y';
 			}
-			localStorageData.expire = Date.now() + 300000;
-            localStorage.setItem("selfCheckSearchConditions", JSON.stringify(localStorageData));
+			localStorage.setItem("selfCheckSearchConditions", JSON.stringify(localStorageData));
 			
             optionSelectedFlag = false;
             Object.keys(localStorageData).forEach(function(key) {
