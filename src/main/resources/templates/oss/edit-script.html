@@ -873,6 +873,33 @@
 			}
 		}
 		
+		// init 후 oss name auto complete 처리
+        if (autoComplete.ossTags.length == 0) {
+        	commonAjax.getOssTags().success(function (data, status, headers, config) {
+                if (data != null) {
+                    data.forEach(function (obj) {
+                        if (obj != null) {
+                            autoComplete.ossTags.push(obj.ossName);
+                        }
+                    })
+                }
+            });
+            
+            $('input[name="ossName"]').autocomplete({
+            	source : autoComplete.ossTags,
+            	select : function (event, ui) {
+            		$(this).val(ui.item.value);
+            	},
+            	focus : function(event, ui) {return false;},
+            	minLength : 1,
+            	autoFocus : false,
+            	disable : false,
+            	close : function(event) {
+            		$(".search-field").val("");
+            	}
+            });
+        }
+		
 		// 라이센스 그리드
         var _licenseChoice = $('#_licenseChoice');
         _licenseChoice.jqGrid({

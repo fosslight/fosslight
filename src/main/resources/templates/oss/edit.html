@@ -55,7 +55,7 @@
 													<i class="fas fa-info-circle fa-lg ml-1 ossI icon-blue" title="detail Info" style="cursor: pointer;" th:onclick="|fn.showOssViewPage(this)|"></i>
 													<button th:if="${detail?.ossId != null}" type="button" class="btn btn-outline-lg-red btn-sm width-5rem px-1 mb-1 float-right" id="rename" th:text="Rename"></button>
 													<div class="input-group">
-														<input class="form-control autoComOss" name="ossName" th:value="${detail?.ossName}" type="text" th:style="${detail?.ossId != null} ? 'border-right: 0px solid #fff;' : ''"/>
+														<input class="form-control" name="ossName" th:value="${detail?.ossName}" type="text" th:style="${detail?.ossId != null} ? 'border-right: 0px solid #fff;' : ''"/>
 														<div th:if="${detail?.ossId != null}" class="input-group-append">
                                                     		<span class="input-group-text pr-3" style="padding-left: 2.2rem; background-color: #fff; border-left: 0px solid #fff;">
                                                     			<input type="checkbox" class="form-check-input" id="deactivateFlag" value="N">
