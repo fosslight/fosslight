@@ -51,9 +51,9 @@
            		 	</if>
                 	)
 				</if> -->
-<!-- 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+	 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 					AND t1.PARTNER_ID = #{partnerId}
-				</if> -->
+				</if>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 					AND t4.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
 				</if>
@@ -220,9 +220,9 @@
            		</if>
         	)
 		</if> -->
-<!-- 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
+	 	<if test="!@oss.fosslight.util.StringUtil@isEmpty(partnerId)">
 		   AND A.PARTNER_ID = #{partnerId}
-		</if> -->
+		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 		   AND A.OSS_NAME LIKE CONCAT('%',#{ossName},'%')
 		</if>
@@ -1419,7 +1419,12 @@
 	<update id="updateComponentsOssId" parameterType="oss.fosslight.domain.PartnerMaster">
 		UPDATE 
 			OSS_COMPONENTS A1
-  		  LEFT OUTER JOIN OSS_NICKNAME A2 ON A1.OSS_NAME = A2.OSS_NICKNAME
+  		  LEFT OUTER JOIN (
+  		  		SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+  		  		FROM OSS_NICKNAME NICK
+  		  		INNER JOIN OSS_COMMON OC
+  		  		ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+  		  ) A2 ON A1.OSS_NAME = A2.OSS_NICKNAME
   		  LEFT OUTER JOIN OSS_MASTER A3 ON (A1.OSS_NAME = A3.OSS_NAME OR A2.OSS_NAME = A3.OSS_NAME) AND IFNULL(A1.OSS_VERSION, '') = IFNULL(A3.OSS_VERSION, '')
 		SET A1.OSS_ID = A3.OSS_ID, A1.OSS_NAME = IFNULL(A3.OSS_NAME, A1.OSS_NAME)
 		WHERE 
@@ -1817,7 +1822,7 @@
                                          , SUB2.OSS_NICKNAME AS OSS_NAME 
                                          , SUB1.OSS_VERSION
                                       FROM OSS_MASTER SUB1 
-                                     INNER JOIN OSS_NICKNAME SUB2 ON SUB1.OSS_NAME = SUB2.OSS_NAME 
+                                     INNER JOIN OSS_NICKNAME SUB2 ON SUB1.OSS_COMMON_ID = SUB2.OSS_COMMON_ID 
                                      WHERE SUB1.OSS_ID = #{ossId}) B ON A.OSS_NAME = B.OSS_NAME AND IFNULL(B.OSS_VERSION, '') = IFNULL(A.OSS_VERSION, '') 
 		                WHERE T1.PARTNER_ID = A.REFERENCE_ID 
 		                  AND A.REFERENCE_DIV IN ( '20' ) 

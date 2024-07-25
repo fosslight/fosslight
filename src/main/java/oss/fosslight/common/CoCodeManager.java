@@ -112,7 +112,11 @@ public class CoCodeManager extends CoTopComponent {
     }
     
 	public void refreshOssInfo () {
-    	loadOssInfo();
+		OSS_INFO_BY_ID.clear();
+		OSS_INFO_UPPER.clear();
+		OSS_INFO_UPPER_NAMES.clear();
+		
+		loadOssInfo();
     }
     
 	private void loadOssInfo() {

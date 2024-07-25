@@ -31,18 +31,18 @@
 					</otherwise>
 				 </choose>
 				OR 
-					UPPER(T1.LICENSE_NAME) IN (select  UPPER(LICENSE_NAME)
-															from LICENSE_NICKNAME
-									                        where
-									                        <choose>
-																<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
-																	 UPPER(LICENSE_NICKNAME) = UPPER(CONCAT(#{licenseName}))
-																</when>
-																<otherwise>
-																	UPPER(LICENSE_NICKNAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
-																</otherwise>
-															</choose>
-															)
+					T1.LICENSE_ID IN (SELECT LICENSE_ID
+										FROM LICENSE_NICKNAME
+									    WHERE
+									<choose>
+										<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
+											UPPER(LICENSE_NICKNAME) = UPPER(CONCAT(#{licenseName}))
+										</when>
+										<otherwise>
+											UPPER(LICENSE_NICKNAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
+										</otherwise>
+									</choose>
+					)
 				OR 
 					<choose>
 						<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
@@ -149,7 +149,7 @@
 					</otherwise>
 				 </choose>
 				
-				OR UPPER(T1.LICENSE_NAME) IN (select  UPPER(LICENSE_NAME)
+				OR T1.LICENSE_ID IN (SELECT LICENSE_ID
 							from LICENSE_NICKNAME
 	                        where
 	                        <choose>
@@ -333,6 +333,7 @@
 			, T1.MODIFIER
 			, T1.MODIFIED_DATE
 			, T1.RESTRICTION
+			, T1.DISCLOSING_SRC
 		FROM 
 			LICENSE_MASTER T1
 		WHERE T1.USE_YN = 'Y'
@@ -341,12 +342,12 @@
 	
 	<select id="selectLicenseNicknameList" parameterType="oss.fosslight.domain.LicenseMaster" resultType="oss.fosslight.domain.LicenseMaster">
 		SELECT
-			LICENSE_NAME
+			LICENSE_ID
 			, LICENSE_NICKNAME
 		FROM
 			LICENSE_NICKNAME
 		WHERE
-			LICENSE_NAME = #{licenseName}
+			LICENSE_ID = #{licenseId}
 	</select>
 	
 	<select id="getLicenseInfoInit" resultType="oss.fosslight.domain.LicenseMaster">
@@ -385,8 +386,9 @@
 				, T1.DESCRIPTION
 				, T1.LICENSE_TEXT
 				, T1.ATTRIBUTION 
-				, (SELECT GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') FROM LICENSE_NICKNAME T2 WHERE T1.LICENSE_NAME = T2.LICENSE_NAME ) AS LICENSE_NICKNAME_STR
+				, (SELECT GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') FROM LICENSE_NICKNAME T2 WHERE T1.LICENSE_ID = T2.LICENSE_ID ) AS LICENSE_NICKNAME_STR
 				, T1.RESTRICTION
+				, T1.DISCLOSING_SRC
 			FROM LICENSE_MASTER T1
 			WHERE T1.USE_YN = 'Y'
 	</select>
@@ -427,7 +429,8 @@
 				, T1.LICENSE_TEXT
 				, T1.ATTRIBUTION 
 				, T1.RESTRICTION
-			FROM LICENSE_MASTER T1 INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+				, T1.DISCLOSING_SRC
+			FROM LICENSE_MASTER T1 INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_ID = T2.LICENSE_ID
 			WHERE T1.USE_YN = 'Y'
 	</select>
 	
@@ -435,7 +438,7 @@
 		SELECT T1.LICENSE_NAME, T1.LICENSE_ID FROM LICENSE_MASTER T1
 		WHERE T1.USE_YN = 'Y' AND T1.LICENSE_TYPE = 'NA'
 		UNION ALL
-		SELECT T2.LICENSE_NICKNAME AS LICENSE_NAME, T1.LICENSE_ID FROM LICENSE_MASTER T1 INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		SELECT T2.LICENSE_NICKNAME AS LICENSE_NAME, T1.LICENSE_ID FROM LICENSE_MASTER T1 INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_ID = T2.LICENSE_ID
 		WHERE T1.USE_YN = 'Y' AND T1.LICENSE_TYPE = 'NA'
     </select>
     
@@ -468,11 +471,11 @@
 	/* checkExistsLicense license duplication check */
 		SELECT * 
 		FROM LICENSE_MASTER T1
-		LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_ID = T2.LICENSE_ID
 		WHERE
 			USE_YN = 'Y'
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseId)">
-			AND LICENSE_ID <![CDATA[<>]]> #{licenseId}
+			AND T1.LICENSE_ID <![CDATA[<>]]> #{licenseId}
 			</if>
 		    AND (
 				UPPER(T1.LICENSE_NAME) = UPPER(#{licenseName}) 
@@ -490,7 +493,7 @@
 	</update>
 	
 	<delete id="deleteLicenseNickname" parameterType="oss.fosslight.domain.LicenseMaster">
-		DELETE FROM LICENSE_NICKNAME WHERE LICENSE_NAME=#{licenseName}
+		DELETE FROM LICENSE_NICKNAME WHERE LICENSE_ID=#{licenseId}
 	</delete>
 	
 	 <select id="existNetworkServerLicense" parameterType="String" resultType="String">
@@ -558,6 +561,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(restriction)">
 			, RESTRICTION
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
+			, DISCLOSING_SRC
+			</if>
 		)
 		VALUES
 		(
@@ -580,6 +586,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(restriction)">
 			, #{restriction}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
+			, #{disclosingSrc}
+			</if>
 		)
 	</insert>
 	
@@ -587,12 +596,12 @@
 		INSERT
 		INTO LICENSE_NICKNAME
 		(
-			LICENSE_NAME
+			LICENSE_ID
 			, LICENSE_NICKNAME
 		)
 		VALUES
 		(
-			#{licenseName}
+			#{licenseId}
 			, #{licenseNickname}
 		)
 	</insert>
@@ -620,7 +629,13 @@
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@isEmpty(restriction)">
 		, RESTRICTION					  = ''
-		</if>  
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
+		, DISCLOSING_SRC				  = #{disclosingSrc}
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
+		, DISCLOSING_SRC				  = NULL
+		</if>
 	WHERE LICENSE_ID = #{licenseId}
 	</update>
 	
@@ -667,7 +682,7 @@
 		SELECT 
 			T2.LICENSE_NICKNAME
 		FROM LICENSE_MASTER T1
-		INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		INNER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_ID = T2.LICENSE_ID
 		WHERE T1.USE_YN = 'Y'
 	</select>
 	
@@ -688,7 +703,7 @@
 			, GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') AS LICENSE_NICKNAME_STR
 			, T1.RESTRICTION
 		FROM LICENSE_MASTER T1
-		LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_ID = T2.LICENSE_ID
 		WHERE T1.USE_YN = 'Y' 
 			AND (T1.LICENSE_NAME = #{licenseName} OR T2.LICENSE_NICKNAME = #{licenseName} OR T1.SHORT_IDENTIFIER = #{licenseName})
 		LIMIT 1
@@ -711,7 +726,7 @@
 			, GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') AS LICENSE_NICKNAME_STR
 			, T1.RESTRICTION
 		FROM LICENSE_MASTER T1
-		LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_NAME = T2.LICENSE_NAME
+		LEFT OUTER JOIN LICENSE_NICKNAME T2 ON T1.LICENSE_ID = T2.LICENSE_ID
 		WHERE T1.USE_YN = 'Y' 
 			T1.LICENSE_ID = #{licenseId}
 	</select>
@@ -748,4 +763,13 @@
 	<delete id="deleteLicenseWebPages" parameterType="oss.fosslight.domain.LicenseMaster">
 		DELETE FROM LICENSE_WEBPAGE WHERE LICENSE_ID = #{licenseId}
 	</delete>
+	
+	<select id="getLicenseInfoByRestriction" parameterType="string" resultType="oss.fosslight.domain.LicenseMaster">
+		SELECT
+			LICENSE_NAME, SHORT_IDENTIFIER, RESTRICTION
+		FROM
+			LICENSE_MASTER
+		WHERE
+			RESTRICTION LIKE CONCAT('%', #{restriction}, '%')
+	</select>
 </mapper>

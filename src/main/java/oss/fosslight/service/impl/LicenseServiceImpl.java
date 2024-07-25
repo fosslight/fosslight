@@ -595,7 +595,6 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 
 		if(!isNew) {
 			beforeBean = getLicenseMasterOne(licenseMaster);
-			System.out.println("beforeBean = " + beforeBean);
 		}
 
 		// webpages이 n건일때 0번째 값은 oss Master로 저장.
@@ -734,3 +733,4 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		return resMap;
 	}
 }
+

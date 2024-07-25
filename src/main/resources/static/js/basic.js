@@ -4079,3 +4079,20 @@ function optimizeGridSizeAdjustmentMultiPage() {
         }
     }
 }
+
+function draftUserComments(param) {
+	var comments = "";
+	$.ajax({
+		url : "/comment/getDraftUserComment",
+		type : 'POST',
+		data : param,
+		dataType : 'json',
+		cache : false,
+		async : false,
+		success : function(data){
+			comments = data.resultData;
+		},
+		error : fn.onError
+	});
+	return comments;
+}

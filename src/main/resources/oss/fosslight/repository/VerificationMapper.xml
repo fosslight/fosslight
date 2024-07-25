@@ -506,7 +506,7 @@
 	<select id="checkOssNickName2" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.OssComponents">
 		SELECT T2.OSS_ID, T2.OSS_NAME, T1.OSS_NICKNAME 
 		FROM OSS_NICKNAME T1 
-		INNER JOIN OSS_MASTER T2 ON T1.OSS_NAME = T2.OSS_NAME AND T2.USE_YN = 'Y'
+		INNER JOIN OSS_MASTER T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.USE_YN = 'Y'
 		WHERE T1.OSS_NICKNAME = #{ossName}
 		AND IFNULL(T2.OSS_VERSION, '') = IFNULL(#{ossVersion}, '')
 		ORDER BY T2.OSS_ID DESC

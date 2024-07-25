@@ -413,6 +413,7 @@ public class CoConstDef {
 	public static final String CD_DTL_COMMENT_LICENSE_USER = "31";
 	public static final String CD_DTL_COMMENT_OSS = "40";
 	public static final String CD_DTL_COMMENT_OSS_USER = "41";
+	public static final String CD_DTL_COMMENT_OSS_COMMON = "42";
 	public static final String CD_DTL_COMMENT_SECURITY_HIS = "60";
 	public static final String CD_DTL_COMMENT_SECURITY_USER = "61";
 	
@@ -714,6 +715,9 @@ public class CoConstDef {
 	public static final String CD_LICENSE_RESTRICTION							= "226";
 	public static final String CD_LICENSE_NETWORK_RESTRICTION					= "2";
 	
+	/** Source Code Disclosure Scope 코드 **/
+	public static final String CD_SOURCE_CODE_DISCLOSURE_SCOPE					= "230";
+	
 	/** 사용자별 Default Tab Menu 코드 */
 	public static final String CD_DEFAULT_TAB 									= "701";
 	
@@ -781,6 +785,7 @@ public class CoConstDef {
 	public static final String CD_SUPPLEMENT_NOTICE_HELP_URL					= "102";
 	
 	public static final String CD_CHECK_OSS_NAME_URL							= "903";
+	public static final String CD_CHECK_OSS_DOWNLOADLOCAION_PURL				= "913";
 	
 	// check LicenseText Server Info
 	public static final String CD_CHECK_LICENSETEXT_SERVER_INFO					= "904";

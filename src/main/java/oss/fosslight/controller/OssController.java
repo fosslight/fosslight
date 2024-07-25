@@ -300,6 +300,7 @@ public class OssController extends CoTopComponent{
 		model.addAttribute("list", map);
 		model.addAttribute("detail", ossMaster);
 		model.addAttribute("ossId", ossMaster.getOssId());
+		model.addAttribute("ossCommonId", ossMaster.getOssCommonId());
 		
 		// 참조 프로젝트 목록 조회
 		boolean projectListFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
@@ -900,11 +901,13 @@ public class OssController extends CoTopComponent{
 		
 		T2CoValidationResult vr = validator.validateObject(ossMaster);
 		
+		String purl = ossService.getPurlByDownloadLocation(ossMaster);
+		
 		if (!vr.isDiff()) {
-			return makeJsonResponseHeader(true, null, null, null, vr.getDiffMessageMap());
+			return makeJsonResponseHeader(true, null, purl, null, vr.getDiffMessageMap());
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(true, null, purl);
 	}
 	
 	@PostMapping(value=OSS.SAVE_SESSION_OSS_INFO)
@@ -1617,7 +1620,7 @@ public class OssController extends CoTopComponent{
 			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
 					.collect(Collectors.toList()));
 		} */
-
+		
 		return makeJsonResponseHeader(resMap);
 	}
 	
@@ -1837,7 +1840,11 @@ public class OssController extends CoTopComponent{
 		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
 		for (OssAnalysis oa : analysisResultData) {
 			if (oa.getTitle().contains("최신 등록 정보")) {
-				oa.setOssId(ossService.getOssInfo(null, oa.getOssName(), false).getOssId());
+				OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
+				if (bean != null) {
+					oa.setOssId(bean.getOssId());
+					oa.setOssCommonId(bean.getOssCommonId());
+				}
 			}
 		}
 		

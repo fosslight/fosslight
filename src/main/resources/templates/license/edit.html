@@ -115,6 +115,21 @@
 									</div>
 									<div class="row">
 										<div class="col-lg-6">
+											<label th:text="#{msg.common.field.license.disclosure.scope}"></label>
+											<div class="form-group">
+												<select class="select2" id="disclosingSrc" name="disclosingSrc" style="width: 100%;">
+													<option value="" disabled th:selected="${detail?.disclosingSrc == null}"></option>
+													<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_SOURCE_CODE_DISCLOSURE_SCOPE'))}"
+														th:text="${code.cdDtlNm}" th:value="${code.cdDtlNm}"
+														th:selected="${detail?.disclosingSrc != null and #strings.equalsIgnoreCase(detail.disclosingSrc, code.cdDtlNo)}"
+														th:disabled="${isReadOnly}">
+													</option>
+												</select>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-lg-6">
 											<div class="form-group tag-form">
 												<label th:text="#{msg.common.field.nickname}"></label>
 												<div class="input-group" th:unless="${isReadOnly}">

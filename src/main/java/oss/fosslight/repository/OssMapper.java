@@ -55,7 +55,9 @@ public interface OssMapper {
 	
 	int checkExistOssConfPartner(OssMaster ossMaster);
 		
-	void insertOssMaster(OssMaster ossMaster);					
+	void insertOssMaster(OssMaster ossMaster);
+	
+	void insertCommonOssMaster(OssMaster ossMaster);
 	
 	int insertOssNickname(OssMaster ossMaster);					
 	
@@ -70,6 +72,8 @@ public interface OssMapper {
 	int mergeOssName(OssMaster ossMaster);
 	
 	List<OssMaster> selectOssList2(OssMaster ossMaster); 				
+	
+	int deleteOssCommonMaster(OssMaster ossMaster);
 	
 	int deleteOssMaster(OssMaster ossMaster);				
 	
@@ -141,7 +145,9 @@ public interface OssMapper {
 	
 	void updateNvdData(OssMaster ossMaster);
 	
-	void changeOssNameByDelete(OssMaster bean);
+	void changeOssNameByDelete(OssMaster ossMaster);
+	
+	void changeOssCommonNameByDelete(OssMaster ossMaster);
 	
 	void mergeOssNickname2(OssMaster nickMergeParam);
 	
@@ -254,4 +260,32 @@ public interface OssMapper {
 	List<String> checkExistsVendorProductMatchOss(OssMaster ossMaster);
 
 	int checkOssVersionDiff(String ossName);
+	
+	int existsOssIncludeCpe(OssMaster ossMaster);
+
+	void deleteOssIncludeCpe(OssMaster ossMaster);
+
+	int existsOssExcludeCpe(OssMaster ossMaster);
+
+	void deleteOssExcludeCpe(OssMaster ossMaster);
+
+	void insertOssIncludeCpe(OssMaster ossMaster);
+
+	void insertOssExcludeCpe(OssMaster ossMaster);
+
+	List<String> selectOssIncludeCpeList(OssMaster ossMaster);
+
+	List<String> selectOssExcludeCpeList(OssMaster ossMaster);
+
+	int existsOssVersionAlias(OssMaster ossMaster);
+
+	void deleteOssVersionAlias(OssMaster ossMaster);
+
+	void insertOssVersionAlias(OssMaster ossMaster);
+
+	List<String> selectOssVersionAliases(OssMaster ossMaster);
+
+	List<String> selectIncludeCpeMatchOssInfo();
+
+	List<OssMaster> getOssInfoByRestriction(@Param("restriction") String restriction);
 }

@@ -39,8 +39,8 @@ public final class Url {
 		public static final String PATH = "/main";
 		
 		/**  메인 페이지: {@value #INDEX}. */
-		public static final String INDEX_EMPTY			 = "/";
-		public static final String INDEX			 	   = "/index";
+		public static final String INDEX_EMPTY             = "/";
+		public static final String INDEX             	   = "/index";
 		public static final String INDEX_JSP			   = TILES + PATH + "/index";
 
 	}
@@ -144,6 +144,7 @@ public final class Url {
 		public static final String DIV_COMMENT_BY_ID =  PATH + "/getDivCommentByCommId";
 
 		public static final String DIV_USER_COMMENT = PATH + "/getDivUserComment";
+		public static final String DRAFT_USER_COMMENT = PATH + "/getDraftUserComment";
 	}
 	
 	public static final class PROCESSGUIDE {
@@ -680,6 +681,19 @@ public final class Url {
 		public static final String AUTOCOMPLETE_NM_AJAX = PATH + "/autoCompleteNmAjax";
 	}
 	
+	public static final class RESTRICTION {
+		public static final String PATH = "/system/restriction";
+		
+		public static final String PAGE = PATH + "";
+		public static final String PAGE_JSP = TILES_ROOT + PATH + "";
+		
+		public static final String LIST_AJAX = PATH + "/listAjax";
+		
+		public static final String SAVE_AJAX = PATH + "/saveAjax";
+		
+		public static final String CHECK_RESTRICTION = PATH + "/checkRestriction/{cdDtlNo}";
+	}
+	
 	public static final class HISTORY {
 		public static final String PATH = "/system/history";
 		
@@ -848,9 +862,9 @@ public final class Url {
 			
 			/** API DOWNLOAD LOCATION 조회 */
 			public static final String FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH	= "/downloadlocation_search";
-			public static final String FOSSLIGHT_API_AUTOANALYSIS_REGISTER				= "/autoAnalysis_register";
 			
-
+			public static final String FOSSLIGHT_API_AUTOANALYSIS_REGISTER		= "/autoAnalysis_register";
+			
 		/** LICENSE */
 			/** API License List 조회 */
 			public static final String FOSSLIGHT_API_LICENSE_SEARCH			= "/license_search";
@@ -1052,3 +1066,4 @@ public final class Url {
 	}
 
 }
+

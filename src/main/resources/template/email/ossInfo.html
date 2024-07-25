@@ -61,6 +61,18 @@
 										</td>
 									</tr>
 									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">OSS Version Alias</th>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.ossVersionAlias}"></td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Include Cpe</th>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.includeCpe}"></td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Exclude Cpe</th>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.excludeCpe}"></td>
+									</tr>
+									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name (Type)</th>
 										<td style="padding:5px;" th:text="${oss_basic_info?.licenseName} + ' (' + ${oss_basic_info?.licenseType} + ')'"></td>
 									</tr>
@@ -72,6 +84,10 @@
 												<span th:if="${iterStat.last == false}">, </span>
 											</span>
 										</td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Restriction</th>
+										<td style="padding:5px;" th:utext="${oss_basic_info?.restriction}"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Obligation</th>
