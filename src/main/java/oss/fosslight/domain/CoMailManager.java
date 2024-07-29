@@ -139,7 +139,7 @@ public class CoMailManager extends CoTopComponent {
     			return false;
     		}
 
-    		boolean isTest = !"REAL".equals(avoidNull(CommonFunction.getProperty("server.mode"))); 
+    		boolean isTest = !"REAL".equals(avoidNull(CommonFunction.getProperty("server.mode")));
 
     		Map<String, Object> convertDataMap = new HashMap<>();
     		convertDataMap.put("mailType", bean.getMsgType());
@@ -3680,8 +3680,17 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
-			// Email Send
-			mailSender.send(message);
+			boolean isTest = !"REAL".equals(avoidNull(CommonFunction.getProperty("server.mode")));
+			if (isTest && (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(coMail.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(coMail.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(coMail.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_OSS.equals(coMail.getMsgType())
+					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(coMail.getMsgType()))) {
+			} else {
+				// Email Send
+//				mailSender.send(message);
+			}
+			
 			// Email History Status Update
 			coMail.setSndStatus("C");	// 전송완료
 			mailManagerMapper.updateSendStatus(coMail);

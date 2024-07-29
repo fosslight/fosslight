@@ -102,7 +102,17 @@
 										, MAX(A2.CVSS_SCORE) AS CVSS_SCORE
 								 		, 'Y' AS VULN_YN
 									 FROM PRE_OSS_COMPONENTS A1
-						  			INNER JOIN OSS_MASTER A2 
+						  			INNER JOIN (
+						        		SELECT
+						    				OC.OSS_NAME,
+						    				OV.OSS_VERSION,
+						    				OV.CVSS_SCORE,
+						    				OV.CVE_ID,
+						    				OV.VULN_YN
+										FROM OSS_COMMON OC
+										LEFT OUTER JOIN OSS_VERSION OV
+										ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+						  			) A2 
 						    		   ON A1.OSS_NAME = A2.OSS_NAME
 						    		  AND A1.OSS_VERSION = A2.OSS_VERSION 
 						    		  AND A2.VULN_YN = 'Y'

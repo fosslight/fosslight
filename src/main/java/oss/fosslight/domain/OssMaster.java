@@ -1811,7 +1811,7 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setDownloadLocationGroup(String downloadLocationGroup) {
 		// OSS를 삭제하면서 다른 OSS로 rename시, "This oss has multiple version"이라 뜨며 에러 발생. / NullPointException
-		if (!isEmpty(downloadLocationGroup)){
+		if (!isEmpty(downloadLocationGroup)) {
 			this.downloadLocations = downloadLocationGroup.split(",");
 		}
 		

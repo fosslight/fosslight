@@ -428,7 +428,19 @@
             ,T1.MODIFIED_DATE
             ,(SELECT CONCAT(IF(SUB1.MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(SUB1.DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(SUB1.VERSION_DIFF_FLAG = 'N', '0', '1')) FROM OSS_MASTER_LICENSE_FLAG SUB1 WHERE T1.OSS_ID = SUB1.OSS_ID) AS OSS_TYPE
         FROM 
-            OSS_MASTER T1
+            (
+				SELECT
+					OV.OSS_ID,
+					OC.OSS_COMMON_ID,
+					OC.OSS_NAME,
+					OV.OSS_VERSION,
+					OC.HOMEPAGE,
+					OV.MODIFIER,
+					OV.MODIFIED_DATE
+				FROM OSS_COMMON OC
+				LEFT OUTER JOIN OSS_VERSION OV
+				ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+       	) T1
         WHERE T1.USE_YN = 'Y'
             AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
             AND T1.MODIFIED_DATE <![CDATA[<=]]> now()
@@ -451,7 +463,14 @@
         SELECT 
             COUNT(T1.OSS_ID)
         FROM 
-            OSS_MASTER T1
+            (
+				SELECT
+					OV.OSS_ID
+					OV.MODIFIED_DATE
+				FROM OSS_COMMON OC
+				LEFT OUTER JOIN OSS_VERSION OV
+				ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+       	) T1
         WHERE T1.USE_YN = 'Y'
             AND T1.MODIFIED_DATE <![CDATA[>=]]> DATE_FORMAT(date_add(now(), interval -7 day), '%Y%m%d') 
             AND T1.MODIFIED_DATE <![CDATA[<=]]> now()
@@ -699,7 +718,7 @@
 				) AS NEW_MAT_CNT
 				,(
 					SELECT COUNT(1) AS MAT_OSS_CNT
-					FROM OSS_MASTER OM
+					FROM OSS_VERSION OM
 					WHERE OM.VULN_YN = 'Y'
 					AND DATE_FORMAT(OM.VULN_DATE, '%Y-%m-%d') = DATE_FORMAT(NOW(), '%Y-%m-%d')
 				) AS OM_M_CNT
@@ -727,7 +746,7 @@
 				) AS NEW_MAT_CNT
 				,(
 					SELECT COUNT(1) AS MAT_OSS_CNT
-					FROM OSS_MASTER OM
+					FROM OSS_VERSION OM
 					WHERE OM.VULN_YN = 'Y'
 					AND DATE_FORMAT(OM.VULN_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 WEEK), '%Y-%m-%d')
 				) AS OM_M_CNT
@@ -755,7 +774,7 @@
 				) AS NEW_MAT_CNT
 				,(
 					SELECT COUNT(1) AS MAT_OSS_CNT
-					FROM OSS_MASTER OM
+					FROM OSS_VERSION OM
 					WHERE OM.VULN_YN = 'Y'
 					AND DATE_FORMAT(OM.VULN_DATE, '%Y-%m-%d') >= DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 MONTH), '%Y-%m-%d')
 				) AS OM_M_CNT
@@ -783,7 +802,7 @@
 				) AS NEW_MAT_CNT
 				,(
 					SELECT COUNT(1) AS MAT_OSS_CNT
-					FROM OSS_MASTER OM
+					FROM OSS_VERSION OM
 					WHERE OM.VULN_YN = 'Y'
 					AND DATE_FORMAT(OM.VULN_DATE, '%Y-%m-%d') BETWEEN DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 2 MONTH), '%Y-%m-%d') AND DATE_FORMAT(DATE_ADD(NOW(), INTERVAL - 1 MONTH), '%Y-%m-%d')
 				) AS OM_M_CNT
@@ -811,7 +830,7 @@
 				) AS NEW_MAT_CNT
 				,(
 					SELECT COUNT(1) AS MAT_OSS_CNT
-					FROM OSS_MASTER OM
+					FROM OSS_VERSION OM
 					WHERE OM.VULN_YN = 'Y'
 					AND DATE_FORMAT(OM.VULN_DATE, '%Y') = DATE_FORMAT(NOW(), '%Y')
 				) AS OM_M_CNT

@@ -460,7 +460,37 @@
     
     <select id="checkExistsUsedOss" parameterType="String" resultType="oss.fosslight.domain.OssMaster">
 		SELECT T1.* 
-		FROM OSS_MASTER T1 
+		FROM (
+			SELECT
+		    	OV.OSS_ID,
+		    	OC.OSS_COMMON_ID,
+		    	OC.OSS_NAME,
+		    	OV.OSS_VERSION,
+		    	OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+		    	OC.SUMMARY_DESCRIPTION,
+		    	OV.LICENSE_DIV,
+		    	OV.USE_YN,
+		    	OV.VULN_CPE_NM,
+		    	OV.CVSS_SCORE,
+		    	OV.CVE_ID,
+		    	OV.VULN_YN,
+		    	OV.VULN_RECHECK,
+		    	OV.VULN_DATE,
+		    	OV.LICENSE_TYPE,
+		    	OV.OBLIGATION_TYPE,
+		    	OV.COPYRIGHT,
+		    	OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OC.CREATOR,
+				OC.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OC.IN_CPE_MATCH_FLAG
+			FROM OSS_COMMON OC
+			LEFT OUTER JOIN OSS_VERSION OV
+		) T1 
 		WHERE 
 			USE_YN = 'Y' 
 			AND EXISTS(SELECT 1 FROM OSS_LICENSE_DECLARED T2 WHERE T1.OSS_ID = T2.OSS_ID AND T2.LICENSE_ID = #{licenseId})
@@ -534,7 +564,7 @@
     </delete>
     
     <select id="getOssListWithLicenseForTypeCheck" parameterType="String" resultType="String">
-		SELECT DISTINCT T1.OSS_ID FROM OSS_MASTER T1 INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
+		SELECT DISTINCT T1.OSS_ID FROM OSS_VERSION T1 INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		WHERE T1.USE_YN = 'Y'
 		AND T2.LICENSE_ID = #{licenseId}
     </select>
