@@ -3688,7 +3688,7 @@ public class CoMailManager extends CoTopComponent {
 					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(coMail.getMsgType()))) {
 			} else {
 				// Email Send
-//				mailSender.send(message);
+				mailSender.send(message);
 			}
 			
 			// Email History Status Update
