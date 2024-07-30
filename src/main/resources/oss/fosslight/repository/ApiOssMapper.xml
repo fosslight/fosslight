@@ -395,17 +395,16 @@
     <select id = "getDownloadLocationListByOssName" parameterType="String" resultType="String">
         SELECT DOWNLOAD_LOCATION
         FROM OSS_DOWNLOADLOCATION
-        WHERE OSS_COMMON_ID IN (SELECT OSS_COMMON_ID FROM OSS_COMMON where OSS_NAME = #{ossName} AND USE_YN = 'Y' AND DEACTIVATE_FLAG = 'N')
+        WHERE OSS_COMMON_ID IN (SELECT OSS_COMMON_ID FROM OSS_COMMON where OSS_NAME = #{ossName} AND USE_YN = 'Y' AND (DEACTIVATE_FLAG IS NULL OR DEACTIVATE_FLAG = 'N'))
         UNION
-        SELECT DOWNLOAD_LOCATION from OSS_COMMON where oss_name = #{ossName} AND USE_YN = 'Y' AND DEACTIVATE_FLAG = 'N'
+        SELECT DOWNLOAD_LOCATION  from OSS_COMMON where OSS_NAME = #{ossName} AND USE_YN = 'Y' AND (DEACTIVATE_FLAG IS NULL OR DEACTIVATE_FLAG = 'N')
 
     </select>
 
     <select id = "getHomepageListByOssName" parameterType="String" resultType="String">
         SELECT DISTINCT HOMEPAGE
         FROM OSS_COMMON
-        WHERE OSS_NAME = #{ossName} AND USE_YN = 'Y' AND DEACTIVATE_FLAG = 'N'
-
+        WHERE OSS_NAME = #{ossName} AND USE_YN = 'Y' AND (DEACTIVATE_FLAG IS NULL OR DEACTIVATE_FLAG = 'N')
     </select>
 
     <resultMap id="OssDtoMap" type="oss.fosslight.api.dto.OssDto">
