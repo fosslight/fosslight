@@ -1879,6 +1879,19 @@ public class OssController extends CoTopComponent{
 		if (detailData != null) {
 			for (OssAnalysis oa : detailData) {
 				if (ossService.checkOssTypeForAnalysisResult(oa)) oa.setOssType("V");
+				String key = (oa.getOssName() + "_" + avoidNull(oa.getOssVersion())).toUpperCase();
+				if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
+					OssMaster param = new OssMaster();
+					param.setOssId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssId());
+					param.setOssCommonId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssCommonId());
+					param.setOssName(oa.getOssName());
+					param.setOssVersion(oa.getOssVersion());
+					
+					OssMaster om = ossService.getOssMasterOne(param);
+					oa.setIncludeCpes(om.getIncludeCpes());
+					oa.setExcludeCpes(om.getExcludeCpes());
+					oa.setOssVersionAliases(om.getOssVersionAliases());
+				}
 			}
 			
 			result.put("isValid", true);

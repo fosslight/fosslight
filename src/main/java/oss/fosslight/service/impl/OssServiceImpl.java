@@ -275,7 +275,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	
 	@Override
 	public OssMaster getOssMasterOne(OssMaster ossMaster) {
-		
 		ossMaster = ossMapper.selectOssOne(ossMaster);
 		List<OssMaster> ossNicknameList = ossMapper.selectOssNicknameList(ossMaster);
 		List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(ossMaster);
@@ -4192,7 +4191,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				if (ossMaster.getOssVersionAliases() != null) {
 					ossVersionAlias.addAll(Arrays.asList(ossMaster.getOssVersionAliases()));
 				}
-				ossMaster.setOssVersionAliases(ossVersionAlias.toArray(new String[ossVersionAlias.size()]));
+				param.setOssVersionAliases(ossVersionAlias.toArray(new String[ossVersionAlias.size()]));
 				
 				
 				List<Map<String, Object>> includeVendorProductInfoList = null;
