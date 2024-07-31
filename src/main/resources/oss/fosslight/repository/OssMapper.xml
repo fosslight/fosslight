@@ -281,10 +281,12 @@
 			OC.OSS_NAME
 			, NICK.OSS_NICKNAME
 		FROM
-			OSS_NICKNAME NICK
-			INNER JOIN OSS_COMMON OC
+			OSS_COMMON OC
+			INNER JOIN OSS_NICKNAME NICK
 			ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
 		WHERE
+			OC.USE_YN = 'Y'
+		AND
 			OC.OSS_NAME = #{ossName}
 		ORDER BY OSS_NICKNAME
 	</select>
@@ -2430,7 +2432,8 @@
   			LEFT JOIN OSS_VERSION OV
   			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
 		) T1 WHERE T1.USE_YN = 'Y' AND T1.OSS_NAME = #{ossName}</select>
-	<select id="getBasicOssListByName" parameterType="String" resultType="oss.fosslight.domain.OssMaster">SELECT * FROM (
+	<select id="getBasicOssListByName" parameterType="String" resultType="oss.fosslight.domain.OssMaster">
+	SELECT * FROM (
 			SELECT
     			OV.OSS_ID,
     			OC.OSS_COMMON_ID,

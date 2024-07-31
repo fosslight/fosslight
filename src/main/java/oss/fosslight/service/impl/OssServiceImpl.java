@@ -2957,6 +2957,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					if (ossList != null && !ossList.isEmpty()) {
 						OssMaster bean = ossList.get(0);
 						bean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
+						ossMaster.setOssCommonId(bean.getOssCommonId());
 						ossMaster.setExistIncludeCpes(bean.getIncludeCpe() != null ? bean.getIncludeCpe().split(",") : null);
 						ossMaster.setExistExcludeCpes(bean.getExcludeCpe() != null ? bean.getExcludeCpe().split(",") : null);
 						ossMaster.setExistArrRestriction(bean.getRestriction() != null ? bean.getRestriction().split(",") : null);
