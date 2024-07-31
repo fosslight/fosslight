@@ -46,9 +46,9 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 		if (partnerCnt > 0) {
 			list = apiPartnerMapper.selectPartnerMaster(paramMap);
 		}
-		
-		result.put("content", list);
-		result.put("record", partnerCnt);
+
+		result.put("list", list);
+		result.put("totalCount", partnerCnt);
 		
 		return result;
 	}
