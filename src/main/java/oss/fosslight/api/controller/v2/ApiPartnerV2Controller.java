@@ -212,7 +212,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             paramMap.put("userId", userInfo.getUserId());
             paramMap.put("userRole", userRole(userInfo));
             paramMap.put("partnerIdList", partnerIds);
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
+            paramMap.put("readOnly", CoConstDef.FLAG_YES);
 
             boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
             if (searchFlag) {
