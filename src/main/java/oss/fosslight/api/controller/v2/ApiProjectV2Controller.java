@@ -617,7 +617,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> ossReportAll(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true) @PathVariable(name = "tab_name") String tabName,
+            @ApiParam(value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin") @PathVariable(name = "tab_name") String tabName,
             @ApiParam(value = "OSS Report", required = true) @RequestPart(required = true) MultipartFile ossReport,
             @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
