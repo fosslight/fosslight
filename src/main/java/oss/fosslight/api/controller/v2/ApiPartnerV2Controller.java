@@ -96,7 +96,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             paramMap.put("division", division);
             paramMap.put("status", status);
             paramMap.put("partnerIdList", partnerIdList);
-            paramMap.put("countPerPage", countPerPage);
+            paramMap.put("countPerPage", _countPerPage);
             paramMap.put("offset", _offset);
 
             resultMap = apiPartnerService.getPartnerMasterList(paramMap);
