@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.dto.Paging;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.api.service.RestResponseService;
@@ -68,7 +69,9 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
             @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", required = false, allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
             @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
-            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator) {
+            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
+            @ApiParam(value = "Count Per Page (max: 1000, default: 1000)", required = false) @RequestParam(required = false, defaultValue="1000") String countPerPage,
+            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -76,6 +79,13 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
         try {
+            var _page = Integer.parseInt(page);
+            var _countPerPage = Integer.parseInt(countPerPage);
+            if (_page < 0 || _countPerPage < 0 ) {
+                throw new NumberFormatException();
+            }
+            var _offset = (_page - 1) * _countPerPage;
+
             CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
             CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
 
@@ -86,10 +96,14 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             paramMap.put("division", division);
             paramMap.put("status", status);
             paramMap.put("partnerIdList", partnerIdList);
+            paramMap.put("countPerPage", countPerPage);
+            paramMap.put("offset", _offset);
 
             resultMap = apiPartnerService.getPartnerMasterList(paramMap);
 
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST,
                     CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
