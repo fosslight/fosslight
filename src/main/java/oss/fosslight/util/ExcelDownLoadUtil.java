@@ -1096,26 +1096,45 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		Cell networkServiceOnly = sheet.getRow(10).getCell(1);
 		networkServiceOnly.setCellType(CellType.STRING);
 		networkServiceOnly.setCellValue(project.getNetworkServerType());
-				
+
 		// About OSC Process
-		// Distribution Site
-		Cell distributionSite = sheet.getRow(13).getCell(1);
-		distributionSite.setCellType(CellType.STRING);
-		distributionSite.setCellValue(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, project.getDistributeTarget()));
-		// Notice Type		
-		String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, project.getNoticeType());
-		
-		if (!isEmpty(project.getNoticeTypeEtc())) {
-			noticeTypeStr += " (" +CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, project.getNoticeTypeEtc()) + ")";
+		String suffixUrl = CommonFunction.getProperty("fosslight.suffix");
+		if (!isEmpty(suffixUrl)) {
+			// Distribution Site
+			Cell distributionSite = sheet.getRow(13).getCell(1);
+			distributionSite.setCellType(CellType.STRING);
+			distributionSite.setCellValue(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, project.getDistributeTarget()));
+			// Notice Type
+			String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, project.getNoticeType());
+
+			if (!isEmpty(project.getNoticeTypeEtc())) {
+				noticeTypeStr += " (" +CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, project.getNoticeTypeEtc()) + ")";
+			}
+
+			Cell noticeType = sheet.getRow(14).getCell(1);
+			noticeType.setCellType(CellType.STRING);
+			noticeType.setCellValue(noticeTypeStr);
+			// Comment
+			Cell comment = sheet.getRow(15).getCell(1);
+			comment.setCellType(CellType.STRING);
+			comment.setCellValue(CommonFunction.html2text(project.getComment()));
+
+		} else {
+			// Notice Type
+			String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, project.getNoticeType());
+
+			if (!isEmpty(project.getNoticeTypeEtc())) {
+				noticeTypeStr += " (" +CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, project.getNoticeTypeEtc()) + ")";
+			}
+
+			Cell noticeType = sheet.getRow(13).getCell(1);
+			noticeType.setCellType(CellType.STRING);
+			noticeType.setCellValue(noticeTypeStr);
+			// Comment
+			Cell comment = sheet.getRow(14).getCell(1);
+			comment.setCellType(CellType.STRING);
+			comment.setCellValue(CommonFunction.html2text(project.getComment()));
 		}
-		
-		Cell noticeType = sheet.getRow(14).getCell(1);
-		noticeType.setCellType(CellType.STRING);
-		noticeType.setCellValue(noticeTypeStr);
-		// Comment
-		Cell comment = sheet.getRow(15).getCell(1);
-		comment.setCellType(CellType.STRING);
-		comment.setCellValue(CommonFunction.html2text(project.getComment()));
 	}
 
 	/**
