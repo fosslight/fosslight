@@ -3165,21 +3165,11 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		Map<String, Object> rtnMap = new HashMap<>();
 		
 		String errorMsg = (String) result.get("errorMessage");
-		
-		if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
-			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
-			return rtnMap;
-		}
-		
+
 		List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 		ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>());
 		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
-		
-		if (ossComponents.isEmpty()) {
-			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, sheetNamesEmptyFlag ? getMessage("api.upload.file.sheet.no.match", new String[]{sheetName + "*"}) : getMessage("api.upload.file.sheet.no.match", new String[]{sheetName}));
-			return rtnMap;
-		}
-		
+
 		if (!isEmpty(errorMsg)) {
 			rtnMap.put("errorMessage", errorMsg);
 		}
