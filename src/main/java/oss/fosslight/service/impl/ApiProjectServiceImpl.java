@@ -3161,7 +3161,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, 
-			String comment, String tabGubn, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
+			String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
 		Map<String, Object> rtnMap = new HashMap<>();
 		
 		String errorMsg = (String) result.get("errorMessage");
@@ -3199,7 +3199,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
 			
 			if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag)) || (loopFlag && sheetIdx > 0)) {
-				getIdentificationGridList(prjId, tabGubn.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
+				getIdentificationGridList(prjId, tabName.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
 			}
 			
 			ossComponentList.addAll(ossComponents);
@@ -3208,13 +3208,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			Project project = new Project();
 			project.setPrjId(prjId);
 			
-			if (tabGubn.equals("DEP")) {
+			if (tabName.equals("DEP")) {
 				project.setDepCsvFileId(registFileId); // set file id
 				projectService.registDepOss(ossComponentList, ossComponentsLicenseList, project);
-			} else if (tabGubn.equals("SRC")){
+			} else if (tabName.equals("SRC")){
 				project.setSrcCsvFileId(registFileId); // set file id
 				projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
-			} else if (tabGubn.equals("BIN")){
+			} else if (tabName.equals("BIN")){
 				project.setBinCsvFileId(registFileId); // set file id
 				projectService.registBinOss(ossComponentList, ossComponentsLicenseList, project);
 			}
@@ -3229,7 +3229,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 						CommentsHistory commentHisBean = new CommentsHistory();
 						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 						commentHisBean.setReferenceId(prjId);
-						commentHisBean.setExpansion1(tabGubn);
+						commentHisBean.setExpansion1(tabName);
 						commentHisBean.setContents(changedLicenseName);
 						commentHisBean.setLoginUserName(userId);
 						commentService.registComment(commentHisBean, false);
@@ -3243,7 +3243,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				CommentsHistory commentHisBean = new CommentsHistory();
 				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 				commentHisBean.setReferenceId(prjId);
-				commentHisBean.setExpansion1(tabGubn);
+				commentHisBean.setExpansion1(tabName);
 				commentHisBean.setContents(comment);
 				commentHisBean.setLoginUserName(userId);
 				commentService.registComment(commentHisBean, false);
