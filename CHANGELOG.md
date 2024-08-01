@@ -18,8 +18,8 @@
 - **Issue**: Recent FOSSLight scanner report file format, which includes TLSH and checksum data, cannot be uploaded to the BIN tab.
 - **Reason**: The `TLSH` and `CHECK_SUM` columns are not included in the `OSS_COMPONENTS` table.
 - **Workaround**: Manually add the following columns to the `OSS_COMPONENTS` table:
-  - `TLSH` text DEFAULT NULL
-  - `CHECK_SUM` text DEFAULT NULL
+  - \`TLSH\`text DEFAULT NULL
+  - \`CHECK_SUM\` text DEFAULT NULL
 - **Fixed Version**: This issue will be resolved in the official version 2.0.0. It is currently addressed in the `develop_osori` branch.(commit link in develop_osori : [de15493](https://github.com/fosslight/fosslight/commit/de15493ed7b670e35bcefbed243ce0ce041b28a8))
 ---
 
