@@ -2899,41 +2899,6 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 	}
 
-	@Override
-	public void registDepOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
-		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
-		if(ossComponent.size()==0){
-			Project projectSubStatus = new Project();
-			projectSubStatus.setPrjId(project.getPrjId());
-			
-			if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
-				projectSubStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
-			} else {
-				projectSubStatus.setIdentificationSubStatusDep("X");
-			}
-			
-			projectSubStatus.setModifier(projectSubStatus.getLoginUserName());
-			projectSubStatus.setReferenceDiv(refDiv);
-			projectMapper.updateProjectMaster(projectSubStatus);
-		}
-		
-		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
-		String refId = project.getReferenceId();
-		
-		updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense);
-
-		// 파일 등록
-		if(!isEmpty(project.getDepCsvFileId())){
-			projectMapper.updateFileId(project);
-			
-			if(project.getCsvFileSeq() != null) {
-				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
-					projectMapper.updateFileBySeq(project.getCsvFileSeq().get(i));
-				}
-			}
-		}
-	}
-
 	private void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense) {
 		// 컴포넌트 마스터 라이센스 지우기
 		ProjectIdentification prj = new ProjectIdentification();
@@ -3245,10 +3210,13 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			if (tabGubn.equals("DEP")) {
 				project.setDepCsvFileId(registFileId); // set file id
-				registDepOss(ossComponentList, ossComponentsLicenseList, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-			} else {
+				projectService.registDepOss(ossComponentList, ossComponentsLicenseList, project);
+			} else if (tabGubn.equals("SRC")){
 				project.setSrcCsvFileId(registFileId); // set file id
 				projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
+			} else if (tabGubn.equals("BIN")){
+				project.setBinCsvFileId(registFileId); // set file id
+				projectService.registBinOss(ossComponentList, ossComponentsLicenseList, project);
 			}
 			
 			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
