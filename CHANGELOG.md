@@ -15,12 +15,38 @@
 
 
 ## Known Issue
+
+### Issue1
 - **Issue**: Recent FOSSLight scanner report file format, which includes TLSH and checksum data, cannot be uploaded to the BIN tab.
 - **Reason**: The `TLSH` and `CHECK_SUM` columns are not included in the `OSS_COMPONENTS` table.
 - **Workaround**: Manually add the following columns to the `OSS_COMPONENTS` table:
   - \`TLSH\`text DEFAULT NULL
   - \`CHECK_SUM\` text DEFAULT NULL
-- **Fixed Version**: This issue will be resolved in the official version 2.0.0. It is currently addressed in the `develop_osori` branch.(commit link in develop_osori : [de15493](https://github.com/fosslight/fosslight/commit/de15493ed7b670e35bcefbed243ce0ce041b28a8))
+
+
+### Issue2
+- **Issue**: User custom column in list view doesn't work 
+- **Reason**: USER_COLUMNS table is not included in fosslight_create.sql
+- **Note**: The table is already included in the migration script 20240401085317_update_2.0.0-beta.sql
+- **Workaround**: Manually add the following  SQL script to fosslight_create.sql or create table in DB:
+```
+  CREATE TABLE `USER_COLUMNS` (
+  `COLUMNS` longtext DEFAULT NULL,
+  `LIST_TYPE` varchar(20) NOT NULL DEFAULT '',
+  `CREATED_DATE` datetime NOT NULL DEFAULT current_timestamp(),
+  `UPDATED_DATE` datetime NOT NULL DEFAULT current_timestamp(),
+  `USER_ID` varchar(45) NOT NULL DEFAULT '',
+  PRIMARY KEY (`LIST_TYPE`,`USER_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+
+
+### Fixed Version
+ Above issues will be resolved in the official version 2.0.0. 
+   - Bug fix for Issue1: [de15493](https://github.com/fosslight/fosslight/commit/de15493ed7b670e35bcefbed243ce0ce041b28a8)
+   - Bug fix for Issue2: [d8060a8](https://github.com/fosslight/fosslight/commit/d8060a8e6e8be1bf37b7cfac02de3c17b3362a61)
+
 ---
 
 ## v2.0.0.pre-release (05/07/2024)
