@@ -4796,14 +4796,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					purlString = "link:" + downloadLocation;
 				} else {
 					String[] splitDownloadLocation = downloadLocation.split("/");
+					boolean addFlag = false;
+					String namespace = "/";
+					
 					switch(urlSearchSeq) {
 						case 0: // github
 							purl = new PackageURL(StandardTypes.GITHUB, splitDownloadLocation[1], splitDownloadLocation[2], null, null, null);
 							break;
 						case 1: // npm
+							if (downloadLocation.contains("/package/@")) addFlag = true;
 							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[2], null, null, null);
 							break;
 						case 2: // npm
+							if (downloadLocation.contains("/@")) addFlag = true;
 							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[1], null, null, null);
 							break;
 						case 3: // pypi
@@ -4821,7 +4826,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 							purl = new PackageURL(StandardTypes.GEM, null, splitDownloadLocation[2], null, null, null);
 							break;
 						case 9: // go
-							purl = new PackageURL(StandardTypes.GOLANG, splitDownloadLocation[1], splitDownloadLocation[2], null, null, subPath);
+							int idx = 0;
+							for (String data : splitDownloadLocation) {
+								if (idx > 1) {
+									namespace += data + "/";
+								}
+								idx++;
+							}
+							namespace = namespace.substring(0, namespace.length()-1);
+							purl = new PackageURL(StandardTypes.GOLANG, splitDownloadLocation[1]);
+							
 							break;
 						case 11:
 							purl = new PackageURL("pub", null, splitDownloadLocation[2], null, null, null);
@@ -4831,7 +4845,18 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 					
 					if (purl != null) {
-						purlString = StringUtils.decodeURIComponent(purl.toString());
+						purlString = purl.toString();
+						if (urlSearchSeq == 9) {
+							purlString += namespace + subPath;
+						} else {
+							if (addFlag) {
+								if (urlSearchSeq == 1) {
+									purlString += "/" + splitDownloadLocation[3];
+								} else {
+									purlString += "/" + splitDownloadLocation[2];
+								}
+							}
+						}
 					}
 				}
 			}
