@@ -4737,7 +4737,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				downloadLocation = downloadLocation.split("://")[1];
 				if (downloadLocation.startsWith("www.")) {
-					downloadLocation = downloadLocation.substring(5, downloadLocation.length());
+					downloadLocation = downloadLocation.substring(4, downloadLocation.length());
 				}
 				if (downloadLocation.contains(";")) {
 					downloadLocation = downloadLocation.split(";")[0];

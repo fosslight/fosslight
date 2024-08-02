@@ -2868,7 +2868,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 
 	@Override
-	public Map<String, List<String>> nickNameValid(List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentLicenseList) {
+	public Map<String, List<String>> nickNameValid(String prjId, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentLicenseList) {
 		List<String> ossNickNameCheckResult = new ArrayList<>();
 		List<String> licenseNickNameCheckResult = new ArrayList<>();
 		Map<String, List<String>> result = new HashMap<String, List<String>>();
@@ -2876,12 +2876,29 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> ossCheckParam = new ArrayList<>();
 		List<String> licenseCheckParam = new ArrayList<>();
 		
+		List<ProjectIdentification> adminCheckList = projectMapper.selectAdminCheckList(prjId);
+		List<String> refComponentIdList = new ArrayList<>();
+		List<String> ossNameVersionList = new ArrayList<>();
+		
+		for (ProjectIdentification pi : adminCheckList) {
+			refComponentIdList.add(pi.getRefComponentId());
+			if (!pi.getOssName().isEmpty() && !pi.getOssName().equals("")) {
+				String ossName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(pi.getOssName().toUpperCase());
+				ossNameVersionList.add((ossName + "_" + avoidNull(pi.getOssVersion())).toUpperCase());
+			}
+		}
+		
 		for (ProjectIdentification bean : ossComponentList) {
 			String _ossName = avoidNull(bean.getOssName()).trim();
-			int isAdminCheck = projectMapper.selectAdminCheckCnt(bean);
 			
-			if (!isEmpty(_ossName) && !"-".equals(_ossName) && !ossCheckParam.contains(_ossName) && isAdminCheck < 1) {
-				ossCheckParam.add(_ossName);
+			if (!isEmpty(_ossName) && !"-".equals(_ossName)) {
+				boolean adminCheckFlag = false;
+				if (refComponentIdList.contains(bean.getComponentId()) || ossNameVersionList.contains((_ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase())) {
+					adminCheckFlag = true;
+				}
+				if (!ossCheckParam.contains(_ossName) && !adminCheckFlag) {
+					ossCheckParam.add(_ossName);
+				}
 			}
 			
 			if (CoConstDef.LICENSE_DIV_MULTI.equals(bean.getLicenseDiv())) {

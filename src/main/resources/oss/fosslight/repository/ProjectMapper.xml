@@ -5421,6 +5421,14 @@
 		   AND ADMIN_CHECK_YN = 'Y'
 	</select>
 	
+	<select id="selectAdminCheckList" parameterType="string" resultType="oss.fosslight.domain.ProjectIdentification">
+		SELECT OSS_NAME, OSS_VERSION, REF_COMPONENT_ID
+		  FROM OSS_COMPONENTS 
+		 WHERE REFERENCE_ID = #{prjId}
+		   AND REFERENCE_DIV = '13' 
+		   AND ADMIN_CHECK_YN = 'Y'
+	</select>
+	
 	<select id="selectPartnerRefPrjList" parameterType="oss.fosslight.domain.PartnerMaster" resultType="oss.fosslight.domain.Project">
 		SELECT PM.PRJ_ID
 			 , PM.PRJ_NAME
