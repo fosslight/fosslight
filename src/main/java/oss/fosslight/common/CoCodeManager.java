@@ -127,7 +127,7 @@ public class CoCodeManager extends CoTopComponent {
 			if (nickNameList != null) {
 				for (OssMaster bean : nickNameList) {
 					if (bean.getOssNickname() != null) {
-						nickNameMap.put(bean.getOssName(), bean.getOssNickname().split(","));
+						nickNameMap.put(bean.getOssCommonId(), bean.getOssNickname().split(","));
 					}
 				}
 			}
@@ -143,8 +143,8 @@ public class CoCodeManager extends CoTopComponent {
 					} else {
 						targetBean = bean;
 						
-						if (nickNameMap.containsKey(targetBean.getOssNameTemp())) {
-							targetBean.setOssNicknames(nickNameMap.get(targetBean.getOssNameTemp()));
+						if (nickNameMap.containsKey(targetBean.getOssCommonId())) {
+							targetBean.setOssNicknames(nickNameMap.get(targetBean.getOssCommonId()));
 						}
 					}
 					

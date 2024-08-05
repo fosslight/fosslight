@@ -897,7 +897,7 @@ function createValidMsgComplex(msgData) {
     
     //닉네임, 그리드데이터, 일반 인풋 Validation 체크
     $.each(msgData, function (key, value) {
-        if ("isValid" != key && "validMsg" != key) {
+        if ("isValid" != key && "validMsg" != key) {console.log("key", key);
             if (key.indexOf(".") > -1) {
                 var seqSuffix = key.split(".");
                 var targetId = seqSuffix[1] + "_" + seqSuffix[0];
@@ -935,6 +935,11 @@ function createValidMsgComplex(msgData) {
 				if ('noticeType' == key) {
 					$('.noticeTypeDiv').addClass("cus-is-invalid");
 					$('.noticeTypeDiv').focus().next("span.retxt,div.retxt").html(value).show();
+				}
+				
+				if ('disclosingSrc' == key) {
+					$('select[name=' + key + 'Select]').parent().addClass("cus-is-invalid");
+					$('select[name=' + key + 'Select]').parent().next("span.retxt,div.retxt").html(value).show();
 				}
 				
                 if ($('input[name=' + key + ']').length > 0) {

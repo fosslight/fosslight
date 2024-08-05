@@ -2126,6 +2126,11 @@ public class CoMailManager extends CoTopComponent {
 				isModified = makeRestrictionConversion(before, after, before.getRestriction(), after.getRestriction(), "license");
 			}
 			
+			if (before.getDisclosingSrc() != null || after.getDisclosingSrc() != null) {
+				isModified = checkEquals(before.getDisclosingSrc(), after.getDisclosingSrc(), isModified);
+				after.setDisclosingSrc(appendChangeStyleMultiLine(before.getDisclosingSrc(), after.getDisclosingSrc(), true));
+			}
+			
 			//데이터 변경 없을시
 			if (!isModified){
 				convertDataMap.replace("isModify", true);
@@ -3319,6 +3324,7 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 			bean.setRestriction(restrictionStr);
+			bean.setDisclosingSrc(CoCodeManager.getCodeString(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE, avoidNull((String) dataMap.get("DISCLOSING_SRC"))));
 			
 			bean.setCreator(avoidNull((String) dataMap.get("CREATOR")));
 			if (!isEmpty(bean.getCreator())) {
@@ -3680,12 +3686,11 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
-			boolean isTest = !"REAL".equals(avoidNull(CommonFunction.getProperty("server.mode")));
-			if (isTest && (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(coMail.getMsgType())
+			if (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(coMail.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(coMail.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(coMail.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_OSS.equals(coMail.getMsgType())
-					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(coMail.getMsgType()))) {
+					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(coMail.getMsgType())) {
 			} else {
 				// Email Send
 				mailSender.send(message);

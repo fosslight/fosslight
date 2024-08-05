@@ -24,6 +24,7 @@
 					<input name="licenseId" th:value="${detail?.licenseId}" type="hidden" />
 					<input name="comment" type="hidden" />
 					<input name="restriction" type="hidden" />
+					<input name="disclosingSrc" type="hidden" />
 
 					<div class="row">
 						<div class="col-md-1 editInfoAreaTop" th:style="${detail != null} ? 'display: none;'"></div>
@@ -115,17 +116,18 @@
 									</div>
 									<div class="row">
 										<div class="col-lg-6">
-											<label th:text="#{msg.common.field.license.disclosure.scope}"></label>
-											<div class="form-group">
-												<select class="select2" id="disclosingSrc" name="disclosingSrc" style="width: 100%;">
+											<label th:text="#{msg.common.field.license.disclosure.scope}"></label><span class="text-orange">*</span>
+											<div class="form-group mb-0">
+												<select class="select2" id="disclosingSrcSelect" name="disclosingSrcSelect" style="width: 100%;">
 													<option value="" disabled th:selected="${detail?.disclosingSrc == null}"></option>
 													<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_SOURCE_CODE_DISCLOSURE_SCOPE'))}"
-														th:text="${code.cdDtlNm}" th:value="${code.cdDtlNm}"
-														th:selected="${detail?.disclosingSrc != null and #strings.equalsIgnoreCase(detail.disclosingSrc, code.cdDtlNo)}"
+														th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"
+														th:selected="${detail?.disclosingSrc != null and #strings.equalsIgnoreCase(detail.disclosingSrcCdNo, code.cdDtlNo)}"
 														th:disabled="${isReadOnly}">
 													</option>
 												</select>
 											</div>
+											<span class="col-12 retxt text-danger text-sm"></span>
 										</div>
 									</div>
 									<div class="row">
