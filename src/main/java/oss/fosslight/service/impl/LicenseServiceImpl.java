@@ -192,6 +192,12 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			}
 		//}
 		
+		if (!isEmpty(licenseMaster.getDisclosingSrc())) {
+			String disclosingSrcStr = CoCodeManager.getCodeString(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE, licenseMaster.getDisclosingSrc());
+			licenseMaster.setDisclosingSrcCdNo(licenseMaster.getDisclosingSrc());
+			licenseMaster.setDisclosingSrc(disclosingSrcStr);
+		}
+			
 		licenseMaster.setLicenseNicknames(nickNames.toArray(new String[nickNames.size()]));
 		licenseMaster.setWebpages(webPage.toArray(new String[webPage.size()]));
 
