@@ -864,38 +864,7 @@
 	<select id="selectOssNameList" resultType="oss.fosslight.domain.OssMaster">
 	    /* selectOssNameList Auto complete */
 		SELECT T1.OSS_NAME 
-		FROM (
-			SELECT
-    			OV.OSS_ID,
-    			OC.OSS_COMMON_ID,
-    			OC.OSS_NAME,
-    			OV.OSS_VERSION,
-    			OC.HOMEPAGE,
-				OC.DOWNLOAD_LOCATION,
-    			OC.SUMMARY_DESCRIPTION,
-    			OV.LICENSE_DIV,
-    			OV.USE_YN,
-    			OV.VULN_CPE_NM,
-    			OV.CVSS_SCORE,
-    			OV.CVE_ID,
-    			OV.VULN_YN,
-    			OV.VULN_RECHECK,
-    			OV.VULN_DATE,
-    			OV.LICENSE_TYPE,
-    			OV.OBLIGATION_TYPE,
-    			OV.COPYRIGHT,
-    			OV.ATTRIBUTION,
-				OC.DEACTIVATE_FLAG,
-				OC.CREATOR,
-				OC.CREATED_DATE,
-				OV.MODIFIER,
-				OV.MODIFIED_DATE,
-				OV.RESTRICTION,
-				OC.IN_CPE_MATCH_FLAG
-  			FROM OSS_COMMON OC
-  			LEFT JOIN OSS_VERSION OV
-  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-		) T1 
+		FROM OSS_COMMON T1 
 		WHERE T1.USE_YN = 'Y' GROUP BY T1.OSS_NAME
 	</select>
 	<select id="selectOssOne" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
@@ -2644,7 +2613,7 @@
   			LEFT JOIN OSS_VERSION OV
   			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
 		) T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.USE_YN = 'Y'
-		WHERE T1.OSS_COMMON_ID = #{ossCommonId}
+		WHERE T1.OSS_NAME = #{ossName}
 	</select>
 	
 	<update id="updateLicenseTypeAndObligation" parameterType="oss.fosslight.domain.OssMaster">
@@ -2735,6 +2704,7 @@
 		  	) T1
 		 INNER JOIN OSS_NICKNAME T4 ON T1.OSS_COMMON_ID = T4.OSS_COMMON_ID
 		 WHERE T1.USE_YN = 'Y'
+		 GROUP BY T1.OSS_NAME, T4.OSS_NICKNAME
 	</select>
 	<select id="getOssAllNickNameList" resultType="oss.fosslight.domain.OssMaster">SELECT OSS_COMMON_ID, GROUP_CONCAT(OSS_NICKNAME) AS OSS_NICKNAME FROM OSS_NICKNAME GROUP BY OSS_COMMON_ID</select>
 	
