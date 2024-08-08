@@ -712,7 +712,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					ossMapper.deleteOssLicense(bean);
 					ossMapper.deleteOssDownloadLocation(bean);
 					ossMapper.deleteOssMaster(bean);
-					ossMapper.deleteOssCommonMaster(bean);
 					
 					mergeBean.setMergeOssId(bean.getNewOssId());
 
@@ -760,6 +759,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				ossMapper.mergeOssNickname2(nickMergeParam);
 			}
 		}
+		
+		ossMapper.deleteOssCommonMaster(deleteNickParam);
 		
 		CoCodeManager.getInstance().refreshOssInfo();
 
@@ -1243,34 +1244,31 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 		
 		String purlJsonString = ossMaster.getPurlJson();
-		Map<String, List<String>> purlMap = null;
+		Map<String, String> purlMap = null;
 		if (!isEmpty(purlJsonString)) {
-			Type collectionType = new TypeToken<Map<String, List<String>>>() {}.getType();
-			purlMap = (Map<String, List<String>>) fromJson(purlJsonString, collectionType);
+			Type collectionType = new TypeToken<Map<String, String>>() {}.getType();
+			purlMap = (Map<String, String>) fromJson(purlJsonString, collectionType);
 		}
 		
 		int idx = 0;
 		
 		String[] downloadLocations = ossMaster.getDownloadLocations();
 		
+		OssMaster master = new OssMaster();
+		
 		if (downloadLocations != null){
 			for (String url : downloadLocations){
 				if (!isEmpty(url)){ // 공백의 downloadLocation은 save하지 않음.
-					OssMaster master = new OssMaster();
 					master.setOssCommonId(ossMaster.getOssCommonId());
 					master.setDownloadLocation(url);
 					master.setOssDlIdx(++idx);
 					
 					String purlString = "";
 					if (purlMap != null) {
-						for (String key : purlMap.keySet()) {
-							if (url.equalsIgnoreCase(key)) {
-								List<String> purls = purlMap.get(key);
-								for (String purl : purls) {
-									purlString = purl;
-									break;
-								}
-							}
+						if (purlMap.containsKey(url)) {
+							purlString = purlMap.get(url);
+						} else {
+							purlString = generatePurlByDownloadLocation(master);
 						}
 					} else {
 						purlString = generatePurlByDownloadLocation(master);
@@ -4661,10 +4659,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		String[] includeCpes = ossMaster.getIncludeCpes();
 		
+		OssMaster master = new OssMaster();
 		if (includeCpes != null){
 			for (String includeCpe : includeCpes){
 				if (!isEmpty(includeCpe)){
-					OssMaster master = new OssMaster();
 					master.setOssCommonId(ossMaster.getOssCommonId());
 					master.setIncludeCpe(includeCpe);;
 					
@@ -4678,7 +4676,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if (excludeCpes != null){
 			for (String excludeCpe : excludeCpes){
 				if (!isEmpty(excludeCpe)){
-					OssMaster master = new OssMaster();
 					master.setOssCommonId(ossMaster.getOssCommonId());
 					master.setExcludeCpe(excludeCpe);;
 					
@@ -4740,13 +4737,13 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					downloadLocation = downloadLocation.substring(4, downloadLocation.length());
 				}
 				if (downloadLocation.contains(";")) {
-					downloadLocation = downloadLocation.split(";")[0];
+					downloadLocation = downloadLocation.split("[;]")[0];
 				}
 				// delete port number
 				if (downloadLocation.contains(":")) {
 					int colonIdx = downloadLocation.indexOf(":");
-					int slashIdx = downloadLocation.indexOf("/");
-					if (downloadLocation.substring(colonIdx+1, slashIdx).chars().allMatch(Character::isDigit)) {
+					int slashIdx = downloadLocation.indexOf("/", colonIdx);
+					if (slashIdx > -1 && slashIdx > colonIdx && downloadLocation.substring(colonIdx+1, slashIdx).chars().allMatch(Character::isDigit)) {
 						downloadLocation = downloadLocation.substring(0, colonIdx) + downloadLocation.substring(slashIdx, downloadLocation.length());
 					}
 				}
@@ -4766,7 +4763,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				if (downloadLocation.contains("#")) {
 					if (urlSearchSeq == 9) {
-						String[] splitDownloadLocation = downloadLocation.split("#");
+						String[] splitDownloadLocation = downloadLocation.split("[#]");
 						subPath = splitDownloadLocation[1];
 					}
 					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
@@ -4851,9 +4848,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						} else {
 							if (addFlag) {
 								if (urlSearchSeq == 1) {
-									purlString += "/" + splitDownloadLocation[3];
+									if (splitDownloadLocation.length > 3) purlString += "/" + splitDownloadLocation[3];
 								} else {
-									purlString += "/" + splitDownloadLocation[2];
+									if (splitDownloadLocation.length > 2) purlString += "/" + splitDownloadLocation[2];
 								}
 							}
 						}
