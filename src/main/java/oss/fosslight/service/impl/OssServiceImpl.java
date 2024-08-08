@@ -677,10 +677,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					historyBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
 					historyBean.setReferenceId(bean.getOssId());
 					historyBean.setContents("OSS 일괄 이관 처리에 의해 OSS Name이 변경되었습니다. <br/>" + "Before OSS Name : " + bean.getOssName() + "<br/>" + avoidNull(ossMaster.getComment()));
-					bean.setOssName(chagedOssName);
-					bean.setNewOssId(bean.getOssId()); // 삭제하지 않고 이름만 변경해서 재사용한다.
+//					bean.setOssName(chagedOssName);
+//					bean.setNewOssId(bean.getOssId()); // 삭제하지 않고 이름만 변경해서 재사용한다.
+					bean.setOssCommonId(chagedOssCommonId);
 					
-					ossMapper.changeOssNameByDelete(bean);
+//					ossMapper.changeOssNameByDelete(bean);
 					ossMapper.changeOssCommonNameByDelete(bean);
 					
 					// Version Flag Setting
@@ -710,7 +711,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					
 					ossMapper.deleteOssLicenseFlag(bean.getOssId());
 					ossMapper.deleteOssLicense(bean);
-					ossMapper.deleteOssDownloadLocation(bean);
 					ossMapper.deleteOssMaster(bean);
 					
 					mergeBean.setMergeOssId(bean.getNewOssId());
@@ -738,29 +738,54 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 		}
 		
-		OssMaster deleteNickParam = new OssMaster();
+		OssMaster deleteParam = new OssMaster();
 //		deleteNickParam.setOssName(beforOssName);
-		deleteNickParam.setOssCommonId(beforOssCommonId);
+		deleteParam.setOssCommonId(beforOssCommonId);
 		
-		ossMapper.deleteOssNickname(deleteNickParam);
+		ossMapper.deleteOssNickname(deleteParam);
 		
 		// nick name merge
 		// 일단 삭제된 oss name을 nickname으로 추가한다.
-		OssMaster nickMergeParam  = new OssMaster();
+		OssMaster mergeParam  = new OssMaster();
 //		nickMergeParam.setOssName(chagedOssName);
-		nickMergeParam.setOssCommonId(chagedOssCommonId);
-		nickMergeParam.setOssNickname(beforOssName);
-		ossMapper.mergeOssNickname2(nickMergeParam);
+		mergeParam.setOssCommonId(chagedOssCommonId);
+		mergeParam.setOssNickname(beforOssName);
+		ossMapper.mergeOssNickname2(mergeParam);
 		
 		if (beforeBean.getOssNicknames() != null) {
 			for (String nickName : beforeBean.getOssNicknames()) {
-				nickMergeParam.setOssNickname(nickName);
+				mergeParam.setOssNickname(nickName);
 				
-				ossMapper.mergeOssNickname2(nickMergeParam);
+				ossMapper.mergeOssNickname2(mergeParam);
 			}
 		}
 		
-		ossMapper.deleteOssCommonMaster(deleteNickParam);
+		// download location merge
+		if (beforeBean.getDownloadLocations() != null) {
+			List<String> mergeDownloadLocationList = Arrays.asList(beforeBean.getDownloadLocations());
+			int ossDlIdx = 1;
+			
+			List<OssMaster> afterBeanList = ossMapper.selectOssDownloadLocationList(mergeParam);
+			if (afterBeanList != null && !afterBeanList.isEmpty()) {
+				ossDlIdx += afterBeanList.size();
+				List<String> afterDownloadLocationList = afterBeanList.stream().map(e -> e.getDownloadLocation()).collect(Collectors.toList());
+				mergeDownloadLocationList.removeAll(afterDownloadLocationList);
+			}
+			
+			if (mergeDownloadLocationList != null && !mergeDownloadLocationList.isEmpty()) {
+				for (String mergeDownloadLocation : mergeDownloadLocationList) {
+					mergeParam.setDownloadLocation(mergeDownloadLocation);
+					String purl = generatePurlByDownloadLocation(mergeParam);
+					mergeParam.setPurl(purl);
+					mergeParam.setOssDlIdx(ossDlIdx);
+					ossMapper.insertOssDownloadLocation(mergeParam);
+					ossDlIdx++;
+				}
+			}
+		}
+		
+		ossMapper.deleteOssDownloadLocation(deleteParam);
+		ossMapper.deleteOssCommonMaster(deleteParam);
 		
 		CoCodeManager.getInstance().refreshOssInfo();
 
