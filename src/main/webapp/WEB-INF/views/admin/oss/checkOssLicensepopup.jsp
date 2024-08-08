@@ -300,7 +300,7 @@
 					<div align="left" style="padding-bottom: 20px;">
 						<b><spring:message code="msg.project.check.license" /></b>
 						<c:choose>
-							<c:when test="${ct:getCodeExpString(ct:getConstDef('CD_SYSTEM_SETTING'), ct:getConstDef('CD_EXTERNAL_SERVICE_USED_FLAG')) eq 'N'}">
+							<c:when test="${ct:getProperty('external.service.useflag') eq 'N'}">
 								</br>
 								<b style="color:blue"><spring:message code="external.service.disable" /></b>
 							</c:when>
