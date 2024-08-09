@@ -82,6 +82,10 @@ public interface OssService extends HistoryConfig{
 	
 	void registOssDownloadLocation(OssMaster ossMaster);
 	
+	void registOssVersionAlias(OssMaster ossMaster);
+	
+	void registCpeInfo(OssMaster ossMaster);
+	
 	int checkExistsOssByname(OssMaster bean);
 	
 	List<ProjectIdentification> checkOssName(List<ProjectIdentification> list);
@@ -156,5 +160,7 @@ public interface OssService extends HistoryConfig{
 
 	void setVdiffInfoForSentMail(String ossName, CoMail mailBean);
 
+	String getPurlByDownloadLocation(OssMaster ossMaster);
+	
 	void setOssAnalysisStatus(String prjId);
 }

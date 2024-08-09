@@ -4,6 +4,13 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="oss.fosslight.repository.ApiPartnerMapper">
+	<sql id="limitPage">
+		<if test="countPerPage != 0">
+			LIMIT
+			#{offset},
+			#{countPerPage}
+		</if>
+	</sql>
 	
 	<select id="selectPartnerMasterCount" parameterType="hashMap" resultType="int">
 		SELECT COUNT(*) FROM (
@@ -103,7 +110,7 @@
 					 , t2.USER_NAME
      	             , t1.REVIEWER
 					 , t3.CD_DTL_NM AS DIVISION
-					 , (SELECT (GROUP_CONCAT(DISTINCT PRJ_ID)) FROM PROJECT_PARTNER_MAP WHERE PARTNER_ID = t1.PARTNER_ID) AS PRJ_ID
+					 , (SELECT GROUP_CONCAT(DISTINCT PRJ_ID) FROM PROJECT_PARTNER_MAP WHERE PARTNER_ID = t1.PARTNER_ID) AS PRJ_ID
 				  FROM PARTNER_MASTER t1
 				  LEFT JOIN T2_USERS t2 ON t1.CREATOR = t2.USER_ID
 				  LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') t3 ON t1.DIVISION = t3.CD_DTL_NO
@@ -149,7 +156,7 @@
 		    </foreach>
 		</if>
 		ORDER BY RESULT.PARTNER_ID DESC
-		LIMIT 0, 1000
+		<include refid="limitPage"/>
 	</select>
 	
 	<select id="existPartnertCnt" parameterType="hashMap" resultType="int">

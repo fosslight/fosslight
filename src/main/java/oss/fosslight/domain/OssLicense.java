@@ -23,6 +23,7 @@ public class OssLicense extends ComBean implements Serializable {
 	private String licenseType;				//라이센스 타입
 	private String obligation;				
 	private String obligationChecks;			//Obligation Check 상태(고지, 소스공개, 체크)
+	private String restriction;
 	
 	public String getOssId() {
 		return ossId;
@@ -96,7 +97,10 @@ public class OssLicense extends ComBean implements Serializable {
 	public void setLicenseNameEx(String licenseNameEx) {
 		this.licenseNameEx = licenseNameEx;
 	}
-	
-	
-	
+	public String getRestriction() {
+		return restriction;
+	}
+	public void setRestriction(String restriction) {
+		this.restriction = restriction;
+	}
 }

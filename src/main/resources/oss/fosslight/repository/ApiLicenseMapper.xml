@@ -24,7 +24,7 @@
                     UPPER(T1.LICENSE_NAME) LIKE UPPER(CONCAT('%',REGEXP_REPLACE(#{licenseName}, '_', '\\\\_'),'%'))
                 </otherwise>
             </choose>
-            OR UPPER(T1.LICENSE_NAME) IN (select UPPER(LICENSE_NAME)
+            OR UPPER(T1.LICENSE_ID) IN (select UPPER(LICENSE_ID)
             from LICENSE_NICKNAME
             where
             <choose>
@@ -138,7 +138,7 @@
         IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER,
         T1.CREATED_DATE,
         T1.MODIFIED_DATE,
-        (SELECT GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR ', ') FROM LICENSE_NICKNAME T2 WHERE T1.LICENSE_NAME = T2.LICENSE_NAME ) AS LICENSE_NICKNAME,
+        (SELECT GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR ', ') FROM LICENSE_NICKNAME T2 WHERE T1.LICENSE_ID = T2.LICENSE_ID ) AS LICENSE_NICKNAME,
         T1.RESTRICTION
         FROM LICENSE_MASTER T1
         LEFT OUTER JOIN T2_CODE_DTL T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
@@ -256,11 +256,14 @@
 
     <select id="selectLicenseNicknameList" parameterType="String" resultType="String">
         SELECT
-        LICENSE_NICKNAME
+        T1.LICENSE_NICKNAME
         FROM
-        LICENSE_NICKNAME
+        LICENSE_NICKNAME T1
+        INNER JOIN
+        LICENSE_MASTER T2
+        ON T1.LICENSE_ID = T2.LICENSE_ID
         WHERE
-        LICENSE_NAME = #{licenseName}
+        T2.LICENSE_NAME = #{licenseName}
     </select>
     <select id="getLicenseAutocompleteCandidates" resultMap="LicenseDetailMap">
         SELECT LICENSE_NAME, SHORT_IDENTIFIER FROM LICENSE_MASTER;

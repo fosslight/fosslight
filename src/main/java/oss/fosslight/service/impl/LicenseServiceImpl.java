@@ -192,6 +192,12 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			}
 		//}
 		
+		if (!isEmpty(licenseMaster.getDisclosingSrc())) {
+			String disclosingSrcStr = CoCodeManager.getCodeString(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE, licenseMaster.getDisclosingSrc());
+			licenseMaster.setDisclosingSrcCdNo(licenseMaster.getDisclosingSrc());
+			licenseMaster.setDisclosingSrc(disclosingSrcStr);
+		}
+			
 		licenseMaster.setLicenseNicknames(nickNames.toArray(new String[nickNames.size()]));
 		licenseMaster.setWebpages(webPage.toArray(new String[webPage.size()]));
 
@@ -595,7 +601,6 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 
 		if(!isNew) {
 			beforeBean = getLicenseMasterOne(licenseMaster);
-			System.out.println("beforeBean = " + beforeBean);
 		}
 
 		// webpages이 n건일때 0번째 값은 oss Master로 저장.
@@ -734,3 +739,4 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		return resMap;
 	}
 }
+

@@ -148,6 +148,10 @@ public class LicenseMaster extends ComBean implements Serializable {
 	
 	private String defaultSearchFlag;
 	
+	private String disclosingSrc;
+	
+	private String disclosingSrcCdNo;
+	
 	/**
 	 * Instantiates a new license master.
 	 */
@@ -868,5 +872,20 @@ public class LicenseMaster extends ComBean implements Serializable {
 	public void setLicenseIds(String[] licenseIds) {
 		this.licenseIds = licenseIds;
 	}
-	
+
+	public String getDisclosingSrc() {
+		return disclosingSrc;
+	}
+
+	public void setDisclosingSrc(String disclosingSrc) {
+		this.disclosingSrc = disclosingSrc;
+	}
+
+	public String getDisclosingSrcCdNo() {
+		return disclosingSrcCdNo;
+	}
+
+	public void setDisclosingSrcCdNo(String disclosingSrcCdNo) {
+		this.disclosingSrcCdNo = disclosingSrcCdNo;
+	}
 }

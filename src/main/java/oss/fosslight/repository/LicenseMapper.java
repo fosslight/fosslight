@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssMaster;
@@ -70,4 +71,6 @@ public interface LicenseMapper {
 	Set<String> getLicenseNickNames();
 	LicenseMaster getLicenseInfoWithName(String licenseName);
 	LicenseMaster getLicenseInfoWithId(String licenseId);
+
+	List<LicenseMaster> getLicenseInfoByRestriction(@Param("restriction") String restriction);
 }

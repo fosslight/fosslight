@@ -341,6 +341,8 @@ public interface ProjectMapper {
 	
 	int selectAdminCheckCnt(ProjectIdentification projectIdentification);
 	
+	List<ProjectIdentification> selectAdminCheckList(@Param("prjId") String prjId);
+	
 	List<Project> selectPartnerRefPrjList(PartnerMaster partner);
 	
 	void updateFileId2(Project project);

@@ -160,6 +160,12 @@ public class CommentController extends CoTopComponent {
         return "fragments/comment-fragments :: userCommentPopupFragment";
     };
     
+    @PostMapping(value = COMMENT.DRAFT_USER_COMMENT)
+    public @ResponseBody ResponseEntity<Object> getDraftUserComment(CommentsHistory comHisBean, Model model) {
+    	String comment = commentService.getUserComment(comHisBean);
+        return makeJsonResponseHeader(true, "true", comment);
+    };
+    
     @PostMapping(value = COMMENT.EDIT_POPUP)
     public String editPopup(@ModelAttribute CommentsHistory commentsHistory, HttpServletRequest req, HttpServletResponse res, Model model) {
     	Map<String, Object> map = commentService.getCommnetInfo(commentsHistory.getCommId());

@@ -128,6 +128,12 @@ public class T2CoLicenseValidator extends T2CoValidator {
 	            	}
 	        	}
 			}
+			
+			// 4. DISCLOSING SRC
+			targetName = "DISCLOSING_SRC";
+			if (!errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
+				
+			}
 		}
 	}
 

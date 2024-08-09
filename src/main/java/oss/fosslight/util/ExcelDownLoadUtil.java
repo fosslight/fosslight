@@ -2907,7 +2907,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					rowIdx++;
 				}
 				
-				List<String> duplicateChecklist = new ArrayList<>();
+				List<String> duplicateCheckList = new ArrayList<>();
 				for (OssComponents oss : dependenciesDataList) {
 					String key = oss.getPackageUrl(); // (oss.getOssName() + "(" + oss.getOssVersion() + ")").toUpperCase();
 					if (relationshipsMap.containsKey(key)) {
@@ -2917,10 +2917,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							if (relationshipsMap.containsKey(dependency)) {
 								String relatedSpdxElement = (String) relationshipsMap.get(dependency);
 								String duplicateKey = spdxElementId + "|" + relatedSpdxElement;
-								if (duplicateChecklist.contains(duplicateKey)) {
+								if (duplicateCheckList.contains(duplicateKey)) {
 									continue;
 								} else {
-									duplicateChecklist.add(duplicateKey);
+									duplicateCheckList.add(duplicateKey);
 								}
 								
 								int cellIdx = 0;
@@ -5228,3 +5228,4 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return bom;
 	}
 }
+

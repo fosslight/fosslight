@@ -17,4 +17,6 @@ public interface ApiPartnerService {
 	boolean existLdapUserToEmail(String email);
 	boolean existsWatcherByEmail(String partnerId, String email);
 	void insertWatcher(Map<String, Object> paramMap);
+
+	public Map<String, Object> getExportJson (String partnerId);
 }

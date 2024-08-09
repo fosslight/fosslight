@@ -62,6 +62,10 @@ public class OssAnalysis extends ComBean implements Serializable {
 	private String useYn;
 	private String ossType;
 	private String ossId;
+	private String ossCommonId;
+	private String[] ossVersionAliases;
+	private String[] includeCpes;
+	private String[] excludeCpes;
 
 	public String getHomepage() {
 		return avoidNull(homepage);

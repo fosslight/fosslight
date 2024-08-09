@@ -85,6 +85,33 @@
 									</th:block>
                                 </td>
                             </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">OSS Version Alias</th>
+                                <td style="padding:5px;">
+                                    <div th:each="alias : ${before.ossVersionAliases}" th:utext="${alias}"></div>
+                                </td>
+                                <td style="padding:5px;">
+                                    <div th:each="alias : ${after.ossVersionAliases}" th:utext="${alias}"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Include Cpe</th>
+                                <td style="padding:5px;">
+                                    <div th:each="include : ${before.includeCpes}" th:utext="${include}"></div>
+                                </td>
+                                <td style="padding:5px;">
+                                    <div th:each="include : ${after.includeCpes}" th:utext="${include}"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th align="left" style="padding:5px;background:#f0f0f0;">Exclude Cpe</th>
+                                <td style="padding:5px;">
+                                    <div th:each="exclude : ${before.excludeCpes}" th:utext="${exclude}"></div>
+                                </td>
+                                <td style="padding:5px;">
+                                    <div th:each="exclude : ${after.excludeCpes}" th:utext="${exclude}"></div>
+                                </td>
+                            </tr>
 							<tr>
 								<th align="left" style="padding:5px;background:#f0f0f0;">Declared License Name (Type)</th>
 								<td style="padding:5px;">
@@ -101,6 +128,15 @@
 								</td>
 								<td style="padding:5px;">
 									<span th:each="afterDetectedLicense : ${after.detectedLicenses}" th:utext="${afterDetectedLicense}"></span>
+								</td>
+							</tr>
+							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Restriction</th>
+								<td style="padding:5px;">
+									<div th:each="restriction : ${before?.arrRestriction}" th:utext="${restriction}"></div>
+								</td>
+								<td style="padding:5px;">
+									<div th:each="restriction : ${after?.arrRestriction}" th:utext="${restriction}"></div>
 								</td>
 							</tr>
 							<tr>

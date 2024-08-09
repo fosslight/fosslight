@@ -2623,7 +2623,7 @@ public class ProjectController extends CoTopComponent {
 				CommonFunction.makeSessionKey(loginUserName(), code, prjId), ossComponent, ossComponentLicense,
 				CommonFunction.makeSessionReportKey(loginUserName(), code, prjId));
 
-		result = projectService.nickNameValid(ossComponent, ossComponentLicense);
+		result = projectService.nickNameValid(prjId, ossComponent, ossComponentLicense);
 
 		StringBuffer resultSb = new StringBuffer();
 		if (result != null) {
