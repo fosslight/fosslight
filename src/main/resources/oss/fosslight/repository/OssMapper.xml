@@ -2613,7 +2613,7 @@
   			LEFT JOIN OSS_VERSION OV
   			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
 		) T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.USE_YN = 'Y'
-		WHERE T1.OSS_NAME = #{ossName}
+		WHERE T2.OSS_NAME = #{ossName}
 	</select>
 	
 	<update id="updateLicenseTypeAndObligation" parameterType="oss.fosslight.domain.OssMaster">
@@ -2744,7 +2744,7 @@
 	</update>
 	
 	<update id="changeOssCommonNameByDelete" parameterType="oss.fosslight.domain.OssMaster">
-		UPDATE OSS_COMMON SET OSS_NAME = #{ossName}, MODIFIER = #{loginUserName}, MODIFIED_DATE = NOW() WHERE OSS_COMMON_ID = #{ossCommonId}
+		UPDATE OSS_VERSION SET OSS_COMMON_ID = #{ossCommonId}, MODIFIER = #{loginUserName}, MODIFIED_DATE = NOW() WHERE OSS_ID = #{ossId}
 	</update>
 	
     <select id="checkExistsOssDownloadLocation" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">

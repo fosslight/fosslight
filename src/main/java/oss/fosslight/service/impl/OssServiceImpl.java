@@ -2936,9 +2936,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					result = registOssMaster(ossMaster);
 				}
 				
-				if (updateNvdFlag) {
-					updateVulnInfoByOssMaster(ossMaster, true);
-				}
+//				if (updateNvdFlag) {
+//					updateVulnInfoByOssMaster(ossMaster, true);
+//				}
 				
 				CoCodeManager.getInstance().refreshOssInfo();
 				action = CoConstDef.ACTION_CODE_UPDATE;
@@ -2989,7 +2989,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				ossId = registOssMaster(ossMaster);
 				
 				// update vulnerability info
-				updateVulnInfoByOssMaster(ossMaster, false);
+//				updateVulnInfoByOssMaster(ossMaster, false);
 				
 				CoCodeManager.getInstance().refreshOssInfo();
 				action = CoConstDef.ACTION_CODE_INSERT;
@@ -3294,7 +3294,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			
 			Map<String, OssMaster> ossMap = getBasicOssInfoList(ossMaster);
 			
-			if (ossMap == null || ossMap.isEmpty()) {}else {
+			if (ossMap == null || ossMap.isEmpty()) {
+				OssMaster bean = ossMapper.checkExistsOss(ossMaster);
+				if (bean != null) ossMaster.setOssCommonId(bean.getOssCommonId());
+			} else {
 				throw new Exception(paramBean.getOssName() + " -> OSS Name registered in OSS list.");
 			}
 			
