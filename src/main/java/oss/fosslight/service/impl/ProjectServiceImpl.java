@@ -8,6 +8,10 @@ package oss.fosslight.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,10 +26,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,6 +93,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Autowired private CodeMapper codeMapper;
 	@Autowired private CacheService cacheService;
 
+	@Autowired Environment env;
+	
+	private String JDBC_DRIVER;
+	private String DB_URL;
+	private String USERNAME;
+	private String PASSWORD;
+	
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		JDBC_DRIVER = env.getRequiredProperty("spring.datasource.driver-class-name");
+		DB_URL = env.getRequiredProperty("spring.datasource.url");
+		if (!DB_URL.startsWith("jdbc:mariadb")) DB_URL = "jdbc:mariadb://" + DB_URL;
+		USERNAME = env.getRequiredProperty("spring.datasource.username");
+		PASSWORD = env.getRequiredProperty("spring.datasource.password");
+	}
+	
 	@Override
 	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName, #project?.creator, #project?.identificationStatus}")
 	public List<Project> getProjectNameList(Project project) {
@@ -6407,16 +6430,8 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				}
 			}
 			
-			if (!deleteDataList.isEmpty()) {
-				for (OssComponents oc : deleteDataList) {
-					oc.setReferenceId(prjId);
-					projectMapper.deleteSecurityData(oc);
-				}
-			}
-			
-			for (OssComponents oc : ossComponents) {
-				oc.setReferenceId(prjId);
-				projectMapper.insertSecurityData(oc);
+			{
+				updatePreparedStatementSecurity(prjId, deleteDataList, ossComponents);
 			}
 			
 			if (updateNvdDataList != null && !updateNvdDataList.isEmpty()) {
@@ -6443,6 +6458,118 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		}
 	}
 	
+	private void updatePreparedStatementSecurity(String prjId, List<OssComponents> deleteDataList, List<OssComponents> ossComponents) {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+		
+		String query = "";
+		
+		try{
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			
+			int idx = 1;
+			if (deleteDataList != null && !deleteDataList.isEmpty()) {
+				query = "DELETE FROM NVD_DATA_SECURITY WHERE REFERENCE_ID = ? AND OSS_NAME = ? AND OSS_VERSION = ? AND CVE_ID = ? AND CAST(CVSS_SCORE AS DECIMAL(10, 1)) = CAST(? AS DECIMAL(10,1));";
+				stmt = conn.prepareStatement(query);
+				
+				for (OssComponents item : deleteDataList) {
+					stmt.setString(1, prjId);
+					stmt.setString(2, item.getOssName());
+					stmt.setString(3, item.getOssVersion());
+					stmt.setString(4, item.getCveId());
+					stmt.setString(5, item.getCvssScore());
+					stmt.addBatch();
+					stmt.clearParameters();
+					
+					if ((idx % 1000) == 0) {
+						stmt.executeBatch();
+						stmt.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+				
+				stmt.executeBatch() ;
+				conn.commit();
+			}
+			
+			if (ossComponents != null && !ossComponents.isEmpty()) {
+				query = "INSERT INTO NVD_DATA_SECURITY (REFERENCE_ID, OSS_NAME, OSS_VERSION, CVE_ID, CVSS_SCORE, PUBL_DATE, VULNERABILITY_RESOLUTION, SECURITY_PATCH_LINK, SECURITY_COMMENTS) VALUES (?,?,?,?,?,?,?,?,?);";
+				stmt2 = conn.prepareStatement(query);
+				idx = 1;
+				
+				for (OssComponents item : ossComponents) {
+					stmt2.setString(1, prjId);
+					stmt2.setString(2, item.getOssName());
+					stmt2.setString(3, avoidNull(item.getOssVersion()).equals("-") ? "" : item.getOssVersion());
+					stmt2.setString(4, isEmpty(item.getCveId()) ? "" : item.getCveId());
+					stmt2.setFloat(5, isEmpty(item.getCvssScore()) ? Float.valueOf("0.0") : Float.valueOf(item.getCvssScore()));
+					stmt2.setString(6, isEmpty(item.getPublDate()) ? null : item.getPublDate());
+					stmt2.setString(7, isEmpty(item.getVulnerabilityResolution()) ? null : item.getVulnerabilityResolution());
+					stmt2.setString(8, isEmpty(item.getSecurityPatchLink()) ? null : item.getSecurityPatchLink());
+					stmt2.setString(9, isEmpty(item.getSecurityComments()) ? null : item.getSecurityComments());
+					stmt2.addBatch();
+					stmt2.clearParameters();
+					
+					if ((idx % 1000) == 0) {
+						stmt2.executeBatch();
+						stmt2.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+				
+				stmt2.executeBatch() ;
+				conn.commit();
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException se) {}
+			
+			try{
+				if (stmt2 != null) {
+					stmt2.close();
+				}
+			} catch(SQLException se) {}
+			
+			if (conn != null) {
+				try {
+					conn.rollback();
+					conn.close();
+				} catch (Exception e2) {
+					log.error(e2.getMessage(), e2);
+				}
+			}
+		} finally {
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException e) {}
+			
+			try {
+				if (stmt2 != null) {
+					stmt2.close();
+				}
+			} catch(SQLException e) {}
+			
+			try{
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e) {}
+		}
+	}
+
 	@Override
 	public Map<String, Object> getExportDataForSBOMInfo(OssNotice ossNotice) {
 		Map<String, Object> model = new HashMap<String, Object>();
