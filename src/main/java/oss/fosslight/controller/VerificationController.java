@@ -576,7 +576,7 @@ public class VerificationController extends CoTopComponent {
 					commHisBean.setContents(userComment);
 					commHisBean.setStatus(CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM));
 					
-					commentService.registComment(commHisBean, false);
+					commentService.registComment(commHisBean);
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
