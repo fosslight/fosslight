@@ -470,10 +470,12 @@ public class OssController extends CoTopComponent{
 			, Model model){
 		String resCd="00";
 		HashMap<String, Object> resMap = new HashMap<>();
-		String[] ossIds = ossMaster.getOssIds();
+		String[] delOssIds = ossMaster.getOssIds();
 		List<String> notDelOssList = new ArrayList<>();
 		
-		for (String ossId : ossIds) {
+		for (String delOssId : delOssIds) {
+			String[] delOssIdInfo = delOssId.split("\\|");
+			String ossId = delOssIdInfo[1];
 			String existOssCnt = ossService.checkExistOssConf(ossId);
 			
 			if (Integer.parseInt(existOssCnt) > 0) {
@@ -484,6 +486,7 @@ public class OssController extends CoTopComponent{
 				OssMaster ossMailBean = ossService.getOssInfo(ossId, true);
 				
 				OssMaster param = new OssMaster();
+				param.setOssCommonId(delOssIdInfo[0]);
 				param.setOssId(ossId);
 				param.setOssName(ossMailBean.getOssName());
 				param.setComment(ossMaster.getComment());

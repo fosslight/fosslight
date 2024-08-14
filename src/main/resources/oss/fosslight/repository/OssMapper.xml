@@ -288,7 +288,6 @@
 			OC.USE_YN = 'Y'
 		AND
 			OC.OSS_NAME = #{ossName}
-		ORDER BY OSS_NICKNAME
 	</select>
 	<select id="selectOssNicknameListWithoutOwn" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT
@@ -934,7 +933,8 @@
 	</select>
 	<select id="selectOssSubList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT
-			#{ossId} AS REF_OSS_ID 
+			T1.OSS_COMMON_ID
+			, #{ossId} AS REF_OSS_ID 
 			, T1.OSS_ID
 			, T1.OSS_NAME
 			, T1.OSS_VERSION
@@ -1208,7 +1208,8 @@
 	
 	<select id="selectOssListExcel" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT 
-			T1.OSS_ID
+			T1.OSS_COMMON_ID
+			, T1.OSS_ID
 			, T1.OSS_NAME
 			, T1.OSS_VERSION
 			, T1.HOMEPAGE

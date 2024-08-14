@@ -344,8 +344,9 @@
                         var obj = {};
 
                         var name = $(this).attr('name');
+                        var ossCommonId = $(this).parent().next().next().text();
                         var ossId = name.split("_")[2];
-                        deleteIds.push(ossId);
+                        deleteIds.push(ossCommonId + "|" + ossId);
                     }
                 });
 
@@ -496,7 +497,7 @@
         const oss_lst_grid = {
             oldRowNum: 20,
             load: function () {
-            	var colNameArr = ['', 'ID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
+            	var colNameArr = ['', 'ID', 'CID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
 
                 colNameArr.push("Creator");
                 colNameArr.push("Created<br>Date");
@@ -521,6 +522,9 @@
                         }
                     }
                     , {
+                        name: 'ossCommonId', index: 'ossCommonId', width: 80, align: 'center', hidden: true
+                    }
+                    ,{
                         name: 'ossType',
                         index: 'ossType',
                         width: 70,
