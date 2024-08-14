@@ -762,7 +762,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		// download location merge
 		if (beforeBean.getDownloadLocations() != null) {
-			List<String> mergeDownloadLocationList = Arrays.asList(beforeBean.getDownloadLocations());
+			List<String> mergeDownloadLocationList = new ArrayList<>();
+			for (String downloadLocation : beforeBean.getDownloadLocations()) {
+				mergeDownloadLocationList.add(downloadLocation);
+			}
+			
 			int ossDlIdx = 1;
 			
 			List<OssMaster> afterBeanList = ossMapper.selectOssDownloadLocationList(mergeParam);
@@ -1017,6 +1021,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 			if (StringUtil.isEmpty(ossId)){
 				ossMaster.setCreator(ossMaster.getLoginUserName());
+				
 			} else {
 				orgMasterInfo = new OssMaster();
 				orgMasterInfo.setOssId(ossId);
