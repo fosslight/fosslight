@@ -775,7 +775,7 @@ CREATE TABLE IF NOT EXISTS `NVD_CVE_V3` (
   `BASE_METRIC` varchar(10) DEFAULT NULL COMMENT 'CVSS Score Version',
   `REG_DATE` timestamp NULL DEFAULT current_timestamp() COMMENT 'Data registration date',
   PRIMARY KEY (`CVE_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci ROW_FORMAT=COMPACT;
 
 -- 테이블 데이터 fosslight.NVD_CVE_V3:~0 rows (대략적) 내보내기
 DELETE FROM `NVD_CVE_V3`;
