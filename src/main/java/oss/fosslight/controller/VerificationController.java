@@ -513,17 +513,20 @@ public class VerificationController extends CoTopComponent {
 				Project project = new Project();
 				project.setPrjId(ossNotice.getPrjId());
 				//다운로드 허용 플래그
-				project.setAllowDownloadNoticeHTMLYn(allowDownloadNoticeHTMLYn);
-				project.setAllowDownloadNoticeTextYn(allowDownloadNoticeTextYn);
-				project.setAllowDownloadSimpleHTMLYn(allowDownloadSimpleHTMLYn);
-				project.setAllowDownloadSimpleTextYn(allowDownloadSimpleTextYn);
-				project.setAllowDownloadSPDXSheetYn(allowDownloadSPDXSheetYn);
-				project.setAllowDownloadSPDXRdfYn(allowDownloadSPDXRdfYn);
-				project.setAllowDownloadSPDXTagYn(allowDownloadSPDXTagYn);
-				project.setAllowDownloadSPDXJsonYn(allowDownloadSPDXJsonYn);
-				project.setAllowDownloadSPDXYamlYn(allowDownloadSPDXYamlYn);
-				project.setAllowDownloadCDXJsonYn(allowDownloadCDXJsonYn);
-				project.setAllowDownloadCDXXmlYn(allowDownloadCDXXmlYn);
+				List<String> noticeFileFormatList = Arrays.asList(ossNotice.getNoticeFileFormat());
+				projectService.setNoticeFileFormat(project, noticeFileFormatList);
+				
+//				project.setAllowDownloadNoticeHTMLYn(allowDownloadNoticeHTMLYn);
+//				project.setAllowDownloadNoticeTextYn(allowDownloadNoticeTextYn);
+//				project.setAllowDownloadSimpleHTMLYn(allowDownloadSimpleHTMLYn);
+//				project.setAllowDownloadSimpleTextYn(allowDownloadSimpleTextYn);
+//				project.setAllowDownloadSPDXSheetYn(allowDownloadSPDXSheetYn);
+//				project.setAllowDownloadSPDXRdfYn(allowDownloadSPDXRdfYn);
+//				project.setAllowDownloadSPDXTagYn(allowDownloadSPDXTagYn);
+//				project.setAllowDownloadSPDXJsonYn(allowDownloadSPDXJsonYn);
+//				project.setAllowDownloadSPDXYamlYn(allowDownloadSPDXYamlYn);
+//				project.setAllowDownloadCDXJsonYn(allowDownloadCDXJsonYn);
+//				project.setAllowDownloadCDXXmlYn(allowDownloadCDXXmlYn);
 				
 				project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
 				
