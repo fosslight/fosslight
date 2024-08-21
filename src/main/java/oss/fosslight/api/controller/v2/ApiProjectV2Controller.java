@@ -32,7 +32,7 @@ import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
-import oss.fosslight.validation.ValuesAllowed;
+import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 import javax.annotation.PostConstruct;
