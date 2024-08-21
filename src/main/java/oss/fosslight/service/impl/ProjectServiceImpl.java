@@ -35,6 +35,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.HtmlUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -5318,7 +5319,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			model.put("noticeData", mergedBinaryData.get(binaryPath));
 			
 			String contents = CommonFunction.VelocityTemplateToString(model);
-			
+			contents = HtmlUtils.htmlUnescape(contents);
 			for (String path : binaryPath.split(",")) {
 				String fileName = "";
 				String binaryFilePath = binaryDirPath;
@@ -5400,12 +5401,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		Map<String, List<ProjectIdentification>> binaryMergeData = new HashMap<String, List<ProjectIdentification>>();
 		Map<String, String> binaryOssKeyMap = new HashMap<String, String>();
+		List<String> mergeOssCheckList = new ArrayList<>();
+		Map<String, List<String>> mergeLicenseCheckList = new HashMap<>();
 		
 		for (ProjectIdentification bean : mainData) {
+			boolean licenseDuplicateFlag = false;
 			List<ProjectIdentification> _list = new ArrayList<>();
 			String _oldKey = null;
 			String key = bean.getOssName() + "|" + bean.getOssVersion() + "|" + bean.getLicenseName();
 			String licenseName = "";
+			
+			String _key = (bean.getOssName() + "|" + licenseName).toUpperCase();
+			if (!mergeOssCheckList.contains(_key)) {
+				mergeOssCheckList.add(_key);
+			} else {
+				continue;
+			}
 			
 			List<String> duplicateCheckList = new ArrayList<>();
 			List<ProjectIdentification> deduplicateComponentLicenseList = new ArrayList<>();
@@ -5435,10 +5446,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 					}
 					
+					if (mergeLicenseCheckList.containsKey(bean.getBinaryName())) {
+						List<String> licenseList = mergeLicenseCheckList.get(bean.getBinaryName());
+						if (licenseList.contains(licenseName)) {
+							licenseDuplicateFlag = true;
+						} else {
+							licenseList.add(licenseName);
+							mergeLicenseCheckList.put(bean.getBinaryName(), licenseList);
+						}
+					}
+					
 					OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() +"_"+ avoidNull(bean.getOssVersion())).toUpperCase());
 					bean.setAttribution(avoidNull(ossBean.getAttribution()));
 					bean.setLicenseName(licenseName);
-					bean.setDeduplicatedComponentLicenseList(deduplicateComponentLicenseList);
+					if (!licenseDuplicateFlag) bean.setDeduplicatedComponentLicenseList(deduplicateComponentLicenseList);
 					
 					_list.add(bean);
 					
@@ -5466,6 +5487,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						licenseName += license.getLicenseName();
 					}
 				}
+				
+				List<String> licenseList = new ArrayList<>();
+				licenseList.add(licenseName);
+				mergeLicenseCheckList.put(bean.getBinaryName(), licenseList);
 				
 				OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() +"_"+ avoidNull(bean.getOssVersion())).toUpperCase());
 				
