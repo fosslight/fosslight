@@ -92,6 +92,7 @@ public class Project extends ComBean implements Serializable {
 	private String noticeType;
 	private String noticeTypeEtc;
 
+	private String editNoticeYn;
 	/** The use custom notice yn. */
 	private String useCustomNoticeYn;
 	
@@ -4516,5 +4517,13 @@ public class Project extends ComBean implements Serializable {
 
 	public void setPrjIdName(String prjIdName) {
 		this.prjIdName = prjIdName;
+	}
+
+	public String getEditNoticeYn() {
+		return editNoticeYn;
+	}
+
+	public void setEditNoticeYn(String editNoticeYn) {
+		this.editNoticeYn = editNoticeYn;
 	}
 }
