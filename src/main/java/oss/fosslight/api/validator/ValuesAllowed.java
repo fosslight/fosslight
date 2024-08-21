@@ -1,13 +1,11 @@
-package oss.fosslight.validation;
+package oss.fosslight.api.validator;
 
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Payload;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,6 +42,7 @@ public @interface ValuesAllowed {
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate(message.concat(this.allowable.toString()))
                         .addPropertyNode(this.propName).addConstraintViolation();
+
             }
             return valid;
         }
