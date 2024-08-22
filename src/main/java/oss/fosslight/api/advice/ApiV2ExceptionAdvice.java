@@ -36,11 +36,7 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<Map<String, Object>> constraintViolationException(HttpServletRequest request, ConstraintViolationException e) {
-        Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
-        String validParam = ((ConstraintViolation)constraintViolations.toArray()[0]).getMessageTemplate();
-        String inputParam = (String) ((ConstraintViolation)constraintViolations.toArray()[0]).getInvalidValue();
-
-        return responseService.errorResponse(HttpStatus.BAD_REQUEST, "InputParma = " + inputParam + ". " + validParam);
+        return responseService.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage().split(":")[1].trim());
     }
 
     @ExceptionHandler(CUserNotFoundException.class)

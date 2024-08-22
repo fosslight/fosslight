@@ -13,7 +13,7 @@ import java.util.List;
 @Constraint(validatedBy = { ValuesAllowed.Validator.class })
 public @interface ValuesAllowed {
 
-    String message() default "Field value should be from list of ";
+    String message() default "Input value='%s'. '%s' field value should be from list of %s";
 
     Class<?>[] groups() default {};
 
@@ -40,8 +40,12 @@ public @interface ValuesAllowed {
 
             if (!valid) {
                 context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate(message.concat(this.allowable.toString()))
-                        .addPropertyNode(this.propName).addConstraintViolation();
+//                context.buildConstraintViolationWithTemplate(message.concat(this.allowable.toString()))
+//                        .addPropertyNode(this.propName).addConstraintViolation();
+
+                context.buildConstraintViolationWithTemplate(
+                        String.format(message, value, this.propName, this.allowable.toString())).addConstraintViolation();
+
 
             }
             return valid;
