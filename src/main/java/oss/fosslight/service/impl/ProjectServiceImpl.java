@@ -5457,7 +5457,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 					
 					OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() +"_"+ avoidNull(bean.getOssVersion())).toUpperCase());
-					bean.setAttribution(avoidNull(ossBean.getAttribution()));
+					bean.setAttribution(ossBean != null ? avoidNull(ossBean.getAttribution())  : "");
 					bean.setLicenseName(licenseName);
 					if (!licenseDuplicateFlag) bean.setDeduplicatedComponentLicenseList(deduplicateComponentLicenseList);
 					
