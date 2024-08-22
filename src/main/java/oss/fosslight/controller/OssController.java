@@ -1842,12 +1842,10 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> analysisResultData = new ArrayList<OssAnalysis>();
 		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
 		for (OssAnalysis oa : analysisResultData) {
-			if (oa.getTitle().contains("최신 등록 정보")) {
-				OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
-				if (bean != null) {
-					oa.setOssId(bean.getOssId());
-					oa.setOssCommonId(bean.getOssCommonId());
-				}
+			OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
+			if (bean != null) {
+				oa.setOssId(bean.getOssId());
+				oa.setOssCommonId(bean.getOssCommonId());
 			}
 		}
 		
@@ -1880,8 +1878,34 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> detailData = (List<OssAnalysis>) getSessionObject(sessionKey);
 		
 		if (detailData != null) {
+			OssMaster bean = new OssMaster();
 			for (OssAnalysis oa : detailData) {
 				if (ossService.checkOssTypeForAnalysisResult(oa)) oa.setOssType("V");
+				if (!isEmpty(oa.getDownloadLocation())) {
+					StringBuilder sb = new StringBuilder();
+					if (oa.getDownloadLocation().contains(",")) {
+						for (String downloadLocation : oa.getDownloadLocation().split("[,]")) {
+							bean.setDownloadLocation(downloadLocation);
+							String purl = ossService.getPurlByDownloadLocation(bean);
+							if (!isEmpty(purl)) {
+								sb.append(downloadLocation + "|" + purl).append(",");
+							} else {
+								sb.append(downloadLocation);
+							}
+						}
+					} else {
+						bean.setDownloadLocation(oa.getDownloadLocation());
+						String purl = ossService.getPurlByDownloadLocation(bean);
+						if (!isEmpty(purl)) {
+							sb.append(oa.getDownloadLocation() + "|" + purl);
+						} else {
+							sb.append(oa.getDownloadLocation());
+						}
+					}
+					
+					oa.setDownloadLocation(sb.toString());
+				}
+				
 				String key = (oa.getOssName() + "_" + avoidNull(oa.getOssVersion())).toUpperCase();
 				if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
 					OssMaster param = new OssMaster();
