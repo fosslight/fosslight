@@ -473,12 +473,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
     public ResponseEntity<FileSystemResource> getPrjBomDownload(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Merge & Save Flag (YES : Y, NO : N)", required = false, allowableValues = "Y,N")
-            @ValuesAllowed(propName = "mergeSaveFlag", values={"Y","N"}) @RequestParam(required = false) String mergeSaveFlag,
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
             @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
 
-        log.info("Project Bom Download as File :: " + prjId + " :: " + mergeSaveFlag + " :: " + format);
+        log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
         // 사용자 인증
         String downloadId = "";
@@ -498,9 +498,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 
             if (searchFlag) {
-                if ("Y".equals(mergeSaveFlag)) {
+                if ("Y".equals(saveFlag)) {
 //                    apiProjectService.registBom(prjId, mergeSaveFlag);
-                    projectService.registBom(prjId, mergeSaveFlag, new ArrayList<>(), new ArrayList<>());
+                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
                 }
                 downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
                 fileInfo = fileService.selectFileInfo(downloadId);
@@ -520,9 +520,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_JSON})
     public ResponseEntity<Map<String, Object>> getPrjBomAsJson(
             @RequestHeader String authorization,
-            @ApiParam(value = "Merge & Save Flag (YES : Y, NO : N)", required = false, allowableValues = "Y,N")
-            @ValuesAllowed(propName = "mergeSaveFlag", values={"Y","N"}) @RequestParam(required = false) String mergeSaveFlag,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId) {
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -541,8 +541,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             if (searchFlag) {
                 resultMap = apiProjectService.getBomExportJson(prjId);
-                if ("Y".equals(mergeSaveFlag)) {
-                    projectService.registBom(prjId, mergeSaveFlag, new ArrayList<>(), new ArrayList<>());
+                if ("Y".equals(saveFlag)) {
+                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
                 }
             }
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
