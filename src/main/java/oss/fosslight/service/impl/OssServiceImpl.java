@@ -2868,6 +2868,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		}
 
 		String action = "";
+		String ossCommonId = ossMaster.getOssCommonId();
 		String ossId = ossMaster.getOssId();
 		boolean isNew = StringUtil.isEmpty(ossId);
 		boolean isNewVersion = false; // 새로운 version을 등록
@@ -2877,6 +2878,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		OssMaster beforeBean = null;
 		OssMaster afterBean = null;
 
+		if (isEmpty(ossCommonId)) {
+			OssMaster bean = ossMapper.checkExistsOssname(ossMaster);
+			if (bean != null) ossMaster.setOssCommonId(bean.getOssCommonId());
+		}
+		
 		// downloadLocations이 n건일때 0번째 값은 oss Master로 저장.
 		String[] downloadLocations = ossMaster.getDownloadLocations();
 		if (downloadLocations != null) {
