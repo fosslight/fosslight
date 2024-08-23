@@ -15,6 +15,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
@@ -31,6 +32,7 @@ import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 import javax.annotation.PostConstruct;
@@ -42,6 +44,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
+@Validated
 public class ApiProjectV2Controller extends CoTopComponent {
 
     @Resource
@@ -461,15 +464,21 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Project Bom Tab Export", notes = "Project > Bom tab Export")
+
+    @ApiOperation(value = "Project Bom Download as File", notes = "Project > Bom tab download as file")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_EXPORT})
-    public ResponseEntity<FileSystemResource> getPrjBomExport(
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD})
+    public ResponseEntity<FileSystemResource> getPrjBomDownload(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Merge & Save Flag (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String mergeSaveFlag) {
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet")
+            @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+
+        log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
         // 사용자 인증
         String downloadId = "";
@@ -489,9 +498,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 
             if (searchFlag) {
-                if ("Y".equals(mergeSaveFlag)) {
+                if ("Y".equals(saveFlag)) {
 //                    apiProjectService.registBom(prjId, mergeSaveFlag);
-                    projectService.registBom(prjId, mergeSaveFlag, new ArrayList<>(), new ArrayList<>());
+                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
                 }
                 downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
                 fileInfo = fileService.selectFileInfo(downloadId);
@@ -504,14 +513,16 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Project Bom Tab Export Json", notes = "Project > Bom tab Export Json")
+    @ApiOperation(value = "Get Project Bom Tab As Json", notes = "Project > Get Bom tab data as json")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON})
-    public ResponseEntity<Map<String, Object>> getPrjBomExportJson(
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_JSON})
+    public ResponseEntity<Map<String, Object>> getPrjBomAsJson(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId) {
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -530,6 +541,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             if (searchFlag) {
                 resultMap = apiProjectService.getBomExportJson(prjId);
+                if ("Y".equals(saveFlag)) {
+                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
+                }
             }
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
