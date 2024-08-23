@@ -3661,13 +3661,13 @@ public class CoMailManager extends CoTopComponent {
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED.equals(coMail.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
 				if((ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()).equals("SUCCESS"))
-				    || (ossMapper.getOssAnalysisStatus(coMail.getParamPartnerId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPartnerId()).equals("SUCCESS"))){
+				    || (ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()) != null && ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()).equals("SUCCESS"))){
 
 					String prjId = "";
 					if(ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null) {
 						prjId = coMail.getParamPrjId();
 					} else {
-						prjId = "3rd-"+coMail.getParamPartnerId();
+						prjId = "3rd_"+coMail.getParamPartnerId();
 					}
 					String analysisResultListPath = CommonFunction.emptyCheckProperty("autoanalysis.output.path", "");
 					if(!isEmpty(analysisResultListPath)){
