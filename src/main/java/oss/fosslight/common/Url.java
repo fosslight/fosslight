@@ -999,6 +999,8 @@ public final class Url {
 
 			public static final String FOSSLIGHT_API_PROJECT_GET_NOTICE		= "/projects/{id}/notice";
 
+			public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
+
 		/** VULNABILITY */
 			/** vulnerability info search */
 			public static final String FOSSLIGHT_API_VULNERABILITY_DATA	    = "/vulnerabilities";
