@@ -314,6 +314,8 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String ossVersionAlias;
 	
+	private String[] ossVersionAliasWithColon;
+	
 	private String[] ossVersionAliases;
 	
 	private String purl;
@@ -2306,5 +2308,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setExistArrRestriction(String[] existArrRestriction) {
 		this.existArrRestriction = existArrRestriction;
+	}
+
+	public String[] getOssVersionAliasWithColon() {
+		return ossVersionAliasWithColon;
+	}
+
+	public void setOssVersionAliasWithColon(String[] ossVersionAliasWithColon) {
+		this.ossVersionAliasWithColon = ossVersionAliasWithColon;
 	}
 }
