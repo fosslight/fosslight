@@ -1842,10 +1842,12 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> analysisResultData = new ArrayList<OssAnalysis>();
 		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
 		for (OssAnalysis oa : analysisResultData) {
-			OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
-			if (bean != null) {
-				oa.setOssId(bean.getOssId());
-				oa.setOssCommonId(bean.getOssCommonId());
+			if (oa.getTitle().contains("최신 등록 정보")) {
+				OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
+				if (bean != null) {
+					oa.setOssId(bean.getOssId());
+					oa.setOssCommonId(bean.getOssCommonId());
+				}
 			}
 		}
 		
