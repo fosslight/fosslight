@@ -5293,36 +5293,37 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 
 	public static String checkNvdInfoForProduct(Map<String, OssMaster> ossInfoMap, List<String> productCheckList) {
 		List<String> rtnScoreList = new ArrayList<>();
-		OssMaster om = new OssMaster();
-		String[] cvssScoreMaxString = null;
-		
-		for (String cvssScoreMaxStr : productCheckList) {
-			cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
-			if (!cvssScoreMaxString[2].isEmpty()) {
-				boolean cvssScoreCheckFlag = false;
-				String ossVersion = !cvssScoreMaxString[0].equals("-") ? cvssScoreMaxString[1] : "";
-				OssMaster bean = ossInfoMap.get((cvssScoreMaxString[0] + "_" + ossVersion).toUpperCase());
-				
-				om.setSchOssName(cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2]);
-				om.setOssVersion(ossVersion);
-				
-				List<String> matchOssIdList = ossService.checkExistsVendorProductMatchOss(om);
-				if (matchOssIdList != null && !matchOssIdList.isEmpty()) {
-					for (String matchOssId : matchOssIdList) {
-						if (matchOssId.equals(bean.getOssId())) {
-							cvssScoreCheckFlag = true;
-							break;
-						}
-					}
-				}
-				
-				if (!cvssScoreCheckFlag) {
-					rtnScoreList.add(cvssScoreMaxStr);
-				}
-			} else {
-				rtnScoreList.add(cvssScoreMaxStr);
-			}
-		}
+		if (productCheckList != null) rtnScoreList.addAll(productCheckList);
+//		OssMaster om = new OssMaster();
+//		String[] cvssScoreMaxString = null;
+//		
+//		for (String cvssScoreMaxStr : productCheckList) {
+//			cvssScoreMaxString = cvssScoreMaxStr.split("\\@");
+//			if (!cvssScoreMaxString[2].isEmpty()) {
+//				boolean cvssScoreCheckFlag = false;
+//				String ossVersion = !cvssScoreMaxString[0].equals("-") ? cvssScoreMaxString[1] : "";
+//				OssMaster bean = ossInfoMap.get((cvssScoreMaxString[0] + "_" + ossVersion).toUpperCase());
+//				
+//				om.setSchOssName(cvssScoreMaxString[0] + "-" + cvssScoreMaxString[2]);
+//				om.setOssVersion(ossVersion);
+//				
+//				List<String> matchOssIdList = ossService.checkExistsVendorProductMatchOss(om);
+//				if (matchOssIdList != null && !matchOssIdList.isEmpty() && bean != null) {
+//					for (String matchOssId : matchOssIdList) {
+//						if (matchOssId.equals(bean.getOssId())) {
+//							cvssScoreCheckFlag = true;
+//							break;
+//						}
+//					}
+//				}
+//				
+//				if (!cvssScoreCheckFlag) {
+//					rtnScoreList.add(cvssScoreMaxStr);
+//				}
+//			} else {
+//				rtnScoreList.add(cvssScoreMaxStr);
+//			}
+//		}
 		
 		if (!rtnScoreList.isEmpty()) {
 			rtnScoreList = rtnScoreList.stream().distinct().collect(Collectors.toList());

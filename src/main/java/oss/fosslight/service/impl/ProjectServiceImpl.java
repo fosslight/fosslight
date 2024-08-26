@@ -639,6 +639,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						String cveId = ll.getCvssScoreMax1().split("\\@")[4];
 						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
 					}
+					if (ll.getCvssScoreMax2() != null) {
+						String cveId = ll.getCvssScoreMax2().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
+					}
 					
 					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
 						if (cvssScoreMaxList.size() > 1) {
@@ -961,6 +965,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (bean.getCvssScoreMax1() != null) {
 							String cveId = bean.getCvssScoreMax1().split("\\@")[4];
 							if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax1());
+						}
+						if (bean.getCvssScoreMax2() != null) {
+							String cveId = bean.getCvssScoreMax2().split("\\@")[4];
+							if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax2());
 						}
 						
 						if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {

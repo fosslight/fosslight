@@ -392,4 +392,6 @@ public interface ProjectMapper {
 	int checkProjectDistributeHis(Project project);
 
 	Float getCvssScoreForNotFixed(String prjId);
+
+	List<ProjectIdentification> selectSecurityListForProject(ProjectIdentification identification);
 }

@@ -3686,15 +3686,8 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
-			if (CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(coMail.getMsgType())
-					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(coMail.getMsgType())
-					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(coMail.getMsgType())
-					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_OSS.equals(coMail.getMsgType())
-					|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED_ALL.equals(coMail.getMsgType())) {
-			} else {
-				// Email Send
-				mailSender.send(message);
-			}
+			// Email Send
+			mailSender.send(message);
 			
 			// Email History Status Update
 			coMail.setSndStatus("C");	// 전송완료

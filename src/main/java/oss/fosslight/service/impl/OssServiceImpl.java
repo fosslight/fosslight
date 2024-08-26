@@ -4294,26 +4294,24 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					vuln.setVulnSummary((String) maxScoreVulnMap.get("VULN_SUMMARY"));
 					vuln.setModiDate(String.valueOf((Timestamp) maxScoreVulnMap.get("MODI_DATE")));
 					list.add(vuln);
-				} else {
-					inCpeMatchFlag = false;
-					list = vulnDataForNotIncludeCpeMatch(convertFlag, ossMaster, nicknameList, convertNameList, dashOssNameList, param);
+				}
+				
+				List<Vulnerability> list2 = vulnDataForNotIncludeCpeMatch(convertFlag, ossMaster, nicknameList, convertNameList, dashOssNameList, param);
+				if (list2 != null && !list2.isEmpty()) {
+					list.addAll(list2);
 				}
 			} else {
 				list = vulnDataForNotIncludeCpeMatch(convertFlag, ossMaster, nicknameList, convertNameList, dashOssNameList, param);
 			}
 			
 			if (list != null) {
-				if (!inCpeMatchFlag) {
-					if (!CoConstDef.FLAG_YES.equals(avoidNull(param.getVulnerabilityCheckFlag()))) list = checkVulnData(list, ossMaster.getOssNicknames());
-					list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
-					int idx = 1;
-					for (Vulnerability vuln : list) {
-						if (idx > 5) break;
-						convertList.add(vuln);
-						idx++;
-					}
-				} else {
-					convertList.add(list.get(0));
+				if (!CoConstDef.FLAG_YES.equals(avoidNull(param.getVulnerabilityCheckFlag()))) list = checkVulnData(list, ossMaster.getOssNicknames());
+				list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
+				int idx = 1;
+				for (Vulnerability vuln : list) {
+					if (idx > 5) break;
+					convertList.add(vuln);
+					idx++;
 				}
 			}
 		} catch (Exception e) {

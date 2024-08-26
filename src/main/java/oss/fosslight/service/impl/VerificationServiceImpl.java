@@ -783,7 +783,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			paths = null;
 			
 			// 결과 file path에 대해서 4가지 허용 패턴으로 검사한다.
-			Map<String, Integer> checkResultMap = new HashMap<>();
+//			Map<String, Integer> checkResultMap = new HashMap<>();
 //			List<String> pathCheckList1 = new ArrayList<>();
 //			List<String> pathCheckList2 = new ArrayList<>();
 //			List<String> pathCheckList3 = new ArrayList<>();

@@ -354,6 +354,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private List<ProjectIdentification> deduplicatedComponentLicenseList;
 	
+	private Float standardScore;
+	
 	public String getRedirectLocation() {
 		return redirectLocation;
 	}
@@ -2166,5 +2168,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setPackageUrl(String packageUrl) {
 		this.packageUrl = packageUrl;
+	}
+
+	public Float getStandardScore() {
+		return standardScore;
+	}
+
+	public void setStandardScore(Float standardScore) {
+		this.standardScore = standardScore;
 	}
 }
