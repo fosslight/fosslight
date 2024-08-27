@@ -4113,12 +4113,12 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					if (ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
 						for (OssAnalysis oa : ossAnalysisByNickList) {
 							if (totalNewestOssInfo != null) {
-								if (!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName()) && !totalNewestOssInfo.getOssVersion().equals(oa.getOssVersion())) {
+								if (!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName())) {
 									changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
 								}
 							} else {
 								if (newestOssInfo != null) {
-									if (!newestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName()) && !newestOssInfo.getOssVersion().equals(oa.getOssVersion())) {
+									if (!newestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName())) {
 										changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
 									}
 								} else {
@@ -4180,7 +4180,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					if (ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
 						for (OssAnalysis oa : ossAnalysisByNickList) {
 							if (totalNewestOssInfo != null) {
-								if (!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName()) && !totalNewestOssInfo.getOssVersion().equals(oa.getOssVersion())) {
+								if (!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName())) {
 									changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
 								}
 							} else {
