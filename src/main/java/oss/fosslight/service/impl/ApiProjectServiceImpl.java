@@ -3385,6 +3385,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			bean.setReportFileId(null);
 			licenses = projectMapper.selectOssComponentsLicenseList(bean);
 			bean.setComponentIdx(String.valueOf(ossComponentIdx++));
+			String loadToListComment = "(From Prj " + prjIdToLoad + ")";
+			bean.setComments(loadToListComment);
 			projectMapper.insertOssComponents(bean);
 
 			for (OssComponentsLicense licenseBean : licenses) {

@@ -1813,6 +1813,25 @@ public class ApiProjectController extends CoTopComponent {
 		try {
 			Map<String, Object> paramMap = new HashMap<>();
 
+            		List<String> prjIdList = new ArrayList<String>();
+            		prjIdList.add(targetPrjId);
+			paramMap.put("userId", userInfo.getUserId());
+   		        paramMap.put("loginUserName", userInfo.getUserName());
+		        paramMap.put("userRole", userRole(userInfo));
+            		paramMap.put("prjId", prjIdList);
+            		paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+          		paramMap.put("distributionType", "normal");
+           		paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+            		boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+
+          		if (!searchFlag) {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE,
+						String.format("Project %s not exist or User doesn't have permission for the project", targetPrjId));
+      			}
+
+            		paramMap.clear();
+
 			if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
 				return responseService.getFailResult(errorMsgCode, "targetPrjId is not in the correct format");
 			}
@@ -1888,7 +1907,26 @@ public class ApiProjectController extends CoTopComponent {
 		
 		try {
 			Map<String, Object> paramMap = new HashMap<>();
-			
+
+            		List<String> prjIdList = new ArrayList<String>();
+            		prjIdList.add(targetPrjId);
+			paramMap.put("userId", userInfo.getUserId());
+   		        paramMap.put("loginUserName", userInfo.getUserName());
+		        paramMap.put("userRole", userRole(userInfo));
+            		paramMap.put("prjId", prjIdList);
+            		paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+          		paramMap.put("distributionType", "normal");
+           		paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+            		boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+
+          		if (!searchFlag) {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE,
+						String.format("Project %s not exist or User doesn't have permission for the project", targetPrjId));
+      			}
+
+            		paramMap.clear();
+
 			if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
 				return responseService.getFailResult(errorMsgCode, "targetPrjId is not in the correct format");
 			}
@@ -1964,6 +2002,25 @@ public class ApiProjectController extends CoTopComponent {
 		
 		try {
 			Map<String, Object> paramMap = new HashMap<>();
+
+            		List<String> prjIdList = new ArrayList<String>();
+            		prjIdList.add(targetPrjId);
+			paramMap.put("userId", userInfo.getUserId());
+   		        paramMap.put("loginUserName", userInfo.getUserName());
+		        paramMap.put("userRole", userRole(userInfo));
+            		paramMap.put("prjId", prjIdList);
+            		paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+          		paramMap.put("distributionType", "normal");
+           		paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+            		boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+
+          		if (!searchFlag) {
+				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE,
+						String.format("Project %s not exist or User doesn't have permission for the project", targetPrjId));
+      			}
+
+            		paramMap.clear();
 
 			if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
 				return responseService.getFailResult(errorMsgCode, "targetPrjId is not in the correct format");
