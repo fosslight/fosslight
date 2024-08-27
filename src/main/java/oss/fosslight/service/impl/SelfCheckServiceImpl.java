@@ -319,6 +319,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					if (bean.getCvssScoreMax2() != null) {
 						cvssScoreMaxList.add(bean.getCvssScoreMax2());
 					}
+					if (bean.getCvssScoreMax3() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax3());
+					}
 					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
 						if (cvssScoreMaxList.size() > 1) {
 							Collections.sort(cvssScoreMaxList, new Comparator<String>() {

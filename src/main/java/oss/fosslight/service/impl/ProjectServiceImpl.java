@@ -265,9 +265,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							bean.setVulnYn(CoConstDef.FLAG_YES);
 						}
 						
-						if (getSecurityDataCntByProject(bean)) {
+//						if (getSecurityDataCntByProject(bean)) {
 							checkIfVulnerabilityResolutionIsFixed(bean);
-						}
+//						}
 						
 						bean.setCvssScore(avoidNull(bean.getCvssScore(), CoConstDef.FLAG_NO));
 						bean.setSecCode(avoidNull(bean.getSecCode(), CoConstDef.FLAG_NO));
@@ -643,7 +643,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						String cveId = ll.getCvssScoreMax2().split("\\@")[4];
 						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
 					}
-					
+					if (ll.getCvssScoreMax3() != null) {
+						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
+					}
 					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
 						if (cvssScoreMaxList.size() > 1) {
 							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
@@ -970,7 +973,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							String cveId = bean.getCvssScoreMax2().split("\\@")[4];
 							if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax2());
 						}
-						
+						if (bean.getCvssScoreMax3() != null) {
+							String cveId = bean.getCvssScoreMax3().split("\\@")[4];
+							if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax3());
+						}
 						if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
 							if (cvssScoreMaxList.size() > 1) {
 								Collections.sort(cvssScoreMaxList, new Comparator<String>() {

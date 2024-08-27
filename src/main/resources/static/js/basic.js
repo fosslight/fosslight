@@ -897,7 +897,7 @@ function createValidMsgComplex(msgData) {
     
     //닉네임, 그리드데이터, 일반 인풋 Validation 체크
     $.each(msgData, function (key, value) {
-        if ("isValid" != key && "validMsg" != key) {console.log("key", key);
+        if ("isValid" != key && "validMsg" != key) {
             if (key.indexOf(".") > -1) {
                 var seqSuffix = key.split(".");
                 var targetId = seqSuffix[1] + "_" + seqSuffix[0];
