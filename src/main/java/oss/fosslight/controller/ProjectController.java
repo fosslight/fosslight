@@ -385,6 +385,7 @@ public class ProjectController extends CoTopComponent {
 	public String edit(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setPrjId(prjId);
+		project.setActType(CoConstDef.FLAG_NO);
 		project = projectService.getProjectDetail(project);
 		
 		CommentsHistory comHisBean = new CommentsHistory();
@@ -1841,6 +1842,7 @@ public class ProjectController extends CoTopComponent {
 		HashMap<String, Object> resMap = new HashMap<>();
 		
 		project.setPrjId(prjId);
+		project.setActType(CoConstDef.FLAG_NO);
 		Project projectInfo = projectService.getProjectDetail(project);
 		
 		if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(initDiv)) {
@@ -2994,6 +2996,7 @@ public class ProjectController extends CoTopComponent {
 			@PathVariable String initDiv) throws Exception {
 		Project project = new Project();
 		project.setPrjId(prjId);
+		project.setActType(CoConstDef.FLAG_NO);
 		Project projectMaster = projectService.getProjectDetail(project);
 		
 		boolean partnerFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);

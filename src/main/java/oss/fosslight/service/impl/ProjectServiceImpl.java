@@ -422,17 +422,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				project.setPermission(1);
 			}
 		}
-		
-		String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(project.getPrjId(), project.getReferenceDiv());
-		if (conversionCveInfo != null) {
-			String[] conversionCveData = conversionCveInfo.split("\\@");
-			project.setCvssScore(conversionCveData[3]);
-			project.setCveId(conversionCveData[4]);
-			project.setVulnYn(CoConstDef.FLAG_YES);
-		}
-		
-		if (getSecurityDataCntByProject(project)) {
-			checkIfVulnerabilityResolutionIsFixed(project);
+		if (!CoConstDef.FLAG_NO.equals(avoidNull(project.getActType()))) {
+			String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(project.getPrjId(), project.getReferenceDiv());
+			if (conversionCveInfo != null) {
+				String[] conversionCveData = conversionCveInfo.split("\\@");
+				project.setCvssScore(conversionCveData[3]);
+				project.setCveId(conversionCveData[4]);
+				project.setVulnYn(CoConstDef.FLAG_YES);
+			}
+			
+//			if (getSecurityDataCntByProject(project)) {
+				checkIfVulnerabilityResolutionIsFixed(project);
+//			}
 		}
 		
 		project.setStandardScore(null);
@@ -1016,19 +1017,41 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					componentOssInfoMap = ossService.getBasicOssInfoListById(ossParam);
 				}
 				
+				Map<String, List<ProjectIdentification>> licenseMap = new HashMap<>();
 				List<ProjectIdentification> licenseList = projectMapper.identificationSubGrid(param);
 				
-				for (ProjectIdentification licenseBean : licenseList) {
-					for (ProjectIdentification bean : list) {
-						if (licenseBean.getComponentId().equals(bean.getComponentId())) {
-							// 수정가능 여부 초기설정
-							licenseBean.setEditable(CoConstDef.FLAG_YES);
-							bean.addComponentLicenseList(licenseBean);
-							
-							break;
-						}
+				for (ProjectIdentification ocl : licenseList) {
+					String key = ocl.getComponentId();
+					List<ProjectIdentification> bomLicenses = null;
+					if (licenseMap.containsKey(key)) {
+						bomLicenses = licenseMap.get(ocl.getComponentId());
+					} else {
+						bomLicenses = new ArrayList<>();
+					}
+					ocl.setEditable(CoConstDef.FLAG_YES);
+					bomLicenses.add(ocl);
+					licenseMap.put(key, bomLicenses);
+				}
+				
+				for (ProjectIdentification bean : list) {
+					if (licenseMap.containsKey(bean.getComponentId())) {
+						bean.setComponentLicenseList(licenseMap.get(bean.getComponentId()));
 					}
 				}
+				
+				licenseMap = null;
+				
+//				for (ProjectIdentification licenseBean : licenseList) {
+//					for (ProjectIdentification bean : list) {
+//						if (licenseBean.getComponentId().equals(bean.getComponentId())) {
+//							// 수정가능 여부 초기설정
+//							licenseBean.setEditable(CoConstDef.FLAG_YES);
+//							bean.addComponentLicenseList(licenseBean);
+//							
+//							break;
+//						}
+//					}
+//				}
 				
 				// license 정보 등록
 				for (ProjectIdentification bean : list) {
