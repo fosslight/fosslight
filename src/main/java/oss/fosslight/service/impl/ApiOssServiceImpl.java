@@ -26,6 +26,7 @@ import oss.fosslight.util.StringUtil;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -99,7 +100,9 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
 
         List<String> multiOssList = ossMapper.selectMultiOssList(ossMaster);
         multiOssList.replaceAll(String::toUpperCase);
-        int totalCount = ossMapper.selectOssMasterTotalCount(ossMaster);
+        var wrapperCount = new Object() {
+            int totalCount = ossMapper.selectOssMasterTotalCount(ossMaster);;
+        };
 
         var rows = list.stream().flatMap(oss -> {
             if (!multiOssList.contains(oss.getOssName().toUpperCase())) {
@@ -107,12 +110,12 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
             }
             var query = request.toBuilder()
                     .ossName(oss.getOssName())
-                    .ossVersion(oss.getOssVersion())
                     .ossId(oss.getOssId())
                     .build()
                     .toOssMaster();
             var sublist = apiOssMapper.selectOssSubList(query);
-            return sublist.stream();
+            wrapperCount.totalCount += sublist.size() - 1;
+            return sublist.stream().sorted(Comparator.comparing(OssDto::getOssId).reversed());
         }).collect(Collectors.toList());
 
         // license name 처리
@@ -135,7 +138,7 @@ public class ApiOssServiceImpl extends CoTopComponent implements ApiOssService {
 
         return ListOssDto.Result.builder()
                 .list(rows)
-                .totalCount(totalCount)
+                .totalCount(wrapperCount.totalCount)
                 .build();
     }
 
