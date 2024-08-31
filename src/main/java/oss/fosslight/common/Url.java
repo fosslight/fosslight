@@ -1017,6 +1017,9 @@ public final class Url {
 
 			public static final String FOSSLIGHT_API_PROJECT_GET_NOTICE		= "/projects/{id}/notice";
 
+
+			public static final String FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON	    = "/projects/{id}/security/json-data";
+
 		/** VULNABILITY */
 			/** vulnerability info search */
 			public static final String FOSSLIGHT_API_VULNERABILITY_DATA	    = "/vulnerabilities";
@@ -1049,6 +1052,7 @@ public final class Url {
 		/** CODE */
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/codes";
+
 	}
 
 	public static final class API_LITE {
