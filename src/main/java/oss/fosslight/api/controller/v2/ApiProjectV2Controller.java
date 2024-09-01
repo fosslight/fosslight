@@ -1584,9 +1584,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "Load Searched Project Oss to Bin", notes = "Project > Identification > BIN")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
+            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header") })
     @PostMapping(value = { Url.APIV2.FOSSLIGHT_API_OSS_LOAD })
-    public ResponseEntity<Map<String, Object>> ossLoad(@RequestHeader String _token,
+    public ResponseEntity<Map<String, Object>> ossLoad(@RequestHeader String authorization,
                                                        @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String targetPrjId,
                                                        @ApiParam(value = "Load Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
                                     @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name = "tab_name") String tabName,
@@ -1600,7 +1600,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         log.error("/api/v2/oss_load called:" + targetPrjId);
 
-        T2Users userInfo = userService.checkApiUserAuth(_token);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         String errorMsgCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
