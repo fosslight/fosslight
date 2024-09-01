@@ -92,7 +92,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
-            HttpServletRequest request,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Name", required = false) @RequestParam(required = false) String prjName,
             @ApiParam(value = "Project Name exact match (Y: true, N: false)", allowableValues = "Y,N", required = false) @RequestParam(required = false, defaultValue = "N") String prjNameExactYn,
             @ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
@@ -103,7 +103,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
             @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator) {
 
-        String authorization = request.getHeader("Authorization");
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
