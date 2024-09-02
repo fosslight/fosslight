@@ -69,7 +69,7 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(
             MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        String error = ex.getParameterName() + " parameter is missing or misspelled";
+        String error = "'" + ex.getParameterName()  + "'" + " parameter is missing or misspelled";
 
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", "Bad Request");
