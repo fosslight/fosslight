@@ -85,10 +85,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
-//    @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-//    })
     @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
@@ -136,12 +132,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_MODEL_SEARCH})
     public ResponseEntity<Map<String, Object>> selectModelList(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "project ID List", required = true) @RequestParam(required = true) String[] prjIdList) {
 
         // 사용자 인증
@@ -165,12 +158,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Update model list of project", notes = "Basic Information > Model list")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE})
     public ResponseEntity<Map<String, Object>> updateModelList(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(required = true, name = "id") String prjId,
             @ApiParam(
                     value = "Model List, in format of: ${MODEL_NAME}|${CATEGORY}|${yyyyMMdd} (ex. MODEL_NAME|ETC > Etc|20220428)",
@@ -228,12 +218,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Update model list of project with file", notes = "Basic Information > Model list with file")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
     public ResponseEntity<Map<String, Object>> updateModelListUploadFile(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
 
@@ -287,12 +274,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Create Project", notes = "project 생성")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_CREATE})
     public ResponseEntity<Map<String, Object>> createProject(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Name (Duplicate not allowed)", required = true) @RequestParam(required = true) String prjName,
             @ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion,
             @ApiParam(value = "OS Type (\"Check the input value with /api/v2/codes\")", required = true) @RequestParam(required = true) String osType,
@@ -470,12 +454,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
 
     @ApiOperation(value = "Project Bom Download as File", notes = "Project > Bom tab download as file")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD})
     public ResponseEntity<FileSystemResource> getPrjBomDownload(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag,
@@ -518,12 +499,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Get Project Bom Tab As Json", notes = "Project > Get Bom tab data as json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_JSON})
     public ResponseEntity<Map<String, Object>> getPrjBomAsJson(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
             @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
@@ -556,12 +534,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Project Bom Compare", notes = "Project > Bom tab Compare")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_COMPARE})
     public ResponseEntity<Map<String, Object>> getPrjBomCompare(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
             @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
 
@@ -628,12 +603,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Identification OSS Report", notes = "Identification > src > oss report")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SRC})
     public ResponseEntity<Map<String, Object>> ossReportSrc(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "OSS Report > sheetName : all sheets starting with 'SRC'", required = false) @RequestPart(required = false) MultipartFile ossReport,
             @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
@@ -764,12 +736,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Identification OSS Report", notes = "Identification > bin > oss report")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_BIN})
     public ResponseEntity<Map<String, Object>> ossReportBin(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "OSS Report > sheetName : 'BIN'", required = false) @RequestPart(required = false) MultipartFile ossReport,
             @ApiParam(value = "Binary.txt", required = false) @RequestPart(required = false) MultipartFile binaryTxt,
@@ -1121,12 +1090,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Identification OSS Report", notes = "Identification > android > oss report", hidden = true)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_ANDROID})
     public ResponseEntity<Map<String, Object>> ossReportAndroid(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "OSS Report > sheetName : 'BIN (Android)'", required = true) @RequestPart(required = true) MultipartFile ossReport,
             @ApiParam(value = "NOTICE.html", required = true) @RequestPart(required = true) MultipartFile noticeHtml,
@@ -1343,12 +1309,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Verification Package File Upload", notes = "Verification > Package File Upload")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PACKAGE_UPLOAD})
     public ResponseEntity<Map<String, Object>> ossUploadPackage(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile,
             @ApiParam(value = "Verify when file is uploaded (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String verifyFlag) {
@@ -1490,12 +1453,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Project Add Watcher", notes = "Project Add Watcher")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
 
@@ -1550,12 +1510,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Project get Notice", notes = "Project Get")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
     public ResponseEntity getSelfcheckReport(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId,
             HttpServletRequest req
     ) {
@@ -1584,24 +1541,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
 
     @ApiOperation(value = "Load Searched Project Oss to Bin", notes = "Project > Identification > BIN")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header") })
     @PostMapping(value = { Url.APIV2.FOSSLIGHT_API_OSS_LOAD })
-    public ResponseEntity<Map<String, Object>> ossLoad(@RequestHeader String _token,
-                                                       @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String targetPrjId,
-                                                       @ApiParam(value = "Load Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
-                                    @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name = "tab_name") String tabName,
-                                                       @ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name")
-                                    @ValuesAllowed(propName = "searchCondition", values = {"id", "name"})@RequestParam(required = true) String searchCondition,
-                                                       @ApiParam(value = "Project ID to Load") @RequestParam(required = false) String prjIdToLoad,
-                                                       @ApiParam(value = "Project Name to Load") @RequestParam(required = false) String prjNameToLoad,
-                                                       @ApiParam(value = "Project Version to Load") @RequestParam(required = false) String prjVersionToLoad,
-                                                       @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", defaultValue = "Y", allowableValues = "Y, N")
-                                    @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false) String resetFlag) {
+    public ResponseEntity<Map<String, Object>> ossLoad(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String targetPrjId,
+            @ApiParam(value = "Load Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
+            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name = "tab_name") String tabName,
+            @ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name")
+            @ValuesAllowed(propName = "searchCondition", values = {"id", "name"})@RequestParam(required = true) String searchCondition,
+            @ApiParam(value = "Project ID to Load") @RequestParam(required = false) String prjIdToLoad,
+            @ApiParam(value = "Project Name to Load") @RequestParam(required = false) String prjNameToLoad,
+            @ApiParam(value = "Project Version to Load") @RequestParam(required = false) String prjVersionToLoad,
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", defaultValue = "Y", allowableValues = "Y, N")
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false) String resetFlag) {
 
         log.error("/api/v2/oss_load called:" + targetPrjId);
 
-        T2Users userInfo = userService.checkApiUserAuth(_token);
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         String errorMsgCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
