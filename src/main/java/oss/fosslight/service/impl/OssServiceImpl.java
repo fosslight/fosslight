@@ -1014,6 +1014,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 //	@CacheEvict(value="autocompleteCache", allEntries=true)
 	public String registOssMaster(OssMaster ossMaster) {
 		try {
+			if (isEmpty(ossMaster.getOssCommonId())) {
+				OssMaster bean = ossMapper.checkExistsOssname(ossMaster);
+				if (bean != null) ossMaster.setOssCommonId(bean.getOssCommonId());
+			}
+			
 			String[] ossNicknames = ossMaster.getOssNicknames();
 			String ossId = ossMaster.getOssId();
 			boolean isNew = StringUtil.isEmpty(ossId);
@@ -2878,11 +2883,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		OssMaster beforeBean = null;
 		OssMaster afterBean = null;
 
-		if (isEmpty(ossCommonId)) {
-			OssMaster bean = ossMapper.checkExistsOssname(ossMaster);
-			if (bean != null) ossMaster.setOssCommonId(bean.getOssCommonId());
-		}
-		
 		// downloadLocations이 n건일때 0번째 값은 oss Master로 저장.
 		String[] downloadLocations = ossMaster.getDownloadLocations();
 		if (downloadLocations != null) {
