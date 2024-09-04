@@ -246,8 +246,6 @@ public interface OssMapper {
 	List<OssComponents> getConfirmOssComponentsList(OssMaster ossMaster);
 
 	List<Vulnerability> getOssVulnerabilityList2(OssMaster ossMaster);
-	
-	List<Vulnerability> selectOssVulnerabilityListByVersionAlias(OssMaster ossMaster);
 
 	List<String> selectMultiOssList(OssMaster ossMaster);
 

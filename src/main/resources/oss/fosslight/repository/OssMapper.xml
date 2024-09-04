@@ -3969,61 +3969,6 @@
 			ORDER BY CVSS_SCORE DESC, MODI_DATE DESC LIMIT 10
 	</select>
 	
-	<select id="selectOssVulnerabilityListByVersionAlias" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Vulnerability">
-		SELECT TBL.*
-	    FROM
-	    (
-	    	SELECT NVD.PRODUCT, NVD.VERSION, NVD.VENDOR, CVE.CVE_ID, CVE.CVSS_SCORE, CVE.MODI_DATE, IFNULL(MAT.CPE23URI, NVD.CRITERIA) AS CRITERIA, CVE.VULN_SUMMARY
-			FROM (
-				SELECT MATCH_CRITERIA_ID, CVE_ID, VENDOR, PRODUCT, VERSION, CRITERIA
-				FROM NVD_DATA_CONFIGURATIONS
-				WHERE (
-					PRODUCT = #{ossName} OR PRODUCT = REPLACE(#{ossName}, ' ', '_')
-					<if test="ossNicknames != null">
-						<foreach item="item" collection="ossNicknames">
-							OR PRODUCT = #{item}
-						</foreach>
-					</if>
-					<if test="ossNicknames != null">
-						<foreach item="item" collection="ossNicknames">
-							OR PRODUCT = REPLACE(#{item}, ' ', '_')
-						</foreach>
-					</if>
-				)
-			) NVD
-			INNER JOIN NVD_CVE_V3 CVE
-			ON NVD.CVE_ID = CVE.CVE_ID
-			LEFT JOIN NVD_CPE_MATCH_NAMES MAT
-			ON NVD.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
-		) TBL
-		WHERE 1=1
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliases) and !@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliasWithColon)">
-		AND (
-			<foreach item="item" index="index" collection="ossVersionAliases" open="(" close=")" separator="OR">
-				SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = #{item}
-			</foreach>
-			OR
-			<foreach item="item" index="index" collection="ossVersionAliasWithColon" open="(" close=")" separator="OR">
-				SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 7), ':', -2) = #{item}
-			</foreach>
-			)
-		</if>
-		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliases) and @oss.fosslight.util.StringUtil@isEmpty(ossVersionAliasWithColon)">
-		AND
-			<foreach item="item" index="index" collection="ossVersionAliases" open="(" close=")" separator="OR">
-				SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = #{item}
-			</foreach>
-		</if>
-		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliases) and !@oss.fosslight.util.StringUtil@isEmpty(ossVersionAliasWithColon)">
-		AND
-			<foreach item="item" index="index" collection="ossVersionAliasWithColon" open="(" close=")" separator="OR">
-				SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 7), ':', -2) = #{item}
-			</foreach>
-		</if>
-		GROUP BY TBL.CVSS_SCORE, TBL.CVE_ID, TBL.CRITERIA
-		ORDER BY TBL.CVSS_SCORE DESC
-	</select>
-	
 	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
 		SELECT 
 			T1.OSS_NAME

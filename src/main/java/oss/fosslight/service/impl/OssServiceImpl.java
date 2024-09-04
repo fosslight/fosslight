@@ -4329,7 +4329,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	private List<Vulnerability> vulnDataForNotIncludeCpeMatch(Boolean convertFlag, OssMaster ossMaster, String[] nicknameList, List<String> convertNameList, List<String> dashOssNameList, OssMaster param) {
-		List<Vulnerability> list = ossMapper.selectOssVulnerabilityListByVersionAlias(param);
+		List<Vulnerability> list = vulnerabilityMapper.selectOssVulnerabilityListByVersionAlias(param);
 		
 		if ("N/A".equals(ossMaster.getOssVersion()) || isEmpty(ossMaster.getOssVersion())) {
 			ossMaster.setOssVersion("-");
