@@ -221,7 +221,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					continue;
 				}
 				
-				String checkKey = bean.getOssName().trim() +"_"+ avoidNull(bean.getOssVersion()).trim();
+				String checkKey = avoidNull(bean.getRefOssName(), bean.getOssName()).trim() +"_"+ avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
 				OssMaster ossBean = ossInfoByName.get(checkKey);
 
@@ -406,7 +406,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					continue;
 				}
 				
-				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
+				String checkKey = avoidNull(bean.getRefOssName(), bean.getOssName()).trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
 				OssMaster ossBean = ossInfoByName.get(checkKey);
 				basicKey = "OSS_NAME";
@@ -686,7 +686,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				// V-DIFF 및 편집중인 상태에서 oss 의 라이선스가 변경되어 oss는 multi이나, 라이선스가 하나만
 				// 등록되는 현상 대응
 				if (!isEmpty(bean.getOssName())) {
-					String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
+					String checkKey = avoidNull(bean.getRefOssName(), bean.getOssName()).trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 					checkKey = checkKey.toUpperCase();
 					licenseList = findLicense(bean.getGridId());
 					
@@ -822,7 +822,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 					continue;
 				}
 				
-				String checkKey = avoidNull(bean.getOssName(), "").trim() + "_" + avoidNull(bean.getOssVersion(), "").trim();
+				String checkKey = avoidNull(bean.getRefOssName(), avoidNull(bean.getOssName(), "")).trim() + "_" + avoidNull(bean.getOssVersion(), "").trim();
 				checkKey = checkKey.toUpperCase();
 				OssMaster checkOSSMaster = ossInfoByName.get(checkKey);
 				basicKey = "OSS_NAME";
@@ -1826,7 +1826,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				boolean hasError = false;
 				boolean hasMultiError = false; // multi license용
 				
-				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
+				String checkKey = avoidNull(bean.getRefOssName(), bean.getOssName()).trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
 				OssMaster ossmaster = ossInfo.get(checkKey);
 				
