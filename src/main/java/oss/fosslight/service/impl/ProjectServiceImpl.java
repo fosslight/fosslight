@@ -619,6 +619,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					} else {
 						setCveInfoFlag = true;
 					}
+				} else {
+					setCveInfoFlag = true;
 				}
 				
 				if (setCveInfoFlag) {
@@ -959,6 +961,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						} else {
 							setCveInfoFlag = true;
 						}
+					} else {
+						setCveInfoFlag = true;
 					}
 					
 					if (setCveInfoFlag) {
@@ -7099,5 +7103,55 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		} else {
 			project.setAllowDownloadCDXXmlYn(CoConstDef.FLAG_NO);
 		}
+	}
+
+	@Override
+	public void updateSecurityDataForProject(String prjId) {
+		// check project notice
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = getProjectDetail(project);
+		project.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD)));
+		
+		if (CoConstDef.FLAG_NO.equals(project.getAndroidFlag())) {
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		} else {
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+		}
+		
+		// set vulnerability resolution
+		checkIfVulnerabilityResolutionIsFixed(project);
+		
+		if (!CoConstDef.FLAG_NO.equals(project.getSecCode())) {
+			if (project.getSecCode().equals("Fixed")) {
+				project.setVulnerabilityResolution("Resolved");
+				if (CoConstDef.FLAG_NO.equals(project.getCvssScore())) {
+					project.setCvssScoreMax("N/A");
+				} else {
+					project.setCvssScoreMax(project.getCvssScore());
+				}
+			} else {
+				if (!project.getCvssScore().equals("0") && !project.getCvssScore().equals("N")) {
+					if (new BigDecimal(project.getCvssScore()).compareTo(new BigDecimal(project.getStandardScore())) > 0) {
+						project.setVulnerabilityResolution("Need to resolve");
+					} else {
+						project.setVulnerabilityResolution("Discovered");
+					}
+					project.setCvssScoreMax(project.getCvssScore());
+				} else {
+					project.setVulnerabilityResolution("Discovered");
+					project.setCvssScoreMax("N/A");
+				}
+			}
+		} else {
+			if (!project.getCvssScore().equals("0") && !project.getCvssScore().equals("N")) {
+				project.setCvssScoreMax(project.getCvssScore());
+			} else {
+				project.setCvssScoreMax("N/A");
+			}
+		}
+		
+		// update security data for project
+		projectMapper.updateProjectForSecurity(project);
 	}
 }
