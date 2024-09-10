@@ -14,9 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.dto.Paging;
-import oss.fosslight.api.entity.CommonResult;
-import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -168,14 +165,86 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         }
     }
 
+    @ApiOperation(value = "3rd Party Export report (Deprecated)", notes = "3rd Party > Export report")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_EXPORT_DEPRECATED})
+    public ResponseEntity<FileSystemResource> get3rdExport(
+            @RequestHeader String authorization,
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
+
+        String downloadId = "";
+        T2File fileInfo = new T2File();
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+
+        try {
+            Map<String, Object> paramMap = new HashMap<>();
+            List<String> partnerIdList = new ArrayList<String>();
+            partnerIdList.add(partnerId);
+            String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
+
+            paramMap.put("userId", userInfo.getUserId());
+            paramMap.put("userRole", userRole(userInfo));
+            paramMap.put("partnerIdList", partnerIds);
+            paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+            boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
+            if (searchFlag) {
+                downloadId = ExcelDownLoadUtil.getExcelDownloadId("partnerCheckList", partnerId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+                fileInfo = fileService.selectFileInfo(downloadId);
+            }
+
+            return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @ApiOperation(value = "3rd Party Export Json (Deprecated)", notes = "3rd Party > Export Json")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
+    })
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_JSON_DEPRECATED})
+    public ResponseEntity<Map<String, Object>> get3rdExportJson(
+            @RequestHeader String authorization,
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        try {
+            Map<String, Object> paramMap = new HashMap<>();
+            List<String> partnerIdList = new ArrayList<String>();
+            partnerIdList.add(partnerId);
+            String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
+
+            paramMap.put("userId", userInfo.getUserId());
+            paramMap.put("userRole", userRole(userInfo));
+            paramMap.put("partnerIdList", partnerIds);
+            paramMap.put("readOnly", CoConstDef.FLAG_YES);
+
+            boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
+            if (searchFlag) {
+                resultMap = apiPartnerService.getExportJson(partnerId);
+            }
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+        } catch (Exception e) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
     @ApiOperation(value = "3rd Party Export report", notes = "3rd Party > Export report")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_EXPORT})
-    public ResponseEntity<FileSystemResource> get3rdExport(
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD})
+    public ResponseEntity<FileSystemResource> get3rdDownload(
             @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) {
 
         String downloadId = "";
         T2File fileInfo = new T2File();
@@ -210,7 +279,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_JSON})
-    public ResponseEntity<Map<String, Object>> get3rdExportJson(
+    public ResponseEntity<Map<String, Object>> get3rdAsJson(
             @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
 

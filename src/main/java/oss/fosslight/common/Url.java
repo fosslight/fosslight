@@ -959,8 +959,11 @@ public final class Url {
 
 			/** API 3rd Party Add Watcher */
 			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partners/{id}/watchers";
-			public static final String FOSSLIGHT_API_PARTNER_EXPORT			= "/partners/{id}/export";
-			public static final String FOSSLIGHT_API_PARTNER_JSON			= "/partners/{id}/json";
+			public static final String FOSSLIGHT_API_PARTNER_EXPORT_DEPRECATED = "/partners/{id}/export";
+			public static final String FOSSLIGHT_API_PARTNER_JSON_DEPRECATED = "/partners/{id}/json";
+
+			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD		= "/partners/{id}/file";
+			public static final String FOSSLIGHT_API_PARTNER_JSON			= "/partners/{id}/json-data";
 
 
 		/** OSS */
