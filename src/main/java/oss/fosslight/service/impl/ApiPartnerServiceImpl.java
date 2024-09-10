@@ -120,7 +120,7 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 		Map<String, Object> map = projectService.getIdentificationGridList(_param);
 
 		List<ProjectIdentification> list = (List<ProjectIdentification>) map.get("mainData");
-		LinkedHashMap<String, List<Map<String, Object>>> resultYamlFormat = YamlUtil.checkYamlFormat(projectService.setMergeGridData(list), type);
+		LinkedHashMap<String, List<Map<String, Object>>> resultYamlFormat = YamlUtil.checkYamlFormat(list, type);
 
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
