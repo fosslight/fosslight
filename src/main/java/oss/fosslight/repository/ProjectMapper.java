@@ -394,4 +394,8 @@ public interface ProjectMapper {
 	Float getCvssScoreForNotFixed(String prjId);
 
 	List<ProjectIdentification> selectSecurityListForProject(ProjectIdentification identification);
+	
+	void updateProjectForSecurity(Project project);
+
+	List<String> selectProjectForSecurity();
 }
