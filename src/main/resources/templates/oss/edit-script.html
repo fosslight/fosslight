@@ -570,7 +570,7 @@
                     "ossName" : $("input[name='ossName']").val(), "ossVersion" : $("input[name='ossVersion']").val(), "licenseName" : "", "refPartnerName" : "", "prjDivision" : "","networkServerType" : "", "priority" : "",
                     "distributionType" : "", "noticeType" : "", "statuses" : "", "comment" : "", "userComment" : ""}
                 projectSearchConditions.expire = Date.now() + 300000;
-                localStorage.setItem("projectSearchConditions", JSON.stringify(projectSearchConditions));
+                sessionStorage.setItem("projectSearchConditions", JSON.stringify(projectSearchConditions));
                 customCreateTabInFrame("project", "/project/list");
 			});
 

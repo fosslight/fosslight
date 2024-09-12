@@ -88,8 +88,8 @@
         		var textarea = ["copyrights", "summaryDescription"];
                 
         		var optionSelectedFlag = false;
-                if ("Y" != linkFlag &&  typeof localStorage.ossSearchConditions !== "undefined") {
-                	var localStorageSearchConditions = JSON.parse(localStorage.ossSearchConditions);
+                if ("Y" != linkFlag &&  typeof sessionStorage.ossSearchConditions !== "undefined") {
+                	var localStorageSearchConditions = JSON.parse(sessionStorage.ossSearchConditions);
                 	
                 	Object.keys(localStorageSearchConditions).forEach(function(key) {
             			if (input.includes(key)) {
@@ -234,7 +234,7 @@
                     postData.ignoreSearchFlag = "N";
                     
                     var localStorageData = oss_lst_fn.serializeObjectHelper();
-                    localStorage.setItem("ossSearchConditions", JSON.stringify(localStorageData));
+                    sessionStorage.setItem("ossSearchConditions", JSON.stringify(localStorageData));
                     
                     optionSelectedFlag = false;
                     Object.keys(localStorageData).forEach(function(key) {

@@ -72,8 +72,8 @@ var evt = {
 		var textarea = ["comment", "userComment"];
 		
 		var optionSelectedFlag = false;
-		if (typeof localStorage.projectSearchConditions !== "undefined") {
-			var localStorageSearchConditions = JSON.parse(localStorage.projectSearchConditions);
+		if (typeof sessionStorage.projectSearchConditions !== "undefined") {
+			var localStorageSearchConditions = JSON.parse(sessionStorage.projectSearchConditions);
 			
 			Object.keys(localStorageSearchConditions).forEach(function(key) {
     			if (input.includes(key)) {
@@ -163,7 +163,7 @@ var evt = {
 			var postData = fn.setGridParam();
 			
 			var localStorageData = fn.setGridParam();
-            localStorage.setItem("projectSearchConditions", JSON.stringify(localStorageData));
+            sessionStorage.setItem("projectSearchConditions", JSON.stringify(localStorageData));
 			
             optionSelectedFlag = false;
             Object.keys(localStorageData).forEach(function(key) {
