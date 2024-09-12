@@ -218,6 +218,8 @@ public interface ProjectService extends HistoryConfig{
 
 	public void setNoticeFileFormat(Project project, List<String> noticeFileFormatList);
 
+	public void updateSecurityDataForProject(String prjId);
+
 }
 
 
