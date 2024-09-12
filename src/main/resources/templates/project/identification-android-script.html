@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <th:block th:fragment="contentScript">
 <script th:inline="javascript">
+var userRole = [[${#authentication.authorities[0].authority}]];
 var androidGridCompleteFlag = false;
 
 $(document).ready(function () {
@@ -181,37 +182,19 @@ $(document).ready(function () {
 				var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
 				var vulnerability = "<span class=\"ml-2\"> | </span>";
 				
-				var cvssScore = [[${project.cvssScore}]];
-				var secCode = [[${project.secCode}]];
-				var secCvssScore = [[${project.secCvssScore}]];
-				
-				if (secCvssScore != null && (secCode != null && "Fixed" != secCode)) {
-					cvssScore = secCvssScore;
-				}
-				
-				if (secCode != null) {
-					if ("Fixed" == secCode) {
-						if (cvssScore != null && cvssScore != 0) {
-							vulnerability += "<span class=\"badge badge-cherry size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(" + cvssScore + ")</span>";
-						} else {
-							vulnerability += "<span class=\"badge badge-cherry size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Resolved(N/A)</span>";
-						}
+				var cvssScoreMax = displayInfo.cvssScoreMax;
+				if (typeof displayInfo.vulnerabilityResolution !== "undefined") {
+					var vulnerabilityResolution = displayInfo.vulnerabilityResolution;
+					if ("Need to resolve" == vulnerabilityResolution) {
+						vulnerability += '<span type="button" class="badge badge-dark-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 					} else {
-						if (cvssScore >= standardScore) {
-							vulnerability += "<span class=\"badge badge-dark-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Need to resolve(" + cvssScore + ")</span>";
-						} else {
-							if (cvssScore != null && cvssScore != 0) {
-								vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(" + cvssScore + ")</span>";
-							} else {
-								vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem pointer px-1 ml-2\" onclick=\"createTabInFrame('" + [[${project.prjId}]] + "_Security', '/project/security/" + [[${project.prjId}]] + "')\">Discovered(N/A)</span>";
-							}
-						}
+						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 					}
 				} else {
-					if (cvssScore != null && cvssScore != 0) {
-						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered("+cvssScore+")</span>";
+					if (typeof cvssScoreMax !== "undefined") {
+						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered(' + cvssScoreMax + ')</span>';
 					} else {
-						vulnerability += "<span class=\"badge badge-cerebral-gray size-sm width-9rem px-1 ml-2\">Discovered(N/A)</span>";
+						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered(N/A)</span>';
 					}
 				}
 				
@@ -224,6 +207,9 @@ $(document).ready(function () {
 		},
 		mvEditTab : function(prjId){
 			createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
+		},
+		mvSecurity : function() {
+			createTabInFrame([[${project.prjId}]] + "_Security", "/project/security/" + [[${project.prjId}]]);
 		},
 	    handleUserCommentPopupOpen: function () {
 	        // 코멘트 팝업

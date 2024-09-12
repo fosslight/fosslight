@@ -1330,19 +1330,31 @@ var src_grid = {
                 	if (!permission || "CONF" == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 	} else {
-                		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                		}
                 	}
             		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('SRC', 'srcList', 'main', "+permission+", '"+identificationStatus+"')\">";
             		if (!permission || "CONF" == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
                 	} else {
-                		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                		}
                 	}
             		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('SRC', "+permission+", '"+identificationStatus+"')\">";
             		if (!permission || "CONF" == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
                 	} else {
-                		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                		}
                 	}
                 	appendBtn += "<button type=\"button\" id=\"srcDropTop\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
                 	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"srcDropTop\">";
