@@ -802,6 +802,10 @@ public class Project extends ComBean implements Serializable {
 	
 	private String deleteOsddFlag;
 
+	private String vulnerabilityResolution;
+	
+	private String cvssScoreMax;
+	
 	/**
 	 * Gets the prj id.
 	 *
@@ -4525,5 +4529,21 @@ public class Project extends ComBean implements Serializable {
 
 	public void setEditNoticeYn(String editNoticeYn) {
 		this.editNoticeYn = editNoticeYn;
+	}
+
+	public String getVulnerabilityResolution() {
+		return vulnerabilityResolution;
+	}
+
+	public void setVulnerabilityResolution(String vulnerabilityResolution) {
+		this.vulnerabilityResolution = vulnerabilityResolution;
+	}
+
+	public String getCvssScoreMax() {
+		return cvssScoreMax;
+	}
+
+	public void setCvssScoreMax(String cvssScoreMax) {
+		this.cvssScoreMax = cvssScoreMax;
 	}
 }
