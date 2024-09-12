@@ -1398,31 +1398,34 @@ var src_grid = {
             	var identificationStatus = [[${project.identificationStatus}]];
 				
 				if (permission && "CONF" != identificationStatus) {
-					// 체크 박스 영역 제외
-					cleanErrMsg("srcList", rowid);
+					if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+					} else {
+						// 체크 박스 영역 제외
+						cleanErrMsg("srcList", rowid);
 
-					fn_grid_com.setCellEdit(srcList, rowid, srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
+						fn_grid_com.setCellEdit(srcList, rowid, srcValidMsgData, srcDiffMsgData, srcInfoMsgData, com_fn.getLicenseName);
 
-					// 서브 그리드 제외
-					ondblClickRowBln = false;
-					
-	 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
-	 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
-	 	 			
-					var result = $('#'+rowid+'_licenseName').val().split(",");
+						// 서브 그리드 제외
+						ondblClickRowBln = false;
+						
+		 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
+		 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+		 	 			
+						var result = $('#'+rowid+'_licenseName').val().split(",");
 
-					result.forEach(function(cur,idx){
-						if(cur != ""){
-							var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+						result.forEach(function(cur,idx){
+							if(cur != ""){
+								var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
 
-							$('#'+rowid+'_licenseNameBtn').append(mult);
-						}
-					});
-					
-					$('#'+rowid+'_licenseName').val("");
-	                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name;
-	                var nextRow = rowid;
-	                $('#'+nextRow+"_"+nextCol).focus();
+								$('#'+rowid+'_licenseNameBtn').append(mult);
+							}
+						});
+						
+						$('#'+rowid+'_licenseName').val("");
+		                var nextCol = srcList.jqGrid('getGridParam', 'colModel')[iCol].name;
+		                var nextRow = rowid;
+		                $('#'+nextRow+"_"+nextCol).focus();
+					}
 				}
 			},
 			onPaging: function(action) {

@@ -63,16 +63,21 @@
 								</span>
 								<input type="hidden" id="copyUrl"/>
 								<th:block th:if="${detail.statusPermission > 0 and detail.status != 'CONF'}">
-									<span class="mr-2 px-2 pointer" id="partyDelete" th:onclick="|fn.delete()|" title="delete">
-										<i class="far fa-trash-alt customIcon2"></i>
-									</span>
-									<span class="mr-2 px-2 pointer" id="partyReset" th:onclick="|fn.reset()|" title="reset">
-										<i class="fas fa-undo-alt customIcon2"></i>
-									</span>
+									<th:block th:if="${#authentication.authorities[0].authority != 'ROLE_USER' or (#authentication.authorities[0].authority == 'ROLE_USER' and detail.status != 'REQ' and detail.status != 'REV')}">
+										<span class="mr-2 px-2 pointer" id="partyDelete" th:onclick="|fn.delete()|" title="delete">
+											<i class="far fa-trash-alt customIcon2"></i>
+										</span>
+										<span class="mr-2 px-2 pointer" id="partyReset" th:onclick="|fn.reset()|" title="reset">
+											<i class="fas fa-undo-alt customIcon2"></i>
+										</span>
+									</th:block>
 								</th:block>
-									<span th:if="${detail?.partnerId == null or (detail.statusPermission > 0 and detail.status != 'CONF')}" class="mr-2 px-2 pointer" id="partySave" th:onclick="|fn.save()|" title="save">
+								<th:block th:if="${detail?.partnerId == null or detail.statusPermission > 0}">
+									<span th:if="${#authentication.authorities[0].authority != 'ROLE_USER' or (#authentication.authorities[0].authority == 'ROLE_USER' and detail.status != 'REQ' and detail.status != 'REV')}"
+											class="mr-2 px-2 pointer" id="partySave" th:onclick="|fn.save()|" title="save">
 										<i class="fas fa-save customIcon2"></i>
 									</span>
+								</th:block>
                            	 	<span class="btn btn-tool mr-2 pointer" id="expandBtn" data-card-widget="collapse" title="Collapse">
                             		<i class="fas fa-minus"></i>
                            		</span>
