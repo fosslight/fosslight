@@ -223,7 +223,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
-				if (!ossInfoByName.containsKey(checkKey)) {
+				if (!ossInfoByName.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
 					checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 					checkKey = checkKey.toUpperCase();
 				}
@@ -412,7 +412,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
-				if (!ossInfoByName.containsKey(checkKey)) {
+				if (!ossInfoByName.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
 					checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 					checkKey = checkKey.toUpperCase();
 				}
@@ -696,7 +696,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				if (!isEmpty(bean.getOssName())) {
 					String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 					checkKey = checkKey.toUpperCase();
-					if (!ossInfo.containsKey(checkKey)) {
+					if (!ossInfo.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
 						checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 						checkKey = checkKey.toUpperCase();
 					}
@@ -836,7 +836,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
-				if (!ossInfoByName.containsKey(checkKey)) {
+				if (!ossInfoByName.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
 					checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 					checkKey = checkKey.toUpperCase();
 				}
@@ -1844,7 +1844,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
-				if (!ossInfo.containsKey(checkKey)) {
+				if (!ossInfo.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
 					checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 					checkKey = checkKey.toUpperCase();
 				}
