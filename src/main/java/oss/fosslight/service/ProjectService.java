@@ -219,7 +219,12 @@ public interface ProjectService extends HistoryConfig{
 	public void setNoticeFileFormat(Project project, List<String> noticeFileFormatList);
 
 	public void updateSecurityDataForProject(String prjId);
+	
+	public void updatePreparedStatement(List<ProjectIdentification> updateOssComponentList, List<ProjectIdentification> insertOssComponentList, List<OssComponentsLicense> insertOssComponentLicenseList, List<String> deleteRows);
+	
+	public void deletePreparedStatement(List<OssComponents> componentIds);
 
+	public void setLoadToList(Map<String, Object> map, String prjId);
 }
 
 

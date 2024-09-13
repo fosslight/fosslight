@@ -2894,7 +2894,7 @@ public class ProjectController extends CoTopComponent {
 		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
 		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
 		projectService.registBom(prjId, merge, projectIdentification, checkGridBomList);
-
+//		projectService.updateSecurityDataForProject(prjId);
 		Map<String, String> resMap = new HashMap<>();
 		
 		try {
@@ -3214,7 +3214,7 @@ public class ProjectController extends CoTopComponent {
 			HttpServletResponse res, Model model) {
 		ossComponents.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
 		Map<String, Object> map = projectService.getPartnerOssList(ossComponents);
-
+		projectService.setLoadToList(map, ossComponents.getReferenceId());
 		return makeJsonResponseHeader(map);
 	}
 	

@@ -414,8 +414,6 @@ public class PartnerController extends CoTopComponent{
 			} else {
 				res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=true");
 			}
-		} else {
-			ResponseUtil.DefaultbasicAlert(res, getMessage("msg.common.delete.comment.alert"));
 		}
 	}
 	

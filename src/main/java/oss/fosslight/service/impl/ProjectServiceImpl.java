@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -257,21 +258,21 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 						}
 						
-						String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(bean.getPrjId(), bean.getReferenceDiv());
-						if (conversionCveInfo != null) {
-							String[] conversionCveData = conversionCveInfo.split("\\@");
-							bean.setCvssScore(conversionCveData[3]);
-							bean.setCveId(conversionCveData[4]);
-							bean.setVulnYn(CoConstDef.FLAG_YES);
-						}
-						
-//						if (getSecurityDataCntByProject(bean)) {
-							checkIfVulnerabilityResolutionIsFixed(bean);
+//						String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(bean.getPrjId(), bean.getReferenceDiv());
+//						if (conversionCveInfo != null) {
+//							String[] conversionCveData = conversionCveInfo.split("\\@");
+//							bean.setCvssScore(conversionCveData[3]);
+//							bean.setCveId(conversionCveData[4]);
+//							bean.setVulnYn(CoConstDef.FLAG_YES);
 //						}
 						
-						bean.setCvssScore(avoidNull(bean.getCvssScore(), CoConstDef.FLAG_NO));
-						bean.setSecCode(avoidNull(bean.getSecCode(), CoConstDef.FLAG_NO));
-						bean.setSecCvssScore(avoidNull(bean.getSecCvssScore(), CoConstDef.FLAG_NO));
+//						if (getSecurityDataCntByProject(bean)) {
+//							checkIfVulnerabilityResolutionIsFixed(bean);
+//						}
+						
+//						bean.setCvssScore(avoidNull(bean.getCvssScore(), CoConstDef.FLAG_NO));
+//						bean.setSecCode(avoidNull(bean.getSecCode(), CoConstDef.FLAG_NO));
+//						bean.setSecCvssScore(avoidNull(bean.getSecCvssScore(), CoConstDef.FLAG_NO));
 					});
 				}
 			}
@@ -335,6 +336,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			}
 		}
+		
+		bean.setCvssScore(avoidNull(bean.getCvssScore(), CoConstDef.FLAG_NO));
+		bean.setSecCode(avoidNull(bean.getSecCode(), CoConstDef.FLAG_NO));
 	}
 
 	private boolean getSecurityDataCntByProject(Project project) {
@@ -421,19 +425,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				project.setPermission(1);
 			}
-		}
-		if (!CoConstDef.FLAG_NO.equals(avoidNull(project.getActType()))) {
-			String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(project.getPrjId(), project.getReferenceDiv());
-			if (conversionCveInfo != null) {
-				String[] conversionCveData = conversionCveInfo.split("\\@");
-				project.setCvssScore(conversionCveData[3]);
-				project.setCveId(conversionCveData[4]);
-				project.setVulnYn(CoConstDef.FLAG_YES);
-			}
-			
-//			if (getSecurityDataCntByProject(project)) {
-				checkIfVulnerabilityResolutionIsFixed(project);
-//			}
 		}
 		
 		project.setStandardScore(null);
@@ -4173,18 +4164,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		ossComponents.setReferenceDiv(avoidNull(ossComponents.getReferenceDiv(), CoConstDef.CD_DTL_COMPONENT_PARTNER));
 		List<OssComponents> list = projectMapper.getPartnerOssList(ossComponents);
+		ProjectIdentification param = new ProjectIdentification();
 		
 		for (OssComponents oc : list){
 			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())){
-				ProjectIdentification PI = new ProjectIdentification();
-				PI.setComponentId(oc.getComponentId());
-				List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
-				if (!subGridData.isEmpty()) {
-					PI = subGridData.get(0);
-					
-					oc.setLicenseName(PI.getLicenseName());
-					oc.setLicenseText(PI.getLicenseText());
-					oc.setCopyrightText(PI.getCopyrightText());
+				param.addComponentIdList(oc.getComponentId());
+			}
+		}
+		
+		Map<String, List<ProjectIdentification>> licenseMap = new HashMap<>();
+		if (param.getComponentIdList() != null && !param.getComponentIdList().isEmpty()) {
+			List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(param);
+			for (ProjectIdentification ocl : subGridData) {
+				String key = ocl.getComponentId();
+				List<ProjectIdentification> thridLicenses = null;
+				if (licenseMap.containsKey(key)) {
+					thridLicenses = licenseMap.get(ocl.getComponentId());
+				} else {
+					thridLicenses = new ArrayList<>();
+				}
+				ocl.setEditable(CoConstDef.FLAG_YES);
+				thridLicenses.add(ocl);
+				licenseMap.put(key, thridLicenses);
+			}
+			
+			for (OssComponents oc : list){
+				if (licenseMap.containsKey(oc.getComponentId())) {
+					List<ProjectIdentification> licenseList = licenseMap.get(oc.getComponentId());
+					oc.setLicenseName(licenseList.get(0).getLicenseName());
+					oc.setLicenseText(licenseList.get(0).getLicenseText());
+					oc.setCopyrightText(licenseList.get(0).getCopyrightText());
 				}
 			}
 		}
@@ -7153,5 +7162,310 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		// update security data for project
 		projectMapper.updateProjectForSecurity(project);
+	}
+
+	@Override
+	public void updatePreparedStatement(List<ProjectIdentification> updateOssComponentList, List<ProjectIdentification> insertOssComponentList, List<OssComponentsLicense> insertOssComponentLicenseList, List<String> deleteRows) {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+		PreparedStatement stmt3 = null;
+		
+		String query = "";
+		
+		try{
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			
+			int idx = 1;
+			if (updateOssComponentList != null && updateOssComponentList.size() > 0) {
+				query = "UPDATE OSS_COMPONENTS SET OSS_ID = ?, OSS_NAME = TRIM(?), OSS_VERSION = TRIM(REPLACE(?, 'N/A','')), DOWNLOAD_LOCATION = ?, HOMEPAGE = ?, FILE_PATH = ?, EXCLUDE_YN = ?, BINARY_NAME = ?, BINARY_NOTICE = ?, CUSTOM_BINARY_YN = ?, COPYRIGHT = ?,"
+						+ " OBLIGATION_TYPE = ?, COMMENTS = ?, DEPENDENCIES = ?, REF_OSS_NAME = ?, PACKAGE_URL = ?"
+						+ " WHERE COMPONENT_ID = ?;";
+				stmt = conn.prepareStatement(query);
+				
+				for (ProjectIdentification item : updateOssComponentList) {
+					stmt.setString(1, item.getOssId());
+					stmt.setString(2, item.getOssName());
+					stmt.setString(3, item.getOssVersion());
+					stmt.setString(4, item.getDownloadLocation());
+					stmt.setString(5, item.getHomepage());
+					stmt.setString(6, item.getFilePath());
+					stmt.setString(7, item.getExcludeYn());
+					stmt.setString(8, item.getBinaryName());
+					stmt.setString(9, item.getBinaryNotice());
+					stmt.setString(10, item.getCustomBinaryYn());
+					stmt.setString(11, item.getCopyrightText());
+					stmt.setString(12, isEmpty(item.getObligationType()) ? null : item.getObligationType());
+					stmt.setString(13, item.getComments());
+					stmt.setString(14, isEmpty(item.getDependencies()) ? null : item.getDependencies());
+					stmt.setString(15, isEmpty(item.getRefOssName()) ? null : item.getRefOssName());
+					stmt.setString(16, isEmpty(item.getPackageUrl()) ? null : item.getPackageUrl());
+					stmt.setString(17, item.getComponentId());
+					stmt.addBatch();
+					stmt.clearParameters();
+					
+					if ((idx % 1000) == 0) {
+						stmt.executeBatch();
+						stmt.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+
+				stmt.executeBatch() ;
+				conn.commit();
+			}
+			
+			Map<String, String> componentIdMap = new HashMap<>();
+			Map<String, String> gridMap = new HashMap<>();
+			
+			if (insertOssComponentList != null && insertOssComponentList.size() > 0) {
+				query = "INSERT INTO OSS_COMPONENTS (REFERENCE_ID, REFERENCE_DIV, COMPONENT_IDX, OSS_ID, OSS_NAME, OSS_VERSION, DOWNLOAD_LOCATION, HOMEPAGE, FILE_PATH, EXCLUDE_YN, COPYRIGHT, BINARY_NAME, BINARY_SIZE, BINARY_NOTICE, CUSTOM_BINARY_YN, REF_PARTNER_ID"
+						+ ", REF_PRJ_ID, REF_BAT_ID, REF_COMPONENT_ID, REPORT_FILE_ID, BAT_STRING_MATCH_PERCENTAGE, BAT_PERCENTAGE, BAT_SCORE, OBLIGATION_TYPE, COMMENTS, DEPENDENCIES, REF_OSS_NAME, TLSH, CHECK_SUM, PACKAGE_URL) "
+						+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+				stmt2 = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+				
+				idx = 1;
+				int rsIdx = 1;
+				
+				for (ProjectIdentification item : insertOssComponentList) {
+					stmt2.setString(1, item.getReferenceId());
+					stmt2.setString(2, item.getReferenceDiv());
+					stmt2.setString(3, item.getComponentIdx());
+					stmt2.setString(4, isEmpty(item.getOssId()) ? null : item.getOssId());
+					stmt2.setString(5, item.getOssName().trim());
+					stmt2.setString(6, item.getOssVersion().equals("N/A") ? "" : item.getOssVersion().trim());
+					stmt2.setString(7, item.getDownloadLocation());
+					stmt2.setString(8, item.getHomepage());
+					stmt2.setString(9, item.getFilePath());
+					stmt2.setString(10, item.getExcludeYn());
+					stmt2.setString(11, item.getCopyrightText());
+					stmt2.setString(12, isEmpty(item.getBinaryName()) ? null : item.getBinaryName());
+					stmt2.setString(13, isEmpty(item.getBinarySize()) ? null : item.getBinarySize());
+					stmt2.setString(14, isEmpty(item.getBinaryNotice()) ? null : item.getBinaryNotice());
+					stmt2.setString(15, isEmpty(item.getCustomBinaryYn()) ? null : item.getCustomBinaryYn());
+					stmt2.setString(16, isEmpty(item.getRefPartnerId()) ? null : item.getRefPartnerId());
+					stmt2.setString(17, isEmpty(item.getRefPrjId()) ? null : item.getRefPrjId());
+					stmt2.setString(18, isEmpty(item.getRefBatId()) ? null : item.getRefBatId());
+					stmt2.setString(19, isEmpty(item.getRefComponentId()) ? null : item.getRefComponentId());
+					stmt2.setString(20, isEmpty(item.getReportFileId()) ? null : item.getReportFileId());
+					stmt2.setString(21, isEmpty(item.getBatStringMatchPercentage()) ? null : item.getBatStringMatchPercentage());
+					stmt2.setString(22, isEmpty(item.getBatPercentage()) ? null : item.getBatPercentage());
+					stmt2.setString(23, isEmpty(item.getBatScore()) ? null : item.getBatScore());
+					stmt2.setString(24, isEmpty(item.getObligationType()) ? null : item.getObligationType());
+					stmt2.setString(25, isEmpty(item.getComments()) ? null : item.getComments());
+					stmt2.setString(26, isEmpty(item.getDependencies()) ? null : item.getDependencies());
+					stmt2.setString(27, isEmpty(item.getRefOssName()) ? null : item.getRefOssName());
+					stmt2.setString(28, isEmpty(item.getTlsh()) ? null : item.getTlsh());
+					stmt2.setString(29, isEmpty(item.getCheckSum()) ? null : item.getCheckSum());
+					stmt2.setString(30, isEmpty(item.getPackageUrl()) ? null : item.getPackageUrl());
+					stmt2.addBatch();
+					gridMap.put(String.valueOf(idx), item.getGridId());
+					
+					if ((idx % 1000) == 0) {
+						stmt2.executeBatch();
+						ResultSet rs = stmt2.getGeneratedKeys();
+						while (rs.next()) {
+							int componentId = rs.getInt(1);
+							componentIdMap.put(String.valueOf(rsIdx), String.valueOf(componentId));
+							deleteRows.add(String.valueOf(componentId));
+							rsIdx++;
+						}
+						
+						stmt2.clearParameters();
+						stmt2.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+
+				stmt2.executeBatch();
+				
+				ResultSet rs = stmt2.getGeneratedKeys();
+				while (rs.next()) {
+					int componentId = rs.getInt(1);
+					componentIdMap.put(String.valueOf(rsIdx), String.valueOf(componentId));
+					deleteRows.add(String.valueOf(componentId));
+					rsIdx++;
+				}
+				
+				stmt2.clearParameters();
+				stmt2.clearBatch();
+				
+				conn.commit();
+			}
+
+			
+			if (insertOssComponentLicenseList != null && insertOssComponentLicenseList.size() > 0) {
+				Map<String, String> ossComponentIdMap = new HashMap<>();
+				for (String key : gridMap.keySet()) {
+					ossComponentIdMap.put(gridMap.get(key), componentIdMap.get(key));
+				}
+				
+				query = "INSERT INTO OSS_COMPONENTS_LICENSE (COMPONENT_ID, LICENSE_ID, LICENSE_NAME, COPYRIGHT_TEXT, EXCLUDE_YN) VALUES (?,?,?,?,?);";
+				stmt3 = conn.prepareStatement(query);
+				
+				idx = 1;
+				for (OssComponentsLicense item : insertOssComponentLicenseList) {
+					String componentId = item.getComponentId();
+					if (componentId.contains(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX) && ossComponentIdMap.containsKey(componentId)) {
+						componentId = ossComponentIdMap.get(componentId);
+					}
+					
+					stmt3.setString(1, componentId);
+					stmt3.setString(2, item.getLicenseId());
+					stmt3.setString(3, item.getLicenseName().trim());
+					stmt3.setString(4, item.getCopyrightText());
+					stmt3.setString(5, item.getExcludeYn());
+					stmt3.addBatch();
+					stmt3.clearParameters();
+					
+					if ((idx % 1000) == 0) {
+						stmt3.executeBatch();
+						stmt3.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+
+				stmt3.executeBatch() ;
+				conn.commit();
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException se) {}
+			
+			try{
+				if (stmt2 != null) {
+					stmt2.close();
+				}
+			} catch(SQLException se) {}
+			
+			try{
+				if (stmt3 != null) {
+					stmt3.close();
+				}
+			} catch(SQLException se) {}
+			
+			if (conn != null) {
+				try {
+					conn.rollback();
+					conn.close();
+				} catch (Exception e2) {
+					log.error(e2.getMessage(), e2);
+				}
+			}
+		} finally {
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException e) {}
+			
+			try {
+				if (stmt2 != null) {
+					stmt2.close();
+				}
+			} catch(SQLException e) {}
+			
+			try{
+				if (stmt3 != null) {
+					stmt3.close();
+				}
+			} catch(SQLException e) {}
+			
+			try{
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e) {}
+		}
+	}
+	
+	public void deletePreparedStatement(List<OssComponents> componentIdList) {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		String query = "DELETE FROM OSS_COMPONENTS_LICENSE WHERE COMPONENT_ID = ?";
+		
+		try{
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			
+			stmt = conn.prepareStatement(query);
+			
+			int idx = 1;
+			for (OssComponents item : componentIdList) {
+				stmt.setString(1, item.getComponentId());
+				stmt.addBatch();
+				stmt.clearParameters();
+				
+				if ((idx % 1000) == 0) {
+					stmt.executeBatch();
+					stmt.clearBatch();
+					conn.commit();
+				}
+				
+				idx++;
+			}
+
+			stmt.executeBatch() ;
+			conn.commit();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException e1) {}
+			
+			if (conn != null) {
+				try {
+					conn.rollback();
+					conn.close();
+				} catch (Exception e2) {
+					log.error(e2.getMessage(), e2);
+				}
+			}
+		} finally {
+			try {
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException e) {}
+			
+			try{
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e) {}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void setLoadToList(Map<String, Object> map, String prjId) {
+		List<OssComponents> rows = (List<OssComponents>) map.get("rows");
+		int idx = 1;
+		
+		for (OssComponents row : rows) {
+			row.setGridId("jqg" + String.valueOf(idx));
+			row.setComponentId(null);
+			row.setReferenceId(prjId);
+			row.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+			
+			idx++;
+		}
+		
+		map.put("rows", rows);
 	}
 }
