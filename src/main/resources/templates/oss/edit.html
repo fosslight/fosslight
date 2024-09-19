@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
 <th:block th:replace="oss/edit-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
@@ -35,6 +36,7 @@
 								</div>
                                 <form id="ossForm" name="ossForm">
                     			<input type="hidden" name="ossLicensesJson"/>
+                    			<input type="hidden" name="ossCommonId" th:value="${ossCommonId}"/>
 								<input type="hidden" name="ossId" th:value="${ossId}"/>
                     			<input type="hidden" name="licenseType" id="licenseType"/>
                     			<input type="hidden" name="obligationType" id="obligationType"/>
@@ -46,6 +48,7 @@
                     			<input type="hidden" name="deactivateFlag" value="N"/>
                     			<input type="hidden" name="renameFlag" value="N"/>
                     			<input type="hidden" name="ossCopyFlag" th:value="N" />
+                    			<input type="hidden" name="purlJson" />
                                 <div class="card-body">
                                     <div class="row form-group">
 										<div class="col-lg-6">
@@ -54,6 +57,7 @@
 													<label th:text="#{msg.common.field.OSS.name}"></label><span class="text-orange">*</span>
 													<i class="fas fa-info-circle fa-lg ml-1 ossI icon-blue" title="detail Info" style="cursor: pointer;" th:onclick="|fn.showOssViewPage(this)|"></i>
 													<button th:if="${detail?.ossId != null}" type="button" class="btn btn-outline-lg-red btn-sm width-5rem px-1 mb-1 float-right" id="rename" th:text="Rename"></button>
+													<span class="float-right mr-2" id="ossTypeDiv"></span>
 													<div class="input-group">
 														<input class="form-control" name="ossName" th:value="${detail?.ossName}" type="text" th:style="${detail?.ossId != null} ? 'border-right: 0px solid #fff;' : ''"/>
 														<div th:if="${detail?.ossId != null}" class="input-group-append">
@@ -98,17 +102,72 @@
 									</div>
 
                                     <div class="row form-group">
-										<div class="col-lg-2">
-                                            <label th:text="#{msg.common.field.OSS.type}"></label>
-                                        </div>
-                                        <div class="col-10" id="ossTypeDiv"></div>
-										<div class="col-12 required">
-											<span class="retxt text-danger text-sm"></span>
-										</div>
-                                    </div>
+										<ul class="nav nav-pills nav-sidebar flex-column col-lg-12" data-accordion="false" data-widget="treeview" role="menu">
+											<li class="nav-item col-md-12">
+												<a class="nav-link my-1 ml-0 pl-0 width-12rem" style="cursor: pointer;">
+                                                	<label th:text="#{msg.common.field.vulnerability}+ ' Info'"></label>
+                                                	<i class="right fas fa-angle-left ml-1"></i>
+                                            	</a>
+                                            	<ul class="nav nav-treeview">
+                                                	<li class="nav-item">
+													<div class="row form-group">
+														<div class="col-lg-6">
+															<div class="row">
+																<div class="col-md-12">
+																	<div class="input-group" th:unless="${isReadOnly}">
+																		<input class="form-control" id="input_ossVersionAlias" type="text" th:placeholder="#{msg.common.field.OSS.version.alias}">
+																		<div class="input-group-append">
+																			<button class="btn btn-default" id="ossVersionAliasAdd" name="addTagButton" type="button" th:text="Add"></button>
+																		</div>
+																	</div>
+																</div>
+																<div class="col-md-12">
+																	<div class="row multiTxtVersionAlias"></div>
+																</div>
+															</div>
+														</div>
+													</div>
+													<div class="row">
+														<div class="col-lg-6">
+															<div class="row">
+																<div class="col-md-12">
+																	<div class="input-group" th:unless="${isReadOnly}">
+																		<input class="form-control" id="input_includeCpe" type="text" th:placeholder="#{msg.common.field.includeCPE}">
+																		<div class="input-group-append">
+																			<button class="btn btn-default" id="includeCpeAdd" name="addTagButton" type="button" th:text="Add"></button>
+																		</div>
+																	</div>
+																</div>
+																<div class="col-md-12">
+																	<div class="row multiTxtIncludeCpe"></div>
+																</div>
+															</div>
+														</div>
+														<div class="col-lg-6">
+															<div class="row">
+																<div class="col-md-12">
+																	<div class="input-group" th:unless="${isReadOnly}">
+																		<input class="form-control" id="input_excludeCpe" type="text" th:placeholder="#{msg.common.field.excludeCPE}">
+																		<div class="input-group-append">
+																			<button class="btn btn-default" id="excludeCpeAdd" name="addTagButton" type="button" th:text="Add"></button>
+																		</div>
+																	</div>
+																</div>
+																<div class="col-md-12">
+																	<div class="row multiTxtExcludeCpe"></div>
+																</div>
+															</div>
+														</div>
+													</div>
+                                                	</li>
+                                                </ul>
+											</li>
+										</ul>
+									</div>
+									
                                     <div class="form-group required">
                                         <label th:text="#{msg.common.field.declaredLicense}"></label><span class="text-orange">*</span>
-										<!--                                   	<input type="button" class="btn btn-info btn-xs mx-3 mb-1 px-3 py-0" id="btnShowLicenseText" value="Show license text"> -->
+<!--                                   	<input type="button" class="btn btn-info btn-xs mx-3 mb-1 px-3 py-0" id="btnShowLicenseText" value="Show license text"> -->
                                         <input type="hidden" name="licenseDiv" />
                                         <div class="licenseMulti">
                                        		<div class="mark"></div>
@@ -151,7 +210,20 @@
                                     		<div class="row detectedLicensesDiv"></div>
                                     	</div>
                                     </div>
-
+                                    
+                                    <div class="row form-group">
+										<div class="col-lg-6">
+											<label th:text="#{msg.common.field.restriction}"></label>
+											<select class="form-control select2" id="restrictionSelect" multiple="multiple" name="restriction" style="width: 100%;" th:disabled="${isReadOnly}">
+												<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+													th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"
+													th:selected="${detail?.restrictionCdNoList != null and #arrays.contains(detail.restrictionCdNoList, code.cdDtlNo)}"
+													th:disabled="${isReadOnly}">
+												</option>
+											</select>
+										</div>
+									</div>
+                                    
                                     <div class="row form-group">
                                     	<div class="col-lg-6">
                                     		<label th:text="#{msg.common.field.downloadLocation}"></label>
@@ -161,6 +233,9 @@
                                             		<button class="btn btn-default" id="downloadLocationAdd" type="button" th:text="Add"></button>
                                             	</div>
                                      		</div>
+                                    	</div>
+                                    	<div class="col-lg-6">
+                                    		<label th:text="#{msg.common.field.packageUrl}"></label>
                                     	</div>
 										<div class="col-md-12">
 											<div class="row multiDownloadLocationSet"></div>
@@ -173,6 +248,7 @@
                                     	</div>
                                         <div class="col-md-12 required">
                                         	<span class="urltxt"></span>
+                                        	<span class="retxt"></span>
                                     	</div>
                                     </div>
 									<div class="form-group">
@@ -206,7 +282,7 @@
 											<table id="_vulnInfoList" style="border-collapse: initial;"><tr><td></td></tr></table>
 										</div>
                                     </div>
-<!--                                    <div class="form-group" th:unless="${isReadOnly}">
+<!--                               	<div class="form-group" th:unless="${isReadOnly}">
                                     	<label for="inputName" th:text="#{msg.common.field.comment}"></label>
                                     	<textarea class="form-control" id="commentCont" name='commentInput' rows="3" style="height: 800px"></textarea>
                                   	</div>-->
@@ -225,7 +301,7 @@
 										<button type="button" class="btn btn-tool text-white" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-times"></i></button>
                                   	</div>
                               	</div>
-                                <div class="card-body pt-0" style="padding-bottom: 0;">
+                                <div class="card-body comment-card-body  pt-0" style="padding-bottom: 0;">
                                     <div clas="col-md-12" id="commentList"></div>
                                	</div>
                           	</div>
@@ -233,6 +309,7 @@
                     </div>
                     
                     <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+                    <th:block th:replace="fragments/common-fragments :: loadingIdenFragment"></th:block>
             </section>
             <!-- loading bar -->
             <th:block th:replace="oss/fragments/ossSelectPopup"></th:block>
