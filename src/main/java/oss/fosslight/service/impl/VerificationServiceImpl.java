@@ -1438,8 +1438,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				if (idx >= 24) {
 					customPath = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(checkPath), checkPath);
 				}
-				if (checkPath.equalsIgnoreCase(gridPath)) {
-					checkGridMap.put(checkPath, deCompResultMap.get(customPath));
+				if (customPath.equalsIgnoreCase(gridPath)) {
+					checkGridMap.put(gridPath, deCompResultMap.containsKey(gridPath) ? deCompResultMap.get(gridPath) : 0);
 					matchFlag = true;
 					break;
 				}
