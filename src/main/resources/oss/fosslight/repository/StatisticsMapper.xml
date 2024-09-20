@@ -320,7 +320,20 @@
 				  				  , CONCAT(YEAR(OM.MODIFIED_DATE), LPAD(MONTH(OM.MODIFIED_DATE), 2, '0')) AS DATE
 				  				</otherwise>
 				  			</choose>
-							   FROM OSS_MASTER OM
+							   FROM (
+								SELECT
+							    	OV.OSS_ID,
+							    	OC.OSS_COMMON_ID,
+							    	OC.OSS_NAME,
+							    	OV.OSS_VERSION,
+									OC.CREATOR,
+									OC.CREATED_DATE,
+									OV.MODIFIER,
+									OV.MODIFIED_DATE
+								FROM OSS_COMMON OC
+								LEFT OUTER JOIN OSS_VERSION OV
+								ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+							 ) OM
 							   
 							  INNER JOIN T2_USERS T1
 							     ON OM.MODIFIER = T1.USER_ID
@@ -393,7 +406,21 @@
 							<if test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
 							  INNER JOIN (
 							  		SELECT OLD.LICENSE_ID
-							  	  	  FROM OSS_MASTER OM
+							  	  	  FROM (
+									SELECT
+								    	OV.OSS_ID,
+								    	OC.OSS_COMMON_ID,
+								    	OC.OSS_NAME,
+								    	OV.OSS_VERSION,
+								    	OV.USE_YN,
+										OC.CREATOR,
+										OC.CREATED_DATE,
+										OV.MODIFIER,
+										OV.MODIFIED_DATE
+									FROM OSS_COMMON OC
+									LEFT OUTER JOIN OSS_VERSION OV
+									ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+								 ) OM
 							  	INNER JOIN OSS_LICENSE_DECLARED OLD
 							  	        ON OM.OSS_ID = OLD.OSS_ID
 							  	     WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')

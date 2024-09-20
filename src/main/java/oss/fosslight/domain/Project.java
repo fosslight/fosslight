@@ -92,6 +92,7 @@ public class Project extends ComBean implements Serializable {
 	private String noticeType;
 	private String noticeTypeEtc;
 
+	private String editNoticeYn;
 	/** The use custom notice yn. */
 	private String useCustomNoticeYn;
 	
@@ -801,6 +802,10 @@ public class Project extends ComBean implements Serializable {
 	
 	private String deleteOsddFlag;
 
+	private String vulnerabilityResolution;
+	
+	private String cvssScoreMax;
+	
 	/**
 	 * Gets the prj id.
 	 *
@@ -4516,5 +4521,29 @@ public class Project extends ComBean implements Serializable {
 
 	public void setPrjIdName(String prjIdName) {
 		this.prjIdName = prjIdName;
+	}
+
+	public String getEditNoticeYn() {
+		return editNoticeYn;
+	}
+
+	public void setEditNoticeYn(String editNoticeYn) {
+		this.editNoticeYn = editNoticeYn;
+	}
+
+	public String getVulnerabilityResolution() {
+		return vulnerabilityResolution;
+	}
+
+	public void setVulnerabilityResolution(String vulnerabilityResolution) {
+		this.vulnerabilityResolution = vulnerabilityResolution;
+	}
+
+	public String getCvssScoreMax() {
+		return cvssScoreMax;
+	}
+
+	public void setCvssScoreMax(String cvssScoreMax) {
+		this.cvssScoreMax = cvssScoreMax;
 	}
 }

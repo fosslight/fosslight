@@ -12,7 +12,5 @@
 ------------------------[/][/]
 [# th:each="ossInfo : ${noticeData}"][# th:each="licenseInfo : ${ossInfo.deduplicatedComponentLicenseList}"][# th:if="${licenseInfo.licenseText != '' and licenseInfo.obligationType == '10'}"]
 [# th:text="${licenseInfo.licenseName}"][/]
-[# th:text="${licenseInfo.licenseText}"][/]
-[/]
-[/]
+[# th:utext="${licenseInfo.licenseText}"][/][/][/]
 [/]

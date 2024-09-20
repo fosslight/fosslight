@@ -49,8 +49,8 @@ $(document).ready(function () {
 	var textarea = ["binaryName", "userComment", "description"];
     
     var optionSelectedFlag = false;
-	if (typeof localStorage.partnerSearchConditions !== "undefined") {
-		var localStorageSearchConditions = JSON.parse(localStorage.partnerSearchConditions);
+	if (typeof sessionStorage.partnerSearchConditions !== "undefined") {
+		var localStorageSearchConditions = JSON.parse(sessionStorage.partnerSearchConditions);
 		
 		Object.keys(localStorageSearchConditions).forEach(function(key) {
 			if (input.includes(key)) {
@@ -139,7 +139,7 @@ $(document).ready(function () {
 		var postData = fn.setGridParam();
 		
 		var localStorageData = fn.setGridParam();
-		localStorage.setItem("partnerSearchConditions", JSON.stringify(localStorageData));
+		sessionStorage.setItem("partnerSearchConditions", JSON.stringify(localStorageData));
 		
         optionSelectedFlag = false;
         Object.keys(localStorageData).forEach(function(key) {

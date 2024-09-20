@@ -101,8 +101,8 @@
                 var textarea = ["licenseText", "description"];
 
                 var optionSelectedFlag = false;
-                if (typeof localStorage.licenseSearchConditions !== "undefined") {
-                    var localStorageSearchConditions = JSON.parse(localStorage.licenseSearchConditions);
+                if (typeof sessionStorage.licenseSearchConditions !== "undefined") {
+                    var localStorageSearchConditions = JSON.parse(sessionStorage.licenseSearchConditions);
 
                     Object.keys(localStorageSearchConditions).forEach(function(key) {
                         if (input.includes(key)) {
@@ -216,7 +216,7 @@
 
                     var localStorageData = fn.setGridParam();
                     localStorageData.ignoreSearchFlag = "N";
-                    localStorage.setItem("licenseSearchConditions", JSON.stringify(localStorageData));
+                    sessionStorage.setItem("licenseSearchConditions", JSON.stringify(localStorageData));
 
                     optionSelectedFlag = false;
                     Object.keys(localStorageData).forEach(function(key) {
@@ -467,7 +467,7 @@
                 });
             },
             onMoreLicenseDisplay : async function(licenseName) {
-                localStorage.setItem("ossSearchConditions", JSON.stringify({ "licenseName": licenseName }));
+                sessionStorage.setItem("ossSearchConditions", JSON.stringify({ "licenseName": licenseName }));
                 await callCreateTabInFrame("Open Source", "/oss/list", 'oss-list', true);
             }
         };

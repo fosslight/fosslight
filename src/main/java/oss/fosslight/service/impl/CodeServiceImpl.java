@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
-import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.T2Code;
 import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.repository.CodeMapper;
@@ -52,6 +51,14 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 	 */
 	@Override
 	public ArrayList<T2CodeDtl> getCodeDetailList(T2CodeDtl vo) throws Exception {
+		return getCodeDetailList(vo, false);
+	}
+	
+	/**
+	 * 코드상세 목록 조회
+	 */
+	@Override
+	public ArrayList<T2CodeDtl> getCodeDetailList(T2CodeDtl vo, boolean notDisplayFlag) throws Exception {
 		ArrayList<T2CodeDtl> codeDetailList = codeMapper.selectCodeDetailList(vo);
 		
 		if (codeDetailList.size() > 0){
@@ -62,7 +69,11 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 				t2CodeDtl.setCdDtlNoOrign(t2CodeDtl.getCdDtlNo());
 			}
 		}
-			
+		
+		if (notDisplayFlag) {
+			codeDetailList = (ArrayList<T2CodeDtl>) codeDetailList.stream().filter(e -> CoConstDef.FLAG_YES.equals(e.getUseYn())).collect(Collectors.toList());
+		}
+		
 		return codeDetailList;
 	}
 

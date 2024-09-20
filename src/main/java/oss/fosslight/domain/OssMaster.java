@@ -309,6 +309,45 @@ public class OssMaster extends ComBean implements Serializable{
 	private Float securityStandardScore;
 	private Float standardScore;
 	
+	// Added when improving OSORI DB function
+	private String ossCommonId;
+	
+	private String ossVersionAlias;
+	
+	private String[] ossVersionAliasWithColon;
+	
+	private String[] ossVersionAliases;
+	
+	private String purl;
+	
+	private String includeCpe;
+	
+	private String[] includeCpes;
+	
+	private String excludeCpe;
+	
+	private String[] excludeCpes;
+	
+	private String[] existIncludeCpes;
+	
+	private String[] existExcludeCpes;
+	
+	private String purlJson;
+	
+	private int ossDlIdx;
+	
+	private int ossPurlIdx;
+	
+	private String restriction;
+	
+	private String[] arrRestriction;
+	
+	private String[] existArrRestriction;
+ 	
+	private List<String> restrictionCdNoList;
+	
+	private String inCpeMatchFlag;
+		
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
 	}
@@ -368,15 +407,13 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param ossCopyright the oss copyright
 	 * @param licenseDiv the license div
 	 */
-	public OssMaster(String ossLicenseIdx, String ossId, String licenseId, String licenseName, String ossLicenseComb, String ossLicenseText,
-			String ossCopyright, String licenseDiv) {
+	public OssMaster(String ossLicenseIdx, String ossId, String licenseId, String licenseName, String ossLicenseComb, String ossCopyright, String licenseDiv) {
 		super();
 		this.ossLicenseIdx = ossLicenseIdx;
 		this.ossId = ossId;
 		this.licenseId = licenseId;
 		this.licenseName = licenseName;
 		this.ossLicenseComb = ossLicenseComb;
-		this.ossLicenseText = ossLicenseText;
 		this.ossCopyright = ossCopyright;
 		this.licenseDiv = licenseDiv;
 	}
@@ -1776,7 +1813,7 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setDownloadLocationGroup(String downloadLocationGroup) {
 		// OSS를 삭제하면서 다른 OSS로 rename시, "This oss has multiple version"이라 뜨며 에러 발생. / NullPointException
-		if (!isEmpty(downloadLocationGroup)){
+		if (!isEmpty(downloadLocationGroup)) {
 			this.downloadLocations = downloadLocationGroup.split(",");
 		}
 		
@@ -2127,5 +2164,157 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setStandardScore(Float standardScore) {
 		this.standardScore = standardScore;
+	}
+
+	public String getPurlJson() {
+		return purlJson;
+	}
+
+	public void setPurlJson(String purlJson) {
+		this.purlJson = purlJson;
+	}
+
+	public String getOssCommonId() {
+		return ossCommonId;
+	}
+
+	public void setOssCommonId(String ossCommonId) {
+		this.ossCommonId = ossCommonId;
+	}
+
+	public int getOssDlIdx() {
+		return ossDlIdx;
+	}
+
+	public void setOssDlIdx(int ossDlIdx) {
+		this.ossDlIdx = ossDlIdx;
+	}
+
+	public int getOssPurlIdx() {
+		return ossPurlIdx;
+	}
+
+	public void setOssPurlIdx(int ossPurlIdx) {
+		this.ossPurlIdx = ossPurlIdx;
+	}
+
+	public String getPurl() {
+		return purl;
+	}
+
+	public void setPurl(String purl) {
+		this.purl = purl;
+	}
+
+	public String getIncludeCpe() {
+		return includeCpe;
+	}
+
+	public void setIncludeCpe(String includeCpe) {
+		this.includeCpe = includeCpe;
+	}
+
+	public String[] getIncludeCpes() {
+		return includeCpes;
+	}
+
+	public void setIncludeCpes(String[] includeCpes) {
+		this.includeCpes = includeCpes;
+	}
+
+	public String getExcludeCpe() {
+		return excludeCpe;
+	}
+
+	public void setExcludeCpe(String excludeCpe) {
+		this.excludeCpe = excludeCpe;
+	}
+
+	public String[] getExcludeCpes() {
+		return excludeCpes;
+	}
+
+	public void setExcludeCpes(String[] excludeCpes) {
+		this.excludeCpes = excludeCpes;
+	}
+
+	public String getOssVersionAlias() {
+		return ossVersionAlias;
+	}
+
+	public void setOssVersionAlias(String ossVersionAlias) {
+		this.ossVersionAlias = ossVersionAlias;
+	}
+
+	public String[] getOssVersionAliases() {
+		return ossVersionAliases;
+	}
+
+	public void setOssVersionAliases(String[] ossVersionAliases) {
+		this.ossVersionAliases = ossVersionAliases;
+	}
+
+	public String getRestriction() {
+		return restriction;
+	}
+
+	public void setRestriction(String restriction) {
+		this.restriction = restriction;
+	}
+
+	public List<String> getRestrictionCdNoList() {
+		return restrictionCdNoList;
+	}
+
+	public void setRestrictionCdNoList(List<String> restrictionCdNoList) {
+		this.restrictionCdNoList = restrictionCdNoList;
+	}
+
+	public String getInCpeMatchFlag() {
+		return inCpeMatchFlag;
+	}
+
+	public void setInCpeMatchFlag(String inCpeMatchFlag) {
+		this.inCpeMatchFlag = inCpeMatchFlag;
+	}
+
+	public String[] getExistIncludeCpes() {
+		return existIncludeCpes;
+	}
+
+	public void setExistIncludeCpes(String[] existIncludeCpes) {
+		this.existIncludeCpes = existIncludeCpes;
+	}
+
+	public String[] getExistExcludeCpes() {
+		return existExcludeCpes;
+	}
+
+	public void setExistExcludeCpes(String[] existExcludeCpes) {
+		this.existExcludeCpes = existExcludeCpes;
+	}
+
+	public String[] getArrRestriction() {
+		return arrRestriction;
+	}
+
+	public void setArrRestriction(String[] arrRestriction) {
+		this.arrRestriction = arrRestriction;
+	}
+
+	public String[] getExistArrRestriction() {
+		return existArrRestriction;
+	}
+
+	public void setExistArrRestriction(String[] existArrRestriction) {
+		this.existArrRestriction = existArrRestriction;
+	}
+
+	public String[] getOssVersionAliasWithColon() {
+		return ossVersionAliasWithColon;
+	}
+
+	public void setOssVersionAliasWithColon(String[] ossVersionAliasWithColon) {
+		this.ossVersionAliasWithColon = ossVersionAliasWithColon;
 	}
 }

@@ -7,6 +7,7 @@ package oss.fosslight.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -274,7 +275,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		if (list != null && !list.isEmpty()) {
 			List<String> cvssScoreMaxList = new ArrayList<>();
-			List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
 			
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceDiv(identification.getReferenceDiv());
@@ -289,40 +289,69 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossParam.addOssIdList(bean.getOssId());
 				}
 				
-				// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
-				if (isEmpty(bean.getCveId()) 
-						&& isEmpty(bean.getOssVersion()) 
-						&& !isEmpty(bean.getCvssScoreMax())
-						&& !("-".equals(bean.getOssName()))){ 
-					String[] cvssScoreMax = bean.getCvssScoreMax().split("\\@");
-					bean.setCvssScore(cvssScoreMax[0]);
-					bean.setCveId(cvssScoreMax[1]);
+				String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+				boolean setCveInfoFlag = false;
+				if (ossInfoMap.containsKey(key)) {
+					OssMaster om = ossInfoMap.get(key);
+					if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag()))) {
+						String cveId = om.getCveId();
+						String cvssScore = om.getCvssScore();
+						if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+							bean.setCvssScore(cvssScore);
+							bean.setCveId(cveId);
+							bean.setVulnYn(CoConstDef.FLAG_YES);
+						} else {
+							setCveInfoFlag = true;
+						}
+					} else {
+						setCveInfoFlag = true;
+					}
 				}
 				
-				// convert max score
-				if (bean.getCvssScoreMax() != null) {
-					cvssScoreMaxList.add(bean.getCvssScoreMax());
+				if (setCveInfoFlag) {
+					// convert max score
+					if (bean.getCvssScoreMax() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax());
+					}
+					if (bean.getCvssScoreMax1() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax1());
+					}
+					if (bean.getCvssScoreMax2() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax2());
+					}
+					if (bean.getCvssScoreMax3() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax3());
+					}
+					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+						if (cvssScoreMaxList.size() > 1) {
+							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+								@Override
+								public int compare(String o1, String o2) {
+									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+										return -1;
+									}else {
+										return 1;
+									}
+								}
+							});
+						}
+						
+						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+						bean.setCvssScore(cveData[3]);
+						bean.setCveId(cveData[4]);
+						bean.setVulnYn(CoConstDef.FLAG_YES);
+					} else {
+						String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, null, cvssScoreMaxList, false);
+						if (conversionCveInfo != null) {
+							String[] conversionCveData = conversionCveInfo.split("\\@");
+							bean.setCvssScore(conversionCveData[3]);
+							bean.setCveId(conversionCveData[4]);
+							bean.setVulnYn(CoConstDef.FLAG_YES);
+						}
+					}
+					
+					cvssScoreMaxList.clear();
 				}
-				if (bean.getCvssScoreMax1() != null) {
-					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax1());
-				}
-				if (bean.getCvssScoreMax2() != null) {
-					cvssScoreMaxList.add(bean.getCvssScoreMax2());
-				}
-				if (bean.getCvssScoreMax3() != null) {
-					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
-				}
-				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
-				if (conversionCveInfo != null) {
-					String[] conversionCveData = conversionCveInfo.split("\\@");
-					bean.setCvssScore(conversionCveData[3]);
-					bean.setCveId(conversionCveData[4]);
-					bean.setVulnYn(CoConstDef.FLAG_YES);
-				}
-				
-				cvssScoreMaxVendorProductList.clear();
-				cvssScoreMaxList.clear();
 			}
 				
 			// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득

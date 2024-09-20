@@ -139,7 +139,7 @@ public class CoMailManager extends CoTopComponent {
     			return false;
     		}
 
-    		boolean isTest = !"REAL".equals(avoidNull(CommonFunction.getProperty("server.mode"))); 
+    		boolean isTest = !"REAL".equals(avoidNull(CommonFunction.getProperty("server.mode")));
 
     		Map<String, Object> convertDataMap = new HashMap<>();
     		convertDataMap.put("mailType", bean.getMsgType());
@@ -1867,6 +1867,23 @@ public class CoMailManager extends CoTopComponent {
 			
 			after.setOssVersion(appendChangeStyleMultiLine(before.getOssVersion(), after.getOssVersion()));
 			isModified = checkEquals(before.getOssVersion(), after.getOssVersion(), isModified);
+			
+			if (before.getOssVersionAlias() != null || after.getOssVersionAlias() != null) {
+				isModified = makeDataMultiLineConversion(before, after, before.getOssVersionAlias(), after.getOssVersionAlias(), "alias");
+			}
+			
+			if (before.getIncludeCpe() != null || after.getIncludeCpe() != null) {
+				isModified = makeDataMultiLineConversion(before, after, before.getIncludeCpe(), after.getIncludeCpe(), "include");
+			}
+			
+			if (before.getExcludeCpe() != null || after.getExcludeCpe() != null) {
+				isModified = makeDataMultiLineConversion(before, after, before.getExcludeCpe(), after.getExcludeCpe(), "exclude");
+			}
+			
+			if (before.getRestriction() != null || after.getRestriction() != null) {
+				isModified = makeRestrictionConversion(before, after, before.getRestriction(), after.getRestriction(), "oss");
+			}
+			
 			after.setLicenseName(appendChangeStyleMultiLine(before.getLicenseName(), after.getLicenseName()));
 			isModified = checkEquals(before.getLicenseName(), after.getLicenseName(), isModified);
 			if (CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_DIV, "M").equals(after.getLicenseDiv())){ // multi license일때 만
@@ -2106,44 +2123,12 @@ public class CoMailManager extends CoTopComponent {
 			isModified = checkEquals(before.getLicenseText(), after.getLicenseText(), isModified);
 			
 			if (before.getRestriction() != null || after.getRestriction() != null) {
-				List<String> _beforeList = before.getRestriction() == null ? new ArrayList<>() : Arrays.asList(before.getRestriction().split(","));
-				List<String> _afterList = after.getRestriction() == null ? new ArrayList<>() : Arrays.asList(after.getRestriction().split(","));
-				
-
-				List<String> _newBeforeList = new ArrayList<>();
-				List<String> _newAfterList = new ArrayList<>();
-				
-				for (String cd : CoCodeManager.getCodes(CoConstDef.CD_LICENSE_RESTRICTION)) {
-					// 둘다 없으면 변경사항 없음
-					if (!_beforeList.contains(cd) && !_afterList.contains(cd)) {
-						continue;
-					}
-					
-					// add
-					if (!_beforeList.contains(cd) && _afterList.contains(cd)) {
-						_newBeforeList.add("");
-						_newAfterList.add(changeStyle(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, cd), "mod"));
-						isModified = true;
-					}
-					// delete
-					else if (_beforeList.contains(cd) && !_afterList.contains(cd)) {
-						_newBeforeList.add(changeStyle(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, cd), "del", true));
-						_newBeforeList.add("");
-						isModified = true;
-						
-					}
-					// 변경 없음
-					else {
-						_newBeforeList.add(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, cd));
-						_newAfterList.add(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, cd));
-					}
-				}
-				
-				String[] beforeArry = _newBeforeList.toArray(new String[_newBeforeList.size()]);
-				String[] afterArry =  _newAfterList.toArray(new String[_newAfterList.size()]);
-				
-				before.setArrRestriction(beforeArry);
-				after.setArrRestriction(afterArry);
+				isModified = makeRestrictionConversion(before, after, before.getRestriction(), after.getRestriction(), "license");
+			}
+			
+			if (before.getDisclosingSrc() != null || after.getDisclosingSrc() != null) {
+				isModified = checkEquals(before.getDisclosingSrc(), after.getDisclosingSrc(), isModified);
+				after.setDisclosingSrc(appendChangeStyleMultiLine(before.getDisclosingSrc(), after.getDisclosingSrc(), true));
 			}
 			
 			//데이터 변경 없을시
@@ -2401,37 +2386,20 @@ public class CoMailManager extends CoTopComponent {
 			OssMaster om = (OssMaster) convertDataMap.get("paramOssInfo");
 						
 			if (om != null) {
-				List<String> checkOssNickNamesAdd = new ArrayList<>();
+				makeMultiLineConversion(om.getRestriction() != null ? om.getRestriction().split(",") : null, om.getExistArrRestriction(), om, convertDataMap, "restriction");
+				makeMultiLineConversion(om.getOssNicknames(), om.getExistOssNickNames(), om, convertDataMap, "nick");
+				makeMultiLineConversion(om.getIncludeCpes(), om.getExistIncludeCpes(), om, convertDataMap, "includeCpe");
+				makeMultiLineConversion(om.getExcludeCpes(), om.getExistExcludeCpes(), om, convertDataMap, "excludeCpe");
 				
-				if (om.getOssNicknames() != null && om.getOssNicknames().length > 0) {
-					if (om.getExistOssNickNames() != null && om.getExistOssNickNames().length > 0) {
-						checkOssNickNamesAdd = Arrays.asList(om.getOssNicknames()).stream().filter(x -> !Arrays.asList(om.getExistOssNickNames()).contains(x)).collect(Collectors.toList());
-					}else {
-						checkOssNickNamesAdd = Arrays.asList(om.getOssNicknames());
+				if (om.getOssVersionAliases() != null && om.getOssVersionAliases().length > 0) {
+					List<String> ossVersionAliasList = Arrays.asList(om.getOssVersionAliases());
+					String ossVersionAlias = "";
+					for (String alias : ossVersionAliasList) {
+						ossVersionAlias += alias + "<br/>";
 					}
-				}
-				
-				if (checkOssNickNamesAdd != null && checkOssNickNamesAdd.size() > 0) {
-					String changeOssNickName = "";
-					
-					if (om.getExistOssNickNames() != null && om.getExistOssNickNames().length > 0) {
-						for (String nickName : om.getExistOssNickNames()) {
-							changeOssNickName += nickName + "<br/>";
-						}
-					}
-					
-					for (String ossNickName : checkOssNickNamesAdd) {
-						if (!isEmpty(ossNickName)) {
-							ossNickName = appendChangeStyle("newVersion_ossNickNameAdd", ossNickName);
-							changeOssNickName += ossNickName + "<br/>";
-						}
-					}
-					
-					if (!isEmpty(changeOssNickName)) {
-						OssMaster ossBasicInfo = (OssMaster) convertDataMap.get("oss_basic_info");
-						ossBasicInfo.setOssNickname(changeOssNickName);
-						convertDataMap.replace("oss_basic_info", ossBasicInfo);
-					}
+					OssMaster ossBasicInfo = (OssMaster) convertDataMap.get("oss_basic_info");
+					ossBasicInfo.setOssVersionAlias(ossVersionAlias);
+					convertDataMap.replace("oss_basic_info", ossBasicInfo);
 				}
 			}
 		} else if (CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(msgType)) {
@@ -2454,6 +2422,187 @@ public class CoMailManager extends CoTopComponent {
 		return convertDataMap;
 	}
 
+
+	private boolean makeRestrictionConversion(Object before, Object after, String beforeRestriction, String afterRestriction, String gubn) {
+		boolean isModified = false;
+		
+		List<String> _beforeList = null;
+		if (gubn.equals("license")) {
+			_beforeList = ((LicenseMaster) before).getRestriction() == null ? new ArrayList<>() : Arrays.asList(((LicenseMaster) before).getRestriction().split(","));
+		} else {
+			_beforeList = ((OssMaster) before).getRestriction() == null ? new ArrayList<>() : Arrays.asList(((OssMaster) before).getRestriction().split(","));
+		}
+		List<String> _afterList = null;
+		if (gubn.equals("license")) {
+			_afterList = ((LicenseMaster) after).getRestriction() == null ? new ArrayList<>() : Arrays.asList(((LicenseMaster) after).getRestriction().split(","));
+		} else {
+			_afterList = ((OssMaster) after).getRestriction() == null ? new ArrayList<>() : Arrays.asList(((OssMaster) after).getRestriction().split(","));
+		}
+
+		List<String> _newBeforeList = new ArrayList<>();
+		List<String> _newAfterList = new ArrayList<>();
+		
+		for (String cd : CoCodeManager.getCodes(CoConstDef.CD_LICENSE_RESTRICTION)) {
+			// 둘다 없으면 변경사항 없음
+			if (!_beforeList.contains(cd) && !_afterList.contains(cd)) {
+				continue;
+			}
+			
+			// add
+			if (!_beforeList.contains(cd) && _afterList.contains(cd)) {
+				_newBeforeList.add("");
+				_newAfterList.add(changeStyle(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, cd), "mod"));
+				isModified = true;
+			}
+			// delete
+			else if (_beforeList.contains(cd) && !_afterList.contains(cd)) {
+				_newBeforeList.add(changeStyle(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, cd), "del", true));
+				_newBeforeList.add("");
+				isModified = true;
+				
+			}
+			// 변경 없음
+			else {
+				_newBeforeList.add(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, cd));
+				_newAfterList.add(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, cd));
+			}
+		}
+		
+		String[] beforeArry = _newBeforeList.toArray(new String[_newBeforeList.size()]);
+		String[] afterArry =  _newAfterList.toArray(new String[_newAfterList.size()]);
+		
+		if (gubn.equals("license")) {
+			((LicenseMaster) before).setArrRestriction(beforeArry);
+			((LicenseMaster) after).setArrRestriction(afterArry);
+		} else {
+			((OssMaster) before).setArrRestriction(beforeArry);
+			((OssMaster) after).setArrRestriction(afterArry);
+		}
+		
+		return isModified;
+	}
+
+	private void makeMultiLineConversion(String[] targetArr, String[] compareArr, OssMaster om, Map<String, Object> convertDataMap, String gubn) {
+		List<String> checkDataAdd = new ArrayList<>();
+		boolean skipFlag = false;
+		
+		if (targetArr != null && targetArr.length > 0) {
+			if (compareArr != null && compareArr.length > 0) {
+				checkDataAdd = Arrays.asList(targetArr).stream().filter(x -> !Arrays.asList(compareArr).contains(x)).collect(Collectors.toList());
+				if (checkDataAdd.isEmpty() && gubn.contains("Cpe") && gubn.equals("restriction")) {
+					checkDataAdd = Arrays.asList(targetArr);
+					skipFlag = true;
+				}
+			} else {
+				checkDataAdd = Arrays.asList(targetArr);
+			}
+		}
+		
+		if (checkDataAdd != null && checkDataAdd.size() > 0) {
+			String changeName = "";
+			
+			if (!skipFlag && compareArr != null && compareArr.length > 0) {
+				for (String compare : compareArr) {
+					if (gubn.equals("restriction")) compare = CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, compare);
+					changeName += compare + "<br/>";
+				}
+			}
+			
+			for (String checkdata : checkDataAdd) {
+				if (!isEmpty(checkdata)) {
+					if (gubn.equals("nick")) {
+						checkdata = appendChangeStyle("newVersion_ossNickNameAdd", checkdata);
+					} else if (gubn.equals("restriction")) {
+						checkdata = CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, checkdata);
+					}
+					changeName += checkdata + "<br/>";
+				}
+			}
+			
+			if (!isEmpty(changeName)) {
+				OssMaster ossBasicInfo = (OssMaster) convertDataMap.get("oss_basic_info");
+				if (gubn.equals("nick")) {
+					ossBasicInfo.setOssNickname(changeName);
+				} else if (gubn.equals("includeCpe")) {
+					ossBasicInfo.setIncludeCpe(changeName);
+				} else if (gubn.equals("excludeCpe")) {
+					ossBasicInfo.setExcludeCpe(changeName);
+				} else if (gubn.equals("restriction")) {
+					ossBasicInfo.setRestriction(changeName);
+				}
+				convertDataMap.replace("oss_basic_info", ossBasicInfo);
+			}
+		}
+	}
+
+	private boolean makeDataMultiLineConversion(OssMaster before, OssMaster after, String beforeData, String afterData, String gubn) {
+		boolean isModified = false;
+		List<String> _beforeList = beforeData == null ? new ArrayList<>() : Arrays.asList(beforeData.split(","));
+		List<String> _afterList = afterData == null ? new ArrayList<>() : Arrays.asList(afterData.split(","));
+		
+		List<String> _newBeforeList = new ArrayList<>(_beforeList);
+		List<String> _newAfterList = new ArrayList<>(_afterList);
+
+		Collections.sort(_newBeforeList);
+		Collections.sort(_newAfterList);
+
+		
+		List<String> addList = new ArrayList<>();
+		List<String> delList = new ArrayList<>();
+		
+		// 삭제 여부 체크
+		for (String s : _newBeforeList) {
+			if (!isEmpty(s) && !_newAfterList.contains(s)) {
+				delList.add(s);
+				isModified = true;
+			}
+		}
+		// 추가 여부 체크
+		for (String s : _newAfterList) {
+			if (!isEmpty(s) && !_newBeforeList.contains(s)) {
+				addList.add(s);
+				isModified = true;
+			}
+		}
+		
+		// 하나의 통합 list로 만들어서 순서 정렬
+		List<String> tmpList = _newBeforeList;
+		tmpList.addAll(_newAfterList);
+		
+		List<String> mergeList = new ArrayList<>(new HashSet<String>(tmpList));
+		Collections.sort(mergeList);
+
+		List<String> _finalBeforeList = new ArrayList<>();
+		List<String> _finalAfterList = new ArrayList<>();
+		for (String s : mergeList) {
+			if (delList.contains(s)) {
+				_finalBeforeList.add(appendChangeStyleMultiLine(s, ""));
+				_finalAfterList.add("");
+			} else if (addList.contains(s)) {
+				_finalAfterList.add(appendChangeStyleMultiLine("", s));
+				_finalBeforeList.add("");
+			} else {
+				_finalBeforeList.add(s);
+				_finalAfterList.add(s);
+			}
+		}
+		
+		String[] beforeArry = _finalBeforeList.toArray(new String[_finalBeforeList.size()]);
+		String[] afterArry =  _finalAfterList.toArray(new String[_finalAfterList.size()]);
+		
+		if (gubn.equals("alias")) {
+			before.setOssVersionAliases(beforeArry);
+			after.setOssVersionAliases(afterArry);
+		} else if (gubn.equals("include")) {
+			before.setIncludeCpes(beforeArry);
+			after.setIncludeCpes(afterArry);
+		} else {
+			before.setExcludeCpes(beforeArry);
+			after.setExcludeCpes(afterArry);
+		}
+		
+		return isModified;
+	}
 
 	private boolean checkEquals(String before, String after, boolean isModified) {
 		if (isModified) {
@@ -3175,6 +3324,7 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 			bean.setRestriction(restrictionStr);
+			bean.setDisclosingSrc(CoCodeManager.getCodeString(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE, avoidNull((String) dataMap.get("DISCLOSING_SRC"))));
 			
 			bean.setCreator(avoidNull((String) dataMap.get("CREATOR")));
 			if (!isEmpty(bean.getCreator())) {
@@ -3511,13 +3661,13 @@ public class CoMailManager extends CoTopComponent {
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED.equals(coMail.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
 				if((ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()).equals("SUCCESS"))
-				    || (ossMapper.getOssAnalysisStatus(coMail.getParamPartnerId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPartnerId()).equals("SUCCESS"))){
+				    || (ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()) != null && ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()).equals("SUCCESS"))){
 
 					String prjId = "";
 					if(ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null) {
 						prjId = coMail.getParamPrjId();
 					} else {
-						prjId = "3rd-"+coMail.getParamPartnerId();
+						prjId = "3rd_"+coMail.getParamPartnerId();
 					}
 					String analysisResultListPath = CommonFunction.emptyCheckProperty("autoanalysis.output.path", "");
 					if(!isEmpty(analysisResultListPath)){
@@ -3538,6 +3688,7 @@ public class CoMailManager extends CoTopComponent {
 
 			// Email Send
 			mailSender.send(message);
+			
 			// Email History Status Update
 			coMail.setSndStatus("C");	// 전송완료
 			mailManagerMapper.updateSendStatus(coMail);

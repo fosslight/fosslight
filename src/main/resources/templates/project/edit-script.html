@@ -2499,6 +2499,16 @@
 				var status = ["PROG","REQ","REV"];
 				var complete = false;
 				var drop = false;
+
+				if(data.detail.completeYn == "Y"){
+					$("#complete").hide();
+				} else {
+					if(data.detail.status == "FREV" && userRole=="ROLE_ADMIN"){
+						$("#complete").show();
+					} else {
+						$("#complete").hide();
+					}
+				}
 				
 				if(userRole=="ROLE_ADMIN" 
 					&& data.detail.identificationStatus=="CONF" 
@@ -2531,8 +2541,7 @@
 				var currentYmd = parseInt(""+year+month+day);
 				 
 				$("#copy").show();
-				
-				complete ? $("#complete").show() : $("#complete").hide();
+
 				drop ? $("#drop").show() : $("#drop").hide();
 				
 				$('input[name=distributeTarget]').each(function(){

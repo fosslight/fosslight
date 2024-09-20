@@ -16,6 +16,7 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.ldap.core.AttributesMapper;
@@ -556,7 +557,7 @@ public class T2UserServiceImpl implements T2UserService {
 				String expireDate = CommonFunction.removeSpecialChar(vo.getExpireDate(), 8);
 				
 				JwtUtil jwt = new JwtUtil(env.getProperty("token.secret.key") + expireDate);
-				String tokenKey = jwt.createToken(vo.getUserId(), vo.getEmail());
+				String tokenKey = jwt.createToken(vo.getUserId(), StringUtils.isEmpty(vo.getEmail()) ? "" : vo.getEmail());
 				vo.setToken(tokenKey);
 			}
 			
@@ -575,9 +576,12 @@ public class T2UserServiceImpl implements T2UserService {
 	}
 	
 	private boolean checkToken(T2Users vo, String _token) {
+		if (StringUtil.isEmpty(vo.getExpireDate())) {
+			vo.setExpireDate(CoConstDef.CD_TOKEN_END_DATE);
+		}
 		String expireDate = CommonFunction.removeSpecialChar(vo.getExpireDate(), 8);
 		JwtUtil jwt = new JwtUtil(env.getProperty("token.secret.key") + expireDate);
-		String tokenKey = jwt.createToken(vo.getUserId(), vo.getEmail());
+		String tokenKey = jwt.createToken(vo.getUserId(), StringUtils.isEmpty(vo.getEmail()) ? "" : vo.getEmail());
 		
 		return _token.equals(tokenKey);
 	}

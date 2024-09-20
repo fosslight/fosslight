@@ -937,6 +937,11 @@ function createValidMsgComplex(msgData) {
 					$('.noticeTypeDiv').focus().next("span.retxt,div.retxt").html(value).show();
 				}
 				
+				if ('disclosingSrc' == key) {
+					$('select[name=' + key + 'Select]').parent().addClass("cus-is-invalid");
+					$('select[name=' + key + 'Select]').parent().next("span.retxt,div.retxt").html(value).show();
+				}
+				
                 if ($('input[name=' + key + ']').length > 0) {
                     $('input[name=' + key + ']').focus().next("span.retxt,div.retxt").html(value).show();
                     $('input[name=' + key + ']').addClass("is-invalid");
@@ -4078,4 +4083,21 @@ function optimizeGridSizeAdjustmentMultiPage() {
             });
         }
     }
+}
+
+function draftUserComments(param) {
+	var comments = "";
+	$.ajax({
+		url : "/comment/getDraftUserComment",
+		type : 'POST',
+		data : param,
+		dataType : 'json',
+		cache : false,
+		async : false,
+		success : function(data){
+			comments = data.resultData;
+		},
+		error : fn.onError
+	});
+	return comments;
 }

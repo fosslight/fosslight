@@ -341,6 +341,8 @@ public interface ProjectMapper {
 	
 	int selectAdminCheckCnt(ProjectIdentification projectIdentification);
 	
+	List<ProjectIdentification> selectAdminCheckList(@Param("prjId") String prjId);
+	
 	List<Project> selectPartnerRefPrjList(PartnerMaster partner);
 	
 	void updateFileId2(Project project);
@@ -390,4 +392,10 @@ public interface ProjectMapper {
 	int checkProjectDistributeHis(Project project);
 
 	Float getCvssScoreForNotFixed(String prjId);
+
+	List<ProjectIdentification> selectSecurityListForProject(ProjectIdentification identification);
+	
+	void updateProjectForSecurity(Project project);
+
+	List<String> selectProjectForSecurity();
 }

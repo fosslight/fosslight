@@ -64,6 +64,7 @@ import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.SearchService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelUtil;
+import oss.fosslight.util.ResponseUtil;
 import oss.fosslight.util.YamlUtil;
 import oss.fosslight.validation.T2CoValidationConfig;
 import oss.fosslight.validation.T2CoValidationResult;
@@ -407,10 +408,12 @@ public class PartnerController extends CoTopComponent{
 			log.error(e.getMessage(), e);
 		}
 		
-		if (CoConstDef.FLAG_NO.equals(partnerMaster.getViewOnlyFlag()) && partnerMaster.getStatusPermission() == 1) {
-			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=false");
-		} else {
-			res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=true");
+		if (!CoConstDef.FLAG_NO.equals(avoidNull(partnerMaster.getUseYn()))) {
+			if (CoConstDef.FLAG_NO.equals(partnerMaster.getViewOnlyFlag()) && partnerMaster.getStatusPermission() == 1) {
+				res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=false");
+			} else {
+				res.sendRedirect(req.getContextPath() + "/index?id=" + partnerMaster.getPartnerId() + "&menu=par&view=true");
+			}
 		}
 	}
 	

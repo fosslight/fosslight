@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="script">
+<script th:inline="javascript">
+$(document).ready(function () {
+	evt.init();
+	restriction.getRestrictionList();
+});
+
+
+// 이벤트
+var evt = {
+	// ready event
+	init: function(){
+ 		$('#btnSaveCodeDetail').click(function(){
+ 			fn.saveCode('codeDtl');
+ 		});
+	}
+};
+
+var ajax = {
+	setCodeDetail: function(data){
+		var dataToSend = JSON.stringify(data);
+		
+		$.ajax({
+			type: 'POST',
+			url:'/system/restriction/saveAjax',
+			data: dataToSend,
+			dataType: "json",
+			contentType: "application/json; charset=utf-8"
+		}).success(function (data, status, headers, config) {
+			if("false" == data.isValid) {
+				alertify.error([[#{msg.common.valid}]], 0);
+				gridListBulkEdit("list")
+				
+				createValidMsgComplex(data);
+			} else {
+				alertify.success([[#{msg.common.success}]]);
+			}
+		}).error(function (data, status, headers, config) {
+			alertify.error([[#{msg.common.valid2}]], 0);
+		});
+	}
+}
+
+var fn = {
+	getMaxIdNo: function(grid){
+		var ids = $("#list").jqGrid('getDataIDs');
+		return (ids.length == 0) ? 0 : Math.max.apply(Math, ids);
+	},
+	addRow : function(grid) {
+		var codeNo = restriction.codeNo;
+		var _tempRandId = $.jgrid.randId();
+		var grid = $("#list");
+		
+		grid.jqGrid("addRowData", _tempRandId, {cdNo: codeNo, gridId: _tempRandId}, "last");
+		grid.jqGrid('setColProp','cdDtlNo', {editable: true});
+		grid.jqGrid('editRow', _tempRandId, true, function(){});
+	},
+	saveCode : function() {
+		var sendRowData = {};
+		var dataToSend = [];
+		var grid = $('#list');
+		var rows = grid.jqGrid('getDataIDs');
+		
+		for(idx=0; idx < rows.length; idx++) {
+			grid.jqGrid('saveRow', rows[idx]);
+			var rowData = grid.jqGrid('getRowData', rows[idx]);
+			dataToSend.push(rowData);
+		}
+		
+		sendRowData['t2codeDtl'] = dataToSend;
+		sendRowData['cdNo'] = [[${@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION')}]];
+		
+		ajax.setCodeDetail(sendRowData);
+	},
+	delRow: function(delRowId, delFlag){
+		var target = $("#list");
+		var rowData = target.jqGrid('getRowData', delRowId);
+		var cdDtlNo = rowData.cdDtlNo;
+		
+		if (cdDtlNo.indexOf('type="text"') > -1) {
+			target.jqGrid('collapseSubGridRow', delRowId);
+            target.jqGrid('delRowData', delRowId);
+		} else {
+			$.ajax({
+				type: 'POST',
+				url: '/system/restriction/checkRestriction/' + cdDtlNo,
+				contentType: "application/json"
+			}).success(function (data, status, headers, config) {
+				var matchedOssNames = new Array();
+				matchedOssNames = data.resultData.matchedOssNames;
+				var matchedLicenseNames = new Array();
+				matchedLicenseNames = data.resultData.matchedLicenseNames;
+				
+				if (matchedOssNames.length > 0 || matchedLicenseNames.length > 0) {
+					var msg = "";
+					var idx = 1;
+					if (matchedOssNames.length > 0) {
+						msg += [[${@CommonFunction.getCustomMessage('msg.common.cannot.delete.restriction', 'OSS')}]];
+						if (!delFlag) msg = msg.replace("cannot be deleted", "cannot be modified");
+						for (var i in matchedOssNames) {
+							if (idx > 5) break;
+							msg += '<br/>';
+	                        msg += '&emsp;&#8259; ' + matchedOssNames[i];
+	                        idx++;
+						}
+					}
+					if (matchedLicenseNames.length > 0) {
+						idx = 1;
+						if ("" != msg) msg += '<br/><br/>';
+						msg += [[${@CommonFunction.getCustomMessage('msg.common.cannot.delete.restriction', 'License')}]];
+						if (!delFlag) msg = msg.replace("cannot be deleted", "cannot be modified");
+						for (var j in matchedLicenseNames) {
+							if (idx > 5) break;
+							msg += '<br/>';
+	                        msg += '&emsp;&#8259; ' + matchedLicenseNames[j];
+	                        idx++;
+						}
+					}
+					
+					alertify.alert(msg, function () {
+						if (!delFlag) {
+							$("#" + delRowId + "_useYn option:eq(0)").prop("selected", true);
+						}
+					});
+				} else {
+					if (delFlag) $("#list").jqGrid('delRowData',delRowId,{editurl: 'clientArray'});
+				}	
+			}).error(function (data, status, headers, config) {
+				alertiy.error([[#{msg.common.valid2}]], 0);
+			});
+		}
+	}
+}
+
+var gridFormat = {
+	gridListBulkEdit : function(listId) {
+		var grid = $("#" + listId);
+	    var ids = grid.jqGrid('getDataIDs');
+
+	    for (var i = 0; i < ids.length; i++) {
+	    	grid.jqGrid('setColProp','cdDtlNo', {editable: false});
+	    	grid.jqGrid('editRow', ids[i], true);
+	    }
+	}
+}
+
+var restriction = {
+	list : [],
+	lastIdNo : "",
+	codeNo : [[${@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION')}]],
+	getRestrictionList : function() {
+		var data = "cdNo=" + restriction.codeNo;
+	
+		$.ajax({
+			type: 'GET',
+			url:'/system/restriction/listAjax',
+			data: data
+		}).success(function (data, status, headers, config) {
+			restriction.list = data.restrictionList;
+			restriction.load();
+		}).error(function (data, status, headers, config) {
+			alertify.error([[#{msg.common.valid2}]], 0);
+		});
+	},
+	load : function() {
+		$("#list").jqGrid({
+			datatype: 'local',
+			data: restriction.list,
+			colNames: ['','','No', 'Name', 'Description', 'Level', 'Order', 'Use YN'],
+			colModel: [
+				{name: 'cdNo', index: 'cdNo', hidden:true},
+				{name: 'gridId', index: 'gridId', key:true, hidden:true},
+				{name: 'cdDtlNo', index: 'cdDtlNo', width: 40, align: 'center', sorttype: "int", editable:false},
+				{name: 'cdDtlNm', index: 'cdDtlNm', width: 200, align: 'left', editable:true},
+				{name: 'cdDtlExp', index: 'cdDtlExp', width: 250, align: 'left', editable:true},
+				{name: 'cdSubNo', index: 'cdSubNo', width: 70, align: 'left', editable:true, editoptions:{dataEvents: [{type:'keydown', fn:fn.numChk}]}},
+				{name: 'cdOrder', index: 'cdOrder', width: 50, align: 'left', sorttype: "int", editable:true, editoptions:{dataEvents: [{type:'keydown', fn:fn.numChk}]}},
+				{name: 'useYn', index: 'useYn', width: 50, align: 'center', editable:true, edittype:"select", editoptions : {value:"Y:Y;N:N"
+					, dataEvents:[
+						{
+							type:'change'
+							, fn:function(e){
+								if ("N" == $(this).val()) {
+									var rowId = $(this).parent().parent().attr("id");
+									fn.delRow(rowId, false);
+								}
+							}
+						}
+					]}}
+			],
+			autoencode: true,
+			autowidth: true,
+			pager: '#pager',
+			toppager: true,
+   			rowNum: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_MAX')}]],
+			gridview: true,
+			sortable: function (permutation) {
+				alert ('permutation=' + permutation.join(','));
+			},
+			sortname: 'cdOrder',
+			sortorder: 'asc',
+			pgbuttons: false,
+		   	pgtext: false,
+		   	pginput: false,
+		   	multiselect: true,
+		   	multiselectWidth: 35,
+			height: 'auto',
+			editurl: 'clientArray',
+			loadonce: true,
+			loadComplete: function(data) {
+				// id(key값)의 max값을 lastIdNo에 설정
+				restriction.lastIdNo = fn.getMaxIdNo('codeDtl');
+				$("#list").addClass("ui-jqgrid-htable");
+			},
+            ondblClickRow: function(rowid,iRow,iCol,e) {
+            	gridFormat.gridListBulkEdit("list");
+            	
+                $("input, select",e.target).focus();    // 더블클릭한 cell 위치로 포커스(기본포커스는 맨 앞 cell)
+            },
+            gridComplete : function() {
+				updateGridRowCount('list', 'pager');
+			}
+		});
+		
+		$("#list").jqGrid('navGrid',"#list_toppager",{edit:false,add:true,del:true,search:false,refresh:false
+			, addfunc: function (rowid) {
+				fn.addRow('codeDtl');
+			}
+			, delfunc: function () {
+				var ids = $("#list").jqGrid("getGridParam", "selarrrow");
+        		if (ids.length != 1) {
+        			alertify.alert("Choose only one restriction", function(){});
+        		} else {
+        			fn.delRow(ids[0], true);
+        		}
+			}
+		});
+	}
+}
+</script>
+</th:block>
