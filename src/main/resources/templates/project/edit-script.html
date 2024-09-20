@@ -2503,7 +2503,7 @@
 				if(data.detail.completeYn == "Y"){
 					$("#complete").hide();
 				} else {
-					if(data.detail.status == "FREV"){
+					if(data.detail.status == "FREV" && userRole=="ROLE_ADMIN"){
 						$("#complete").show();
 					} else {
 						$("#complete").hide();
