@@ -62,6 +62,7 @@ dependencies {
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude module: 'junit'
 	}
+	testImplementation('org.springframework.security:spring-security-test')
 
 	testImplementation(platform('org.junit:junit-bom:5.10.0'))
 	testImplementation('org.junit.jupiter:junit-jupiter')
@@ -174,6 +175,8 @@ dependencies {
 	implementation group: 'org.cyclonedx', name: 'cyclonedx-core-java', version: '8.0.3'
 
 	implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.3'
+
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	
 	implementation files('libs/tlsh-4.6.0.jar')
 }

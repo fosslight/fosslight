@@ -998,10 +998,10 @@ public final class Url {
 			public static final String FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE		= "/projects/{id}/models/upload";
 
 			/** API Project BOM Tab Export */
-			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT	    = "/projects/{id}/bom/export";
+			public static final String FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD = "/projects/{id}/bom/file";
 
 			/** API Project BOM Tab Export JSON*/
-			public static final String FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON	    = "/projects/{id}/bom/json";
+			public static final String FOSSLIGHT_API_PROJECT_BOM_JSON	    = "/projects/{id}/bom/json-data";
 
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/bom/compare-with/{compareId}";
@@ -1023,6 +1023,9 @@ public final class Url {
 
 			public static final String FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON	    = "/projects/{id}/security/json-data";
 
+      public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
+
+    
 		/** VULNABILITY */
 			/** vulnerability info search */
 			public static final String FOSSLIGHT_API_VULNERABILITY_DATA	    = "/vulnerabilities";

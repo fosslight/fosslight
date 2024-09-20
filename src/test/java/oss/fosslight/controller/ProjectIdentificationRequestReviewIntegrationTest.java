@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,10 +26,12 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false)
 @SpringBootTest
+@WithMockUser(username = "user", roles = {"USER"})
 @Transactional
 public class ProjectIdentificationRequestReviewIntegrationTest {
     private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.107 Safari/537.36";
@@ -53,14 +56,15 @@ public class ProjectIdentificationRequestReviewIntegrationTest {
                 .param("listId", "")
                 .param("publicYn", "Y")
                 .param("networkServerType", "N")
-                .param("prjDivision", "999")
-                .param("prjUserId", "test2")
+                .param("prjDivision", "")
+                .param("prjUserId", "user")
                 .param("prjId", "")
                 .param("prjDivision", "")
                 .param("distributeTarget", "NA")
                 .param("prjModelJson", "[]")
                 .header("user-agent", USER_AGENT)
                 .contentType(MediaType.APPLICATION_JSON))
+                .andDo(log())
                 .andReturn().getResponse();
 
         Map<String, Map<String, String>> responseMapForProject = new ObjectMapper().readValue(response.getContentAsString(), Map.class);

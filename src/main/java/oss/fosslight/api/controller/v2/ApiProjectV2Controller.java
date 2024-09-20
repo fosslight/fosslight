@@ -9,19 +9,23 @@ import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.*;
 import oss.fosslight.repository.CodeMapper;
@@ -31,6 +35,7 @@ import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 import javax.annotation.PostConstruct;
@@ -43,6 +48,7 @@ import java.util.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
+@Validated
 public class ApiProjectV2Controller extends CoTopComponent {
 
     @Resource
@@ -462,15 +468,21 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Project Bom Tab Export", notes = "Project > Bom tab Export")
+
+    @ApiOperation(value = "Project Bom Download as File", notes = "Project > Bom tab download as file")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_EXPORT})
-    public ResponseEntity<FileSystemResource> getPrjBomExport(
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD})
+    public ResponseEntity<FileSystemResource> getPrjBomDownload(
             @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Merge & Save Flag (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String mergeSaveFlag) {
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet")
+            @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+
+        log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
         // 사용자 인증
         String downloadId = "";
@@ -490,9 +502,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 
             if (searchFlag) {
-                if ("Y".equals(mergeSaveFlag)) {
+                if ("Y".equals(saveFlag)) {
 //                    apiProjectService.registBom(prjId, mergeSaveFlag);
-                    projectService.registBom(prjId, mergeSaveFlag, new ArrayList<>(), new ArrayList<>());
+                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
                 }
                 downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
                 fileInfo = fileService.selectFileInfo(downloadId);
@@ -505,14 +517,16 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Project Bom Tab Export Json", notes = "Project > Bom tab Export Json")
+    @ApiOperation(value = "Get Project Bom Tab As Json", notes = "Project > Get Bom tab data as json")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
     })
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON})
-    public ResponseEntity<Map<String, Object>> getPrjBomExportJson(
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_JSON})
+    public ResponseEntity<Map<String, Object>> getPrjBomAsJson(
             @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId) {
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -531,6 +545,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             if (searchFlag) {
                 resultMap = apiProjectService.getBomExportJson(prjId);
+                if ("Y".equals(saveFlag)) {
+                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
+                }
             }
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
@@ -1241,4 +1258,115 @@ public class ApiProjectV2Controller extends CoTopComponent {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+
+    @ApiOperation(value = "Load Searched Project Oss to Bin", notes = "Project > Identification > BIN")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header") })
+    @PostMapping(value = { Url.APIV2.FOSSLIGHT_API_OSS_LOAD })
+    public ResponseEntity<Map<String, Object>> ossLoad(@RequestHeader String authorization,
+                                                       @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String targetPrjId,
+                                                       @ApiParam(value = "Load Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
+                                    @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name = "tab_name") String tabName,
+                                                       @ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name")
+                                    @ValuesAllowed(propName = "searchCondition", values = {"id", "name"})@RequestParam(required = true) String searchCondition,
+                                                       @ApiParam(value = "Project ID to Load") @RequestParam(required = false) String prjIdToLoad,
+                                                       @ApiParam(value = "Project Name to Load") @RequestParam(required = false) String prjNameToLoad,
+                                                       @ApiParam(value = "Project Version to Load") @RequestParam(required = false) String prjVersionToLoad,
+                                                       @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", defaultValue = "Y", allowableValues = "Y, N")
+                                    @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false) String resetFlag) {
+
+        log.error("/api/v2/oss_load called:" + targetPrjId);
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        String errorMsgCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+
+        try {
+            Map<String, Object> paramMap = new HashMap<>();
+            List<String> prjIdList = new ArrayList<String>();
+            prjIdList.add(targetPrjId);
+            paramMap.put("userId", userInfo.getUserId());
+            paramMap.put("loginUserName", userInfo.getUserName());
+            paramMap.put("userRole", userRole(userInfo));
+            paramMap.put("prjId", prjIdList);
+            paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+            paramMap.put("distributionType", "normal");
+            paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+            boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+
+            if (!searchFlag) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND,
+                        String.format("Project %s not exist or User doesn't have permission for the project", targetPrjId));
+            }
+
+            paramMap.clear();
+
+            // Parameter validation check:
+            if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "targetPrjId is not in the correct format");
+            }
+
+            paramMap.put("targetPrjId", targetPrjId);
+            paramMap.put("resetFlag", CoConstDef.FLAG_YES.equals(StringUtils.isEmpty(resetFlag) ? "Y" : resetFlag));
+
+            switch (searchCondition) {
+                case "id":
+                    // Check if project ID is entered
+                    if (StringUtils.isEmpty(prjIdToLoad)) {
+                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, "the prjIdToLoad is missing");
+                    }
+
+                    if (!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
+                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, "prjIdToLoad is not in the correct format");
+                    }
+
+                    // Check for duplication of targetPrjId with prjIdToLoad
+                    if (targetPrjId.equals(prjIdToLoad)) {
+                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Please enter other prjIdToLoad that is different from targetPrjId");
+                    }
+                    paramMap.put("prjIdToLoad", prjIdToLoad);
+                    break;
+
+                case "name":
+                    // Check if project name is entered
+                    if (StringUtils.isEmpty(prjNameToLoad)) {
+                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, "the prjNameToLoad is missing");
+                    }
+
+                    paramMap.put("prjNameToLoad", prjNameToLoad);
+                    paramMap.put("prjVersionToLoad", prjVersionToLoad);
+                    break;
+
+                default:
+                    break;
+            }
+
+            switch(tabName) {
+                case "dep":
+                    resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+                    break;
+                case "src":
+                    resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+                    break;
+                case "bin":
+                    resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+                    break;
+            }
+
+            // Check if resultMap contains a "msg" key and return failure result if it does
+            if (errorMsgCode.equals(resultMap.get("code"))) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get("msg"));
+            }
+
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
+
