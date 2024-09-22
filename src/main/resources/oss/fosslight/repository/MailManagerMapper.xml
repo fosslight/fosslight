@@ -108,7 +108,7 @@
 		WHERE T1.USE_YN = 'Y' AND T2.BAT_ID = #{batId}
 	</select>
 	
-	<select id="getOssInfoById" parameterType="String" resultType="oss.fosslight.domain.OssMaster">SELECT * FROM OSS_MASTER WHERE OSS_ID = #{ossId}</select>
+	<select id="getOssInfoById" parameterType="String" resultType="oss.fosslight.domain.OssMaster">SELECT * FROM OSS_COMMON OC INNER JOIN OSS_VERSION OV ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID WHERE OV.OSS_ID = #{ossId}</select>
 	<select id="getLicenseInfoById" parameterType="String" resultType="oss.fosslight.domain.LicenseMaster">SELECT * FROM LICENSE_MASTER WHERE LICENSE_ID = #{licenseId}</select>
 	<select id="getProjectInfoById" parameterType="String" resultType="oss.fosslight.domain.Project">SELECT * FROM PROJECT_MASTER WHERE PRJ_ID = #{prjId}</select>
 	<select id="getSelfCheckProjectInfoById" parameterType="String" resultType="oss.fosslight.domain.Project">SELECT * FROM PRE_PROJECT_MASTER WHERE PRJ_ID = #{prjId}</select>

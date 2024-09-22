@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
-<script th:inline="javascript" src="https://code.highcharts.com/highcharts.src.js"></script>
     <script th:inline="javascript">
         var dataTable;
 
@@ -372,83 +371,10 @@
 
         var chart_fn = {
           	mostUsedOssChartOpen : function(){
-               	var params = {};
-           		params["startDate"] = $("#startDate").val();;
-           		params["endDate"] = $("#endDate").val();
-           		params["divisionNo"] = "";
-           		params["pieSize"] = $("#mostUsedOssChartPieSize").val();
-           		params["chartType"] = "OSS";
-           		params["isRawData"] = "N";
-
-           		$.ajax({
-           			url : '/statistics/mostUsedChart',
-           			type : 'GET',
-           			dataType : 'json',
-           			cache : false,
-           			data : params,
-           			success : function(data){
-           				var data = data.chartData;
-           				var obj = new Object();
-           				var chartData = new Array();
-           				var idx = 0;
-           				for(var i in data){
-           					var result = {
-           						name: data[i].columnName
-           						, y: data[i].columnCnt
-           					}
-           					chartData.push(result);
-          					idx++;
-          				}
-
-           				obj["chartId"] = 'mostUsedOssChart';
-           				obj["chartData"] = chartData;
-
-                        getPieChart(obj);
-       				},
-       				error: function(data){
-        				alertify.error([[#{msg.common.valid2}]], 0);
-        			}
-        		});
+          		// change chart library
        		},
            	mostUsedLicenseChartOpen : function(){
-        		var params = {};
-        		params["startDate"] = $("#startDate").val();
-        		params["endDate"] = $("#endDate").val();
-        		params["divisionNo"] = "";
-        		params["pieSize"] = $("#mostUsedLicenseChartPieSize").val();
-        		params["chartType"] = "LICENSE";
-        		params["isRawData"] = "N";
-
-        		$.ajax({
-        			url : '/statistics/mostUsedChart',
-        			type : 'GET',
-        			dataType : 'json',
-        			cache : false,
-        			data : params,
-        			success : function(data){
-        				var data = data.chartData;
-        				var obj = new Object();
-        				var chartData = new Array();
-        				var idx = 0;
-        				for(var i in data){
-        					var result = {
-        						name: data[i].columnName
-        					  	, y: data[i].columnCnt
-        					}
-
-        					chartData.push(result);
-        					idx++;
-        				}
-
-        				obj["chartId"] = 'mostUsedLicenseChart';
-        				obj["chartData"] = chartData;
-
-        				getPieChart(obj);
-        			},
-        			error: function(data){
-        				alertify.error([[#{msg.common.valid2}]], 0);
-        			}
-        		});
+           		// change chart library
         	}
         }
 

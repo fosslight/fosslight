@@ -39,8 +39,8 @@ public final class Url {
 		public static final String PATH = "/main";
 		
 		/**  메인 페이지: {@value #INDEX}. */
-		public static final String INDEX_EMPTY			 = "/";
-		public static final String INDEX			 	   = "/index";
+		public static final String INDEX_EMPTY             = "/";
+		public static final String INDEX             	   = "/index";
 		public static final String INDEX_JSP			   = TILES + PATH + "/index";
 
 	}
@@ -144,6 +144,7 @@ public final class Url {
 		public static final String DIV_COMMENT_BY_ID =  PATH + "/getDivCommentByCommId";
 
 		public static final String DIV_USER_COMMENT = PATH + "/getDivUserComment";
+		public static final String DRAFT_USER_COMMENT = PATH + "/getDraftUserComment";
 	}
 	
 	public static final class PROCESSGUIDE {
@@ -680,6 +681,19 @@ public final class Url {
 		public static final String AUTOCOMPLETE_NM_AJAX = PATH + "/autoCompleteNmAjax";
 	}
 	
+	public static final class RESTRICTION {
+		public static final String PATH = "/system/restriction";
+		
+		public static final String PAGE = PATH + "";
+		public static final String PAGE_JSP = TILES_ROOT + PATH + "";
+		
+		public static final String LIST_AJAX = PATH + "/listAjax";
+		
+		public static final String SAVE_AJAX = PATH + "/saveAjax";
+		
+		public static final String CHECK_RESTRICTION = PATH + "/checkRestriction/{cdDtlNo}";
+	}
+	
 	public static final class HISTORY {
 		public static final String PATH = "/system/history";
 		
@@ -848,9 +862,9 @@ public final class Url {
 			
 			/** API DOWNLOAD LOCATION 조회 */
 			public static final String FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH	= "/downloadlocation_search";
-			public static final String FOSSLIGHT_API_AUTOANALYSIS_REGISTER				= "/autoAnalysis_register";
 			
-
+			public static final String FOSSLIGHT_API_AUTOANALYSIS_REGISTER		= "/autoAnalysis_register";
+			
 		/** LICENSE */
 			/** API License List 조회 */
 			public static final String FOSSLIGHT_API_LICENSE_SEARCH			= "/license_search";
@@ -945,6 +959,12 @@ public final class Url {
 
 			/** API 3rd Party Add Watcher */
 			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partners/{id}/watchers";
+			public static final String FOSSLIGHT_API_PARTNER_EXPORT_DEPRECATED = "/partners/{id}/export";
+			public static final String FOSSLIGHT_API_PARTNER_JSON_DEPRECATED = "/partners/{id}/json";
+
+			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD		= "/partners/{id}/file";
+			public static final String FOSSLIGHT_API_PARTNER_JSON			= "/partners/{id}/json-data";
+
 
 		/** OSS */
 			/** API OSS List 조회 */
@@ -990,6 +1010,7 @@ public final class Url {
 			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/projects/{id}/watchers";
 
 			/** API OSS Report upload */
+			public static final String FOSSLIGHT_API_OSS_REPORT = "/projects/{id}/{tab_name}/reports";
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/projects/{id}/src";
 			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/projects/{id}/bin";
 			public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/projects/{id}/report-android";
@@ -999,8 +1020,12 @@ public final class Url {
 
 			public static final String FOSSLIGHT_API_PROJECT_GET_NOTICE		= "/projects/{id}/notice";
 
-			public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
 
+			public static final String FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON	    = "/projects/{id}/security/json-data";
+
+      public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
+
+    
 		/** VULNABILITY */
 			/** vulnerability info search */
 			public static final String FOSSLIGHT_API_VULNERABILITY_DATA	    = "/vulnerabilities";
@@ -1033,6 +1058,7 @@ public final class Url {
 		/** CODE */
 			/** Code 조회 */
 			public static final String FOSSLIGHT_API_CODE_SEARCH				="/codes";
+
 	}
 
 	public static final class API_LITE {
@@ -1054,3 +1080,4 @@ public final class Url {
 	}
 
 }
+

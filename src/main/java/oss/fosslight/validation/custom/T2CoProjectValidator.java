@@ -221,8 +221,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 					continue;
 				}
 				
-				String checkKey = bean.getOssName().trim() +"_"+ avoidNull(bean.getOssVersion()).trim();
+				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
+				if (!ossInfoByName.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
+					checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
+					checkKey = checkKey.toUpperCase();
+				}
 				OssMaster ossBean = ossInfoByName.get(checkKey);
 
 				List<ProjectIdentification> licenseList = null;
@@ -408,6 +412,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
+				if (!ossInfoByName.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
+					checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
+					checkKey = checkKey.toUpperCase();
+				}
 				OssMaster ossBean = ossInfoByName.get(checkKey);
 				basicKey = "OSS_NAME";
 				gridKey = StringUtil.convertToCamelCase(basicKey);
@@ -688,6 +696,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 				if (!isEmpty(bean.getOssName())) {
 					String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 					checkKey = checkKey.toUpperCase();
+					if (!ossInfo.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
+						checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
+						checkKey = checkKey.toUpperCase();
+					}
 					licenseList = findLicense(bean.getGridId());
 					
 					if (licenseList != null && ossInfo.containsKey(checkKey)) {
@@ -822,8 +834,12 @@ public class T2CoProjectValidator extends T2CoValidator {
 					continue;
 				}
 				
-				String checkKey = avoidNull(bean.getOssName(), "").trim() + "_" + avoidNull(bean.getOssVersion(), "").trim();
+				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
+				if (!ossInfoByName.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
+					checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
+					checkKey = checkKey.toUpperCase();
+				}
 				OssMaster checkOSSMaster = ossInfoByName.get(checkKey);
 				basicKey = "OSS_NAME";
 				gridKey = StringUtil.convertToCamelCase(basicKey);
@@ -1828,6 +1844,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 				
 				String checkKey = bean.getOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
 				checkKey = checkKey.toUpperCase();
+				if (!ossInfo.containsKey(checkKey) && !isEmpty(bean.getRefOssName())) {
+					checkKey = bean.getRefOssName().trim() + "_" + avoidNull(bean.getOssVersion()).trim();
+					checkKey = checkKey.toUpperCase();
+				}
 				OssMaster ossmaster = ossInfo.get(checkKey);
 				
 				// exclude=Y 상태인 경우 체크하지 않음

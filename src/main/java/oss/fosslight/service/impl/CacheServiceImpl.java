@@ -62,7 +62,7 @@ public class CacheServiceImpl implements CacheService {
 	public String findIdentificationMaxNvdInfo(String prjId, String referenceDiv) {
 		List<String> customNvdMaxScoreInfoList = new ArrayList<>();
 		List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(prjId, referenceDiv);
-		List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(prjId, referenceDiv);
+//		List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(prjId, referenceDiv);
 		
 		if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
 			nvdMaxScoreInfoList = nvdMaxScoreInfoList.stream().distinct().collect(Collectors.toList());
@@ -72,9 +72,9 @@ public class CacheServiceImpl implements CacheService {
 			}
 		}
 		
-		if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
-			customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
-		}
+//		if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
+//			customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
+//		}
 		
 		if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
 			return CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);

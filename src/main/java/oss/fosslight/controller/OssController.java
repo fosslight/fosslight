@@ -300,6 +300,7 @@ public class OssController extends CoTopComponent{
 		model.addAttribute("list", map);
 		model.addAttribute("detail", ossMaster);
 		model.addAttribute("ossId", ossMaster.getOssId());
+		model.addAttribute("ossCommonId", ossMaster.getOssCommonId());
 		
 		// 참조 프로젝트 목록 조회
 		boolean projectListFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
@@ -469,10 +470,12 @@ public class OssController extends CoTopComponent{
 			, Model model){
 		String resCd="00";
 		HashMap<String, Object> resMap = new HashMap<>();
-		String[] ossIds = ossMaster.getOssIds();
+		String[] delOssIds = ossMaster.getOssIds();
 		List<String> notDelOssList = new ArrayList<>();
 		
-		for (String ossId : ossIds) {
+		for (String delOssId : delOssIds) {
+			String[] delOssIdInfo = delOssId.split("\\|");
+			String ossId = delOssIdInfo[1];
 			String existOssCnt = ossService.checkExistOssConf(ossId);
 			
 			if (Integer.parseInt(existOssCnt) > 0) {
@@ -483,6 +486,7 @@ public class OssController extends CoTopComponent{
 				OssMaster ossMailBean = ossService.getOssInfo(ossId, true);
 				
 				OssMaster param = new OssMaster();
+				param.setOssCommonId(delOssIdInfo[0]);
 				param.setOssId(ossId);
 				param.setOssName(ossMailBean.getOssName());
 				param.setComment(ossMaster.getComment());
@@ -900,11 +904,13 @@ public class OssController extends CoTopComponent{
 		
 		T2CoValidationResult vr = validator.validateObject(ossMaster);
 		
+		String purl = ossService.getPurlByDownloadLocation(ossMaster);
+		
 		if (!vr.isDiff()) {
-			return makeJsonResponseHeader(true, null, null, null, vr.getDiffMessageMap());
+			return makeJsonResponseHeader(true, null, purl, null, vr.getDiffMessageMap());
 		}
 		
-		return makeJsonResponseHeader();
+		return makeJsonResponseHeader(true, null, purl);
 	}
 	
 	@PostMapping(value=OSS.SAVE_SESSION_OSS_INFO)
@@ -1617,7 +1623,7 @@ public class OssController extends CoTopComponent{
 			resMap.put("list", Stream.concat(valid.stream(), invalid.stream())
 					.collect(Collectors.toList()));
 		} */
-
+		
 		return makeJsonResponseHeader(resMap);
 	}
 	
@@ -1837,7 +1843,10 @@ public class OssController extends CoTopComponent{
 		analysisResultData = (List<OssAnalysis>) fromJson(dataString, typeAnalysis);
 		for (OssAnalysis oa : analysisResultData) {
 			if (oa.getTitle().contains("최신 등록 정보")) {
-				oa.setOssId(ossService.getOssInfo(null, oa.getOssName(), false).getOssId());
+				OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
+				if (bean != null) {
+					oa.setOssId(bean.getOssId());
+				}
 			}
 		}
 		
@@ -1870,8 +1879,47 @@ public class OssController extends CoTopComponent{
 		List<OssAnalysis> detailData = (List<OssAnalysis>) getSessionObject(sessionKey);
 		
 		if (detailData != null) {
+			OssMaster bean = new OssMaster();
 			for (OssAnalysis oa : detailData) {
 				if (ossService.checkOssTypeForAnalysisResult(oa)) oa.setOssType("V");
+				if (!isEmpty(oa.getDownloadLocation())) {
+					StringBuilder sb = new StringBuilder();
+					if (oa.getDownloadLocation().contains(",")) {
+						for (String downloadLocation : oa.getDownloadLocation().split("[,]")) {
+							bean.setDownloadLocation(downloadLocation);
+							String purl = ossService.getPurlByDownloadLocation(bean);
+							if (!isEmpty(purl)) {
+								sb.append(downloadLocation + "|" + purl).append(",");
+							} else {
+								sb.append(downloadLocation);
+							}
+						}
+					} else {
+						bean.setDownloadLocation(oa.getDownloadLocation());
+						String purl = ossService.getPurlByDownloadLocation(bean);
+						if (!isEmpty(purl)) {
+							sb.append(oa.getDownloadLocation() + "|" + purl);
+						} else {
+							sb.append(oa.getDownloadLocation());
+						}
+					}
+					
+					oa.setDownloadLocation(sb.toString());
+				}
+				
+				String key = (oa.getOssName() + "_" + avoidNull(oa.getOssVersion())).toUpperCase();
+				if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
+					OssMaster param = new OssMaster();
+					param.setOssId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssId());
+					param.setOssCommonId(CoCodeManager.OSS_INFO_UPPER.get(key).getOssCommonId());
+					param.setOssName(oa.getOssName());
+					param.setOssVersion(oa.getOssVersion());
+					
+					OssMaster om = ossService.getOssMasterOne(param);
+					oa.setIncludeCpes(om.getIncludeCpes());
+					oa.setExcludeCpes(om.getExcludeCpes());
+					oa.setOssVersionAliases(om.getOssVersionAliases());
+				}
 			}
 			
 			result.put("isValid", true);

@@ -1487,7 +1487,13 @@
 					alertify.error([[#{msg.common.valid2}]], 0);
 				}
 			});
-		}
+		},
+        	setGridBeforeSearch : function (target, callbackFunc) {
+        		var licenseName = callbackFunc(target.getRowData(_mainLastsel));
+        		target.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
+            	fn_grid_com.saveCellData(target.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
+            	target.jqGrid('saveRow', _mainLastsel);
+       		}
         }
 
         var src_fn_com = {

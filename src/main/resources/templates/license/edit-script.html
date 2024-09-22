@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
     <script th:inline="javascript">
-        var userRole = [[${sessUserInfo.authority}]];
+        var userRole = [[${#authentication.authorities[0].authority}]];
         var commentsParam = {referenceDiv : 'license'};
         var isNew = false;
 
@@ -199,6 +199,9 @@
                     if (checked1 && !checked2){
                         $('input[name=obligationNotificationYn]').trigger('click');
                     }
+                    if (typeof checked1 === "undefined") {
+    					$('#disclosingSrcSelect').val("1").trigger('change');
+    				}
                 });
 
                 $('select[name=licenseType]').on('change', function(){
@@ -233,7 +236,13 @@
         const lic_edit_fn = {
             registSubmit: function () {
                 $("#licenseType option[value='']").removeAttr('disabled');
-
+                
+                if ($("#disclosingSrcSelect").val() != null) {
+            		$('input[name=disclosingSrc]').val($("#disclosingSrcSelect").val());
+            	} else {
+            		$('input[name=disclosingSrc]').val('');
+            	}
+                
                 $("#licenseForm").ajaxForm({
                     url :"/license/validation",
                     type : 'POST',
@@ -275,7 +284,7 @@
                 if (json.resCd == '10') {
                     alertify.alert([[ #{msg.common.success} ]], function(){
                         if (isNew) {
-                            deleteTabInFrame('/license/edit/');
+                            deleteTabInFrame('/license/edit');
                             createTabInFrame(json.licenseId + '_License', '/license/edit/' + json.licenseId);
                         } else {
                             deleteTabInFrame('/license/edit/' + json.licenseId);
@@ -295,6 +304,7 @@
         		$("#licenseNameInput").removeClass("is-invalid");
         		$("#licenseType").removeClass("is-invalid");
         		$("#licenseTextInput").removeClass("is-invalid");
+        		$("#disclosingSrcSelect").parent().removeClass("cus-is-invalid");
         		$(".retxt").text("");
         	},
             removeTag : function(obj) {
@@ -587,6 +597,7 @@
                     } else {
                         deleteTabInFrame('/license/edit');
                     }
+                    callCreateTabInFrame("License", "/license/list", 'license-list', true);
                 });
             }
         }

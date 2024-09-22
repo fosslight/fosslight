@@ -26,8 +26,6 @@ var detectedLicenseValid = {
 		"3" : true
 };
 
-var suffixUrl = [[${@environment.getProperty('fosslight.suffix')}]];
-
 var Ctrl_fn = {
 	init: function(){
 		evt.init();
@@ -66,7 +64,7 @@ var Ctrl_fn = {
 		if (typeof selectData.ossId !== 'undefined') {
 			if ('' == commentTemp){
 				$("input[name=latestOssId]").val(selectData.ossId);
-				Ctrl_fn.getCommentList(seq);
+//				Ctrl_fn.getCommentList(seq);
 			} else {
 				if ($('#commentListArea'+seq).find('dl').length == 0) {
 					$('#commentListArea'+seq).append(commentTemp);
@@ -86,10 +84,10 @@ var Ctrl_fn = {
 		
 		selectData.ossNickname.split(",").forEach(function(nickName){
 		    if ('' != nickName){
-		    	let nickHtml 	= 	'<div class="col-2" style="margin-top: 5px;">';
-				nickHtml 		+= 		'<div class="input-group card-tools">';
+		    	let nickHtml 	= 	'<div class="col-lg-12 mt-1 pl-0">';
+				nickHtml 		+= 		'<div class="form-group mb-0">';
 				nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+nickName+'"/>';
-				nickHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
 				nickHtml 		+=		'</div>';
 				nickHtml 		+=		'<span class="retxt"></span>';
 				nickHtml 		+= 	'</div>';
@@ -100,30 +98,48 @@ var Ctrl_fn = {
 		
 		selectData.downloadLocation.split(",").forEach(function(downloadLocation){
 		    if ('' != downloadLocation){
-		    	let downloadLocationHtml 	= 	'<div style="margin-top: 5px;">';
-				downloadLocationHtml 		+= 		'<div class="input-group card-tools">';
-				downloadLocationHtml 		+=			'<input class="form-control" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
-				downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-				downloadLocationHtml 		+=		'</div>';
-				downloadLocationHtml 		+=		'<span class="urltxt"></span>';
-				downloadLocationHtml 		+=		'<span class="retxt"></span>';
+		    	var download = "";
+				var purl = "";
+		    	
+				if (downloadLocation.indexOf("|") > -1) {
+					download = downloadLocation.split("|")[0];
+					purl = downloadLocation.split("|")[1];
+				} else {
+					download = downloadLocation;
+				}
+				
+		    	let downloadLocationHtml 	= 	'<div class="col-lg-12 mt-1 pl-0">';
+		    	downloadLocationHtml 		+= 		'<div class="row">';
+		    	downloadLocationHtml 		+= 			'<div class="col-lg-6" style="margin-top: 5px;">';
+		    	downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
+				downloadLocationHtml 		+=					'<input class="form-control" name="downloadLocations" id="downloadLocations'+seq+'" type="text" value="'+download+'" onblur="Ctrl_fn.urlDuplication(this);">';
+				downloadLocationHtml 		+=					'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
+				downloadLocationHtml 		+=				'</div>';
+				downloadLocationHtml 		+=				'<span class="urltxt"></span>';
+				downloadLocationHtml 		+=				'<span class="retxt"></span>';
+		    	downloadLocationHtml 		+=			'</div>';
+		    	downloadLocationHtml 		+=			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
+		    	downloadLocationHtml 		+=				'<div class="form-group mb-0">';
+		    	downloadLocationHtml 		+=					'<input class="form-control" style="background-color:#f5f4f3 !important; border-width:0;" name="purl" type="text" value="' + purl + '" readonly>';
+		    	downloadLocationHtml 		+=					'<input class="form-control" type="hidden" name="refDownloadLocation" value="'+downloadLocation+'">';
+		    	downloadLocationHtml 		+=				'</div>';
+		    	downloadLocationHtml 		+=			'</div>';
+		    	downloadLocationHtml 		+=		'</div>';
 				downloadLocationHtml 		+= 	'</div>';
 				
 				$(".detailDownloadLocation" + seq).append(downloadLocationHtml);
 				$("#input_downloadLocations" + seq).val("");
 				
-				$(".detailDownloadLocation" + seq + " > div > div > input[name='downloadLocations']").each(function(idx, cur){
-					$(cur).trigger("blur");
-				});
+				$(".detailDownloadLocation" + seq +" > div:last").find("input").trigger("blur");
 		    }
 		});
 		
 		selectData.detectedLicense.split(",").forEach(function(licenseName){
 			if ('' != licenseName) {
-				let detectedLicenseHtml 	= 	'<div class="col-lg-2" style="margin-top: 5px;">';
-				detectedLicenseHtml 		+= 		'<div class="input-group card-tools">';
+				let detectedLicenseHtml 	= 	'<div class="col-lg-4 mt-1 pl-0">';
+				detectedLicenseHtml 		+= 		'<div class="form-group mb-0">';
 				detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="'+licenseName+'" readonly/>';
-				detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
 				detectedLicenseHtml 		+=		'</div>';
 				detectedLicenseHtml 		+=		'<span class="retxt"></span>';
 				detectedLicenseHtml 		+= 	'</div>';
@@ -133,9 +149,27 @@ var Ctrl_fn = {
 			}
 		});
 
-		if (selectData.downloadLocation) {
-			Ctrl_fn.urlDuplication($("#ossForm"+seq+" input[name=downloadLocations]"));
+		if (typeof selectData.includeCpes !== "undefined") {
+			selectData.includeCpes.forEach(function(includeCpe){
+				
+			});
 		}
+		
+		if (typeof selectData.excludeCpes !== "undefined") {
+			selectData.excludeCpes.forEach(function(excludeCpe){
+				
+			});
+		}
+		
+		if (typeof selectData.ossVersionAliases !== "undefined") {
+			selectData.ossVersionAliases.forEach(function(versionAlias){
+				
+			});
+		}
+		
+//		if (selectData.downloadLocation) {
+//			Ctrl_fn.urlDuplication($("#ossForm"+seq+" input[name=downloadLocations]"));
+//		}
 		
 		if (selectData.homepage) {
 			Ctrl_fn.homepageDuplication($("#ossForm"+seq+" input[name=homepage]"));
@@ -245,13 +279,128 @@ var Ctrl_fn = {
 		Ctrl_fn.setMessage(gridId, seq);
 	},
 	nicknameAdd : function(seq) {
-		console.log("nick " + seq);
+		let nickHtml 	= 	'<div class="col-lg-12 mt-1 pl-0">';
+		nickHtml 		+= 		'<div class="form-group mb-0">';
+		nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+$("#input_ossNicknames" + seq).val()+'"/>';
+		nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+		nickHtml 		+=		'</div>';
+		nickHtml 		+=		'<span class="retxt"></span>';
+		nickHtml 		+= 	'</div>';
+		
+		$('.detailNickName' + seq).append(nickHtml);
+		$("#input_ossNicknames"+ seq).val('');
 	},
 	detectedLicenseAdd : function(seq) {
-		console.log("detectedLicense " + seq);
+		var duplicatedFlag = false;
+		var addNickname = $("#input_detectedLicense" + seq).val();
+	
+		$("input[name='detectedLicenses']").each(function (i) {
+			if (addNickname == $(this).val()) duplicatedFlag = true;
+		});
+	
+		if (!duplicatedFlag) {
+			let detectedLicenseHtml 	= 	'<div class="col-lg-4 mt-1 pl-0">';
+			detectedLicenseHtml 		+= 		'<div class="form-group mb-0">';
+			detectedLicenseHtml 		+=			'<input class="form-control" name="detectedLicenses" type="text" value="' + addNickname + '" readonly/>';
+			detectedLicenseHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+			detectedLicenseHtml 		+=		'</div>';
+			detectedLicenseHtml 		+=		'<span class="retxt"></span>';
+			detectedLicenseHtml 		+= 	'</div>';
+		
+			$(".detailDetectedLicense"+seq).append(detectedLicenseHtml);
+			grid_fn.setCustomAutoComplete("single");
+		}
+		
+		$("#input_detectedLicense" + seq).val("");
 	},
 	downloadLocationAdd : function(seq) {
-		console.log("downloadLocation " + seq);
+		var downloadLocation = $("#input_downloadLocations" + seq).val();
+		if (downloadLocation.endsWith("/")) {
+			downloadLocation = downloadLocation.slice(0, -1);
+		}
+		
+		let downloadLocationHtml 	= 	'<div class="col-md-12 mt-1 pl-0">';
+		downloadLocationHtml 		+=		'<div class="row">';
+		downloadLocationHtml 		+= 			'<div class="col-lg-6">';
+		downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
+		downloadLocationHtml 		+=					'<input class="form-control" name="downloadLocations" id="downloadLocations'+seq+'" type="text" value="'+$("#input_downloadLocations" + seq).val()+'"/ onblur="Ctrl_fn.urlDuplication(this);">';
+		downloadLocationHtml 		+=					'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
+		downloadLocationHtml 		+=				'</div>';
+		downloadLocationHtml 		+=				'<span class="urltxt"></span>';
+		downloadLocationHtml 		+=				'<span class="retxt"></span>';
+		downloadLocationHtml 		+=			'</div>';
+		downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea">';
+		downloadLocationHtml 		+= 				'<div class="row">';
+		downloadLocationHtml 		+= 					'<div class="col-lg-12">';
+//		downloadLocationHtml 		+=						'<div class="input-group">';
+		downloadLocationHtml 		+=							'<input class="form-control" name="purl" type="text" style="background-color:#f5f4f3 !important;" placeholder="Package URL" readonly/>';
+		downloadLocationHtml 		+=							'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
+// 		downloadLocationHtml 		+=							'<div class="input-group-append">';
+// 		downloadLocationHtml 		+=								'<button class="btn btn-default" type="button" onclick="fn.addPurl(this);">Add</button>';
+// 		downloadLocationHtml 		+=								'<input class="form-control" type="hidden" value="'+downloadLocation+'"/>';
+// 		downloadLocationHtml 		+=							'</div>';
+// 		downloadLocationHtml 		+=						'</div>';
+		downloadLocationHtml 		+=					'</div>';
+// 		downloadLocationHtml 		+= 					'<div class="col-lg-12">';
+// 		downloadLocationHtml 		+= 						'<div class="row multiPurlSet"></div>';
+// 		downloadLocationHtml 		+=					'</div>';
+		downloadLocationHtml 		+=				'</div>';
+		downloadLocationHtml 		+=			'</div>';
+		downloadLocationHtml 		+=		'</div>';
+		downloadLocationHtml 		+= 	'</div>';
+		
+		$(".detailDownloadLocation" + seq).append(downloadLocationHtml);
+		$("#input_downloadLocations" + seq).val("");
+		
+		$(".detailDownloadLocation" + seq +" > div:last").find("input").trigger("blur");
+	},
+	ossVersionAliasAdd : function(seq) {
+		let ossVersionAliasHtml 	= 	'<div class="col-md-12 mt-1">';
+		ossVersionAliasHtml 		+= 		'<div class="form-group mb-0">';
+		ossVersionAliasHtml 		+=			'<input class="form-control" name="ossVersionAliases" type="text" value="'+$("#ossVersionAliases" + seq).val()+'">';
+		ossVersionAliasHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+		ossVersionAliasHtml 		+=		'</div>';
+		ossVersionAliasHtml 		+= 	'</div>';
+		
+		$(".multiTxtVersionAlias" + seq).append(ossVersionAliasHtml);
+		$("#ossVersionAliases" + seq).val("");
+	},
+	includeCpeAdd : function(seq) {
+		let includeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
+		includeCpeHtml 			+= 		'<div class="form-group mb-0">';
+		includeCpeHtml 			+=			'<input class="form-control" name="includeCpes" type="text" value="'+$("#includeCpe" + seq).val()+'">';
+		includeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+		includeCpeHtml 			+=		'</div>';
+		includeCpeHtml 			+= 	'</div>';
+		
+		$(".multiTxtIncludeCpe" + seq).append(includeCpeHtml);
+		$("#includeCpe" + seq).val("");
+	},
+	excludeCpeAdd : function(seq) {
+		let excludeCpeHtml 		= 	'<div class="col-md-12 mt-1">';
+		excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
+		excludeCpeHtml 			+=			'<input class="form-control" name="excludeCpes" type="text" value="'+$("#excludeCpe" + seq).val()+'">';
+		excludeCpeHtml 			+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+		excludeCpeHtml 			+=		'</div>';
+		excludeCpeHtml 			+= 	'</div>';
+		
+		$(".multiTxtExcludeCpe" + seq).append(excludeCpeHtml);
+		$("#excludeCpe" + seq).val("");
+	},
+	addPurl : function (obj, seq) {
+		let purlValue = $(obj).parent().prev().val();
+  		let refDonwloadLocation = $(obj).next().val();
+    	
+    	let purlHtml 	= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+		purlHtml 		+= 		'<div class="form-group mb-0">';
+		purlHtml 		+=			'<input class="form-control" name="purl" type="text" value="'+purlValue+'"/>';
+		purlHtml 		+=			'<input class="form-control" type="hidden" value="'+refDonwloadLocation+'"/>';
+		purlHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+		purlHtml 		+=		'</div>';
+		purlHtml 		+= 	'</div>';
+		
+		$(obj).parent().parent().parent().next().find('.multiPurlSet' + seq).append(purlHtml);
+		$(obj).parent().parent().find("#input_purl" + seq).val('');
 	},
 	getAnalysisResultDetailData:function(){
 		$("#loading_wrap_popup").show();
@@ -317,6 +466,12 @@ var Ctrl_fn = {
 	removeTag: function(str){
 		return str.replace(/(<([^]+)>)/ig,"");
 	},
+	removeTag2: function(obj){
+		$(obj).parent().parent().remove();
+	},
+	downloadRemoveTag : function(obj) {
+		$(obj).parent().parent().parent().parent().remove();
+	},
 	clone : function(obj) {
 		if (obj === null || typeof(obj) !== 'object') {
 			return obj;
@@ -369,10 +524,14 @@ var Ctrl_fn = {
 		
 		$(ossForm + ' input[name=\'ossLicensesJson\']').val(JSON.stringify(newRows));
 		
+		var purlJson = {};
+		var downloadLocations = new Array();
+		
 		var pattern = /\s/g;
 		$(ossForm + ' [name=\'downloadLocations\']').each(function(idx, cur){
 			var value = $(cur).val().trim();
 			$(cur).val(value);
+			downloadLocations.push(value);
 			
 			if (value.match(pattern)) {
 				alertify.error("DownloadLocation remove spaces", 0);
@@ -380,6 +539,19 @@ var Ctrl_fn = {
 				return false;
 			}
 		});
+		
+		if (downloadLocations.length > 0) {
+			var refDownloadLocation = "";
+			
+			$("input[name=purl]").each(function(index, item){
+				refDownloadLocation = $(item).next().val();
+				purlJson[refDownloadLocation] = $(item).val();
+			});
+			
+			if (Object.keys(purlJson).length > 0) {
+				$(ossForm + ' input[name=\'purlJson\']').val(JSON.stringify(purlJson));
+			}
+		}
 		
 		$(ossForm + ' [name=\'homepage\']').each(function(idx, cur){
 			var value = $(cur).val().trim();
@@ -393,7 +565,7 @@ var Ctrl_fn = {
 		});
 
 		$(ossForm).ajaxForm({
-            url : suffixUrl + '/oss/validation',
+            url : '/oss/validation',
             type : 'POST',
             dataType:"json",
             cache : false,
@@ -503,10 +675,10 @@ var Ctrl_fn = {
 			$(target).parent().next().next("span.retxt").empty();
 			$(target).parent().next().next("span.retxt").css("display", "none");
 			
-			$("input[name=validationType]").val('DOWNLOADLOCATION');
-	    	$("[name='downloadLocation']").val(value);
-			$("#ossForm"+seq).ajaxForm({
-	            url : suffixUrl + '/oss/urlDuplicateValidation',
+			$("#ossForm" + seq + " input[name=validationType]").val('DOWNLOADLOCATION');
+			$("[name='downloadLocation']").val(value);
+			$("#ossForm" + seq).ajaxForm({
+	            url : '/oss/urlDuplicateValidation',
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
@@ -524,6 +696,9 @@ var Ctrl_fn = {
 		        	} else {
 			        	$(target).parent().next("span.urltxt").empty();
 		        	}
+		        	
+		        	$(target).parent().parent().next().find("input").val(json.resultData);
+		        	$(target).parent().parent().next().find("input[name='refDownloadLocation']").val(value);
 		        },
 		        error : Ctrl_fn.onError
 		    }).submit();
@@ -555,7 +730,7 @@ var Ctrl_fn = {
 			$("#ossForm"+seq+" input[name=validationType]").val('DOWNLOADLOCATIONS');
 			
 			$("#ossForm"+seq).ajaxForm({
-	            url : suffixUrl + '/oss/urlDuplicateValidation',
+	            url : '/oss/urlDuplicateValidation',
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
@@ -608,10 +783,10 @@ var Ctrl_fn = {
 			$(target).next().next("span.retxt").empty();
 			$(target).next().next("span.retxt").css("display", "none");
 			
-			$("input[name=validationType]").val('HOMEPAGE');
+			$("#ossForm"+seq + " input[name=validationType]").val('HOMEPAGE');
 			
 			$("#ossForm"+seq).ajaxForm({
-	            url : suffixUrl + '/oss/urlDuplicateValidation',
+	            url : '/oss/urlDuplicateValidation',
 	            type : 'POST',
 	            dataType:"json",
 	            cache : false,
@@ -653,8 +828,8 @@ var Ctrl_fn = {
 //		window.opener.opener.bom_fn.loadAnalysisUrl(target, url);
 	},
 	showOssViewPage : function (obj) {
-		var ossName = $(obj).parent().next().find('input').val();
-		var ossVersion = $(obj).parent().parent().next().find('input').val();
+		var ossName = $(obj).next().find('input').val();
+		var ossVersion = $(obj).parent().next().find('input').val();
 		Ctrl_fn.showDetailPopup(ossName, ossVersion);
 	},
 	showDetailPopup : function (ossName, ossVersion) {
@@ -747,9 +922,9 @@ var Ctrl_fn = {
             cache : false,
 	        success : function(json, status){
 	        	$("#loading_wrap_popup").hide();
-	    		if(json.resCd == '10'){
-	    				Ctrl_fn.setComplete(json.ossId);
-	    		}else{
+	    		if (json.resCd == '10') {
+	    			Ctrl_fn.setComplete(json.ossId);
+	    		} else {
 	    			alertify.error([[#{msg.common.valid2}]], 0);
 	    		}
 	    	},
@@ -896,41 +1071,13 @@ var Ctrl_fn = {
 
 var evt = {
 	init : function(){
+		$('.select2').select2();
+		$('#restrictionSelect1').select2({allowClear: true, tags: true});
+		$('#restrictionSelect2').select2({allowClear: true, tags: true});
+		$('#restrictionSelect3').select2({allowClear: true, tags: true});
+		
 		$(".smallDelete").on('click', function(){
 			$(this).parent().parent().remove();
-		});
-
-		$("input[id^=nickAdd]").on('click', function(){
-			var nicknameSeq = $(this).attr("id").replace(/[^\d]+/g, "");
-			$(common_data.nickNameClone).appendTo(".detailNickName"+nicknameSeq);
-			$(".smallDelete").on('click', function(){
-				$(this).parent().parent().remove();
-			});
-		});
-
-		//Detect License Input 추가
-		$('input[id^=detectedLicenseAdd]').on('click', function(){
-			var seq = $(this).attr("id").replace(/[^\d]+/g, "");
-			var cloneData = common_data.detectLicenseClone.split("autoComOssLicense1").join("autoComOssLicense"+seq); // autoComplete 기능으로 인해 cloneData를 별도로 가공함.
-			$(cloneData).appendTo('.detailDetectedLicense'+seq);
-			
-			grid_fn.setCustomAutoComplete('single', '', seq);
-			
-			$('.smallDelete').on('click', function(){
-				$(this).parent().parent().remove();
-			});
-		});
-		
-		$("input[id^=downloadLocationAdd]").on('click', function(){
-			var seq = $(this).attr("id").replace(/[^\d]+/g, "");
-			$(common_data.downloadLocationClone).appendTo(".detailDownloadLocation"+seq);
-			$(".smallDelete").on('click', function(){
-				$(this).parent().parent().remove();
-			});
-
-			$("#ossForm"+seq+" .multiDownloadLocationSet > div > span > input[name='downloadLocations']").each(function(idx, cur){
-				$(cur).attr("onblur", "Ctrl_fn.urlDuplication(this)");
-			});
 		});
 
 		$("[name='homepage']").on('blur', function(){
@@ -1636,12 +1783,12 @@ var grid_fn = {
 
 						break;
 					case 2:
-						result = '<span class=\"iconSet ops\" title=\"Notice\"></span>';
+						result = '<i class="far fa-file-alt fa-1-3x mr-1" title="Notice"></i>';
 						$('input[name=obligationType]').val("10");
 
 						break;
 					case 3:
-						result = '<span class=\"iconSet ops\" title=\"Notice\"></span><span class=\"iconSet man\" title=\"Source Code\"></span>';
+						result = '<i class="far fa-file-alt fa-1-3x mr-1" title="Notice"></i><i class="far fa-file-code fa-1-3x ml-3 mr-1" title="Source Code"></i>';
 						$('input[name=obligationType]').val("11");
 
 						break;
@@ -1655,12 +1802,12 @@ var grid_fn = {
 
 						break;
 					case 2:
-						result = '<span class=\"iconSet ops\" title=\"Notice\"></span>';
+						result = '<i class="far fa-file-alt fa-1-3x mr-2" title="Notice"></i>';
 						$('input[name=obligationType]').val("10");
 
 						break;
 					case 3:
-						result = '<span class=\"iconSet ops\" title=\"Notice\"></span><span class=\"iconSet man\" title=\"Source Code\"></span>';
+						result = '<i class="far fa-file-alt fa-1-3x mr-2" title="Notice"></i><i class="far fa-file-code fa-1-3x" title="Source Code"></i>';
 						$('input[name=obligationType]').val("11");
 
 						break;

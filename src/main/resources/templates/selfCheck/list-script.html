@@ -61,8 +61,8 @@ var evt = {
         var input = ["prjName", "publicYn", "ossName", "schStartDate", "schEndDate", "licenseName", "creator"];
         var optionSelectedFlag = false;
 		
-        if (typeof localStorage.selfCheckSearchConditions !== "undefined") {
-        	var localStorageSearchConditions = JSON.parse(localStorage.selfCheckSearchConditions);
+        if (typeof sessionStorage.selfCheckSearchConditions !== "undefined") {
+        	var localStorageSearchConditions = JSON.parse(sessionStorage.selfCheckSearchConditions);
         	
         	Object.keys(localStorageSearchConditions).forEach(function(key) {
     			if (input.includes(key)) {
@@ -134,7 +134,7 @@ var evt = {
 			} else {
 				localStorageData.publicYn = 'Y';
 			}
-			localStorage.setItem("selfCheckSearchConditions", JSON.stringify(localStorageData));
+			sessionStorage.setItem("selfCheckSearchConditions", JSON.stringify(localStorageData));
 			
             optionSelectedFlag = false;
             Object.keys(localStorageData).forEach(function(key) {

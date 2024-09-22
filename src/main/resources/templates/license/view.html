@@ -57,6 +57,10 @@
 												<td th:text="${detail?.restriction}"></td>
 											</tr>
 											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.license.disclosure.scope}"></th>
+												<td th:text="${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_SOURCE_CODE_DISCLOSURE_SCOPE'), licenseInfo?.disclosingSrcCdNo)}"></td>
+											</tr>
+											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.licenseWebsite}"></th>
 												<td>
 													<th:block th:if="${#lists.size(detail?.webpages) > 0}" th:each="webpage, status : ${detail?.webpages}">

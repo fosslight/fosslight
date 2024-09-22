@@ -152,8 +152,10 @@
 		syncData : function(syncData, copyFlag){
 			$.each(syncData, function(k, v){
 				$('input[name='+k+'],select[name='+k+'],textarea[name='+k+']').each(function(){
-					var $this = $(this);
-					$this.val(v);
+					if ("purl" != k && "includeCpes" != k && "excludeCpes" != k && "ossVersionAliases" != k && "restriction" != k) {
+						var $this = $(this);
+						$this.val(v);
+					}
 				});
 				
 				$('input[type=radio]').each(function(){
@@ -193,18 +195,39 @@
 								if (index == 0) {
 									$('.multiDownloadLocationSet').empty();
 								}
-								let downloadLocationHtml 	= 	'<div class="col-lg-4" style="margin-top: 5px;">';
-								downloadLocationHtml 		+= 		'<div class="form-group mb-0">';
-	                            if (isReadOnly == 'true' || isReadOnly) {
-	                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/ disabled>';
-	                            } else {
-	                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'" onblur="fn.urlDuplication(this)"/>';
-	                                downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
-	                            }
-								downloadLocationHtml 		+=		'</div>';
-								downloadLocationHtml 		+=		'<span class="urltxt"></span>';
-								downloadLocationHtml 		+=		'<span class="retxt"></span>';
-								downloadLocationHtml 		+= 	'</div>';
+								
+								var download = "";
+								var purl = "";
+								
+								if (downloadLocation.indexOf("|") > -1) {
+									download = downloadLocation.split("|")[0];
+									purl = downloadLocation.split("|")[1];
+								} else {
+									download = downloadLocation;
+								}
+								
+									let downloadLocationHtml 	= 	'<div class="col-md-12">';
+									downloadLocationHtml 		+=		'<div class="row">';
+									downloadLocationHtml 		+= 			'<div class="col-lg-6" style="margin-top: 5px;">';
+									downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
+				               	if (isReadOnly == 'true' || isReadOnly) {
+	                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)" disabled>';
+				                } else {
+	                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)">';
+				                    downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
+				                }
+									downloadLocationHtml 		+=				'</div>';
+									downloadLocationHtml 		+=				'<span class="urltxt"></span>';
+									downloadLocationHtml 		+=				'<span class="retxt"></span>';
+									downloadLocationHtml 		+= 			'</div>';
+									downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
+									downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
+									downloadLocationHtml 		+=					'<input class="form-control" style="background-color:#fff !important; border-width:0;" name="purl" type="text" value="' + purl + '" readonly>';
+									downloadLocationHtml 		+=					'<input class="form-control" type="hidden" name="refDownloadLocation" value="'+download+'">';
+									downloadLocationHtml 		+=				'</div>';
+									downloadLocationHtml 		+= 			'</div>';
+									downloadLocationHtml 		+= 		'</div>';
+									downloadLocationHtml 		+= 	'</div>';
 								
 								$(".multiDownloadLocationSet").append(downloadLocationHtml);
 							}
@@ -283,6 +306,68 @@
 						}
 						
 						break;
+					case 'includeCpes':
+						if (v != null) {
+							v.forEach(function(includeCpe, index, obj){
+								if (index == 0){
+									$('.multiTxtIncludeCpe').empty();
+								}
+								let includeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+								includeCpeHtml 			+= 		'<div class="form-group mb-0">';
+	                            if(isReadOnly == 'true' || isReadOnly) {
+	                            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/ disabled>';
+	                            } else {
+	                            	includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+includeCpe+'"/>';
+	                            	includeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+	                            }
+	                            includeCpeHtml 			+=		'</div>';
+	                            includeCpeHtml 			+= 	'</div>';
+								
+								$(".multiTxtIncludeCpe").append(includeCpeHtml);
+							});
+						}
+						
+						break;
+					case 'excludeCpes':
+						if (v != null) {
+							v.forEach(function(excludeCpe, index, obj){
+								if (index == 0){
+									$('.multiTxtExcludeCpe').empty();
+								}
+								let excludeCpeHtml 		= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+								excludeCpeHtml 			+= 		'<div class="form-group mb-0">';
+	                            if(isReadOnly == 'true' || isReadOnly) {
+	                            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/ disabled>';
+	                            } else {
+	                            	excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+excludeCpe+'"/>';
+	                            	excludeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+	                            }
+	                            excludeCpeHtml 			+=		'</div>';
+	                            excludeCpeHtml 			+= 	'</div>';
+								
+								$(".multiTxtExcludeCpe").append(excludeCpeHtml);
+							});
+						}
+						
+						break;
+					case 'ossVersionAliases':
+						if (v != null) {
+							v.forEach(function(ossVersionAlias, index, obj){
+								if (index == 0){
+									$('.multiTxtVersionAlias').empty();
+								}
+								
+								let ossVersionAliasHtml 	= 	'<div class="col-lg-4" style="margin-top: 5px;">';
+								ossVersionAliasHtml 		+= 		'<div class="form-group mb-0">';
+								ossVersionAliasHtml 		+=			'<input class="form-control" name="ossVersionAliases" type="text" value="'+ossVersionAlias+'"/>';
+								ossVersionAliasHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+								ossVersionAliasHtml 		+=		'</div>';
+								ossVersionAliasHtml 		+= 	'</div>';
+								
+								$('.multiTxtVersionAlias').append(ossVersionAliasHtml);
+							});
+						}
+						break;
 				}
 			});
 			
@@ -297,7 +382,10 @@
 	
 	//이벤트 객체
 	var evt = {
-		init : function(){ 
+		init : function(){
+			$('.select2').select2();
+			$('select[name=level]').select2({placeholder: "", allowClear: true});
+			
 			$('.btnCancel').click(function(){
 				$('.pop').hide();
 				$('#blind_wrap').hide();
@@ -339,31 +427,92 @@
 			//Download Location Input 추가
 			$('#downloadLocationAdd').on('click', function(){
 				var downloadLocation = $("#input_downloadLocations").val();
-                if (downloadLocation.endsWith("/")) {
-                    downloadLocation = downloadLocation.slice(0, -1);
-                }
+				if (downloadLocation.endsWith("/")) {
+					downloadLocation = downloadLocation.slice(0, -1);
+				}
 				
-				let downloadLocationHtml 	= 	'<div class="col-lg-4" style="margin-top: 5px;">';
-				downloadLocationHtml 		+= 		'<div class="form-group mb-0">';
+				let downloadLocationHtml 	= 	'<div class="col-md-12">';
+				downloadLocationHtml 		+=		'<div class="row">';
+				downloadLocationHtml 		+= 			'<div class="col-lg-6" style="margin-top: 5px;">';
+				downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
                 if (isReadOnly == 'true' || isReadOnly) {
-                    downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);" disabled>';
+                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);" disabled>';
                 } else {
-                    downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
-                    downloadLocationHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+                    downloadLocationHtml 		+=				'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+downloadLocation+'"/ onblur="fn.urlDuplication(this);">';
+                    downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
                 }
-				downloadLocationHtml 		+=		'</div>';
-				downloadLocationHtml 		+=		'<span class="urltxt"></span>';
-				downloadLocationHtml 		+=		'<span class="retxt"></span>';
+				downloadLocationHtml 		+=				'</div>';
+				downloadLocationHtml 		+=				'<span class="urltxt"></span>';
+				downloadLocationHtml 		+=				'<span class="retxt"></span>';
+				downloadLocationHtml 		+= 			'</div>';
+				downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
+				downloadLocationHtml 		+= 				'<div class="row">';
+				downloadLocationHtml 		+= 					'<div class="col-lg-12">';
+//				downloadLocationHtml 		+=						'<div class="input-group">';
+				downloadLocationHtml 		+=							'<input class="form-control" name="purl" type="text" style="background-color:#fff !important; border-width:0;" placeholder="Package URL" readonly/>';
+				downloadLocationHtml 		+=							'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
+//				downloadLocationHtml 		+=							'<div class="input-group-append">';
+//				downloadLocationHtml 		+=								'<button class="btn btn-default" type="button" onclick="fn.addPurl(this);">Add</button>';
+//				downloadLocationHtml 		+=								'<input class="form-control" type="hidden" value="'+downloadLocation+'"/>';
+//				downloadLocationHtml 		+=							'</div>';
+//				downloadLocationHtml 		+=						'</div>';
+				downloadLocationHtml 		+=					'</div>';
+//				downloadLocationHtml 		+= 					'<div class="col-lg-12">';
+//				downloadLocationHtml 		+= 						'<div class="row multiPurlSet"></div>';
+//				downloadLocationHtml 		+=					'</div>';
+				downloadLocationHtml 		+=				'</div>';
+				downloadLocationHtml 		+= 			'</div>';
+				downloadLocationHtml 		+= 		'</div>';
 				downloadLocationHtml 		+= 	'</div>';
 				
 				$(".multiDownloadLocationSet").append(downloadLocationHtml);
 				$("#input_downloadLocations").val("");
 				
-				if ([[${ossId}]] == null && '' != downloadLocation){
-					$(".multiDownloadLocationSet > div > div > input[name='downloadLocations']").each(function(idx, cur){
-						$(cur).trigger("blur");
-					});
+				if ('' != downloadLocation){
+					$(".multiDownloadLocationSet > div:last").find("input").trigger("blur");
 				}
+			});
+			
+			// add oss version alias
+			$("#ossVersionAliasAdd").on("click", function() {
+				let versionAliasHtml 	= 	'<div class="col-lg-4" style="margin-top: 5px;">';
+				versionAliasHtml 		+= 		'<div class="form-group mb-0">';
+				versionAliasHtml 		+=			'<input class="form-control" name="ossVersionAliases" type="text" value="'+$("#input_ossVersionAlias").val()+'"/>';
+				versionAliasHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				versionAliasHtml 		+=		'</div>';
+				versionAliasHtml 		+=		'<span class="retxt"></span>';
+				versionAliasHtml 		+= 	'</div>';
+				
+				$('.multiTxtVersionAlias').append(versionAliasHtml);
+				$("#input_ossVersionAlias").val('');
+			});
+			
+			// add include CPE
+			$("#includeCpeAdd").on("click", function() {
+				let includeCpeHtml 	= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+				includeCpeHtml 		+= 		'<div class="form-group mb-0">';
+				includeCpeHtml 		+=			'<input class="form-control" name="includeCpes" type="text" value="'+$("#input_includeCpe").val()+'"/>';
+				includeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				includeCpeHtml 		+=		'</div>';
+				includeCpeHtml 		+=		'<span class="retxt"></span>';
+				includeCpeHtml 		+= 	'</div>';
+				
+				$('.multiTxtIncludeCpe').append(includeCpeHtml);
+				$("#input_includeCpe").val('');
+			});
+			
+			// add exclude CPE
+			$("#excludeCpeAdd").on("click", function() {
+				let excludeCpeHtml 	= 	'<div class="col-lg-12" style="margin-top: 5px;">';
+				excludeCpeHtml 		+= 		'<div class="form-group mb-0">';
+				excludeCpeHtml 		+=			'<input class="form-control" name="excludeCpes" type="text" value="'+$("#input_excludeCpe").val()+'"/>';
+				excludeCpeHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="fn.removeTag(this);"><i class="fas fa-times"></i></button>';
+				excludeCpeHtml 		+=		'</div>';
+				excludeCpeHtml 		+=		'<span class="retxt"></span>';
+				excludeCpeHtml 		+= 	'</div>';
+				
+				$('.multiTxtExcludeCpe').append(excludeCpeHtml);
+				$("#input_excludeCpe").val('');
 			});
 			
 			//oss 등록
@@ -531,9 +680,11 @@
 			});
 			
 			$("#mergeOssSubmit").on('click', function(){
+				loadingIden.show();
 
                 var editorVal = $("#deleteOssEditor").summernote('code');
 				var sendData = {
+					ossCommonId : [[${ossCommonId}]],
 					ossId : [[${ossId}]],
 					newOssId : tempNewOssId,
 					comment : editorVal
@@ -546,6 +697,8 @@
 		            dataType:"json",
 		            cache : false,
 			        success : function(json){
+			        	loadingIden.hide();
+			        	
 						var ossId = $('input[name=ossId]').val();
 						if(json.resCd == '10'){
 							alertify.alert([[#{msg.common.success}]],function(){
@@ -570,7 +723,7 @@
                     "ossName" : $("input[name='ossName']").val(), "ossVersion" : $("input[name='ossVersion']").val(), "licenseName" : "", "refPartnerName" : "", "prjDivision" : "","networkServerType" : "", "priority" : "",
                     "distributionType" : "", "noticeType" : "", "statuses" : "", "comment" : "", "userComment" : ""}
                 projectSearchConditions.expire = Date.now() + 300000;
-                localStorage.setItem("projectSearchConditions", JSON.stringify(projectSearchConditions));
+                sessionStorage.setItem("projectSearchConditions", JSON.stringify(projectSearchConditions));
                 customCreateTabInFrame("project", "/project/list");
 			});
 
@@ -804,10 +957,7 @@
 		evt.init();
 		data.init();
 
-        commentsParam["height"] = $(window).height() - 120;
-        fn_comment.getCommentList(commentsParam);
-		
-		$("#btnShowLicenseText").click(function() {
+        $("#btnShowLicenseText").click(function() {
 			if($(this).val() == "Show license text") {
 				$(this).val("Hide license text");
 				$("#disp_licenseText").show();
@@ -905,7 +1055,7 @@
         _licenseChoice.jqGrid({
             datatype: 'local',
             data:list,
-            colNames:['','','','License', 'Copyright', '','','','','license Type', 'obligationChecks'],
+			colNames:['','','','License', 'Restriction', 'Copyright', '','','','license Type', 'obligationChecks'],
             colModel:[
                 {name:'no', index: 'ossLicenseIdx', width:30, hidden:true},
                 {name:'ossLicenseIdx', index: 'ossLicenseIdx', width:30, key:true, hidden:true},
@@ -918,8 +1068,9 @@
                         }
                     }
                 },
+                {name:'restriction',index:'restriction', width:120, formatter: displayRestriction, template: searchStringOptions, editable:false},
                 {name:'ossCopyright',index:'ossCopyright', width:250, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}},
-                {name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons},
+//              {name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons},
                 {name:'licenseName',index:'licenseName', width:50, hidden:true},
                 {name:'licenseId',index:'licenseId', width:50, hidden:true},
                 {name:'licenseNameEx',index:'licenseNameOrg', width:50,hidden:true},
@@ -927,14 +1078,18 @@
                 {name:'obligationChecks',index:'obligationChecks', width:50,hidden:true}
             ],
             autoencode: true,
-            editurl:'clientArray',
-            pager: '#_licenseChoicePager',
-            autowidth: true,
-            height: 'auto',
-            gridview: true,
-            rownumbers: true,
-            viewrecords: true,
-            loadonce:true,
+			editurl:'clientArray',
+			pager: '#_licenseChoicePager',
+			pgbuttons: false,
+			toppager: true,
+		   	pgtext: false,
+		   	pginput:false,
+			autowidth: true,
+			height: 'auto',
+			gridview: true,
+			loadonce:true,
+			multiselect : true,
+			multiselectWidth: 35,
 			onSelectRow: function(rowid){
 				// 로울 클릭시 그리드 에러 메세지 삭제 
 				$("div.retxt._licenseChoice_"+rowid).remove();
@@ -987,8 +1142,6 @@
 			},
 			loadComplete:function(data){
 				lastsel = -1;
-				// 페이징 UI 설정
-				hidePageNav('_licenseChoicePager');
 				// 첫 로우 ossLicenseComb 설정
 				setFristComb();
 				// 라이센스 묶음 텍스트 출력
@@ -1012,11 +1165,14 @@
 				
 				$('#obDiv').html('');
 				$(obligationHtml).appendTo('#obDiv');
+			},
+			gridComplete : function() {
+				 updateGridRowCount('_licenseChoice', '_licenseChoicePager');
 			}
 		});
 
         if(isReadOnly == null) {
-            _licenseChoice.jqGrid('navGrid',"#_licenseChoicePager",{edit:false,add:true,del:false,search:false,refresh:false
+            _licenseChoice.jqGrid('navGrid',"#_licenseChoice_toppager",{edit:false,add:true,del:false,search:false,refresh:false
                 , addfunc: function (rowid) {
                     var ids = $("#_licenseChoice").jqGrid("getDataIDs");
                     var newId = ids.length ? Number(ids[ids.length-1])+1 : 1;
@@ -1029,6 +1185,14 @@
                     // 첫 로우 ossLicenseComb 설정
                     setFristComb();
                 }
+            	, delfunc: function () {
+        			var ids = $("#_licenseChoice").jqGrid("getGridParam", "selarrrow");
+        			if (ids.length != 1) {
+        				alertify.alert("Choose only one license", function(){});
+        			} else {
+        				exeDelete(ids[0]);
+        			}
+        		}
             });
         }
 		
@@ -1178,7 +1342,10 @@
 	 					alertify.alert([[#{msg.oss.cannot.select}]], function(){});
 					}
 				}
-			});			
+			});
+			
+			commentsParam["height"] = $(window).height() - 120;
+	        fn_comment.getCommentList(commentsParam);
 		}
 
 		// comment history
@@ -1201,6 +1368,25 @@
 	// 그리드 첫 로우 ossLicenseComb 설정
 	function setFristComb(){
 		$('#_licenseChoice').find("tr").eq(1).find("td").eq(3).text("");
+	}
+	
+	function displayRestriction(cellvalue, options, rowObject) {
+		var restriction = "";
+		if (typeof cellvalue !== "undefined" && cellvalue != null){
+			if (cellvalue.indexOf(",") > -1) {
+				var restrictions = cellvalue.split(",");
+				for (var i=0; i < restrictions.length; i++){
+					var _restriction = restrictions[i];
+					if ("" != _restriction) {
+						restriction += "<span>" + _restriction + "</span>";
+						if (i < restrictions.length-1){
+							restriction += "<br>";
+						}
+					}
+				}
+			}
+		}
+		return restriction;
 	}
 	
 	// 그리드 삭제 버튼 표출
@@ -1752,15 +1938,17 @@
 	// OSS 삭제
 	function deleteOssByOne(){
 		var ossId = $('input[name=ossId]').val();
+		var ossCommonId = $('input[name=ossCommonId]').val();
 		var ossName = $('input[name=ossName]').val();
 		var editorVal = $("#deleteOssEditor").summernote('code');
 
 		var sendData = {
-				ossId:ossId,
-				ossName:ossName,
-				newOssId:"N", // 단건일때 "N" 로 보냄 
-				comment:editorVal
-			};
+			ossCommonId:ossCommonId,
+			ossId:ossId,
+			ossName:ossName,
+			newOssId:"N", // 단건일때 "N" 로 보냄 
+			comment:editorVal
+		};
 			
 		$.ajax({
 			url :'/oss/delAjax',
@@ -2158,6 +2346,26 @@
 	function onRegist(){
 		loading.show();
 		saveRow();
+		
+		var purlJson = {};
+		var downloadLocations = new Array();
+		
+		$("input[name=downloadLocations]").each(function(index, item){
+			downloadLocations.push($(item).val());
+		});
+		
+		if (downloadLocations.length > 0) {
+			var refDownloadLocation = "";
+			
+			$("input[name=purl]").each(function(index, item){
+				refDownloadLocation = $(item).next().val();
+				purlJson[refDownloadLocation] = $(item).val();
+			});
+			
+			if (Object.keys(purlJson).length > 0) {
+				$('input[name=purlJson]').val(JSON.stringify(purlJson));
+			}
+		}
 
 		$("#ossForm").ajaxForm({
 			url :'/oss/saveAjax',
@@ -2179,7 +2387,12 @@
 					self.opener = null;self.close();
 				} else {
                     if (ossId != null) {
-                        deleteTabInFrame('/oss/edit/'+json.ossId);
+                    	if (data.copyData != null) {
+                    		deleteTabInFrame('/oss/copy/'+ossId);
+                    	} else {
+                    		deleteTabInFrame('/oss/edit/'+json.ossId);
+                    	}
+                        
                         createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
                     } else {
                         deleteTabInFrame('/oss/edit/');
@@ -2310,7 +2523,7 @@
 		$('.ossSelectPop').hide();
 		$("#_ossMergeCheckList").jqGrid('GridUnload');
 		$('.mergeOssCheckPop').show();
-;
+
 		$('#_ossMergeCheckList').jqGrid({
             url: '/oss/ossMergeCheckList/' + [[${ossId}]] + '/' + newOssId,
 			datatype: 'json',
@@ -2365,9 +2578,24 @@
 
 
 	var fn_comment = {
-        callbackFunction : function () {
-            fn_comment.getCommentList(commentsParam);
-        },
+		getPurlByDownloadLocation : function (data) {
+			$.ajax({
+				url : '/oss/getPurlByDownloadLocation',
+				type : 'POST',
+				dataType : 'json',
+				cache : false,
+				data : {'downloadLocation' : data},
+				success : function(data){
+					console.log(data);
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		},
+		callbackFunction : function () {
+		   	fn_comment.getCommentList(commentsParam);
+		},
     	getCommentList : function(param){
     		if (data.copyData) {
         	} else {
@@ -2557,6 +2785,9 @@
 		        		} else {
 			        		$(target).parent().next("span.urltxt").empty();
 		        		}
+		        		
+		        		$(target).parent().parent().next().find("input[name='purl']").val(json.resultData);
+		        		$(target).parent().parent().next().find("input[name='refDownloadLocation']").val(value);
 		        	},
 	            	error : onError
 		    	}).submit();
@@ -2889,6 +3120,9 @@
 	removeTag : function(obj) {
 		$(obj).parent().parent().remove();
 	},
+	downloadRemoveTag : function(obj) {
+		$(obj).parent().parent().parent().parent().remove();
+	},
 	displayVulnerability : function (cellvalue, options, rowObject) {
 		var display = "";
 
@@ -2957,6 +3191,8 @@
                         }
                     }
                 });
+                
+                $(".checkboxArea").show();
             });
     },
     sendEditor: function (type) {
@@ -2969,7 +3205,11 @@
             return false;
         }
 
-        var param = {referenceId: [[${ossId}]], referenceDiv: [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}]], contents: editorVal, mailSendType: type};
+        var referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}]];
+        if ("42" == $('input[name=checkComment]:checked').val()) {
+        	referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS_COMMON')}]];
+        }
+        var param = {referenceId: [[${ossId}]], referenceDiv: referenceDiv, contents: editorVal, mailSendType: type};
 
         $.ajax({
             url: '/oss/sendComment',

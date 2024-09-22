@@ -2899,41 +2899,6 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 	}
 
-	@Override
-	public void registDepOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
-		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
-		if(ossComponent.size()==0){
-			Project projectSubStatus = new Project();
-			projectSubStatus.setPrjId(project.getPrjId());
-			
-			if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
-				projectSubStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
-			} else {
-				projectSubStatus.setIdentificationSubStatusDep("X");
-			}
-			
-			projectSubStatus.setModifier(projectSubStatus.getLoginUserName());
-			projectSubStatus.setReferenceDiv(refDiv);
-			projectMapper.updateProjectMaster(projectSubStatus);
-		}
-		
-		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
-		String refId = project.getReferenceId();
-		
-		updateOssComponentList(project, refDiv, refId, ossComponent, ossComponentLicense);
-
-		// 파일 등록
-		if(!isEmpty(project.getDepCsvFileId())){
-			projectMapper.updateFileId(project);
-			
-			if(project.getCsvFileSeq() != null) {
-				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
-					projectMapper.updateFileBySeq(project.getCsvFileSeq().get(i));
-				}
-			}
-		}
-	}
-
 	private void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense) {
 		// 컴포넌트 마스터 라이센스 지우기
 		ProjectIdentification prj = new ProjectIdentification();
@@ -3196,25 +3161,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getProcessSheetData(Map<String, Object> result, String prjId, String resetFlag, String registFileId, String userId, 
-			String comment, String tabGubn, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
+			String comment, String tabName, String sheetName, boolean sheetNamesEmptyFlag, boolean loopFlag, int sheetIdx) {
 		Map<String, Object> rtnMap = new HashMap<>();
 		
 		String errorMsg = (String) result.get("errorMessage");
-		
-		if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
-			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
-			return rtnMap;
-		}
-		
+
 		List<ProjectIdentification> ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
 		ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>());
 		List<List<ProjectIdentification>> ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
-		
-		if (ossComponents.isEmpty()) {
-			rtnMap.put(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE, sheetNamesEmptyFlag ? getMessage("api.upload.file.sheet.no.match", new String[]{sheetName + "*"}) : getMessage("api.upload.file.sheet.no.match", new String[]{sheetName}));
-			return rtnMap;
-		}
-		
+
 		if (!isEmpty(errorMsg)) {
 			rtnMap.put("errorMessage", errorMsg);
 		}
@@ -3234,7 +3189,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
 			
 			if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag)) || (loopFlag && sheetIdx > 0)) {
-				getIdentificationGridList(prjId, tabGubn.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
+				getIdentificationGridList(prjId, tabName.equals("DEP") ? CoConstDef.CD_DTL_COMPONENT_ID_DEP : CoConstDef.CD_DTL_COMPONENT_ID_SRC, ossComponentList, ossComponentsLicenseList, null);
 			}
 			
 			ossComponentList.addAll(ossComponents);
@@ -3243,12 +3198,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			Project project = new Project();
 			project.setPrjId(prjId);
 			
-			if (tabGubn.equals("DEP")) {
+			if (tabName.equals("DEP")) {
 				project.setDepCsvFileId(registFileId); // set file id
-				registDepOss(ossComponentList, ossComponentsLicenseList, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-			} else {
+				projectService.registDepOss(ossComponentList, ossComponentsLicenseList, project);
+			} else if (tabName.equals("SRC")){
 				project.setSrcCsvFileId(registFileId); // set file id
 				projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project);
+			} else if (tabName.equals("BIN")){
+				project.setBinCsvFileId(registFileId); // set file id
+				projectService.registBinOss(ossComponentList, ossComponentsLicenseList, project);
 			}
 			
 			// oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
@@ -3261,7 +3219,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 						CommentsHistory commentHisBean = new CommentsHistory();
 						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 						commentHisBean.setReferenceId(prjId);
-						commentHisBean.setExpansion1(tabGubn);
+						commentHisBean.setExpansion1(tabName);
 						commentHisBean.setContents(changedLicenseName);
 						commentHisBean.setLoginUserName(userId);
 						commentService.registComment(commentHisBean, false);
@@ -3275,7 +3233,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 				CommentsHistory commentHisBean = new CommentsHistory();
 				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
 				commentHisBean.setReferenceId(prjId);
-				commentHisBean.setExpansion1(tabGubn);
+				commentHisBean.setExpansion1(tabName);
 				commentHisBean.setContents(comment);
 				commentHisBean.setLoginUserName(userId);
 				commentService.registComment(commentHisBean, false);

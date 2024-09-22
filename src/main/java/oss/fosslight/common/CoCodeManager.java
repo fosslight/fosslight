@@ -112,7 +112,7 @@ public class CoCodeManager extends CoTopComponent {
     }
     
 	public void refreshOssInfo () {
-    	loadOssInfo();
+		loadOssInfo();
     }
     
 	private void loadOssInfo() {
@@ -127,7 +127,7 @@ public class CoCodeManager extends CoTopComponent {
 			if (nickNameList != null) {
 				for (OssMaster bean : nickNameList) {
 					if (bean.getOssNickname() != null) {
-						nickNameMap.put(bean.getOssName(), bean.getOssNickname().split(","));
+						nickNameMap.put(bean.getOssCommonId(), bean.getOssNickname().split(","));
 					}
 				}
 			}
@@ -143,8 +143,8 @@ public class CoCodeManager extends CoTopComponent {
 					} else {
 						targetBean = bean;
 						
-						if (nickNameMap.containsKey(targetBean.getOssNameTemp())) {
-							targetBean.setOssNicknames(nickNameMap.get(targetBean.getOssNameTemp()));
+						if (nickNameMap.containsKey(targetBean.getOssCommonId())) {
+							targetBean.setOssNicknames(nickNameMap.get(targetBean.getOssCommonId()));
 						}
 					}
 					
@@ -197,30 +197,31 @@ public class CoCodeManager extends CoTopComponent {
 					
 					String sourceKey = (bean.getOssNameTemp() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
 					OssMaster sourceBean = _ossMap.get(sourceKey);
-					
-					bean.setLicenseDiv(sourceBean.getLicenseDiv());
-					bean.setDownloadLocation(sourceBean.getDownloadLocation());
-					bean.setDownloadLocationGroup(sourceBean.getDownloadLocationGroup());
-					bean.setHomepage(sourceBean.getHomepage());
-					bean.setSummaryDescription(sourceBean.getSummaryDescription());
-					bean.setAttribution(sourceBean.getAttribution());
-					bean.setCopyright(sourceBean.getCopyright());
-					bean.setCvssScore(sourceBean.getCvssScore());
-					bean.setCveId(sourceBean.getCveId());
-					bean.setVulnYn(sourceBean.getVulnYn());
-					bean.setVulnRecheck(sourceBean.getVulnRecheck());
-					bean.setVulnDate(sourceBean.getVulnDate());
-					bean.setLicenseType(sourceBean.getLicenseType());
-					bean.setOssLicenses(sourceBean.getOssLicenses());
-					bean.setOssType(sourceBean.getOssType());
-					bean.setMultiLicenseFlag(sourceBean.getMultiLicenseFlag());
-					bean.setDualLicenseFlag(sourceBean.getDualLicenseFlag());
-					bean.setVersionDiffFlag(sourceBean.getVersionDiffFlag());
-					if (sourceBean.getDetectedLicenses() != null) {
-						bean.setDetectedLicenses(sourceBean.getDetectedLicenses());
-					}
+					if (sourceBean != null) {
+						bean.setLicenseDiv(sourceBean.getLicenseDiv());
+						bean.setDownloadLocation(sourceBean.getDownloadLocation());
+						bean.setDownloadLocationGroup(sourceBean.getDownloadLocationGroup());
+						bean.setHomepage(sourceBean.getHomepage());
+						bean.setSummaryDescription(sourceBean.getSummaryDescription());
+						bean.setAttribution(sourceBean.getAttribution());
+						bean.setCopyright(sourceBean.getCopyright());
+						bean.setCvssScore(sourceBean.getCvssScore());
+						bean.setCveId(sourceBean.getCveId());
+						bean.setVulnYn(sourceBean.getVulnYn());
+						bean.setVulnRecheck(sourceBean.getVulnRecheck());
+						bean.setVulnDate(sourceBean.getVulnDate());
+						bean.setLicenseType(sourceBean.getLicenseType());
+						bean.setOssLicenses(sourceBean.getOssLicenses());
+						bean.setOssType(sourceBean.getOssType());
+						bean.setMultiLicenseFlag(sourceBean.getMultiLicenseFlag());
+						bean.setDualLicenseFlag(sourceBean.getDualLicenseFlag());
+						bean.setVersionDiffFlag(sourceBean.getVersionDiffFlag());
+						if (sourceBean.getDetectedLicenses() != null) {
+							bean.setDetectedLicenses(sourceBean.getDetectedLicenses());
+						}
 
-					_ossMap.put(key.toUpperCase(), bean);
+						_ossMap.put(key.toUpperCase(), bean);
+					}
 				}
 			
 			}
