@@ -1221,7 +1221,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
 
-    @ApiOperation(value = "Load Searched Project Oss to Bin", notes = "Project > Identification > BIN")
+    @ApiOperation(value = "Load Searched Project Oss to Target Project", notes = "Project > Identification > 'Project Search'")
     @PostMapping(value = { Url.APIV2.FOSSLIGHT_API_OSS_LOAD })
     public ResponseEntity<Map<String, Object>> ossLoad(
             @ApiParam(hidden=true) @RequestHeader String authorization,
