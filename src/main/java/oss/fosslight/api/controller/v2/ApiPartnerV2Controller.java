@@ -55,12 +55,9 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
     @ApiOperation(value = "3rd Party Search", notes = "3rd party 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_SEARCH})
     public ResponseEntity<Map<String, Object>> getPartners(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID List", required = false) @RequestParam(required = false) String[] partnerIdList,
             @ApiParam(value = "Division", required = false) @RequestParam(required = false) String division,
             @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
@@ -109,12 +106,9 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "3rd Party Add Watcher", notes = "3rd Party Add Watcher")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
             @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
 

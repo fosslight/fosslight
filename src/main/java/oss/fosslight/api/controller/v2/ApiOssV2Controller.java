@@ -50,12 +50,9 @@ public class ApiOssV2Controller extends CoTopComponent {
 
 
     @ApiOperation(value = "Search OSS List", notes = "OSS 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_SEARCH})
     public @ResponseBody ResponseEntity<ListOssDto.Result> getOssInfo(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
             @ApiParam(value = "OSS Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String ossNameExact,
             @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
@@ -94,12 +91,9 @@ public class ApiOssV2Controller extends CoTopComponent {
 
 
     @ApiOperation(value = "Search License Info", notes = "License Info 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_LICENSE_SEARCH})
     public @ResponseBody ResponseEntity<ListLicenseDto.Result> getLicenseInfo(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "License Name", required = false) @RequestParam(required = false) String licenseName,
             @ApiParam(value = "License Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String licenseNameExact,
             @ApiParam(value = "Count Per Page (max 10000, default 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
@@ -196,12 +190,9 @@ public class ApiOssV2Controller extends CoTopComponent {
 //    }
 
     @ApiOperation(value = "Register New OSS", notes = "신규 OSS 등록")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REGISTER})
     public ResponseEntity<Map<String, Object>> registerOss(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
 
         if (userService.isAdmin(authorization)) {
