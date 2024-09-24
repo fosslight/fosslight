@@ -91,12 +91,6 @@
 			, DOWNLOAD_LOCATION
 			, HOMEPAGE
 			, SUMMARY_DESCRIPTION
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			, CREATOR
-			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-			, MODIFIER
-			</if>
 		)
 		VALUES
 		(
@@ -107,12 +101,6 @@
 			, #{downloadLocation}
 			, #{homepage}
 			, #{summaryDescription}
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
-			, #{creator}
-			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(modifier)">
-			, #{modifier}
-			</if>
 		) ON DUPLICATE KEY UPDATE
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
 			OSS_COMMON_ID					= #{ossCommonId},
@@ -121,8 +109,6 @@
 			, DOWNLOAD_LOCATION             = #{downloadLocation}                
 			, HOMEPAGE                      = #{homepage}                
 			, SUMMARY_DESCRIPTION           = #{summaryDescription}      
-			, MODIFIER           			= #{loginUserName}       
-			, MODIFIED_DATE           		= now()
 	</insert>
 	
 	<insert id="insertOssMaster" parameterType="oss.fosslight.domain.OssMaster" useGeneratedKeys="true" keyProperty="ossId" >
@@ -2992,7 +2978,10 @@
 	</select>
 	
 	<select id="selectOssIncludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
-		SELECT CPE23URI FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID = #{ossCommonId}
+		SELECT CPE23URI FROM OSS_INCLUDE_CPE
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
+			WHERE OSS_COMMON_ID = #{ossCommonId}
+		</if>
 	</select>
 	
 	<select id="selectOssExcludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
@@ -3921,7 +3910,7 @@
 	
 	<select id="getOssVulnerabilityList2" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Vulnerability">
 		<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
-			SELECT T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE
+			SELECT T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE, T1.CRITERIA
 			FROM
 			(
 		</if>
@@ -3931,8 +3920,9 @@
 					 , CVE.CVE_ID
 					 , CVE.VULN_SUMMARY
 					 , CVE.MODI_DATE
+					 , DATA.CRITERIA
 				  FROM (
-				  		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID
+				  		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID, SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 5), ':', -2) AS CRITERIA
 				  		FROM
 				  		(SELECT REPLACE(PRODUCT, ' ', '_') AS PRODUCT
 				 			 , VERSION
@@ -3948,16 +3938,15 @@
 										OR PRODUCT = #{item}
 									</foreach>
 								</if>
-								<if test="!@oss.fosslight.util.StringUtil@isEmpty(dashOssNameList)">
-									<foreach item="dashItem" index="index" collection="dashOssNameList">
-										OR VENDORPRODUCT = #{dashItem}
-									</foreach>
-								</if>
 				 				)
 				 		<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 				 		   AND VERSION = #{ossVersion}
 				 		</if>
 				 		) NVD
+				 		LEFT JOIN NVD_DATA_CONFIGURATIONS CONF
+				 		ON NVD.CVE_ID = CONF.CVE_ID
+				 		LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+				 		ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
 				 		GROUP BY NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID
 				 	   ) DATA
 				 INNER JOIN NVD_CVE_V3 CVE
