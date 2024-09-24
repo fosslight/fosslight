@@ -617,42 +617,22 @@ var fn = {
 	},
 	// Grid vulnerability cell display
 	displayVulnerability : function(cellvalue, options, rowObject){
-		var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
-		
 		var display = "";
 
-        var cvssScore = rowObject.cvssScore;
-        var secCode = rowObject.secCode;
-        var secCvssScore = rowObject.secCvssScore;
-
-        if ("N" != secCvssScore && "Fixed" != secCode) {
-            cvssScore = secCvssScore;
-        }
-		
-		if ("N" != secCode) {
-			if ("Fixed" == secCode) {
-                if ("N" != cvssScore) {
-                    display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Resolved('+cvssScore+')</span>';
-                } else {
-                    display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Resolved(N/A)</span>';
-                }
+		var cvssScoreMax = rowObject.cvssScoreMax;
+		if (typeof rowObject.vulnerabilityResolution !== "undefined") {
+			var vulnerabilityResolution = rowObject.vulnerabilityResolution;
+			if ("Need to resolve" == vulnerabilityResolution) {
+				display = '<span type="button" class="badge badge-dark-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 			} else {
-                if ("0" != cvssScore && "N" != cvssScore) {
-                    if (cvssScore - standardScore >= 0) {
-                        display = '<span type="button" class="badge badge-dark-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Need to resolve('+cvssScore+')</span>';
-                    } else {
-                        display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Discovered('+cvssScore+')</span>';
-                    }
-                } else {
-                    display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Discovered(N/A)</span>';
-                }
+				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 			}
 		} else {
-            if ("0" != cvssScore && "N" != cvssScore) {
-                display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cvssScore+')</span>';
-            } else {
-                display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
-            }
+			if (typeof cvssScoreMax !== "undefined") {
+				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered(' + cvssScoreMax + ')</span>';
+			} else {
+				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
+			}
 		}
 		
 		return display;
