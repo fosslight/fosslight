@@ -2894,7 +2894,7 @@ public class ProjectController extends CoTopComponent {
 		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
 		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
 		projectService.registBom(prjId, merge, projectIdentification, checkGridBomList);
-//		projectService.updateSecurityDataForProject(prjId);
+		projectService.updateSecurityDataForProject(prjId);
 		Map<String, String> resMap = new HashMap<>();
 		
 		try {
@@ -4841,9 +4841,8 @@ public class ProjectController extends CoTopComponent {
 		map.put("commId", avoidNull(prjBean.getCommId(), ""));
 		map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
 		map.put("statusRequestYn", avoidNull(prjBean.getStatusRequestYn(), CoConstDef.FLAG_NO));
-		map.put("cvssScore", avoidNull(prjBean.getCvssScore(), CoConstDef.FLAG_NO));
-		map.put("secCode", avoidNull(prjBean.getSecCode(), CoConstDef.FLAG_NO));
-		map.put("secCvssScore", avoidNull(prjBean.getSecCvssScore(), CoConstDef.FLAG_NO));
+		if (!isEmpty(prjBean.getCvssScoreMax())) map.put("cvssScoreMax", prjBean.getCvssScoreMax());
+		if (!isEmpty(prjBean.getVulnerabilityResolution())) map.put("vulnerabilityResolution", prjBean.getVulnerabilityResolution());
 		
 		return makeJsonResponseHeader(map);
 	}
@@ -5196,7 +5195,7 @@ public class ProjectController extends CoTopComponent {
 		
 		try {
 			projectService.registSecurity(prjId, tabName, ossComponents);
-			
+			projectService.updateSecurityDataForProject(prjId);
 			Project param = new Project();
 			param.setPrjId(prjId);
 			Project pDat = projectService.getProjectDetail(param);
