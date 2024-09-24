@@ -90,9 +90,10 @@
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.downloadLocation}"></th>
 												<td>
-													<th:block th:if="${detail?.downloadLocations != null}" th:each="downloadLocation, status : ${detail?.downloadLocations}">
-														<a th:href="${downloadLocation}" th:text="${downloadLocation}" target="_blank"></a>
-														<th:block th:if="${status.count != status.size}"><br/></th:block>
+													<th:block th:if="${detail?.downloadLocations != null}" th:each="downloadLocation : ${detail?.downloadLocations}">
+														<span class="input-group-append">
+															<a th:href="${#strings.setSplit(downloadLocation, '|')[0]}" class="urlLink" target="_blank" th:text="${#strings.setSplit(downloadLocation, '|')[0]}"></a><span class="ml-1" th:text="|(${#strings.setSplit(downloadLocation, '|')[1]})|"></span>
+														</span>
 													</th:block>
 												</td>
 											</tr>

@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 
@@ -29,8 +30,11 @@ import oss.fosslight.service.CommentService;
 import oss.fosslight.service.MailService;
 import oss.fosslight.service.NvdDataService;
 import oss.fosslight.service.OssService;
+import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.impl.VulnerabilityServiceImpl;
 import oss.fosslight.util.FileUtil;
+
+import oss.fosslight.repository.ProjectMapper;
 
 @Component
 public class SchedulerWorkerTask extends CoTopComponent {
@@ -42,7 +46,8 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Autowired CommentService commentService;
 	@Autowired VulnerabilityServiceImpl vulnerabilityService;
 	@Autowired NvdDataService nvdService;
-	
+	@Autowired ProjectService projectService;
+	@Autowired ProjectMapper projectMapper;
 	boolean serverLoadFlag = false; 
 	boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 	
@@ -93,6 +98,15 @@ public class SchedulerWorkerTask extends CoTopComponent {
 		}
 		
 		log.info("nvdDataIfJob end");
+		
+//		List<String> prjIdList = projectMapper.selectProjectForSecurity();
+//		if (prjIdList != null && !prjIdList.isEmpty()) {
+//			log.info("security data update start");
+//			for (String prjId : prjIdList) {
+//				projectService.updateSecurityDataForProject(prjId);
+//			}
+//			log.info("security data update end");
+//		}
 	}
 	
 	// 0분 부터 5분 단위 스케줄 - 30분이 지난 메일은 삭제한다.

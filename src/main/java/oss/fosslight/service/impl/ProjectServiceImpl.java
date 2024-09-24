@@ -257,22 +257,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						} else {
 							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 						}
-						
-//						String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(bean.getPrjId(), bean.getReferenceDiv());
-//						if (conversionCveInfo != null) {
-//							String[] conversionCveData = conversionCveInfo.split("\\@");
-//							bean.setCvssScore(conversionCveData[3]);
-//							bean.setCveId(conversionCveData[4]);
-//							bean.setVulnYn(CoConstDef.FLAG_YES);
-//						}
-						
-//						if (getSecurityDataCntByProject(bean)) {
-//							checkIfVulnerabilityResolutionIsFixed(bean);
-//						}
-						
-//						bean.setCvssScore(avoidNull(bean.getCvssScore(), CoConstDef.FLAG_NO));
-//						bean.setSecCode(avoidNull(bean.getSecCode(), CoConstDef.FLAG_NO));
-//						bean.setSecCvssScore(avoidNull(bean.getSecCvssScore(), CoConstDef.FLAG_NO));
 					});
 				}
 			}
@@ -641,32 +625,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
 						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
 					}
-					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
-						if (cvssScoreMaxList.size() > 1) {
-							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
-								@Override
-								public int compare(String o1, String o2) {
-									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
-										return -1;
-									}else {
-										return 1;
-									}
-								}
-							});
-						}
-						
-						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
-						ll.setCvssScore(cveData[3]);
-						ll.setCveId(cveData[4]);
+					String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
+					if (conversionCveInfo != null) {
+						String[] conversionCveData = conversionCveInfo.split("\\@");
+						ll.setCvssScore(conversionCveData[3]);
+						ll.setCveId(conversionCveData[4]);
 						ll.setVulnYn(CoConstDef.FLAG_YES);
-					} else {
-						String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
-						if (conversionCveInfo != null) {
-							String[] conversionCveData = conversionCveInfo.split("\\@");
-							ll.setCvssScore(conversionCveData[3]);
-							ll.setCveId(conversionCveData[4]);
-							ll.setVulnYn(CoConstDef.FLAG_YES);
-						}
 					}
 					
 					cvssScoreMaxList.clear();
