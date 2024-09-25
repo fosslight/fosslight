@@ -7,8 +7,6 @@ package oss.fosslight.common;
 
 import java.util.regex.Pattern;
 
-import oss.fosslight.config.AppConstBean;
-
 public class CoConstDef {
 	
 	/** Application의 기본 패키지 명: {@value #APP_DEFAULT_PACKAGE_NAME} */
@@ -577,8 +575,10 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_INVATED = "63";
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED = "64";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED = "815";
-	public static final String CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED = "818";
+	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED = "818";
 	public static final String CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED = "819";
+
+	public static final String CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED = "821";
 
 	/** changed USER Info */
 	public static final String CD_MAIL_TYPE_CHANGED_USER_INFO = "816";

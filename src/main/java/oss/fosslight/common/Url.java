@@ -406,6 +406,8 @@ public final class Url {
 		public static final String AUTO_REVIEW_STATUS = PATH + "/autoReviewStatus";
 		public static final String AUTO_REVIEW_STOP = PATH + "/autoReviewStop";
 
+		public static final String AUTO_REVIEW_PACKAGING = PATH + "/autoReviewPackaging";
+
 		public static final String SHARE_URL = PATH + "/shareUrl/{prjId}";
 
 	}

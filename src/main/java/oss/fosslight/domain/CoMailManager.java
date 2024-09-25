@@ -759,8 +759,9 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_OSS_DEACTIVATED:
     		case CoConstDef.CD_MAIL_TYPE_OSS_ACTIVATED:
-			case CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED:
+			case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED:
 			case CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED:
+			case CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED :
     			// Set creator to sender and cc the other Admin users
     			bean.setToIds(selectMailAddrFromIds(new String[]{bean.getLoginUserName()}));
     			bean.setCcIds(selectAdminMailAddr());
@@ -3658,7 +3659,7 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 
-			if(CoConstDef.CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED.equals(coMail.getMsgType())
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED.equals(coMail.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
 				if((ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()).equals("SUCCESS"))
 				    || (ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()) != null && ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()).equals("SUCCESS"))){
@@ -3683,6 +3684,16 @@ public class CoMailManager extends CoTopComponent {
 						helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
 
 					}
+				}
+			}
+
+			if(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED.equals(coMail.getMsgType())) {
+				String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output");
+				String banned = VERIFY_PATH_OUTPUT + "/" + coMail.getParamPrjId() + "/proprietaryCheckList.txt";
+				File file = new File(banned);
+				if(file.exists()) {
+					DataSource dataSource = new FileDataSource(banned);
+					helper.addAttachment(MimeUtility.encodeText(file.getName(), "UTF-8", "B"), dataSource);
 				}
 			}
 
