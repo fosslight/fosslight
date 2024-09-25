@@ -649,10 +649,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		prj.setReferenceDiv(refDiv);
 		List<OssComponents> componentId = selfCheckMapper.selectComponentId(prj);
 		
-		deletePreparedStatement(componentId);
-//		for (int i = 0; i < componentId.size(); i++) {
-//			selfCheckMapper.deleteOssComponentsLicense(componentId.get(i));
-//		}
+//		deletePreparedStatement(componentId);
+		for (int i = 0; i < componentId.size(); i++) {
+			selfCheckMapper.deleteOssComponentsLicense(componentId.get(i));
+		}
 				
 		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
 		if (ossComponent.size()==0){
@@ -687,12 +687,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		//deleteRows
 		List<String> deleteRows = new ArrayList<String>();
-		List<ProjectIdentification> updateOssComponentList = new ArrayList<>();
-		List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
-		List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
 		
 		String ossInfoKey = "";
-		int componentIdx = Integer.parseInt(selfCheckMapper.selectComponentIdx(prj));
+		
 		// 컴포넌트 등록	
 		for (int i = 0; i < ossComponent.size(); i++) {
 			String downloadLocation = ossComponent.get(i).getDownloadLocation();
@@ -705,8 +702,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			//update
 			if (!StringUtil.contains(ossComponent.get(i).getGridId(), CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
 				//ossComponents 등록
-//				selfCheckMapper.updateSrcOssList(ossComponent.get(i));
-				updateOssComponentList.add(ossComponent.get(i));
+				selfCheckMapper.updateSrcOssList(ossComponent.get(i));
 				deleteRows.add(ossComponent.get(i).getComponentIdx());
 				
 				//멀티라이센스일 경우
@@ -717,8 +713,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 							OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
 							license.setComponentLicenseId(String.valueOf(componentLicenseId));
 							// 라이센스 등록
-//							selfCheckMapper.registComponentLicense(license);
-							insertOssComponentLicenseList.add(license);
+							selfCheckMapper.registComponentLicense(license);
 							componentLicenseId++;
 						}
 					}
@@ -726,14 +721,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossComponent.get(i), CoConstDef.LICENSE_DIV_SINGLE);
 					license.setComponentLicenseId(String.valueOf(componentLicenseId));
 					// 라이센스 등록
-//					selfCheckMapper.registComponentLicense(license);
-					insertOssComponentLicenseList.add(license);
+					selfCheckMapper.registComponentLicense(license);
 				}
 			} else { // insert
 				//ossComponents 등록
 				String exComponentId = ossComponent.get(i).getGridId();
 				//component_idx key
-//				String componentIdx = selfCheckMapper.selectComponentIdx(prj);
+				String componentIdx = selfCheckMapper.selectComponentIdx(prj);
 				
 				ossComponent.get(i).setReferenceId(project.getPrjId());
 				ossComponent.get(i).setReferenceDiv(refDiv);
@@ -747,8 +741,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossComponent.get(i).setObligationType(ossInfo.getObligationType());
 				}
 				
-//				selfCheckMapper.insertSrcOssList(ossComponent.get(i));
-				insertOssComponentList.add(ossComponent.get(i));
+				selfCheckMapper.insertSrcOssList(ossComponent.get(i));
 				deleteRows.add(String.valueOf(componentIdx));
 				
 				//멀티라이센스일 경우
@@ -770,8 +763,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 								// 컴포넌트 ID 설정
 								license.setComponentId(_componentId);
 								license.setComponentLicenseId(String.valueOf(componentLicenseId));
-								insertOssComponentLicenseList.add(license);
-//								selfCheckMapper.registComponentLicense(license);
+								selfCheckMapper.registComponentLicense(license);
 							}
 							componentLicenseId++;
 						}
@@ -781,17 +773,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					// 라이센스 등록
 					license.setComponentId(_componentId);
 					license.setComponentLicenseId(String.valueOf(componentLicenseId));
-					insertOssComponentLicenseList.add(license);
-//					selfCheckMapper.registComponentLicense(license);
+					selfCheckMapper.registComponentLicense(license);
 				}
-				
-				componentIdx++;
 			}
 		}
 		
-		{
-			updatePreparedStatement(updateOssComponentList, insertOssComponentList, insertOssComponentLicenseList);
-		}
+//		{
+//			updatePreparedStatement(updateOssComponentList, insertOssComponentList, insertOssComponentLicenseList);
+//		}
 		
 		{
 			Project _ossidUpdateParam = new Project();

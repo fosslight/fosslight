@@ -3323,86 +3323,80 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			Map<String, Object> map = null;
 			
+			Project prjParam = new Project();
+			prjParam.setPrjId(project.getPrjId());
+			Project prjInfo = getProjectDetail(prjParam);
+			
 			// confirm 시 다시 DB Data를 가져와서 체크한다.
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceId(project.getPrjId());
-			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			param.setMerge(CoConstDef.FLAG_NO);
-			map = getIdentificationGridList(param);
 			
-			if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
-				T2CoProjectValidator pv = new T2CoProjectValidator();
-				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
+			if (CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())
+					&& !CoConstDef.FLAG_NO.equals(prjInfo.getIdentificationSubStatusAndroid())
+					&& !CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA.equals(prjInfo.getIdentificationSubStatusAndroid())) {
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				map = getIdentificationGridList(param);
 
-				pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
+				if (map != null && map.containsKey("mainData")
+						&& !((List<ProjectIdentification>) map.get("mainData")).isEmpty()) {
+					isAndroidModel = true;
+					T2CoProjectValidator pv = new T2CoProjectValidator();
+					pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
 
-				T2CoValidationResult vr = pv.validate(new HashMap<>());
-				
-				// return validator result
-				if (!vr.isValid() && !vr.isAdminCheck((List<String>) map.get("adminCheckList"))) {
-//					return makeJsonResponseHeader(vr.getValidMessageMap());
-					resultMap.put("validMap", vr.getValidMessageMap());
-					return resultMap;
-				}
-				
-				String networkRedistribution = CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, CoConstDef.CD_LICENSE_NETWORK_RESTRICTION);
-				
-				for (ProjectIdentification _projectBean : (List<ProjectIdentification>) map.get("rows")) {
-					if (hasSourceOss && hasNotificationOss && isNetworkRestriction) {
-						break;
-					}
+					pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
+					pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+					T2CoValidationResult vr = pv.validate(new HashMap<>());
 					
-					if (!hasNotificationOss) {
-						if (!CoConstDef.FLAG_YES.equals(_projectBean.getExcludeYn()) && ("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType()) )) {
-							hasNotificationOss = true;
-						}
-					}
-					
-					if (!hasSourceOss) {
-						if ("11".equals(_projectBean.getObligationType())){
-							hasSourceOss = true;
-						}
-					}
-					
-					if (!isNetworkRestriction) {
-						if (("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType())) && _projectBean.getRestriction().toUpperCase().contains(networkRedistribution.toUpperCase())) {
-							isNetworkRestriction = true;
-						}
+					// return validator result
+					if (!vr.isValid()) {
+//						return makeJsonResponseHeader(false, getMessage("msg.project.android.valid"));
+						resultMap.put("androidMessage", getMessage("msg.project.android.valid"));
+						return resultMap;
 					}
 				}
-			}
-
-			Project prjInfo = null;
-			
-			{
-				// ANDROID PROJECT인 경우
-				Project prjParam = new Project();
-				prjParam.setPrjId(project.getPrjId());
-				prjInfo = getProjectDetail(prjParam);
+			} else {
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				param.setMerge(CoConstDef.FLAG_NO);
+				map = getIdentificationGridList(param);
 				
-				if (CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())
-						&& !CoConstDef.FLAG_NO.equals(prjInfo.getIdentificationSubStatusAndroid())
-						&& !CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA.equals(prjInfo.getIdentificationSubStatusAndroid())) {
-					param = new ProjectIdentification();
-					param.setReferenceId(project.getPrjId());
-					param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-					map = getIdentificationGridList(param);
+				if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
+					T2CoProjectValidator pv = new T2CoProjectValidator();
+					pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
 
-					if (map != null && map.containsKey("mainData")
-							&& !((List<ProjectIdentification>) map.get("mainData")).isEmpty()) {
-						isAndroidModel = true;
-						T2CoProjectValidator pv = new T2CoProjectValidator();
-						pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
+					pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
 
-						pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
-						pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
-						T2CoValidationResult vr = pv.validate(new HashMap<>());
+					T2CoValidationResult vr = pv.validate(new HashMap<>());
+					
+					// return validator result
+					if (!vr.isValid() && !vr.isAdminCheck((List<String>) map.get("adminCheckList"))) {
+//						return makeJsonResponseHeader(vr.getValidMessageMap());
+						resultMap.put("validMap", vr.getValidMessageMap());
+						return resultMap;
+					}
+					
+					String networkRedistribution = CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, CoConstDef.CD_LICENSE_NETWORK_RESTRICTION);
+					
+					for (ProjectIdentification _projectBean : (List<ProjectIdentification>) map.get("rows")) {
+						if (hasSourceOss && hasNotificationOss && isNetworkRestriction) {
+							break;
+						}
 						
-						// return validator result
-						if (!vr.isValid()) {
-//							return makeJsonResponseHeader(false, getMessage("msg.project.android.valid"));
-							resultMap.put("androidMessage", getMessage("msg.project.android.valid"));
-							return resultMap;
+						if (!hasNotificationOss) {
+							if (!CoConstDef.FLAG_YES.equals(_projectBean.getExcludeYn()) && ("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType()) )) {
+								hasNotificationOss = true;
+							}
+						}
+						
+						if (!hasSourceOss) {
+							if ("11".equals(_projectBean.getObligationType())){
+								hasSourceOss = true;
+							}
+						}
+						
+						if (!isNetworkRestriction) {
+							if (("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType())) && _projectBean.getRestriction().toUpperCase().contains(networkRedistribution.toUpperCase())) {
+								isNetworkRestriction = true;
+							}
 						}
 					}
 				}
