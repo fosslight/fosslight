@@ -2853,12 +2853,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		Project prjParam = new Project(); 
 		prjParam.setPrjId(prjId);
 		  
-		Project project = projectMapper.selectProjectMaster(prjParam);
-		
 		if (fileSeq.equals("4")) {
 			prjParam.setPackageVulDocFileId(registFileId);
 			verificationMapper.updatePackageVulDocFile(prjParam);
 		} else {
+			Project project = projectMapper.selectProjectMaster(prjParam);
+			
 			if (fileSeq.equals("1")) {
 				prjParam.setPackageFileId(registFileId);
 				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);

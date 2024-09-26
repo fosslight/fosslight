@@ -1176,35 +1176,65 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	}
 
 	@Override
-	public String copyPhysicalFile(String fileId) {
+	public String copyPhysicalFile(String fileId, String prjId, boolean isFileId) {
 		boolean fileCopyFlag = false;
 		String newFileId = fileMapper.getFileId();
-		List<T2File> orgFileInfoList = fileMapper.getFileInfoList(fileId);
+		List<T2File> orgFileInfoList = null;
 		
-		for (T2File orgFile : orgFileInfoList) {
-			String baseFile = orgFile.getLogiPath() + "/" + orgFile.getLogiNm();
-			
-			UUID randomUUID = UUID.randomUUID();
-			String copyFileName = randomUUID + "." + orgFile.getExt();
-			String newFile = orgFile.getLogiPath();
-			
-			if (FileUtil.copyFile(baseFile, newFile, copyFileName)) {
-				T2File fileInfo = new T2File();
-				fileInfo.setFileId(newFileId);
-				fileInfo.setFileSeq(orgFile.getFileSeq());
-				fileInfo.setLogiNm(copyFileName);
+		if (isFileId) {
+			orgFileInfoList = fileMapper.getFileInfoList(fileId);
+		} else {
+			T2File orgFile = selectFileInfo(fileId);
+			if (orgFile != null) {
+				orgFileInfoList = new ArrayList<>();
+				orgFileInfoList.add(orgFile);
+			}
+		}
+		
+		if (orgFileInfoList != null && !orgFileInfoList.isEmpty()) {
+			for (T2File orgFile : orgFileInfoList) {
+				String baseFile = orgFile.getLogiPath() + "/" + orgFile.getLogiNm();
 				
-				fileMapper.insertCopyPhysicalFileInfo(fileInfo);
-				fileCopyFlag = true;
-			}else {
-				fileCopyFlag = false;
+				UUID randomUUID = UUID.randomUUID();
+				String copyFileName = randomUUID + "." + orgFile.getExt();
+				String newFile = orgFile.getLogiPath();
+				if (!isFileId) {
+					newFile = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
+					new File(newFile).mkdirs();
+				}
+				
+				if (FileUtil.copyFile(baseFile, newFile, copyFileName)) {
+					T2File fileInfo = new T2File();
+					fileInfo.setFileId(newFileId);
+					fileInfo.setFileSeq(orgFile.getFileSeq());
+					fileInfo.setLogiNm(copyFileName);
+					if (!isFileId) {
+						fileInfo.setLogiPath(newFile);
+						fileInfo.setLogiThumbNm(randomUUID + "_thumb." + orgFile.getExt());
+						fileInfo.setLogiThumbPath(newFile + "/thumb");
+					}
+					
+					fileMapper.insertCopyPhysicalFileInfo(fileInfo);
+					if (!isFileId) {
+						fileInfo = selectFileInfoById(newFileId);
+						newFileId = fileInfo.getFileSeq();
+					}
+					fileCopyFlag = true;
+				} else {
+					fileCopyFlag = false;
+				}
+				
+				if (!fileCopyFlag) {
+					newFileId = null;
+					log.error("physical file copy error");
+					break;
+				}
 			}
-			
-			if (!fileCopyFlag) {
-				newFileId = null;
-				log.error("physical file copy error");
-				break;
-			}
+		}
+		
+		if (!fileCopyFlag) {
+			newFileId = null;
+			log.error("physical file copy error");
 		}
 		
 		return newFileId;

@@ -6067,7 +6067,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		Project prj = getProjectBasicInfo(project.getCopyPrjId());
 		
 		if (!isEmpty(prj.getSrcAndroidNoticeFileId())) {
-			String fileId = fileService.copyPhysicalFile(prj.getSrcAndroidNoticeFileId());
+			String fileId = fileService.copyPhysicalFile(prj.getSrcAndroidNoticeFileId(), null, true);
 			if (!isEmpty(fileId)) {
 				project.setSrcAndroidNoticeFileId(fileId);
 				projectMapper.updateFileId(project);

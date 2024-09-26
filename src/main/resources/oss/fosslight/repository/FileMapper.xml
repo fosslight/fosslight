@@ -340,7 +340,7 @@
 	
 	<insert id="insertCopyPhysicalFileInfo" parameterType="oss.fosslight.domain.T2File">
 		INSERT INTO T2_FILE ( FILE_ID, GUBN, GUBN_CHK, ORIG_NM, LOGI_NM, LOGI_PATH, LOGI_THUMB_NM, LOGI_THUMB_PATH, EXT, SIZE, REG_ID, UPD_ID, CONTENT_TYPE ) 
-		SELECT #{fileId}, GUBN, GUBN_CHK, ORIG_NM, #{logiNm}, LOGI_PATH, LOGI_THUMB_NM, LOGI_THUMB_PATH, EXT, SIZE, #{loginUserName}, #{loginUserName}, CONTENT_TYPE
+		SELECT #{fileId}, GUBN, GUBN_CHK, ORIG_NM, #{logiNm}, #{logiPath}, #{logiThumbNm}, #{logiThumbPath}, EXT, SIZE, #{loginUserName}, #{loginUserName}, CONTENT_TYPE
 		FROM T2_FILE
 		WHERE FILE_SEQ = #{fileSeq}
 	</insert>
