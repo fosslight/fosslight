@@ -1069,6 +1069,7 @@ var fn = {
 			display += oscProgress;
 			
 			// vulnerability score
+			var standardScore = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE'))}]];
 			var vulnerability = "<span class=\"ml-2\"> | </span>";
 			
 			var cvssScoreMax = displayInfo.cvssScoreMax;
@@ -1077,7 +1078,11 @@ var fn = {
 				if ("Need to resolve" == vulnerabilityResolution) {
 					vulnerability += '<span type="button" class="badge badge-dark-gray size-sm width-9rem px-1 ml-2 customShadow" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 				} else {
-					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2 customShadow" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
+					if (cvssScoreMax - standardScore >= 0) {
+						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2 customShadow" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
+					} else {
+						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2 customShadow">Discovered('+cvssScoreMax+')</span>';
+					}
 				}
 			} else {
 				if (typeof cvssScoreMax !== "undefined") {

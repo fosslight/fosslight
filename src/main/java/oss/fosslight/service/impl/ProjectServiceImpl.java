@@ -311,7 +311,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				bean.setSecCode("notFixed");
 				bean.setCvssScore(notFixedCvssScore);
 			} else {
-				if (fixedCheckCnt == securityListCnt) {
+				if (fixedCheckCnt > 0 && fixedCheckCnt == securityListCnt) {
 					bean.setSecCode("Fixed");
 					bean.setCvssScore(fixedCvssScore);
 				} else {
