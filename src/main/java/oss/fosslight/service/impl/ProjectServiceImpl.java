@@ -2372,24 +2372,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		//deleteRows
 		List<String> deleteRows = new ArrayList<String>();
 		
-		Map<String, OssMaster> ossInfo = null;
-		if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
-			ossInfo = CoCodeManager.OSS_INFO_UPPER;
-		}
-		
 		// 컴포넌트 등록	
 		for (int i = 0; i < ossComponent.size(); i++) {
 			// SRC STATUS 등록
 			
 			ProjectIdentification ossBean = ossComponent.get(i);
-			
-			if (ossInfo != null) {
-				String key = (ossBean.getOssName()+"_"+ossBean.getOssVersion()).toUpperCase();
-				OssMaster bean = ossInfo.get(key);
-				if (bean != null && (!bean.getOssName().equals(bean.getOssNameTemp()))) {
-					ossBean.setRefOssName(bean.getOssNameTemp());
-				}
-			}
 			
 			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
 			ossBean = CommonFunction.findOssIdAndName(ossBean);
