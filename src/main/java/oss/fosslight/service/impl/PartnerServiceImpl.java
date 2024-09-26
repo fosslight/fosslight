@@ -415,7 +415,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 									|| exComponentId.equals(gridId)){
 								OssComponentsLicense license = new OssComponentsLicense();
 								// 컴포넌트 ID 설정
-								license.setComponentId(exComponentId);
+								license.setComponentId(projectMapper.selectLastComponent());
 								
 								// 라이센스 ID 설정
 								if (StringUtil.isEmpty(comLicense.getLicenseId())) {
@@ -438,7 +438,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				} else { //싱글라이센스일경우
 					OssComponentsLicense license = new OssComponentsLicense();
 					// 컴포넌트 ID 설정
-					license.setComponentId(exComponentId);
+					license.setComponentId(projectMapper.selectLastComponent());
 					
 					// 라이센스 ID 설정
 					if (StringUtil.isEmpty(bean.getLicenseId())) {
