@@ -385,6 +385,7 @@ public class ProjectController extends CoTopComponent {
 	public String edit(@PathVariable String prjId, HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 		project.setPrjId(prjId);
+		project.setActType(CoConstDef.FLAG_NO);
 		project = projectService.getProjectDetail(project);
 		
 		CommentsHistory comHisBean = new CommentsHistory();
@@ -1841,6 +1842,7 @@ public class ProjectController extends CoTopComponent {
 		HashMap<String, Object> resMap = new HashMap<>();
 		
 		project.setPrjId(prjId);
+		project.setActType(CoConstDef.FLAG_NO);
 		Project projectInfo = projectService.getProjectDetail(project);
 		
 		if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(initDiv)) {
@@ -2623,7 +2625,7 @@ public class ProjectController extends CoTopComponent {
 				CommonFunction.makeSessionKey(loginUserName(), code, prjId), ossComponent, ossComponentLicense,
 				CommonFunction.makeSessionReportKey(loginUserName(), code, prjId));
 
-		result = projectService.nickNameValid(ossComponent, ossComponentLicense);
+		result = projectService.nickNameValid(prjId, ossComponent, ossComponentLicense);
 
 		StringBuffer resultSb = new StringBuffer();
 		if (result != null) {
@@ -2892,7 +2894,7 @@ public class ProjectController extends CoTopComponent {
 		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
 		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
 		projectService.registBom(prjId, merge, projectIdentification, checkGridBomList);
-
+		projectService.updateSecurityDataForProject(prjId);
 		Map<String, String> resMap = new HashMap<>();
 		
 		try {
@@ -2994,6 +2996,7 @@ public class ProjectController extends CoTopComponent {
 			@PathVariable String initDiv) throws Exception {
 		Project project = new Project();
 		project.setPrjId(prjId);
+		project.setActType(CoConstDef.FLAG_NO);
 		Project projectMaster = projectService.getProjectDetail(project);
 		
 		boolean partnerFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
@@ -3211,7 +3214,7 @@ public class ProjectController extends CoTopComponent {
 			HttpServletResponse res, Model model) {
 		ossComponents.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
 		Map<String, Object> map = projectService.getPartnerOssList(ossComponents);
-
+		projectService.setLoadToList(map, ossComponents.getReferenceId());
 		return makeJsonResponseHeader(map);
 	}
 	
@@ -4838,9 +4841,8 @@ public class ProjectController extends CoTopComponent {
 		map.put("commId", avoidNull(prjBean.getCommId(), ""));
 		map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
 		map.put("statusRequestYn", avoidNull(prjBean.getStatusRequestYn(), CoConstDef.FLAG_NO));
-		map.put("cvssScore", avoidNull(prjBean.getCvssScore(), CoConstDef.FLAG_NO));
-		map.put("secCode", avoidNull(prjBean.getSecCode(), CoConstDef.FLAG_NO));
-		map.put("secCvssScore", avoidNull(prjBean.getSecCvssScore(), CoConstDef.FLAG_NO));
+		if (!isEmpty(prjBean.getCvssScoreMax())) map.put("cvssScoreMax", prjBean.getCvssScoreMax());
+		if (!isEmpty(prjBean.getVulnerabilityResolution())) map.put("vulnerabilityResolution", prjBean.getVulnerabilityResolution());
 		
 		return makeJsonResponseHeader(map);
 	}
@@ -5193,7 +5195,7 @@ public class ProjectController extends CoTopComponent {
 		
 		try {
 			projectService.registSecurity(prjId, tabName, ossComponents);
-			
+			projectService.updateSecurityDataForProject(prjId);
 			Project param = new Project();
 			param.setPrjId(prjId);
 			Project pDat = projectService.getProjectDetail(param);

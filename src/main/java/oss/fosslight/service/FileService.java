@@ -54,7 +54,7 @@ public interface FileService {
 
 	public void deletePhysicalFile(T2File t2File, String flag);
 
-	public String copyPhysicalFile(String fileId);
+	public String copyPhysicalFile(String fileId, String prjId, boolean isFileId);
 
 	T2File uploadSingleFile(MultipartFile mFile, String fileId ,String fileGubn, Path of, boolean useRandomFileName);
 }

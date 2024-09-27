@@ -400,7 +400,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				deleteRows.add(bean.getComponentId());
 				
 				//멀티라이센스일 경우
-				if ("M".equals(bean.getLicenseDiv())){
+				if (CoConstDef.LICENSE_DIV_MULTI.equals(bean.getLicenseDiv())){
 					for (List<ProjectIdentification> comLicenseList : ossComponentsLicense) {
 						for (ProjectIdentification comLicense : comLicenseList) {
 							String gridId = comLicense.getGridId();

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
 <th:block th:replace="oss/ossAnalysisResultDetail-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
     <!-- Site wrapper -->
@@ -14,12 +14,14 @@
 							<form name="ossForm1" id="ossForm1">
 								<input type="hidden" name="ossLicensesJson"/>
 								<input type="hidden" name="ossId"/>
+								<input type="hidden" name="ossCommonId"/>
 								<input type="hidden" name="licenseType" id="licenseType" />
 								<input type="hidden" name="obligationType" id="obligationType" />
 								<input type="hidden" name="ossType"/>
 								<input type="hidden" name="validationType"/>
 								<input type="hidden" name="downloadLocation"/>
 								<input type="hidden" name="licenseDiv"/>
+								<input type="hidden" name="purlJson"/>
 								<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
 									<div class="form-group" style="margin-top: 1rem;">
 										<label class="text-smaller" th:text="Title"></label>
@@ -29,6 +31,7 @@
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.OSS.name}"></label>
+										<i class="fas fa-info-circle fa-lg ml-1 ossI icon-blue" title="detail Info" style="cursor: pointer;" th:onclick="|Ctrl_fn.showOssViewPage(this)|"></i>
 										<div class="col-12">
 											<input class="form-control" type="text" name="ossName" id="detailOssName1"/>
 											<span class="retxt"></span>
@@ -56,6 +59,59 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<ul id="vulnerabilityInfo1" class="nav nav-pills nav-sidebar flex-column col-lg-12" data-accordion="false" data-widget="treeview" role="menu">
+											<li class="nav-item col-md-12">
+												<a class="nav-link my-1 ml-0 pl-0 width-12rem" style="cursor: pointer;">
+                                                	<label th:text="#{msg.common.field.vulnerability}+ ' Info'"></label>
+                                                	<i class="right fas fa-angle-left ml-1"></i>
+                                            	</a>
+                                            	<ul class="nav nav-treeview">
+                                                	<li class="nav-item">
+                                                		<div class="form-group">
+															<div class="col-lg-12">
+																<div class="input-group">
+																	<input class="form-control" type="text" name="ossVersionAliases" id="ossVersionAliases1" th:placeholder="#{msg.common.field.OSS.version.alias}"/>
+																	<div class="input-group-append">
+																		<button class="btn btn-default" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.ossVersionAliasAdd('1')|"></button>
+																	</div>
+																</div>
+															</div>
+															<div class="col-12">
+                                    							<div class="row multiTxtVersionAlias1"></div>
+                                    						</div>
+														</div>
+														<div class="form-group">
+															<div class="col-lg-12">
+																<div class="input-group">
+																	<input class="form-control" type="text" name="includeCpe" id="includeCpe1" th:placeholder="#{msg.common.field.includeCPE}"/>
+																	<div class="input-group-append">
+																		<button class="btn btn-default" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.includeCpeAdd('1')|"></button>
+																	</div>
+																</div>
+															</div>
+															<div class="col-12">
+                         					           			<div class="row multiTxtIncludeCpe1"></div>
+                     					               		</div>
+														</div>
+														<div class="form-group">
+															<div class="col-lg-12">
+																<div class="input-group">
+																	<input class="form-control" type="text" name="excludeCpe" id="excludeCpe1" th:placeholder="#{msg.common.field.excludeCPE}"/>
+																	<div class="input-group-append">
+																		<button class="btn btn-default" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.excludeCpeAdd('1')|"></button>
+																	</div>
+																</div>
+															</div>
+															<div class="col-12">
+                                    							<div class="row multiTxtExcludeCpe1"></div>
+                                    						</div>
+														</div>
+                                                	</li>
+                                                </ul>
+                                          	</li>
+                                      	</ul>
+									</div>
+									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.declaredLicense}"></label>
 										<!-- <button type="button" class="btn btn-info btn-xs" id="btnShowLicenseText1" th:text="'Show license text'"></button> -->
 										<div class="col-12">
@@ -73,15 +129,28 @@
 										<label class="text-smaller" th:text="#{msg.common.field.detectedLicense}"></label>
 										<div class="col-12">
 											<div class="input-group">
-                                        		<input class="form-control autoComOssLicense" id="input_detectedLicense1" type="text"/>
+                                        		<input class="form-control autoComOssLicense1" id="input_detectedLicense1" type="text"/>
                                            		<div class="input-group-append">
                                             		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.detectedLicenseAdd('1')|"></button>
                                             	</div>
                                      		</div>
 										</div>
-										<div class="col-12">
+										<div class="col-12 ml-2">
                                     		<div class="row multiItemSet multiDetectedLicenseSet detailDetectedLicense1"></div>
                                     	</div>
+									</div>
+									<div class="form-group">
+										<div class="row">
+											<div class="col-lg-12">
+												<label class="text-smaller" th:text="#{msg.common.field.restriction}"></label>
+												<select class="form-control select2" id="restrictionSelect1" multiple="multiple" name="restriction" style="width: 100%;" th:disabled="${isReadOnly}">
+													<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+														th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"
+														th:selected="${detail?.restrictionCdNoList != null and #arrays.contains(detail.restrictionCdNoList, code.cdDtlNo)}">
+													</option>
+												</select>
+											</div>
+										</div>
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.Copyright}"></label>
@@ -98,14 +167,19 @@
 										<div class="col-12" id="ob1"></div>
 									</div>
 									<div class="form-group">
-										<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
-										<div class="col-12">
-											<div class="input-group">
-                                        		<input class="form-control" id="input_downloadLocations" type="text"/>
-                                           		<div class="input-group-append">
-                                            		<button class="btn btn-outline-dark text-smaller" id="downloadLocationAdd1" type="button" th:text="Add" th:onclick="|Ctrl_fn.downloadLocationAdd('1')|"></button>
-                                            	</div>
-                                     		</div>
+										<div class="row">
+											<div class="col-lg-6">
+												<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
+												<div class="col-12 input-group">
+                                        			<input class="form-control" id="input_downloadLocations1" type="text"/>
+                                           			<div class="input-group-append">
+                                            			<button class="btn btn-outline-dark text-smaller" id="downloadLocationAdd1" type="button" th:text="Add" th:onclick="|Ctrl_fn.downloadLocationAdd('1')|"></button>
+                                            		</div>
+                                     			</div>
+											</div>
+											<div class="col-lg-6">
+												<label class="text-smaller" th:text="#{msg.common.field.packageUrl}"></label>
+											</div>
 										</div>
 										<div class="col-12">
 											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation1"></div>
@@ -143,12 +217,14 @@
 							<form name="ossForm2" id="ossForm2">
 								<input type="hidden" name="ossLicensesJson"/>
 								<input type="hidden" name="ossId"/>
+								<input type="hidden" name="ossCommonId"/>
 								<input type="hidden" name="licenseType" id="licenseType" />
 								<input type="hidden" name="obligationType" id="obligationType" />
 								<input type="hidden" name="ossType"/>
 								<input type="hidden" name="validationType"/>
 								<input type="hidden" name="downloadLocation"/>
 								<input type="hidden" name="licenseDiv"/>
+								<input type="hidden" name="purlJson"/>
 								<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
 									<div class="form-group" style="margin-top: 1rem;">
 										<label class="text-smaller" th:text="Title"></label>
@@ -158,6 +234,7 @@
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.OSS.name}"></label>
+										<i class="fas fa-info-circle fa-lg ml-1 ossI icon-blue" title="detail Info" style="cursor: pointer;" th:onclick="|Ctrl_fn.showOssViewPage(this)|"></i>
 										<div class="col-12">
 											<input class="form-control" type="text" name="ossName" id="detailOssName2"/>
 											<span class="retxt"></span>
@@ -185,6 +262,59 @@
 										</div>
 									</div>
 									<div class="form-group">
+										<ul id="vulnerabilityInfo2" class="nav nav-pills nav-sidebar flex-column col-lg-12" data-accordion="false" data-widget="treeview" role="menu">
+											<li class="nav-item col-md-12">
+												<a class="nav-link my-1 ml-0 pl-0 width-12rem" style="cursor: pointer;">
+                                                	<label th:text="#{msg.common.field.vulnerability}+ ' Info'"></label>
+                                                	<i class="right fas fa-angle-left ml-1"></i>
+                                            	</a>
+                                            	<ul class="nav nav-treeview">
+                                                	<li class="nav-item">
+                                                		<div class="form-group">
+															<div class="col-lg-12">
+																<div class="input-group">
+																	<input class="form-control" type="text" name="ossVersionAliases" id="ossVersionAliases2" th:placeholder="#{msg.common.field.OSS.version.alias}"/>
+																	<div class="input-group-append">
+																		<button class="btn btn-default" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.ossVersionAliasAdd('2')|"></button>
+																	</div>
+																</div>
+															</div>
+															<div class="col-12">
+                                    							<div class="row multiTxtVersionAlias2"></div>
+                                    						</div>
+														</div>
+														<div class="form-group">
+															<div class="col-lg-12">
+																<div class="input-group">
+																	<input class="form-control" type="text" name="includeCpe" id="includeCpe2" th:placeholder="#{msg.common.field.includeCPE}"/>
+																	<div class="input-group-append">
+																		<button class="btn btn-default" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.includeCpeAdd('2')|"></button>
+																	</div>
+																</div>
+															</div>
+															<div class="col-12">
+                         					           			<div class="row multiTxtIncludeCpe2"></div>
+                     					               		</div>
+														</div>
+														<div class="form-group">
+															<div class="col-lg-12">
+																<div class="input-group">
+																	<input class="form-control" type="text" name="excludeCpe" id="excludeCpe2" th:placeholder="#{msg.common.field.excludeCPE}"/>
+																	<div class="input-group-append">
+																		<button class="btn btn-default" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.excludeCpeAdd('2')|"></button>
+																	</div>
+																</div>
+															</div>
+															<div class="col-12">
+                                    							<div class="row multiTxtExcludeCpe2"></div>
+                                    						</div>
+														</div>
+                                                	</li>
+                                                </ul>
+                                          	</li>
+                                      	</ul>
+									</div>
+									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.declaredLicense}"></label>
 										<!-- <button type="button" class="btn btn-info btn-xs" id="btnShowLicenseText2" th:text="'Show license text'"></button> -->
 										<div class="col-12">
@@ -202,15 +332,28 @@
 										<label class="text-smaller" th:text="#{msg.common.field.detectedLicense}"></label>
 										<div class="col-12">
 											<div class="input-group">
-                                        		<input class="form-control autoComOssLicense" id="input_detectedLicense2" type="text"/>
+                                        		<input class="form-control autoComOssLicense2" id="input_detectedLicense2" type="text"/>
                                            		<div class="input-group-append">
                                             		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.detectedLicenseAdd('2')|"></button>
                                             	</div>
                                      		</div>
 										</div>
-										<div class="col-12">
+										<div class="col-12 ml-2">
                                     		<div class="row multiItemSet multiDetectedLicenseSet detailDetectedLicense2"></div>
                                     	</div>
+									</div>
+									<div class="form-group">
+										<div class="row">
+											<div class="col-lg-12">
+												<label class="text-smaller" th:text="#{msg.common.field.restriction}"></label>
+												<select class="form-control select2" id="restrictionSelect2" multiple="multiple" name="restriction" style="width: 100%;" th:disabled="${isReadOnly}">
+													<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+														th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"
+														th:selected="${detail?.restrictionCdNoList != null and #arrays.contains(detail.restrictionCdNoList, code.cdDtlNo)}">
+													</option>
+												</select>
+											</div>
+										</div>
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.Copyright}"></label>
@@ -227,14 +370,19 @@
 										<span id="ob2"></span>
 									</div>
 									<div class="form-group">
-										<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
-										<div class="col-12">
-											<div class="input-group">
-                                        		<input class="form-control" id="input_downloadLocations" type="text"/>
-                                           		<div class="input-group-append">
-                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.downloadLocationAdd('2')|"></button>
-                                            	</div>
-                                     		</div>
+										<div class="row">
+											<div class="col-lg-6">
+												<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
+												<div class="col-12 input-group">
+                                        			<input class="form-control" id="input_downloadLocations2" type="text"/>
+                                           			<div class="input-group-append">
+                                            			<button class="btn btn-outline-dark text-smaller" id="downloadLocationAdd2" type="button" th:text="Add" th:onclick="|Ctrl_fn.downloadLocationAdd('2')|"></button>
+                                            		</div>
+                                     			</div>
+											</div>
+											<div class="col-lg-6">
+												<label class="text-smaller" th:text="#{msg.common.field.packageUrl}"></label>
+											</div>
 										</div>
 										<div class="col-12">
 											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation2"></div>
@@ -272,21 +420,24 @@
 							<form name="ossForm3" id="ossForm3">
 								<input type="hidden" name="ossLicensesJson"/>
 								<input type="hidden" name="ossId"/>
+								<input type="hidden" name="ossCommonId"/>
 								<input type="hidden" name="licenseType" id="licenseType" />
 								<input type="hidden" name="obligationType" id="obligationType" />
 								<input type="hidden" name="ossType"/>
 								<input type="hidden" name="validationType"/>
 								<input type="hidden" name="downloadLocation"/>
 								<input type="hidden" name="licenseDiv"/>
+								<input type="hidden" name="purlJson"/>
 								<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
 									<div class="form-group" style="margin-top: 1rem;">
 										<label class="text-smaller" th:text="Title"></label>
 										<div class="col-12">
-											<select class="form-control select2" id="selectTitle1" th:onchange="|Ctrl_fn.selectTitle(3)|" style="width: 100%;"></select>
+											<select class="form-control select2" id="selectTitle3" th:onchange="|Ctrl_fn.selectTitle(3)|" style="width: 100%;"></select>
 										</div>
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.OSS.name}"></label>
+										<i class="fas fa-info-circle fa-lg ml-1 ossI icon-blue" title="detail Info" style="cursor: pointer;" th:onclick="|Ctrl_fn.showOssViewPage(this)|"></i>
 										<div class="col-12">
 											<input class="form-control" type="text" name="ossName" id="detailOssName3"/>
 											<span class="retxt"></span>
@@ -305,13 +456,66 @@
 											<div class="input-group">
 												<input class="form-control" type="text" id="input_ossNicknames3"/>
 												<div class="input-group-append">
-                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.nicknameAdd('1')|"></button>
+                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.nicknameAdd('3')|"></button>
                                           		</div>
 											</div>
 											<div class="col-12">
                                     			<div class="row multiTxtSet detailNickName3"></div>
                                     		</div>
 										</div>
+									</div>
+									<div class="form-group">
+										<ul id="vulnerabilityInfo3" class="nav nav-pills nav-sidebar flex-column col-lg-12" data-accordion="false" data-widget="treeview" role="menu">
+											<li class="nav-item col-md-12">
+												<a class="nav-link my-1 ml-0 pl-0 width-12rem" style="cursor: pointer;">
+                                                	<label th:text="#{msg.common.field.vulnerability}+ ' Info'"></label>
+                                                	<i class="right fas fa-angle-left ml-1"></i>
+                                            	</a>
+                                            	<ul class="nav nav-treeview">
+                                                	<li class="nav-item">
+                                                		<div class="form-group">
+															<div class="col-lg-12">
+																<div class="input-group">
+																	<input class="form-control" type="text" name="ossVersionAliases" id="ossVersionAliases3" th:placeholder="#{msg.common.field.OSS.version.alias}"/>
+																	<div class="input-group-append">
+																		<button class="btn btn-default" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.ossVersionAliasAdd('3')|"></button>
+																	</div>
+																</div>
+															</div>
+															<div class="col-12">
+                                    							<div class="row multiTxtVersionAlias3"></div>
+                                    						</div>
+														</div>
+														<div class="form-group">
+															<div class="col-lg-12">
+																<div class="input-group">
+																	<input class="form-control" type="text" name="includeCpe" id="includeCpe3" th:placeholder="#{msg.common.field.includeCPE}"/>
+																	<div class="input-group-append">
+																		<button class="btn btn-default" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.includeCpeAdd('3')|"></button>
+																	</div>
+																</div>
+															</div>
+															<div class="col-12">
+                         					           			<div class="row multiTxtIncludeCpe3"></div>
+                     					               		</div>
+														</div>
+														<div class="form-group">
+															<div class="col-lg-12">
+																<div class="input-group">
+																	<input class="form-control" type="text" name="excludeCpe" id="excludeCpe3" th:placeholder="#{msg.common.field.excludeCPE}"/>
+																	<div class="input-group-append">
+																		<button class="btn btn-default" name="addTagButton" type="button" th:text="Add" th:onclick="|Ctrl_fn.excludeCpeAdd('3')|"></button>
+																	</div>
+																</div>
+															</div>
+															<div class="col-12">
+                                    							<div class="row multiTxtExcludeCpe3"></div>
+                                    						</div>
+														</div>
+                                                	</li>
+                                                </ul>
+                                          	</li>
+                                      	</ul>
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.declaredLicense}"></label>
@@ -331,15 +535,28 @@
 										<label class="text-smaller" th:text="#{msg.common.field.detectedLicense}"></label>
 										<div class="col-12">
 											<div class="input-group">
-                                        		<input class="form-control autoComOssLicense" id="input_detectedLicense3" type="text"/>
+                                        		<input class="form-control autoComOssLicense3" id="input_detectedLicense3" type="text"/>
                                            		<div class="input-group-append">
                                             		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.detectedLicenseAdd('3')|"></button>
                                             	</div>
                                      		</div>
 										</div>
-										<div class="col-12">
+										<div class="col-12 ml-2">
                                     		<div class="row multiItemSet multiDetectedLicenseSet detailDetectedLicense3"></div>
                                     	</div>
+									</div>
+									<div class="form-group">
+										<div class="row">
+											<div class="col-lg-12">
+												<label class="text-smaller" th:text="#{msg.common.field.restriction}"></label>
+												<select class="form-control select2" id="restrictionSelect3" multiple="multiple" name="restriction" style="width: 100%;" th:disabled="${isReadOnly}">
+													<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+														th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"
+														th:selected="${detail?.restrictionCdNoList != null and #arrays.contains(detail.restrictionCdNoList, code.cdDtlNo)}">
+													</option>
+												</select>
+											</div>
+										</div>
 									</div>
 									<div class="form-group">
 										<label class="text-smaller" th:text="#{msg.common.field.Copyright}"></label>
@@ -356,14 +573,19 @@
 										<span id="ob3"></span>
 									</div>
 									<div class="form-group">
-										<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
-										<div class="col-12">
-											<div class="input-group">
-                                        		<input class="form-control" id="input_downloadLocations" type="text"/>
-                                           		<div class="input-group-append">
-                                            		<button class="btn btn-outline-dark text-smaller" type="button" th:text="Add" th:onclick="|Ctrl_fn.downloadLocationAdd('3')|"></button>
-                                            	</div>
-                                     		</div>
+										<div class="row">
+											<div class="col-lg-6">
+												<label class="text-smaller" th:text="#{msg.common.field.downloadLocation}"></label>
+												<div class="col-12 input-group">
+                                        			<input class="form-control" id="input_downloadLocations3" type="text"/>
+                                           			<div class="input-group-append">
+                                            			<button class="btn btn-outline-dark text-smaller" id="downloadLocationAdd3" type="button" th:text="Add" th:onclick="|Ctrl_fn.downloadLocationAdd('3')|"></button>
+                                            		</div>
+                                     			</div>
+											</div>
+											<div class="col-lg-6">
+												<label class="text-smaller" th:text="#{msg.common.field.packageUrl}"></label>
+											</div>
 										</div>
 										<div class="col-12">
 											<div class="multiItemSet multiDownloadLocationSet detailDownloadLocation3"></div>

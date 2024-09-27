@@ -553,6 +553,10 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		Map<String, Object> returnMap = null;
 		ObjectMapper mapper = new ObjectMapper();
         
+		if (!isEmpty(responseString) && (responseString.startsWith("{") && !responseString.endsWith("}"))) {
+			responseString += "}";
+		}
+		
 		try {
 			returnMap = mapper.readValue(responseString, Map.class);
 		} catch (JsonMappingException e) {

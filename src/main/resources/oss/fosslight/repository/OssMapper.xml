@@ -81,19 +81,48 @@
     	</choose>
     </sql>
     
+	<insert id="insertCommonOssMaster" parameterType="oss.fosslight.domain.OssMaster" useGeneratedKeys="true" keyProperty="ossCommonId" >
+		INSERT INTO OSS_COMMON
+		(
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
+			OSS_COMMON_ID, 
+		</if>
+			OSS_NAME
+			, DOWNLOAD_LOCATION
+			, HOMEPAGE
+			, SUMMARY_DESCRIPTION
+		)
+		VALUES
+		(
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
+			#{ossCommonId},
+		</if>
+			#{ossName}
+			, #{downloadLocation}
+			, #{homepage}
+			, #{summaryDescription}
+		) ON DUPLICATE KEY UPDATE
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
+			OSS_COMMON_ID					= #{ossCommonId},
+			</if>
+			OSS_NAME                      	= #{ossName}                
+			, DOWNLOAD_LOCATION             = #{downloadLocation}                
+			, HOMEPAGE                      = #{homepage}                
+			, SUMMARY_DESCRIPTION           = #{summaryDescription}      
+	</insert>
+	
 	<insert id="insertOssMaster" parameterType="oss.fosslight.domain.OssMaster" useGeneratedKeys="true" keyProperty="ossId" >
-		INSERT INTO OSS_MASTER
+		INSERT INTO OSS_VERSION
 		(
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
 			OSS_ID ,
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
+			OSS_COMMON_ID ,
+			</if>
 			LICENSE_DIV
-			, OSS_NAME
 			, OSS_VERSION
 			, COPYRIGHT
-			, DOWNLOAD_LOCATION
-			, HOMEPAGE
-			, SUMMARY_DESCRIPTION
 			, ATTRIBUTION
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			, CREATOR
@@ -103,20 +132,19 @@
 			</if>
 			, LICENSE_TYPE
 			, OBLIGATION_TYPE
-			, DEACTIVATE_FLAG
+			, RESTRICTION
 		)
 		VALUES
 		(
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
 			#{ossId},
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
+			#{ossCommonId},
+			</if>
 			#{licenseDiv}
-			, #{ossName}
 			, #{ossVersion}
 			, #{copyright}
-			, #{downloadLocation}
-			, #{homepage}
-			, #{summaryDescription}
 			, #{attribution}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			, #{creator}
@@ -126,18 +154,17 @@
 			</if>
 			, #{licenseType}
 			, #{obligationType}
-			, #{deactivateFlag}
+			, #{restriction}
 		) ON DUPLICATE KEY UPDATE
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
 			OSS_ID						  	= #{ossId} ,
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
+			OSS_COMMON_ID					= #{ossCommonId} ,
+			</if>
 			LICENSE_DIV						= #{licenseDiv}
-			, OSS_NAME                      = #{ossName}                
 			, OSS_VERSION                   = #{ossVersion}                
 			, COPYRIGHT                  	= #{copyright}                
-			, DOWNLOAD_LOCATION             = #{downloadLocation}                
-			, HOMEPAGE                      = #{homepage}                
-			, SUMMARY_DESCRIPTION           = #{summaryDescription}      
 			, ATTRIBUTION           		= #{attribution}          
 			, MODIFIER						= #{modifier}      
 			, LICENSE_TYPE          		= #{licenseType}                
@@ -147,7 +174,7 @@
 			<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(vulnRecheck,'Y')">
 			, VULN_RECHECK					= 'Y'   
 			</if>
-			, DEACTIVATE_FLAG				= #{deactivateFlag}
+			, RESTRICTION					= #{restriction}
 	</insert>
 	
 	<insert id="insertOssLicenseDeclared" parameterType="oss.fosslight.domain.OssMaster">
@@ -157,21 +184,21 @@
 			, LICENSE_ID
 			, OSS_LICENSE_IDX
 			, OSS_LICENSE_COMB
-			, OSS_LICENSE_TEXT
+<!-- 		, OSS_LICENSE_TEXT -->
 			, OSS_COPYRIGHT
 		)VALUES(
 			#{ossId}
 			,#{licenseId}
 			, #{ossLicenseIdx}  
 			, #{ossLicenseComb} 
-			, #{ossLicenseText} 
+<!--		, #{ossLicenseText} -->
 			, #{ossCopyright}
 		) ON DUPLICATE KEY UPDATE
 			OSS_ID = #{ossId}
 			, LICENSE_ID = #{licenseId}
 			, OSS_LICENSE_IDX 	= #{ossLicenseIdx}
 			, OSS_LICENSE_COMB 	= #{ossLicenseComb}
-			, OSS_LICENSE_TEXT 	= #{ossLicenseText}
+<!-- 		, OSS_LICENSE_TEXT 	= #{ossLicenseText} -->
 			, OSS_COPYRIGHT 	= #{ossCopyright}
 	</insert>
 	
@@ -194,12 +221,12 @@
 		INSERT
 		INTO OSS_NICKNAME
 		(
-			OSS_NAME
+			OSS_COMMON_ID
 			, OSS_NICKNAME
 		)
 		VALUES
 		(
-			#{ossName}
+			#{ossCommonId}
 			, #{ossNickname}
 		)
 	</insert>
@@ -207,15 +234,15 @@
 		INSERT
 		INTO OSS_NICKNAME
 		(
-			OSS_NAME
+			OSS_COMMON_ID
 			, OSS_NICKNAME
 		)
 		VALUES
 		(
-			(SELECT OSS_NAME FROM OSS_MASTER WHERE OSS_ID = #{newOssId})
+			(SELECT OSS_COMMON_ID FROM OSS_VERSION WHERE OSS_ID = #{newOssId})
 			, #{ossNickname}
 		) ON DUPLICATE KEY UPDATE
-			OSS_NAME = (SELECT OSS_NAME FROM OSS_MASTER WHERE OSS_ID = #{newOssId})
+			OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_VERSION WHERE OSS_ID = #{newOssId})
 			, OSS_NICKNAME = #{ossNickname}
 	</insert>
 	
@@ -223,36 +250,39 @@
 		INSERT
 		INTO OSS_NICKNAME
 		(
-			OSS_NAME
+			OSS_COMMON_ID
 			, OSS_NICKNAME
 		)
 		VALUES
 		(
-			#{ossName}
+			#{ossCommonId}
 			, #{ossNickname}
 		) ON DUPLICATE KEY UPDATE
-			OSS_NAME = #{ossName}
+			OSS_COMMON_ID = #{ossCommonId}
 			, OSS_NICKNAME = #{ossNickname}
 	</insert>
 	
 	<select id="selectOssNicknameList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT
-			OSS_NAME
-			, OSS_NICKNAME
+			OC.OSS_NAME
+			, NICK.OSS_NICKNAME
 		FROM
-			OSS_NICKNAME
+			OSS_COMMON OC
+			INNER JOIN OSS_NICKNAME NICK
+			ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
 		WHERE
-			OSS_NAME = #{ossName}
-		ORDER BY OSS_NICKNAME
+			OC.USE_YN = 'Y'
+		AND
+			OC.OSS_NAME = #{ossName}
 	</select>
 	<select id="selectOssNicknameListWithoutOwn" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT
-			OSS_NAME
+			OSS_COMMON_ID
 			, OSS_NICKNAME
 		FROM
 			OSS_NICKNAME
 		WHERE
-			OSS_NAME <![CDATA[<>]]> #{ossName}
+			OSS_COMMON_ID <![CDATA[<>]]> #{ossCommonId}
 	</select>
 	
 	<select id="selectOssMasterTotalCount" parameterType="oss.fosslight.domain.OssMaster" resultType="int">
@@ -289,13 +319,44 @@
             , SUB1.OSS_TYPE AS OSS_TYPE
 			, IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM ) AS LICENSE_TYPE
 			, T1.DEACTIVATE_FLAG
-		FROM OSS_MASTER					T1
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'			/*Code Table*/
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
+		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>
 		WHERE T1.USE_YN = 'Y'
 		/*검색 쿼리 시작*/
@@ -311,7 +372,7 @@
 			 </choose>
 		   OR EXISTS (SELECT * 
 		   				FROM OSS_NICKNAME A1 
-		   			   WHERE A1.OSS_NAME = T1.OSS_NAME 
+		   			   WHERE A1.OSS_COMMON_ID = T1.OSS_COMMON_ID 
 		   			   <choose>
 			   			   <when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
 			   			   	AND A1.OSS_NICKNAME = #{ossName}
@@ -334,10 +395,10 @@
 					</otherwise>
 				 </choose>
 				OR 
-				UPPER(T3.LICENSE_NAME) IN (
-						select  UPPER(LICENSE_NAME)
-						from LICENSE_NICKNAME
-                        where
+					T3.LICENSE_ID IN (
+						SELECT LICENSE_ID
+						FROM LICENSE_NICKNAME
+                        WHERE
                         <choose>
 							<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
 								UPPER(LICENSE_NICKNAME) = UPPER(#{licenseName})
@@ -448,10 +509,41 @@
 	<select id="selectOssPopupTotalCount" parameterType="oss.fosslight.domain.OssMaster" resultType="int">
 		SELECT 
 			COUNT(*)
-		FROM OSS_MASTER T1
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		LEFT OUTER JOIN (
-				SELECT A1.OSS_NAME, GROUP_CONCAT(A1.OSS_NICKNAME SEPARATOR ' / ') AS OSS_NICKNAME FROM OSS_NICKNAME A1 GROUP BY OSS_NAME
-			) T2 ON T1.OSS_NAME = T2.OSS_NAME
+				SELECT A1.OSS_COMMON_ID, GROUP_CONCAT(A1.OSS_NICKNAME SEPARATOR ' / ') AS OSS_NICKNAME FROM OSS_NICKNAME A1 GROUP BY OSS_COMMON_ID
+			) T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
 		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
 	    	<choose>
@@ -471,10 +563,41 @@
 			, CASE WHEN T2.OSS_NICKNAME IS NULL THEN T1.OSS_NAME ELSE CONCAT(T1.OSS_NAME, '(', T2.OSS_NICKNAME, ')') END AS OSS_NAME
 			, T1.OSS_NAME AS OSS_NAME_TEMP
 			, T1.OSS_VERSION 
-		FROM OSS_MASTER T1
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		LEFT OUTER JOIN (
-				SELECT A1.OSS_NAME, GROUP_CONCAT(A1.OSS_NICKNAME SEPARATOR ' / ') AS OSS_NICKNAME FROM OSS_NICKNAME A1 GROUP BY OSS_NAME
-			) T2 ON T1.OSS_NAME = T2.OSS_NAME
+				SELECT A1.OSS_COMMON_ID, GROUP_CONCAT(A1.OSS_NICKNAME SEPARATOR ' / ') AS OSS_NICKNAME FROM OSS_NICKNAME A1 GROUP BY OSS_COMMON_ID
+			) T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
 		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
 	    <if test="!@oss.fosslight.util.StringUtil@isEmpty(schOssName)">
 	    	<choose>
@@ -491,8 +614,9 @@
 	</select>
 	
 	<select id="selectOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT 
-			T1.OSS_ID
+		SELECT
+			T1.OSS_COMMON_ID 
+			, T1.OSS_ID
 			, T1.OSS_NAME
 			, T1.OSS_VERSION
 			, T1.LICENSE_DIV
@@ -502,9 +626,9 @@
 			, SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, ',', 1) AS DOWNLOAD_LOCATION
 			</when>
 			<otherwise>
-			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC) 
+			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.OSS_DL_IDX ASC) 
 					    FROM OSS_DOWNLOADLOCATION D
-					   WHERE D.OSS_ID = T1.OSS_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
+					   WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
 			</otherwise>
 		</choose>
 			, T1.SUMMARY_DESCRIPTION
@@ -528,17 +652,48 @@
             ) AS OBLIGATION_CHECKS
             , SUB1.OSS_TYPE AS OSS_TYPE
 			, IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM ) AS LICENSE_TYPE
-			, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME
+			, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS OSS_NICKNAME
 			, T1.COPYRIGHT
 			, T1.ATTRIBUTION
 			, T1.DEACTIVATE_FLAG
-		FROM OSS_MASTER					T1
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'				/*Code Table*/
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
+		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>
 		WHERE T1.USE_YN = 'Y'
 		/*검색 쿼리 시작*/
@@ -552,9 +707,9 @@
 					T1.OSS_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{ossName}, '_', '\\\\_'),'%')
 				</otherwise>
 			 </choose>
-		   OR EXISTS (SELECT * 
+		   OR EXISTS (SELECT 1 
 		   				FROM OSS_NICKNAME A1 
-		   			   WHERE A1.OSS_NAME = T1.OSS_NAME
+		   			   WHERE A1.OSS_COMMON_ID = T1.OSS_COMMON_ID
 		   			   <choose>
 			   			   <when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(ossNameAllSearchFlag,'Y')">
 			   			   	AND A1.OSS_NICKNAME = #{ossName}
@@ -577,10 +732,10 @@
 					</otherwise>
 				 </choose>
 				OR 
-				UPPER(T3.LICENSE_NAME) IN (
-						select  UPPER(LICENSE_NAME)
-						from LICENSE_NICKNAME
-                        where
+					T3.LICENSE_ID IN (
+						SELECT LICENSE_ID
+						FROM LICENSE_NICKNAME
+                        WHERE
                         <choose>
 							<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(licenseNameAllSearchFlag,'Y')">
 								UPPER(LICENSE_NICKNAME) = UPPER(#{licenseName})
@@ -693,11 +848,14 @@
 	</select>
 	<select id="selectOssNameList" resultType="oss.fosslight.domain.OssMaster">
 	    /* selectOssNameList Auto complete */
-		SELECT OSS_NAME FROM OSS_MASTER WHERE USE_YN = 'Y' GROUP BY OSS_NAME
+		SELECT T1.OSS_NAME 
+		FROM OSS_COMMON T1 
+		WHERE T1.USE_YN = 'Y' GROUP BY T1.OSS_NAME
 	</select>
 	<select id="selectOssOne" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT 
-			T1.OSS_ID
+		SELECT
+			T1.OSS_COMMON_ID 
+			, T1.OSS_ID
 			, T1.OSS_NAME
 			, T1.OSS_VERSION
 			, T1.LICENSE_DIV
@@ -715,8 +873,41 @@
 			, T1.MODIFIED_DATE
 			, T1.CVE_ID
 			, T1.CVSS_SCORE
+			, T1.RESTRICTION
+			, T1.IN_CPE_MATCH_FLAG
 		FROM
-			OSS_MASTER 									T1
+			(
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 			LEFT OUTER JOIN OSS_LICENSE_DECLARED		T2	ON T1.OSS_ID = T2.OSS_ID AND T2.OSS_LICENSE_IDX  = 1
 			INNER JOIN (
 			SELECT OSS_ID, 
@@ -728,7 +919,8 @@
 	</select>
 	<select id="selectOssSubList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT
-			#{ossId} AS REF_OSS_ID 
+			T1.OSS_COMMON_ID
+			, #{ossId} AS REF_OSS_ID 
 			, T1.OSS_ID
 			, T1.OSS_NAME
 			, T1.OSS_VERSION
@@ -739,9 +931,9 @@
 			, SUBSTRING_INDEX(T1.DOWNLOAD_LOCATION, ',', 1) AS DOWNLOAD_LOCATION
 			</when>
 			<otherwise>
-			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC) 
+			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.OSS_DL_IDX ASC) 
 					    FROM OSS_DOWNLOADLOCATION D
-					   WHERE D.OSS_ID = T1.OSS_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
+					   WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
 			</otherwise>
 		</choose>
 			, T1.SUMMARY_DESCRIPTION
@@ -765,16 +957,47 @@
             ) AS OBLIGATION_CHECKS
             , SUB1.OSS_TYPE AS OSS_TYPE
 			, T4.CD_DTL_NM AS LICENSE_TYPE
-			, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME
+			, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS OSS_NICKNAME
 			, T1.COPYRIGHT
 			, T1.DEACTIVATE_FLAG
-		FROM OSS_MASTER					T1
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
 		LEFT OUTER JOIN T2_CODE_DTL 	T4 ON T4.CD_NO = '201' AND T1.LICENSE_TYPE	= T4.CD_DTL_NO			/*Code Table*/
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
+		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>			
 		WHERE T1.USE_YN = 'Y'		
 		AND T1.OSS_NAME = #{ossName}
@@ -897,7 +1120,7 @@
             	, IF(	T2.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'Y',	'N')
             	, IF(	T2.OBLIGATION_NEEDS_CHECK_YN='Y'	,'Y',	'N')
             ) AS OBLIGATION_CHECKS
-			
+			, T2.RESTRICTION
 		FROM 
 			OSS_LICENSE_DECLARED 			T1
 			LEFT OUTER JOIN LICENSE_MASTER 	T2 ON T1.LICENSE_ID 	= T2.LICENSE_ID AND T2.USE_YN = 'Y'
@@ -917,16 +1140,49 @@
 	
 	<select id="checkHasAnotherVersion" parameterType="oss.fosslight.domain.OssMaster" resultType="int">
 		SELECT COUNT(1) 
-		FROM OSS_MASTER T1 
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 
 		WHERE T1.OSS_ID <![CDATA[<>]]> #{ossId} AND T1.OSS_NAME = #{ossName} AND T1.USE_YN = 'Y'
 	</select>
-	
+	<delete id="deleteOssCommonMaster" parameterType="oss.fosslight.domain.OssMaster">
+		DELETE FROM OSS_COMMON WHERE OSS_COMMON_ID = #{ossCommonId}
+	</delete>
 	<update id="deleteOssMaster" parameterType="oss.fosslight.domain.OssMaster">
 		<!-- UPDATE OSS_MASTER SET USE_YN='N', MODIFIER=#{loginUserName}, MODIFIED_DATE=now() WHERE OSS_ID=#{ossId} -->
-		DELETE FROM OSS_MASTER WHERE OSS_ID=#{ossId}
+		DELETE FROM OSS_VERSION WHERE OSS_ID = #{ossId}
 	</update>
 	<delete id="deleteOssNickname" parameterType="oss.fosslight.domain.OssMaster">
-		DELETE FROM OSS_NICKNAME WHERE OSS_NAME=#{ossName}
+		DELETE FROM OSS_NICKNAME WHERE OSS_COMMON_ID = #{ossCommonId}
 	</delete>
 	<delete id="deleteOssLicense" parameterType="oss.fosslight.domain.OssMaster">
 		DELETE ODC, ODT
@@ -938,7 +1194,8 @@
 	
 	<select id="selectOssListExcel" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT 
-			T1.OSS_ID
+			T1.OSS_COMMON_ID
+			, T1.OSS_ID
 			, T1.OSS_NAME
 			, T1.OSS_VERSION
 			, T1.HOMEPAGE
@@ -957,13 +1214,44 @@
             	, IF(	T3.OBLIGATION_NEEDS_CHECK_YN='Y'	,'Y',	'N')
             ) AS OBLIGATION
 		FROM
-			OSS_MASTER 							 T1
+			(
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 			LEFT OUTER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID 		= T2.OSS_ID				/*OSS License Table*/
 			LEFT OUTER JOIN LICENSE_MASTER 		 T3 ON T2.LICENSE_ID 	= T3.LICENSE_ID AND T3.USE_YN = 'Y' 		/*License Master Table*/
             LEFT OUTER JOIN T2_CODE_DTL 		 T4 ON T3.LICENSE_TYPE	= T4.CD_DTL_NO			/*Code Table*/
-            LEFT OUTER JOIN OSS_NICKNAME		 T5 ON T1.OSS_NAME		= T5.OSS_NAME			/*OSS Nickname Table*/
+            LEFT OUTER JOIN OSS_NICKNAME		 T5 ON T1.OSS_COMMON_ID	= T5.OSS_COMMON_ID			/*OSS Nickname Table*/
             <if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
-			LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_ID = DOWN.OSS_ID
+			LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 			</if>
 		WHERE T1.USE_YN = 'Y'
 		AND T4.CD_NO = '201'
@@ -974,10 +1262,9 @@
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 			AND UPPER(T3.LICENSE_NAME) = UPPER(#{licenseName})
-			OR UPPER(T3.LICENSE_NAME) IN (select  UPPER(LICENSE_NAME)
-						from LICENSE_NICKNAME
-                        where
-                        UPPER(LICENSE_NICKNAME) = UPPER(#{licenseName})
+			OR T3.LICENSE_ID IN (SELECT LICENSE_ID
+						FROM LICENSE_NICKNAME
+                        WHERE UPPER(LICENSE_NICKNAME) = UPPER(#{licenseName})
 					)
 			OR UPPER(T3.SHORT_IDENTIFIER) = UPPER(#{licenseName})
 		</if>
@@ -1024,14 +1311,15 @@
 	</select>
 	<select id="getBasicOssInfoListById" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 	/* OssMapper.getBasicOssInfoListById */
-		SELECT 
-			T1.OSS_ID
+		SELECT
+			T1.OSS_COMMON_ID 
+			, T1.OSS_ID
 			, T1.OSS_NAME
 			, T1.OSS_VERSION
 			, T1.LICENSE_DIV
-			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC) 
+			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.OSS_DL_IDX ASC) 
 						FROM OSS_DOWNLOADLOCATION D
-					   WHERE D.OSS_ID = T1.OSS_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
+					   WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
 			, T1.HOMEPAGE
 			, T1.SUMMARY_DESCRIPTION
 			, T1.ATTRIBUTION
@@ -1055,7 +1343,42 @@
 			, T3.SHORT_IDENTIFIER
 			, SUB1.OSS_TYPE
 			, T1.DEACTIVATE_FLAG
-		FROM OSS_MASTER T1
+			, T1.RESTRICTION
+			, (SELECT GROUP_CONCAT(OSS_VERSION_ALIAS) FROM OSS_VERSION_ALIAS WHERE OSS_ID = T1.OSS_ID) AS OSS_VERSION_ALIAS
+			, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS INCLUDE_CPE
+			, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_EXCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS EXCLUDE_CPE
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
@@ -1068,13 +1391,14 @@
 	
 	<select id="getNewestOssInfoByOssMaster" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 	/* OssMapper.getNewestOssInfo */
-	   SELECT T1.OSS_ID
+	   SELECT T1.OSS_COMMON_ID
+	   		, T1.OSS_ID
 			, T1.OSS_NAME
 			, T1.OSS_VERSION
 			, T1.LICENSE_DIV
-			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.SORT_ORDER ASC) 
+			, IFNULL((SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION ORDER BY D.OSS_DL_IDX ASC) 
 						FROM OSS_DOWNLOADLOCATION D
-					   WHERE D.OSS_ID = T1.OSS_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
+					   WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID), T1.DOWNLOAD_LOCATION) AS DOWNLOAD_LOCATION
 			, T1.HOMEPAGE
 			, T1.SUMMARY_DESCRIPTION
 			, T1.ATTRIBUTION
@@ -1097,21 +1421,89 @@
 			, T3.OBLIGATION_NEEDS_CHECK_YN
 			, T3.SHORT_IDENTIFIER
 			, T1.DEACTIVATE_FLAG
-		 FROM OSS_MASTER T1
+			, T1.IN_CPE_MATCH_FLAG
+			, T1.RESTRICTION
+			, (SELECT GROUP_CONCAT(OSS_VERSION_ALIAS) FROM OSS_VERSION_ALIAS WHERE OSS_ID = T1.OSS_ID) AS OSS_VERSION_ALIAS
+			, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS INCLUDE_CPE
+			, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_EXCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS EXCLUDE_CPE
+		 FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		WHERE T1.USE_YN = 'Y'
-		  AND T1.OSS_ID = (SELECT OSS_ID 
-  							 FROM OSS_MASTER 
-							WHERE OSS_NAME = #{ossName}
-							ORDER BY MODIFIED_DATE DESC
+		  AND T1.OSS_ID = (SELECT T2.OSS_ID 
+  							 FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T2 
+							WHERE T2.OSS_NAME = #{ossName}
+							ORDER BY T2.MODIFIED_DATE DESC
 							LIMIT 1)
 	</select>
 	
 	<select id="getBasicOssInfoList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 	/* OssMapper.getBasicOssInfoList */
-		SELECT 
-			T1.OSS_ID
+		SELECT
+			T1.OSS_COMMON_ID 
+			, T1.OSS_ID
 			, T1.OSS_NAME
 			, T1.OSS_NAME AS OSS_NAME_TEMP
 			, T1.OSS_VERSION
@@ -1138,7 +1530,38 @@
 			, T6.MULTI_LICENSE_FLAG
 			, T6.DUAL_LICENSE_FLAG
 			, T6.VERSION_DIFF_FLAG
-		FROM OSS_MASTER T1
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		LEFT OUTER JOIN OSS_MASTER_LICENSE_FLAG T6 ON T1.OSS_ID = T6.OSS_ID
@@ -1147,8 +1570,9 @@
 		#{_ossName}
 		</foreach>
 	UNION
-		SELECT 
-			T1.OSS_ID
+		SELECT
+			T1.OSS_COMMON_ID 
+			, T1.OSS_ID
 			, T4.OSS_NICKNAME AS OSS_NAME
 			, T1.OSS_NAME AS OSS_NAME_TEMP
 			, T1.OSS_VERSION
@@ -1175,10 +1599,41 @@
 			, T6.MULTI_LICENSE_FLAG
 			, T6.DUAL_LICENSE_FLAG
 			, T6.VERSION_DIFF_FLAG
-		FROM OSS_MASTER T1
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
-		INNER JOIN OSS_NICKNAME T4 ON T1.OSS_NAME = T4.OSS_NAME
+		INNER JOIN OSS_NICKNAME T4 ON T1.OSS_COMMON_ID = T4.OSS_COMMON_ID
 		LEFT OUTER JOIN OSS_MASTER_LICENSE_FLAG T6 ON T1.OSS_ID = T6.OSS_ID
 		WHERE T1.USE_YN = 'Y'
 		<foreach collection="ossNames" item="_ossName" open="AND T4.OSS_NICKNAME IN (" close=")" separator=",">
@@ -1201,8 +1656,39 @@
 			, T1.OSS_NAME
 			, T2.OSS_NICKNAME
 		FROM 
-			OSS_MASTER 					T1
-			LEFT JOIN OSS_NICKNAME		T2	ON T1.OSS_NAME = T2.OSS_NAME			
+			(
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
+			LEFT JOIN OSS_NICKNAME		T2	ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID			
 		WHERE T1.USE_YN = 'Y'
 		AND T1.OSS_ID = #{ossId}		
 	</select>
@@ -1212,8 +1698,8 @@
     		OSS_COMPONENTS
     	SET
     		OSS_ID = #{newOssId}
-    		, OSS_NAME = (SELECT OSS_NAME FROM OSS_MASTER WHERE OSS_ID=#{newOssId})
-    		, OSS_VERSION = IFNULL((SELECT OSS_VERSION FROM OSS_MASTER WHERE OSS_ID=#{newOssId}), '')
+    		, OSS_NAME = (SELECT OC.OSS_NAME FROM OSS_COMMON OC INNER JOIN OSS_VERSION OV ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID WHERE OV.OSS_ID=#{newOssId})
+    		, OSS_VERSION = IFNULL((SELECT OSS_VERSION FROM OSS_VERSION WHERE OSS_ID=#{newOssId}), '')
     	WHERE
     		OSS_ID = #{ossId}
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossMergeReferenceId)">
@@ -1226,38 +1712,140 @@
     <select id="checkExistsOss" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
     	SELECT
     		*
-    	FROM OSS_MASTER
-    	WHERE USE_YN='Y'
+    	FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
+    	WHERE T1.USE_YN='Y'
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
-    	AND OSS_ID<![CDATA[<>]]>#{ossId}
+    	AND T1.OSS_ID<![CDATA[<>]]>#{ossId}
     	</if>
-  		AND OSS_NAME=#{ossName} 
+  		AND T1.OSS_NAME=#{ossName} 
   		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
-  			AND REPLACE(HEX(OSS_VERSION), 'E2808B', '') = HEX(#{ossVersion})
+  			AND REPLACE(HEX(T1.OSS_VERSION), 'E2808B', '') = HEX(#{ossVersion})
   		</if>
   		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
-  			AND (OSS_VERSION = '' OR OSS_VERSION IS NULL)
+  			AND (T1.OSS_VERSION = '' OR OSS_VERSION IS NULL)
   		</if>
-  		ORDER BY CREATED_DATE DESC
+  		ORDER BY T1.CREATED_DATE DESC
   		LIMIT 1
     </select>
     <select id="checkExistsOssname" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
     	SELECT
     		*
-    	FROM OSS_MASTER
-    	WHERE USE_YN='Y'
+    	FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
+    	WHERE T1.USE_YN='Y'
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
-    	AND OSS_ID<![CDATA[<>]]>#{ossId}
+    	AND T1.OSS_ID<![CDATA[<>]]>#{ossId}
     	</if>
-  		AND OSS_NAME=#{ossName}
+  		AND T1.OSS_NAME=#{ossName}
   		LIMIT 1
     </select>
     <select id="checkExistsOssNickname" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT T1.* FROM OSS_MASTER T1 INNER JOIN OSS_NICKNAME T2 ON T1.OSS_NAME = T2.OSS_NAME AND T2.OSS_NICKNAME=#{ossName}
+		SELECT T1.* 
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 
+		INNER JOIN (
+			SELECT OC.OSS_COMMON_ID, OC.OSS_NAME, NICK.OSS_NICKNAME
+			FROM OSS_NICKNAME NICK
+			INNER JOIN OSS_COMMON OC
+			ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+		) T2 
+		ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID 
+		AND T2.OSS_NICKNAME=#{ossName}
 		WHERE T1.USE_YN = 'Y'
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
 		AND T1.OSS_ID <![CDATA[<>]]> #{ossId}
-		AND T2.OSS_NAME <![CDATA[<>]]> (SELECT OSS_NAME FROM OSS_MASTER WHERE OSS_ID = #{ossId})
+		AND T2.OSS_NAME <![CDATA[<>]]> (SELECT OC.OSS_NAME FROM OSS_COMMON OC INNER JOIN OSS_VERSION OV ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID WHERE OV.OSS_ID = #{ossId})
     	</if>
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNameTemp)">
     	AND T2.OSS_NAME <![CDATA[<>]]> #{ossNameTemp}
@@ -1265,8 +1853,39 @@
 		LIMIT 1
     </select>
     <select id="checkExistsOssNickname2" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT T1.* FROM OSS_MASTER T1
-		INNER JOIN OSS_NICKNAME T2 ON T1.OSS_NAME = T2.OSS_NAME AND T2.OSS_NICKNAME=#{ossName}
+		SELECT T1.* FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
+		INNER JOIN OSS_NICKNAME T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.OSS_NICKNAME=#{ossName}
 		WHERE T1.USE_YN = 'Y' AND T1.OSS_ID <![CDATA[<>]]> #{ossId} AND T1.OSS_NAME <![CDATA[<>]]> #{ossNameTemp}
 		LIMIT 1
     </select>
@@ -1284,7 +1903,38 @@
 						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15') 
 						    AND (E1.OSS_ID = #{ossId} OR E1.OSS_NAME = #{ossName} AND IFNULL(E1.OSS_VERSION, '') = #{ossVersion}
 								OR EXISTS ( 
-									SELECT 1 FROM OSS_MASTER A1 INNER JOIN OSS_NICKNAME A2 ON A1.OSS_NAME = A2.OSS_NAME
+									SELECT 1 FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) A1 INNER JOIN OSS_NICKNAME A2 ON A1.OSS_COMMON_ID = A2.OSS_COMMON_ID
 									WHERE A1.OSS_ID = #{ossId}
 										AND IFNULL(E1.OSS_VERSION , '') = IFNULL(A1.OSS_VERSION, '') 
 										AND E1.OSS_NAME = A2.OSS_NICKNAME
@@ -1307,7 +1957,38 @@
 						    AND E1.REFERENCE_DIV IN ('20') 
 						    AND (E1.OSS_ID = #{ossId} OR E1.OSS_NAME = #{ossName} AND IFNULL(E1.OSS_VERSION, '') = #{ossVersion}
 								OR EXISTS ( 
-									SELECT 1 FROM OSS_MASTER A1 INNER JOIN OSS_NICKNAME A2 ON A1.OSS_NAME = A2.OSS_NAME
+									SELECT 1 FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) A1 INNER JOIN OSS_NICKNAME A2 ON A1.OSS_COMMON_ID = A2.OSS_COMMON_ID
 									WHERE A1.OSS_ID = #{ossId}
 										AND IFNULL(E1.OSS_VERSION , '') = IFNULL(A1.OSS_VERSION, '') 
 										AND E1.OSS_NAME = A2.OSS_NICKNAME
@@ -1327,10 +2008,72 @@
 						  FROM OSS_COMPONENTS E1
 						WHERE P.PRJ_ID = E1.REFERENCE_ID 
 						    AND IFNULL(E1.EXCLUDE_YN, 'N') <![CDATA[<>]]> 'Y'
-						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15') 
-						    AND E1.OSS_ID IN (SELECT OSS_ID FROM OSS_MASTER WHERE USE_YN = 'Y' AND OSS_NAME = #{ossName}
+						    AND E1.REFERENCE_DIV IN ('10','11','12','13','14','15','16') 
+						    AND E1.OSS_ID IN (SELECT T1.OSS_ID FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 WHERE T1.USE_YN = 'Y' AND T1.OSS_NAME = #{ossName}
 								OR EXISTS ( 
-									SELECT 1 FROM OSS_MASTER A1 INNER JOIN OSS_NICKNAME A2 ON A1.OSS_NAME = A2.OSS_NAME
+									SELECT 1 FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) A1 INNER JOIN OSS_NICKNAME A2 ON A1.OSS_COMMON_ID = A2.OSS_COMMON_ID
 									WHERE A1.OSS_ID = #{ossId}
 										AND IFNULL(E1.OSS_VERSION , '') = IFNULL(A1.OSS_VERSION, '') 
 										AND E1.OSS_NAME = A2.OSS_NICKNAME
@@ -1346,7 +2089,38 @@
 										CASE WHEN M1.OSS_VERSION IS NULL THEN '-'
 											 WHEN M1.OSS_VERSION = '' THEN '-'
 											 ELSE M1.OSS_VERSION END OSS_VERSION
-								FROM OSS_MASTER M1 
+								FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) M1 
 								WHERE M1.OSS_ID = #{ossId}
 								UNION
 								SELECT M2.OSS_ID, M2.OSS_NICKNAME AS OSS_NAME, M2.OSS_VERSION 
@@ -1355,8 +2129,39 @@
 											CASE WHEN M21.OSS_VERSION IS NULL THEN '-'
 												 WHEN M21.OSS_VERSION = '' THEN '-'
 											 	 ELSE M21.OSS_VERSION END OSS_VERSION
-									FROM OSS_MASTER M21 
-										INNER JOIN OSS_NICKNAME M22 ON M21.OSS_NAME = M22.OSS_NAME 
+									FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) M21 
+										INNER JOIN OSS_NICKNAME M22 ON M21.OSS_COMMON_ID = M22.OSS_COMMON_ID 
 									WHERE M21.OSS_ID = #{ossId}) M2
 							) T2 
 								ON T1.PRODUCT = T2.OSS_NAME
@@ -1402,13 +2207,13 @@
 	<select id="getOssListByName" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		/* OssMapper.getOssListByName */
 		SELECT 
-			T1.OSS_ID, T1.OSS_NAME, T1.OSS_VERSION, T1.LICENSE_DIV, T1.DOWNLOAD_LOCATION, T1.HOMEPAGE, T1.SUMMARY_DESCRIPTION, T1.ATTRIBUTION, T1.COPYRIGHT
-			, (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = T1.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
+			T1.OSS_COMMON_ID, T1.OSS_ID, T1.OSS_NAME, T1.OSS_VERSION, T1.LICENSE_DIV, T1.DOWNLOAD_LOCATION, T1.HOMEPAGE, T1.SUMMARY_DESCRIPTION, T1.ATTRIBUTION, T1.COPYRIGHT
+			, (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID ) AS DOWNLOAD_LOCATION_GROUP
 			, T1.OBLIGATION_TYPE, T1.LICENSE_TYPE
 			, T2.LICENSE_ID, T2.OSS_LICENSE_IDX, T2.OSS_LICENSE_COMB, T2.OSS_COPYRIGHT
 			, CASE WHEN IFNULL(T3.SHORT_IDENTIFIER, '') <![CDATA[<>]]> '' THEN T3.SHORT_IDENTIFIER ELSE T3.LICENSE_NAME END AS LICENSE_NAME
 			, T3.LICENSE_TEXT AS OSS_LICENSE_TEXT
-			, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_NAME = T1.OSS_NAME) AS OSS_NICKNAME
+			, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS OSS_NICKNAME
 			, CONCAT((SELECT USER_NAME FROM T2_USERS WHERE USER_ID = T1.CREATOR), ' (', DATE_FORMAT(T1.CREATED_DATE, '%Y-%m-%d'), ')') AS CREATOR
 	  		, CONCAT((SELECT USER_NAME FROM T2_USERS WHERE USER_ID = T1.MODIFIER), ' (',  DATE_FORMAT(T1.MODIFIED_DATE, '%Y-%m-%d'), ')') AS MODIFIER
 	  		, T1.MODIFIED_DATE
@@ -1418,7 +2223,39 @@
 				INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID 
 				WHERE ODT.OSS_ID = T1.OSS_ID) AS DETECTED_LICENSE
 			, T1.DEACTIVATE_FLAG
-		FROM OSS_MASTER T1 
+			, T1.IN_CPE_MATCH_FLAG
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT OUTER JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID
@@ -1428,7 +2265,7 @@
 			AND T1.OSS_ID = #{ossId}
 			</when>
 			<otherwise>
-			AND ( T1.OSS_NAME = #{ossName} OR EXISTS (SELECT 1 FROM OSS_NICKNAME A1 WHERE A1.OSS_NAME = T1.OSS_NAME AND A1.OSS_NICKNAME = #{ossName}) )
+			AND ( T1.OSS_NAME = #{ossName} OR EXISTS (SELECT 1 FROM OSS_NICKNAME A1 WHERE A1.OSS_COMMON_ID = T1.OSS_COMMON_ID AND A1.OSS_NICKNAME = #{ossName}) )
 			</otherwise>
 		</choose>
 		ORDER BY OSS_VERSION DESC, OSS_LICENSE_IDX
@@ -1437,9 +2274,40 @@
 	<select id="getLastModifiedOssInfoByName" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT T1.OSS_ID
 		     , T1.DOWNLOAD_LOCATION
-		     , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = T1.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
-		  FROM OSS_MASTER T1 
-		  LEFT OUTER JOIN OSS_NICKNAME T2 ON T1.OSS_NAME = T2.OSS_NAME
+		     , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID ) AS DOWNLOAD_LOCATION_GROUP
+		  FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 
+		  LEFT OUTER JOIN OSS_NICKNAME T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
 		 WHERE T1.USE_YN = 'Y' AND (T1.OSS_NAME = #{ossName} OR T2.OSS_NICKNAME = #{ossName}) 
 		 ORDER BY CREATED_DATE DESC, OSS_VERSION DESC LIMIT 1;
 	</select>
@@ -1450,15 +2318,109 @@
 				T1.OSS_ID, T1.OSS_NAME, T1.OSS_VERSION, T1.LICENSE_DIV, T1.DOWNLOAD_LOCATION, T1.HOMEPAGE, T1.SUMMARY_DESCRIPTION, T1.ATTRIBUTION, T1.COPYRIGHT
 				, T2.LICENSE_ID, T2.OSS_LICENSE_IDX, T2.OSS_LICENSE_COMB, T2.OSS_LICENSE_TEXT, T2.OSS_COPYRIGHT
 				, CASE WHEN IFNULL(T3.LICENSE_NAME, '') <![CDATA[<>]]> '' THEN T3.LICENSE_NAME ELSE T3.LICENSE_NAME END AS LICENSE_NAME
-			FROM OSS_MASTER T1 
+			FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 
 			INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 			INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID
-			WHERE T1.USE_YN = 'Y' AND (T1.OSS_NAME = #{ossName} OR EXISTS (SELECT 1 FROM OSS_NICKNAME A1 WHERE A1.OSS_NAME = T1.OSS_NAME AND A1.OSS_NICKNAME = #{ossName}) )
+			WHERE T1.USE_YN = 'Y' AND (T1.OSS_NAME = #{ossName} OR EXISTS (SELECT 1 FROM OSS_NICKNAME A1 WHERE A1.OSS_COMMON_ID = T1.OSS_COMMON_ID AND A1.OSS_NICKNAME = #{ossName}) )
 		) RESULT
 	</select>
 	
-	<select id="getOssVersionCountByName" parameterType="String" resultType="java.lang.Integer" >SELECT COUNT(1) FROM OSS_MASTER WHERE USE_YN = 'Y' AND OSS_NAME = #{ossName}</select>
-	<select id="getBasicOssListByName" parameterType="String" resultType="oss.fosslight.domain.OssMaster">SELECT * FROM OSS_MASTER WHERE USE_YN = 'Y' AND OSS_NAME = #{ossName}</select>
+	<select id="getOssVersionCountByName" parameterType="String" resultType="java.lang.Integer" >SELECT COUNT(1) FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 WHERE T1.USE_YN = 'Y' AND T1.OSS_NAME = #{ossName}</select>
+	<select id="getBasicOssListByName" parameterType="String" resultType="oss.fosslight.domain.OssMaster">
+	SELECT * FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 WHERE T1.USE_YN = 'Y' AND T1.OSS_NAME = #{ossName}</select>
 	
 	<insert id="updateOssLicenseFlag" parameterType="oss.fosslight.domain.OssMaster" >
 		INSERT INTO	 OSS_MASTER_LICENSE_FLAG
@@ -1488,37 +2450,117 @@
 		</foreach>
 	</update>
 	<select id="apiSelectOssIdList" resultType="oss.fosslight.domain.OssMaster">
-		SELECT OSS_ID FROM OSS_MASTER WHERE USE_YN = 'Y' AND CREATED_DATE > '2017-12-12'
+		SELECT T1.OSS_ID FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 WHERE T1.USE_YN = 'Y' AND T1.CREATED_DATE > '2017-12-12'
 	</select>
 	
 	<select id="apiGetOssCopyTargetList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-	SELECT OSS_ID as REF_OSS_ID, 'oscAdmin' as CREATOR FROM OSS_MASTER 
-	WHERE USE_YN = 'Y' AND IFNULL(OSS_VERSION, '') = #{ossVersion} 
-		AND OSS_NAME IN
+	SELECT OSS_ID as REF_OSS_ID, 'oscAdmin' as CREATOR FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
+	WHERE T1.USE_YN = 'Y' AND IFNULL(T1.OSS_VERSION, '') = #{ossVersion} 
+		AND T1.OSS_NAME IN
 		<foreach collection="ossNames" item="_ossName" open="(" close=")" separator=",">
 			#{_ossName}
 		</foreach>
 	</select>
-	<insert id="apiCopyOssMaster" parameterType="oss.fosslight.domain.OssMaster" useGeneratedKeys="true" keyProperty="ossId" >
-	INSERT INTO OSS_MASTER (OSS_NAME, OSS_VERSION, LICENSE_DIV, DOWNLOAD_LOCATION, HOMEPAGE, SUMMARY_DESCRIPTION, ATTRIBUTION, CREATOR, MODIFIER, VULN_CPE_NM, LICENSE_TYPE, OBLIGATION_TYPE, COPYRIGHT)
-	SELECT OSS_NAME, #{ossVersion}, LICENSE_DIV, DOWNLOAD_LOCATION, HOMEPAGE, SUMMARY_DESCRIPTION, ATTRIBUTION, #{creator}, #{creator}, VULN_CPE_NM, LICENSE_TYPE, OBLIGATION_TYPE, COPYRIGHT FROM OSS_MASTER WHERE OSS_ID = #{refOssId}
-	</insert>
-	<insert id="apiCopyOssLicense" parameterType="oss.fosslight.domain.OssMaster">
-	INSERT INTO OSS_LICENSE_DECLARED (OSS_ID, LICENSE_ID, OSS_LICENSE_IDX, OSS_LICENSE_COMB, OSS_LICENSE_TEXT, OSS_COPYRIGHT)
-	SELECT #{ossId}, LICENSE_ID, OSS_LICENSE_IDX, OSS_LICENSE_COMB, OSS_LICENSE_TEXT, OSS_COPYRIGHT FROM OSS_LICENSE_DECLARED WHERE OSS_ID = #{refOssId}
-	</insert>
-	<insert id="apiCopyOssLicenseFlag" parameterType="oss.fosslight.domain.OssMaster">
-	INSERT INTO OSS_MASTER_LICENSE_FLAG (OSS_ID, MULTI_LICENSE_FLAG, DUAL_LICENSE_FLAG, VERSION_DIFF_FLAG)
-	SELECT #{ossId}, MULTI_LICENSE_FLAG, DUAL_LICENSE_FLAG, VERSION_DIFF_FLAG  FROM OSS_MASTER_LICENSE_FLAG WHERE OSS_ID = #{refOssId}
-	</insert>
 	
 	<select id="getOssBasicInfoForMailContents" parameterType="String" resultType="oss.fosslight.domain.OssMaster">
 		SELECT T1.OSS_ID, T1.OSS_NAME, T1.OSS_VERSION, T1.DOWNLOAD_LOCATION, T1.HOMEPAGE, T1.SUMMARY_DESCRIPTION, T1.ATTRIBUTION, T1.COPYRIGHT, T1.LICENSE_TYPE AS OSS_LICENSE_TYPE, T1.OBLIGATION_TYPE AS OSS_OBLIGATION_TYPE, GROUP_CONCAT(T4.OSS_NICKNAME) AS OSS_NICKNAME, T2.LICENSE_ID, T2.OSS_LICENSE_IDX, T2.OSS_LICENSE_COMB, T2.OSS_COPYRIGHT, T2.OSS_LICENSE_TEXT, IF(IFNULL(T3.SHORT_IDENTIFIER, '') = '', T3.LICENSE_NAME, T3.SHORT_IDENTIFIER) AS LICENSE_NAME, T3.LICENSE_TYPE
-		FROM OSS_MASTER T1
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
 		INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 		INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID
-		LEFT OUTER
-		JOIN OSS_NICKNAME T4 ON T1.OSS_NAME = T4.OSS_NAME
+		LEFT OUTER JOIN OSS_NICKNAME T4 ON T1.OSS_COMMON_ID = T4.OSS_COMMON_ID
 		WHERE T1.OSS_ID = #{ossId}
 		GROUP BY OSS_ID, OSS_LICENSE_IDX LIMIT 1
 	</select>
@@ -1526,18 +2568,49 @@
 	<select id="checkNickNameRegOss" parameterType="String" resultType="String">
 		SELECT DISTINCT T1.OSS_NICKNAME 
 		FROM OSS_NICKNAME T1 
-			INNER JOIN OSS_MASTER T2 ON T1.OSS_NAME = T2.OSS_NAME AND T2.USE_YN = 'Y'
-		WHERE T1.OSS_NAME = #{ossName}
+		INNER JOIN (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.USE_YN = 'Y'
+		WHERE T2.OSS_NAME = #{ossName}
 	</select>
 	
 	<update id="updateLicenseTypeAndObligation" parameterType="oss.fosslight.domain.OssMaster">
-		UPDATE OSS_MASTER SET LICENSE_TYPE = #{licenseType}, OBLIGATION_TYPE = #{obligationType} WHERE OSS_ID = #{ossId}
+		UPDATE OSS_VERSION SET LICENSE_TYPE = #{licenseType}, OBLIGATION_TYPE = #{obligationType} WHERE OSS_ID = #{ossId}
 	</update>
 	
 	<select id="getOssInfoAll" resultType="oss.fosslight.domain.OssMaster">
 		SELECT 
-			T1.OSS_ID,T1.OSS_NAME, T1.OSS_NAME AS OSS_NAME_TEMP,T1.OSS_VERSION,T1.LICENSE_DIV,T1.DOWNLOAD_LOCATION
-			,(SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = T1.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
+			T1.OSS_COMMON_ID, T1.OSS_ID, T1.OSS_NAME, T1.OSS_NAME AS OSS_NAME_TEMP,T1.OSS_VERSION,T1.LICENSE_DIV,T1.DOWNLOAD_LOCATION
+			,(SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID ) AS DOWNLOAD_LOCATION_GROUP
 			,T1.HOMEPAGE
 			,T1.SUMMARY_DESCRIPTION
 			,T1.ATTRIBUTION
@@ -1553,7 +2626,44 @@
 				INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID 
 				WHERE ODT.OSS_ID = T1.OSS_ID) AS DETECTED_LICENSE
 		    , T1.DEACTIVATE_FLAG 
-		FROM OSS_MASTER T1 
+		    , T1.IN_CPE_MATCH_FLAG
+		    , T1.RESTRICTION
+		    , (SELECT GROUP_CONCAT(OSS_VERSION_ALIAS) FROM OSS_VERSION_ALIAS WHERE OSS_ID = T1.OSS_ID) AS OSS_VERSION_ALIAS
+			, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS INCLUDE_CPE
+			, (SELECT GROUP_CONCAT(CPE23URI) FROM OSS_EXCLUDE_CPE WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS EXCLUDE_CPE
+		FROM 
+			(
+				SELECT
+    				OV.OSS_ID,
+    				OC.OSS_COMMON_ID,
+    				OC.OSS_NAME,
+    				OV.OSS_VERSION,
+    				OC.HOMEPAGE,
+					OC.DOWNLOAD_LOCATION,
+    				OC.SUMMARY_DESCRIPTION,
+    				OV.LICENSE_DIV,
+    				OV.USE_YN,
+    				OV.VULN_CPE_NM,
+    				OV.CVSS_SCORE,
+    				OV.CVE_ID,
+    				OV.VULN_YN,
+  			 	 	OV.VULN_RECHECK,
+   				 	OV.VULN_DATE,
+    				OV.LICENSE_TYPE,
+    				OV.OBLIGATION_TYPE,
+    				OV.COPYRIGHT,
+    				OV.ATTRIBUTION,
+					OC.DEACTIVATE_FLAG,
+					OV.CREATOR,
+					OV.CREATED_DATE,
+					OV.MODIFIER,
+					OV.MODIFIED_DATE,
+					OV.RESTRICTION,
+					OV.IN_CPE_MATCH_FLAG
+  				FROM OSS_COMMON OC
+  				LEFT JOIN OSS_VERSION OV
+  				ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			) T1 
 			INNER JOIN OSS_LICENSE_DECLARED T2 ON T1.OSS_ID = T2.OSS_ID
 			INNER JOIN LICENSE_MASTER T3 ON T2.LICENSE_ID = T3.LICENSE_ID
 			LEFT OUTER JOIN OSS_MASTER_LICENSE_FLAG SUB2 ON T1.OSS_ID = SUB2.OSS_ID
@@ -1561,16 +2671,29 @@
 		<!-- ORDER BY T1.OSS_ID, T2.OSS_LICENSE_IDX -->
 	</select>
 	<select id="getOssInfoAllWithNick" resultType="oss.fosslight.domain.OssMaster">
-		SELECT T1.OSS_ID
+		SELECT T1.OSS_COMMON_ID
+			 , T1.OSS_ID
 			 , T4.OSS_NICKNAME AS OSS_NAME
 			 , T1.OSS_NAME AS OSS_NAME_TEMP
 			 , T1.OSS_VERSION
 			 , T1.DEACTIVATE_FLAG
-		  FROM OSS_MASTER T1
-		 INNER JOIN OSS_NICKNAME T4 ON T1.OSS_NAME = T4.OSS_NAME
+		  FROM 
+		  	(
+		  		SELECT OC.OSS_COMMON_ID
+		  				, OV.OSS_ID
+		  				, OC.OSS_NAME
+		  				, OV.OSS_VERSION
+		  				, OC.DEACTIVATE_FLAG
+		  				, OV.USE_YN
+		  		FROM OSS_COMMON OC
+  				LEFT JOIN OSS_VERSION OV
+  				ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		  	) T1
+		 INNER JOIN OSS_NICKNAME T4 ON T1.OSS_COMMON_ID = T4.OSS_COMMON_ID
 		 WHERE T1.USE_YN = 'Y'
+		 GROUP BY T1.OSS_NAME, T4.OSS_NICKNAME
 	</select>
-	<select id="getOssAllNickNameList" resultType="oss.fosslight.domain.OssMaster">SELECT OSS_NAME, GROUP_CONCAT(OSS_NICKNAME) AS OSS_NICKNAME FROM OSS_NICKNAME GROUP BY OSS_NAME</select>
+	<select id="getOssAllNickNameList" resultType="oss.fosslight.domain.OssMaster">SELECT OSS_COMMON_ID, GROUP_CONCAT(OSS_NICKNAME) AS OSS_NICKNAME FROM OSS_NICKNAME GROUP BY OSS_COMMON_ID</select>
 	
 	<select id="getNvdDataByOssName" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT PRODUCT AS OSS_NAME, CVSS_SCORE, CVE_ID, VERSION as OSS_VERSION, MODI_DATE AS VULN_DATE
@@ -1600,11 +2723,15 @@
     </select>
 	
 	<update id="updateNvdData" parameterType="oss.fosslight.domain.OssMaster">
-		UPDATE OSS_MASTER SET CVSS_SCORE = #{cvssScore}, CVE_ID = #{cveId}, VULN_DATE = #{vulnDate}, VULN_YN = #{vulnYn} WHERE OSS_ID = #{ossId}
+		UPDATE OSS_VERSION SET CVSS_SCORE = #{cvssScore}, CVE_ID = #{cveId}, VULN_DATE = #{vulnDate}, VULN_YN = #{vulnYn} WHERE OSS_ID = #{ossId}
 	</update>
 	
 	<update id="changeOssNameByDelete" parameterType="oss.fosslight.domain.OssMaster">
-		UPDATE OSS_MASTER SET OSS_NAME = #{ossName}, MODIFIER = #{loginUserName}, MODIFIED_DATE = NOW() WHERE OSS_ID = #{ossId}
+		UPDATE OSS_VERSION OV INNER JOIN OSS_COMMON OC ON OV.OSS_COMMON_ID = OC.OSS_COMMON_ID SET OC.OSS_NAME = #{ossName}, OV.MODIFIER = #{loginUserName}, OV.MODIFIED_DATE = NOW() WHERE OV.OSS_ID = #{ossId}
+	</update>
+	
+	<update id="changeOssCommonNameByDelete" parameterType="oss.fosslight.domain.OssMaster">
+		UPDATE OSS_VERSION SET OSS_COMMON_ID = #{ossCommonId}, MODIFIER = #{loginUserName}, MODIFIED_DATE = NOW() WHERE OSS_ID = #{ossId}
 	</update>
 	
     <select id="checkExistsOssDownloadLocation" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
@@ -1617,8 +2744,39 @@
 							  WHEN IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT(#{downloadLocation},'%') THEN 2
 							  ELSE 3
 						  END) AS S_ORDER
-				   FROM OSS_MASTER T1
-			       LEFT JOIN OSS_DOWNLOADLOCATION T2 ON T1.OSS_ID = T2.OSS_ID
+				   FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
+			       LEFT JOIN OSS_DOWNLOADLOCATION T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
 		    	  WHERE T1.USE_YN = 'Y' 
 		    	    AND IFNULL(T2.DOWNLOAD_LOCATION, T1.DOWNLOAD_LOCATION) LIKE CONCAT('%',#{downloadLocation},'%')
 			   ) AS A
@@ -1637,15 +2795,46 @@
 			, MIN(T1.S_ORDER) AS S_ORDER
 		FROM (
 			SELECT
-				OSS_ID
-				, OSS_NAME
-				, (CASE WHEN HOMEPAGE LIKE CONCAT('%',#{homepage}) THEN 1
-						WHEN HOMEPAGE LIKE CONCAT(#{homepage},'%') THEN 2
+				TBL.OSS_ID
+				, TBL.OSS_NAME
+				, (CASE WHEN TBL.HOMEPAGE LIKE CONCAT('%',#{homepage}) THEN 1
+						WHEN TBL.HOMEPAGE LIKE CONCAT(#{homepage},'%') THEN 2
 						ELSE 3
 				  END) AS S_ORDER
-			FROM OSS_MASTER
-			WHERE USE_YN = 'Y' AND HOMEPAGE LIKE CONCAT('%',#{homepage},'%')
-		) AS T1
+			FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL
+			WHERE TBL.USE_YN = 'Y' AND TBL.HOMEPAGE LIKE CONCAT('%',#{homepage},'%')
+		) T1
 		WHERE 1 = 1
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 		  AND T1.OSS_NAME != #{ossName} 
@@ -1661,14 +2850,45 @@
 			, MIN(T1.S_ORDER) AS S_ORDER
 		FROM (
 			SELECT
-				OSS_ID
-				, OSS_NAME
-				, (CASE WHEN DOWNLOAD_LOCATION = #{downloadLocation} THEN 1
-						WHEN DOWNLOAD_LOCATION LIKE CONCAT(#{downloadLocation},'%') THEN 2
+				TBL.OSS_ID
+				, TBL.OSS_NAME
+				, (CASE WHEN TBL.DOWNLOAD_LOCATION = #{downloadLocation} THEN 1
+						WHEN TBL.DOWNLOAD_LOCATION LIKE CONCAT(#{downloadLocation},'%') THEN 2
 						ELSE 3
 				  END) AS S_ORDER
-			FROM OSS_MASTER
-			WHERE USE_YN = 'Y' AND DOWNLOAD_LOCATION LIKE CONCAT('%',#{downloadLocation},'%')
+			FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL
+			WHERE TBL.USE_YN = 'Y' AND TBL.DOWNLOAD_LOCATION LIKE CONCAT('%',#{downloadLocation},'%')
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 				AND OSS_NAME <![CDATA[<>]]> #{ossName}
 			</if>
@@ -1684,14 +2904,45 @@
 			, MIN(T1.S_ORDER) AS S_ORDER
 		FROM (
 			SELECT
-				OSS_ID
-				, OSS_NAME
-				, (CASE WHEN HOMEPAGE = #{homepage} THEN 1
-						WHEN HOMEPAGE LIKE CONCAT(#{homepage},'%') THEN 2
+				TBL.OSS_ID
+				, TBL.OSS_NAME
+				, (CASE WHEN TBL.HOMEPAGE = #{homepage} THEN 1
+						WHEN TBL.HOMEPAGE LIKE CONCAT(#{homepage},'%') THEN 2
 						ELSE 3
 				  END) AS S_ORDER
-			FROM OSS_MASTER
-			WHERE USE_YN = 'Y' AND HOMEPAGE LIKE CONCAT('%',#{homepage},'%')
+			FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL
+			WHERE TBL.USE_YN = 'Y' AND TBL.HOMEPAGE LIKE CONCAT('%',#{homepage},'%')
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 				AND OSS_NAME <![CDATA[<>]]> #{ossName}
 			</if>
@@ -1701,24 +2952,40 @@
 		LIMIT 10
     </select>
     <select id="existsOssDownloadLocation"  parameterType="oss.fosslight.domain.OssMaster" resultType="int">
-    	SELECT COUNT(*) FROM OSS_DOWNLOADLOCATION WHERE OSS_ID = #{ossId}
+<!--   	SELECT COUNT(*) FROM OSS_DOWNLOADLOCATION WHERE OSS_ID = #{ossId} -->
+		SELECT COUNT(*) FROM OSS_DOWNLOADLOCATION WHERE OSS_COMMON_ID = #{ossCommonId}
     </select>
     <delete id="deleteOssDownloadLocation" parameterType="oss.fosslight.domain.OssMaster">
-		DELETE FROM OSS_DOWNLOADLOCATION WHERE OSS_ID = #{ossId}
+<!-- 	DELETE FROM OSS_DOWNLOADLOCATION WHERE OSS_ID = #{ossId} -->
+		DELETE FROM OSS_DOWNLOADLOCATION WHERE OSS_COMMON_ID = #{ossCommonId}
 	</delete>
 	<insert id="insertOssDownloadLocation" parameterType="oss.fosslight.domain.OssMaster">
-		INSERT INTO OSS_DOWNLOADLOCATION(
-			OSS_ID,
+		INSERT INTO OSS_DOWNLOADLOCATION (
+			OSS_COMMON_ID,
 			DOWNLOAD_LOCATION,
-			SORT_ORDER
-		)VALUES(
-			#{ossId},
+			PURL,
+			OSS_DL_IDX
+		) VALUES (
+			#{ossCommonId},
 			#{downloadLocation},
-			#{sortOrder}
+			#{purl},
+			#{ossDlIdx}
 		)
 	</insert>
 	<select id="selectOssDownloadLocationList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT * FROM OSS_DOWNLOADLOCATION WHERE OSS_ID = #{ossId} ORDER BY SORT_ORDER
+<!-- 	SELECT * FROM OSS_DOWNLOADLOCATION WHERE OSS_ID = #{ossId} ORDER BY SORT_ORDER -->
+		SELECT * FROM OSS_DOWNLOADLOCATION WHERE OSS_COMMON_ID = #{ossCommonId} ORDER BY OSS_DL_IDX
+	</select>
+	
+	<select id="selectOssIncludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+		SELECT CPE23URI FROM OSS_INCLUDE_CPE
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
+			WHERE OSS_COMMON_ID = #{ossCommonId}
+		</if>
+	</select>
+	
+	<select id="selectOssExcludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+		SELECT CPE23URI FROM OSS_EXCLUDE_CPE WHERE OSS_COMMON_ID = #{ossCommonId}
 	</select>
 	
 	<select id="selectOssDetectedLicenseList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
@@ -1733,9 +3000,40 @@
 	
 	<select id="checkOssName" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="String">
 		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME SEPARATOR '|') AS OSS_NAME 
-		  FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y') OM
+		  FROM (SELECT TBL.OSS_COMMON_ID, TBL.OSS_ID, TBL.OSS_NAME, TBL.DOWNLOAD_LOCATION FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL WHERE TBL.USE_YN = 'Y') OM
 		  LEFT JOIN OSS_DOWNLOADLOCATION DOWN
-		    ON OM.OSS_ID = DOWN.OSS_ID
+		    ON OM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		 WHERE (DOWN.DOWNLOAD_LOCATION = #{downloadLocation}
 			   	  OR OM.DOWNLOAD_LOCATION = #{downloadLocation})
 		   AND OM.OSS_NAME != #{ossName}
@@ -1743,9 +3041,40 @@
 	
 	<select id="checkOssNameUrl" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssMaster">
 		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME 
-		  FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y') OM
+		  FROM (SELECT TBL.OSS_COMMON_ID, TBL.OSS_ID, TBL.OSS_NAME, TBL.DOWNLOAD_LOCATION FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL WHERE TBL.USE_YN = 'Y') OM
 		  LEFT JOIN OSS_DOWNLOADLOCATION DOWN
-		    ON OM.OSS_ID = DOWN.OSS_ID
+		    ON OM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		 WHERE OM.OSS_NAME != #{ossName}
 		   AND (
 		   		   OM.DOWNLOAD_LOCATION = #{downloadLocation}
@@ -1758,9 +3087,40 @@
 
 	<select id="checkOssNameUrl2" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssMaster">
 		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME 
-		  FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y') OM
+		  FROM (SELECT TBL.OSS_COMMON_ID, TBL.OSS_ID, TBL.OSS_NAME, TBL.DOWNLOAD_LOCATION FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL WHERE TBL.USE_YN = 'Y') OM
 		  LEFT JOIN OSS_DOWNLOADLOCATION DOWN
-		    ON OM.OSS_ID = DOWN.OSS_ID
+		    ON OM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		 WHERE OM.OSS_NAME != #{ossName}
 		   AND (
 		   		   SUBSTRING_INDEX(SUBSTRING_INDEX(OM.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{downloadLocation}
@@ -1772,23 +3132,73 @@
 	<select id="checkOssNameTotal" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssMaster">
 		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
 		FROM (
-			SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION
-			FROM OSS_MASTER
-			WHERE USE_YN = 'Y'  
-			AND DEACTIVATE_FLAG = 'N'
-			AND MATCH(DOWNLOAD_LOCATION) AGAINST (#{downloadLocation})
-			HAVING DOWNLOAD_LOCATION LIKE CONCAT('%', REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
+			SELECT TBL.OSS_COMMON_ID, TBL.OSS_ID, TBL.OSS_NAME, TBL.DOWNLOAD_LOCATION
+			FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL
+			WHERE TBL.USE_YN = 'Y'  
+			AND TBL.DEACTIVATE_FLAG = 'N'
+			AND TBL.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
 		) OM
 		LEFT JOIN (
-			SELECT OSS_ID, DOWNLOAD_LOCATION
+			SELECT OSS_COMMON_ID, DOWNLOAD_LOCATION, INSTR(DOWNLOAD_LOCATION, #{downloadLocation})
 			FROM OSS_DOWNLOADLOCATION
 			WHERE MATCH(DOWNLOAD_LOCATION) AGAINST (#{downloadLocation})
 			HAVING DOWNLOAD_LOCATION LIKE CONCAT('%', REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
 		) DOWN
-		ON OM.OSS_ID = DOWN.OSS_ID
+		ON OM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		WHERE OM.OSS_NAME != #{ossName}
 		AND (OM.DOWNLOAD_LOCATION IS NOT NULL OR DOWN.DOWNLOAD_LOCATION IS NOT NULL)
 		GROUP BY OM.OSS_NAME
+		
+<!-- 	SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
+		FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y'  AND DEACTIVATE_FLAG = 'N') OM
+				 LEFT JOIN OSS_DOWNLOADLOCATION DOWN
+						   ON OM.OSS_ID = DOWN.OSS_ID
+		WHERE OM.OSS_NAME != #{ossName}
+		  AND (
+			OM.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
+		   	OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{downloadLocation}, '_', '\\\\_'))
+			)
+		GROUP BY OM.OSS_NAME
+		UNION
+		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
+		FROM OSS_MASTER OM
+		WHERE OM.OSS_NAME = #{ossNickName} AND OM.USE_YN = 'Y' AND OM.DEACTIVATE_FLAG = 'N'
+		GROUP BY OM.OSS_NAME
+		UNION
+		SELECT GROUP_CONCAT(DISTINCT OM.OSS_NAME) AS OSS_NAME
+		FROM (SELECT OSS_NAME FROM OSS_NICKNAME WHERE OSS_NICKNAME = #{ossNickName}) A1
+				 INNER JOIN OSS_MASTER OM WHERE (A1.OSS_NAME=OM.OSS_NAME AND OM.USE_YN = "Y" AND OM.DEACTIVATE_FLAG = 'N') GROUP BY OM.OSS_NAME -->
 	</select>
 
 	<update id="updateOssCheckNameBySelfCheck" parameterType="oss.fosslight.domain.ProjectIdentification">
@@ -1845,9 +3255,40 @@
 
 	<select id="checkOssNameCnt" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="int">
 		SELECT COUNT(*) AS CNT
-		  FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y') OM
+		  FROM (SELECT TBL.OSS_COMMON_ID, TBL.OSS_ID, TBL.OSS_NAME, TBL.DOWNLOAD_LOCATION FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL WHERE TBL.USE_YN = 'Y') OM
 		  LEFT JOIN OSS_DOWNLOADLOCATION DOWN
-		    ON OM.OSS_ID = DOWN.OSS_ID
+		    ON OM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		 WHERE (DOWN.DOWNLOAD_LOCATION = #{downloadLocation}
 			   	  OR OM.DOWNLOAD_LOCATION = #{downloadLocation}) 
 		   AND OM.OSS_NAME = #{ossName}
@@ -1855,9 +3296,40 @@
 	
 	<select id="checkOssNameUrlCnt" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="int">
 		SELECT COUNT(*) AS CNT
-		  FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y') OM
+		  FROM (SELECT TBL.OSS_COMMON_ID, TBL.OSS_ID, TBL.OSS_NAME, TBL.DOWNLOAD_LOCATION FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL WHERE TBL.USE_YN = 'Y') OM
 		  LEFT JOIN OSS_DOWNLOADLOCATION DOWN
-		    ON OM.OSS_ID = DOWN.OSS_ID
+		    ON OM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		 WHERE OM.OSS_NAME = #{ossName}
 		   AND (
 		   		   OM.DOWNLOAD_LOCATION = #{downloadLocation}
@@ -1869,9 +3341,40 @@
 	
 	<select id="checkOssNameUrl2Cnt" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="int">
 		SELECT COUNT(*) AS CNT
-		  FROM (SELECT OSS_ID, OSS_NAME, DOWNLOAD_LOCATION FROM OSS_MASTER WHERE USE_YN = 'Y' AND DEACTIVATE_FLAG = 'N') OM
+		  FROM (SELECT TBL.OSS_COMMON_ID, TBL.OSS_ID, TBL.OSS_NAME, TBL.DOWNLOAD_LOCATION FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL WHERE TBL.USE_YN = 'Y' AND DEACTIVATE_FLAG = 'N') OM
 		  LEFT JOIN OSS_DOWNLOADLOCATION DOWN
-		    ON OM.OSS_ID = DOWN.OSS_ID
+		    ON OM.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		 WHERE OM.OSS_NAME = #{ossName}
 		   AND ( 
 		   		SUBSTRING_INDEX(SUBSTRING_INDEX(OM.DOWNLOAD_LOCATION, '//', -1), 'www.', -1) = #{downloadLocation}
@@ -1898,11 +3401,11 @@
 	<delete id="deleteOssAnalysisList" parameterType="String">
 		DELETE FROM OSS_ANALYSIS_MAP WHERE REFERENCE_ID = #{prjId}
 	</delete>
-
+	
 	<delete id="deleteOssAnalysis" parameterType="String">
-		DELETE FROM OSS_ANALYSIS_STATUS WHERE  PRJ_ID = #{prjId}
+		DELETE FROM OSS_ANALYSIS_STATUS WHERE PRJ_ID = #{prjId}
 	</delete>
-
+	
 	<insert id="insertOssAnalysisList" parameterType="oss.fosslight.domain.OssMaster">
 		INSERT INTO OSS_ANALYSIS_MAP (
 				COMPONENT_ID
@@ -2030,16 +3533,17 @@
 		    </otherwise>
 		</choose>
 	</insert>
-
+	
 	<select id="getOssAnalysisStatus" parameterType="string" resultType="string">
 		SELECT STATUS FROM OSS_ANALYSIS_STATUS WHERE PRJ_ID = #{prjId}
 	</select>
-
+	
 	<select id="getNewestOssInfo" parameterType="oss.fosslight.domain.OssAnalysis" resultType="oss.fosslight.domain.OssAnalysis">
 		SELECT #{groupId} AS GROUP_ID 
+			 , A.OSS_COMMON_ID
 			 , A.OSS_NAME
 			 , A.OSS_ID
-		     , (SELECT GROUP_CONCAT(OSS_NICKNAME) FROM OSS_NICKNAME WHERE A.OSS_NAME = OSS_NAME) AS OSS_NICK_NAME
+		     , (SELECT GROUP_CONCAT(OSS_NICKNAME) FROM OSS_NICKNAME WHERE A.OSS_COMMON_ID = OSS_COMMON_ID) AS OSS_NICK_NAME
 		     , (SELECT TRIM(GROUP_CONCAT(CONCAT(OSS_LICENSE_COMB, ' ', IF(SHORT_IDENTIFIER = '' OR SHORT_IDENTIFIER IS NULL,  LICENSE_NAME, SHORT_IDENTIFIER),  ' ') ORDER BY OSS_LICENSE_IDX ASC SEPARATOR ''))
 				  FROM OSS_LICENSE_DECLARED OL
 				 INNER JOIN LICENSE_MASTER LM
@@ -2050,13 +3554,44 @@
 				INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID 
 				WHERE ODT.OSS_ID = A.OSS_ID) AS DETECTED_LICENSE
 			 , A.DOWNLOAD_LOCATION
-			 , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = A.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
+			 , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = A.OSS_COMMON_ID ) AS DOWNLOAD_LOCATION_GROUP
 			 , A.COPYRIGHT AS OSS_COPYRIGHT
 			 , A.HOMEPAGE
 			 , #{result} AS RESULT
 			 , CONCAT(A.OSS_NAME, ' (', IF(A.OSS_VERSION IS NULL OR A.OSS_VERSION = '', 'N/A', A.OSS_VERSION), ') 최신 등록 정보') AS TITLE
 			 , A.SUMMARY_DESCRIPTION
-		  FROM OSS_MASTER A
+		  FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) A
 		 WHERE A.OSS_NAME = #{ossName}
 		   AND A.USE_YN = 'Y'
 		 ORDER BY A.MODIFIED_DATE DESC
@@ -2066,7 +3601,7 @@
 	<select id="getNewestOssInfo2" parameterType="oss.fosslight.domain.OssAnalysis" resultType="oss.fosslight.domain.OssAnalysis">
 		SELECT #{groupId} AS GROUP_ID
 			 , A.OSS_NAME
-			 , (SELECT GROUP_CONCAT(OSS_NICKNAME) FROM OSS_NICKNAME WHERE A.OSS_NAME = OSS_NAME) AS OSS_NICK_NAME
+			 , (SELECT GROUP_CONCAT(OSS_NICKNAME) FROM OSS_NICKNAME WHERE A.OSS_COMMON_ID = OSS_COMMON_ID) AS OSS_NICK_NAME
 			 , (SELECT TRIM(GROUP_CONCAT(CONCAT(OSS_LICENSE_COMB, ' ', IF(SHORT_IDENTIFIER = '' OR SHORT_IDENTIFIER IS NULL,  LICENSE_NAME, SHORT_IDENTIFIER),  ' ') ORDER BY OSS_LICENSE_IDX ASC SEPARATOR ''))
 				FROM OSS_LICENSE_DECLARED OL
 						 INNER JOIN LICENSE_MASTER LM
@@ -2077,14 +3612,45 @@
 						 INNER JOIN LICENSE_MASTER LM ON ODT.LICENSE_ID = LM.LICENSE_ID
 				WHERE ODT.OSS_ID = A.OSS_ID) AS DETECTED_LICENSE
 			 , A.DOWNLOAD_LOCATION
-			 , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = A.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
+			 , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = A.OSS_COMMON_ID ) AS DOWNLOAD_LOCATION_GROUP
 			 , A.COPYRIGHT AS OSS_COPYRIGHT
 			 , A.HOMEPAGE
 			 , #{result} AS RESULT
 			 , CONCAT(A.OSS_NAME, ' (', IF(A.OSS_VERSION IS NULL OR A.OSS_VERSION = '', 'N/A', A.OSS_VERSION), ') 최신 등록 정보') AS TITLE
 			 , A.SUMMARY_DESCRIPTION
-		FROM OSS_MASTER A
-		WHERE (A.OSS_NAME = #{ossName} OR EXISTS(SELECT 1 FROM OSS_NICKNAME A1 WHERE A1.OSS_NAME = A.OSS_NAME AND A1.OSS_NICKNAME = #{ossName}))
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) A
+		WHERE (A.OSS_NAME = #{ossName} OR EXISTS(SELECT 1 FROM OSS_NICKNAME A1 WHERE A1.OSS_COMMON_ID = A.OSS_COMMON_ID AND A1.OSS_NICKNAME = #{ossName}))
 		  AND A.USE_YN = 'Y'
 		ORDER BY A.MODIFIED_DATE DESC
 			LIMIT 0, 1
@@ -2113,16 +3679,47 @@
 	<select id="getAutoAnalysisSuccessOssInfo" parameterType="string" resultType="oss.fosslight.domain.OssAnalysis">
 		SELECT OM.OSS_NAME
 		     , OM.OSS_VERSION
-		     , (SELECT GROUP_CONCAT(OSS_NICKNAME) FROM OSS_NICKNAME WHERE OSS_NAME = OM.OSS_NAME) AS OSS_NICK_NAME
+		     , (SELECT GROUP_CONCAT(OSS_NICKNAME) FROM OSS_NICKNAME WHERE OSS_COMMON_ID = OM.OSS_COMMON_ID) AS OSS_NICK_NAME
 			 , GROUP_CONCAT( CONCAT(OSS_LICENSE_COMB, ' ', IF(LM.SHORT_IDENTIFIER IS NULL OR LM.SHORT_IDENTIFIER = '', LM.LICENSE_NAME, LM.SHORT_IDENTIFIER)) ORDER BY OL.OSS_LICENSE_IDX SEPARATOR ' ' ) AS LICENSE_NAME
 			 , OM.COPYRIGHT AS OSS_COPYRIGHT
-			 , (SELECT GROUP_CONCAT(DOWNLOAD_LOCATION ORDER BY SORT_ORDER) FROM OSS_DOWNLOADLOCATION WHERE OSS_ID = OM.OSS_ID) AS DOWNLOAD_LOCATION_GROUP
+			 , (SELECT GROUP_CONCAT(DOWNLOAD_LOCATION ORDER BY OSS_DL_IDX) FROM OSS_DOWNLOADLOCATION WHERE OSS_COMMON_ID = OM.OSS_COMMON_ID) AS DOWNLOAD_LOCATION_GROUP
 			 , OM.DOWNLOAD_LOCATION
 			 , OM.HOMEPAGE
 			 , OM.SUMMARY_DESCRIPTION
 			 , (SELECT CONTENTS FROM COMMENTS_HISTORY WHERE REFERENCE_DIV = '40' AND REFERENCE_ID = OM.OSS_ID AND USE_YN = 'Y' ORDER BY MODIFIED_DATE DESC LIMIT 0, 1) AS COMMENT
 			 , OM.USE_YN
-		  FROM OSS_MASTER OM
+		  FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) OM
 		 INNER JOIN OSS_LICENSE_DECLARED OL
 		    ON OM.OSS_ID = OL.OSS_ID
 		 INNER JOIN LICENSE_MASTER LM
@@ -2131,9 +3728,9 @@
 	</select>
 	
 	<update id="setDeactivateFlag" parameterType="oss.fosslight.domain.OssMaster">
-		UPDATE OSS_MASTER
+		UPDATE OSS_COMMON
 		   SET DEACTIVATE_FLAG = #{deactivateFlag}
-		 WHERE OSS_NAME = #{ossName}
+		 WHERE OSS_COMMON_ID = #{ossCommonId}
 	</update>
 
 	<select id="getOssNameMergePartnerList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.PartnerMaster">
@@ -2207,19 +3804,20 @@
     </update>
 
     <update id="updateOssMasterSync" parameterType="oss.fosslight.domain.OssMaster">
-    	UPDATE OSS_MASTER
-		   SET LICENSE_DIV 			= #{licenseDiv},
-		       COPYRIGHT 			= #{copyright},
-		       DOWNLOAD_LOCATION 	= #{downloadLocation},
-		       HOMEPAGE 			= #{homepage},
-		       SUMMARY_DESCRIPTION 	= #{summaryDescription},
-		       ATTRIBUTION 			= #{attribution},
-		       MODIFIED_DATE 		= now(),
-		       MODIFIER 			= #{modifier},
-		       LICENSE_TYPE 		= #{licenseType},
-		       OBLIGATION_TYPE 		= #{obligationType},
-		       DEACTIVATE_FLAG 		= #{deactivateFlag}
-		 WHERE OSS_ID = #{ossId}
+    	UPDATE OSS_VERSION OV
+    	INNER JOIN OSS_COMMON OC ON OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
+		   SET OV.LICENSE_DIV 			= #{licenseDiv},
+		       OV.COPYRIGHT 			= #{copyright},
+		       OC.DOWNLOAD_LOCATION 	= #{downloadLocation},
+		       OC.HOMEPAGE 				= #{homepage},
+		       OC.SUMMARY_DESCRIPTION 	= #{summaryDescription},
+		       OV.ATTRIBUTION 			= #{attribution},
+		       OV.MODIFIED_DATE 		= now(),
+		       OV.MODIFIER 				= #{modifier},
+		       OV.LICENSE_TYPE 			= #{licenseType},
+		       OV.OBLIGATION_TYPE 		= #{obligationType},
+		       OC.DEACTIVATE_FLAG 		= #{deactivateFlag}
+		 WHERE OV.OSS_ID = #{ossId}
     </update>
 
     <delete id="deleteOssLicenseDeclaredSync" parameterType="oss.fosslight.domain.OssMaster">
@@ -2254,9 +3852,40 @@
     <select id="getSaveSesstionOssInfoByName" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
 		SELECT T1.OSS_ID
 		     , T1.DOWNLOAD_LOCATION
-		     , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_ID = T1.OSS_ID ) AS DOWNLOAD_LOCATION_GROUP
-		  FROM OSS_MASTER T1 
-		  LEFT OUTER JOIN OSS_NICKNAME T2 ON T1.OSS_NAME = T2.OSS_NAME
+		     , (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID ) AS DOWNLOAD_LOCATION_GROUP
+		  FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1 
+		  LEFT OUTER JOIN OSS_NICKNAME T2 ON T1.OSS_COMMON_ID = T2.OSS_COMMON_ID
 		 WHERE T1.USE_YN = 'Y' AND (T1.OSS_NAME = #{ossName} OR T2.OSS_NICKNAME = #{ossName}) 
 		   AND T1.OSS_VERSION = #{ossVersion}
 		 ORDER BY CREATED_DATE DESC, OSS_VERSION DESC LIMIT 1;
@@ -2272,7 +3901,7 @@
 		   		AND OC.REFERENCE_DIV IN ('20')
     		</when>
     		<otherwise>
-    			AND OC.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
+    			AND OC.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
     		</otherwise>
     	</choose>
     	  AND OC.OSS_NAME = #{ossName}
@@ -2281,7 +3910,7 @@
 	
 	<select id="getOssVulnerabilityList2" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.Vulnerability">
 		<if test="@oss.fosslight.util.StringUtil@equals('-', ossVersion)">
-			SELECT T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE
+			SELECT T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE, T1.CRITERIA
 			FROM
 			(
 		</if>
@@ -2291,8 +3920,9 @@
 					 , CVE.CVE_ID
 					 , CVE.VULN_SUMMARY
 					 , CVE.MODI_DATE
+					 , DATA.CRITERIA
 				  FROM (
-				  		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID
+				  		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID, SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 5), ':', -2) AS CRITERIA
 				  		FROM
 				  		(SELECT REPLACE(PRODUCT, ' ', '_') AS PRODUCT
 				 			 , VERSION
@@ -2308,16 +3938,15 @@
 										OR PRODUCT = #{item}
 									</foreach>
 								</if>
-								<if test="!@oss.fosslight.util.StringUtil@isEmpty(dashOssNameList)">
-									<foreach item="dashItem" index="index" collection="dashOssNameList">
-										OR VENDORPRODUCT = #{dashItem}
-									</foreach>
-								</if>
 				 				)
 				 		<if test="@oss.fosslight.util.StringUtil@notEquals('-', ossVersion)">
 				 		   AND VERSION = #{ossVersion}
 				 		</if>
 				 		) NVD
+				 		LEFT JOIN NVD_DATA_CONFIGURATIONS CONF
+				 		ON NVD.CVE_ID = CONF.CVE_ID
+				 		LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+				 		ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
 				 		GROUP BY NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID
 				 	   ) DATA
 				 INNER JOIN NVD_CVE_V3 CVE
@@ -2332,7 +3961,38 @@
 	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
 		SELECT 
 			T1.OSS_NAME
-        FROM OSS_MASTER T1
+        FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) T1
         WHERE T1.USE_YN = 'Y'
         <if test="!@oss.fosslight.util.StringUtil@isEmpty(cveId)">
         	AND T1.VULN_YN = 'Y' 
@@ -2343,24 +4003,91 @@
 	</select>
 	
 	<select id="getDeactivateOssList" resultType="string">
-		SELECT OSS_NAME 
-		FROM OSS_MASTER 
-		WHERE USE_YN = 'Y' 
-		AND DEACTIVATE_FLAG = 'Y'
-		GROUP BY OSS_NAME
+		SELECT TBL.OSS_NAME 
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) TBL
+		WHERE TBL.USE_YN = 'Y' 
+		AND TBL.DEACTIVATE_FLAG = 'Y'
+		GROUP BY TBL.OSS_NAME
 	</select>
 
 	<select id="getRecentlyModifiedOss" parameterType="oss.fosslight.domain.OssMaster" resultType="HashMap">
 		SELECT COUNT(*) AS CNT, OSS_ID
 		FROM OSS_DOWNLOADLOCATION
-		WHERE OSS_ID = (SELECT OSS_ID FROM OSS_MASTER WHERE OSS_NAME = #{ossName} ORDER BY MODIFIED_DATE DESC LIMIT 1)
+		WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = #{ossName} ORDER BY MODIFIED_DATE DESC LIMIT 1)
 	</select>
 
 	<select id="checkExistsVendorProductMatchOss" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
 		SELECT OM.OSS_ID
-    	FROM OSS_MASTER OM
-    	LEFT JOIN OSS_NICKNAME NICK
-    	ON OM.OSS_NAME = NICK.OSS_NAME
+    	FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) OM
+    	LEFT JOIN (
+    		SELECT NICK.OSS_COMMON_ID, OC.OSS_NAME
+    		FROM OSS_NICKNAME NICK
+    		INNER JOIN OSS_COMMON OC
+    		ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+    	) NICK
+    	ON OM.OSS_COMMON_ID = NICK.OSS_COMMON_ID
     	AND OM.USE_YN = 'Y'
     	WHERE OM.OSS_VERSION = #{ossVersion}
     	AND NICK.OSS_NAME = #{schOssName}
@@ -2389,9 +4116,6 @@
 				<foreach item="item" collection="ossNicknames">
 					OR PRODUCT = #{item}
 				</foreach>
-				<foreach item="item" collection="ossNicknames">
-					OR VENDORPRODUCT = #{item}
-				</foreach>
 			</if>
     		)
     		<if test="!@oss.fosslight.util.StringUtil@isEmpty(vulnerabilityCheckFlag)">
@@ -2409,16 +4133,127 @@
     	) NVD
 		INNER JOIN NVD_CVE_V3 CVE
     	ON NVD.CVE_ID = CVE.CVE_ID
-    	ORDER BY CVE.CVSS_SCORE*1 DESC LIMIT 5
+    	WHERE NOT EXISTS (SELECT 1 FROM OSS_COMMON OC INNER JOIN OSS_VERSION OV ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID WHERE OV.IN_CPE_MATCH_FLAG = 'Y' AND OV.CVE_ID = CVE.CVE_ID)
+    	ORDER BY CVE.CVSS_SCORE*1 DESC LIMIT 1
     </select>
     
     <select id="checkOssVersionDiff" parameterType="string" resultType="int">
 		SELECT COUNT(*)
-		FROM OSS_MASTER OM
+		FROM (
+			SELECT
+    			OV.OSS_ID,
+    			OC.OSS_COMMON_ID,
+    			OC.OSS_NAME,
+    			OV.OSS_VERSION,
+    			OC.HOMEPAGE,
+				OC.DOWNLOAD_LOCATION,
+    			OC.SUMMARY_DESCRIPTION,
+    			OV.LICENSE_DIV,
+    			OV.USE_YN,
+    			OV.VULN_CPE_NM,
+    			OV.CVSS_SCORE,
+    			OV.CVE_ID,
+    			OV.VULN_YN,
+    			OV.VULN_RECHECK,
+    			OV.VULN_DATE,
+    			OV.LICENSE_TYPE,
+    			OV.OBLIGATION_TYPE,
+    			OV.COPYRIGHT,
+    			OV.ATTRIBUTION,
+				OC.DEACTIVATE_FLAG,
+				OV.CREATOR,
+				OV.CREATED_DATE,
+				OV.MODIFIER,
+				OV.MODIFIED_DATE,
+				OV.RESTRICTION,
+				OV.IN_CPE_MATCH_FLAG
+  			FROM OSS_COMMON OC
+  			LEFT JOIN OSS_VERSION OV
+  			ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		) OM
 		INNER JOIN OSS_MASTER_LICENSE_FLAG OMF
 		ON OM.OSS_ID = OMF.OSS_ID
 		WHERE OM.USE_YN = 'Y'
 		AND OM.OSS_NAME = #{ossName}
 		AND OMF.VERSION_DIFF_FLAG = 'Y'
+	</select>
+	
+	<select id="existsOssIncludeCpe"  parameterType="oss.fosslight.domain.OssMaster" resultType="int">
+		SELECT COUNT(*) FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID = #{ossCommonId}
+    </select>
+    
+    <delete id="deleteOssIncludeCpe" parameterType="oss.fosslight.domain.OssMaster">
+		DELETE FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID = #{ossCommonId}
+	</delete>
+    
+    <insert id="insertOssIncludeCpe" parameterType="oss.fosslight.domain.OssMaster">
+		INSERT INTO OSS_INCLUDE_CPE (
+			OSS_COMMON_ID,
+			CPE23URI
+		) VALUES (
+			#{ossCommonId},
+			#{includeCpe}
+		)
+	</insert>
+    
+    <select id="existsOssExcludeCpe"  parameterType="oss.fosslight.domain.OssMaster" resultType="int">
+		SELECT COUNT(*) FROM OSS_EXCLUDE_CPE WHERE OSS_COMMON_ID = #{ossCommonId}
+    </select>
+    
+    <delete id="deleteOssExcludeCpe" parameterType="oss.fosslight.domain.OssMaster">
+		DELETE FROM OSS_EXCLUDE_CPE WHERE OSS_COMMON_ID = #{ossCommonId}
+	</delete>
+	
+	<insert id="insertOssExcludeCpe" parameterType="oss.fosslight.domain.OssMaster">
+		INSERT INTO OSS_EXCLUDE_CPE (
+			OSS_COMMON_ID,
+			CPE23URI
+		) VALUES (
+			#{ossCommonId},
+			#{excludeCpe}
+		)
+	</insert>
+	
+	<select id="existsOssVersionAlias"  parameterType="oss.fosslight.domain.OssMaster" resultType="int">
+		SELECT COUNT(*) FROM OSS_VERSION_ALIAS WHERE OSS_ID = #{ossId}
+    </select>
+    
+    <delete id="deleteOssVersionAlias" parameterType="oss.fosslight.domain.OssMaster">
+		DELETE FROM OSS_VERSION_ALIAS WHERE OSS_ID = #{ossId}
+	</delete>
+	
+	<insert id="insertOssVersionAlias" parameterType="oss.fosslight.domain.OssMaster">
+		INSERT INTO OSS_VERSION_ALIAS (
+			OSS_ID,
+			OSS_VERSION_ALIAS
+		) VALUES (
+			#{ossId},
+			#{ossVersionAlias}
+		)
+	</insert>
+	
+	<select id="selectOssVersionAliases" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+		SELECT OSS_VERSION_ALIAS FROM OSS_VERSION_ALIAS WHERE OSS_ID = #{ossId}
+	</select>
+	
+	<select id="selectIncludeCpeMatchOssInfo" resultType="string">
+		SELECT
+			DISTINCT OV.CVE_ID
+		FROM
+			OSS_COMMON OC
+		INNER JOIN
+			OSS_VERSION OV
+		ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+		WHERE
+			OV.IN_CPE_MATCH_FLAG = 'Y'
+	</select>
+	
+	<select id="getOssInfoByRestriction" parameterType="string" resultType="oss.fosslight.domain.OssMaster">
+		SELECT
+			OSS_NAME, OSS_VERSION, RESTRICTION
+		FROM
+			OSS_VERSION
+		WHERE
+			RESTRICTION LIKE CONCAT('%', #{restriction}, '%')
 	</select>
 </mapper>

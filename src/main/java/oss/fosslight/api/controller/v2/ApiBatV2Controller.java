@@ -39,12 +39,9 @@ public class ApiBatV2Controller extends CoTopComponent {
     private final ApiBatService apibatService;
 
     @ApiOperation(value = "Search Binary List", notes = "Binary Info 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authentication", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_BINARY_SEARCH})
     public ResponseEntity<Map<String, Object>> getBinaryInfo(
-            @RequestHeader String authentication,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Binary Name", required = false) @RequestParam(required = false) String fileName,
             @ApiParam(value = "Tlsh", required = false) @RequestParam(required = false) String tlsh,
             @ApiParam(value = "checksum", required = false) @RequestParam(required = false) String checksum,
@@ -53,7 +50,7 @@ public class ApiBatV2Controller extends CoTopComponent {
             @ApiParam(value = "Source Path", required = false) @RequestParam(required = false) String sourcePath) {
 
         // 사용자 인증
-        userService.checkApiUserAuth(authentication);
+        userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, Object> paramMap = new HashMap<String, Object>();
 

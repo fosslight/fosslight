@@ -7,8 +7,6 @@ package oss.fosslight.common;
 
 import java.util.regex.Pattern;
 
-import oss.fosslight.config.AppConstBean;
-
 public class CoConstDef {
 	
 	/** Application의 기본 패키지 명: {@value #APP_DEFAULT_PACKAGE_NAME} */
@@ -413,6 +411,7 @@ public class CoConstDef {
 	public static final String CD_DTL_COMMENT_LICENSE_USER = "31";
 	public static final String CD_DTL_COMMENT_OSS = "40";
 	public static final String CD_DTL_COMMENT_OSS_USER = "41";
+	public static final String CD_DTL_COMMENT_OSS_COMMON = "42";
 	public static final String CD_DTL_COMMENT_SECURITY_HIS = "60";
 	public static final String CD_DTL_COMMENT_SECURITY_USER = "61";
 	
@@ -576,7 +575,10 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_INVATED = "63";
 	public static final String CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED = "64";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED = "815";
-	public static final String CD_MAIL_TYPE_PROJECT_COREVIEWER_FINISHED = "818";
+	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED = "818";
+	public static final String CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED = "819";
+
+	public static final String CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED = "821";
 
 	/** changed USER Info */
 	public static final String CD_MAIL_TYPE_CHANGED_USER_INFO = "816";
@@ -713,6 +715,9 @@ public class CoConstDef {
 	public static final String CD_LICENSE_RESTRICTION							= "226";
 	public static final String CD_LICENSE_NETWORK_RESTRICTION					= "2";
 	
+	/** Source Code Disclosure Scope 코드 **/
+	public static final String CD_SOURCE_CODE_DISCLOSURE_SCOPE					= "230";
+	
 	/** 사용자별 Default Tab Menu 코드 */
 	public static final String CD_DEFAULT_TAB 									= "701";
 	
@@ -780,6 +785,7 @@ public class CoConstDef {
 	public static final String CD_SUPPLEMENT_NOTICE_HELP_URL					= "102";
 	
 	public static final String CD_CHECK_OSS_NAME_URL							= "903";
+	public static final String CD_CHECK_OSS_DOWNLOADLOCAION_PURL				= "913";
 	
 	// check LicenseText Server Info
 	public static final String CD_CHECK_LICENSETEXT_SERVER_INFO					= "904";
@@ -823,6 +829,7 @@ public class CoConstDef {
 	public static final String CD_OPEN_API_DATA_VALIDERROR_MESSAGE				= "330";
 	public static final String CD_OPEN_API_CREATE_PROJECT_DUPLICATE_MESSAGE		= "340";
 	public static final String CD_OPEN_API_FILE_NOTEXISTS_MESSAGE				= "400";
+	public static final String CD_OPEN_API_NOT_FOUND_MESSAGE					= "404";
 	public static final String CD_OPEN_API_FILE_SIZEOVER_MESSAGE				= "410";
 	public static final String CD_OPEN_API_EXT_UNSUPPORT_MESSAGE				= "420";
 	public static final String CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE			= "430";

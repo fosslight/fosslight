@@ -1437,19 +1437,31 @@ var bin_grid = {
                     if (!permission || "CONF" == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 	} else {
-                		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                		}
                 	}
                     appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('BIN', 'binList', 'main', "+permission+", '"+identificationStatus+"')\">";
                     if (!permission || "CONF" == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
                 	} else {
-                		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                		}
                 	}
                     appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('BIN', "+permission+", '"+identificationStatus+"')\">";
                     if (!permission || "CONF" == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
                 	} else {
-                		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                		}
                 	}
                     appendBtn += "<button type=\"button\" id=\"exportDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
 	            	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
@@ -1492,34 +1504,37 @@ var bin_grid = {
             	var identificationStatus = [[${project.identificationStatus}]];
 				
             	if (permission && "CONF" != identificationStatus) {
-            		if (iCol == "4"){ 
-    					com_fn.exitCell(_mainLastsel, "binList");
-    					
-    					fn_grid_com.showBinaryViewPage(binList, rowid, true, binValidMsgData, binDiffMsgData, binInfoMsgData);
-    				}
-    				
-    				cleanErrMsg("binList", rowid);
-    				fn_grid_com.setCellEdit(binList, rowid, binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
+            		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+            		} else {
+            			if (iCol == "4"){
+        					com_fn.exitCell(_mainLastsel, "binList");
+        					
+        					fn_grid_com.showBinaryViewPage(binList, rowid, true, binValidMsgData, binDiffMsgData, binInfoMsgData);
+        				}
+        				
+        				cleanErrMsg("binList", rowid);
+        				fn_grid_com.setCellEdit(binList, rowid, binValidMsgData, binDiffMsgData, binInfoMsgData, com_fn.getLicenseName);
 
-    				// 서브 그리드 제외 
-    				ondblClickRowBln = false;
+        				// 서브 그리드 제외 
+        				ondblClickRowBln = false;
 
-     	 			$('#'+rowid+'_licenseName').addClass('autoCom');
-     	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
-    				var result = $('#'+rowid+'_licenseName').val().split(",");
+         	 			$('#'+rowid+'_licenseName').addClass('autoCom');
+         	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+        				var result = $('#'+rowid+'_licenseName').val().split(",");
 
-    				result.forEach(function(cur,idx){
-    					if(cur != ""){
-    						var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+        				result.forEach(function(cur,idx){
+        					if(cur != ""){
+        						var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
 
-    						$('#'+rowid+'_licenseNameBtn').append(mult);
-    					}
-    				});
-    				
-    				$('#'+rowid+'_licenseName').val("");
-                    var nextCol = binList.jqGrid('getGridParam', 'colModel')[iCol].name
-                    var nextRow = rowid
-                   	$('#'+nextRow+"_"+nextCol).focus();
+        						$('#'+rowid+'_licenseNameBtn').append(mult);
+        					}
+        				});
+        				
+        				$('#'+rowid+'_licenseName').val("");
+                        var nextCol = binList.jqGrid('getGridParam', 'colModel')[iCol].name
+                        var nextRow = rowid
+                       	$('#'+nextRow+"_"+nextCol).focus();
+            		}
             	}
 			},
 			onPaging: function(action) {

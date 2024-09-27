@@ -1580,11 +1580,54 @@ var binAndroid_grid = {
 					
 					// 한번에 처리
 					$("#binAndroidList tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
-					$("#binAndroidList_toppager").remove();
-					
-					tableRefreshNew("binAndroidList");
 				}
-
+				
+				// append button event
+				if ($("#binAndroidList_toppager_left").find('button').length == 0) {
+					var permission = [[${project.statusPermission}]] == 1;
+                	var identificationStatus = [[${project.identificationStatus}]];
+					
+                	var appendBtn = "";
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Add\" onclick=\"com_fn.gridAddFunc('BINANDROID', 'binAndroidList', "+permission+", '"+identificationStatus+"')\">";
+                    if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                	} else {
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                		}
+                	}
+                    appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" title=\"Delete\" onclick=\"com_fn.gridDelFunc('BINANDROID', 'binAndroidList', 'main', "+permission+", '"+identificationStatus+"')\">";
+                    if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                		}
+                	}
+                    appendBtn += "<button type=\"button\" title=\"Bulk Edit\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('BINANDROID', "+permission+", '"+identificationStatus+"')\">";
+                    if (!permission || "CONF" == identificationStatus) {
+                		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                	} else {
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                		}
+                	}
+                    appendBtn += "<button type=\"button\" id=\"binandroidDropTop\" title=\"Export\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+                	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"binandroidDropTop\">";
+                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"binAndroid_fn.downloadExcel()\">FOSSLight Report (Spreadsheet)</span>";
+                	
+                	if ([[${@CommonFunction.isAdmin() || project.identificationStatus == 'CONF'}]]) {
+                		appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"com_fn.downloadYaml('ANDROID')\">FOSSLight Report (YAML)</span></div>"        
+                	}
+                	                              
+                    $("#binAndroidList_toppager_left").append(appendBtn);
+                }
 			},
 			beforeSelectRow: function(rowid, e) {
 				var $self = $(this), iCol, cm,
@@ -1613,33 +1656,41 @@ var binAndroid_grid = {
 				}
 			},
 			ondblClickRow: function(rowid,iRow,iCol,e) {
-				if ("4" == iCol) {
-					com_fn.exitCell(_mainLastsel, "binAndroidList");
-					
-					fn_grid_com.showBinaryViewPage(binAndroidList, rowid, true, binAndroidValidMsgData, binAndroidDiffMsgData, binAndroidInfoMsgData);
-				}
+				var permission = [[${project.statusPermission}]] == 1;
+            	var identificationStatus = [[${project.identificationStatus}]];
 				
-				cleanErrMsg("binAndroidList", rowid);
-				fn_grid_com.setCellEdit(binAndroidList, rowid, binAndroidValidMsgData, binAndroidDiffMsgData, binAndroidInfoMsgData, com_fn.getLicenseName);
+				if (permission && "CONF" != identificationStatus) {
+					if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+					} else {
+						if ("4" == iCol) {
+							com_fn.exitCell(_mainLastsel, "binAndroidList");
+							
+							fn_grid_com.showBinaryViewPage(binAndroidList, rowid, true, binAndroidValidMsgData, binAndroidDiffMsgData, binAndroidInfoMsgData);
+						}
+						
+						cleanErrMsg("binAndroidList", rowid);
+						fn_grid_com.setCellEdit(binAndroidList, rowid, binAndroidValidMsgData, binAndroidDiffMsgData, binAndroidInfoMsgData, com_fn.getLicenseName);
 
-				// 서브 그리드 제외 
-				ondblClickRowBln = false;
-				
-				$('#'+rowid+'_licenseName').addClass('autoCom');
- 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
-				var result = $('#'+rowid+'_licenseName').val().split(",");
+						// 서브 그리드 제외 
+						ondblClickRowBln = false;
+						
+						$('#'+rowid+'_licenseName').addClass('autoCom');
+		 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+						var result = $('#'+rowid+'_licenseName').val().split(",");
 
-				result.forEach(function(cur,idx){
-					if(cur != ""){
-						var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
-						$('#'+rowid+'_licenseNameBtn').append(mult);
+						result.forEach(function(cur,idx){
+							if(cur != ""){
+								var mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'><span class=\"btnLicenseShow\" ondblclick='com_fn.showLicenseInfo(this)'>" + cur + "</span><button onclick='com_fn.deleteLicenseRenewal(this)'>x</button></span><br/>";
+								$('#'+rowid+'_licenseNameBtn').append(mult);
+							}
+						});
+						
+						$('#'+rowid+'_licenseName').val("");
+		                var nextCol = binAndroidList.jqGrid('getGridParam', 'colModel')[iCol].name
+		                var nextRow = rowid
+		                $('#'+nextRow+"_"+nextCol).focus();
 					}
-				});
-				
-				$('#'+rowid+'_licenseName').val("");
-                var nextCol = binAndroidList.jqGrid('getGridParam', 'colModel')[iCol].name
-                var nextRow = rowid
-                $('#'+nextRow+"_"+nextCol).focus();
+				}
 			},
 			onPaging: function(action) {
 				cleanErrMsg("binAndroidList");
@@ -1665,19 +1716,28 @@ var binAndroid_grid = {
 			removeHighLight : true
 		});
 		
-		binAndroidList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () { updateGridRowCount('binAndroidList', 'binAndroidPager'); }});
-		
-		binAndroidList.jqGrid('navGrid',"#binAndroidPager",{add:true,edit:false,del:true,search:false,refresh:false
-												  , addfunc: function () {
-													  com_fn.saveFlagObject["ANDROID"] = false; 
-													  fn_grid_com.rowAddNew('binAndroidList',binAndroidList,"main", null, com_fn.getLicenseName);
-												  }, delfunc: function () { 
-													  fn_grid_com.rowDelNew(binAndroidList,"main");
-												  }, cloneToTop:true
+		binAndroidList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+			beforeSearch: function () {
+				if (_mainLastsel != -1) {
+					fn_grid_com.setGridBeforeSearch(binAndroidList, com_fn.getLicenseName);
+            	}
+			},
+			afterSearch : function () {
+				updateGridRowCount('binAndroidList', 'binAndroidPager');
+			}
 		});
 		
+// 		binAndroidList.jqGrid('navGrid',"#binAndroidPager",{add:true,edit:false,del:true,search:false,refresh:false
+// 												  , addfunc: function () {
+// 													  com_fn.saveFlagObject["ANDROID"] = false; 
+// 													  fn_grid_com.rowAddNew('binAndroidList',binAndroidList,"main", null, com_fn.getLicenseName);
+// 												  }, delfunc: function () { 
+// 													  fn_grid_com.rowDelNew(binAndroidList,"main");
+// 												  }, cloneToTop:true
+// 		});
 		
-		$('#binAndroidList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+		
+//		$('#binAndroidList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
 	}
 }
 

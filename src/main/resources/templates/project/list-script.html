@@ -72,8 +72,8 @@ var evt = {
 		var textarea = ["comment", "userComment"];
 		
 		var optionSelectedFlag = false;
-		if (typeof localStorage.projectSearchConditions !== "undefined") {
-			var localStorageSearchConditions = JSON.parse(localStorage.projectSearchConditions);
+		if (typeof sessionStorage.projectSearchConditions !== "undefined") {
+			var localStorageSearchConditions = JSON.parse(sessionStorage.projectSearchConditions);
 			
 			Object.keys(localStorageSearchConditions).forEach(function(key) {
     			if (input.includes(key)) {
@@ -163,7 +163,7 @@ var evt = {
 			var postData = fn.setGridParam();
 			
 			var localStorageData = fn.setGridParam();
-            localStorage.setItem("projectSearchConditions", JSON.stringify(localStorageData));
+            sessionStorage.setItem("projectSearchConditions", JSON.stringify(localStorageData));
 			
             optionSelectedFlag = false;
             Object.keys(localStorageData).forEach(function(key) {
@@ -621,38 +621,24 @@ var fn = {
 		
 		var display = "";
 
-        var cvssScore = rowObject.cvssScore;
-        var secCode = rowObject.secCode;
-        var secCvssScore = rowObject.secCvssScore;
-
-        if ("N" != secCvssScore && "Fixed" != secCode) {
-            cvssScore = secCvssScore;
-        }
-		
-		if ("N" != secCode) {
-			if ("Fixed" == secCode) {
-                if ("N" != cvssScore) {
-                    display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Resolved('+cvssScore+')</span>';
-                } else {
-                    display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Resolved(N/A)</span>';
-                }
+		var cvssScoreMax = rowObject.cvssScoreMax;
+		if (typeof rowObject.vulnerabilityResolution !== "undefined") {
+			var vulnerabilityResolution = rowObject.vulnerabilityResolution;
+			if ("Need to resolve" == vulnerabilityResolution) {
+				display = '<span type="button" class="badge badge-dark-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 			} else {
-                if ("0" != cvssScore && "N" != cvssScore) {
-                    if (cvssScore - standardScore >= 0) {
-                        display = '<span type="button" class="badge badge-dark-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Need to resolve('+cvssScore+')</span>';
-                    } else {
-                        display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Discovered('+cvssScore+')</span>';
-                    }
-                } else {
-                    display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Discovered(N/A)</span>';
-                }
+				if (cvssScoreMax - standardScore >= 0) {
+					display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
+				} else {
+					display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cvssScoreMax+')</span>';
+				}
 			}
 		} else {
-            if ("0" != cvssScore && "N" != cvssScore) {
-                display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cvssScore+')</span>';
-            } else {
-                display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
-            }
+			if (typeof cvssScoreMax !== "undefined") {
+				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered(' + cvssScoreMax + ')</span>';
+			} else {
+				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
+			}
 		}
 		
 		return display;
@@ -2328,7 +2314,36 @@ var list = {
 // 					}
 // 				}
 			},
-            gridComplete:function (){ updateGridRowCount('list', 'pager'); },
+            gridComplete:function (){
+            	updateGridRowCount('list', 'pager');
+            	
+            	// grid complete 후 oss name auto complete 처리
+                if (autoComplete.ossTags.length == 0) {
+                	commonAjax.getOssTags().success(function (data, status, headers, config) {
+                        if (data != null) {
+                            data.forEach(function (obj) {
+                                if (obj != null) {
+                                    autoComplete.ossTags.push(obj.ossName);
+                                }
+                            })
+                        }
+                    });
+                    
+                    $('input[name="ossName"]').autocomplete({
+                    	source : autoComplete.ossTags,
+                    	select : function (event, ui) {
+                    		$(this).val(ui.item.value);
+                    	},
+                    	focus : function(event, ui) {return false;},
+                    	minLength : 1,
+                    	autoFocus : false,
+                    	disable : false,
+                    	close : function(event) {
+                    		$(".search-field").val("");
+                    	}
+                    });
+                }
+            },
 			postData: refreshParam
 		});
 	}

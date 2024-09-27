@@ -740,6 +740,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						deCompResultMap.put(s, 0);
 					}
 				}
+				
+				result = null;
 			}
 			
 			if (collectDataDeCompResultList != null && !collectDataDeCompResultList.isEmpty()) {
@@ -766,6 +768,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					
 					deCompResultMap.put(s, 0);
 				}
+				
+				collectDataDeCompResultList = null;
 			}
 			
 			List<String> paths = sortByValue(deCompResultMap);
@@ -776,187 +780,281 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				}
 			}
 			
+			paths = null;
+			
 			// 결과 file path에 대해서 4가지 허용 패턴으로 검사한다.
-			Map<String, Integer> checkResultMap = new HashMap<>();
-			List<String> pathCheckList1 = new ArrayList<>();
-			List<String> pathCheckList2 = new ArrayList<>();
-			List<String> pathCheckList3 = new ArrayList<>();
-			List<String> pathCheckList4 = new ArrayList<>();
+//			Map<String, Integer> checkResultMap = new HashMap<>();
+//			List<String> pathCheckList1 = new ArrayList<>();
+//			List<String> pathCheckList2 = new ArrayList<>();
+//			List<String> pathCheckList3 = new ArrayList<>();
+//			List<String> pathCheckList4 = new ArrayList<>();
+//			
+//			List<String> pathCheckList11 = new ArrayList<>();
+//			List<String> pathCheckList21 = new ArrayList<>();
+//			List<String> pathCheckList31 = new ArrayList<>();
+//			List<String> pathCheckList41 = new ArrayList<>();
+//			
+//			List<String> pathCheckList12 = new ArrayList<>();
+//			List<String> pathCheckList22 = new ArrayList<>();
+//			List<String> pathCheckList32 = new ArrayList<>();
+//			List<String> pathCheckList42 = new ArrayList<>();
+//			
+//			List<String> pathCheckList13 = new ArrayList<>();
+//			List<String> pathCheckList23 = new ArrayList<>();
+//			List<String> pathCheckList33 = new ArrayList<>();
+//			List<String> pathCheckList43 = new ArrayList<>();
+//			
+//			List<String> pathCheckList14 = new ArrayList<>();
+//			List<String> pathCheckList24 = new ArrayList<>();
+//			List<String> pathCheckList34 = new ArrayList<>();
+//			List<String> pathCheckList44 = new ArrayList<>();
+//			
+//			List<String> pathCheckList15 = new ArrayList<>();
+//			List<String> pathCheckList25 = new ArrayList<>();
+//			List<String> pathCheckList35 = new ArrayList<>();
+//			List<String> pathCheckList45 = new ArrayList<>();
+//
+//			List<String> pathCheckList16 = new ArrayList<>();
+//			List<String> pathCheckList26 = new ArrayList<>();
+//			List<String> pathCheckList36 = new ArrayList<>();
+//			List<String> pathCheckList46 = new ArrayList<>();
 			
-			List<String> pathCheckList11 = new ArrayList<>();
-			List<String> pathCheckList21 = new ArrayList<>();
-			List<String> pathCheckList31 = new ArrayList<>();
-			List<String> pathCheckList41 = new ArrayList<>();
-			
-			List<String> pathCheckList12 = new ArrayList<>();
-			List<String> pathCheckList22 = new ArrayList<>();
-			List<String> pathCheckList32 = new ArrayList<>();
-			List<String> pathCheckList42 = new ArrayList<>();
-			
-			List<String> pathCheckList13 = new ArrayList<>();
-			List<String> pathCheckList23 = new ArrayList<>();
-			List<String> pathCheckList33 = new ArrayList<>();
-			List<String> pathCheckList43 = new ArrayList<>();
-			
-			List<String> pathCheckList14 = new ArrayList<>();
-			List<String> pathCheckList24 = new ArrayList<>();
-			List<String> pathCheckList34 = new ArrayList<>();
-			List<String> pathCheckList44 = new ArrayList<>();
-			
-			List<String> pathCheckList15 = new ArrayList<>();
-			List<String> pathCheckList25 = new ArrayList<>();
-			List<String> pathCheckList35 = new ArrayList<>();
-			List<String> pathCheckList45 = new ArrayList<>();
+//			for (String path : deCompResultMap.keySet()) {
+//				pathCheckList1.add(path);
+//				pathCheckList2.add("/" + path);
+//				pathCheckList3.add(path + "/");
+//				pathCheckList4.add("/"+path + "/");
 
-			List<String> pathCheckList16 = new ArrayList<>();
-			List<String> pathCheckList26 = new ArrayList<>();
-			List<String> pathCheckList36 = new ArrayList<>();
-			List<String> pathCheckList46 = new ArrayList<>();
-			
-			for (String path : deCompResultMap.keySet()) {
-				pathCheckList1.add(path);
-				pathCheckList2.add("/" + path);
-				pathCheckList3.add(path + "/");
-				pathCheckList4.add("/"+path + "/");
-
-				String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
-				
-				if (replaceFilePath.startsWith("/")) {
-					replaceFilePath = replaceFilePath.substring(1);
-				}
-				
-				if (replaceFilePath.endsWith("/")) {
-					replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
-				}
-				
-				pathCheckList11.add(replaceFilePath);
-				pathCheckList21.add("/" + replaceFilePath);
-				pathCheckList31.add(replaceFilePath + "/");
-				pathCheckList41.add("/"+replaceFilePath + "/");
-				
-				String addRootDir = decompressionDirName + "/" + path;
-				
-				if (addRootDir.startsWith("/")) {
-					addRootDir = addRootDir.substring(1);
-				}
-				
-				if (addRootDir.endsWith("/")) {
-					addRootDir = addRootDir.substring(0, addRootDir.length()-1);
-				}
-				
-				pathCheckList12.add(addRootDir);
-				pathCheckList22.add("/" + addRootDir);
-				pathCheckList32.add(addRootDir + "/");
-				pathCheckList42.add("/"+addRootDir + "/");
-				
-				String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
-				
-				if (addRootDirReplaceFilePath.startsWith("/")) {
-					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
-				}
-				
-				if (addRootDirReplaceFilePath.endsWith("/")) {
-					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
-				}
-				
-				pathCheckList13.add(addRootDirReplaceFilePath);
-				pathCheckList23.add("/" + addRootDirReplaceFilePath);
-				pathCheckList33.add(addRootDirReplaceFilePath + "/");
-				pathCheckList43.add("/"+addRootDirReplaceFilePath + "/");
-
-				String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
-				if (replaceRootDir.startsWith("/")) {
-					replaceRootDir = replaceRootDir.substring(1);
-				}
-				
-				if (replaceRootDir.endsWith("/")) {
-					replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
-				}
-				
-				pathCheckList14.add(replaceRootDir);
-				pathCheckList24.add("/" + replaceRootDir);
-				pathCheckList34.add(replaceRootDir + "/");
-				pathCheckList44.add("/"+replaceRootDir + "/");
-				
-				String replaceRootDirReplaceFilePath = replaceRootDir;
-				
-				if (replaceRootDirReplaceFilePath.endsWith("*")) {
-					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
-				}
-				
-				if (replaceRootDirReplaceFilePath.endsWith("/")) {
-					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
-				}
-				
-				pathCheckList15.add(replaceRootDirReplaceFilePath);
-				pathCheckList25.add("/" + replaceRootDirReplaceFilePath);
-				pathCheckList35.add(replaceRootDirReplaceFilePath + "/");
-				pathCheckList45.add("/"+replaceRootDirReplaceFilePath + "/");
-				
-				String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
-				
-				if (replaceDecomFileRootDir.startsWith("/")) {
-					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
-				}
-				
-				if (replaceDecomFileRootDir.endsWith("/")) {
-					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
-				}
-				
-				pathCheckList16.add(replaceDecomFileRootDir);
-				pathCheckList26.add("/" + replaceDecomFileRootDir);
-				pathCheckList36.add(replaceDecomFileRootDir + "/");
-				pathCheckList46.add("/"+replaceDecomFileRootDir + "/");
-			}
+//				String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+//				
+//				if (replaceFilePath.startsWith("/")) {
+//					replaceFilePath = replaceFilePath.substring(1);
+//				}
+//				
+//				if (replaceFilePath.endsWith("/")) {
+//					replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
+//				}
+//				
+//				pathCheckList11.add(replaceFilePath);
+//				pathCheckList21.add("/" + replaceFilePath);
+//				pathCheckList31.add(replaceFilePath + "/");
+//				pathCheckList41.add("/"+replaceFilePath + "/");
+//				
+//				String addRootDir = decompressionDirName + "/" + path;
+//				
+//				if (addRootDir.startsWith("/")) {
+//					addRootDir = addRootDir.substring(1);
+//				}
+//				
+//				if (addRootDir.endsWith("/")) {
+//					addRootDir = addRootDir.substring(0, addRootDir.length()-1);
+//				}
+//				
+//				pathCheckList12.add(addRootDir);
+//				pathCheckList22.add("/" + addRootDir);
+//				pathCheckList32.add(addRootDir + "/");
+//				pathCheckList42.add("/"+addRootDir + "/");
+//				
+//				String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+//				
+//				if (addRootDirReplaceFilePath.startsWith("/")) {
+//					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
+//				}
+//				
+//				if (addRootDirReplaceFilePath.endsWith("/")) {
+//					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
+//				}
+//				
+//				pathCheckList13.add(addRootDirReplaceFilePath);
+//				pathCheckList23.add("/" + addRootDirReplaceFilePath);
+//				pathCheckList33.add(addRootDirReplaceFilePath + "/");
+//				pathCheckList43.add("/"+addRootDirReplaceFilePath + "/");
+//
+//				String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
+//				if (replaceRootDir.startsWith("/")) {
+//					replaceRootDir = replaceRootDir.substring(1);
+//				}
+//				
+//				if (replaceRootDir.endsWith("/")) {
+//					replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
+//				}
+//				
+//				pathCheckList14.add(replaceRootDir);
+//				pathCheckList24.add("/" + replaceRootDir);
+//				pathCheckList34.add(replaceRootDir + "/");
+//				pathCheckList44.add("/"+replaceRootDir + "/");
+//				
+//				String replaceRootDirReplaceFilePath = replaceRootDir;
+//				
+//				if (replaceRootDirReplaceFilePath.endsWith("*")) {
+//					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+//				}
+//				
+//				if (replaceRootDirReplaceFilePath.endsWith("/")) {
+//					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+//				}
+//				
+//				pathCheckList15.add(replaceRootDirReplaceFilePath);
+//				pathCheckList25.add("/" + replaceRootDirReplaceFilePath);
+//				pathCheckList35.add(replaceRootDirReplaceFilePath + "/");
+//				pathCheckList45.add("/"+replaceRootDirReplaceFilePath + "/");
+//				
+//				String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
+//				
+//				if (replaceDecomFileRootDir.startsWith("/")) {
+//					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
+//				}
+//				
+//				if (replaceDecomFileRootDir.endsWith("/")) {
+//					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
+//				}
+//				
+//				pathCheckList16.add(replaceDecomFileRootDir);
+//				pathCheckList26.add("/" + replaceDecomFileRootDir);
+//				pathCheckList36.add(replaceDecomFileRootDir + "/");
+//				pathCheckList46.add("/"+replaceDecomFileRootDir + "/");
+//			}
 			
 			// 통합 Map 에 모든 허용 패턴을 저장
-			int idx = 0;
+//			int idx = 0;
 			
-			for (String s : pathCheckList1) {
-				checkResultMap.put(s, deCompResultMap.containsKey(s) ? deCompResultMap.get(s) : 0);
-				checkResultMap.put(pathCheckList2.get(idx), deCompResultMap.containsKey(pathCheckList2.get(idx)) ? deCompResultMap.get(pathCheckList2.get(idx)) : 0);
-				checkResultMap.put(pathCheckList3.get(idx), deCompResultMap.containsKey(pathCheckList3.get(idx)) ? deCompResultMap.get(pathCheckList3.get(idx)) : 0);
-				checkResultMap.put(pathCheckList4.get(idx), deCompResultMap.containsKey(pathCheckList4.get(idx)) ? deCompResultMap.get(pathCheckList4.get(idx)) : 0);
+//			for (String s : deCompResultMap.keySet()) {
+//				String path = s;
+//				String path2 = "/" + path;
+//				String path3 = path + "/";
+//				String path4 = "/"+ path + "/";
+//				
+//				String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+//				
+//				if (replaceFilePath.startsWith("/")) {
+//					replaceFilePath = replaceFilePath.substring(1);
+//				}
+//				
+//				if (replaceFilePath.endsWith("/")) {
+//					replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
+//				}
+//				
+//				String path5 = replaceFilePath;
+//				String path6 = "/" + replaceFilePath;
+//				String path7 = replaceFilePath + "/";
+//				String path8 = "/"+ replaceFilePath + "/";
+//				
+//				String addRootDir = decompressionDirName + "/" + path;
+//				
+//				if (addRootDir.startsWith("/")) {
+//					addRootDir = addRootDir.substring(1);
+//				}
+//				
+//				if (addRootDir.endsWith("/")) {
+//					addRootDir = addRootDir.substring(0, addRootDir.length()-1);
+//				}
+//				
+//				String path9 = addRootDir;
+//				String path10 = "/" + addRootDir;
+//				String path11 = addRootDir + "/";
+//				String path12 = "/" + addRootDir + "/";
+//				
+//				String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+//				
+//				if (addRootDirReplaceFilePath.startsWith("/")) {
+//					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
+//				}
+//				
+//				if (addRootDirReplaceFilePath.endsWith("/")) {
+//					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
+//				}
+//				
+//				String path13 = addRootDirReplaceFilePath;
+//				String path14 = "/" + addRootDirReplaceFilePath;
+//				String path15 = addRootDirReplaceFilePath + "/";
+//				String path16 = "/" + addRootDirReplaceFilePath + "/";
+//
+//				String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
+//				if (replaceRootDir.startsWith("/")) {
+//					replaceRootDir = replaceRootDir.substring(1);
+//				}
+//				
+//				if (replaceRootDir.endsWith("/")) {
+//					replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
+//				}
+//				
+//				String path17 = replaceRootDir;
+//				String path18 = "/" + replaceRootDir;
+//				String path19 = replaceRootDir + "/";
+//				String path20 = "/"+replaceRootDir + "/";
+//				
+//				String replaceRootDirReplaceFilePath = replaceRootDir;
+//				
+//				if (replaceRootDirReplaceFilePath.endsWith("*")) {
+//					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+//				}
+//				
+//				if (replaceRootDirReplaceFilePath.endsWith("/")) {
+//					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+//				}
+//				
+//				String path21 = replaceRootDirReplaceFilePath;
+//				String path22 = "/" + replaceRootDirReplaceFilePath;
+//				String path23 = replaceRootDirReplaceFilePath + "/";
+//				String path24 = "/"+replaceRootDirReplaceFilePath + "/";
+//				
+//				String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
+//				
+//				if (replaceDecomFileRootDir.startsWith("/")) {
+//					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
+//				}
+//				
+//				if (replaceDecomFileRootDir.endsWith("/")) {
+//					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
+//				}
+//				
+//				String path25 = replaceDecomFileRootDir;
+//				String path26 = "/" + replaceDecomFileRootDir;
+//				String path27 = replaceDecomFileRootDir + "/";
+//			    String path28 = "/"+replaceDecomFileRootDir + "/";
+//				
+//				checkResultMap.put(s, deCompResultMap.containsKey(s) ? deCompResultMap.get(s) : 0);
+//				checkResultMap.put(path2, deCompResultMap.containsKey(path2) ? deCompResultMap.get(path2) : 0);
+//				checkResultMap.put(path3, deCompResultMap.containsKey(path3) ? deCompResultMap.get(path3) : 0);
+//				checkResultMap.put(path4, deCompResultMap.containsKey(path4) ? deCompResultMap.get(path4) : 0);
+//
+//				checkResultMap.put(path5, deCompResultMap.containsKey(path5) ? deCompResultMap.get(path5) : 0);
+//				checkResultMap.put(path6, deCompResultMap.containsKey(path6) ? deCompResultMap.get(path6) : 0);
+//				checkResultMap.put(path7, deCompResultMap.containsKey(path7) ? deCompResultMap.get(path7) : 0);
+//				checkResultMap.put(path8, deCompResultMap.containsKey(path8) ? deCompResultMap.get(path8) : 0);
+//
+//				checkResultMap.put(path9, deCompResultMap.containsKey(path9) ? deCompResultMap.get(path9) : 0);
+//				checkResultMap.put(path10, deCompResultMap.containsKey(path10) ? deCompResultMap.get(path10) : 0);
+//				checkResultMap.put(path11, deCompResultMap.containsKey(path11) ? deCompResultMap.get(path11) : 0);
+//				checkResultMap.put(path12, deCompResultMap.containsKey(path12) ? deCompResultMap.get(path12) : 0);
+//
+//				checkResultMap.put(path13, deCompResultMap.containsKey(path13) ? deCompResultMap.get(path13) : 0);
+//				checkResultMap.put(path14, deCompResultMap.containsKey(path14) ? deCompResultMap.get(path14) : 0);
+//				checkResultMap.put(path15, deCompResultMap.containsKey(path15) ? deCompResultMap.get(path15) : 0);
+//				checkResultMap.put(path16, deCompResultMap.containsKey(path16) ? deCompResultMap.get(path16) : 0);
+//
+//				checkResultMap.put(path17, deCompResultMap.containsKey(path17) ? deCompResultMap.get(path17) : 0);
+//				checkResultMap.put(path18, deCompResultMap.containsKey(path18) ? deCompResultMap.get(path18) : 0);
+//				checkResultMap.put(path19, deCompResultMap.containsKey(path19) ? deCompResultMap.get(path19) : 0);
+//				checkResultMap.put(path20, deCompResultMap.containsKey(path20) ? deCompResultMap.get(path20) : 0);
+//
+//				checkResultMap.put(path21, deCompResultMap.containsKey(path21) ? deCompResultMap.get(path21) : 0);
+//				checkResultMap.put(path22, deCompResultMap.containsKey(path22) ? deCompResultMap.get(path22) : 0);
+//				checkResultMap.put(path23, deCompResultMap.containsKey(path23) ? deCompResultMap.get(path23) : 0);
+//				checkResultMap.put(path24, deCompResultMap.containsKey(path24) ? deCompResultMap.get(path24) : 0);
+//
+//				String _tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path25), path25);
+//				checkResultMap.put(path25, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+//				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path26), path26);
+//				checkResultMap.put(path26, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+//				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path27), path27);
+//				checkResultMap.put(path27, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+//				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path28), path28);
+//				checkResultMap.put(path28, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+//				
+//				idx ++;
+//			}
 
-				checkResultMap.put(pathCheckList11.get(idx), deCompResultMap.containsKey(pathCheckList11.get(idx)) ? deCompResultMap.get(pathCheckList11.get(idx)) : 0);
-				checkResultMap.put(pathCheckList21.get(idx), deCompResultMap.containsKey(pathCheckList21.get(idx)) ? deCompResultMap.get(pathCheckList21.get(idx)) : 0);
-				checkResultMap.put(pathCheckList31.get(idx), deCompResultMap.containsKey(pathCheckList31.get(idx)) ? deCompResultMap.get(pathCheckList31.get(idx)) : 0);
-				checkResultMap.put(pathCheckList41.get(idx), deCompResultMap.containsKey(pathCheckList41.get(idx)) ? deCompResultMap.get(pathCheckList41.get(idx)) : 0);
-
-				checkResultMap.put(pathCheckList12.get(idx), deCompResultMap.containsKey(pathCheckList12.get(idx)) ? deCompResultMap.get(pathCheckList12.get(idx)) : 0);
-				checkResultMap.put(pathCheckList22.get(idx), deCompResultMap.containsKey(pathCheckList22.get(idx)) ? deCompResultMap.get(pathCheckList22.get(idx)) : 0);
-				checkResultMap.put(pathCheckList32.get(idx), deCompResultMap.containsKey(pathCheckList32.get(idx)) ? deCompResultMap.get(pathCheckList32.get(idx)) : 0);
-				checkResultMap.put(pathCheckList42.get(idx), deCompResultMap.containsKey(pathCheckList42.get(idx)) ? deCompResultMap.get(pathCheckList42.get(idx)) : 0);
-
-				checkResultMap.put(pathCheckList13.get(idx), deCompResultMap.containsKey(pathCheckList13.get(idx)) ? deCompResultMap.get(pathCheckList13.get(idx)) : 0);
-				checkResultMap.put(pathCheckList23.get(idx), deCompResultMap.containsKey(pathCheckList23.get(idx)) ? deCompResultMap.get(pathCheckList23.get(idx)) : 0);
-				checkResultMap.put(pathCheckList33.get(idx), deCompResultMap.containsKey(pathCheckList33.get(idx)) ? deCompResultMap.get(pathCheckList33.get(idx)) : 0);
-				checkResultMap.put(pathCheckList43.get(idx), deCompResultMap.containsKey(pathCheckList43.get(idx)) ? deCompResultMap.get(pathCheckList43.get(idx)) : 0);
-
-				checkResultMap.put(pathCheckList14.get(idx), deCompResultMap.containsKey(pathCheckList14.get(idx)) ? deCompResultMap.get(pathCheckList14.get(idx)) : 0);
-				checkResultMap.put(pathCheckList24.get(idx), deCompResultMap.containsKey(pathCheckList24.get(idx)) ? deCompResultMap.get(pathCheckList24.get(idx)) : 0);
-				checkResultMap.put(pathCheckList34.get(idx), deCompResultMap.containsKey(pathCheckList34.get(idx)) ? deCompResultMap.get(pathCheckList34.get(idx)) : 0);
-				checkResultMap.put(pathCheckList44.get(idx), deCompResultMap.containsKey(pathCheckList44.get(idx)) ? deCompResultMap.get(pathCheckList44.get(idx)) : 0);
-
-				checkResultMap.put(pathCheckList15.get(idx), deCompResultMap.containsKey(pathCheckList15.get(idx)) ? deCompResultMap.get(pathCheckList15.get(idx)) : 0);
-				checkResultMap.put(pathCheckList25.get(idx), deCompResultMap.containsKey(pathCheckList25.get(idx)) ? deCompResultMap.get(pathCheckList25.get(idx)) : 0);
-				checkResultMap.put(pathCheckList35.get(idx), deCompResultMap.containsKey(pathCheckList35.get(idx)) ? deCompResultMap.get(pathCheckList35.get(idx)) : 0);
-				checkResultMap.put(pathCheckList45.get(idx), deCompResultMap.containsKey(pathCheckList45.get(idx)) ? deCompResultMap.get(pathCheckList45.get(idx)) : 0);
-
-				
-				String _tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList16.get(idx)), pathCheckList16.get(idx));
-				checkResultMap.put(pathCheckList16.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList26.get(idx)), pathCheckList26.get(idx));
-				checkResultMap.put(pathCheckList26.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList36.get(idx)), pathCheckList36.get(idx));
-				checkResultMap.put(pathCheckList36.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList46.get(idx)), pathCheckList46.get(idx));
-				checkResultMap.put(pathCheckList46.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-				
-				idx ++;
-			}
-
-			
 			int gridIdx = 0;
 			ArrayList<String> gValidIdxlist = new ArrayList<>();
 			HashMap<String,Object> gFileCountMap = new HashMap<>();
@@ -997,9 +1095,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					 */
 					boolean resultFlag = false;
 					
-					if (checkResultMap.containsKey(gridPath)) {
+					Map<String, Integer> resultMap = checkGridPath(gridPath, deCompResultMap, decompressionDirName, packageFileName, decompressionRootPath);
+					if (resultMap != null && !resultMap.isEmpty()) {
 						resultFlag = true;
-						gFileCount = checkResultMap.get(gridPath);
+						gFileCount = resultMap.get(gridPath);
 					}
 					
 					if (!resultFlag) {//path가 존재하지않을 때
@@ -1232,6 +1331,128 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		return resMap;
 	}
 	
+	private Map<String, Integer> checkGridPath(String gridPath, Map<String, Integer> deCompResultMap, String decompressionDirName, String packageFileName, String decompressionRootPath) {
+		Map<String, Integer> checkGridMap = new HashMap<>();
+		List<String> checkPathList = new ArrayList<>();
+		boolean matchFlag = false;
+		
+		for (String s : deCompResultMap.keySet()) {
+			String path = s;
+			checkPathList.add(path);
+			checkPathList.add("/" + path);
+			checkPathList.add(path + "/");
+			checkPathList.add("/"+ path + "/");
+			
+			String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+			
+			if (replaceFilePath.startsWith("/")) {
+				replaceFilePath = replaceFilePath.substring(1);
+			}
+			
+			if (replaceFilePath.endsWith("/")) {
+				replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
+			}
+			
+			checkPathList.add(replaceFilePath);
+			checkPathList.add("/" + replaceFilePath);
+			checkPathList.add(replaceFilePath + "/");
+			checkPathList.add("/"+ replaceFilePath + "/");
+			
+			String addRootDir = decompressionDirName + "/" + path;
+			
+			if (addRootDir.startsWith("/")) {
+				addRootDir = addRootDir.substring(1);
+			}
+			
+			if (addRootDir.endsWith("/")) {
+				addRootDir = addRootDir.substring(0, addRootDir.length()-1);
+			}
+			
+			checkPathList.add(addRootDir);
+			checkPathList.add("/" + addRootDir);
+			checkPathList.add(addRootDir + "/");
+			checkPathList.add("/"+ addRootDir + "/");
+			
+			String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+			
+			if (addRootDirReplaceFilePath.startsWith("/")) {
+				addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
+			}
+			
+			if (addRootDirReplaceFilePath.endsWith("/")) {
+				addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
+			}
+			
+			checkPathList.add(addRootDirReplaceFilePath);
+			checkPathList.add("/" + addRootDirReplaceFilePath);
+			checkPathList.add(addRootDirReplaceFilePath + "/");
+			checkPathList.add("/"+ addRootDirReplaceFilePath + "/");
+
+			String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
+			if (replaceRootDir.startsWith("/")) {
+				replaceRootDir = replaceRootDir.substring(1);
+			}
+			
+			if (replaceRootDir.endsWith("/")) {
+				replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
+			}
+			
+			checkPathList.add(replaceRootDir);
+			checkPathList.add("/" + replaceRootDir);
+			checkPathList.add(replaceRootDir + "/");
+			checkPathList.add("/"+ replaceRootDir + "/");
+			
+			String replaceRootDirReplaceFilePath = replaceRootDir;
+			
+			if (replaceRootDirReplaceFilePath.endsWith("*")) {
+				replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+			}
+			
+			if (replaceRootDirReplaceFilePath.endsWith("/")) {
+				replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+			}
+			
+			checkPathList.add(replaceRootDirReplaceFilePath);
+			checkPathList.add("/" + replaceRootDirReplaceFilePath);
+			checkPathList.add(replaceRootDirReplaceFilePath + "/");
+			checkPathList.add("/"+ replaceRootDirReplaceFilePath + "/");
+			
+			String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
+			
+			if (replaceDecomFileRootDir.startsWith("/")) {
+				replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
+			}
+			
+			if (replaceDecomFileRootDir.endsWith("/")) {
+				replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
+			}
+			
+			checkPathList.add(replaceDecomFileRootDir);
+			checkPathList.add("/" + replaceDecomFileRootDir);
+			checkPathList.add(replaceDecomFileRootDir + "/");
+			checkPathList.add("/"+ replaceDecomFileRootDir + "/");
+			
+			int idx = 0;
+			for (String checkPath : checkPathList) {
+				String customPath = checkPath;
+				if (idx >= 24) {
+					customPath = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(checkPath), checkPath);
+				}
+				if (customPath.equalsIgnoreCase(gridPath)) {
+					checkGridMap.put(gridPath, deCompResultMap.containsKey(gridPath) ? deCompResultMap.get(gridPath) : 0);
+					matchFlag = true;
+					break;
+				}
+				idx++;
+			}
+			
+			checkPathList.clear();
+			if (matchFlag) break;
+		}
+		
+		return checkGridMap;
+	}
+
 	private String addDecompressionRootPath(String path, boolean flag, String val) {
 		return flag ? val : path + "/" + val;
 	}
@@ -2632,12 +2853,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		Project prjParam = new Project(); 
 		prjParam.setPrjId(prjId);
 		  
-		Project project = projectMapper.selectProjectMaster(prjParam);
-		
 		if (fileSeq.equals("4")) {
 			prjParam.setPackageVulDocFileId(registFileId);
 			verificationMapper.updatePackageVulDocFile(prjParam);
 		} else {
+			Project project = projectMapper.selectProjectMaster(prjParam);
+			
 			if (fileSeq.equals("1")) {
 				prjParam.setPackageFileId(registFileId);
 				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);

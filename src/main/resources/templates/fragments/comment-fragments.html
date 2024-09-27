@@ -204,7 +204,29 @@
                                     	<input name="referenceId" id="referenceId"  th:value="${basicInfo.referenceId}" type="hidden">
                                 	</div>
                              	</th:block>
-                               	<th:block th:if="${basicInfo.referenceDiv == '3rd' or basicInfo.referenceDiv == 'oss' or basicInfo.referenceDiv == 'license'}">
+                             	<th:block th:if="${basicInfo.referenceDiv == 'oss'}">
+                             		<div class="col-md-3 px-1">
+                                        <select class="custom-select float-right" data-placeholder="Section" id="schReferenceDiv" name="schReferenceDiv">
+                                            <option value="" th:text="Section"></option>
+                                            <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS_COMMON')}" th:text="'All version'"></option>
+                                            <option th:value="${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}" th:text="'Current version'"></option>
+                                        </select>
+                                	</div>
+                                	<div class="col-md-9 px-0">
+                                    	<div class="input-group ml-1">
+                                        	<input class="form-control" type="text" id="schKeyword" name="schKeyword" autocomplete="off">
+                                        	<div class="input-group-append">
+                                            	<button class="btn btn-default" id="search" type="button"><i class="fa fa-search"></i></button>
+                                        	</div>
+                                        	<button class="btn btn-ivory btn-md px-2 ml-1 width-7rem commentBtn" type="button">
+                                            	<i class="fas fa-plus mr-2"></i>Add
+                                        	</button>
+                                    	</div>
+                                    	<input name="referenceDiv" id="referenceDiv" th:value="${basicInfo.referenceDiv}" type="hidden">
+                                    	<input name="referenceId" id="referenceId"  th:value="${basicInfo.referenceId}" type="hidden">
+                                	</div>
+                             	</th:block>
+                               	<th:block th:if="${basicInfo.referenceDiv == '3rd' or basicInfo.referenceDiv == 'license'}">
                                     <div class="col-md-12 px-0">
                                     	<div class="input-group ml-1">
                                         	<input class="form-control" type="text" id="schKeyword" name="schKeyword" autocomplete="off">
@@ -494,6 +516,8 @@
                                 }
                             }
                         });
+                        
+                        if ("41" == userCommentReferenceDiv) $(".checkboxArea").show();
                     });
             },
             sendEditor: function (type) {
@@ -585,7 +609,17 @@
                 <input type="hidden" id="userContents" th:value="${contents}">
                 <textarea class="form-control" id="modifiedCommentInPjtEditor" name="commentInput" rows="3" style="margin:0 auto;"></textarea>
                 <div class="row">
-                    <div class="col-12 my-2">
+                	<div class="col-lg-6 my-3">
+                		<div class="col-12 checkboxArea" style="display: none;">
+                			<span class="ml-5">
+                				<input class="form-check-input" type="radio" name="checkComment" value="42"><label class="form-check-label">All version</label>
+                			</span>
+                			<span class="ml-5">
+                				<input class="form-check-input" type="radio" name="checkComment" value="40" checked><label class="form-check-label">Current version</label>
+                			</span>
+                		</div>
+                	</div>
+                    <div class="col-lg-6 my-2">
                         <input type="button" value="Save draft" class="btn btn-outline-dark btn-md float-right" onclick="fn.saveEditor();"/>
                         <input type="button" value="Save & Send comment" class="btn btn-dark btn-md float-right mx-1" onclick="fn.sendEditor('WR');"/>
                     </div>

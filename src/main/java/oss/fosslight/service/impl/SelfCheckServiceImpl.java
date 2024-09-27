@@ -7,6 +7,7 @@ package oss.fosslight.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -274,7 +275,6 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		if (list != null && !list.isEmpty()) {
 			List<String> cvssScoreMaxList = new ArrayList<>();
-			List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
 			
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceDiv(identification.getReferenceDiv());
@@ -289,40 +289,69 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossParam.addOssIdList(bean.getOssId());
 				}
 				
-				// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
-				if (isEmpty(bean.getCveId()) 
-						&& isEmpty(bean.getOssVersion()) 
-						&& !isEmpty(bean.getCvssScoreMax())
-						&& !("-".equals(bean.getOssName()))){ 
-					String[] cvssScoreMax = bean.getCvssScoreMax().split("\\@");
-					bean.setCvssScore(cvssScoreMax[0]);
-					bean.setCveId(cvssScoreMax[1]);
+				String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+				boolean setCveInfoFlag = false;
+				if (ossInfoMap.containsKey(key)) {
+					OssMaster om = ossInfoMap.get(key);
+					if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag()))) {
+						String cveId = om.getCveId();
+						String cvssScore = om.getCvssScore();
+						if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+							bean.setCvssScore(cvssScore);
+							bean.setCveId(cveId);
+							bean.setVulnYn(CoConstDef.FLAG_YES);
+						} else {
+							setCveInfoFlag = true;
+						}
+					} else {
+						setCveInfoFlag = true;
+					}
 				}
 				
-				// convert max score
-				if (bean.getCvssScoreMax() != null) {
-					cvssScoreMaxList.add(bean.getCvssScoreMax());
+				if (setCveInfoFlag) {
+					// convert max score
+					if (bean.getCvssScoreMax() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax());
+					}
+					if (bean.getCvssScoreMax1() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax1());
+					}
+					if (bean.getCvssScoreMax2() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax2());
+					}
+					if (bean.getCvssScoreMax3() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax3());
+					}
+					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+						if (cvssScoreMaxList.size() > 1) {
+							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+								@Override
+								public int compare(String o1, String o2) {
+									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+										return -1;
+									}else {
+										return 1;
+									}
+								}
+							});
+						}
+						
+						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+						bean.setCvssScore(cveData[3]);
+						bean.setCveId(cveData[4]);
+						bean.setVulnYn(CoConstDef.FLAG_YES);
+					} else {
+						String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, null, cvssScoreMaxList, false);
+						if (conversionCveInfo != null) {
+							String[] conversionCveData = conversionCveInfo.split("\\@");
+							bean.setCvssScore(conversionCveData[3]);
+							bean.setCveId(conversionCveData[4]);
+							bean.setVulnYn(CoConstDef.FLAG_YES);
+						}
+					}
+					
+					cvssScoreMaxList.clear();
 				}
-				if (bean.getCvssScoreMax1() != null) {
-					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax1());
-				}
-				if (bean.getCvssScoreMax2() != null) {
-					cvssScoreMaxList.add(bean.getCvssScoreMax2());
-				}
-				if (bean.getCvssScoreMax3() != null) {
-					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
-				}
-				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
-				if (conversionCveInfo != null) {
-					String[] conversionCveData = conversionCveInfo.split("\\@");
-					bean.setCvssScore(conversionCveData[3]);
-					bean.setCveId(conversionCveData[4]);
-					bean.setVulnYn(CoConstDef.FLAG_YES);
-				}
-				
-				cvssScoreMaxVendorProductList.clear();
-				cvssScoreMaxList.clear();
 			}
 				
 			// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득
@@ -620,10 +649,10 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		prj.setReferenceDiv(refDiv);
 		List<OssComponents> componentId = selfCheckMapper.selectComponentId(prj);
 		
-		deletePreparedStatement(componentId);
-//		for (int i = 0; i < componentId.size(); i++) {
-//			selfCheckMapper.deleteOssComponentsLicense(componentId.get(i));
-//		}
+//		deletePreparedStatement(componentId);
+		for (int i = 0; i < componentId.size(); i++) {
+			selfCheckMapper.deleteOssComponentsLicense(componentId.get(i));
+		}
 				
 		// 한건도 없을시 프로젝트 마스터 SRC 사용가능여부가 N이면 N 그외 null
 		if (ossComponent.size()==0){
@@ -658,12 +687,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		//deleteRows
 		List<String> deleteRows = new ArrayList<String>();
-		List<ProjectIdentification> updateOssComponentList = new ArrayList<>();
-		List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
-		List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
 		
 		String ossInfoKey = "";
-		int componentIdx = Integer.parseInt(selfCheckMapper.selectComponentIdx(prj));
+		
 		// 컴포넌트 등록	
 		for (int i = 0; i < ossComponent.size(); i++) {
 			String downloadLocation = ossComponent.get(i).getDownloadLocation();
@@ -676,8 +702,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			//update
 			if (!StringUtil.contains(ossComponent.get(i).getGridId(), CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
 				//ossComponents 등록
-//				selfCheckMapper.updateSrcOssList(ossComponent.get(i));
-				updateOssComponentList.add(ossComponent.get(i));
+				selfCheckMapper.updateSrcOssList(ossComponent.get(i));
 				deleteRows.add(ossComponent.get(i).getComponentIdx());
 				
 				//멀티라이센스일 경우
@@ -688,8 +713,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 							OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
 							license.setComponentLicenseId(String.valueOf(componentLicenseId));
 							// 라이센스 등록
-//							selfCheckMapper.registComponentLicense(license);
-							insertOssComponentLicenseList.add(license);
+							selfCheckMapper.registComponentLicense(license);
 							componentLicenseId++;
 						}
 					}
@@ -697,14 +721,13 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossComponent.get(i), CoConstDef.LICENSE_DIV_SINGLE);
 					license.setComponentLicenseId(String.valueOf(componentLicenseId));
 					// 라이센스 등록
-//					selfCheckMapper.registComponentLicense(license);
-					insertOssComponentLicenseList.add(license);
+					selfCheckMapper.registComponentLicense(license);
 				}
 			} else { // insert
 				//ossComponents 등록
 				String exComponentId = ossComponent.get(i).getGridId();
 				//component_idx key
-//				String componentIdx = selfCheckMapper.selectComponentIdx(prj);
+				String componentIdx = selfCheckMapper.selectComponentIdx(prj);
 				
 				ossComponent.get(i).setReferenceId(project.getPrjId());
 				ossComponent.get(i).setReferenceDiv(refDiv);
@@ -718,8 +741,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					ossComponent.get(i).setObligationType(ossInfo.getObligationType());
 				}
 				
-//				selfCheckMapper.insertSrcOssList(ossComponent.get(i));
-				insertOssComponentList.add(ossComponent.get(i));
+				selfCheckMapper.insertSrcOssList(ossComponent.get(i));
 				deleteRows.add(String.valueOf(componentIdx));
 				
 				//멀티라이센스일 경우
@@ -741,8 +763,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 								// 컴포넌트 ID 설정
 								license.setComponentId(_componentId);
 								license.setComponentLicenseId(String.valueOf(componentLicenseId));
-								insertOssComponentLicenseList.add(license);
-//								selfCheckMapper.registComponentLicense(license);
+								selfCheckMapper.registComponentLicense(license);
 							}
 							componentLicenseId++;
 						}
@@ -752,17 +773,14 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 					// 라이센스 등록
 					license.setComponentId(_componentId);
 					license.setComponentLicenseId(String.valueOf(componentLicenseId));
-					insertOssComponentLicenseList.add(license);
-//					selfCheckMapper.registComponentLicense(license);
+					selfCheckMapper.registComponentLicense(license);
 				}
-				
-				componentIdx++;
 			}
 		}
 		
-		{
-			updatePreparedStatement(updateOssComponentList, insertOssComponentList, insertOssComponentLicenseList);
-		}
+//		{
+//			updatePreparedStatement(updateOssComponentList, insertOssComponentList, insertOssComponentLicenseList);
+//		}
 		
 		{
 			Project _ossidUpdateParam = new Project();

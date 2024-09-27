@@ -3301,28 +3301,31 @@ var grid = {
 				var permission = partnerData.permission == 1;
 				
 				if (iCol != "17" && (permission && "CONF" != partnerStatus)) {
-					cleanErrMsg("list", rowid);
-					fn_grid_com.setCellEdit(partnerList, rowid, partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
+					if ('ROLE_USER' == userRole && ('REQ' == partnerStatus || 'REV' == partnerStatus)) {
+					} else {
+						cleanErrMsg("list", rowid);
+						fn_grid_com.setCellEdit(partnerList, rowid, partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
 
-					// 서브 그리드 제외
-					ondblClickRowBln = false;
-					
-					$('#'+rowid+'_licenseName').addClass('autoCom');
-					$('#'+rowid+'_licenseName').css({'width' : '60px'});
-					var result = $('#'+rowid+'_licenseName').val().split(",");
-					
-					result.forEach(function(cur,idx){
-						if(cur != ""){
-							var mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-							
-							$('#'+rowid+'_licenseNameBtn').append(mult);
-						}
-					});
-					
-					$('#'+rowid+'_licenseName').val("");
-                    var nextCol = partnerList.jqGrid('getGridParam', 'colModel')[iCol].name;
-                    var nextRow = rowid;
-                    $('#'+nextRow+"_"+nextCol).focus();
+						// 서브 그리드 제외
+						ondblClickRowBln = false;
+						
+						$('#'+rowid+'_licenseName').addClass('autoCom');
+						$('#'+rowid+'_licenseName').css({'width' : '60px'});
+						var result = $('#'+rowid+'_licenseName').val().split(",");
+						
+						result.forEach(function(cur,idx){
+							if(cur != ""){
+								var mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+								
+								$('#'+rowid+'_licenseNameBtn').append(mult);
+							}
+						});
+						
+						$('#'+rowid+'_licenseName').val("");
+	                    var nextCol = partnerList.jqGrid('getGridParam', 'colModel')[iCol].name;
+	                    var nextRow = rowid;
+	                    $('#'+nextRow+"_"+nextCol).focus();
+					}
 				}
 			},
 			onPaging: function(action) {

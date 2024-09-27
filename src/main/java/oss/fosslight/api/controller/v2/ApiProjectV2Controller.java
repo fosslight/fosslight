@@ -9,19 +9,23 @@ import com.google.common.collect.Lists;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
+import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.*;
 import oss.fosslight.repository.CodeMapper;
@@ -31,17 +35,20 @@ import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
+import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.websocket.server.PathParam;
 import java.util.*;
 
 @Api(tags = {"3. Project"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
+@Validated
 public class ApiProjectV2Controller extends CoTopComponent {
 
     @Resource
@@ -80,12 +87,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
     @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Name", required = false) @RequestParam(required = false) String prjName,
             @ApiParam(value = "Project Name exact match (Y: true, N: false)", allowableValues = "Y,N", required = false) @RequestParam(required = false, defaultValue = "N") String prjNameExactYn,
             @ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
@@ -129,12 +133,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_MODEL_SEARCH})
     public ResponseEntity<Map<String, Object>> selectModelList(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "project ID List", required = true) @RequestParam(required = true) String[] prjIdList) {
 
         // 사용자 인증
@@ -158,12 +159,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Update model list of project", notes = "Basic Information > Model list")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE})
     public ResponseEntity<Map<String, Object>> updateModelList(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(required = true, name = "id") String prjId,
             @ApiParam(
                     value = "Model List, in format of: ${MODEL_NAME}|${CATEGORY}|${yyyyMMdd} (ex. MODEL_NAME|ETC > Etc|20220428)",
@@ -221,12 +219,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Update model list of project with file", notes = "Basic Information > Model list with file")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
     public ResponseEntity<Map<String, Object>> updateModelListUploadFile(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
 
@@ -280,12 +275,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Create Project", notes = "project 생성")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_CREATE})
     public ResponseEntity<Map<String, Object>> createProject(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Name (Duplicate not allowed)", required = true) @RequestParam(required = true) String prjName,
             @ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion,
             @ApiParam(value = "OS Type (\"Check the input value with /api/v2/codes\")", required = true) @RequestParam(required = true) String osType,
@@ -461,15 +453,18 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Project Bom Tab Export", notes = "Project > Bom tab Export")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_EXPORT})
-    public ResponseEntity<FileSystemResource> getPrjBomExport(
-            @RequestHeader String authorization,
+
+    @ApiOperation(value = "Project Bom Download as File", notes = "Project > Bom tab download as file")
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD})
+    public ResponseEntity<FileSystemResource> getPrjBomDownload(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Merge & Save Flag (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String mergeSaveFlag) {
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet")
+            @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+
+        log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
         // 사용자 인증
         String downloadId = "";
@@ -489,9 +484,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
 
             if (searchFlag) {
-                if ("Y".equals(mergeSaveFlag)) {
+                if ("Y".equals(saveFlag)) {
 //                    apiProjectService.registBom(prjId, mergeSaveFlag);
-                    projectService.registBom(prjId, mergeSaveFlag, new ArrayList<>(), new ArrayList<>());
+                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
                 }
                 downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
                 fileInfo = fileService.selectFileInfo(downloadId);
@@ -504,14 +499,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Project Bom Tab Export Json", notes = "Project > Bom tab Export Json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_EXPORT_JSON})
-    public ResponseEntity<Map<String, Object>> getPrjBomExportJson(
-            @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId) {
+    @ApiOperation(value = "Get Project Bom Tab As Json", notes = "Project > Get Bom tab data as json")
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_JSON})
+    public ResponseEntity<Map<String, Object>> getPrjBomAsJson(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -530,6 +524,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             if (searchFlag) {
                 resultMap = apiProjectService.getBomExportJson(prjId);
+                if ("Y".equals(saveFlag)) {
+                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
+                }
             }
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
@@ -538,12 +535,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Project Bom Compare", notes = "Project > Bom tab Compare")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_COMPARE})
     public ResponseEntity<Map<String, Object>> getPrjBomCompare(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
             @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
 
@@ -608,16 +602,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    @ApiOperation(value = "Identification OSS Report", notes = "Identification > src > oss report")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SRC})
-    public ResponseEntity<Map<String, Object>> ossReportSrc(
-            @RequestHeader String authorization,
+    @ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT})
+    public ResponseEntity<Map<String, Object>> ossReportAll(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "OSS Report > sheetName : all sheets starting with 'SRC'", required = false) @RequestPart(required = false) MultipartFile ossReport,
+            @ApiParam(value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin") @PathVariable(name = "tab_name") String tabName,
+            @ApiParam(value = "OSS Report", required = true) @RequestPart(required = true) MultipartFile ossReport,
             @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
             @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
@@ -625,45 +616,61 @@ public class ApiProjectV2Controller extends CoTopComponent {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
+        tabName = tabName == null? null : tabName.toUpperCase();
+        if (tabName == null || (!tabName.equals("DEP") && !tabName.equals("SRC") && !tabName.equals("BIN"))) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tab name : " + tabName);
+        }
+
         try {
             Map<String, Object> paramMap = new HashMap<>();
             List<String> prjIdList = new ArrayList<String>();
             prjIdList.add(prjId);
             paramMap.put("userId", userInfo.getUserId());
+            paramMap.put("loginUserName", userInfo.getUserName());
             paramMap.put("userRole", userRole(userInfo));
             paramMap.put("prjId", prjIdList);
             paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
             paramMap.put("distributionType", "normal");
+            paramMap.put("readOnly", CoConstDef.FLAG_NO);
 
             boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
 
             if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.FORBIDDEN); // TODO: permission 맞나?
+                return responseService.errorResponse(HttpStatus.NOT_FOUND);
             }
 
             String oldFileId = "";
             if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
                 Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
-                if (prjInfo.get("srcCsvFileId") != null) {
-                    oldFileId = String.valueOf((int) prjInfo.get("srcCsvFileId"));
+                if (prjInfo.get(tabName.toLowerCase() + "CsvFileId") != null) {
+                    oldFileId = String.valueOf((int) prjInfo.get(tabName.toLowerCase() + "CsvFileId"));
                 }
             }
+
+            List<ProjectIdentification> ossComponents = new ArrayList<>();
+            List<List<ProjectIdentification>> ossComponentsLicense = null;
+            String changeExclude = "";
+            String changeAdded = "";
+            Project project = new Project();
+            UploadFile ossReportBean = null;
+            UploadFile binaryTxtBean = null;
 
             if (ossReport == null) {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, "ossReport is required.");
             }
             if (!ossReport.getOriginalFilename().contains("xls")) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST);
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid oss report file format.");
             }
             if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) {
                 return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
             }
-
             boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) src -> bin Android
             if (!checkDistributionTypeFlag) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Target project invalid");
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE,
+                                CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE)
+                                + " Check Project Distribution Type");
             }
 
             UploadFile bean = null;
@@ -679,8 +686,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             try {
                 if (sheetNamesEmptyFlag) {
-                    sheet = ExcelUtil.getSheetNoStartsWith("SRC", Arrays.asList(bean),
-                            CommonFunction.emptyCheckProperty("upload.path", "/upload"));
+                    sheet = ExcelUtil.getSheetNoStartsWith(tabName, Arrays.asList(bean), CommonFunction.emptyCheckProperty("upload.path", "/upload"));
                 } else {
                     List<UploadFile> list = new ArrayList<UploadFile>();
                     list.add(bean);
@@ -698,417 +704,76 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         }
                     }
                 }
-            } catch (Exception e) {
+            }  catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
 
             Map<String, Object> result = null;
             if (sheetNamesEmptyFlag) {
-                result = apiProjectService.getSheetData(bean, prjId, "SRC", sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY);
-                resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(), userInfo.getUserId(), comment, "SRC", "SRC", sheetNamesEmptyFlag, false, 0);
+                result = apiProjectService.getSheetData(bean, prjId, tabName.toUpperCase(),
+                        sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY);
+                resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(),
+                        userInfo.getUserId(), comment, tabName, tabName, sheetNamesEmptyFlag,
+                        false, 0);
             } else {
                 int sheetLength = sheetNames.split(",").length;
                 int sheetIdx = 0;
                 for (String sheetNm : sheetNames.split(",")) {
                     if (isEmpty(sheetNm.trim())) continue;
-                    result = apiProjectService.getSheetData(bean, prjId, sheetNm.trim(), sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY, true);
-                    resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(), userInfo.getUserId(), comment, "SRC", sheetNm.trim(), sheetNamesEmptyFlag, sheetLength > 1 ? true : false, sheetIdx);
+                    result = apiProjectService.getSheetData(bean, prjId, sheetNm.trim(),
+                            sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY,
+                            true);
+                    resultMap = apiProjectService.getProcessSheetData(result, prjId, resetFlag, bean.getRegistFileId(),
+                            userInfo.getUserId(), comment, tabName, sheetNm.trim(), sheetNamesEmptyFlag,
+                            sheetLength > 1 ? true : false, sheetIdx);
                     sheetIdx++;
                     if (!resultMap.isEmpty()) {
                         break;
                     }
                 }
             }
-
             if (resultMap.isEmpty()) {
                 // 정상처리된 경우 세션 삭제
-                deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
-                deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+                switch(tabName) {
+                    case "DEP":
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
+                        break;
+                    case "SRC":
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_SRC, prjId));
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_SRC, prjId));
+                        break;
+                    case "BIN":
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
+                        deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN, prjId));
+                        break;
+                }
                 return new ResponseEntity<>(resultMap, HttpStatus.OK);
             } else {
                 if (resultMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
-
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
+                            CoCodeManager.getCodeString(
+                                    CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
                 } else if (resultMap.containsKey("validError")) {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
+                            CoCodeManager.getCodeString(
+                                    CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
                 } else {
                     return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
-                }
-            }
-        } catch (Exception e) {
-            // TODO: used to be BAD REQUEST, add case when user's input is wrong
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @ApiOperation(value = "Identification OSS Report", notes = "Identification > bin > oss report")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_BIN})
-    public ResponseEntity<Map<String, Object>> ossReportBin(
-            @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "OSS Report > sheetName : 'BIN'", required = false) @RequestPart(required = false) MultipartFile ossReport,
-            @ApiParam(value = "Binary.txt", required = false) @RequestPart(required = false) MultipartFile binaryTxt,
-            @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
-            @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
-
-        T2Users userInfo = userService.checkApiUserAuth(authorization); // token이 정상적인 값인지 확인
-        Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
-
-        try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> prjIdList = new ArrayList<String>();
-            prjIdList.add(prjId);
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("loginUserName", userInfo.getUserName());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjIdList);
-            paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
-            paramMap.put("distributionType", "normal");
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
-
-            boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
-
-            if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.FORBIDDEN);
-            }
-            List<ProjectIdentification> ossComponents = new ArrayList<>();
-            List<List<ProjectIdentification>> ossComponentsLicense = null;
-            String changeExclude = "";
-            String changeAdded = "";
-            Project project = new Project();
-            UploadFile ossReportBean = null;
-            UploadFile binaryTxtBean = null;
-
-            String oldFileId = "";
-            if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-                Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
-                if (prjInfo.get("binCsvFileId") != null) {
-                    oldFileId = String.valueOf((int) prjInfo.get("binCsvFileId"));
-                }
-            }
-
-            if (ossReport != null) {
-                if (!ossReport.getOriginalFilename().contains("xls")) { // 확장자 xls, xlsx, xlsm 허용
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
-                } else if (CoConstDef.CD_XLSX_UPLOAD_FILE_SIZE_LIMIT <= ossReport.getSize()) { // file size 5MB 이하만 허용.
-                    return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
-                }
-
-                boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) bin -> bin Android
-                if (!checkDistributionTypeFlag) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE));
-                }
-
-                if (!isEmpty(oldFileId)) {
-                    ossReportBean = apiFileService.uploadFile(ossReport, null, oldFileId);
-                } else {
-                    ossReportBean = apiFileService.uploadFile(ossReport);
-                }
-
-                List<String> sheet = null;
-                boolean sheetNamesEmptyFlag = isEmpty(sheetNames) ? true : false;
-                try {
-                    if (sheetNamesEmptyFlag) {
-                        sheet = ExcelUtil.getSheetNoStartsWith("BIN", Arrays.asList(ossReportBean), CommonFunction.emptyCheckProperty("upload.path", "/upload"));
-                    } else {
-                        List<UploadFile> list = new ArrayList<UploadFile>();
-                        list.add(ossReportBean);
-
-                        List<Object> sheets = ExcelUtil.getSheetNames(list, CommonFunction.emptyCheckProperty("upload.path", "/upload"));
-                        boolean createListFlag = false;
-                        for (Object obj : sheets) {
-                            Map<String, Object> sheetMap = (Map<String, Object>) obj;
-                            if (sheetMap.containsKey("name")) {
-                                if (!createListFlag) {
-                                    sheet = new ArrayList<>();
-                                    createListFlag = true;
-                                }
-                                sheet.add((String) sheetMap.get("name"));
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
-
-                Map<String, Object> result = null;
-                boolean errorFlag = false;
-                String errorMsg = "";
-                String sheetName = "";
-
-                if (sheetNamesEmptyFlag) {
-                    sheetName = "BIN";
-                    result = apiProjectService.getSheetData(ossReportBean, prjId, sheetName, sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY);
-                    if (result.containsKey("errorMsg")) {
-                        errorMsg = (String) result.get("errorMsg");
-                    }
-                } else {
-                    for (String sheetNm : sheetNames.split(",")) {
-                        sheetName = sheetNm.trim();
-                        if (isEmpty(sheetName)) continue;
-                        Map<String, Object> rtnMap = apiProjectService.getSheetData(ossReportBean, prjId, sheetName, sheet != null ? sheet.toArray(new String[sheet.size()]) : ArrayUtils.EMPTY_STRING_ARRAY, true);
-                        String rtnErrorMsg = "";
-                        if (rtnMap.containsKey("errorMsg")) {
-                            rtnErrorMsg = (String) rtnMap.get("errorMsg");
-                            if (!isEmpty(rtnErrorMsg) && rtnErrorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
-                                errorMsg = rtnErrorMsg;
-                                break;
-                            }
-                        }
-
-                        List<ProjectIdentification> rtnOssComponents = (List<ProjectIdentification>) rtnMap.get("ossComponents");
-                        rtnOssComponents = (rtnOssComponents != null ? rtnOssComponents : new ArrayList<>());
-                        if (rtnOssComponents.isEmpty()) {
-                            errorFlag = true;
-                            break;
-                        } else {
-                            ossComponents.addAll(rtnOssComponents);
-                        }
-
-                        List<List<ProjectIdentification>> rtnOssComponentsLicense = (List<List<ProjectIdentification>>) rtnMap.get("ossComponentLicense");
-                        if (rtnOssComponentsLicense != null) {
-                            if (ossComponentsLicense == null) {
-                                ossComponentsLicense = new ArrayList<>();
-                            }
-                            ossComponentsLicense.addAll(rtnOssComponentsLicense);
-                        }
-                    }
-                }
-
-                if (!isEmpty(errorMsg) && errorMsg.toUpperCase().startsWith("THERE ARE NO OSS LISTED")) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST
-                            , CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE));
-                }
-
-                if (!isEmpty(errorMsg)) {
-                    resultMap.put("errorMessage", errorMsg);
-                }
-
-                if (sheetNamesEmptyFlag) {
-                    ossComponents = (List<ProjectIdentification>) result.get("ossComponents");
-                    ossComponents = (ossComponents != null ? ossComponents : new ArrayList<>());
-                    ossComponentsLicense = (List<List<ProjectIdentification>>) result.get("ossComponentLicense");
-
-                    if (ossComponents.isEmpty()) {
-                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, getMessage("api.upload.file.sheet.no.match", new String[]{"BIN*"}));
-                    }
-                } else {
-                    if (errorFlag) {
-                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, getMessage("api.upload.file.sheet.no.match", new String[]{sheetName + "*"}));
-                    }
-                }
-
-                project.setBinCsvFileId(ossReportBean.getRegistFileId()); // set file id
-            }
-
-            if (binaryTxt != null) {
-                if (!binaryTxt.getOriginalFilename().contains("txt")) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
-                }
-                binaryTxtBean = apiFileService.uploadFile(binaryTxt); // file 등록 처리 이후 upload된 file정보를 return함.
-                String binaryFileId = binaryTxtBean.getRegistFileId();
-                List<String> binaryTxtList = CommonFunction.getBinaryListBinBinaryTxt(fileService.selectFileInfoById(binaryFileId));
-
-                if (binaryTxtList != null && !binaryTxtList.isEmpty()) {
-                    // 현재 osslist의 binary 목록을 격납
-                    Map<String, ProjectIdentification> componentBinaryList = new HashMap<>();
-                    for (ProjectIdentification bean : ossComponents) {
-                        if (bean != null && !isEmpty(bean.getBinaryName())) {
-                            componentBinaryList.put(bean.getBinaryName(), bean);
-                        }
-                    }
-                    List<ProjectIdentification> addComponentList = Lists.newArrayList();
-                    // 존재여부 확인
-                    for (String binaryNameTxt : binaryTxtList) {
-                        if (!componentBinaryList.containsKey(binaryNameTxt)) {
-                            // add 해야할 list
-                            ProjectIdentification bean = new ProjectIdentification();
-                            // 화면에서 추가한 것 처럼 jqg로 시작하는 component id를 임시로 설정한다.
-                            bean.setGridId("jqg_" + binaryFileId + "_" + addComponentList.size());
-                            bean.setBinaryName(binaryNameTxt);
-                            addComponentList.add(bean);
-
-                            changeAdded += "<br> - " + binaryNameTxt;
-                        }
-                        // exclude처리된 경우
-                        else {
-                            ProjectIdentification bean = componentBinaryList.get(binaryNameTxt);
-                            if (bean != null && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
-                                changeExclude += "<br>" + binaryNameTxt;
-                            }
-                        }
-                    }
-                    if (addComponentList != null && !addComponentList.isEmpty()) {
-                        ossComponents.addAll(addComponentList);
-                    }
-                }
-
-                project.setBinBinaryFileId(binaryFileId);
-            }
-
-            if (ossReportBean == null && binaryTxtBean == null) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_NOTEXISTS_MESSAGE));
-            } else {
-                T2CoProjectValidator pv = new T2CoProjectValidator();
-                pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BIN);
-                pv.setValidLevel(pv.VALID_LEVEL_BASIC);
-                pv.setAppendix("mainList", ossComponents); // sub grid
-                pv.setAppendix("subList", ossComponentsLicense);
-                T2CoValidationResult vr = pv.validate(new HashMap<>());
-
-                if (!vr.isValid()) {
-                    return responseService.errorResponse(HttpStatus.UNPROCESSABLE_ENTITY,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_DATA_VALIDERROR_MESSAGE));
-                } else {
-                    List<ProjectIdentification> ossComponentList = new ArrayList<>();
-                    List<List<ProjectIdentification>> ossComponentsLicenseList = new ArrayList<>();
-
-                    if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
-                        apiProjectService.getIdentificationGridList(prjId, CoConstDef.CD_DTL_COMPONENT_ID_BIN, ossComponentList, ossComponentsLicenseList, null);
-                    }
-
-                    ossComponentList.addAll(ossComponents);
-                    ossComponentsLicenseList.addAll(ossComponentsLicense);
-
-                    project.setPrjId(prjId);
-                    projectService.registSrcOss(ossComponentList, ossComponentsLicenseList, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN); // bin tab
-
-                    String csvFileId = project.getBinCsvFileId();
-
-                    if (!isEmpty(changeExclude) || !isEmpty(changeAdded)) {
-                        String changedByResultTxt = "";
-
-                        if (!isEmpty(changeAdded)) {
-                            changedByResultTxt += "<b>The following binaries were added to OSS List automatically because they exist in the binary.txt.</b><br>";
-                            changedByResultTxt += changeAdded;
-                        }
-                        if (!isEmpty(changeExclude)) {
-                            if (!isEmpty(changedByResultTxt)) {
-                                changedByResultTxt += "<br><br>";
-                            }
-                            changedByResultTxt += "<b>The following binaries are written to the OSS report as excluded, but they are in the binary.txt. Make sure it is not included in the final firmware.</b><br>";
-                            changedByResultTxt += changeExclude;
-                        }
-
-                        CommentsHistory commentHisBean = new CommentsHistory();
-                        commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-                        commentHisBean.setReferenceId(prjId);
-                        commentHisBean.setExpansion1("BIN");
-                        commentHisBean.setContents(changedByResultTxt);
-                        commentService.registComment(commentHisBean, false);
-                    }
-
-                    // 분석결과서 업로드시 라이선스명(닉네임)이 변경된 사항이 있으면 이력으로 등록한다.
-                    try {
-                        if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
-                                CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, csvFileId)) != null) {
-                            String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(
-                                    loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, csvFileId), true);
-                            if (!isEmpty(changedLicenseName)) {
-                                CommentsHistory commentHisBean = new CommentsHistory();
-                                commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-                                commentHisBean.setReferenceId(prjId);
-                                commentHisBean.setExpansion1("BIN");
-                                commentHisBean.setContents(changedLicenseName);
-                                commentService.registComment(commentHisBean, false);
-                            }
-                        }
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                    }
-
-                    // oss name이 nick name으로 등록되어 있는 경우, 자동치환된 Data를 comment his에 등록
-                    try {
-                        if (getSessionObject(
-                                CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId,
-                                        CoConstDef.CD_DTL_COMPONENT_ID_BIN)) != null) {
-                            String changedLicenseName = (String) getSessionObject(
-                                    CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_NICKNAME_CHANGED,
-                                            prjId, CoConstDef.CD_DTL_COMPONENT_ID_BIN),
-                                    true);
-                            if (!isEmpty(changedLicenseName)) {
-                                CommentsHistory commentHisBean = new CommentsHistory();
-                                commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-                                commentHisBean.setReferenceId(prjId);
-                                commentHisBean.setExpansion1("BIN");
-                                commentHisBean.setContents(changedLicenseName);
-                                commentService.registComment(commentHisBean, false);
-                            }
-                        }
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                    }
-
-                    try {
-                        if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, csvFileId)) != null) {
-                            String chagedOssVersion = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_OSS_VERSION_CHANGED, csvFileId), true);
-                            if (!isEmpty(chagedOssVersion)) {
-                                CommentsHistory commentHisBean = new CommentsHistory();
-                                commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-                                commentHisBean.setReferenceId(prjId);
-                                commentHisBean.setExpansion1("BIN");
-                                commentHisBean.setContents(chagedOssVersion);
-                                commentService.registComment(commentHisBean, false);
-                            }
-                        }
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                    }
-
-                    if (comment != null) {
-                        CommentsHistory commentHisBean = new CommentsHistory();
-                        commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
-                        commentHisBean.setReferenceId(prjId);
-                        commentHisBean.setExpansion1("BIN");
-                        commentHisBean.setContents(comment);
-                        commentService.registComment(commentHisBean, false);
-                    }
-
-                    try {
-                        History h = new History();
-                        h = projectService.work(project);
-                        h.sethAction(CoConstDef.ACTION_CODE_UPDATE);
-                        project = (Project) h.gethData();
-                        h.sethEtc(project.etcStr());
-                        historyService.storeData(h);
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                    }
-
-                    // session 삭제
-                    deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_BIN, prjId));
-                    deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_BIN,
-                            prjId));
+                            CoCodeManager.getCodeString(
+                                    CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE));
                 }
             }
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Identification OSS Report", notes = "Identification > android > oss report", hidden = true)
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_ANDROID})
     public ResponseEntity<Map<String, Object>> ossReportAndroid(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "OSS Report > sheetName : 'BIN (Android)'", required = true) @RequestPart(required = true) MultipartFile ossReport,
             @ApiParam(value = "NOTICE.html", required = true) @RequestPart(required = true) MultipartFile noticeHtml,
@@ -1325,12 +990,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "Verification Package File Upload", notes = "Verification > Package File Upload")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PACKAGE_UPLOAD})
     public ResponseEntity<Map<String, Object>> ossUploadPackage(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile,
             @ApiParam(value = "Verify when file is uploaded (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String verifyFlag) {
@@ -1472,12 +1134,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Project Add Watcher", notes = "Project Add Watcher")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
 
@@ -1532,12 +1191,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Project get Notice", notes = "Project Get")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
     public ResponseEntity getSelfcheckReport(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId,
             HttpServletRequest req
     ) {
@@ -1563,4 +1219,114 @@ public class ApiProjectV2Controller extends CoTopComponent {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+
+    @ApiOperation(value = "Load Searched Project Oss to Target Project", notes = "Project > Identification > 'Project Search'")
+    @PostMapping(value = { Url.APIV2.FOSSLIGHT_API_OSS_LOAD })
+    public ResponseEntity<Map<String, Object>> ossLoad(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String targetPrjId,
+            @ApiParam(value = "Load Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
+            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name = "tab_name") String tabName,
+            @ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name")
+            @ValuesAllowed(propName = "searchCondition", values = {"id", "name"})@RequestParam(required = true) String searchCondition,
+            @ApiParam(value = "Project ID to Load") @RequestParam(required = false) String prjIdToLoad,
+            @ApiParam(value = "Project Name to Load") @RequestParam(required = false) String prjNameToLoad,
+            @ApiParam(value = "Project Version to Load") @RequestParam(required = false) String prjVersionToLoad,
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", defaultValue = "Y", allowableValues = "Y, N")
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false) String resetFlag) {
+
+        log.error("/api/v2/oss_load called:" + targetPrjId);
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        String errorMsgCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
+
+        try {
+            Map<String, Object> paramMap = new HashMap<>();
+            List<String> prjIdList = new ArrayList<String>();
+            prjIdList.add(targetPrjId);
+            paramMap.put("userId", userInfo.getUserId());
+            paramMap.put("loginUserName", userInfo.getUserName());
+            paramMap.put("userRole", userRole(userInfo));
+            paramMap.put("prjId", prjIdList);
+            paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+            paramMap.put("distributionType", "normal");
+            paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+            boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+
+            if (!searchFlag) {
+                return responseService.errorResponse(HttpStatus.NOT_FOUND,
+                        String.format("Project %s not exist or User doesn't have permission for the project", targetPrjId));
+            }
+
+            paramMap.clear();
+
+            // Parameter validation check:
+            if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "targetPrjId is not in the correct format");
+            }
+
+            paramMap.put("targetPrjId", targetPrjId);
+            paramMap.put("resetFlag", CoConstDef.FLAG_YES.equals(StringUtils.isEmpty(resetFlag) ? "Y" : resetFlag));
+
+            switch (searchCondition) {
+                case "id":
+                    // Check if project ID is entered
+                    if (StringUtils.isEmpty(prjIdToLoad)) {
+                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, "the prjIdToLoad is missing");
+                    }
+
+                    if (!StringUtils.isEmpty(prjIdToLoad) && !prjIdToLoad.chars().allMatch(Character::isDigit)) {
+                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, "prjIdToLoad is not in the correct format");
+                    }
+
+                    // Check for duplication of targetPrjId with prjIdToLoad
+                    if (targetPrjId.equals(prjIdToLoad)) {
+                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Please enter other prjIdToLoad that is different from targetPrjId");
+                    }
+                    paramMap.put("prjIdToLoad", prjIdToLoad);
+                    break;
+
+                case "name":
+                    // Check if project name is entered
+                    if (StringUtils.isEmpty(prjNameToLoad)) {
+                        return responseService.errorResponse(HttpStatus.BAD_REQUEST, "the prjNameToLoad is missing");
+                    }
+
+                    paramMap.put("prjNameToLoad", prjNameToLoad);
+                    paramMap.put("prjVersionToLoad", prjVersionToLoad);
+                    break;
+
+                default:
+                    break;
+            }
+
+            switch(tabName) {
+                case "dep":
+                    resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+                    break;
+                case "src":
+                    resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+                    break;
+                case "bin":
+                    resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+                    break;
+            }
+
+            // Check if resultMap contains a "msg" key and return failure result if it does
+            if (errorMsgCode.equals(resultMap.get("code"))) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, (String) resultMap.get("msg"));
+            }
+
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
+

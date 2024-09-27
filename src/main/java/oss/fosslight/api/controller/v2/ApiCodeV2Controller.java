@@ -37,12 +37,9 @@ public class ApiCodeV2Controller extends CoTopComponent {
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
     @ApiOperation(value = "Search Code Info", notes = "code 조회")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_CODE_SEARCH})
     public ResponseEntity<Map<String, Object>> getVulnerabilityData(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "code Type (DIV:Division, OS:Os Type, DSTT:Distribution Type, DSTS:Distribution Site, NOTI:NOTICE TYPE, NP:NOTICE PLATFORM, PRI:PRIORITY)", required = true, allowableValues = "DIV,OS,DSTT,DSTS,NOTI,NP,PRI") @RequestParam(required = true) String codeType,
             @ApiParam(value = "detail Value", required = false) @RequestParam(required = false) String detailValue) {
 

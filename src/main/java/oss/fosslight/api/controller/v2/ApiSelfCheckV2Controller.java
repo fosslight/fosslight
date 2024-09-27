@@ -76,12 +76,9 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     private final ProjectService projectService;
 
     @ApiOperation(value = "Create SelfCheck", notes = "SelfCheck 생성")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_CREATE})
     public ResponseEntity<Map<String, Object>> createSelfCheck(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Name", required = true) @RequestParam(required = true) String prjName,
             @ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion) {
 
@@ -118,12 +115,9 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 
     @SuppressWarnings("unchecked")
     @ApiOperation(value = "SelfCheck OSS Report", notes = "SelfCheck > oss report")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
     public ResponseEntity<Map<String, Object>> ossReportSelfCheck(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
             @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
@@ -307,12 +301,9 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "SelfCheck Export", notes = "SelfCheck > Export")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_EXPORT_SELFCHECK})
     public ResponseEntity selfCheckExport(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId
     ) {
         String downloadId = "";
@@ -340,12 +331,9 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "SelfCheck Add Watcher", notes = "SelfCheck Add Watcher")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id", required = true) String prjId,
             @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
 
@@ -395,12 +383,9 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "SelfCheck Get", notes = "SelfCheck Get")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_GET})
     public ResponseEntity<Map<String, Object>> getSelfcheck(
-            @RequestHeader String authorization,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId) {
 
         Map<String, Object> resultMap = new HashMap<>();

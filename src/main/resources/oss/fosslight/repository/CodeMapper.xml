@@ -58,6 +58,7 @@
 			,CD_EXP
 		FROM T2_CODE
 		WHERE SYS_CD_YN != 'Y'
+		AND CD_NO != '226'
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(cdNo)">
 			AND CD_NO = #{cdNo}
 		</if>

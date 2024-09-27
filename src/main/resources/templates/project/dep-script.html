@@ -1376,19 +1376,31 @@ var dep_grid = {
                		if (!permission || "CONF" == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 	} else {
-                		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+                		}
                 	}
                 	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('DEP', 'depList', 'main', "+permission+", '"+identificationStatus+"')\">";
                 	if (!permission || "CONF" == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
                 	} else {
-                		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
+                		}
                 	}
                 	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('DEP', "+permission+", '"+identificationStatus+"')\">";
                 	if (!permission || "CONF" == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
                 	} else {
-                		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                    		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+                		} else {
+                    		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+                		}
                 	}
                 	appendBtn += "<button type=\"button\" id=\"exportDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
                 	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
@@ -1432,30 +1444,33 @@ var dep_grid = {
             	var identificationStatus = [[${project.identificationStatus}]];
 				
 				if (permission && "CONF" != identificationStatus) {
-					// 체크 박스 영역 제외
-					cleanErrMsg("depList", rowid);
+					if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+					} else {
+						// 체크 박스 영역 제외
+						cleanErrMsg("depList", rowid);
 
-					fn_grid_com.setCellEdit(depList, rowid, depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
+						fn_grid_com.setCellEdit(depList, rowid, depValidMsgData, depDiffMsgData, null, com_fn.getLicenseName);
 
-					// 서브 그리드 제외
-					ondblClickRowBln = false;
-					
-	 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
-	 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
-	 	 			
-					var result = $('#'+rowid+'_licenseName').val().split(",");
+						// 서브 그리드 제외
+						ondblClickRowBln = false;
+						
+		 	 			$('#'+rowid+'_licenseName').addClass('autoCom');
+		 	 			$('#'+rowid+'_licenseName').css({'width' : '100%'});
+		 	 			
+						var result = $('#'+rowid+'_licenseName').val().split(",");
 
-					result.forEach(function(cur,idx){
-						if(cur != ""){
-							var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
-							$('#'+rowid+'_licenseNameBtn').append(mult);
-						}
-					});
-					
-					$('#'+rowid+'_licenseName').val("");
-					var nextCol = depList.jqGrid('getGridParam', 'colModel')[iCol].name
-					var nextRow = rowid
-					$('#'+nextRow+"_"+nextCol).focus();
+						result.forEach(function(cur,idx){
+							if(cur != ""){
+								var mult = "<button class=\"btn btn-outline-secondary btn-sm\" style=\"margin-left: 10px; margin-bottom: 5px;\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+								$('#'+rowid+'_licenseNameBtn').append(mult);
+							}
+						});
+						
+						$('#'+rowid+'_licenseName').val("");
+						var nextCol = depList.jqGrid('getGridParam', 'colModel')[iCol].name
+						var nextRow = rowid
+						$('#'+nextRow+"_"+nextCol).focus();
+					}
 				}
 			},
 			onPaging: function(action) {
