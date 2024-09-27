@@ -6,6 +6,66 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+# [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
+## NEW
+* **Opensource Database Schema Changes**
+  - The OSS Master has been separated into 'OSS_COMMON' and 'OSS_VERSION'.
+    - **'OSS_COMMON' Table**: Added to manage the common information of OSS.
+    - **'OSS_VERSION' Table**: Added to manage the version information of OSS.
+
+* **Enhanced License and Opensource Information**
+  - Restrictions have been updated based on OSORI data.
+  - Added Source Code Disclosing Scope information to License.
+  - Opensource now includes restriction information.
+
+* **Enhanced Matching of Open-Source Security Vulnerabilities**
+  - Added 'Include CPE', 'Exclude CPE', and 'OSS Version Alias' to Opensource.
+
+
+## Changed
+* **fosslight_create.sql Updated for Hub Version 2.0**
+* **API V2 Updates**
+  - Changed the authorization method in the API v2 Swagger UI.
+  - Added 3rd party export API.
+  - Modified the name for BOM export/JSON API.
+
+* **Bugfixes**
+  - Fixed issues in the UI.
+
+* **Performance Improvement**
+  - Added a column to PROJECT_MASTER to improve the speed of the Project list screen.
+
+## Notes
+Hub version 2.0.0 is a major update that includes changes to the database schema.
+We provide a migration script to upgrade to Hub version 2.0.0 for existing users.  
+(Filename: 20240725150921_update_v2.0.0.sql)
+
+This migration script involves several schema changes, so it is recommended to review the overall content.  
+Please note that the migration script only supports normal cases.
+
+The main changes and points to note are summarized as follows:
+
+1. **Change of fk in OSS_LICENSE_DECLARED, OSS_LICENSE_DETECTED tables**
+  - If there is invalid data in OSS_ID, an error may occur when changing the fk.
+  - Therefore, it is necessary to check data integrity and perform correction work in advance if necessary.
+
+2. **Deletion and modification of data in T2_CODE, T2_CODE_DTL**
+  - The codes to be updated: 913, 230
+  - Please check if you have been using these codes by modifying them.
+  - This may affect related business logic or data references, so prior review is necessary.
+
+3. **Schema change in LICENSE_NICKNAME table**
+  - The schema has been changed to use LICENSE_ID.
+
+4. **Separation of Opensource related databases**
+  - Separated into 'OSS_COMMON' and 'OSS_VERSION'.
+
+Before executing the migration script, please make sure to back up the database 
+and run the script in a test environment to ensure there are no issues.
+
+
+
+
 # [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
 ### Changed
 * Fix wrong column name in fosslight_create.sql
