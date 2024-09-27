@@ -1,5 +1,35 @@
 # Changelog
 
+## v2.0.0 (27/09/2024)
+## Changes
+- Release Hub 2.0.0 official @FOSSLight-dev, @Min-Kyungsun, @hyeinlee00 (#1081)
+- bug fix and speed improvement  @FOSSLight-dev  (#1080)
+- [DEV] Changed the path of verify executable to relative path @vampard (#1073)
+- Added migration script for bug fixes for higher versions of v2.0.0.pre-release @hyeinlee00 (#1060)
+- API changes
+  - Modify report upload api to upload empty file @hyeinlee00 (#1059)
+  - Change report upload api in API V2 @hyeinlee00 (#1057)
+  - Bugfix/api v2 3rd party @hyeinlee00 (#1056)
+
+## 🚀 Features
+
+- Improved osori db related functions @FOSSLight-dev (#1053)
+- API changes
+  - Add 3rd party export APIs @Min-Kyungsun (#1053) 
+  - Add common authorization in API V2 @hyeinlee00 (#1077)
+  - Add get an api to get security json data to API V2 @hyeinlee00 (#1076)
+  - Feature/api v2 load project @hyeinlee00 (#1075)
+  - Feature/api v2 project bom @hyeinlee00 (#1072)
+ 
+## 🐛 Hotfixes
+
+- Bugfix in migration script @hyeinlee00 @Min-Kyungsun (#1079) (#1081)
+- [DEV] Changed Character-set and Collate for NVD_CVE_V3 to utf8mb4 from utf8 @vampard (#1071)
+- Bugfix user_columns in fosslight_create.sql @hyeinlee00 (#1061)
+- Update unit test for hub 2.0.0.pre-release @hyeinlee00 (#1055)
+
+---
+
 ## v2.0.1.pre-release (22/07/2024)
 ## 🐛 Hotfixes
 
@@ -752,11 +782,3 @@
 - Show 'list more' in Vulnerability in OSS details @FOSSLight-dev (#430)
 - Self-check > Mark Obligation unclear for deactivate. @FOSSLight-dev (#427)
 
-
----
-
-## v1.2.33 (11/03/2022)
-## Changes
-## 🔧 Maintenance
-
-- Change the condition Obligation: unclear in self-check. @FOSSLight-dev (#422)
