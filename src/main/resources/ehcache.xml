@@ -20,8 +20,8 @@
     </listeners>
      -->
     <resources>
-	    <heap unit="entries">5000</heap>
-	    <offheap unit="MB">20</offheap>
+	    <heap unit="entries">100000</heap>
+	    <offheap unit="MB">50</offheap>
     </resources>
   </cache-template>
   
@@ -45,8 +45,8 @@
     </listeners>
      -->
     <resources>
-	    <heap unit="entries">5000</heap>
-	    <offheap unit="MB">20</offheap>
+	    <heap unit="entries">100000</heap>
+	    <offheap unit="MB">100</offheap>
     </resources>
   </cache-template>
   
@@ -70,8 +70,8 @@
     </listeners>
      -->
     <resources>
-	    <heap unit="entries">5000</heap>
-	    <offheap unit="MB">20</offheap>
+	    <heap unit="entries">100000</heap>
+	    <offheap unit="MB">50</offheap>
     </resources>
   </cache-template>
   
