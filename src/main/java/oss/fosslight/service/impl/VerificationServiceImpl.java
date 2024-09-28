@@ -655,7 +655,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (rePath.indexOf(".tar") > -1){
 				rePath = rePath.substring(0, rePath.lastIndexOf(".tar"));
 			}
-			
+			if (rePath.indexOf(".zip") > -1){
+				rePath = rePath.substring(0, rePath.lastIndexOf(".zip"));
+			}
 			String decompressionDirName = "/" + rePath;
 			
 			String packageFileName = rePath;
@@ -747,6 +749,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (collectDataDeCompResultList != null && !collectDataDeCompResultList.isEmpty()) {
 				for (String s : collectDataDeCompResultList) {
 					boolean isFile = s.endsWith("*");
+					
+					if (s.startsWith("/")) {
+						s = s.substring(1);
+					}
+					
+					if (s.endsWith("*")) {
+						s = s.substring(0, s.length()-1);
+					}
+					
+					if (s.endsWith("/")) {
+						s = s.substring(0, s.length() -1);
+					}
 					
 					int cnt = 0;
 					
@@ -1095,10 +1109,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					 */
 					boolean resultFlag = false;
 					
-					Map<String, Integer> resultMap = checkGridPath(gridPath, deCompResultMap, decompressionDirName, packageFileName, decompressionRootPath);
-					if (resultMap != null && !resultMap.isEmpty()) {
+					int fileCount = checkGridPath(gridPath, deCompResultMap, decompressionDirName, packageFileName, decompressionRootPath);
+					if (fileCount > 0) {
 						resultFlag = true;
-						gFileCount = resultMap.get(gridPath);
+						gFileCount = fileCount;
 					}
 					
 					if (!resultFlag) {//path가 존재하지않을 때
@@ -1331,10 +1345,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		return resMap;
 	}
 	
-	private Map<String, Integer> checkGridPath(String gridPath, Map<String, Integer> deCompResultMap, String decompressionDirName, String packageFileName, String decompressionRootPath) {
-		Map<String, Integer> checkGridMap = new HashMap<>();
+	private int checkGridPath(String gridPath, Map<String, Integer> deCompResultMap, String decompressionDirName, String packageFileName, String decompressionRootPath) {
 		List<String> checkPathList = new ArrayList<>();
-		boolean matchFlag = false;
+		String matchPath = "";
 		
 		for (String s : deCompResultMap.keySet()) {
 			String path = s;
@@ -1432,6 +1445,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			checkPathList.add(replaceDecomFileRootDir + "/");
 			checkPathList.add("/"+ replaceDecomFileRootDir + "/");
 			
+			if (checkPathList != null && !checkPathList.isEmpty()) checkPathList = checkPathList.stream().distinct().collect(Collectors.toList());
+			
 			int idx = 0;
 			for (String checkPath : checkPathList) {
 				String customPath = checkPath;
@@ -1439,18 +1454,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					customPath = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(checkPath), checkPath);
 				}
 				if (customPath.equalsIgnoreCase(gridPath)) {
-					checkGridMap.put(gridPath, deCompResultMap.containsKey(gridPath) ? deCompResultMap.get(gridPath) : 0);
-					matchFlag = true;
+					matchPath = customPath;
 					break;
 				}
 				idx++;
 			}
 			
 			checkPathList.clear();
-			if (matchFlag) break;
 		}
 		
-		return checkGridMap;
+		return !isEmpty(matchPath) ? deCompResultMap.get(matchPath) : 0;
 	}
 
 	private String addDecompressionRootPath(String path, boolean flag, String val) {
