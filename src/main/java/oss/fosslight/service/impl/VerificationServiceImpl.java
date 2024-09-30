@@ -32,7 +32,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.jsonwebtoken.lang.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
@@ -90,7 +89,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// 1. Verification정보
 		// 2. Comment 정보
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		Project prj = projectMapper.selectProjectMaster(project);
+		Project prj = projectMapper.selectProjectMaster(project.getPrjId());
 
 		String comment = prj != null ? prj.getComment() : null;
 		String content = commentMapper.getContent(comment);
@@ -199,7 +198,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				// packaging File comment
 				try {
-					Project project = projectMapper.selectProjectMaster(prjParam);
+					Project project = projectMapper.selectProjectMaster(prjParam.getPrjId());
 					ArrayList<String> origPackagingFileIdList = new ArrayList<String>();
 					origPackagingFileIdList.add(project.getPackageFileId());
 					origPackagingFileIdList.add(project.getPackageFileId2());
@@ -1877,9 +1876,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	public void changePackageFileNameDistributeFormat(String prjId) {
 		// 프로젝트 기본정보 취득
-		Project prjBean = new Project();
-		prjBean.setPrjId(prjId);
-		prjBean = projectMapper.selectProjectMaster2(prjBean);
+		Project prjBean = projectMapper.selectProjectMaster2(prjId);
 		List<String> packageFileIds = new ArrayList<String>();
 		
 		if (!isEmpty(prjBean.getPackageFileId())) {
@@ -1918,9 +1915,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		String contents = "";
 		// 프로젝트 기본정보 취득
-		Project prjBean = new Project();
-		prjBean.setPrjId(prjId);
-		prjBean = projectMapper.selectProjectMaster2(prjBean);
+		Project prjBean = projectMapper.selectProjectMaster2(prjId);
 		List<String> packageFileIds = new ArrayList<String>();
 
 		if (!isEmpty(prjBean.getPackageFileId())) {
@@ -1999,9 +1994,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String resMsg="none.";
 		
 		try{
-			Project project = new Project();
-			project.setPrjId(ossNotice.getPrjId());
-			project = projectMapper.selectProjectMaster(project);
+			Project project = projectMapper.selectProjectMaster(ossNotice.getPrjId());
 			
 			Map<String, Object> result = projectMapper.getNoticeType(ossNotice.getPrjId());
 			
@@ -2187,9 +2180,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String fileName = "";
 		String filePath = rESOURCE_PUBLIC_DOWNLOAD_NOTICE_FILE_PATH_PREFIX;
 
-		Project project = new Project();
-		project.setPrjId(prjId);
-		project = projectMapper.selectProjectMaster(project);
+		Project project = projectMapper.selectProjectMaster(prjId);
 		
 		oss.fosslight.domain.File noticeFile = null;
 		
@@ -2212,9 +2203,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String fileName = "";
 		String filePath = rESOURCE_PUBLIC_DOWNLOAD_REVIEW_REPORT_FILE_PATH_PREFIX;
 
-		Project project = new Project();
-		project.setPrjId(prjId);
-		project = projectMapper.selectProjectMaster(project);
+		Project project = projectMapper.selectProjectMaster(prjId);
 
 		oss.fosslight.domain.File reviewReportFile = null;
 
@@ -2880,7 +2869,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			prjParam.setPackageVulDocFileId(registFileId);
 			verificationMapper.updatePackageVulDocFile(prjParam);
 		} else {
-			Project project = projectMapper.selectProjectMaster(prjParam);
+			Project project = projectMapper.selectProjectMaster(prjParam.getPrjId());
 			
 			if (fileSeq.equals("1")) {
 				prjParam.setPackageFileId(registFileId);
@@ -2994,9 +2983,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	public void registOssNoticeConfirmStatus(OssNotice ossNotice) {
 		try{
-			Project project = new Project();
-			project.setPrjId(ossNotice.getPrjId());
-			project = projectMapper.selectProjectMaster(project);
+			Project project = projectMapper.selectProjectMaster(ossNotice.getPrjId());
 			
 			// android project는 notice를 사용하지 않음.
 			if (!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(project.getNoticeType())) {

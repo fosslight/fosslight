@@ -638,7 +638,7 @@
 		ORDER BY T1.CD_ORDER, T2.CD_ORDER
 	</select>
 	
-	<select id="selectProjectMaster" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
+	<select id="selectProjectMaster" resultType="oss.fosslight.domain.Project">
 		/* ProjectMapper.selectProjectMaster */
 		SELECT A.PRJ_ID 
 			, A.PRJ_NAME 
@@ -760,11 +760,6 @@
 		                   
             LEFT OUTER JOIN T2_USERS R
                             ON A.REVIEWER = R.USER_ID
-<!--                             
-		    LEFT OUTER JOIN T2_CODE_DTL D
-		                    ON C.DIVISION = D.CD_DTL_NO
-						   AND D.CD_NO = '200'
-						   AND D.USE_YN = 'Y' -->
 		 WHERE A.PRJ_ID = #{prjId} 
 	</select>
 	
@@ -2441,7 +2436,7 @@
 			)
 	</insert>
 	
-	<select id="selectProjectMaster2" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
+	<select id="selectProjectMaster2" resultType="oss.fosslight.domain.Project">
 		SELECT T1.*,
 			   T2.NOTICE_TYPE,
 			   T2.NOTICE_TYPE_ETC,
@@ -6530,4 +6525,76 @@
 		AND CVSS_SCORE_MAX IS NULL
 		ORDER BY PRJ_ID DESC
 	</select>
+	
+	<delete id="resetOssComponentsAndLicense">
+		/* ProjectMapper.resetOssComponentsAndLicense */
+		DELETE COMPONENT, LICENSE 
+		FROM OSS_COMPONENTS COMPONENT 
+			LEFT JOIN OSS_COMPONENTS_LICENSE LICENSE ON COMPONENT.COMPONENT_ID = LICENSE.COMPONENT_ID
+		WHERE
+		 COMPONENT.REFERENCE_ID = #{referenceId} AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
+	</delete>
+	
+	<insert id="insertOssComponentListWithComponentId">
+		INSERT INTO
+			OSS_COMPONENTS
+			(
+			COMPONENT_ID, REFERENCE_ID, REFERENCE_DIV, COMPONENT_IDX
+			, OSS_ID, OSS_NAME, OSS_VERSION
+			, DOWNLOAD_LOCATION, HOMEPAGE, FILE_PATH, PACKAGE_URL, EXCLUDE_YN, COPYRIGHT
+			, BINARY_NAME, BINARY_SIZE, BINARY_NOTICE, CUSTOM_BINARY_YN
+			, REF_PARTNER_ID, REF_PRJ_ID, REF_BAT_ID, REF_COMPONENT_ID
+			, REPORT_FILE_ID, MERGE_PRE_DIV, PRE_OBLIGATION_TYPE, OBLIGATION_TYPE
+			, ADMIN_CHECK_YN, COMMENTS, REF_DIV, DEPENDENCIES, TLSH, CHECK_SUM, REF_OSS_NAME
+			)
+			VALUES
+			<foreach item="item" index="index" collection="list" separator=",">
+			(
+			#{item.componentId}, #{item.referenceId}, #{item.referenceDiv}, ${item.componentIdx}
+			, #{item.ossId}, #{item.ossName}, #{item.ossVersion}
+			, #{item.downloadLocation}, #{item.homepage}, #{item.filePath}, #{item.packageUrl}, #{item.excludeYn}, #{item.copyright}
+			, #{item.binaryName}, #{item.binarySize}, #{item.binaryNotice}, #{item.customBinaryYn}
+			, #{item.refPartnerId}, #{item.refPrjId}, #{item.refBatId}, #{item.refComponentId}
+			, #{item.reportFileId}, #{item.mergePreDiv}, #{item.preObligationType}, #{item.obligationType}
+			, #{item.adminCheckYn}, #{item.comments}, #{item.refDiv}, #{item.dependencies}, #{item.tlsh}, #{item.checkSum}, #{item.refOssName}
+			)
+			</foreach>
+	</insert>
+	<insert id="insertOssComponentList" useGeneratedKeys="true" keyProperty="componentId">
+		INSERT INTO
+			OSS_COMPONENTS
+			(
+			REFERENCE_ID, REFERENCE_DIV, COMPONENT_IDX
+			, OSS_ID, OSS_NAME, OSS_VERSION
+			, DOWNLOAD_LOCATION, HOMEPAGE, FILE_PATH, PACKAGE_URL, EXCLUDE_YN, COPYRIGHT
+			, BINARY_NAME, BINARY_SIZE, BINARY_NOTICE, CUSTOM_BINARY_YN
+			, REF_PARTNER_ID, REF_PRJ_ID, REF_BAT_ID, REF_COMPONENT_ID
+			, REPORT_FILE_ID, MERGE_PRE_DIV, PRE_OBLIGATION_TYPE, OBLIGATION_TYPE
+			, ADMIN_CHECK_YN, COMMENTS, REF_DIV, DEPENDENCIES, TLSH, CHECK_SUM, REF_OSS_NAME
+			)
+			VALUES
+			<foreach item="item" index="index" collection="list" separator=",">
+			(
+			#{item.referenceId}, #{item.referenceDiv}, #{item.componentIdx}
+			, #{item.ossId}, #{item.ossName}, #{item.ossVersion}
+			, #{item.downloadLocation}, #{item.homepage}, #{item.filePath}, #{item.packageUrl}, #{item.excludeYn}, #{item.copyright}
+			, #{item.binaryName}, #{item.binarySize}, #{item.binaryNotice}, #{item.customBinaryYn}
+			, #{item.refPartnerId}, #{item.refPrjId}, #{item.refBatId}, #{item.refComponentId}
+			, #{item.reportFileId}, #{item.mergePreDiv}, #{item.preObligationType}, #{item.obligationType}
+			, #{item.adminCheckYn}, #{item.comments}, #{item.refDiv}, #{item.dependencies}, #{item.tlsh}, #{item.checkSum}, #{item.refOssName}
+			)
+			</foreach>
+	</insert>
+	
+	<insert id="insertOssComponentLicenseList">
+		INSERT INTO
+			OSS_COMPONENTS_LICENSE
+			(COMPONENT_ID, LICENSE_ID, LICENSE_NAME, COPYRIGHT_TEXT, EXCLUDE_YN)
+			VALUES
+			<foreach item="item" index="index" collection="list" separator=",">
+			(
+			#{item.componentId}, #{item.licenseId}, #{item.licenseName}, #{item.copyrightText}, #{item.excludeYn}
+			)
+			</foreach>
+	</insert>
 </mapper>

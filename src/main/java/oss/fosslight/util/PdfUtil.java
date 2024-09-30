@@ -1,5 +1,18 @@
 package oss.fosslight.util;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.core.io.ClassPathResource;
+
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
@@ -11,25 +24,24 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.IBlockElement;
 import com.itextpdf.layout.element.IElement;
 import com.itextpdf.layout.font.FontProvider;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.domain.*;
-import oss.fosslight.domain.File;
-import oss.fosslight.repository.*;
+import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.Project;
+import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.repository.CodeMapper;
+import oss.fosslight.repository.LicenseMapper;
+import oss.fosslight.repository.OssMapper;
+import oss.fosslight.repository.ProjectMapper;
+import oss.fosslight.repository.VerificationMapper;
 import oss.fosslight.service.ProjectService;
 import oss.fosslight.service.VulnerabilityService;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static oss.fosslight.common.CoConstDef.CD_LICENSE_RESTRICTION;
 
 
 @Slf4j
@@ -90,17 +102,15 @@ public final class PdfUtil extends CoTopComponent {
         Map<String,OssMaster> ossMasterMap = new HashMap<>();
         String type = "";
 
-        Project projectMaster = new Project();
-        projectMaster.setPrjId(prjId);
 
-        Project project = projectMapper.selectProjectMaster2(projectMaster);
+        Project project = projectMapper.selectProjectMaster2(prjId);
         if(project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
             type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
         } else {
             type = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
         }
 
-        project = projectMapper.selectProjectMaster(projectMaster);
+        project = projectMapper.selectProjectMaster(prjId);
         String url = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/project/shareUrl/" + prjId;
         String _s = "<a href='"+url+"' target='_blank'>" + project.getPrjName();
         if(!isEmpty(project.getPrjVersion())) {
@@ -255,9 +265,7 @@ public final class PdfUtil extends CoTopComponent {
         String fileName = "";
         String filePath = CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport");
 
-        Project project = new Project();
-        project.setPrjId(prjId);
-        project = projectMapper.selectProjectMaster(project);
+        Project project = projectMapper.selectProjectMaster(prjId);
 
         oss.fosslight.domain.File pdfFile = null;
 
