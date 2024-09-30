@@ -2749,14 +2749,6 @@ var datas = {
 			partySubData = [];
 		}
 		
-		var deliveryForm = partnerData.deliveryForm||'';
-		
-		if ('' == deliveryForm) {
-		} else {
-			$('select[name=deliveryForm]').val(deliveryForm).attr('selected', 'true');
-			$('select[name=deliveryForm]').trigger('change');	
-		}
-
 		var userDivision = $('#division');
  		if (partnerData != null) {
  			if (partnerData.partnerId != null && partnerData.division != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
