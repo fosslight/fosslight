@@ -1579,6 +1579,7 @@ public class ProjectController extends CoTopComponent {
 				map.put("fileSeqs", fileSeqsList);
 				map.put("gridFilePaths", filePathList);
 				map.put("gridComponentIds", componentIdList);
+				map.put("copyConfirm", CoConstDef.FLAG_YES);
 				
 				try {
 					boolean isChangedPackageFile = verificationService.getChangedPackageFile(project.getPrjId(), fileSeqsList);

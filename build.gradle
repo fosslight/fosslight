@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'oss.fosslight'
-version = '2.0.0'
+version = '2.0.1'
 
 sourceCompatibility = '11'
 
@@ -31,6 +31,7 @@ repositories {
 }
 
 test {
+	maxHeapSize="2048m"
 	useJUnitPlatform()
 }
 

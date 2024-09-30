@@ -6,6 +6,10 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+### Changed
+* **Switched to using local resources for Jqgrid**
+  - Due to the discontinuation of CDN support for jqgrid, it has been changed to use local resources.
+
 # [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
 ## NEW
 * **Opensource Database Schema Changes**
