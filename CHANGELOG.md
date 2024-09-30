@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.1 (30/09/2024)
+## Hotfix
+- 2.0.1 release. Implemented due to the discontinuation of CDN support for jqgrid. @FOSSLight-dev (#1083)
+
+---
+
 ## v2.0.0 (27/09/2024)
 ## Changes
 - Release Hub 2.0.0 official @FOSSLight-dev, @Min-Kyungsun, @hyeinlee00 (#1081)
@@ -762,23 +768,3 @@
 - Show up to 5 Vulnerability in OSS details @FOSSLight-dev (#436)
 - Add Sample template to OSS Bulk Registration @soimkim (#435)
 - Do not load if OSS Name or Declared License is null in OSS Bulk @FOSSLight-dev  (#434)
-
----
-
-## v1.2.34 (18/03/2022)
-## 🚀 Features
-
-- Add a function to copy even the status when copying the project. @FOSSLight-dev (#429)
-
-## 🐛 Hotfixes
-
-- Fix a bug where Homepage could not be loaded for nickname when OSS Notice was issued. @FOSSLight-dev (#428)
-- Self-Check > Mark as obligation unclear for licenses that are not included in Declared or Detected licenses. @FOSSLight-dev (#426)
-- Fix the bug where OSS is renamed when copying and saving. @FOSSLight-dev (#425)
-- Fix the bug that Copyright is not displayed in OSS Notice @FOSSLight-dev (#424)
-
-## 🔧 Maintenance
-
-- Show 'list more' in Vulnerability in OSS details @FOSSLight-dev (#430)
-- Self-check > Mark Obligation unclear for deactivate. @FOSSLight-dev (#427)
-
