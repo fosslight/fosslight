@@ -551,6 +551,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 		boolean isChangedPackageFile = (boolean)map.get("isChangedPackageFile");
 		String packagingComment = (String)map.get("packagingComment");
+		boolean isCopyConfirm = map.containsKey("copyConfirm");
 		
 		List<String> checkExceptionWordsList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_EXCEPTION_WORDS);
 		List<String> checkExceptionIgnoreWorksList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_IGNORE_WORDS);
@@ -737,6 +738,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							cnt++;
 							
 							deCompResultMap.put(_dir, cnt);
+						}
+						
+						if (isCopyConfirm) {
+							if (!isEmpty(s)) {
+								packageFileName = s;
+								isCopyConfirm = false;
+							}
 						}
 						
 						deCompResultMap.put(s, 0);
@@ -1348,6 +1356,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private int checkGridPath(String gridPath, Map<String, Integer> deCompResultMap, String decompressionDirName, String packageFileName, String decompressionRootPath) {
 		List<String> checkPathList = new ArrayList<>();
 		String matchPath = "";
+		int fileCount = 0;
 		
 		for (String s : deCompResultMap.keySet()) {
 			String path = s;
@@ -1445,25 +1454,26 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			checkPathList.add(replaceDecomFileRootDir + "/");
 			checkPathList.add("/"+ replaceDecomFileRootDir + "/");
 			
+			checkPathList.add(decompressionRootPath + "/" + replaceDecomFileRootDir);
+			checkPathList.add(decompressionRootPath + "/" + replaceDecomFileRootDir + "/");
+			
 			if (checkPathList != null && !checkPathList.isEmpty()) checkPathList = checkPathList.stream().distinct().collect(Collectors.toList());
 			
-			int idx = 0;
 			for (String checkPath : checkPathList) {
-				String customPath = checkPath;
-				if (idx >= 24) {
-					customPath = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(checkPath), checkPath);
-				}
-				if (customPath.equalsIgnoreCase(gridPath)) {
-					matchPath = customPath;
+				if (checkPath.equalsIgnoreCase(gridPath)) {
+					matchPath = checkPath;
 					break;
 				}
-				idx++;
 			}
 			
 			checkPathList.clear();
 		}
 		
-		return !isEmpty(matchPath) ? deCompResultMap.get(matchPath) : 0;
+		if (!isEmpty(matchPath) && deCompResultMap.containsKey(matchPath)) {
+			fileCount = deCompResultMap.get(matchPath);
+		}
+		
+		return fileCount;
 	}
 
 	private String addDecompressionRootPath(String path, boolean flag, String val) {
