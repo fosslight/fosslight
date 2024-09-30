@@ -1183,6 +1183,7 @@
                         // empty check
                         for (var i in arr) {
                             var _path = target.jqGrid('getCell', arr[i], 'filePath');
+                            if ("undefined/" == _path) _path = "";
                             var _componentId = target.jqGrid('getCell', arr[i], 'componentId');
 
                             filePaths.push(_path);
@@ -1192,6 +1193,8 @@
                         // edit mode 원복
                         for (var i in arr) {
                             target.jqGrid('editRow', arr[i], true);
+                            var _path = $("#" + arr[i] + "_filePath").val();
+                        	if ("undefined/" == _path) $("#" + arr[i] + "_filePath").val("");
                         }
 
                         var fileSeqs = [];
