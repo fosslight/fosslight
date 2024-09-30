@@ -6,9 +6,16 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
-# [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
+## [2.0.1](https://github.com/fosslight/fosslight/releases/tag/v2.0.1) (2024-09-30)
 
-## NEW
+### Changed
+* **Jqgrid 로컬 리소스 사용으로 변경**
+ - jqgrid의 CDN지원이 중단되어, 로컬 리소스를 사용하도록 변경되었습니다.
+
+
+## [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
+
+### NEW
 
 * **오픈소스 데이터베이스 스키마 변경**
   - OSS 마스터가 'OSS_COMMON'과 'OSS_VERSION'으로 분리되었습니다.
@@ -24,7 +31,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   - 오픈소스에 'Include CPE', 'Exclude CPE', 'OSS Version Alias'가 추가되었습니다.
 
 
-## Changed
+### Changed
 
 * **Hub 버전 2.0을 위한 fosslight_create.sql 업데이트**
 * **API V2 업데이트**
@@ -39,7 +46,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   - Project 목록 화면 속도 개선을 위해 PROJECT_MASTER에 column이 추가되었습니다.
 
 
-## Notes
+### Notes
 
 기존 유저들을 위해 Hub 2.0.0 버전으로 업그레이드 하기 위한 Migration script를 제공합니다.  
 (파일명: 20240725150921_update_v2.0.0.sql)
@@ -67,7 +74,7 @@ Migration script는 정상케이스만 지원하고 있으니 참고하시기 �
 위의 내용을 참고하여 Migration script를 실행하기 전에 반드시 데이터베이스를 백업하고, 스크립트를 테스트 환경에서 먼저 실행하여 문제가 없는지 확인하시기 바랍니다.
 
 
-# [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
+## [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
 * fosslight_create.sql에서 잘못된 column 수정
 * API V2의 버그 수정
   - 3rd party search API 반환 값 유형 변경
@@ -78,7 +85,7 @@ Migration script는 정상케이스만 지원하고 있으니 참고하시기 �
 * SPDX 문서의 버그 수정
 
 
-# [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
+## [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
 ### New
 * UI 2.0 릴리즈
   - UI 프레임워크를 Thymeleaf로 변경
@@ -97,7 +104,7 @@ Migration script는 정상케이스만 지원하고 있으니 참고하시기 �
   - 응답 일관성이 개선되었습니다.
 
 
-# [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
+## [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
 ### New
 * oss report API 들에 'sheetNames' parameter가 추가
   - /api/v1/oss_report_bin
