@@ -1234,11 +1234,12 @@ public class PartnerController extends CoTopComponent{
 				String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PARTER_CONF));
 
 				if (!isEmpty(userComment)) {
-					mailbean.setComment(avoidNull(userComment) + "<br />" + _tempComment);
+					userComment += "<br />" + _tempComment;
 				} else{
-					mailbean.setComment(_tempComment);
+					userComment = _tempComment;
 				}
-				
+
+				mailbean.setComment(userComment);
 				CoMailManager.getInstance().sendMail(mailbean);
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
@@ -1306,7 +1307,7 @@ public class PartnerController extends CoTopComponent{
 				log.error(e.getMessage(), e);
 			}
 		}
-		
+
 		if (!isEmpty(avoidNull(userComment).trim())) {
 			try {
 				CommentsHistory commHisBean = new CommentsHistory();
