@@ -6560,7 +6560,7 @@
 			)
 			</foreach>
 	</insert>
-	<insert id="insertOssComponentList" useGeneratedKeys="true" keyProperty="componentId">
+	<insert id="insertOssComponentList" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="componentId">
 		INSERT INTO
 			OSS_COMPONENTS
 			(

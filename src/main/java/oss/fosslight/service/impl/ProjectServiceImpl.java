@@ -2410,11 +2410,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				insertOssComponentListWithComponentId.clear();
 			}
 			
-			if(insertOssComponentList.size() == 1000) {
-				projectMapper.insertOssComponentList(insertOssComponentList);
-				insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
-				insertOssComponentList.clear();
-			}
+//			if(insertOssComponentList.size() == 1000) {
+//				projectMapper.insertOssComponentList(insertOssComponentList);
+//				insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
+//				insertOssComponentList.clear();
+//			}
 		}
 		
 		if(!insertOssComponentListWithComponentId.isEmpty()) {
@@ -2422,8 +2422,14 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentListWithComponentId));
 		}
 		
+//		if(!insertOssComponentList.isEmpty()) {
+//			projectMapper.insertOssComponentList(insertOssComponentList);
+//			insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
+//		}
 		if(!insertOssComponentList.isEmpty()) {
-			projectMapper.insertOssComponentList(insertOssComponentList);
+			for(ProjectIdentification bean : insertOssComponentList) {
+				projectMapper.insertOssComponents(bean);
+			}
 			insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
 		}
 		
