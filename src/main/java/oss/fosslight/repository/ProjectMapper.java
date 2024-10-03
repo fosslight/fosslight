@@ -410,4 +410,6 @@ public interface ProjectMapper {
 	void insertOssComponentListWithComponentId(@Param("list")List<ProjectIdentification> OssComponentList);
 	void insertOssComponentList(@Param("list")List<ProjectIdentification> OssComponentList);
 	void insertOssComponentLicenseList(@Param("list")List<OssComponentsLicense> ossComponentLicenseList);
+
+	List<Map<String, Object>> getCpeInfoAndRangeForProject(ProjectIdentification identification);
 }
