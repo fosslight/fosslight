@@ -6,6 +6,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 public class BinaryMaster extends ComBean implements Serializable{
 
+	@Serial
 	private static final long serialVersionUID = -4375349371642376739L;
 	
 	private String batId;

@@ -15,9 +15,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FileUtils;
@@ -337,7 +337,7 @@ public class ProjectController extends CoTopComponent {
 	 * @param model the model
 	 * @return the string
 	 */
-	@RequestMapping(value = { PROJECT.EDIT }, method = RequestMethod.GET, produces = "text/html; charset=utf-8")
+	@GetMapping(value = { PROJECT.EDIT }, produces = "text/html; charset=utf-8")
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) {
 		Project project = new Project();
 //		project.setNoticeType(CoConstDef.CD_GENERAL_MODEL);
@@ -4716,7 +4716,7 @@ public class ProjectController extends CoTopComponent {
 	@SuppressWarnings("unchecked")
 	@GetMapping(value=PROJECT.BOM_COMPARE_LIST_AJAX)
 	public @ResponseBody ResponseEntity<Object> bomCompareList(
-			@RequestParam("beforePrjId") String beforePrjId, @RequestParam("afterPrjId") String afterPrjId) throws Exception{
+			@RequestParam String beforePrjId, @RequestParam String afterPrjId) throws Exception{
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		try {

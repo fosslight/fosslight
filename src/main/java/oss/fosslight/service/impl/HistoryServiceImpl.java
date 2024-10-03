@@ -189,6 +189,6 @@ public class HistoryServiceImpl extends CoTopComponent implements HistoryService
 	}
 
 	public String escapeSql(String str){
-		return str == null ? "null" : String.format("%s", str.replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r").replace("\"", "\\\""));
+		return str == null ? "null" : "%s".formatted(str.replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r").replace("\"", "\\\""));
 	}
 }

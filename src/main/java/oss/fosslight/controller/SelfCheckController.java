@@ -12,14 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -613,7 +613,7 @@ public class SelfCheckController extends CoTopComponent {
 				
 				if (result != null) {
 					for (Project bean : result) {
-						if (!StringUtils.isEmpty(bean.getPrjDivision())) {
+						if (!ObjectUtils.isEmpty(bean.getPrjDivision())) {
 							bean.setPrjDivisionName(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getPrjDivision()));
 						}
 					}
@@ -686,17 +686,17 @@ public class SelfCheckController extends CoTopComponent {
 	
 	@PostMapping(value = SELF_CHECK.NOTICE_AJAX)
 	public @ResponseBody ResponseEntity<Object>  getNoticeHtml(HttpServletRequest req,HttpServletResponse res, Model model,	//
-			@RequestParam(value="confirm", defaultValue="")String confirm, //
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
-			@RequestParam(value="allowDownloadNoticeHTMLYn", defaultValue="")String allowDownloadNoticeHTMLYn, //
-			@RequestParam(value="allowDownloadNoticeTextYn", defaultValue="")String allowDownloadNoticeTextYn, //
-			@RequestParam(value="allowDownloadSimpleHTMLYn", defaultValue="")String allowDownloadSimpleHTMLYn, //
-			@RequestParam(value="allowDownloadSimpleTextYn", defaultValue="")String allowDownloadSimpleTextYn, //
-			@RequestParam(value="allowDownloadSPDXSheetYn", defaultValue="")String allowDownloadSPDXSheetYn, //
-			@RequestParam(value="allowDownloadSPDXRdfYn", defaultValue="")String allowDownloadSPDXRdfYn, //
-			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
-			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
-			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
+			@RequestParam(defaultValue="")String confirm, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String allowDownloadNoticeHTMLYn, //
+			@RequestParam(defaultValue="")String allowDownloadNoticeTextYn, //
+			@RequestParam(defaultValue="")String allowDownloadSimpleHTMLYn, //
+			@RequestParam(defaultValue="")String allowDownloadSimpleTextYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXSheetYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXRdfYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXTagYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXJsonYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXYamlYn, //
 			OssNotice ossNotice	//
 			) throws IOException {
 		
@@ -716,7 +716,7 @@ public class SelfCheckController extends CoTopComponent {
 	
 	@PostMapping(value = SELF_CHECK.MAKE_NOTICE_PREVIEW)
 	public @ResponseBody ResponseEntity<Object>  makeNoticePreview(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
 			HttpServletResponse res, Model model) throws IOException {
 
 		String downloadId = null;
@@ -748,7 +748,7 @@ public class SelfCheckController extends CoTopComponent {
 	
 	@PostMapping(value = SELF_CHECK.MAKE_NOTICE_TEXT)
 	public @ResponseBody ResponseEntity<Object>  makeNoticeText(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
 			HttpServletResponse res, Model model) throws IOException {
 		
 		String downloadId = null;
@@ -767,7 +767,7 @@ public class SelfCheckController extends CoTopComponent {
 	
 	@PostMapping(value = SELF_CHECK.MAKE_NOTICE_SIMPLE)
 	public @ResponseBody ResponseEntity<Object>  makeNoticeSimple(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
 			HttpServletResponse res, Model model) throws IOException {
 		
 		String downloadId = null;
@@ -788,7 +788,7 @@ public class SelfCheckController extends CoTopComponent {
 	
 	@PostMapping(value = SELF_CHECK.MAKE_NOTICE_TEXT_SIMPLE)
 	public @ResponseBody ResponseEntity<Object>  makeNoticeTextSimple(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
 			HttpServletResponse res, Model model) throws IOException {
 		
 		String downloadId = null;

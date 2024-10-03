@@ -7,8 +7,8 @@ package oss.fosslight.controller;
 
 import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -339,7 +339,7 @@ public class LicenseController extends CoTopComponent {
 
 	@PostMapping(value = LICENSE.LICENSE_ID)
 	public @ResponseBody ResponseEntity<Object> getLicenseId(HttpServletRequest req, HttpServletResponse res,
-															 @RequestParam(value = "licenseName", required = true) String licenseName) {
+															 @RequestParam(required = true) String licenseName) {
 		Map<String, String> map = new HashMap<String, String>();
 
 		LicenseMaster lm = new LicenseMaster();

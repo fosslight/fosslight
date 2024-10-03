@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -298,7 +298,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 	}
 	
 	public String escapeSql(String str){
-		return str == null ? "null" : String.format("%s", str.replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r").replace("\"", "\\\""));
+		return str == null ? "null" : "%s".formatted(str.replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r").replace("\"", "\\\""));
 	}
 	
 	/** 메일 발송 **/

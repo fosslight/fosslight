@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -2541,7 +2542,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 					}
 					
-					downloadlocationUrl = URLDecoder.decode(downloadlocationUrl);
+					downloadlocationUrl = URLDecoder.decode(downloadlocationUrl, StandardCharsets.UTF_8);
 					
 					Pattern p = generatePattern(urlSearchSeq, downloadlocationUrl);
 					int cnt = ossMapper.checkOssNameUrl2Cnt(bean);

@@ -5,10 +5,12 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class UploadFile extends ComBean implements Serializable{
-	
+
+	@Serial
 	private static final long serialVersionUID = 4663446686199447488L;
 	
 	private String registSeq;

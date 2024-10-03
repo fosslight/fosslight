@@ -5,10 +5,12 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GridBean extends ComBean{
+	@Serial
 	private static final long serialVersionUID = 1481189510461854682L;
 
 	private int result;		// 성공,실패 코드  | 성공 : 0

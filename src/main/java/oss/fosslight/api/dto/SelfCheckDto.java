@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 
-import javax.xml.bind.annotation.XmlElementDecl;
+import jakarta.xml.bind.annotation.XmlElementDecl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

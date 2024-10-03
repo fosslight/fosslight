@@ -23,8 +23,8 @@ import oss.fosslight.service.ApiVerificationService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.SelfCheckService;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +82,7 @@ public class LiteSelfCheckController extends CoTopComponent {
 
     @GetMapping("/selfchecks/{id}/list-oss")
     public @ResponseBody ResponseEntity<ListSelfCheckOssDto.Result> listOss(
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         var projectQuery = new Project();
         projectQuery.setPrjId(id);
@@ -109,7 +109,7 @@ public class LiteSelfCheckController extends CoTopComponent {
 
     @GetMapping("/selfchecks/{id}")
     public @ResponseBody ResponseEntity<GetSelfCheckDetailsDto.Result> selfCheckDetail(
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         try {
             var result = apiSelfCheckService.getSelfCheck(id);
@@ -122,7 +122,7 @@ public class LiteSelfCheckController extends CoTopComponent {
 
     @GetMapping("/selfchecks/{id}/packages")
     public @ResponseBody ResponseEntity<ListSelfCheckVerifyOssDto.Result> selfCheckPackage(
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         try {
             var result = apiVerificationService.getVerifyOssList(id);
@@ -136,7 +136,7 @@ public class LiteSelfCheckController extends CoTopComponent {
 
     @GetMapping("/selfchecks/{id}/packages/files")
     public @ResponseBody ResponseEntity<SelfCheckFileListDto.Response> packageFiles(
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         try {
             var packages = apiSelfCheckService.listSelfCheckPackages(id);
@@ -155,7 +155,7 @@ public class LiteSelfCheckController extends CoTopComponent {
 
     @PostMapping("/selfchecks/{id}/packages/files")
     public @ResponseBody ResponseEntity<Object> registerFile(
-            @PathVariable("id") String id,
+            @PathVariable String id,
             MultipartHttpServletRequest req
     ) {
         var fileMap = req.getFileMap();
@@ -199,7 +199,7 @@ public class LiteSelfCheckController extends CoTopComponent {
     @DeleteMapping("/selfchecks/{id}/packages/files")
     public @ResponseBody ResponseEntity<SelfCheckFileDeleteDto.Response> deleteFile(
             @ModelAttribute SelfCheckFileDeleteDto.Request request,
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         var fileId = request.getFileId();
         try {
@@ -218,7 +218,7 @@ public class LiteSelfCheckController extends CoTopComponent {
 
     @GetMapping("/selfchecks/{id}/oss/check")
     public @ResponseBody ResponseEntity<SelfCheckVerifyOssDto.Response> checkOss(
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         var ossIdentificationList = apiSelfCheckService.validateOss(id);
 
@@ -234,7 +234,7 @@ public class LiteSelfCheckController extends CoTopComponent {
 
     @GetMapping("/selfchecks/{id}/licenses/check")
     public @ResponseBody ResponseEntity<SelfCheckVerifyLicensesDto.Response> checkLicenses(
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         var licenseIdentificationList = apiSelfCheckService.validateLicenses(id);
 
@@ -251,7 +251,7 @@ public class LiteSelfCheckController extends CoTopComponent {
     @PostMapping("/selfchecks/{id}/license-notice-email")
     public @ResponseBody ResponseEntity<Object> sendLicenseNoticeEmail(
             @RequestHeader(value = "Origin") String origin,
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         try {
             apiSelfCheckService.sendLicenseNoticeEmail(origin, id);

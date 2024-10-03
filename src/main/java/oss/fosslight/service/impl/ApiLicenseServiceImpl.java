@@ -12,7 +12,7 @@ import oss.fosslight.repository.LicenseMapper;
 import oss.fosslight.service.ApiLicenseService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class ApiLicenseServiceImpl extends CoTopComponent implements ApiLicenseService {

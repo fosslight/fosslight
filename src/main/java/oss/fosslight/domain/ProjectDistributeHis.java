@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -18,8 +19,9 @@ import java.io.Serializable;
  */
 public class ProjectDistributeHis extends ComBean implements Serializable{
 
-	
+
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = 702862084569729284L;
 	
 	/** The prj id. */

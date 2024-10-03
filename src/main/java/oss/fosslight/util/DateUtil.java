@@ -792,7 +792,7 @@ public final class DateUtil {
     	if (!date.isEmpty()){
     		date = date.substring(0, 10);
         	String[] temp = date.split("-");
-        	date = date.format("%s년 %s월 %s일", 	temp[0], temp[1], temp[2]);
+        	date = "%s년 %s월 %s일".formatted(temp[0], temp[1], temp[2]);
     	}
     	
     	return date;

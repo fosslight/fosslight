@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import oss.fosslight.common.CommonFunction;
 
 public class OssComponents extends ComBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 4907819340622537583L;
 
 	private String componentId;

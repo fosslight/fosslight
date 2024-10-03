@@ -339,8 +339,8 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 
     private String hasSearchCondition(Map<String, Object> params) {
     	for (Object obj : params.values()) {
-    		if (obj instanceof String) {
-    			if (!StringUtil.isEmpty((String)obj)) {
+    		if (obj instanceof String string) {
+    			if (!StringUtil.isEmpty(string)) {
     				return "Y";
     			}
     		}

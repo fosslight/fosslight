@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import com.google.gson.JsonObject;
@@ -15,8 +16,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CodeDtlBean extends ComBean implements Serializable{
-	
+
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
     /** 코드번호. */

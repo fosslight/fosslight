@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import lombok.Getter;
@@ -16,6 +17,7 @@ import lombok.Setter;
 @Getter @Setter
 public class BinaryData  extends ComBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/** The id. */

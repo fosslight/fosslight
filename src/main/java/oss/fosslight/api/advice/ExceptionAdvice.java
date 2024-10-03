@@ -5,7 +5,7 @@
 
 package oss.fosslight.api.advice;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.context.MessageSource;

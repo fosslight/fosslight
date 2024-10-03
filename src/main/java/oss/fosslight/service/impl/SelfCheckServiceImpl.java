@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -25,7 +24,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.jsoup.Jsoup;
@@ -1500,7 +1499,7 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 			
 			String filePath = NOTICE_PATH + "/" + project.getPrjId();
 			// 이전에 생성된 파일은 모두 삭제한다.
-			Path rootPath = Paths.get(filePath);
+			Path rootPath = Path.of(filePath);
 			if (rootPath.toFile().exists()) {
 				for (String _fName : rootPath.toFile().list()) {
 					Files.deleteIfExists(rootPath.resolve(_fName));

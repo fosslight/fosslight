@@ -18,13 +18,12 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.Part;
+import jakarta.servlet.http.Part;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -107,8 +106,8 @@ public class FileUtil {
 	public static boolean moveTo(String srcFilePath, String copyFilePath, String copyFileName) {
 		if (!StringUtil.isEmpty(srcFilePath) && !StringUtil.isEmpty(copyFilePath)) {
 			try {
-				Path srcFile = Paths.get(srcFilePath);
-				Path copyPath = Paths.get(copyFilePath);
+				Path srcFile = Path.of(srcFilePath);
+				Path copyPath = Path.of(copyFilePath);
 				
 				if (!StringUtil.isEmpty(copyFileName)) {
 					if (!Files.exists(copyPath)) {
@@ -284,8 +283,8 @@ public class FileUtil {
 					dir.mkdirs();
 				}
 				
-				Path srcFile = Paths.get(srcFilePath);
-				Path copyPath = Paths.get(copyFilePath);
+				Path srcFile = Path.of(srcFilePath);
+				Path copyPath = Path.of(copyFilePath);
 				
 				if (!StringUtil.isEmpty(copyFileName)) {
 					copyPath = copyPath.resolve(copyFileName);
@@ -340,8 +339,8 @@ public class FileUtil {
                 inputStream = httpConn.getInputStream();
                 String saveFilePath = saveDir + File.separator + fileName;
 
-                if (!Files.exists(Paths.get(saveDir))) {
-                    Files.createDirectories(Paths.get(saveDir));
+                if (!Files.exists(Path.of(saveDir))) {
+                    Files.createDirectories(Path.of(saveDir));
                 }
 
                 // opens an output stream to save into file
@@ -445,8 +444,8 @@ public class FileUtil {
 	public static void backupRawData(String sourceFilePath, String destPath) {
 		try {
 			// zip 파일 백업
-			Path zipPath = Paths.get(sourceFilePath);
-			Path movePath = Paths.get(destPath);
+			Path zipPath = Path.of(sourceFilePath);
+			Path movePath = Path.of(destPath);
 			
 			if (!Files.exists(movePath)) {
 				Files.createDirectories(movePath);

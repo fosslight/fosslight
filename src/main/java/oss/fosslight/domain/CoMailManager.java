@@ -27,13 +27,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeUtility;
-import javax.mail.util.ByteArrayDataSource;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeUtility;
+import jakarta.mail.util.ByteArrayDataSource;
 
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -3639,7 +3639,7 @@ public class CoMailManager extends CoTopComponent {
 			helper.setText(conversionBase64ToContentId(coMail.getEmlMessage(), inlineImage), true);
 
 			for (String key : inlineImage.keySet()) {
-				byte[] imageBytes = javax.xml.bind.DatatypeConverter.parseBase64Binary(inlineImage.get(key));
+				byte[] imageBytes = jakarta.xml.bind.DatatypeConverter.parseBase64Binary(inlineImage.get(key));
 				helper.addInline(key, new ByteArrayDataSource(imageBytes, "image/png"));
 			}
 			

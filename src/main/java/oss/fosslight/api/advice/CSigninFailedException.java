@@ -5,8 +5,11 @@
 
 package oss.fosslight.api.advice;
 
+import java.io.Serial;
+
 public class CSigninFailedException extends RuntimeException {
-	
+
+	@Serial
 	private static final long serialVersionUID = 1L;
     
     public CSigninFailedException(String msg, Throwable t) {

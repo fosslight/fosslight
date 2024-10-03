@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -336,7 +335,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 			// 이전에 생성된 파일은 모두 삭제한다.
-			Path rootPath = Paths.get(filePath);
+			Path rootPath = Path.of(filePath);
 			
 			if (rootPath.toFile().exists()) {
 				for (String _fName : rootPath.toFile().list()) {
@@ -390,7 +389,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			String filePath = NOTICE_PATH + "/" + project.getPrjId();
 			// 이전에 생성된 파일은 모두 삭제한다.
-			Path rootPath = Paths.get(filePath);
+			Path rootPath = Path.of(filePath);
 			if (rootPath.toFile().exists()) {
 				for (String _fName : rootPath.toFile().list()) {
 					Files.deleteIfExists(rootPath.resolve(_fName));
@@ -444,7 +443,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String filePath = REVIEW_REPORT_PATH + "/" + project.getPrjId();
 
 			// 이전에 생성된 pdf 파일은 모두 삭제한다.
-			Path rootPath = Paths.get(filePath);
+			Path rootPath = Path.of(filePath);
 			if (rootPath.toFile().exists()) {
 				for (String _fName : rootPath.toFile().list()) {
 					String[] fNameList = _fName.split("\\.");

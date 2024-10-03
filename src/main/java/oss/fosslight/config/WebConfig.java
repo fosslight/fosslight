@@ -8,6 +8,7 @@ package oss.fosslight.config;
 import java.util.List;
 import java.util.Locale;
 
+import io.swagger.v3.core.util.Json;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +40,6 @@ import com.google.gson.JsonSerializer;
 
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.interceptor.AjaxInterceptor;
-import springfox.documentation.spring.web.json.Json;
 
 @Configuration
 @EnableWebMvc
@@ -55,7 +55,7 @@ public class WebConfig implements WebMvcConfigurer {
 		public JsonElement serialize(Json json, java.lang.reflect.Type typeOfSrc, JsonSerializationContext context) {
 			final JsonParser parser = new JsonParser();
 
-			return parser.parse(json.value());
+			return parser.parse(Json.pretty(json));
 		}
 	}
 

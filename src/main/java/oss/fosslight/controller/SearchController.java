@@ -16,8 +16,8 @@ import oss.fosslight.domain.*;
 import oss.fosslight.common.Url.SEARCH;
 import oss.fosslight.service.SearchService;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.*;
 
 @Controller
@@ -148,7 +148,7 @@ public class SearchController extends CoTopComponent {
 
 
     @GetMapping(value=SEARCH.PATH)
-    public @ResponseBody ResponseEntity<?> getSearchInfo(@RequestParam("type") String type){
+    public @ResponseBody ResponseEntity<?> getSearchInfo(@RequestParam String type){
 
         Object searchFilter = searchService.getSearchFilter(type, loginUserName());
 

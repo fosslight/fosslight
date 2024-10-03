@@ -8,10 +8,10 @@ package oss.fosslight.controller;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +39,8 @@ public class DownloadProcController extends CoTopComponent {
 	
 	@GetMapping(value=DOWNLOAD.SEQ_FNAME)
 	public ResponseEntity<FileSystemResource> downloadComponent (
-			@PathVariable("seq") final String seq, 
-			@PathVariable("fName") final String fName,
+			@PathVariable final String seq, 
+			@PathVariable final String fName,
 			HttpServletRequest req, HttpServletResponse res, Model model) throws IOException{
 		ResponseEntity<FileSystemResource> responseEntity = null;
 		
@@ -97,8 +97,8 @@ public class DownloadProcController extends CoTopComponent {
 	
 	@GetMapping(value={DOWNLOAD.BATGUIREPORT_ID_CHECKSUM})
 	public ResponseEntity<FileSystemResource> downloadBatGuiReport (
-			@PathVariable("batId") final String batId, 
-			@PathVariable("checkSum") final String checkSum,
+			@PathVariable final String batId, 
+			@PathVariable final String checkSum,
 			HttpServletRequest req, HttpServletResponse res, Model model) throws IOException{
 		ResponseEntity<FileSystemResource> responseEntity = null;
 		String baseImageUrl = "http://" + req.getServerName();
@@ -118,7 +118,7 @@ public class DownloadProcController extends CoTopComponent {
 		if (file.exists() && file.isFile()){
 			fileName+=".html";
 		    String encodedFilename = URLEncoder.encode(fileName,"UTF-8").replace("+", "%20");
-		    File tempFile = Paths.get(CommonFunction.emptyCheckProperty("image.temp.path", "/imagetemp")).resolve("BAT").resolve(batId).resolve(file.getName()).toFile();
+		    File tempFile = Path.of(CommonFunction.emptyCheckProperty("image.temp.path", "/imagetemp")).resolve("BAT").resolve(batId).resolve(file.getName()).toFile();
 		   
 		    try {
 		    	if (!tempFile.exists()) {

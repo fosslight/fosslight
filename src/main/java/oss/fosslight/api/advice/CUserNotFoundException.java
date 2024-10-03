@@ -5,8 +5,11 @@
 
 package oss.fosslight.api.advice;
 
+import java.io.Serial;
+
 public class CUserNotFoundException extends RuntimeException {
-	
+
+	@Serial
 	private static final long serialVersionUID = 1L;
     
     public CUserNotFoundException(String msg, Throwable t) {

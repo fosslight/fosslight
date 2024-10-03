@@ -1,20 +1,17 @@
 package oss.fosslight.api.controller.lite;
 
-import io.swagger.models.License;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.dto.*;
-import oss.fosslight.domain.OssMaster;
-import oss.fosslight.repository.*;
+import oss.fosslight.api.dto.ListLicenseDto;
+import oss.fosslight.api.dto.ListVulnerabilityDto;
+import oss.fosslight.api.dto.SearchAllDto;
+import oss.fosslight.repository.ApiLicenseMapper;
+import oss.fosslight.repository.ApiVulnerabilityMapper;
 import oss.fosslight.service.ApiOssService;
-import oss.fosslight.service.impl.ApiOssServiceImpl;
-
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,7 +29,7 @@ public class LiteDashboardController extends CoTopComponent {
 
     @GetMapping("/dashboard/search")
     public @ResponseBody ResponseEntity<SearchAllDto.Response> searchAll(
-            @RequestParam("query") String query
+            @RequestParam String query
     ) {
         final int LIMIT = 5;
         try {

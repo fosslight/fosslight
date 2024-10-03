@@ -5,10 +5,12 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class OssComponentsLicense extends ComBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 4907819340622537583L;
 	
 	private String componentLicenseId;

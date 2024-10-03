@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
@@ -20,9 +21,11 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.util.StringUtil;
+
 public class ComBean extends CoTopComponent implements Serializable {
 
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	// 로그인 User 아이디
 	/**  Login User ID. */

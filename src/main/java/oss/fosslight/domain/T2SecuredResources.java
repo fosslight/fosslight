@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,7 +18,8 @@ import oss.fosslight.common.CoConstDef;
 @Setter
 @Getter
 public class T2SecuredResources implements Serializable{
-	
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String resourceId; // 리소스 ID

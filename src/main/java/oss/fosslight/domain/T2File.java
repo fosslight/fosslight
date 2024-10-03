@@ -5,10 +5,12 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class T2File extends ComBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = -5448637543126888136L;
 
 	private String fileSeq;

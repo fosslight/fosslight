@@ -10,9 +10,9 @@ import java.io.PrintWriter;
 import java.security.Principal;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -67,7 +67,7 @@ public class MainController{
 			model.addAttribute("data", param.get("data"));
 		}
 
-		String v = String.format("%s/%s :: %s", category, templateName ,fragmentName);
-		return String.format("%s/%s :: %s", category, templateName ,fragmentName);
+		String v = "%s/%s :: %s".formatted(category, templateName, fragmentName);
+		return "%s/%s :: %s".formatted(category, templateName, fragmentName);
 	}
 }

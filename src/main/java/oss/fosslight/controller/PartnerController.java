@@ -11,10 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +23,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -1111,7 +1112,7 @@ public class PartnerController extends CoTopComponent{
 				if (result != null) {
 
 					for (PartnerMaster pm : result) {
-						if (!StringUtils.isEmpty(pm.getDivision())) {
+						if (!ObjectUtils.isEmpty(pm.getDivision())) {
 							pm.setParDivision(pm.getDivision());
 							pm.setParDivisionName(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, pm.getDivision()));
 						}

@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import lombok.Getter;
@@ -17,6 +18,7 @@ import lombok.Setter;
 public class Bat  extends ComBean implements Serializable {
 
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = 9018255826730935058L;
 
 	/** The id. */

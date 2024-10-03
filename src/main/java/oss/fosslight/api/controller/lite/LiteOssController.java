@@ -58,7 +58,7 @@ public class LiteOssController {
 
     @GetMapping("/oss/{id}")
     public @ResponseBody ResponseEntity<GetOSSDetailsDto.Result> getOss(
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         try {
             var result = ossService.getOss(id);

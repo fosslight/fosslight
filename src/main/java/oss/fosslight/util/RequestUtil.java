@@ -17,21 +17,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.config.RequestConfig.Builder;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HttpContext;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.config.RequestConfig.Builder;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
@@ -52,7 +49,8 @@ public class RequestUtil {
 	 */
 	public static RestTemplate getRestTemplate(final HttpClientContext context) {
 		HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-		factory.setReadTimeout(5000); // milliseconds
+		// Manual migration to `SocketConfig.Builder.setSoTimeout(Timeout)` necessary; see: https://docs.spring.io/spring-framework/docs/6.0.0/javadoc-api/org/springframework/http/client/HttpComponentsClientHttpRequestFactory.html#setReadTimeout(int)
+		factory.setConnectTimeout(5000); // milliseconds
 		RestTemplate restOperations = new RestTemplate(factory);
 		restOperations.setRequestFactory(new HttpComponentsClientHttpRequestFactory() {
 			@Override
@@ -105,7 +103,7 @@ public class RequestUtil {
 		ResponseEntity<String> exchange = restOperations.exchange(url, HttpMethod.POST,
 				new HttpEntity<MultiValueMap<String, Object>>(parts, headers), String.class);
 		String body = exchange.getBody();
-		HttpStatus statusCode = exchange.getStatusCode();
+		HttpStatusCode statusCode = exchange.getStatusCode();
 		if (statusCode != HttpStatus.OK) {
 			log.warn("%s - status : {}", url, statusCode);
 		}
@@ -137,7 +135,7 @@ public class RequestUtil {
 		HttpHeaders headers = RequestUtil.getHeaders();
 		ResponseEntity<String> exchange = restOperations.exchange(url, HttpMethod.GET, new HttpEntity<Object>(headers),
 				String.class);
-		HttpStatus statusCode = exchange.getStatusCode();
+		HttpStatusCode statusCode = exchange.getStatusCode();
 		if (statusCode != HttpStatus.OK) {
 			log.warn("{} - status : {}", url, statusCode);
 		}
@@ -337,9 +335,7 @@ public class RequestUtil {
 				
 				if (_v instanceof List<?> || _v instanceof String) {
 					parts.add(_k, _v);
-				} else if (_v instanceof String[]) {
-					//2019-06-04 Javaroid 배열로 값을 전송하기 위한 처리. 고객 그룹 등록 등 일괄 처리를 위한 작업 때문에 추가하였다.
-					String[] _value = (String[])_v;
+				} else if (_v instanceof String[] _value) {
 					for (String value : _value) {
 						parts.add(_k, value);
 					}
@@ -395,7 +391,7 @@ public class RequestUtil {
 	}
 	
 	private static CloseableHttpClient createDefault() {
-		RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(5000).setSocketTimeout(5000).setConnectTimeout(5000)
+		RequestConfig config = RequestConfig.custom().setConnectionRequestTimeout(5000, TimeUnit.MILLISECONDS).setResponseTimeout(5000, TimeUnit.MILLISECONDS).setConnectTimeout(5000, TimeUnit.MILLISECONDS)
 				.build();
 		
 		return HttpClients.custom().setDefaultRequestConfig(config).build();

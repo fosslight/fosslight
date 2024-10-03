@@ -30,16 +30,15 @@ import oss.fosslight.service.ApiOssService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.T2UserService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import oss.fosslight.domain.T2Users;
 import java.lang.reflect.Type;
 
-@Api(tags = {"1. OSS & License"})
+@Tag(name = "1. OSS & License")
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -54,15 +53,15 @@ public class ApiOssController extends CoTopComponent {
 
 	private final OssService ossService;
 	
-	@ApiOperation(value = "Search OSS List", notes = "OSS 조회")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	@Operation(summary = "Search OSS List", description = "OSS 조회")
+    @Parameters({
+        @Parameter(name = "_token", description = "token", required = true)
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_OSS_SEARCH})
     public CommonResult getOssInfo(
     		@RequestHeader String _token,
-    		@ApiParam(value = "OSS Name", required = true) @RequestParam(required = true) String ossName,
-    		@ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion){
+    		@Parameter(description = "OSS Name", required = true) @RequestParam(required = true) String ossName,
+    		@Parameter(description = "OSS Version", required = false) @RequestParam(required = false) String ossVersion){
 		
 		// 사용자 인증
 		userService.checkApiUserAuth(_token);
@@ -86,14 +85,14 @@ public class ApiOssController extends CoTopComponent {
 		}
     }
 	
-	@ApiOperation(value = "Search OSS Info by downloadLocation", notes = "downloadLocation별 OSS Info 조회")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	@Operation(summary = "Search OSS Info by downloadLocation", description = "downloadLocation별 OSS Info 조회")
+    @Parameters({
+        @Parameter(name = "_token", description = "token", required = true)
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_DOWNLOADLOCATION_SEARCH})
     public CommonResult getOssInfoByDownloadLocation(
     		@RequestHeader String _token,
-    		@ApiParam(value = "Download Location", required = true) @RequestParam(required = true) String downloadLocation){
+    		@Parameter(description = "Download Location", required = true) @RequestParam(required = true) String downloadLocation){
 		
 		// 사용자 인증
 		userService.checkApiUserAuth(_token);
@@ -114,14 +113,14 @@ public class ApiOssController extends CoTopComponent {
     }
 
 
-	@ApiOperation(value = "Search License Info", notes = "License Info 조회")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	@Operation(summary = "Search License Info", description = "License Info 조회")
+    @Parameters({
+        @Parameter(name = "_token", description = "token", required = true)
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_LICENSE_SEARCH})
     public CommonResult getLicenseInfo(
     		@RequestHeader String _token,
-    		@ApiParam(value = "License Name", required = true) @RequestParam(required = true) String licenseName){
+    		@Parameter(description = "License Name", required = true) @RequestParam(required = true) String licenseName){
 		
 		// 사용자 인증
 		userService.checkApiUserAuth(_token);
@@ -142,14 +141,14 @@ public class ApiOssController extends CoTopComponent {
 		}
     }
 
-	@ApiOperation(value = "Register New OSS", notes = "신규 OSS 등록")
-	@ApiImplicitParams({
-			@ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	@Operation(summary = "Register New OSS", description = "신규 OSS 등록")
+	@Parameters({
+			@Parameter(name = "_token", description = "token", required = true)
 	})
 	@PostMapping(value = {API.FOSSLIGHT_API_OSS_REGISTER})
 	public CommonResult registerOss(
 			@RequestHeader String _token,
-			@ApiParam(value = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
+			@Parameter(description = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
 
 		if (userService.isAdmin(_token)) {
 			Map<String, Object> resultMap = new HashMap<String, Object>();

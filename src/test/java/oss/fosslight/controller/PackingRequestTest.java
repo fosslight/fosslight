@@ -6,10 +6,10 @@ SPDX-License-Identifier: AGPL-3.0-only
 package oss.fosslight.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.InputStreamEntity;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import oss.fosslight.domain.OssNotice;
 import oss.fosslight.domain.Project;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

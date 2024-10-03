@@ -25,14 +25,13 @@ import oss.fosslight.common.Url.API;
 import oss.fosslight.service.ApiBatService;
 import oss.fosslight.service.T2UserService;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Api(tags = {"7. Binary"})
+@Tag(name = "7. Binary")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")
@@ -45,19 +44,19 @@ public class ApiBatController extends CoTopComponent {
 	
 	private final ApiBatService apibatService;
 	
-	@ApiOperation(value = "Search Binary List", notes = "Binary Info 조회")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	@Operation(summary = "Search Binary List", description = "Binary Info 조회")
+    @Parameters({
+        @Parameter(name = "_token", description = "token", required = true)
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_BINARY_SEARCH})
     public CommonResult getBinaryInfo(
     		@RequestHeader String _token,
-    		@ApiParam(value = "Binary Name", required = false) @RequestParam(required = false) String fileName,
-    		@ApiParam(value = "Tlsh", required = false) @RequestParam(required = false) String tlsh,
-    		@ApiParam(value = "checksum", required = false) @RequestParam(required = false) String checksum,
-    		@ApiParam(value = "Platform Name", required = false) @RequestParam(required = false) String platformName,
-    		@ApiParam(value = "PlatForm Version", required = false) @RequestParam(required = false) String platformVersion,
-    		@ApiParam(value = "Source Path", required = false) @RequestParam(required = false) String sourcePath){
+    		@Parameter(description = "Binary Name", required = false) @RequestParam(required = false) String fileName,
+    		@Parameter(description = "Tlsh", required = false) @RequestParam(required = false) String tlsh,
+    		@Parameter(description = "checksum", required = false) @RequestParam(required = false) String checksum,
+    		@Parameter(description = "Platform Name", required = false) @RequestParam(required = false) String platformName,
+    		@Parameter(description = "PlatForm Version", required = false) @RequestParam(required = false) String platformVersion,
+    		@Parameter(description = "Source Path", required = false) @RequestParam(required = false) String sourcePath){
 		
 		// 사용자 인증
 		userService.checkApiUserAuth(_token);

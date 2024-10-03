@@ -5,14 +5,8 @@
 
 package oss.fosslight.domain;
 
+import java.io.*;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,9 +25,10 @@ import oss.fosslight.common.CommonFunction;
 
 @Slf4j
 public class LicenseHtmlGeneratorFromXml extends ComBean implements Serializable {
-    /**
+	/**
 	 * 
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private static int convertXmlCnt = 0; 
@@ -43,23 +38,25 @@ public class LicenseHtmlGeneratorFromXml extends ComBean implements Serializable
     private static final String TAG_FILE_CONTENT = "file-content";
     private static final String ATTR_CONTENT_ID = "contentId";
     private static final String HTML_HEAD_STRING =
-            "<html><head>\n" +
-            "<style type=\"text/css\">\n" +
-            "body { padding: 0; font-family: sans-serif; }\n" +
-            ".same-license { background-color: #eeeeee;\n" +
-            "                border-top: 20px solid white;\n" +
-            "                padding: 10px; }\n" +
-            ".label { font-weight: bold; }\n" +
-            ".file-list { margin-left: 1em; color: blue; }\n" +
-            "</style>\n" +
-            "</head>" +
-            "<body topmargin=\"0\" leftmargin=\"0\" rightmargin=\"0\" bottommargin=\"0\">\n" +
-            "<div class=\"toc\">\n" +
-            "<ul>";
+            """
+            <html><head>
+            <style type="text/css">
+            body { padding: 0; font-family: sans-serif; }
+            .same-license { background-color: #eeeeee;
+                            border-top: 20px solid white;
+                            padding: 10px; }
+            .label { font-weight: bold; }
+            .file-list { margin-left: 1em; color: blue; }
+            </style>
+            </head>\
+            <body topmargin="0" leftmargin="0" rightmargin="0" bottommargin="0">
+            <div class="toc">
+            <ul>""";
     private static final String HTML_MIDDLE_STRING =
-            "</ul>\n" +
-            "</div><!-- table of contents -->\n" +
-            "<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">";
+            """
+            </ul>
+            </div><!-- table of contents -->
+            <table cellpadding="0" cellspacing="0" border="0">""";
     private static final String HTML_REAR_STRING =
             "</table></body></html>";
     private final List<File> mXmlFiles;

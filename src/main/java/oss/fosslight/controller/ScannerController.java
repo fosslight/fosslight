@@ -31,8 +31,8 @@ public class ScannerController {
 	
 	@PostMapping(value = {Url.EXTERNAL.REQUEST_FL_SCAN})
 	public CommonResult requestFlScanService(
-    		@RequestParam(name = "prjId", required = true) String prjId,
-    		@RequestParam(name = "wgetUrl", required = true) String wgetUrl){
+    		@RequestParam(required = true) String prjId,
+    		@RequestParam(required = true) String wgetUrl){
 		
 		try {
 

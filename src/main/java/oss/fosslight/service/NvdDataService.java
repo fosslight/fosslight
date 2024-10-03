@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.sql.Connection;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.TimeZone;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -34,10 +34,9 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -1651,8 +1650,8 @@ public class NvdDataService {
 			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
 		}
 		String NVD_DATA_BACKUP_PATH = NVD_CVE_PATH;
-		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
-		NVD_DATA_BACKUP_PATH = Paths.get(NVD_DATA_BACKUP_PATH, "nvd/backup").toString();
+		NVD_CVE_PATH = Path.of(NVD_CVE_PATH, "nvd/cve").toString();
+		NVD_DATA_BACKUP_PATH = Path.of(NVD_DATA_BACKUP_PATH, "nvd/backup").toString();
 		try {
 			FileUtil.backupRawData(NVD_CVE_PATH + File.separator + FILE_NAME + ".json.zip", NVD_DATA_BACKUP_PATH);
 		} catch(Exception e) {
@@ -1666,9 +1665,9 @@ public class NvdDataService {
 			log.warn(e.getMessage(), e);
 			Thread.sleep(1000 * 30);
 			log.info("Retry downloading the NVD data file. FILE_NAME : " + FILE_NAME);
-			if (Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().exists()) {
+			if (Path.of(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().exists()) {
 				try {
-					Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().delete();
+					Path.of(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().delete();
 				} catch (Exception e2) {}
 			}
 			FileUtil.downloadFile(downloadUrl, NVD_CVE_PATH);
@@ -1691,7 +1690,7 @@ public class NvdDataService {
 		if (StringUtil.isEmpty(NVD_CVE_PATH)) {
 			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
 		}
-		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
+		NVD_CVE_PATH = Path.of(NVD_CVE_PATH, "nvd/cve").toString();
 
 		Connection conn = null;
 		PreparedStatement stmt = null;
@@ -1909,7 +1908,7 @@ public class NvdDataService {
 		if (StringUtil.isEmpty(NVD_CVE_PATH)) {
 			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
 		}
-		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
+		NVD_CVE_PATH = Path.of(NVD_CVE_PATH, "nvd/cve").toString();
 		for (int year = nvdBeginDateYear; year <= currentDateYear; year ++) {
 			updateNvdData(NVD_CVE_PATH, "nvdcve-1.1-" + year);
 		}

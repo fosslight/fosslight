@@ -5,9 +5,11 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class History extends ComBean implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 3832152613376387438L;
 	private String idx;		// index
 	private String hKey;		// master seq

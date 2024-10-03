@@ -7,9 +7,9 @@ package oss.fosslight.config;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,15 +52,14 @@ public class SecurityConfig {
 	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		return http.csrf(AbstractHttpConfigurer::disable).exceptionHandling(exceptionHandling -> exceptionHandling
-						.authenticationEntryPoint(jwtAuthenticationEntryPoint).authenticationEntryPoint(liteAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler))
+				.authenticationEntryPoint(jwtAuthenticationEntryPoint).authenticationEntryPoint(liteAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler))
 				.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
 				.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeRequests(
-						authorize -> authorize.antMatchers(CoConstDef.STATIC_RESOURCES_URL_PATTERNS).permitAll()
-								.antMatchers(CoConstDef.PERMIT_UTL_PATTERNS).permitAll()
+				.authorizeHttpRequests(
+						authorize -> authorize.requestMatchers(CoConstDef.STATIC_RESOURCES_URL_PATTERNS).permitAll()
+								.requestMatchers(CoConstDef.PERMIT_UTL_PATTERNS).permitAll()
 								.anyRequest().authenticated())
 				.formLogin(FormLoginConfigurer::disable)
-				.logout().logoutUrl(AppConstBean.SECURITY_LOGOUT_URL).logoutSuccessHandler(logoutSuccessHandler()).and()
 				.addFilterBefore(new JwtAuthenticationFilter(this.jwtTokenProvider, this.cookieUtil), UsernamePasswordAuthenticationFilter.class)
 				.build();
 	}

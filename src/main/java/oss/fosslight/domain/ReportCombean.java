@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 
@@ -13,6 +14,7 @@ import java.io.Serializable;
  */
 public class ReportCombean implements Serializable{
 
+	@Serial
 	private static final long serialVersionUID = 6760737950434033025L;
 	
 	

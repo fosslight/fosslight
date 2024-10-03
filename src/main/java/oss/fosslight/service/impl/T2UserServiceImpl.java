@@ -656,7 +656,7 @@ public class T2UserServiceImpl implements T2UserService {
 			LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
 			ldapTemplate.afterPropertiesSet();
 			
-			if(ldapTemplate.authenticate("", String.format("(cn=%s)", ldapSearchID), contextSource.getPassword())) {
+			if(ldapTemplate.authenticate("", "(cn=%s)".formatted(ldapSearchID), contextSource.getPassword())) {
 				List<String[]> searchResult = ldapTemplate.search(query().where("cn").is(userId), new AttributesMapper() {
 					public Object mapFromAttributes(Attributes attrs) throws NamingException {
 						return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};
@@ -765,7 +765,7 @@ public class T2UserServiceImpl implements T2UserService {
 				LdapTemplate ldapTemplate = new LdapTemplate(contextSource);
 				ldapTemplate.afterPropertiesSet();
 				
-				if (ldapTemplate.authenticate("", String.format("(cn=%s)", user_id), user_pw)) {
+				if (ldapTemplate.authenticate("", "(cn=%s)".formatted(user_id), user_pw)) {
 					searchResult = ldapTemplate.search(query().where("cn").is(user_id), new AttributesMapper() {
 						public Object mapFromAttributes(Attributes attrs) throws NamingException {
 							return new String[]{(String)attrs.get("mail").get(), (String)attrs.get("displayname").get()};

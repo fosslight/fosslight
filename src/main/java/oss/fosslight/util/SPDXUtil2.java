@@ -6,7 +6,7 @@
 package oss.fosslight.util;
 
 import java.io.File;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ public class SPDXUtil2 {
 
 	public static void convert(String prjId, String inputFilePath, String outputFilePath) throws Exception {
 		// 기존 파일 변환 결과 파일이 존재하는 경우 삭제
-		File inputFile = Paths.get(outputFilePath).toFile();
+		File inputFile = Path.of(outputFilePath).toFile();
 		inputFile.deleteOnExit();
 
 		logger.debug("SPDX format convert ("+prjId+") :" + inputFilePath + " => " + outputFilePath);

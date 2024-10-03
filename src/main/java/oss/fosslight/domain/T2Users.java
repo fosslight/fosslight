@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -16,8 +17,9 @@ import oss.fosslight.common.CoConstDef;
  * The Class T2Users.
  */
 public class T2Users extends ComBean implements Serializable{
-	
+
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = 6658712585854634962L;
 	
 	/** The user id. */

@@ -12,8 +12,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
+import org.springframework.util.ObjectUtils;
 import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
@@ -676,7 +675,7 @@ public class CoCodeManager extends CoTopComponent {
     public static String genCommonCheckbox(String s, String name, String val, Boolean NAExceptionFlag) {
     	CoCode code = getCodeInstance(s);
 		
-    	if (!StringUtils.isEmpty(code)) {
+    	if (!ObjectUtils.isEmpty(code)) {
     		return code.createCommonCheckboxString(val, name, NAExceptionFlag);
     	} else {
     		return null;

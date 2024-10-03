@@ -11,8 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
-import org.springframework.util.StringUtils;
-
+import org.springframework.util.ObjectUtils;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.util.StringUtil;
 
@@ -415,9 +414,9 @@ public class CoCode {
     public String createCommonCheckboxString(String val, String name, Boolean NAExceptionFlag){
         StringBuffer stringbuffer = new StringBuffer();
         int j = 0;
-        NAExceptionFlag = StringUtils.isEmpty(NAExceptionFlag) ? true : NAExceptionFlag; // default 시 true로 setting
+        NAExceptionFlag = ObjectUtils.isEmpty(NAExceptionFlag) ? true : NAExceptionFlag; // default 시 true로 setting
         
-        if (!StringUtils.isEmpty(name)) {
+        if (!ObjectUtils.isEmpty(name)) {
         	List<String> values = Arrays.asList(val.split(","));
 	        for (int k = codeDtls.size(); j < k; j++){
 	            CoCodeDtl codedtl = (CoCodeDtl)codeDtls.get(j);
@@ -449,11 +448,11 @@ public class CoCode {
         StringBuffer stringbuffer = new StringBuffer();
         int j = 0;
         
-        if (StringUtils.isEmpty(distributionType)) {
+        if (ObjectUtils.isEmpty(distributionType)) {
         	distributionType = CoConstDef.CD_GENERAL_MODEL;
         }
         
-        if (StringUtils.isEmpty(networkServerType)) {
+        if (ObjectUtils.isEmpty(networkServerType)) {
           networkServerType = CoConstDef.FLAG_NO;
         }
         

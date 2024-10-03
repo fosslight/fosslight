@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
@@ -82,11 +82,10 @@ public class T2CoValidationConfig extends CoTopComponent {
         List<String> ruleTypeDef = Arrays.asList(RULE_TYPE_DEF.split("\\s*,\\s*"));
 
         Map<String, Object> map = new HashMap<>();
-        if (env instanceof ConfigurableEnvironment) {
-        	for (org.springframework.core.env.PropertySource<?> propertySource : ((ConfigurableEnvironment) env).getPropertySources()) {
-                if (propertySource instanceof CompositePropertySource 
+        if (env instanceof ConfigurableEnvironment environment) {
+        	for (org.springframework.core.env.PropertySource<?> propertySource : environment.getPropertySources()) {
+                if (propertySource instanceof CompositePropertySource cps 
                 		&& propertySource.getName().indexOf("validation") > 0) {
-                	CompositePropertySource cps = (CompositePropertySource) propertySource;
                 	Iterator<org.springframework.core.env.PropertySource<?>> itr = cps.getPropertySources().iterator();
                 	while (itr.hasNext()) {
                 		Map<? extends String, ? extends Object> property = (Map<? extends String, ? extends Object>) itr.next().getSource();

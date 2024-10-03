@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	}
 
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = 2960062822605199127L;
 
 	/** The component id. */

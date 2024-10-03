@@ -5,6 +5,7 @@
 
 package  oss.fosslight.domain;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +13,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 
 public class CoMail extends ComBean {
-	
+
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = -6978575958803751406L;
 
 	/** The snd seq. */

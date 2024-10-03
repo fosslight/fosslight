@@ -5,8 +5,12 @@
 
 package oss.fosslight.api.controller.v2;
 
-import com.google.common.collect.Lists;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,8 +24,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.RestResponseService;
+import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -35,16 +39,11 @@ import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.util.StringUtil;
 import oss.fosslight.validation.T2CoValidationResult;
-import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.websocket.server.PathParam;
 import java.util.*;
 
-@Api(tags = {"3. Project"})
+@Tag(name = "3. Project")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
@@ -86,19 +85,19 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
-    @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+    @Operation(summary = "Search Project List", description = "Project 정보 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project Name", required = false) @RequestParam(required = false) String prjName,
-            @ApiParam(value = "Project Name exact match (Y: true, N: false)", allowableValues = "Y,N", required = false) @RequestParam(required = false, defaultValue = "N") String prjNameExactYn,
-            @ApiParam(value = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
-            @ApiParam(value = "Division (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String division,
-            @ApiParam(value = "Model Name", required = false) @RequestParam(required = false) String modelName,
-            @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
-            @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false, allowableValues = "PROG,REQ,REV,COMP,DROP") @RequestParam(required = false) String status,
-            @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
-            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator) {
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project Name", required = false) @RequestParam(required = false) String prjName,
+            @Parameter(description = "Project Name exact match (Y: true, N: false)", required = false) @ValuesAllowed(propName = "prjNameExactYn", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "N") String prjNameExactYn,
+            @Parameter(description = "project ID List", required = false) @RequestParam(required = false) String[] prjIdList,
+            @Parameter(description = "Division (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String division,
+            @Parameter(description = "Model Name", required = false) @RequestParam(required = false) String modelName,
+            @Parameter(description = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
+            @Parameter(description = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false) @ValuesAllowed(propName = "status", values = {"PROG","REQ","REV","COMP","DROP"}) @RequestParam(required = false) String status,
+            @Parameter(description = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
+            @Parameter(description = "Creator", required = false) @RequestParam(required = false) String creator) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -132,11 +131,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+    @Operation(summary = "Search Project List", description = "Project 정보 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_MODEL_SEARCH})
     public ResponseEntity<Map<String, Object>> selectModelList(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "project ID List", required = true) @RequestParam(required = true) String[] prjIdList) {
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "project ID List", required = true) @RequestParam(required = true) String[] prjIdList) {
 
         // 사용자 인증
         userService.checkApiUserAuth(authorization);
@@ -158,13 +157,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Update model list of project", notes = "Basic Information > Model list")
+    @Operation(summary = "Update model list of project", description = "Basic Information > Model list")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE})
     public ResponseEntity<Map<String, Object>> updateModelList(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(required = true, name = "id") String prjId,
-            @ApiParam(
-                    value = "Model List, in format of: ${MODEL_NAME}|${CATEGORY}|${yyyyMMdd} (ex. MODEL_NAME|ETC > Etc|20220428)",
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project id", required = true) @PathVariable(required = true, name = "id") String prjId,
+            @Parameter(
+                    description = "Model List, in format of: ${MODEL_NAME}|${CATEGORY}|${yyyyMMdd} (ex. MODEL_NAME|ETC > Etc|20220428)",
                     required = true
             )
             @RequestParam(required = true)
@@ -218,12 +217,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ApiOperation(value = "Update model list of project with file", notes = "Basic Information > Model list with file")
+    @Operation(summary = "Update model list of project with file", description = "Basic Information > Model list with file")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_MODEL_UPDATE_UPLOAD_FILE})
     public ResponseEntity<Map<String, Object>> updateModelListUploadFile(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @Parameter(description = "Model List (Spread sheet)", required = false) @RequestPart(required = false) MultipartFile modelReport) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -274,23 +273,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
 //		return responseService.getFailResult(errorCode, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, errorCode));
     }
 
-    @ApiOperation(value = "Create Project", notes = "project 생성")
+    @Operation(summary = "Create Project", description = "project 생성")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_CREATE})
     public ResponseEntity<Map<String, Object>> createProject(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project Name (Duplicate not allowed)", required = true) @RequestParam(required = true) String prjName,
-            @ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion,
-            @ApiParam(value = "OS Type (\"Check the input value with /api/v2/codes\")", required = true) @RequestParam(required = true) String osType,
-            @ApiParam(value = "OS Type etc", required = false) @RequestParam(required = false) String osTypeEtc,
-            @ApiParam(value = "Distribution Type (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String distributionType,
-            @ApiParam(value = "Distribution Site (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String distributionSite,
-            @ApiParam(value = "Network Service (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String networkServerType,
-            @ApiParam(value = "OSS Notice (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String noticeType,
-            @ApiParam(value = "Notice Platform (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String noticeTypeEtc,
-            @ApiParam(value = "Priority (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String priority,
-            @ApiParam(value = "Visible to everyone? (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false, defaultValue = "Y") String publicYn,
-            @ApiParam(value = "User Comment", required = false) @RequestParam(required = false) String userComment,
-            @ApiParam(value = "Additional Information", required = false) @RequestParam(required = false) String additionalInformation) {
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project Name (Duplicate not allowed)", required = true) @RequestParam(required = true) String prjName,
+            @Parameter(description = "Project Version", required = false) @RequestParam(required = false) String prjVersion,
+            @Parameter(description = "OS Type (\"Check the input value with /api/v2/codes\")", required = true) @RequestParam(required = true) String osType,
+            @Parameter(description = "OS Type etc", required = false) @RequestParam(required = false) String osTypeEtc,
+            @Parameter(description = "Distribution Type (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String distributionType,
+            @Parameter(description = "Distribution Site (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String distributionSite,
+            @Parameter(description = "Network Service (YES : Y, NO : N)", required = false)@ValuesAllowed(propName = "networkServerType", values = {"Y", "N"}) @RequestParam(required = false) String networkServerType,
+            @Parameter(description = "OSS Notice (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String noticeType,
+            @Parameter(description = "Notice Platform (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String noticeTypeEtc,
+            @Parameter(description = "Priority (\"Check the input value with /api/v2/codes\")", required = false) @RequestParam(required = false) String priority,
+            @Parameter(description = "Visible to everyone? (YES : Y, NO : N)", required = false) @ValuesAllowed(propName = "publicYn", values = {"Y", "N"})@RequestParam(required = false, defaultValue = "Y") String publicYn,
+            @Parameter(description = "User Comment", required = false) @RequestParam(required = false) String userComment,
+            @Parameter(description = "Additional Information", required = false) @RequestParam(required = false) String additionalInformation) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -335,7 +334,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 if (!CoConstDef.FLAG_YES.equals(networkServerType)
                         && !CoConstDef.FLAG_NO.equals(networkServerType)) { // NETWORK Service Only는 Y / N만 선택 가능함.
 
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, String.format("Network server type parameter must be either %s or %s.", CoConstDef.FLAG_YES, CoConstDef.FLAG_NO));
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Network server type parameter must be either %s or %s.".formatted(CoConstDef.FLAG_YES, CoConstDef.FLAG_NO));
                 }
             } else {
                 networkServerType = CoConstDef.FLAG_NO;
@@ -454,15 +453,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
 
-    @ApiOperation(value = "Project Bom Download as File", notes = "Project > Bom tab download as file")
+    @Operation(summary = "Project Bom Download as File", description = "Project > Bom tab download as file")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_DOWNLOAD})
     public ResponseEntity<FileSystemResource> getPrjBomDownload(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag,
-            @ApiParam(value = "Format", allowableValues = "Spreadsheet")
-            @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @Parameter(description = "Save Flag (YES : Y, NO : N)")
+            @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false) String saveFlag,
+            @Parameter(description = "Format")
+            @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) {
 
         log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
@@ -499,13 +498,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Get Project Bom Tab As Json", notes = "Project > Get Bom tab data as json")
+    @Operation(summary = "Get Project Bom Tab As Json", description = "Project > Get Bom tab data as json")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_JSON})
     public ResponseEntity<Map<String, Object>> getPrjBomAsJson(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag){
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @Parameter(description = "Save Flag (YES : Y, NO : N)")
+            @ValuesAllowed(propName = "saveFlag", values = {"Y", "N"}) @RequestParam(required = false) String saveFlag) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -534,12 +533,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Project Bom Compare", notes = "Project > Bom tab Compare")
+    @Operation(summary = "Project Bom Compare", description = "Project > Bom tab Compare")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_BOM_COMPARE})
     public ResponseEntity<Map<String, Object>> getPrjBomCompare(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
-            @ApiParam(value = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Before Project id", required = true) @PathVariable(name = "id", required = true) String beforePrjId,
+            @Parameter(description = "After Project id", required = true) @PathVariable(name = "compareId", required = true) String afterPrjId) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
@@ -565,28 +564,28 @@ public class ApiProjectV2Controller extends CoTopComponent {
             int records = apiProjectService.existProjectCntBomCompare(paramMap);
 
             if (records > 0) {
-				List<Map<String, Object>> beforeBomList = new ArrayList<>();
-				List<Map<String, Object>> afterBomList = new ArrayList<>();
+                List<Map<String, Object>> beforeBomList = new ArrayList<>();
+                List<Map<String, Object>> afterBomList = new ArrayList<>();
 
-				Map<String, Object> beforePrjInfo = apiProjectService.getProjectBasicInfo(beforePrjId);
-				if (!((String) beforePrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-					beforeBomList = apiProjectService.getBomList(beforePrjId);
-				} else {
-					apiProjectService.getIdentificationGridList(beforePrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, beforeBomList);
-					beforeBomList = apiProjectService.setMergeGridData(beforeBomList);
-				}
+                Map<String, Object> beforePrjInfo = apiProjectService.getProjectBasicInfo(beforePrjId);
+                if (!((String) beforePrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                    beforeBomList = apiProjectService.getBomList(beforePrjId);
+                } else {
+                    apiProjectService.getIdentificationGridList(beforePrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, beforeBomList);
+                    beforeBomList = apiProjectService.setMergeGridData(beforeBomList);
+                }
 
-				Map<String, Object> afterPrjInfo = apiProjectService.getProjectBasicInfo(afterPrjId);
-				if (!((String) afterPrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-					afterBomList = apiProjectService.getBomList(afterPrjId);
-				} else {
-					apiProjectService.getIdentificationGridList(afterPrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, afterBomList);
-					afterBomList = apiProjectService.setMergeGridData(afterBomList);
-				}
+                Map<String, Object> afterPrjInfo = apiProjectService.getProjectBasicInfo(afterPrjId);
+                if (!((String) afterPrjInfo.get("noticeType")).equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+                    afterBomList = apiProjectService.getBomList(afterPrjId);
+                } else {
+                    apiProjectService.getIdentificationGridList(afterPrjId, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, null, null, afterBomList);
+                    afterBomList = apiProjectService.setMergeGridData(afterBomList);
+                }
 
-				if (beforeBomList.isEmpty() || afterBomList.isEmpty()) {
-					throw new Exception();
-				}
+                if (beforeBomList.isEmpty() || afterBomList.isEmpty()) {
+                    throw new Exception();
+                }
 
                 resultMap.put("contents", apiProjectService.getBomCompare(beforeBomList, afterBomList));
 
@@ -602,21 +601,21 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
+    @Operation(summary = "Identification OSS Report", description = "Identification > upload oss report")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT})
     public ResponseEntity<Map<String, Object>> ossReportAll(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin") @PathVariable(name = "tab_name") String tabName,
-            @ApiParam(value = "OSS Report", required = true) @RequestPart(required = true) MultipartFile ossReport,
-            @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
-            @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @Parameter(description = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true) @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"})@PathVariable(name = "tab_name") String tabName,
+            @Parameter(description = "OSS Report", required = true) @RequestPart(required = true) MultipartFile ossReport,
+            @Parameter(description = "Comment", required = false) @RequestParam(required = false) String comment,
+            @Parameter(description = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false) @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false) String resetFlag,
+            @Parameter(description = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
-        tabName = tabName == null? null : tabName.toUpperCase();
+        tabName = tabName == null ? null : tabName.toUpperCase();
         if (tabName == null || (!tabName.equals("DEP") && !tabName.equals("SRC") && !tabName.equals("BIN"))) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tab name : " + tabName);
         }
@@ -704,7 +703,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                         }
                     }
                 }
-            }  catch (Exception e) {
+            } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
 
@@ -734,7 +733,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             }
             if (resultMap.isEmpty()) {
                 // 정상처리된 경우 세션 삭제
-                switch(tabName) {
+                switch (tabName) {
                     case "DEP":
                         deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.CD_DTL_COMPONENT_ID_DEP, prjId));
                         deleteSession(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_PROJECT_DEP, prjId));
@@ -770,15 +769,15 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @SuppressWarnings("unchecked")
-    @ApiOperation(value = "Identification OSS Report", notes = "Identification > android > oss report", hidden = true)
+    @Operation(summary = "Identification OSS Report", description = "Identification > android > oss report", hidden = true)
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_ANDROID})
     public ResponseEntity<Map<String, Object>> ossReportAndroid(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "OSS Report > sheetName : 'BIN (Android)'", required = true) @RequestPart(required = true) MultipartFile ossReport,
-            @ApiParam(value = "NOTICE.html", required = true) @RequestPart(required = true) MultipartFile noticeHtml,
-            @ApiParam(value = "result.txt", required = false) @RequestPart(required = false) MultipartFile resultTxt,
-            @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment) {
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @Parameter(description = "OSS Report > sheetName : 'BIN (Android)'", required = true) @RequestPart(required = true) MultipartFile ossReport,
+            @Parameter(description = "NOTICE.html", required = true) @RequestPart(required = true) MultipartFile noticeHtml,
+            @Parameter(description = "result.txt", required = false) @RequestPart(required = false) MultipartFile resultTxt,
+            @Parameter(description = "Comment", required = false) @RequestParam(required = false) String comment) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization); // token이 정상적인 값인지 확인
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
@@ -989,13 +988,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @SuppressWarnings("unchecked")
-    @ApiOperation(value = "Verification Package File Upload", notes = "Verification > Package File Upload")
+    @Operation(summary = "Verification Package File Upload", description = "Verification > Package File Upload")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PACKAGE_UPLOAD})
     public ResponseEntity<Map<String, Object>> ossUploadPackage(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile,
-            @ApiParam(value = "Verify when file is uploaded (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String verifyFlag) {
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project id", required = true) @PathVariable(name = "id") String prjId,
+            @Parameter(description = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile,
+            @Parameter(description = "Verify when file is uploaded (YES : Y, NO : N)", required = false) @ValuesAllowed(propName = "verifyFlag", values = {"Y", "N"}) @RequestParam(required = false) String verifyFlag) {
 
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
@@ -1133,12 +1132,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Project Add Watcher", notes = "Project Add Watcher")
+    @Operation(summary = "Project Add Watcher", description = "Project Add Watcher")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Project Id", required = true) @PathVariable(name = "id") String prjId,
+            @Parameter(description = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
@@ -1190,11 +1189,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Project get Notice", notes = "Project Get")
+    @Operation(summary = "Project get Notice", description = "Project Get")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
     public ResponseEntity getSelfcheckReport(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId,
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId,
             HttpServletRequest req
     ) {
         try {
@@ -1221,20 +1220,20 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
 
-    @ApiOperation(value = "Load Searched Project Oss to Target Project", notes = "Project > Identification > 'Project Search'")
-    @PostMapping(value = { Url.APIV2.FOSSLIGHT_API_OSS_LOAD })
+    @Operation(summary = "Load Searched Project Oss to Target Project", description = "Project > Identification > 'Project Search'")
+    @PostMapping(value = {Url.APIV2.FOSSLIGHT_API_OSS_LOAD})
     public ResponseEntity<Map<String, Object>> ossLoad(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String targetPrjId,
-            @ApiParam(value = "Load Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
+            @Parameter(hidden = true) @RequestHeader String authorization,
+            @Parameter(description = "Target Project ID", required = true) @PathVariable(name = "id") String targetPrjId,
+            @Parameter(description = "Load Target Tab Name (Valid Input: dep, src, bin)", required = true)
             @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name = "tab_name") String tabName,
-            @ApiParam(value = "Search Condition (Project ID : id, Project Name : name)", required = true, allowableValues = "id,name")
-            @ValuesAllowed(propName = "searchCondition", values = {"id", "name"})@RequestParam(required = true) String searchCondition,
-            @ApiParam(value = "Project ID to Load") @RequestParam(required = false) String prjIdToLoad,
-            @ApiParam(value = "Project Name to Load") @RequestParam(required = false) String prjNameToLoad,
-            @ApiParam(value = "Project Version to Load") @RequestParam(required = false) String prjVersionToLoad,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", defaultValue = "Y", allowableValues = "Y, N")
-            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false) String resetFlag) {
+            @Parameter(description = "Search Condition (Project ID : id, Project Name : name)", required = true)
+            @ValuesAllowed(propName = "searchCondition", values = {"id", "name"}) @RequestParam(required = true) String searchCondition,
+            @Parameter(description = "Project ID to Load") @RequestParam(required = false) String prjIdToLoad,
+            @Parameter(description = "Project Name to Load") @RequestParam(required = false) String prjNameToLoad,
+            @Parameter(description = "Project Version to Load") @RequestParam(required = false) String prjVersionToLoad,
+            @Parameter(description = "Reset Flag (YES : Y, NO : N, Default : Y)")
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag) {
 
         log.error("/api/v2/oss_load called:" + targetPrjId);
 
@@ -1259,7 +1258,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
             if (!searchFlag) {
                 return responseService.errorResponse(HttpStatus.NOT_FOUND,
-                        String.format("Project %s not exist or User doesn't have permission for the project", targetPrjId));
+                        "Project %s not exist or User doesn't have permission for the project".formatted(targetPrjId));
             }
 
             paramMap.clear();
@@ -1304,7 +1303,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     break;
             }
 
-            switch(tabName) {
+            switch (tabName) {
                 case "dep":
                     resultMap = apiProjectService.registProjectOssComponent(paramMap, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
                     break;

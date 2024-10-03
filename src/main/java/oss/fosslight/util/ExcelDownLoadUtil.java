@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 
 import java.util.stream.Collectors;
@@ -1697,8 +1697,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		FileOutputStream outFile = null;
 		
 		try {
-			if (!Files.exists(Paths.get(excelFilePath))) {
-				Files.createDirectories(Paths.get(excelFilePath));
+			if (!Files.exists(Path.of(excelFilePath))) {
+				Files.createDirectories(Path.of(excelFilePath));
 			}
 			outFile = new FileOutputStream(excelFilePath + logiFileName);
 			wb.write(outFile);
@@ -1788,8 +1788,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		FileOutputStream outFile = null;
 		
 		try {
-			if (!Files.exists(Paths.get(analysisSavePath))) {
-				Files.createDirectories(Paths.get(analysisSavePath));
+			if (!Files.exists(Path.of(analysisSavePath))) {
+				Files.createDirectories(Path.of(analysisSavePath));
 			}
 			
 			outFile = new FileOutputStream(analysisSavePath + "/" + logiFileName);
@@ -4877,8 +4877,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		FileOutputStream outFile = null;
 		
 		try {
-			if (!Files.exists(Paths.get(excelFilePath))) {
-				Files.createDirectories(Paths.get(excelFilePath));
+			if (!Files.exists(Path.of(excelFilePath))) {
+				Files.createDirectories(Path.of(excelFilePath));
 			}
 			outFile = new FileOutputStream(excelFilePath + logiFileName);
 			wb.write(outFile);

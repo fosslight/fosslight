@@ -24,7 +24,7 @@ import oss.fosslight.service.OssService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.StringUtil;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;

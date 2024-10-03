@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 
@@ -14,6 +15,7 @@ import java.io.Serializable;
 public class BatWatcher extends ComBean implements Serializable{
 
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = 5429990726160434346L;
 	
 	

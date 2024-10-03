@@ -9,7 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -267,8 +267,8 @@ public class YamlUtil extends CoTopComponent {
 		FileOutputStream outFile = null;
 		
 		try {
-			if (!Files.exists(Paths.get(filePath))) {
-				Files.createDirectories(Paths.get(filePath));
+			if (!Files.exists(Path.of(filePath))) {
+				Files.createDirectories(Path.of(filePath));
 			}
 			outFile = new FileOutputStream(filePath + logiFileName);
 			FileUtil.writeFile(filePath, logiFileName, yamlStr);

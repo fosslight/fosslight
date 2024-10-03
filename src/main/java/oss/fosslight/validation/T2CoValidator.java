@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletRequest;
+import jakarta.servlet.ServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -256,10 +256,10 @@ public abstract class T2CoValidator extends CoTopComponent {
 						key += "." + Integer.toString(seq);
 					}
 					
-					if (valueObj instanceof String[]) {
+					if (valueObj instanceof String[] strings) {
 						String tempVal = "";
 						
-						for (String strVal : (String[]) valueObj) {
+						for (String strVal : strings) {
 							if (!isEmpty(tempVal)) {
 								tempVal += "\t";
 							}

@@ -5,26 +5,25 @@
 
 package oss.fosslight.api.controller.v2;
 
-import io.swagger.annotations.*;
-import io.swagger.models.Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
-import org.apache.tools.ant.taskdefs.condition.Http;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.entity.CommonResult;
-import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.api.service.RestResponseService;
+import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
-import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.*;
 import oss.fosslight.service.*;
@@ -33,15 +32,12 @@ import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = {"5. SelfCheck"})
+@Tag(name = "5. SelfCheck")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
@@ -75,12 +71,12 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
 
     private final ProjectService projectService;
 
-    @ApiOperation(value = "Create SelfCheck", notes = "SelfCheck 생성")
+    @Operation(summary = "Create SelfCheck", description = "SelfCheck 생성")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_CREATE})
     public ResponseEntity<Map<String, Object>> createSelfCheck(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project Name", required = true) @RequestParam(required = true) String prjName,
-            @ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion) {
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "Project Name", required = true) @RequestParam(required = true) String prjName,
+            @Parameter(description = "Project Version", required = false) @RequestParam(required = false) String prjVersion) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -114,14 +110,14 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     }
 
     @SuppressWarnings("unchecked")
-    @ApiOperation(value = "SelfCheck OSS Report", notes = "SelfCheck > oss report")
+    @Operation(summary = "SelfCheck OSS Report", description = "SelfCheck > oss report")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
     public ResponseEntity<Map<String, Object>> ossReportSelfCheck(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
-            @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
-            @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
+            @Parameter(description = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
+            @Parameter(description = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false) @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false) String resetFlag,
+            @Parameter(description = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
@@ -300,11 +296,11 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         return rtnMap;
     }
 
-    @ApiOperation(value = "SelfCheck Export", notes = "SelfCheck > Export")
+    @Operation(summary = "SelfCheck Export", description = "SelfCheck > Export")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_EXPORT_SELFCHECK})
     public ResponseEntity selfCheckExport(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId
     ) {
         String downloadId = "";
         T2File fileInfo = new T2File();
@@ -330,12 +326,12 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "SelfCheck Add Watcher", notes = "SelfCheck Add Watcher")
+    @Operation(summary = "SelfCheck Add Watcher", description = "SelfCheck Add Watcher")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id", required = true) String prjId,
-            @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "Project Id", required = true) @PathVariable(name = "id", required = true) String prjId,
+            @Parameter(description = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         Map<String, Object> resultMap = new HashMap<>();
         String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message
@@ -382,11 +378,11 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "SelfCheck Get", notes = "SelfCheck Get")
+    @Operation(summary = "SelfCheck Get", description = "SelfCheck Get")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_GET})
     public ResponseEntity<Map<String, Object>> getSelfcheck(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId) {
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId) {
 
         Map<String, Object> resultMap = new HashMap<>();
 

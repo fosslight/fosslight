@@ -11,9 +11,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -783,7 +783,7 @@ public class OssController extends CoTopComponent{
 	
 	@GetMapping(value = OSS.CHECK_EXIST_OSS_CONF)
 	public @ResponseBody String checkExistOssConf(HttpServletRequest req, HttpServletResponse res,
-			Model model, @RequestParam(value="ossId", required=true)String ossId) {
+			Model model, @RequestParam(required=true)String ossId) {
 		return ossService.checkExistOssConf(ossId);
 	}
 	
@@ -2150,8 +2150,8 @@ public class OssController extends CoTopComponent{
 	
 	@PostMapping(value=OSS.OSS_SYNC_LIST_VALIDATION)
 	public ResponseEntity<Object> ossSyncListValidation(HttpServletResponse res, Model model
-			, @RequestParam(value="ossId", required=true)String ossId
-			, @RequestParam(value="ossIds", required=true)String ossIds){
+			, @RequestParam(required=true)String ossId
+			, @RequestParam(required=true)String ossIds){
 		OssMaster bean = new OssMaster();
 		bean.setOssId(ossId);
 		try {
@@ -2201,11 +2201,11 @@ public class OssController extends CoTopComponent{
 
 	@PostMapping(value=OSS.OSS_SYNC_UPDATE)
 	public ResponseEntity<Object> ossSyncUpdate(HttpServletResponse res, Model model
-			, @RequestParam(value="ossId", required=true)String ossId
-			, @RequestParam(value="ossName", required=true)String ossName
-			, @RequestParam(value="comment", required=true)String comment
-			, @RequestParam(value="ossIds", required=true)String ossIds
-			, @RequestParam(value="syncItem", required=true)String syncItem){
+			, @RequestParam(required=true)String ossId
+			, @RequestParam(required=true)String ossName
+			, @RequestParam(required=true)String comment
+			, @RequestParam(required=true)String ossIds
+			, @RequestParam(required=true)String syncItem){
 		String[] ossIdsArr = ossIds.split(",");
 		String[] syncItemArr = syncItem.split(",");
 		

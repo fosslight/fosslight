@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,8 @@ import lombok.Setter;
 
 @Setter @Getter
 public class Statistics extends ComBean implements Serializable {
-	
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private String[] colorArray; // 추후 관리가 필요함

@@ -5,10 +5,12 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 public class T2CodeDtl extends ComBean implements  Serializable {
+	@Serial
 	private static final long serialVersionUID = -3911799499686061439L;
 	
 	private String cdNo;			//코드번호

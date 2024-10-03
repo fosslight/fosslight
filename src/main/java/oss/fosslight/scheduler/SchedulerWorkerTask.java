@@ -10,10 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +59,7 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	public void makeInternalLicense() {
 		String internalUrlDirPath = CommonFunction.appendProperty("root.dir", "internal.url.dir.path");
 		String fileNm = "internalLicense.zip";
-		Path copyPath = Paths.get(internalUrlDirPath);
+		Path copyPath = Path.of(internalUrlDirPath);
 		
 		if (!new File(internalUrlDirPath+"/"+fileNm).exists()) {
 			try (InputStream is = new ClassPathResource("/template/"+fileNm).getInputStream()) {

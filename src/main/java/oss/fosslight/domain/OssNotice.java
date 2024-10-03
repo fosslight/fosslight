@@ -5,11 +5,13 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 public class OssNotice extends ComBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = -3729500877991189740L;
 	
 	private String prjId;

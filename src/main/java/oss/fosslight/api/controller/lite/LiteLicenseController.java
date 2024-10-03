@@ -55,7 +55,7 @@ public class LiteLicenseController {
 
     @GetMapping("/licenses/{id}")
     public @ResponseBody ResponseEntity<GetLicenseDetailsDto.Result> getLicense(
-            @PathVariable("id") String id
+            @PathVariable String id
     ) {
         try {
             var result = apiLicenseService.getLicense(id);

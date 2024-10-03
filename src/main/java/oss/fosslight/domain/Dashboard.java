@@ -5,11 +5,13 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 
 public class Dashboard extends ComBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = 9018255826730935058L;
 
 	private String id;

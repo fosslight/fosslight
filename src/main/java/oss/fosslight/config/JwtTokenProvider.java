@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;

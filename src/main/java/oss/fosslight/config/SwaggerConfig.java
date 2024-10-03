@@ -1,80 +1,62 @@
 /*
  * Copyright (c) 2021 LG Electronics Inc.
- * SPDX-License-Identifier: AGPL-3.0-only 
+ * SPDX-License-Identifier: AGPL-3.0-only
  */
 
 package oss.fosslight.config;
 
-import java.util.*;
-
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.service.ApiKey;
-import springfox.documentation.service.AuthorizationScope;
-import springfox.documentation.service.SecurityReference;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spi.service.contexts.SecurityContext;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import org.springframework.http.HttpHeaders;
 
 @Configuration
-@EnableSwagger2
 public class SwaggerConfig {
-	private static final Set<String> DEFAULT_PRODUCES_AND_CONSUMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("application/json")));
+    private static final String APPLICATION_JSON = "application/json";
     private static final String REFERENCE = "authorization header value";
 
     @Bean
-    Docket swaggerApiV1() {
-        return new Docket(DocumentationType.SWAGGER_2).apiInfo(swaggerInfo())
-                .consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
-                .apis(RequestHandlerSelectors.basePackage(AppConstBean.APP_COMPONENT_SCAN_PACKAGE+".api.controller"))
-                .paths(PathSelectors.ant("/api/v1/**"))
-                .build()
-                .groupName("v1")
-                .useDefaultResponseMessages(false); // 기본으로 세팅되는 200,401,403,404 메시지를 표시 하지 않음
+    GroupedOpenApi apiV1() {
+        return GroupedOpenApi.builder()
+                .addOpenApiCustomizer(c -> c.info(apiInfo()))
+                .consumesToMatch(APPLICATION_JSON)
+                .group("v1")
+                .packagesToScan(AppConstBean.APP_COMPONENT_SCAN_PACKAGE + ".api.controller")
+                .pathsToMatch("/api/v1/**")
+                .producesToMatch(APPLICATION_JSON)
+                .build();
     }
 
     @Bean
-    Docket swaggerApiV2() {
-        return new Docket(DocumentationType.SWAGGER_2).apiInfo(swaggerInfo())
-                .consumes(DEFAULT_PRODUCES_AND_CONSUMES).produces(DEFAULT_PRODUCES_AND_CONSUMES).select()
-                .apis(RequestHandlerSelectors.basePackage(AppConstBean.APP_COMPONENT_SCAN_PACKAGE+".api.controller"))
-                .paths(PathSelectors.ant("/api/v2/**"))
-                .build()
-                .groupName("v2")
-                .securityContexts(List.of(securityContext()))
-                .securitySchemes(List.of(securityScheme()));
-    }
-
-    private SecurityContext securityContext() {
-        return SecurityContext.builder()
-                .securityReferences(securityReferences())
-                .operationSelector(operationContext -> true)
+    GroupedOpenApi apiV2() {
+        return GroupedOpenApi.builder()
+                .addOpenApiCustomizer(c ->
+                        c.info(apiInfo())
+                                .addSecurityItem(new SecurityRequirement().addList(REFERENCE))
+                                .components(new Components().addSecuritySchemes(REFERENCE, apiKey())))
+                .consumesToMatch(APPLICATION_JSON)
+                .group("v2")
+                .packagesToScan(AppConstBean.APP_COMPONENT_SCAN_PACKAGE + ".api.controller")
+                .pathsToMatch("/api/v2/**")
+                .producesToMatch(APPLICATION_JSON)
                 .build();
     }
 
-    private List<SecurityReference> securityReferences() {
-        AuthorizationScope[] authorizationScope = new AuthorizationScope[1];
-        authorizationScope[0] = new AuthorizationScope("global", "accessEverything");
-        return List.of(new SecurityReference(REFERENCE, authorizationScope));
+    private SecurityScheme apiKey() {
+        return new SecurityScheme()
+                .type(SecurityScheme.Type.APIKEY)
+                .in(SecurityScheme.In.HEADER)
+                .name(HttpHeaders.AUTHORIZATION);
     }
 
-    private ApiKey securityScheme() {
-        String targetHeader = "Authorization";
-        return new ApiKey(REFERENCE, targetHeader, "header");
-    }
-
-    
-    private ApiInfo swaggerInfo() {
-        return new ApiInfoBuilder()
-        		.title("FOSSLight Hub Open API")
-                .description("") // 시스템설졍이 필요한 경우 기입
-                .version("1")
-                .build();
+    private Info apiInfo() {
+        return new Info()
+                .title("FOSSLight Hub Open API")
+                .description("")
+                .version("1");
     }
 }

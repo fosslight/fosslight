@@ -5,7 +5,9 @@
 
 package oss.fosslight.api.controller.v2;
 
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,6 @@ import oss.fosslight.api.dto.ListOssDto;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
-import oss.fosslight.common.Url;
 import oss.fosslight.common.Url.APIV2;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.service.ApiLicenseService;
@@ -27,11 +28,10 @@ import oss.fosslight.service.OssService;
 import oss.fosslight.service.T2UserService;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@Api(tags = {"1. OSS & License"})
+@Tag(name = "1. OSS & License")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
@@ -49,17 +49,17 @@ public class ApiOssV2Controller extends CoTopComponent {
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
 
-    @ApiOperation(value = "Search OSS List", notes = "OSS 조회")
+    @Operation(summary = "Search OSS List", description = "OSS 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_SEARCH})
     public @ResponseBody ResponseEntity<ListOssDto.Result> getOssInfo(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
-            @ApiParam(value = "OSS Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String ossNameExact,
-            @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
-            @ApiParam(value = "Download Location", required = false) @RequestParam(required = false) String downloadLocation,
-            @ApiParam(value = "Download Location Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String downloadLocationExact,
-            @ApiParam(value = "Count Per Page (max: 10000, default: 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "OSS Name", required = false) @RequestParam(required = false) String ossName,
+            @Parameter(description = "OSS Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String ossNameExact,
+            @Parameter(description = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
+            @Parameter(description = "Download Location", required = false) @RequestParam(required = false) String downloadLocation,
+            @Parameter(description = "Download Location Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String downloadLocationExact,
+            @Parameter(description = "Count Per Page (max: 10000, default: 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
+            @Parameter(description = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page
     ) {
         try {
             var _page = Integer.parseInt(page);
@@ -90,14 +90,14 @@ public class ApiOssV2Controller extends CoTopComponent {
     }
 
 
-    @ApiOperation(value = "Search License Info", notes = "License Info 조회")
+    @Operation(summary = "Search License Info", description = "License Info 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_LICENSE_SEARCH})
     public @ResponseBody ResponseEntity<ListLicenseDto.Result> getLicenseInfo(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "License Name", required = false) @RequestParam(required = false) String licenseName,
-            @ApiParam(value = "License Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String licenseNameExact,
-            @ApiParam(value = "Count Per Page (max 10000, default 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page) {
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "License Name", required = false) @RequestParam(required = false) String licenseName,
+            @Parameter(description = "License Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String licenseNameExact,
+            @Parameter(description = "Count Per Page (max 10000, default 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
+            @Parameter(description = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page) {
 
         // 사용자 인증
         userService.checkApiUserAuth(authorization);
@@ -189,11 +189,11 @@ public class ApiOssV2Controller extends CoTopComponent {
 //        }
 //    }
 
-    @ApiOperation(value = "Register New OSS", notes = "신규 OSS 등록")
+    @Operation(summary = "Register New OSS", description = "신규 OSS 등록")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REGISTER})
     public ResponseEntity<Map<String, Object>> registerOss(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "OSS Master", required = true) @RequestBody(required = true) OssMaster ossMaster) {
 
         if (userService.isAdmin(authorization)) {
             Map<String, Object> resultMap = new HashMap<String, Object>();

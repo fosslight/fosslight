@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,8 +120,8 @@ public class CoTopComponent {
 	}
     
     public static Boolean isNullObject(Object o) {
-    	if (o instanceof String) {
-    		return StringUtil.isEmptyTrimmed((String) o);
+    	if (o instanceof String string) {
+    		return StringUtil.isEmptyTrimmed(string);
     	} else {
     		return o == null;
     	}

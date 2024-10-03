@@ -3,7 +3,7 @@ package oss.fosslight.util;
 import java.io.IOException;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import oss.fosslight.common.response.CommonResult;
 import oss.fosslight.common.response.ListResult;

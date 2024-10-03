@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 public class BinaryAnalysisResult extends ComBean implements Serializable {
 
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = 4907819340622537583L;
 
 	/**  bat Analysis Result Seq. */

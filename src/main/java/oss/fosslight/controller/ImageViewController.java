@@ -9,9 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -50,8 +49,8 @@ public class ImageViewController extends CoTopComponent {
 	@RequestMapping(value=IMAGE_VIEW.GUI_REPORT_ID_NM)
 	private ImageView getGuiReportImage(@PathVariable String batId, @PathVariable String imageName, ModelMap modelMap) {
 		String batPath = CommonFunction.emptyCheckProperty("vat.root.path", CommonFunction.getProperty("root.dir") + "/batsystem/");
-		String dirPath = Paths.get(batPath).resolve("out").resolve(batId+"_dir").resolve("images").toString();
-		Path reportImagePath = Paths.get(dirPath).resolve(imageName);
+		String dirPath = Path.of(batPath).resolve("out").resolve(batId+"_dir").resolve("images").toString();
+		Path reportImagePath = Path.of(dirPath).resolve(imageName);
 		File reportImageFile = reportImagePath.toFile();
 		
 		if (reportImageFile.exists()) {

@@ -5,7 +5,9 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
+
 /**
  * JF_FILE Table Entity
  * 파일관리
@@ -14,7 +16,8 @@ import java.io.Serializable;
  *
  */
 public class File extends ComBean implements Serializable{
-	
+
+	@Serial
 	private static final long serialVersionUID = 6658712585854634962L;
 	
 	private String fileSeq;						//파일 순번 (A.I) 20160524 ms-kwon

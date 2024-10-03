@@ -5,58 +5,41 @@
 
 package oss.fosslight.api.controller.v1;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import lombok.RequiredArgsConstructor;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
+import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.Url.API;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.T2File;
-import oss.fosslight.domain.T2Users;
-import oss.fosslight.domain.UploadFile;
-import oss.fosslight.service.ApiFileService;
-import oss.fosslight.service.ApiProjectService;
-import oss.fosslight.service.ApiSelfCheckService;
-import oss.fosslight.service.FileService;
-import oss.fosslight.service.SelfCheckService;
-import oss.fosslight.service.T2UserService;
+import oss.fosslight.domain.*;
+import oss.fosslight.service.*;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.ExcelUtil;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
-@Api(tags = {"5. SelfCheck"})
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Tag(name = "5. SelfCheck")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v1")
@@ -86,15 +69,15 @@ public class ApiSelfCheckController extends CoTopComponent {
 
 	private final FileService fileService;
 
-	@ApiOperation(value = "Create SelfCheck", notes = "SelfCheck 생성")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	@Operation(summary = "Create SelfCheck", description = "SelfCheck 생성")
+    @Parameters({
+        @Parameter(name = "_token", description = "token", required = true)
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_SELFCHECK_CREATE})
     public CommonResult createSelfCheck(
     		@RequestHeader String _token,
-    		@ApiParam(value = "Project Name", required = true) @RequestParam(required = true) String prjName,
-    		@ApiParam(value = "Project Version", required = false) @RequestParam(required = false) String prjVersion){
+    		@Parameter(description = "Project Name", required = true) @RequestParam(required = true) String prjName,
+    		@Parameter(description = "Project Version", required = false) @RequestParam(required = false) String prjVersion){
 
 		// 사용자 인증
 		T2Users userInfo = userService.checkApiUserAuth(_token);
@@ -130,17 +113,17 @@ public class ApiSelfCheckController extends CoTopComponent {
     }
 
 	@SuppressWarnings("unchecked")
-	@ApiOperation(value = "SelfCheck OSS Report", notes = "SelfCheck > oss report")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	@Operation(summary = "SelfCheck OSS Report", description = "SelfCheck > oss report")
+    @Parameters({
+        @Parameter(name = "_token", description = "token", required = true)
     })
 	@PostMapping(value = {API.FOSSLIGHT_API_OSS_REPORT_SELFCHECK})
     public CommonResult ossReportSelfCheck(
             @RequestHeader String _token,
-            @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId,
-            @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
-            @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
+            @Parameter(description = "Project id", required = true) @RequestParam(required = true) String prjId,
+            @Parameter(description = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
+            @Parameter(description = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false) @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false) String resetFlag,
+            @Parameter(description = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
 
         T2Users userInfo = userService.checkApiUserAuth(_token);
 
@@ -318,12 +301,12 @@ public class ApiSelfCheckController extends CoTopComponent {
 		return rtnMap;
 	}
 
-    @ApiOperation(value = "SelfCheck Export", notes = "SelfCheck > Export")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+    @Operation(summary = "SelfCheck Export", description = "SelfCheck > Export")
+    @Parameters({
+        @Parameter(name = "_token", description = "token", required = true)
     })
 	@PostMapping(value = {API.FOSSLIGHT_API_EXPORT_SELFCHECK})
-    public ResponseEntity<FileSystemResource> selfCheckExport(@RequestHeader String _token, @ApiParam(value = "Project id", required = true) @RequestParam(required = true) String prjId){
+    public ResponseEntity<FileSystemResource> selfCheckExport(@RequestHeader String _token, @Parameter(description = "Project id", required = true) @RequestParam(required = true) String prjId){
 		String downloadId = "";
 		T2File fileInfo = new T2File();
 
@@ -348,15 +331,15 @@ public class ApiSelfCheckController extends CoTopComponent {
 		}
 	}
 
-	@ApiOperation(value = "SelfCheck Add Watcher", notes = "SelfCheck Add Watcher")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
+	@Operation(summary = "SelfCheck Add Watcher", description = "SelfCheck Add Watcher")
+    @Parameters({
+        @Parameter(name = "_token", description = "token", required = true)
     })
 	@GetMapping(value = {API.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
     public CommonResult addPrjWatcher(
     		@RequestHeader String _token,
-    		@ApiParam(value = "Project Id", required = true) @RequestParam(required = true) String prjId,
-    		@ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList){
+    		@Parameter(description = "Project Id", required = true) @RequestParam(required = true) String prjId,
+    		@Parameter(description = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList){
 
 		Map<String, Object> resultMap = new HashMap<>();
 		String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message

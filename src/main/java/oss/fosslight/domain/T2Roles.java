@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,7 +19,8 @@ import oss.fosslight.config.AppConstBean;
 @Setter
 @Getter
 public class T2Roles implements Serializable{
-	
+
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	private String authority; // 권한

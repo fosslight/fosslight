@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import oss.fosslight.common.CoConstDef;
@@ -16,6 +17,7 @@ import oss.fosslight.common.CommonFunction;
 public class CommentsHistory extends ComBean implements Serializable{
 
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = 5662786622538214724L;
 	
 	/** The comm id. */

@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -455,19 +455,19 @@ public class VerificationController extends CoTopComponent {
 	
 	@PostMapping(value = VERIFICATION.NOTICE_AJAX)
 	public @ResponseBody ResponseEntity<Object>  getNoticeHtml(HttpServletRequest req,HttpServletResponse res, Model model,	//
-			@RequestParam(value="confirm", defaultValue="")String confirm, //
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
-			@RequestParam(value="allowDownloadNoticeHTMLYn", defaultValue="")String allowDownloadNoticeHTMLYn, //
-			@RequestParam(value="allowDownloadNoticeTextYn", defaultValue="")String allowDownloadNoticeTextYn, //
-			@RequestParam(value="allowDownloadSimpleHTMLYn", defaultValue="")String allowDownloadSimpleHTMLYn, //
-			@RequestParam(value="allowDownloadSimpleTextYn", defaultValue="")String allowDownloadSimpleTextYn, //
-			@RequestParam(value="allowDownloadSPDXSheetYn", defaultValue="")String allowDownloadSPDXSheetYn, //
-			@RequestParam(value="allowDownloadSPDXRdfYn", defaultValue="")String allowDownloadSPDXRdfYn, //
-			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
-			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
-			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
-			@RequestParam(value="allowDownloadCDXJsonYn", defaultValue="")String allowDownloadCDXJsonYn, //
-			@RequestParam(value="allowDownloadCDXXmlYn", defaultValue="")String allowDownloadCDXXmlYn, //
+			@RequestParam(defaultValue="")String confirm, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String allowDownloadNoticeHTMLYn, //
+			@RequestParam(defaultValue="")String allowDownloadNoticeTextYn, //
+			@RequestParam(defaultValue="")String allowDownloadSimpleHTMLYn, //
+			@RequestParam(defaultValue="")String allowDownloadSimpleTextYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXSheetYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXRdfYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXTagYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXJsonYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXYamlYn, //
+			@RequestParam(defaultValue="")String allowDownloadCDXJsonYn, //
+			@RequestParam(defaultValue="")String allowDownloadCDXXmlYn, //
 			OssNotice ossNotice	//
 			) throws IOException {
 		log.info("URI: "+ "/project/verification/noticeAjax");
@@ -676,18 +676,18 @@ public class VerificationController extends CoTopComponent {
 	@SuppressWarnings("unchecked")
 	@PostMapping(value=VERIFICATION.SAVE_AJAX)
 	public @ResponseBody ResponseEntity<Object> registVerify(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
-			@RequestParam(value="allowDownloadNoticeHTMLYn", defaultValue="")String allowDownloadNoticeHTMLYn, //
-			@RequestParam(value="allowDownloadNoticeTextYn", defaultValue="")String allowDownloadNoticeTextYn, //
-			@RequestParam(value="allowDownloadSimpleHTMLYn", defaultValue="")String allowDownloadSimpleHTMLYn, //
-			@RequestParam(value="allowDownloadSimpleTextYn", defaultValue="")String allowDownloadSimpleTextYn, //
-			@RequestParam(value="allowDownloadSPDXSheetYn", defaultValue="")String allowDownloadSPDXSheetYn, //
-			@RequestParam(value="allowDownloadSPDXRdfYn", defaultValue="")String allowDownloadSPDXRdfYn, //
-			@RequestParam(value="allowDownloadSPDXTagYn", defaultValue="")String allowDownloadSPDXTagYn, //
-			@RequestParam(value="allowDownloadSPDXJsonYn", defaultValue="")String allowDownloadSPDXJsonYn, //
-			@RequestParam(value="allowDownloadSPDXYamlYn", defaultValue="")String allowDownloadSPDXYamlYn, //
-			@RequestParam(value="allowDownloadCDXJsonYn", defaultValue="")String allowDownloadCDXJsonYn, //
-			@RequestParam(value="allowDownloadCDXXmlYn", defaultValue="")String allowDownloadCDXXmlYn, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String allowDownloadNoticeHTMLYn, //
+			@RequestParam(defaultValue="")String allowDownloadNoticeTextYn, //
+			@RequestParam(defaultValue="")String allowDownloadSimpleHTMLYn, //
+			@RequestParam(defaultValue="")String allowDownloadSimpleTextYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXSheetYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXRdfYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXTagYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXJsonYn, //
+			@RequestParam(defaultValue="")String allowDownloadSPDXYamlYn, //
+			@RequestParam(defaultValue="")String allowDownloadCDXJsonYn, //
+			@RequestParam(defaultValue="")String allowDownloadCDXXmlYn, //
 			HttpServletResponse res, Model model) throws Exception {
 		log.info("URI: "+ "/project/verification/saveAjax");
 		
@@ -736,8 +736,8 @@ public class VerificationController extends CoTopComponent {
 	
 	@PostMapping(value = VERIFICATION.SAVE_NOTICE_AJAX)
 	public @ResponseBody ResponseEntity<Object>  saveNoticeHtml(HttpServletRequest req,HttpServletResponse res, Model model,	//
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
-			@RequestParam(value="noticeHtml", defaultValue="")String noticeHtml, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String noticeHtml, //
 			OssNotice ossNotice	//
 			) throws IOException {
 		log.info("URI: "+ "/project/verification/saveNoticeAjax");
@@ -753,7 +753,7 @@ public class VerificationController extends CoTopComponent {
 	
 	@PostMapping(value = VERIFICATION.MAKE_NOTICE_PREVIEW)
 	public @ResponseBody ResponseEntity<Object>  makeNoticePreview(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
 			HttpServletResponse res, Model model) throws IOException {
 		log.info("URI: "+ "/project/verification/makeNoticePreview");
 		
@@ -794,7 +794,7 @@ public class VerificationController extends CoTopComponent {
 	
 	@PostMapping(value = VERIFICATION.MAKE_NOTICE_TEXT)
 	public @ResponseBody ResponseEntity<Object>  makeNoticeText(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
 			HttpServletResponse res, Model model) throws IOException {
 		log.info("URI: "+ "/project/verification/makeNoticeText");
 		
@@ -821,7 +821,7 @@ public class VerificationController extends CoTopComponent {
 	
 	@PostMapping(value = VERIFICATION.MAKE_NOTICE_SIMPLE)
 	public @ResponseBody ResponseEntity<Object>  makeNoticeSimple(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
 			HttpServletResponse res, Model model) throws IOException {
 		log.info("URI: "+ "/project/verification/makeNoticeSimple");
 		
@@ -850,7 +850,7 @@ public class VerificationController extends CoTopComponent {
 	
 	@PostMapping(value = VERIFICATION.MAKE_NOTICE_TEXT_SIMPLE)
 	public @ResponseBody ResponseEntity<Object>  makeNoticeTextSimple(OssNotice ossNotice, HttpServletRequest req,
-			@RequestParam(value="useCustomNoticeYn", defaultValue="")String useCustomNoticeYn, //
+			@RequestParam(defaultValue="")String useCustomNoticeYn, //
 			HttpServletResponse res, Model model) throws IOException {
 		log.info("URI: "+ "/project/verification/makeNoticeTextSimple");
 		

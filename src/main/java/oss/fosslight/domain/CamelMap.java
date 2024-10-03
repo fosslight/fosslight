@@ -8,8 +8,11 @@ package oss.fosslight.domain;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.springframework.jdbc.support.JdbcUtils;
 
+import java.io.Serial;
+
 public class CamelMap extends ListOrderedMap {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Override

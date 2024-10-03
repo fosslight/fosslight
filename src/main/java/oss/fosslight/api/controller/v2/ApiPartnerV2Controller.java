@@ -5,7 +5,11 @@
 
 package oss.fosslight.api.controller.v2;
 
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.service.RestResponseService;
+import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -26,13 +31,12 @@ import oss.fosslight.service.FileService;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Api(tags = {"2. 3rd Party"})
+@Tag(name = "2. 3rd Party")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
@@ -54,18 +58,18 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
-    @ApiOperation(value = "3rd Party Search", notes = "3rd party 조회")
+    @Operation(summary = "3rd Party Search", description = "3rd party 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_SEARCH})
     public ResponseEntity<Map<String, Object>> getPartners(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID List", required = false) @RequestParam(required = false) String[] partnerIdList,
-            @ApiParam(value = "Division", required = false) @RequestParam(required = false) String division,
-            @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
-            @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", required = false, allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
-            @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
-            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
-            @ApiParam(value = "Count Per Page (max: 1000, default: 1000)", required = false) @RequestParam(required = false, defaultValue="1000") String countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page) {
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "3rd Party ID List", required = false) @RequestParam(required = false) String[] partnerIdList,
+            @Parameter(description = "Division", required = false) @RequestParam(required = false) String division,
+            @Parameter(description = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
+            @Parameter(description = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", required = false) @ValuesAllowed(propName = "status", values = {"PROG", "REQ", "REV", "CONF"}) @RequestParam(required = false) String status,
+            @Parameter(description = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
+            @Parameter(description = "Creator", required = false) @RequestParam(required = false) String creator,
+            @Parameter(description = "Count Per Page (max: 1000, default: 1000)", required = false) @RequestParam(required = false, defaultValue="1000") String countPerPage,
+            @Parameter(description = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -105,12 +109,12 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     }
 
-    @ApiOperation(value = "3rd Party Add Watcher", notes = "3rd Party Add Watcher")
+    @Operation(summary = "3rd Party Add Watcher", description = "3rd Party Add Watcher")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
-            @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+            @Parameter(hidden=true) @RequestHeader String authorization,
+            @Parameter(description = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
+            @Parameter(description = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
@@ -159,15 +163,15 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "3rd Party Export report", notes = "3rd Party > Export report")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
+    @Operation(summary = "3rd Party Export report", description = "3rd Party > Export report")
+    @Parameters({
+            @Parameter(name = "Authorization", description = "token", required = true)
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD})
     public ResponseEntity<FileSystemResource> get3rdDownload(
             @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
-            @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) {
+            @Parameter(description = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
+            @Parameter(description = "Format") @ValuesAllowed(propName = "format", values = {"Spreadsheet"}) @RequestParam String format) {
 
         String downloadId = "";
         T2File fileInfo = new T2File();
@@ -197,14 +201,14 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "3rd Party Export Json", notes = "3rd Party > Export Json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
+    @Operation(summary = "3rd Party Export Json", description = "3rd Party > Export Json")
+    @Parameters({
+            @Parameter(name = "Authorization", description = "token", required = true)
     })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_JSON})
     public ResponseEntity<Map<String, Object>> get3rdAsJson(
             @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
+            @Parameter(description = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();

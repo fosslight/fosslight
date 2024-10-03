@@ -1,9 +1,9 @@
 package oss.fosslight.api.validator;
 
-import javax.validation.Constraint;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Payload;
+import jakarta.validation.Constraint;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.Payload;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -44,7 +44,7 @@ public @interface ValuesAllowed {
 //                        .addPropertyNode(this.propName).addConstraintViolation();
 
                 context.buildConstraintViolationWithTemplate(
-                        String.format(message, value, this.propName, this.allowable.toString())).addConstraintViolation();
+						message.formatted(value, this.propName, this.allowable.toString())).addConstraintViolation();
 
 
             }

@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import oss.fosslight.util.StringUtil;
 public class LicenseMaster extends ComBean implements Serializable {
 
 	/** The Constant serialVersionUID. */
+	@Serial
 	private static final long serialVersionUID = -2103290178702190921L;
 	
 	/** The license id. */

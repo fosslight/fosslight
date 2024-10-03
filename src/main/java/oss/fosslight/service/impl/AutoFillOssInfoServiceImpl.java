@@ -6,6 +6,7 @@
 package oss.fosslight.service.impl;
 
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -161,7 +163,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			checkedLicense1 = combineOssLicenses(prjOssLicenses, currentLicense);
 
 			if (!downloadLocation.isEmpty()) {
-				oss.setDownloadLocation(URLDecoder.decode(oss.getDownloadLocation()));
+				oss.setDownloadLocation(URLDecoder.decode(oss.getDownloadLocation(), StandardCharsets.UTF_8));
 				if (oss.getDownloadLocation().contains(";")) {
 					oss.setDownloadLocation(oss.getDownloadLocation().split(";")[0]);
 				}
@@ -499,7 +501,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	public ParallelFlux<Object> getGithubLicenses(List<String> locations) {
 		return Flux.fromIterable(locations)
 			.parallel()
-			.runOn(Schedulers.elastic())
+			.runOn(Schedulers.boundedElastic())
 			.flatMap(this::requestGithubLicense);
 	}
 
@@ -512,7 +514,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			.header("Authorization", "token " + githubToken)
 			.exchange()
 			.flatMap(response -> {
-				HttpStatus statusCode = response.statusCode();
+				HttpStatusCode statusCode = response.statusCode();
 				if (statusCode.is4xxClientError()) {
 					return Mono.error(new HttpServerErrorException(statusCode));
 				}else if (statusCode.is5xxServerError()) {
@@ -537,7 +539,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 	public Map<String, Object> requestClearlyDefinedLicense(String location) {
 		String responseString = webClient.get().uri(location).exchange()
 			    				.flatMap(response -> {
-			    					HttpStatus statusCode = response.statusCode();
+			    					HttpStatusCode statusCode = response.statusCode();
 			    					if (statusCode.is4xxClientError()) {
 			    						return Mono.error(new HttpServerErrorException(statusCode));
 			    					} else if (statusCode.is5xxServerError()) {

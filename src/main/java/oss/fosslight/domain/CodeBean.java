@@ -5,6 +5,7 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +14,9 @@ import java.util.List;
  * The Class HrCodeVO.
  */
 public class CodeBean extends ComBean implements Serializable{
-    
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = 1L;
+	/** The Constant serialVersionUID. */
+	@Serial
+	private static final long serialVersionUID = 1L;
 
     /** 코드번호. */
     private String cdNo;

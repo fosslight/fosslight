@@ -5,10 +5,12 @@
 
 package oss.fosslight.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class ProcessGuide extends ComBean implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = -1474263356907429804L;
 	
 	private String id;
