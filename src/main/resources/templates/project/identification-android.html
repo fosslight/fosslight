@@ -29,7 +29,7 @@
                         		<button type="button" th:if="${@CommonFunction.isAdmin() and project.identificationStatus != 'CONF'}"
                                 		class="btn btn-dark-03 btn-sm width-6rem px-1" id="autoReview" th:text="'Auto Review'"></button>
                                 <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
-                                		type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
+                                		type="button" class="btn btn-dark-04 btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm" th:onclick="|com_fn.confirm()|"></button>
                                 <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"
                                 		type="button" class="btn btn-dark-03 btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
                                 <button th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}"

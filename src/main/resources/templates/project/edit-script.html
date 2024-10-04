@@ -476,8 +476,6 @@
 			
 			/* 2018-07-19 choye 추가  */
 			$("#reqToOpen").click(function(e){
-				e.preventDefault();
-				
 				//prjId로 변경하기
 				var commId = $('input[name=commId]').val();
 				var statusRequestYn = $('input[name=statusRequestYn]').val();
@@ -1716,7 +1714,9 @@
 						
 						let span = document.createElement("span");
 						span.classList.add("ml-3");
-						span.innerText = info.creatorDivisionName + ' > ' + info.creatorName + '(' + info.creator + ')';
+						if (info != null) {
+							span.innerText = info.creatorDivisionName + ' > ' + info.creatorName + '(' + info.creator + ')';
+						}
 						
 						formGroup.appendChild(label);
 						formGroup.appendChild(span);
@@ -1727,7 +1727,9 @@
 						
 						span = document.createElement("span");
 						span.classList.add("ml-3");
-						span.innerText = info.createdDate;
+						if (info != null) {
+							span.innerText = info.createdDate;
+						}
 						formGroup.appendChild(label);
 						formGroup.appendChild(span);
 						colDiv.appendChild(formGroup);
@@ -1982,8 +1984,12 @@
 				}
 			},
 			commentsIgnore : function(){
-				/* 2018-07-30 choye 추가 */
-				var data = {"referenceId" : [[${project.prjId}]], "contents" : ""};
+				var editorVal = $("#reqToOpenTextareaAdmin").summernote('code');
+				if ("" == $(editorVal).text().trim()) {
+					editorVal = "";
+    			}
+				
+				var data = {"referenceId" : [[${project.prjId}]], "contents" : editorVal};
 
 				$.ajax({
 					url : '/project/commentsIgnore',
@@ -1998,7 +2004,7 @@
 							alertify.alert([[#{msg.common.success}]], function(){
 								reloadTabInframe('/project/list');
 								deleteTabInFrame('/project/edit/' + [[${project.prjId}]]);
-								activeTabInFrameList("PROJECT");
+								createTabInFrame([[${project.prjId}]] + '_Project', '/project/edit/' + [[${project.prjId}]]);
 							});
 						}
 					},
