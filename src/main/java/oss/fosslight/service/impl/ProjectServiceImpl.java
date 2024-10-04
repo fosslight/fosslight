@@ -2347,6 +2347,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.updateProjectMaster(projectStatus);
 		}
 
+		project.setReferenceDiv(refDiv);
+		project.setReferenceId(refId);
+		
 		int ossComponentIdx = projectMapper.selectOssComponentMaxIdx(project);
 		// Delete project all components and license
 		projectMapper.resetOssComponentsAndLicense(refId, refDiv);
@@ -2366,6 +2369,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		for(ProjectIdentification ossBean : ossComponent) {
 			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
 			ossBean = CommonFunction.findOssIdAndName(ossBean);
+			if (isEmpty(ossBean.getOssId())) {
+				ossBean.setOssId(null);
+			}
 			downloadLocationUrl = ossBean.getDownloadLocation();
 			if (!StringUtil.isEmpty(downloadLocationUrl) && downloadLocationUrl.endsWith("/")) {
 				ossBean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));

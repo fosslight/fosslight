@@ -263,7 +263,11 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("ossNickList", ossService.getOssNickNameListByOssName(bean.getOssName()));
 			
 			List<String> downloadLocationList = new ArrayList<>();
-			downloadLocationList.add(avoidNull(bean.getDownloadLocation()));
+			String downloadLocation = avoidNull(bean.getDownloadLocation());
+			if (!isEmpty(downloadLocation)) {
+				downloadLocation += "|" + ossService.getPurlByDownloadLocation(bean);
+			}
+			downloadLocationList.add(downloadLocation);
 			model.addAttribute("downloadLocationList", downloadLocationList);
 		} else {
 			// 신규 등록시에도 ossNickList 은 필수(empty array를 설정)
