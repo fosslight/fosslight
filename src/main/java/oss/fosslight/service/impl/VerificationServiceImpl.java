@@ -550,7 +550,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 		boolean isChangedPackageFile = (boolean)map.get("isChangedPackageFile");
 		String packagingComment = (String)map.get("packagingComment");
-		boolean isCopyConfirm = map.containsKey("copyConfirm");
 		
 		List<String> checkExceptionWordsList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_EXCEPTION_WORDS);
 		List<String> checkExceptionIgnoreWorksList = CoCodeManager.getCodeNames(CoConstDef.CD_VERIFY_IGNORE_WORDS);
@@ -663,6 +662,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String packageFileName = rePath;
 			String decompressionRootPath = "";
 			List<String> collectDataDeCompResultList = new ArrayList<>();
+			String firstPathName = "";
 			
 			// 사용자 입력과 packaging 파일의 디렉토리 정보 비교를 위해
 			// 분석 결과를 격납 (dir or file n	ame : count)
@@ -739,11 +739,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							deCompResultMap.put(_dir, cnt);
 						}
 						
-						if (isCopyConfirm) {
-							if (!isEmpty(s)) {
-								packageFileName = s;
-								isCopyConfirm = false;
-							}
+						if (isEmpty(firstPathName) && !isEmpty(s)) {
+							firstPathName = s;
 						}
 						
 						deCompResultMap.put(s, 0);
@@ -1116,7 +1113,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					 */
 					boolean resultFlag = false;
 					
-					int fileCount = checkGridPath(gridPath, deCompResultMap, decompressionDirName, packageFileName, decompressionRootPath);
+					int fileCount = checkGridPath(gridPath, deCompResultMap, decompressionDirName, packageFileName, decompressionRootPath, firstPathName);
 					if (fileCount > 0) {
 						resultFlag = true;
 						gFileCount = fileCount;
@@ -1352,7 +1349,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		return resMap;
 	}
 	
-	private int checkGridPath(String gridPath, Map<String, Integer> deCompResultMap, String decompressionDirName, String packageFileName, String decompressionRootPath) {
+	private int checkGridPath(String gridPath, Map<String, Integer> deCompResultMap, String decompressionDirName, String packageFileName, String decompressionRootPath, String firstPathName) {
 		List<String> checkPathList = new ArrayList<>();
 		String matchPath = "";
 		int fileCount = 0;
@@ -1409,6 +1406,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			checkPathList.add(addRootDirReplaceFilePath + "/");
 			checkPathList.add("/"+ addRootDirReplaceFilePath + "/");
 
+			String firstPathDir = path.replaceFirst(firstPathName, "").replaceAll("//", "/");
+			if (firstPathDir.startsWith("/")) {
+				firstPathDir = firstPathDir.substring(1);
+			}
+			
+			if (firstPathDir.endsWith("/")) {
+				firstPathDir = firstPathDir.substring(0, firstPathDir.length()-1);
+			}
+			
+			checkPathList.add(firstPathDir);
+			checkPathList.add("/" + firstPathDir);
+			checkPathList.add(firstPathDir + "/");
+			checkPathList.add("/"+ firstPathDir + "/");
+			
 			String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
 			if (replaceRootDir.startsWith("/")) {
 				replaceRootDir = replaceRootDir.substring(1);
