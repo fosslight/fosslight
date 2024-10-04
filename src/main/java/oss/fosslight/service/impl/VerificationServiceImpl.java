@@ -699,6 +699,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							collectDataDeCompResultList.add(packageFileName + "/" + s);
 						}
 						
+						if (s.startsWith(firstPathName)) {
+							String removeFirstPathName = s.replace(firstPathName, "");
+							if (removeFirstPathName.startsWith("/")) {
+								removeFirstPathName = removeFirstPathName.substring(1);
+							}
+							collectDataDeCompResultList.add(removeFirstPathName);
+							
+							if (s.startsWith("/")) {
+								s = s.substring(1);
+							}
+						} else {
+							collectDataDeCompResultList.add(firstPathName + "/" + s);
+						}
+						
 						if (s.endsWith("*")) {
 							s = s.substring(0, s.length()-1);
 						}
