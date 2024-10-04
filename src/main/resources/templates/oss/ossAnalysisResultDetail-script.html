@@ -606,14 +606,21 @@ var Ctrl_fn = {
 	    			} else if(json.resultData) {
 	    				alertify.alert([[#{msg.oss.nickname.exists}]], function(){});
 
-	    				for(var k in json.resultData) {
-	    					$(common_data.nickNameClone).appendTo(".detailNickName"+seq);
-							$(".detailNickName"+seq+" input[type=text]:last").val(json.resultData[k]);
+	    				if ($("div.detailNickName" + seq + " > div").length > 1) {
+	    					$("div.detailNickName" + seq).empty();
 	    				}
-
-	    				$('.smallDelete').on('click', function(){
-	    					$(this).parent().remove();
-	    				});
+	    				
+	    				for (var k in json.resultData) {
+	    					let nickHtml 	= 	'<div class="col-lg-12 mt-1 pl-0">';
+	    					nickHtml 		+= 		'<div class="form-group mb-0">';
+	    					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+json.resultData[k]+'"/>';
+	    					nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+	    					nickHtml 		+=		'</div>';
+	    					nickHtml 		+=		'<span class="retxt"></span>';
+	    					nickHtml 		+= 	'</div>';
+							
+	    					$('div.detailNickName' + seq).append(nickHtml);
+	    				}
 	    			} else {
 	    				alertify.error([[#{msg.common.valid}]], 0);
 	    				// 커스텀 에러 메세지 
