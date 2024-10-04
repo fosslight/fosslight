@@ -2745,13 +2745,14 @@
                 if (!!rowObject.filePath || "Y" == isAndroid) {
                     return rowObject.filePath;
                 } else {
-                    var textBox = rowObject.ossName;
+                	var textBox = "";
+//                	var textBox = rowObject.ossName;
 
-                    if (!!rowObject.ossVersion) {
-                        textBox += "-" + rowObject.ossVersion;
-                    }
+//                	if (!!rowObject.ossVersion) {
+//                   	textBox += "-" + rowObject.ossVersion;
+//                 	}
 
-                    textBox += "/";
+//                	textBox += "/";
 
                     return textBox;
                 }
@@ -2834,7 +2835,7 @@
                         var errRow = $("#" + emptyIds[idx] + " > td[aria-describedby='list_filePath']");
 
                         if (errRow) {
-                            errRow.append('<div class=\"list_filePath_' + emptyIds[idx] + ' retxt"\">Required</div>');
+                            errRow.append('<div class=\"list_filePath_' + emptyIds[idx] + ' retxt"\">This field is required</div>');
                         }
                     }
 
