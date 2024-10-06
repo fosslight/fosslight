@@ -20,6 +20,18 @@
 ## 🚀 Features
 
 - Improved osori db related functions @FOSSLight-dev (#1053)
+  - License: Add source code disclosure scope
+  - OSS:
+    - Add restriction
+    - Store OSS information by separating it into
+      - Common
+      - Version
+    - Store 'Download location' info for OSS in common information
+    - Add PURL for each download location 
+    - Subdivide the comment into
+      - Common comments 
+      - Version comments
+    - Add 'include_cpe', 'exclude_cpe', 'version_alias' to enhance vulnerability matching
 - API changes
   - Add 3rd party export APIs @Min-Kyungsun (#1053) 
   - Add common authorization in API V2 @hyeinlee00 (#1077)
