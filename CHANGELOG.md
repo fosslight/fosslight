@@ -24,8 +24,8 @@
   - OSS:
     - Add restriction
     - Store OSS information by separating it into
-      - Common
-      - Version
+      - Common: OSS_COMMON Table added
+      - Version: OSS_VERSION Table added
     - Store 'Download location' info for OSS in common information
     - Add PURL for each download location 
     - Subdivide the comment into
