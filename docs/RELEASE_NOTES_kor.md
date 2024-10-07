@@ -30,7 +30,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 * **오픈소스 보안 취약점 매칭 강화**
   - 오픈소스에 'Include CPE', 'Exclude CPE', 'OSS Version Alias'가 추가되었습니다.
 
-
 ### Changed
 
 * **Hub 버전 2.0을 위한 fosslight_create.sql 업데이트**
@@ -44,7 +43,6 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 * **속도 개선** 
   - Project 목록 화면 속도 개선을 위해 PROJECT_MASTER에 column이 추가되었습니다.
-
 
 ### Notes
 
@@ -75,6 +73,9 @@ Migration script는 정상케이스만 지원하고 있으니 참고하시기 �
 
 
 ## [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
+
+### Changed
+
 * fosslight_create.sql에서 잘못된 column 수정
 * API V2의 버그 수정
   - 3rd party search API 반환 값 유형 변경
@@ -86,6 +87,7 @@ Migration script는 정상케이스만 지원하고 있으니 참고하시기 �
 
 
 ## [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
+
 ### New
 * UI 2.0 릴리즈
   - UI 프레임워크를 Thymeleaf로 변경

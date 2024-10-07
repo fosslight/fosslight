@@ -6,12 +6,16 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+## [2.0.1](https://github.com/fosslight/fosslight/releases/tag/v2.0.1) (2024-09-30)
+
 ### Changed
 * **Switched to using local resources for Jqgrid**
   - Due to the discontinuation of CDN support for jqgrid, it has been changed to use local resources.
 
-# [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
-## NEW
+
+## [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
+
+### NEW
 * **Opensource Database Schema Changes**
   - The OSS Master has been separated into 'OSS_COMMON' and 'OSS_VERSION'.
     - **'OSS_COMMON' Table**: Added to manage the common information of OSS.
@@ -26,7 +30,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   - Added 'Include CPE', 'Exclude CPE', and 'OSS Version Alias' to Opensource.
 
 
-## Changed
+### Changed
 * **fosslight_create.sql Updated for Hub Version 2.0**
 * **API V2 Updates**
   - Changed the authorization method in the API v2 Swagger UI.
@@ -39,7 +43,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 * **Performance Improvement**
   - Added a column to PROJECT_MASTER to improve the speed of the Project list screen.
 
-## Notes
+### Notes
 Hub version 2.0.0 is a major update that includes changes to the database schema.
 We provide a migration script to upgrade to Hub version 2.0.0 for existing users.  
 (Filename: 20240725150921_update_v2.0.0.sql)
@@ -68,9 +72,8 @@ Before executing the migration script, please make sure to back up the database
 and run the script in a test environment to ensure there are no issues.
 
 
+## [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
 
-
-# [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
 ### Changed
 * Fix wrong column name in fosslight_create.sql
 * Bug fix in API V2
@@ -81,7 +84,9 @@ and run the script in a test environment to ensure there are no issues.
 * Bug fix in search bar in Opensource menu
 * Bug fix in SPDX document 
 
-# [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
+
+## [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
+
 ### New
 * UI 2.0 release 
   - Switched UI Framework to Thymeleaf
@@ -97,7 +102,9 @@ and run the script in a test environment to ensure there are no issues.
   - Transitioned to RESTful API architecture.
   - Improved response consistency.
 
-# [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
+
+## [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
+
 ### New
 * Add 'sheetNames' parameter in oss report upload APIs
   - /api/v1/oss_report_bin
@@ -114,7 +121,9 @@ and run the script in a test environment to ensure there are no issues.
   * Apply DEPENDENCIES and REF_OSS_NAME in mapper for component copy
   * Change DEPENDENCIES Column data type as text in DB
 
-# [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-11-23)
+
+## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-11-23)
+
 ### New
 * Added new API that can add a watcher in project, 3rd party, self-check. (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add)
 * Added new api /api/v1/prj_not_applicable which is possible to check “N/A” in 3rd, src, bin tab.
@@ -136,6 +145,7 @@ and run the script in a test environment to ensure there are no issues.
   - The automatic selection form for the Operating System field and Category field within the Model Info sheet has also been updated with the latest information.
 * "Notice" shows before login screen.
 * “Not the same as property” warning message is added in copyright column of OSS table.
+
 
 ## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-07-28)
 
