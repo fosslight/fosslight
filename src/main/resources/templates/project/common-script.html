@@ -309,9 +309,6 @@ var com_fn = {
        		alertify.bomConfirmDialog()
        		.set('onok', function(e) {
        			var editorVal = $("#bomConfirmEditor").summernote('code');
-   				if ("" == $(editorVal).text().trim()) {
-   					editorVal = "";
-   				}
    				
    				if (isAndroidModel) {
 					if ("undefined" !== typeof binAndroidValidMsgData.isValid && "false" == binAndroidValidMsgData.isValid) {
