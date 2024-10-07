@@ -3694,6 +3694,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			// complete mail 발송
 			mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED;
+		} else if(!isEmpty(project.getTerminateYn())) {
+			updateProjectMaster(project);
+
+			String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_TERMINATED));
+			userComment = avoidNull(userComment) + "<br />" + _tempComment;
+
+			// Terminated log 추가
+			commentDiv = CoConstDef.CD_DTL_COMMENT_PROJECT_HIS;
+			status = "Terminated";
+
+			// Terminated mail 발송
+			mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_TERMINATED;
+
 		} else {
 			boolean ignoreValidation = CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getIdentificationStatus()) 
 					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(project.getVerificationStatus()) 

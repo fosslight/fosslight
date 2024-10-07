@@ -164,12 +164,15 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The identification sub status bom. */
 	private String identificationSubStatusBom;
-	
+
 	/** The complete yn. */
 	private String completeYn;
 	
 	/** The drop yn. */
 	private String dropYn;
+
+	/** The terminate yn. */
+	private String terminateYn;
 	
 	/** The verify yn */
 	private String verifyYn;
@@ -1131,6 +1134,14 @@ public class Project extends ComBean implements Serializable {
 	 */
 	public void setDropYn(String dropYn) {
 		this.dropYn = dropYn;
+	}
+
+	public String getTerminateYn() {
+		return terminateYn;
+	}
+
+	public void setTerminateYn(String terminateYn) {
+		this.terminateYn = terminateYn;
 	}
 	
 	public String getVerifyYn() {

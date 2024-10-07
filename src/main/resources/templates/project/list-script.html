@@ -263,7 +263,7 @@ var fn = {
 		var finalReview = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_FINAL_REVIEW'))}]];
 		var complete = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_COMPLETE'))}]];
 		var drop = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_DROP'))}]];
-		
+		var terminate = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'), @CommonFunction.getCoConstDefVal('CD_DTL_PROJECT_STATUS_TERMINATE'))}]];
 		switch(cellvalue){
 			case progress:
 				display = "<span class=\"text-success\">" + cellvalue + "</span>";
@@ -289,6 +289,10 @@ var fn = {
 				display = "<span class=\"text-gray\">" + cellvalue + "</span>";
 
 				break;
+            case terminate:
+                display = "<span class=\"text-red\">" + cellvalue + "</span>";
+
+                break;
 		}
 		
 		return display;
@@ -947,11 +951,13 @@ var fn = {
 		var dropFlag = $("#dropFlag").val() == "Y";
 		var commId = $("#commId").val();
 		var viewOnlyFlag = $("#viewOnlyFlag").val();
+		var terminateFlag = $("#terminateFlag").val() == "Y";
 
 		$("#CSIdentification > input[type=radio]").attr("disabled", false);
 		$("#CSDrop > input[type=radio]").attr("disabled", false);
 		$("#CSDelete > input[type=radio]").attr("disabled", false);
 		$("#CSComplete > input[type=radio]").attr("disabled", false);
+        $("#CSTerminate > input[type=radio]").attr("disabled", true);
 		
 		if (projectStatus == "PROG"){
 			if (identificationStatus == "" || identificationStatus == "PROG"){
@@ -984,6 +990,16 @@ var fn = {
 			$("#CSDrop > input[type=radio]").attr("disabled", true);
 			$("#CSDelete > input[type=radio]").attr("disabled", true);
 		}
+
+        if(completeFlag){
+            $("#CSTerminate > input[type=radio]").attr("disabled", false);
+        }
+
+        if(terminateFlag){
+            $("#CSTerminate > input[type=radio]").attr("disabled", true);
+            $("#CSIdentification > input[type=radio]").attr("disabled", true);
+            $("#CSDrop > input[type=radio]").attr("disabled", true);
+        }
 	},
 	changeStatusProc : function(){
 		$("#warningMsg").hide(); // required reset
@@ -997,6 +1013,7 @@ var fn = {
 		var completeFlag = $("#completeFlag").val();
 		var dropFlag = $("#dropFlag").val();
 		var commentFlag = true;
+        var terminateFlag = $("#terminateFlag").val();
 		
 		var authority = [[${sessUserInfo.authority}]];
 		if ("ROLE_ADMIN" == authority) {
@@ -1118,6 +1135,9 @@ var fn = {
 				fn.updateProjectStatus({"prjId" : prjId, "completeYn" : "Y", "userComment" : reason});
 				
 				break;
+            case "5": // Terminate
+                fn.updateProjectStatus({"prjId" : prjId, "terminateYn" : "Y", "userComment" : reason});
+                break;
 			default:
 				break;
 			}

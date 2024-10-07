@@ -314,6 +314,7 @@ public class CoConstDef {
 	public static final String CD_DTL_PROJECT_STATUS_COMPLETE 		= "COMP";
 //	public static final String CD_DTL_PROJECT_STATUS_DELAY		= "DELAY";
 	public static final String CD_DTL_PROJECT_STATUS_DROP			= "DROP";
+	public static final String CD_DTL_PROJECT_STATUS_TERMINATE      = "TERM";
 	/** status of project Identification and Packaging */
 	public static final String CD_IDENTIFICATION_STATUS		="206";
 	public static final String CD_DTL_IDENTIFICATION_STATUS_PROGRESS 	= "PROG";
@@ -577,6 +578,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_FAILED = "815";
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED = "818";
 	public static final String CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED = "819";
+	public static final String CD_MAIL_TYPE_PROJECT_TERMINATED = "820"; // Project terminated
 
 	public static final String CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED = "821";
 
