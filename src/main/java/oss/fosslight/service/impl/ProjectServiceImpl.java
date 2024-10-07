@@ -3188,10 +3188,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return result;
 	}
 
+	@Override
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList) {
+		registBom(prjId, merge, projectIdentification, checkGridBomList, null, false);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList) {
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm) {
 		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 		List<ProjectIdentification> includeVulnInfoNewBomList = new ArrayList<>();
 		List<ProjectIdentification> includeVulnInfoOldBomList = new ArrayList<>();
@@ -3283,8 +3288,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> mergeListMap = getIdentificationGridList(identification);
 		
 		if (mergeListMap != null && mergeListMap.get("rows") != null) {
-			for (ProjectIdentification bean : (List<ProjectIdentification>)mergeListMap.get("rows")) {
+			if (isCopyConfirm) {
+				ProjectIdentification param = new ProjectIdentification();
+				param.setReferenceId(copyPrjId);
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				param.setMerge(CoConstDef.FLAG_NO);
+				Map<String, Object> copyTargetbomList = getIdentificationGridList(param);
 				
+				if (copyTargetbomList != null && copyTargetbomList.get("rows") != null && projectIdentification.isEmpty()) {
+					projectIdentification = (List<ProjectIdentification>) copyTargetbomList.get("rows");
+				}
+			}
+			
+			for (ProjectIdentification bean : (List<ProjectIdentification>)mergeListMap.get("rows")) {
 				bean.setRefDiv(bean.getReferenceDiv());
 				bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				bean.setRefComponentId(bean.getComponentId());
@@ -3295,10 +3311,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				bean.setPreObligationType(bean.getObligationType());
 				
+				String copyCheckKey = bean.getRefComponentId();
+				if (isCopyConfirm) {
+					copyCheckKey = (bean.getRefDiv() + "_" + bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getLicenseName()).toUpperCase();
+				}
+				
 				// 그리드 데이터 넣기
 				for (ProjectIdentification gridData : projectIdentification) {
+					String copyCheckKey2 = gridData.getRefComponentId();
+					if (isCopyConfirm) {
+						copyCheckKey2 = (gridData.getRefDiv() + "_" + gridData.getOssName() + "_" + gridData.getOssVersion() + "_" + gridData.getLicenseName()).toUpperCase();
+					}
+					
 					// merge 결과 (src/bat/3rd) 일시
-					if (gridData.getRefComponentId().contains(bean.getRefComponentId())){
+					if (copyCheckKey.contains(copyCheckKey2)){
 						bean.setMergePreDiv(gridData.getMergePreDiv());
 						
 						// BOM에 초기표시된 obligation을 초기 값으로 설정
@@ -3306,12 +3332,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (CoConstDef.FLAG_YES.equals(gridData.getAdminCheckYn())) {
 							bean.setAdminCheckYn(gridData.getAdminCheckYn());
 							
-							if (CoConstDef.FLAG_YES.equals(gridData.getSource())) {
-								bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-							} else if (CoConstDef.FLAG_YES.equals(gridData.getNotify())) {
-								bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
-							} else if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_NO.equals(gridData.getSource())) {
-								bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED);
+							if (isCopyConfirm) {
+								bean.setPreObligationType(gridData.getPreObligationType());
+								bean.setObligationType(gridData.getObligationType());
+							} else {
+								if (CoConstDef.FLAG_YES.equals(gridData.getSource())) {
+									bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
+								} else if (CoConstDef.FLAG_YES.equals(gridData.getNotify())) {
+									bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
+								} else if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_NO.equals(gridData.getSource())) {
+									bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED);
+								}
 							}
 							
 							bean.setDownloadLocation(gridData.getDownloadLocation());
