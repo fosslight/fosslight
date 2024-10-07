@@ -16,23 +16,26 @@ SPDX-License-Identifier: AGPL-3.0-only
 ## [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
 
 ### NEW
-
 * **오픈소스 데이터베이스 스키마 변경**
-  - OSS 마스터가 'OSS_COMMON'과 'OSS_VERSION'으로 분리되었습니다.
+  - 효율적인 오픈소스 정보 관리를 위해 OSS_MASTER 테이블이가 'OSS_COMMON'과 'OSS_VERSION'으로 분리되었습니다.
     - **'OSS_COMMON' 테이블**: OSS의 공통 정보를 관리하기 위해 추가되었습니다.
     - **'OSS_VERSION' 테이블**: OSS의 버전 정보를 관리하기 위해 추가되었습니다.
 
 * **라이선스 및 오픈소스 정보 강화**
-  - OSORI 데이터를 기반으로 제한 사항이 업데이트되었습니다.
-  - 라이선스에 소스 코드 공개 범위 정보가 추가되었습니다.
-  - 오픈소스에도 이제 제한 정보가 포함됩니다.
+  - OSORI 데이터를 기반으로 Restriction이 업데이트되었습니다.
+  - 라이선스에 소스 코드 공개 범위 정보(Source Code Disclosure Scope)가 추가되었습니다.
+  - 오픈소스에도 Restriction 정보가 포함됩니다.
+  - 오픈소스의 전체 버전과 특정 버전에 대한 Comment를 구분하여 남길 수 있습니다.
+  - 오픈소스의 Download location 정보가 공통 정보로 관리 됩니다.
+  - Download location에 대해 PURL이 추가되었습니다.
 
 * **오픈소스 보안 취약점 매칭 강화**
-  - 오픈소스에 'Include CPE', 'Exclude CPE', 'OSS Version Alias'가 추가되었습니다.
+  - 보안취약점 매칭 강화를 위해 오픈소스에 'Include CPE', 'Exclude CPE', 'OSS Version Alias'가 추가되었습니다.
 
 ### Changed
-
 * **Hub 버전 2.0을 위한 fosslight_create.sql 업데이트**
+  - 2.0.0 버전에 맞게 fosslight_create.sql이 업데이트 되었습니다.
+
 * **API V2 업데이트**
   - API v2 Swagger UI에서 인증 방법이 변경되었습니다.
   - 3rd party export API가 추가되었습니다.
@@ -45,16 +48,15 @@ SPDX-License-Identifier: AGPL-3.0-only
   - Project 목록 화면 속도 개선을 위해 PROJECT_MASTER에 column이 추가되었습니다.
 
 ### Notes
-
 기존 유저들을 위해 Hub 2.0.0 버전으로 업그레이드 하기 위한 Migration script를 제공합니다.  
 (파일명: 20240725150921_update_v2.0.0.sql)
 
-이번 Migration script는 여러 스키마가 변경되므로 전체적인 내용을 한번 확인하시길 권장드립니다.  
-Migration script는 정상케이스만 지원하고 있으니 참고하시기 바랍니다.
+이번 Migration script는 여러 스키마가 변경되므로 전체적인 내용을 확인하시길 권장드립니다.  
+또한 Migration script는 정상 케이스만 지원하고 있으니 사용에 참고하시기 바랍니다.
 
-주요 변경사항 및 주의점에 대해 정리하면 아래와 같습니다:
+데이터 내용에 따라 Migration 과정에서 에러가 발생할 수 있어 **특히 주의 깊게 확인해야 할 사항**은 다음과 같습니다:
 
-1. **OSS_LICENSE_DECLARED, OSS_LICENSE_DETECTED 테이블의 fk 변경**
+1. **OSS_LICENSE_DECLARED, OSS_LICENSE_DETECTED 테이블의 foreign key 변경**
   - OSS_ID에 대해 정상적이지 않은 데이터가 들어있는 경우, fk 변경에 에러가 발생할 수 있습니다.
   - 이로 인해 데이터 무결성을 확인하고, 필요시 정정 작업을 사전에 수행해야 합니다.
 
@@ -63,19 +65,37 @@ Migration script는 정상케이스만 지원하고 있으니 참고하시기 �
   - 기존에 해당 코드를 변경해서 사용하고 있었는지 확인하시기 바랍니다.
   - 이로 인해 관련된 비즈니스 로직이나 데이터 참조가 영향을 받을 수 있으므로, 사전 검토가 필요합니다.
 
-3. **LICENSE_NICKNAME 테이블의 Schema 변경**
+
+이외의 주요 변경 사항들에 대해 정리하면 다음과 같습니다:
+
+1. **Opensource 관련 데이터베이스 분리**
+- 'OSS_COMMON'과 'OSS_VERSION'으로 나누어졌습니다.
+
+2. **OSS_DOWNLOADLOCATION_COMMON, OSS_NICKNAME_COMMON 테이블 추가**
+  - 오픈소스 공통정보(OSS_COMMON_ID)와 Download location이 연동되도록 Schema가 변경되었습니다.
+  - 오픈소스 공통정보(OSS_COMMON_ID)와 Nickname이 연동되도록 Schema가 변경되었습니다.
+
+3. **OSS_INCLUDE_CPE, OSS_EXCLUDE_CPE, OSS_VERSION_ALIAS 테이블 추가**
+  - 보안취약점 매칭 강화 데이터 관리를 위해 테이블이 추가되었습니다.
+
+4. **LICENSE_NICKNAME 테이블의 Schema 변경**
   - LICENSE_ID를 사용하도록 Schema가 변경되었습니다.
 
-4. **Opensource 관련 데이터베이스 분리**
-  - 'OSS_COMMON'과 'OSS_VERSION'으로 나누어졌습니다.
+5. **LICENSE_MASTER 테이블에 DISCLOSING_SRC column 추가**
+  - DISCLOSING_SRC 정보를 위해 column이 추가되었습니다.
 
-위의 내용을 참고하여 Migration script를 실행하기 전에 반드시 데이터베이스를 백업하고, 스크립트를 테스트 환경에서 먼저 실행하여 문제가 없는지 확인하시기 바랍니다.
+6. **PROJECT_MASTER 테이블에 column 추가**
+  - Project 목록 화면 속도 개선을 위해 column이 추가되었습니다.
+
+
+위의 내용을 참고하여 Migration script를 전체적으로 검토하시기 바랍니다.
+Migration script를 실행하기 전에 반드시 데이터베이스를 백업하고, 
+스크립트를 테스트 환경에서 먼저 실행하여 문제가 없는지 확인하시기 바랍니다.
 
 
 ## [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
 
 ### Changed
-
 * fosslight_create.sql에서 잘못된 column 수정
 * API V2의 버그 수정
   - 3rd party search API 반환 값 유형 변경
