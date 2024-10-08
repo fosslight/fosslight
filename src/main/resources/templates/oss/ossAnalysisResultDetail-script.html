@@ -582,8 +582,15 @@ var Ctrl_fn = {
 	    				}
 	    				
 	    				for(var k in json.resultData.addNickArr) {
-	    					$(common_data.nickNameClone).appendTo(".detailNickName"+seq);
-							$(".detailNickName"+seq+" input[type=text]:last").val(json.resultData.addNickArr[k]);
+	    					let nickHtml 	= 	'<div class="col-lg-12 mt-1 pl-0">';
+	    					nickHtml 		+= 		'<div class="form-group mb-0">';
+	    					nickHtml 		+=			'<input class="form-control" name="ossNicknames" type="text" value="'+json.resultData.addNickArr[k]+'"/>';
+	    					nickHtml 		+=			'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.removeTag2(this);"><i class="fas fa-times"></i></button>';
+	    					nickHtml 		+=		'</div>';
+	    					nickHtml 		+=		'<span class="retxt"></span>';
+	    					nickHtml 		+= 	'</div>';
+							
+	    					$('div.detailNickName' + seq).append(nickHtml);
 	    				}
 	    				
 	    				$(".smallDelete").on('click', function(){
