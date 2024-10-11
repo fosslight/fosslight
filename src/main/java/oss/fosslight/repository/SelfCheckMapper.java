@@ -289,4 +289,6 @@ public interface SelfCheckMapper {
 	List<String> findIdentificationMaxNvdInfoForVendorProduct(@Param("prjId")String prjId);
 
 	List<OssComponents> checkSelectDownloadFile(Project project);
+
+	void resetOssComponentsAndLicense(ProjectIdentification projectIdentification);
 }

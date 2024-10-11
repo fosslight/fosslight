@@ -406,9 +406,10 @@ public interface ProjectMapper {
 	 * @return
 	 */
 	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
-
+	int resetSecurityData(@Param("prjId")String prjId);
+	
 	void insertOssComponentListWithComponentId(@Param("list")List<ProjectIdentification> OssComponentList);
-	void insertOssComponentList(@Param("list")List<ProjectIdentification> OssComponentList);
+	void insertOssComponentList(@Param("list") List<ProjectIdentification> OssComponentList);
 	void insertOssComponentLicenseList(@Param("list")List<OssComponentsLicense> ossComponentLicenseList);
 
 	List<Map<String, Object>> getCpeInfoAndRangeForProject(ProjectIdentification identification);

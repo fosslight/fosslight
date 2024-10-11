@@ -31,6 +31,9 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -102,6 +105,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	private String DB_URL;
 	private String USERNAME;
 	private String PASSWORD;
+	
+	@Autowired private SqlSessionFactory sqlSessionFactory;
 	
 	@PostConstruct
 	public void setResourcePathPrefix(){
@@ -2409,49 +2414,51 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			} else {
 				insertOssComponentList.add(ossBean);
 			}
-			
-			if (insertOssComponentListWithComponentId.size() == 1000) {
-				projectMapper.insertOssComponentListWithComponentId(insertOssComponentListWithComponentId);
-				insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentListWithComponentId));
-				insertOssComponentListWithComponentId.clear();
-			}
-			
-//			if(insertOssComponentList.size() == 1000) {
-//				projectMapper.insertOssComponentList(insertOssComponentList);
-//				insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
-//				insertOssComponentList.clear();
-//			}
 		}
 		
-		if(!insertOssComponentListWithComponentId.isEmpty()) {
-			projectMapper.insertOssComponentListWithComponentId(insertOssComponentListWithComponentId);
-			insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentListWithComponentId));
-		}
-		
-//		if(!insertOssComponentList.isEmpty()) {
-//			projectMapper.insertOssComponentList(insertOssComponentList);
-//			insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
-//		}
-		if(!insertOssComponentList.isEmpty()) {
-			for(ProjectIdentification bean : insertOssComponentList) {
-				projectMapper.insertOssComponents(bean);
-			}
-			insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
-		}
-		
-		final List<OssComponentsLicense> tempOssComponentLicenseList = new ArrayList<>();
-		if(!CollectionUtils.isEmpty(insertOssComponentLicenseList)) {
-			insertOssComponentLicenseList.forEach(componentLicenseInfo -> {
-				tempOssComponentLicenseList.add(componentLicenseInfo);
-				if(tempOssComponentLicenseList.size() == 1000) {
-					projectMapper.insertOssComponentLicenseList(tempOssComponentLicenseList);
-					tempOssComponentLicenseList.clear();
-				}
-			});
-			if(!tempOssComponentLicenseList.isEmpty()) {
-				projectMapper.insertOssComponentLicenseList(tempOssComponentLicenseList);
-			}
-		}
+		if (!insertOssComponentList.isEmpty() || !insertOssComponentListWithComponentId.isEmpty()) {
+            try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+                ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+                int saveCnt = 0;
+                for (ProjectIdentification bean : insertOssComponentListWithComponentId) {
+                    mapper.insertSrcOssList(bean);
+                    if(saveCnt++ == 1000) {
+                        sqlSession.flushStatements();
+                        saveCnt = 0;
+                    }
+                }
+                for (ProjectIdentification bean : insertOssComponentList) {
+                    mapper.insertSrcOssList(bean);
+                    if(saveCnt++ == 1000) {
+                        sqlSession.flushStatements();
+                        saveCnt = 0;
+                    }
+                }
+                
+                if (saveCnt > 0) {
+                    sqlSession.flushStatements();
+                }
+                insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentListWithComponentId));
+                insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
+                
+                saveCnt = 0;
+                for (OssComponentsLicense bean : insertOssComponentLicenseList) {
+                    mapper.registComponentLicense(bean);
+                    if (saveCnt++ == 1000) {
+                        sqlSession.flushStatements();
+                        saveCnt = 0;
+                    }
+                }
+                if (saveCnt > 0) {
+                    sqlSession.flushStatements();
+                }
+                sqlSession.commit();
+            }
+            
+            insertOssComponentListWithComponentId.clear();
+            insertOssComponentList.clear();
+            insertOssComponentLicenseList.clear();
+        }
 		
 //	
 //		
@@ -2728,8 +2735,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	 * @param ossComponentLicense
 	 * @return
 	 */
-	private Map<String, List<OssComponentsLicense>> makeComponentMultiLicenseMap(
-			List<List<ProjectIdentification>> ossComponentLicense) {
+	private Map<String, List<OssComponentsLicense>> makeComponentMultiLicenseMap(List<List<ProjectIdentification>> ossComponentLicense) {
 		final Map<String, List<OssComponentsLicense>> componentMultiLicenseMap = new HashMap<>();
 		List<OssComponentsLicense> licenseList;
 		String _componentId;
@@ -6659,186 +6665,69 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	@Override
 	@Transactional
 	public void registSecurity(String prjId, String tabName, List<OssComponents> ossComponents) {
-		try {
-			List<OssComponents> updateNvdDataList = new ArrayList<>();
-			Map<String, OssComponents> securityGridMap = new HashMap<>();
-			List<OssComponents> deleteDataList = new ArrayList<>();
-			
-			ProjectIdentification identification = new ProjectIdentification();
-			identification.setReferenceId(prjId);
-			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			identification.setMerge(CoConstDef.FLAG_NO);
-			
-			Map<String, Object> bomObj = getIdentificationGridList(identification);
-			List<ProjectIdentification> bomList = (List<ProjectIdentification>) bomObj.get("rows");
-			
-			for (ProjectIdentification pi : bomList) {
-				if (pi.getOssName().equals("-")) continue;
-				List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
-				if (securityDatalist != null) {
-					for (OssComponents oss : securityDatalist) {
-						String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId()).toUpperCase();
-						securityGridMap.put(key, oss);
-					}
+		Map<String, OssComponents> securityGridMap = new HashMap<>();
+		List<OssComponents> deleteDataList = new ArrayList<>();
+		
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(prjId);
+		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		identification.setMerge(CoConstDef.FLAG_NO);
+		
+		Map<String, Object> bomObj = getIdentificationGridList(identification);
+		List<ProjectIdentification> bomList = (List<ProjectIdentification>) bomObj.get("rows");
+		
+		for (ProjectIdentification pi : bomList) {
+			if (pi.getOssName().equals("-")) continue;
+			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
+			if (securityDatalist != null) {
+				for (OssComponents oss : securityDatalist) {
+					String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId()).toUpperCase();
+					securityGridMap.put(key, oss);
 				}
 			}
-			
-			for (OssComponents oc : ossComponents) {
-				String key = (oc.getOssName() + "_" + oc.getOssVersion() + "_" + oc.getCveId()).toUpperCase();
-				if (securityGridMap.containsKey(key)) {
-					if (avoidNull(securityGridMap.get(key).getVulnerabilityResolution(), "").equals("Fixed") && !avoidNull(oc.getVulnerabilityResolution(), "").equals("Fixed")) {
-						updateNvdDataList.add(oc);
-					} else if (!avoidNull(securityGridMap.get(key).getVulnerabilityResolution(), "").equals("Fixed") && avoidNull(oc.getVulnerabilityResolution(), "").equals("Fixed")) {
-						updateNvdDataList.add(oc);
-					}
-					deleteDataList.add(oc);
-				} else {
-					if (avoidNull(oc.getVulnerabilityResolution(), "").equals("Fixed")) {
-						updateNvdDataList.add(oc);
-					}
-				}
+		}
+		
+		for (OssComponents oc : ossComponents) {
+			oc.setReferenceId(prjId);
+			String key = (oc.getOssName() + "_" + oc.getOssVersion() + "_" + oc.getCveId()).toUpperCase();
+			if (securityGridMap.containsKey(key)) {
+				deleteDataList.add(oc);
 			}
-			
-			{
-				updatePreparedStatementSecurity(prjId, deleteDataList, ossComponents);
+		}
+		
+		if (!deleteDataList.isEmpty() || (ossComponents != null && !ossComponents.isEmpty())) {
+			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+				 ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+				 
+				 int cnt = 0;
+				 for (OssComponents bean : deleteDataList) {
+					 mapper.deleteSecurityData(bean);
+					 if (cnt++ == 1000) {
+						 sqlSession.flushStatements();
+						 cnt = 0;
+					 }
+				 }
+				 
+				 if (cnt > 0) sqlSession.flushStatements();
+				 
+				 cnt = 0;
+				 for (OssComponents bean : ossComponents) {
+					 mapper.insertSecurityData(bean);
+					 if (cnt++ == 1000) {
+						 sqlSession.flushStatements();
+						 cnt = 0;
+					 }
+				 }
+				 
+				 if (cnt > 0) {
+					 sqlSession.flushStatements();
+				 }
+				 
+				 sqlSession.commit();
 			}
-			
-			if (updateNvdDataList != null && !updateNvdDataList.isEmpty()) {
-				for (OssComponents oc : updateNvdDataList) {
-					OssMaster om = new OssMaster();
-					om.setOssName(oc.getOssName());
-					om.setOssVersion(avoidNull(oc.getOssVersion()).isEmpty() ? "-" : oc.getOssVersion());
-					om.setPrjId(prjId);
-					
-					Vulnerability vuln = vulnerabilityService.selectNotFixedCveInfo(om);
-					if (vuln != null) {
-						om.setCveId(vuln.getCveId());
-						om.setCvssScore(vuln.getCvssScore());
-						om.setVulnSummary(vuln.getVulnSummary());
-					} else {
-						om.setCveId(null);
-					}
-					
-					projectMapper.updateCveInfoForNotFixedOssInfo(om);
-				}
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 		}
 	}
 	
-	private void updatePreparedStatementSecurity(String prjId, List<OssComponents> deleteDataList, List<OssComponents> ossComponents) {
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		PreparedStatement stmt2 = null;
-		
-		String query = "";
-		
-		try{
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
-			conn.setAutoCommit(false);
-			
-			int idx = 1;
-			if (deleteDataList != null && !deleteDataList.isEmpty()) {
-				query = "DELETE FROM NVD_DATA_SECURITY WHERE REFERENCE_ID = ? AND OSS_NAME = ? AND OSS_VERSION = ? AND CVE_ID = ? AND CAST(CVSS_SCORE AS DECIMAL(10, 1)) = CAST(? AS DECIMAL(10,1));";
-				stmt = conn.prepareStatement(query);
-				
-				for (OssComponents item : deleteDataList) {
-					stmt.setString(1, prjId);
-					stmt.setString(2, item.getOssName());
-					stmt.setString(3, item.getOssVersion());
-					stmt.setString(4, item.getCveId());
-					stmt.setString(5, item.getCvssScore());
-					stmt.addBatch();
-					stmt.clearParameters();
-					
-					if ((idx % 1000) == 0) {
-						stmt.executeBatch();
-						stmt.clearBatch();
-			            conn.commit();
-					}
-					
-					idx++;
-				}
-				
-				stmt.executeBatch() ;
-				conn.commit();
-			}
-			
-			if (ossComponents != null && !ossComponents.isEmpty()) {
-				query = "INSERT INTO NVD_DATA_SECURITY (REFERENCE_ID, OSS_NAME, OSS_VERSION, CVE_ID, CVSS_SCORE, PUBL_DATE, VULNERABILITY_RESOLUTION, SECURITY_PATCH_LINK, SECURITY_COMMENTS) VALUES (?,?,?,?,?,?,?,?,?);";
-				stmt2 = conn.prepareStatement(query);
-				idx = 1;
-				
-				for (OssComponents item : ossComponents) {
-					stmt2.setString(1, prjId);
-					stmt2.setString(2, item.getOssName());
-					stmt2.setString(3, avoidNull(item.getOssVersion()).equals("-") ? "" : item.getOssVersion());
-					stmt2.setString(4, isEmpty(item.getCveId()) ? "" : item.getCveId());
-					stmt2.setFloat(5, isEmpty(item.getCvssScore()) ? Float.valueOf("0.0") : Float.valueOf(item.getCvssScore()));
-					stmt2.setString(6, isEmpty(item.getPublDate()) ? null : item.getPublDate());
-					stmt2.setString(7, isEmpty(item.getVulnerabilityResolution()) ? null : item.getVulnerabilityResolution());
-					stmt2.setString(8, isEmpty(item.getSecurityPatchLink()) ? null : item.getSecurityPatchLink());
-					stmt2.setString(9, isEmpty(item.getSecurityComments()) ? null : item.getSecurityComments());
-					stmt2.addBatch();
-					stmt2.clearParameters();
-					
-					if ((idx % 1000) == 0) {
-						stmt2.executeBatch();
-						stmt2.clearBatch();
-			            conn.commit();
-					}
-					
-					idx++;
-				}
-				
-				stmt2.executeBatch() ;
-				conn.commit();
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			try{
-				if (stmt != null) {
-					stmt.close();
-				}
-			} catch(SQLException se) {}
-			
-			try{
-				if (stmt2 != null) {
-					stmt2.close();
-				}
-			} catch(SQLException se) {}
-			
-			if (conn != null) {
-				try {
-					conn.rollback();
-					conn.close();
-				} catch (Exception e2) {
-					log.error(e2.getMessage(), e2);
-				}
-			}
-		} finally {
-			try{
-				if (stmt != null) {
-					stmt.close();
-				}
-			} catch(SQLException e) {}
-			
-			try {
-				if (stmt2 != null) {
-					stmt2.close();
-				}
-			} catch(SQLException e) {}
-			
-			try{
-				if (conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {}
-		}
-	}
-
 	@Override
 	public Map<String, Object> getExportDataForSBOMInfo(OssNotice ossNotice) {
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -7347,6 +7236,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				}
 			}
 		} else {
+			project.setVulnerabilityResolution("Discovered");
 			if (!project.getCvssScore().equals("0") && !project.getCvssScore().equals("N")) {
 				project.setCvssScoreMax(project.getCvssScore());
 			} else {
