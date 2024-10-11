@@ -472,7 +472,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		String _licenseId;
 		for (List<ProjectIdentification> compLicenseList : ossComponentLicense) {
 			for (ProjectIdentification compLicense : compLicenseList) {
-				_componentId = compLicense.getComponentId();
+				_componentId = isEmpty(compLicense.getComponentId()) ? compLicense.getGridId() : compLicense.getComponentId();
 				_licenseId = compLicense.getLicenseId();
 				if(componentMultiLicenseMap.containsKey(_componentId)) {
 					licenseList = componentMultiLicenseMap.get(_componentId);
