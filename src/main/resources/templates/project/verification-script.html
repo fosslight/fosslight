@@ -532,43 +532,97 @@
                             return false;
                         }
 
-                        if ($("#append").prop("checked")) {
-     						$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
-     						$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
-                        }
-
-                        $("#editCompanyName").attr("disabled", false);
-                        $("#editOssDistributionSite").attr("disabled", false);
-                        $("#editEmail").attr("disabled", false);
-
-                        $('#noticeForm').ajaxForm({
-                            url: '/project/verification/noticeAjax?confirm=conf',
-                            type: 'POST',
-                            dataType: "text",
-                            cache: false,
-                            success: function (data) {
-                                var result = jQuery.parseJSON(data);
-
-                                if (result.isValid == 'false') {
-                                    alertify.error([[#{msg.common.valid2}]], 0);
-                                } else {
-                                    reloadTabInframe('/project/list');
-                                    loading.hide();
-
-                                    var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
-                                    fn.defaultNotice(checkedFlag);
-
-                                    alertify.alert([[#{msg.common.success}]], function () {
-                                        deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
-                                        activeTabInFrameList("PROJECT");
-                                    });
-                                }
-                            },
-                            error: function (data) {
-                                loading.hide();
-                                alertify.error([[#{msg.common.valid2}]], 0);
+                        var innerHtml 	= 'Are you sure you want to confirm?<br>';
+                        innerHtml 		+= '<textarea id="verConfirmEditor"></textarea>';
+                        
+                     	// prevent clicking the OK button on Enter
+            			let keyCode;
+            			$(document).on('keydown', function (event) {
+            				keyCode = event.keyCode;
+            			});
+                        
+                        if(!alertify.verConfirmDialog){
+    						alertify.dialog('verConfirmDialog', function() {
+    							return {
+    								setup: function() {
+    									var settings = alertify.confirm().settings;
+    									
+    									for (var prop in settings) {
+    										this.settings[prop] = settings[prop];
+    									}
+    									
+    									var setup = alertify.confirm().setup();
+    									setup.focus.element = 1;
+    									
+    									return setup;
+    								},
+    							    hooks: {
+    							    	onshow: function() {
+    							        	this.elements.dialog.style.maxWidth = 'none';
+    							          	this.elements.dialog.style.width = '650px';
+    							        }
+    								}
+    							};
+    						}, false, 'confirm');
+                    	}
+                        
+                        alertify.verConfirmDialog()
+                        .set('onok', function(e) {
+                        	// prevent clicking the OK button on Enter
+            				if (typeof keyCode !== 'undefined' && keyCode == 13) {
+								keyCode = undefined;
+								return false;
+							}
+                        	
+            				var editorVal = $("#verConfirmEditor").summernote('code');
+            				if ("" == $(editorVal).text().trim()) {
+               					editorVal = "";
+               				}
+            				$("input[name='userComment']").val(editorVal);
+            				
+            				
+                        })
+                        .set('onshow', function(e){
+                        	if ($("#append").prop("checked")) {
+         						$('#noticeForm input[name=appendedTEXT]').val($($("#editor2").summernote("code")).text());
+         						$('#noticeForm input[name=appended]').val($("#editor2").summernote("code"));
                             }
-                        }).submit();
+
+                            $("#editCompanyName").attr("disabled", false);
+                            $("#editOssDistributionSite").attr("disabled", false);
+                            $("#editEmail").attr("disabled", false);
+
+                            $('#noticeForm').ajaxForm({
+                                url: '/project/verification/noticeAjax?confirm=conf',
+                                type: 'POST',
+                                dataType: "text",
+                                cache: false,
+                                success: function (data) {
+                                    var result = jQuery.parseJSON(data);
+
+                                    if (result.isValid == 'false') {
+                                        alertify.error([[#{msg.common.valid2}]], 0);
+                                    } else {
+                                        reloadTabInframe('/project/list');
+                                        loading.hide();
+
+                                        var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
+                                        fn.defaultNotice(checkedFlag);
+
+                                        alertify.alert([[#{msg.common.success}]], function () {
+                                            deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
+                                            activeTabInFrameList("PROJECT");
+                                        });
+                                    }
+                                },
+                                error: function (data) {
+                                    loading.hide();
+                                    alertify.error([[#{msg.common.valid2}]], 0);
+                                }
+                            }).submit();
+                        })
+                        .set('title', 'Confirm').setContent(innerHtml)
+						.show();
                 	} else {
                 		alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
                 	}
@@ -615,26 +669,47 @@
     						}, false, 'confirm');
                     	}
                         
-                        alertify.verRejectDialog(innerHtml, function () {
-     						if ("" == $("#editor3").summernote('code')){
+                        alertify.verRejectDialog()
+                        .set('onok', function(e) {
+                        	// prevent clicking the OK button on Enter
+            				if (typeof keyCode !== 'undefined' && keyCode == 13) {
+								keyCode = undefined;
+								return false;
+							}
+                        	
+							var editorVal = $("#editor3").summernote('code');
+                        	
+     						if ("" == $(editorVal).text().trim()){
      							alertify.alert([[#{msg.project.required.comments}]], function(){});
 
     							return false;
      						} else {
-                            	var data = {
-                                	"prjId": [[${project.prjId}]]
-                                	, "verificationStatus": "PROG"
-                                	, "useCustomNoticeYn": "N"
-                                	, "userComment": $("#editor3").summernote('code')
-                                	, "referenceDiv": "12"
-                                	, "noticeFileFormat": $("#noticeFileFormat").val()
-                            	};
-
-                            	fn.exeProjectStatus(data, "PROG");
+     							var data = {
+                                   	"prjId": [[${project.prjId}]]
+                                   	, "verificationStatus": "PROG"
+                                   	, "useCustomNoticeYn": "N"
+                                   	, "userComment": $("#editor3").summernote('code')
+                                   	, "referenceDiv": "12"
+                                   	, "noticeFileFormat": $("#noticeFileFormat").val()
+                                };
+     							
+                               	fn.exeProjectStatus(data, "PROG");
     						}
-                        });
-                        
-                        $("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        })
+                        .set('onshow', function(e){
+                        	$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        	
+                        	const parameter = {
+                               	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_USER')}]],
+                               	"referenceId" : [[${project.prjId}]]
+                          	}
+                            var draftUserComment = draftUserComments(parameter);
+                            if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+                               	$("#editor3").summernote('code', "<p>" + draftUserComment + "</p>");
+                            }
+                        })
+                        .set('title', 'Reject').setContent(innerHtml)
+						.show();
                 	} else {
                 		alertify.alert('Status of the project is being changed by another user. Please contact the reviewer for detailed information.', function(){});
                 	}
