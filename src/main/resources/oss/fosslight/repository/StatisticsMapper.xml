@@ -66,9 +66,16 @@
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
-					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = #{user}
-					  </foreach>
+					<choose>
+						<when test="noneUser != null and noneUser.size() > 0">
+							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+								STAT.CATEGORY = #{user}
+							</foreach>
+						</when>
+						<otherwise>
+							1 = 0
+						</otherwise>
+					</choose>
 					  , COUNT(1), 0) AS CATEGORY#{categorySize}
 	  			  </if>
 				  FROM (SELECT CD_DTL_NM
@@ -326,13 +333,13 @@
 							    	OC.OSS_COMMON_ID,
 							    	OC.OSS_NAME,
 							    	OV.OSS_VERSION,
-									OC.CREATOR,
-									OC.CREATED_DATE,
+									OV.CREATOR,
+									OV.CREATED_DATE,
 									OV.MODIFIER,
 									OV.MODIFIED_DATE
 								FROM OSS_COMMON OC
 								LEFT OUTER JOIN OSS_VERSION OV
-								ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+								ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID AND OV.USE_YN = 'Y'
 							 ) OM
 							   
 							  INNER JOIN T2_USERS T1
@@ -351,11 +358,11 @@
 							 				  ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
 					<choose>
 						<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
-							  	 ON OM.CREATOR = ADMIN.USER_ID AND OM.USE_YN = 'Y'
+							  	 ON OM.CREATOR = ADMIN.USER_ID
 							  WHERE DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')) STAT
 						</when>
 						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
-							  	 ON OM.MODIFIER = ADMIN.USER_ID AND OM.USE_YN = 'Y'
+							  	 ON OM.MODIFIER = ADMIN.USER_ID
 							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')
 								AND DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') != DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d')) STAT
 						</when>
@@ -413,8 +420,8 @@
 								    	OC.OSS_NAME,
 								    	OV.OSS_VERSION,
 								    	OV.USE_YN,
-										OC.CREATOR,
-										OC.CREATED_DATE,
+										OV.CREATOR,
+										OV.CREATED_DATE,
 										OV.MODIFIER,
 										OV.MODIFIED_DATE
 									FROM OSS_COMMON OC
@@ -482,9 +489,16 @@
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
-					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = #{user}
-					  </foreach>
+					<choose>
+						<when test="noneUser != null and noneUser.size() > 0">
+							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+								STAT.CATEGORY = #{user}
+							</foreach>
+						</when>
+						<otherwise>
+							1 = 0
+						</otherwise>
+					</choose>
 					  , COUNT(1), 0) AS CATEGORY#{categorySize}
 	  			  </if>
 				  FROM (SELECT CD_DTL_NM

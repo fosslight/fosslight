@@ -2642,48 +2642,87 @@ function getMsgMaxRowCnt() {
     return "More than " + msgGRowCnt + " can not be exported.";
 }
 
-function getBarChart(obj) {
-    var tooltip = obj.tooltip;
+const CHART_COLORS = {
+  red: 'rgb(255, 99, 132)',
+  orange: 'rgb(255, 159, 64)',
+  yellow: 'rgb(255, 205, 86)',
+  green: 'rgb(75, 192, 192)',
+  blue: 'rgb(54, 162, 235)',
+  purple: 'rgb(153, 102, 255)',
+  grey: 'rgb(201, 203, 207)'
+};
 
-    if (typeof obj.tooltip != "object") {
-        tooltip = {
-            pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.percentage:.0f}%)<br/>',
-            shared: true
-        };
-    }
-    ;
+function getBarChart(target, obj) {
+	
+	return new Chart(target, {
+		type: 'bar',
+		data: {labels:obj.labels, datasets:obj.datasets},
+		options: {
+			responsive: true,
+			interaction: {
+			  intersect: false,
+			},
+			scales: {
+			  x: {
+			    stacked: true,
+			  },
+			  y: {
+			    stacked: true
+			  }
+			},
+			plugins: {
+				tooltip: {
+					callbacks: {
+						label: function(context) {
+							let dataLabel = context.dataset.label || '';
+							let total = context.dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+							        return previousValue + currentValue;
+							      });
+							let currentValue = context.raw;
+							let percentage = Math.floor(((currentValue/total) * 100)+0.5);
+							
+							let value = ': ' + context.formattedValue + '(' + percentage + '%)';
+							return dataLabel += value;
+						}
+					}
+				}				
+			}
+		}
+	});
 
-    return Highcharts.chart(obj.chartId, {
-        chart: {
-            type: 'column'
-        },
-        title: {
-            text: ''
-        },
-        xAxis: {
-            categories: obj.categoryList
-        },
-        yAxis: {
-            allowDecimals: false,
-            min: 0,
-            title: {
-                text: ''
-            }
-        },
-        legend: {
-            enabled: obj.legend
-        },
-        tooltip: tooltip,
-        plotOptions: {
-            column: {
-                stacking: 'normal'
-            }
-        },
-        series: obj.chartData
-    });
 }
 
-function getPieChart(obj) {
+function getPieChart(target, obj) {
+	return new Chart(target, {
+		type: 'doughnut',
+		data: {labels:obj.labels, datasets:obj.datasets},
+		options: {
+			responsive: true,
+			maintainAspectRatio : false,
+			plugins: {
+				legend: {
+					position: 'right',
+				},
+				tooltip: {
+					callbacks: {
+						label: function(context) {
+							let dataLabel = context.dataset.label || '';
+							let total = context.dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
+							        return previousValue + currentValue;
+							      });
+							let currentValue = context.raw;
+							let percentage = Math.floor(((currentValue/total) * 100)+0.5);
+							let value = ': ' + context.formattedValue + '(' + percentage + '%)';
+							return dataLabel += value;
+						}
+					}
+				}
+			}
+		}
+	});
+	
+	
+	/*
     return Highcharts.chart(obj.chartId, {
         chart: {
             plotBackgroundColor: null,
@@ -2716,6 +2755,7 @@ function getPieChart(obj) {
             data: obj.chartData
         }]
     });
+	*/
 }
 
 $(document).ready(function () {

@@ -4508,12 +4508,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return true;
 	}
 	
-	@SuppressWarnings({ "unchecked", "serial" })
-	public static String getChartExcel(List<Statistics> chartParams, String filePath) throws Exception {
+	@SuppressWarnings({ "unchecked"})
+	public static String getChartExcel(Statistics chartParams, String filePath) throws Exception {
 		Map<String, Object> chartDataMap = new HashMap<String, Object>();
 		Statistics result = new Statistics();
 		Statistics result2 = new Statistics();
-		Statistics ChartData = chartParams.get(0);
+		Statistics ChartData = chartParams;
 		ChartData.setIsRawData(CoConstDef.FLAG_NO);
 		boolean projectUseFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
 		boolean partnerUseFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
