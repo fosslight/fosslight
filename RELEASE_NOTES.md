@@ -6,6 +6,27 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+## [2.0.2](https://github.com/fosslight/fosslight/releases/tag/v2.0.2) (2024-10-14)
+
+### Changed
+* **Fixed errors occurring during the save process**
+  - Corrected the error in setting the component ID during the license aggregation process 
+    when a new entry is made in the grid data save process.
+  - Fixed the issue caused by foreign keys during identification save - foreign keys have been removed from the table.
+* **Performance Improvement**
+  - Improved the save process speed for Project, 3rd party, and self-check.
+* **Packaging Bug Fixes and Features Added**
+  - Fixed the bug that occurred during Packaging verify after Project copy.
+  - Changed the Packaging process to disallow blank spaces in the path.
+* **Comment Bug Fixes and Features Added**
+  - Fixed the bug where the confirm process would not proceed if there was a comment message.
+  - Admin can now load draft comments when confirming/rejecting.
+* **Security Tab Bug Fixes and Features Added**
+  - Fixed the error that occurred when no vulnerabilities were detected in the Security tab.
+* Revised the 2.0.0 version release note
+  - Specific content updates regarding the features and fixes included in version 2.0.0.
+
+
 ## [2.0.1](https://github.com/fosslight/fosslight/releases/tag/v2.0.1) (2024-09-30)
 
 ### Changed
