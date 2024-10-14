@@ -9,21 +9,21 @@ SPDX-License-Identifier: AGPL-3.0-only
 ## [2.0.2](https://github.com/fosslight/fosslight/releases/tag/v2.0.2) (2024-10-14)
 
 ### Changed
-* **Save과정에서 발생하던 에러 수정 **
- - grid data 저장 과정에서 license 취합 시 component id 를 setting 는 부분에서 신규 입력된 경우에 대한 id설정 에러 수정
- - identificatoin save시 foreign key로 인해 발생하던 이슈 수정 - table에서 foreign key 삭제됨
-* **속도 개선** *
-- Project, 3rd party, self-check save 과정 속도 개선
+* **Save과정에서 발생하던 에러 수정**
+  - grid data 저장 과정에서 license 취합 시 component id 를 setting 는 부분에서 신규 입력된 경우에 대한 id설정 에러 수정
+  - identificatoin save시 foreign key로 인해 발생하던 이슈 수정 - table에서 foreign key 삭제됨
+* **속도 개선** 
+  - Project, 3rd party, self-check save 과정 속도 개선
 * **Packaging 버그 및 기능 추가**
- - Project copy 이후 Packaging verify에서 발생하던 버그 수정
- - Packaging 과정에서 path에 공란 입력 불가능하도록 변경
+  - Project copy 이후 Packaging verify에서 발생하던 버그 수정
+  - Packaging 과정에서 path에 공란 입력 불가능하도록 변경
 * **Comment 버그 및 기능 추가**
- - confirm comment 메세지가 있으면 confirm 진행 안되던 버그 수정 
- - admin이 confirm / reject 할때 draft comment를 불러옵니다
+  - confirm comment 메세지가 있으면 confirm 진행 안되던 버그 수정 
+  - admin이 confirm / reject 할때 draft comment를 불러옵니다
 * **Security탭 버그 및 기능 수정**
- - Security tab에서 검출된 vulnerability가 없는 경우 에러 수정
-* 2.0.0 버전 release note 수정
- - 2.0.0에 반영된 항목에 대해 구체적으로 내용 업데이트
+  - Security tab에서 검출된 vulnerability가 없는 경우 에러 수정
+* **2.0.0 버전 release note 수정**
+  - 2.0.0에 반영된 항목에 대해 구체적으로 내용 업데이트
 
 
 ## [2.0.1](https://github.com/fosslight/fosslight/releases/tag/v2.0.1) (2024-09-30)
