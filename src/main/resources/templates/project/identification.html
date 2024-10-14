@@ -25,8 +25,8 @@
                            	</div>
                        	</div> -->
                         <div class="float-right">
-                        	<th:block th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y' and project.terminateYn != 'Y'}">
-                               	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"</button>
+                        	<th:block th:if="${project.completeYn != 'Y' and project.dropYn != 'Y' and project.distributeDeployYn != 'Y'}">
+                               	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 confirm" th:style="${display.confirmBtn == 'N'} ? 'display:none;'" id="bomConfirm" th:text="Confirm"></button>
                                	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 reject" th:style="${display.rejectBtn == 'N'} ? 'display:none;'" id="bomReject" th:text="Reject"></button>
                                	<button type="button" class="btn btn-lg-red btn-sm width-6rem px-1 review" th:style="${display.requestBtn == 'N'} ? 'display:none;'" id="bomRequest" th:text="Request"></button>
                                	<button type="button" class="btn btn-outline-lg-red btn-sm width-6rem px-1 restart" th:style="${display.reviewBtn == 'N'} ? 'display:none;'" id="bomReviewStart" th:text="'Review Start'"></button>

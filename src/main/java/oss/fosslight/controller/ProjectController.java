@@ -4814,7 +4814,6 @@ public class ProjectController extends CoTopComponent {
 			map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
 			map.put("commId", avoidNull(prjBean.getCommId(), ""));
 			map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
-			map.put("terminateFlag", avoidNull(prjBean.getTerminateYn(), CoConstDef.FLAG_NO));
 			
 			if (distributionStatus.equals("PROC")) {
 				code = "false";

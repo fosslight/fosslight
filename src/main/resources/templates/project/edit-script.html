@@ -602,10 +602,6 @@
 					status += "<span class=\"text-dark-blue text-bold ml-2\">" + customStatus + "</span>";
 
 					break;
-                case 'TERM':
-                    status += "<span class=\"text-red text-bold ml-2\">Terminated</span>";
-
-                    break;
 				default:
 					status += "<span class=\"text-success text-bold ml-2\">" + customStatus + "</span>";
 
@@ -1027,20 +1023,6 @@
 				});
 				return rows;
 			},
-            exeProjectTerminate : function(flag){
-                var data = {"prjId" : $('input[name=prjId]').val() , "terminateYn" : flag, "userComment" : ""};
-
-                $.ajax({
-                    url : suffixUrl + '/project/updateProjectStatus',
-                    type : 'POST',
-                    data : JSON.stringify(data),
-                    dataType : 'json',
-                    cache : false,
-                    contentType : 'application/json',
-                    success: fn.onRegistSuccess,
-                    error : fn.onError
-                });
-            },
 			// 컴플리트 처리
 			exeProjectComplete : function(flag){
 				var data = {"prjId" : $('input[name=prjId]').val() , "completeYn" : flag, "userComment":""};
@@ -2513,10 +2495,10 @@
 				if(data.detail.completeYn == "Y"){
 					$("#complete").hide();
 				} else {
-					if((data.detail.status == "FREV" || data.detail.status == "TERM") && userRole=="ROLE_ADMIN"){
+					if(data.detail.status == "FREV" && userRole=="ROLE_ADMIN"){
 						$("#complete").show();
 					} else {
-						$("#complete").hide();버
+						$("#complete").hide();
 					}
 				}
 				

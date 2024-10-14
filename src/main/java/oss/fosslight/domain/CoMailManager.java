@@ -818,7 +818,6 @@ public class CoMailManager extends CoTopComponent {
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_WATCHER_REGISTED:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT:
     		case CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT:
-			case CoConstDef.CD_MAIL_TYPE_PROJECT_TERMINATED:
     			
     			// to : project creator + cc : watcher + reviewer
     			prjInfo = mailManagerMapper.getProjectInfo(bean.getParamPrjId());
@@ -973,7 +972,6 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_COMPLETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
-							|| CoConstDef.CD_MAIL_TYPE_PROJECT_TERMINATED.equals(bean.getMsgType())
     						) {
 						toList.addAll(mailManagerMapper.setProjectWatcherMailListNotCheckDivision(bean.getParamPrjId())); // creator를 포함
     				}
@@ -1029,8 +1027,6 @@ public class CoMailManager extends CoTopComponent {
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_COMPLETED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_DROPPED.equals(bean.getMsgType())
     						|| CoConstDef.CD_MAIL_TYPE_PROJECT_REOPENED.equals(bean.getMsgType())
-							|| CoConstDef.CD_MAIL_TYPE_PROJECT_TERMINATED.equals(bean.getMsgType())
-
     						) {
         				if (!isEmpty(prjInfo.getReviewer())) {
         					ccList.addAll(Arrays.asList(selectMailAddrFromIds(new String[]{prjInfo.getReviewer()})));
@@ -1321,23 +1317,6 @@ public class CoMailManager extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
-
-				//Do not send vulnerability email when project status is "Terminated"
-				if (!isTest &&
-						(
-								CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType())
-										|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType()))
-						|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(bean.getMsgType())) {
-					if(!isEmpty(bean.getParamPrjId())) {
-						Project project = new Project();
-						project.setPrjId(bean.getParamPrjId());
-						Project projectDetail = projectService.getProjectDetail(project);
-						if(avoidNull(projectDetail.getTerminateYn()).equals("Y")) {
-							return false;
-						}
-					}
-				}
-
     			mailManagerMapper.insertEmailHistory(bean);
         		// 발송처리
         		new Thread(() -> sendEmail(bean)).start();

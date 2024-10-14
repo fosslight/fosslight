@@ -32,9 +32,8 @@
                                 	<th:block th:if="${!@CommonFunction.isAdmin() and project.completeYn == 'Y' and project.viewOnlyFlag == 'N' and project.statusRequestYn == 'N'}">
                                 		<button type="button" id="reqToOpen" class="btn btn-lg-red btn-sm width-6rem px-1" th:text="Reopen"></button>
                                 	</th:block>
-                                    <button th:if="${project.prjId != null and project.viewOnlyFlag == 'N' and project.completeYn == 'Y'}" class="btn btn-lg-red btn-sm width-6rem px-1" id="terminate" th:onclick="|fn.exeProjectTerminate('Y')|" th:text="Terminate"></button>
-                                    <button th:if="${project.prjId != null and project.viewOnlyFlag == 'N' and project.getTerminateYn() == 'N'}" class="btn btn-lg-red btn-sm width-6rem px-1" style="display: none;" id="drop" th:text="Drop"></button>
-                                    <button th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-outline-lg-red btn-sm width-6rem px-1" id="complete" th:onclick="|fn.exeProjectComplete('Y')|" th:text="Complete"></button>
+                                	<button th:if="${project.prjId != null and project.viewOnlyFlag == 'N'}" class="btn btn-lg-red btn-sm width-6rem px-1" style="display: none;" id="drop" th:text="Drop"></button>
+                                	<button th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-outline-lg-red btn-sm width-6rem px-1" id="complete" th:onclick="|fn.exeProjectComplete('Y')|" th:text="Complete"></button>
                         			<button th:if="${project.prjId != null}" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
                         		</div>
                             </div>
@@ -58,7 +57,7 @@
                         				<i class="far fa-copy customIcon2"></i>
                         			</button>
                         			<input type="hidden" id="copyUrl"/>
-                        			<button th:if="${project.prjId != null and project.completeYn != 'Y' and project.terminateYn != 'Y' and project.viewOnlyFlag == 'N' and project.copyFlag != 'Y'}"
+                        			<button th:if="${project.prjId != null and project.completeYn != 'Y' and project.viewOnlyFlag == 'N' and project.copyFlag != 'Y'}" 
                         					class="btn btn-tool" id="delete" data-toggle="tooltip" data-placement="right" title="Delete"><i class="far fa-trash-alt customIcon2"></i>
                         			</button>
                         			<button th:if="${(project.completeYn != 'Y' or project.dropYn != 'Y') and project.viewOnlyFlag == 'N' or project.prjId == null or project.copyFlag == 'Y'}" 
