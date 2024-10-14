@@ -67,13 +67,16 @@ var com_evt = {
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
-				// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-	           	
-	           	if (typeof alertify.bomConfirmDialog === 'undefined') {
+				if (!isAndroidModel) {
+					// 머지 체크
+					if ("Y" != $("#mergeYn").val()) {
+						alertify.alert([[#{msg.project.required.bomSave}]], function(){});
+						$("#tabMenuBom").trigger("click");
+						return false;
+					}
+				}
+				
+				if (typeof alertify.bomConfirmDialog === 'undefined') {
 					alertify.dialog('bomConfirmDialog', function() {
 						return {
 							setup: function() {
@@ -103,6 +106,12 @@ var com_evt = {
 				
 	       		alertify.bomConfirmDialog()
 	       		.set('onok', function(e) {
+	       			// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
+	       			
 	       			var editorVal = $("#bomConfirmEditor").summernote('code');
 	       			if ("" == $(editorVal).text().trim()) {
 	   					editorVal = "";
@@ -114,6 +123,14 @@ var com_evt = {
 							
 							return false;
 						}
+						
+						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : editorVal};
+    					
+    					if ($("#ignoreBinaryDbFlag")) {
+    	 					data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
+    					}
+                        loading.show();
+    	 				com_fn.checkSave(data, "CONF");
 					} else {
 						if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
 							var customKeys = [];
@@ -160,29 +177,6 @@ var com_evt = {
 								return false;
 							}
 						}
-					}
-					
-					if (com_fn.isAndroidOnly()) {
-						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : ""};
-
-						if ($("#ignoreBinaryDbFlag")) {
-			 				data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
-						}
-
-			 			// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
-						if(!com_fn.validBomChangeStatus(true)) {
-							return false;
-						}
-
-						com_fn.checkSave(data, "CONF");
-					} else {
-						// 머지 체크
-						if("Y"!= $("#mergeYn").val()){
-							alertify.alert([[#{msg.project.required.bomSave}]], function(){});
-							$("#tabMenuBom").trigger("click");
-
-							return false;
-						}
 						
 						if (Bom_Save_Flg){
 							if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
@@ -202,10 +196,10 @@ var com_evt = {
 	                    	}
 	                    
 	                    	loading.show();
-	 						com_fn.checkSave(data, "CONF");	
+	 						com_fn.checkSave(data, "CONF");
 						} else {
 							alertify.alert([[#{msg.project.check.save}]], function(){});
-						}				
+						}
 					}
 	       		})
 	       		.set('onshow', function(e){
