@@ -9,10 +9,13 @@ SPDX-License-Identifier: AGPL-3.0-only
 ## [2.0.2](https://github.com/fosslight/fosslight/releases/tag/v2.0.2) (2024-10-14)
 
 ### Changed
+* **Changes to Database Minor**
+  - Added the previously missing Final Review Status to the T2_CODE_DTL table
+  - Foreign key removed from the OSS_COMPONENTS_LICENSE table
 * **Fixed errors occurring during the save process**
   - Corrected the error in setting the component ID during the license aggregation process 
     when a new entry is made in the grid data save process.
-  - Fixed the issue caused by foreign keys during identification save - foreign keys have been removed from the table.
+  - Fixed issues occurring during identification save due to foreign key constraints
 * **Performance Improvement**
   - Improved the save process speed for Project, 3rd party, and self-check.
 * **Packaging Bug Fixes and Features Added**
