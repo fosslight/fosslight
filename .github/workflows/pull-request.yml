@@ -35,7 +35,7 @@ jobs:
           docker compose logs --no-color db > docker-compose-db.log &&
           docker compose logs --no-color mail > docker-compose-mail.log
       - name: Check the site
-        run: tail -f docker-compose-web.log & && 
+        run: tail -f docker-compose-web.log &
              docker run --network container:fosslight_web appropriate/curl -s --retry 3 --retry-connrefused http://localhost:8180/session/login
       - name: Stop containers
         if: always()

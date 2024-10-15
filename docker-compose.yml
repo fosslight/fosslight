@@ -33,6 +33,7 @@ services:
       - ./web-data:/data/fosslight
     environment:
       TZ: Asia/Seoul
+      JAVA_OPTS: "-Xmx8g -XX:MaxRamPercentage=80.0 -XX:MaxDirectMemorySize=2G"
     command: sh -c "./wait-for db:3306 -t 120 && java -jar FOSSLight.war --root.dir=${ROOT_DIR:-/data/fosslight}
       --server.port=${SERVICE_PORT:-8180}
       --spring.datasource.url=${DATABASE_SOURCE:-jdbc:mariadb://db:3306/fosslight}

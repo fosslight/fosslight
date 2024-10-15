@@ -8,6 +8,7 @@ COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
 RUN gradle build --no-daemon --exclude-task test
 
+ENV JAVA_OPTS="-Xmx8g -XX:MaxRamPercentage=80"
 
 # Create the containerized app
 FROM eclipse-temurin:11.0.21_9-jre-jammy
