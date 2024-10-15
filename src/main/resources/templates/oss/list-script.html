@@ -497,7 +497,7 @@
         const oss_lst_grid = {
             oldRowNum: 20,
             load: function () {
-            	var colNameArr = ['', 'ID', 'CID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
+            	var colNameArr = ['', 'ID', 'CID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Notice', 'Source', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
 
                 colNameArr.push("Creator");
                 colNameArr.push("Created<br>Date");
@@ -542,7 +542,9 @@
                     , {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
                     , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}
                     , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
-                    , {name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false}
+                    //, {name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false}
+                    , {name: 'obligationNotificationYn', index: 'obligationNotificationYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeNoticeFormat, unformat: fn_grid_com.unformatter}
+                    , {name: 'obligationDisclosingSrcYn', index: 'obligationDisclosingSrcYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeSourceCodeFormat, unformat: fn_grid_com.unformatter}
                     , {
                         name: 'downloadLocation',
                         index: 'downloadLocation',

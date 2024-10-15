@@ -230,11 +230,11 @@ var bom_fn = {
 		
 		if (adminCheck == false) {
 			if (preObligationType == 10 || preObligationType == 11){
-				display="<i class=\"far fa-circle fa-1x\"></i>";
+				display="<i class=\"fas fa-check fa-2xs\"></i>";
 			}
 
 			if (preObligationType == undefined && (obligationType == 10 || obligationType == 11)){
-				display="<i class=\"far fa-circle fa-1x\"></i>";
+				display="<i class=\"fas fa-check fa-2xs\"></i>";
 			}
 		} else if(obligationLicense == 90 || adminCheck == true) {
 			display = '<select id="'+rowId+'_notify" onchange="bom_fn.onNotifyCboxClick(' + rowId + ')">'
@@ -242,7 +242,7 @@ var bom_fn = {
 				+ '<option value="N" '+((obligationType!='10' && obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
 				+ '</select>';
 		} else if(obligationLicense == 10 || obligationLicense == 11) {
-			display = "<i class=\"far fa-circle fa-1x\"></i>";
+			display = "<i class=\"fas fa-check fa-2xs\"></i>";
 		}
 		
 		return display;
@@ -261,11 +261,11 @@ var bom_fn = {
 		
 		if(adminCheck == false) {
 			if (preObligationType == 11) {
-				display = "<i class=\"far fa-circle fa-1x\"></i>";
+				display = "<i class=\"fas fa-check fa-2xs\"></i>";
 			}
 
 			if (preObligationType == undefined && obligationType == 11){
-				display = "<i class=\"far fa-circle fa-1x\"></i>";
+				display = "<i class=\"fas fa-check fa-2xs\"></i>";
 			}
 		} else if(obligationLicense == 90 || adminCheck == true) {
 			display = '<select id="'+rowId+'_source" onchange="bom_fn.onSourceCboxClick(' + rowId + ')">'
@@ -273,7 +273,7 @@ var bom_fn = {
 				+ '<option value="N" '+((obligationType!='11') ? ' selected="selected"' : '') +'>X</option>'
 				+ '</select>';
 		} else if(obligationLicense == 11) {
-			display = "<i class=\"far fa-circle fa-1x\"></i>";
+			display = "<i class=\"fas fa-check fa-2xs\"></i>";
 		}
 		
 		return display;
@@ -1202,8 +1202,26 @@ var bom_data = {
 					{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
 					{name: 'preObligationType', index: 'preObligationType', width: 40, align: 'center', hidden:true},
 					{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
-					{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: bom_fn.displayNotify, unformat: bom_fn.unDisplayNotify, sortable : false, search : false},
-					{name: 'source', index: 'source', width: 40, align: 'center', formatter: bom_fn.displaySource, unformat: bom_fn.unDisplaySource, sortable : false, search : false},
+					{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: bom_fn.displayNotify, unformat: bom_fn.unDisplayNotify, sortable : true, search : false,
+						sorttype: function (cell, rowData) {
+							var rtnVal = rowData.obligationType;
+							if(rtnVal == '10' || rtnVal == '11') {
+								return 0;
+							} else {
+								return 99;
+							}
+	                    }
+					},
+					{name: 'source', index: 'source', width: 40, align: 'center', formatter: bom_fn.displaySource, unformat: bom_fn.unDisplaySource, sortable : true, search : false,
+						sorttype: function (cell, rowData) {
+							var rtnVal = rowData.obligationType;
+							if(rtnVal == '11') {
+								return 0;
+							} else {
+								return 99;
+							}
+	                    }
+					},
 					{name: 'restriction', index: 'restriction', width: 60, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
 					{name: 'licenseTypeIdx', index: 'licenseTypeIdx', width: 60, align: 'center', hidden:true},
 					{name: 'adminCheckYn', index: 'adminCheckYn', width: 50, align: 'center', hidden:true},
