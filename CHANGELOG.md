@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.0.2 (15/10/2024)
+## Changes
+## 🐛 Hotfixes
+
+- Release version 2.0.2 @FOSSLight-dev @Min-Kyungsun  (#1086)
+  - Fixed errors occurring during the save process
+  - Performance Improvement
+  - Packaging Bug Fixes and Features Added
+  - Comment Bug Fixes and Features Added
+  - Security Tab Bug Fixes and Features Added
+  - Revised the 2.0.0 version release note
+
+---
+
 ## v2.0.1 (30/09/2024)
 ## Hotfix
 - 2.0.1 release. Implemented due to the discontinuation of CDN support for jqgrid. @FOSSLight-dev (#1083)
@@ -758,25 +772,3 @@
 
 - Update OSS Type Mark > VersionDiff Service Transactional Declaration @FOSSLight-dev (#465)
 - Change the sheet name of the 3rd party checklist @soimkim (#455)
-
----
-
-## v1.3.0 (25/03/2022)
-## 🚀 Features
-- Register OSS in bulk by uploading Excel @doggai10 (#418)
-
-## 🐛 Hotfixes
-
-- Fix the bug where License, OSS, Project, and 3rd Party List could not be loaded. @soimkim (#446)
-- Fix the bug where unregistered OSS cannot be searched by CVE-ID. @FOSSLight-dev  (#440)
-
-## 🔧 Maintenance
-
-- Display pointer when mouse hovers on project name @qkrdmstlr3 (#444)
-- Self-check > Notice tab > Don't print unconfirmed licenses @FOSSLight-dev (#445)
-- Change the character that separates multiple nicknames from `\n` to `,` @soimkim (#437)
-- OSS Bulk > Separate the function to check header column @soimkim (#439)
-- OSS Bulk > Separate the function to read data by column @soimkim (#438)
-- Show up to 5 Vulnerability in OSS details @FOSSLight-dev (#436)
-- Add Sample template to OSS Bulk Registration @soimkim (#435)
-- Do not load if OSS Name or Declared License is null in OSS Bulk @FOSSLight-dev  (#434)
