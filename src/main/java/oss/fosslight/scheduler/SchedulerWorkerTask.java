@@ -54,11 +54,11 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@PostConstruct
 	public void init() {
 		serverLoadFlag = true;
+		distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 		makeInternalLicense();
 	}
 	
 	public void makeInternalLicense() {
-		distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 		String internalUrlDirPath = CommonFunction.appendProperty("root.dir", "internal.url.dir.path");
 		String fileNm = "internalLicense.zip";
 		Path copyPath = Paths.get(internalUrlDirPath);
