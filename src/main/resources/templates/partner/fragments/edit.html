@@ -41,7 +41,7 @@
 						</label>
 						<select class="form-control select" id="deliveryForm" name="deliveryForm" style="width: 100%;" th:disabled="${detail.status == 'CONF'} ? 'disabled'">
 							<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PARTNER_DELIVERY_FORM'))}">
-								<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+								<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}" th:selected="${option.cdDtlNo == detail?.deliveryForm}"></option>
 							</th:block>
 						</select>
 					</div>

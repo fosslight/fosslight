@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <th:block th:fragment="contentScript">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script th:inline="javascript">
         var dataTable;
 
@@ -369,12 +370,94 @@
             }
       	}
 
+        var mostUsedOssChartObject;
+        var mostUsedLicenseChartObject;
         var chart_fn = {
           	mostUsedOssChartOpen : function(){
-          		// change chart library
+               	var params = {};
+           		params["startDate"] = $("#startDate").val();;
+           		params["endDate"] = $("#endDate").val();
+           		params["divisionNo"] = "";
+           		params["pieSize"] = $("#mostUsedOssChartPieSize").val();
+           		params["chartType"] = "OSS";
+           		params["isRawData"] = "N";
+
+           		$.ajax({
+           			url : '/statistics/mostUsedChart',
+           			type : 'GET',
+           			dataType : 'json',
+           			cache : false,
+           			data : params,
+           			success : function(data){
+           				var obj = new Object();
+           				var chartData = new Object();
+           				var labels = new Array();
+           				var datasets = new Array();
+           				var dataArr = new Array();
+           				$.each(data.chartData, function(index, value) {
+           					labels.push(value.columnName);
+           					dataArr.push(value.columnCnt);
+           					
+           				});
+           				datasets.push({label:'Count', data:dataArr, backgroundColor:Object.values(CHART_COLORS)});
+           				obj["labels"] = labels;
+           				obj["datasets"] = datasets;
+           				
+           				if(mostUsedOssChartObject) {
+           					mostUsedOssChartObject.data.labels = obj["labels"];
+           					mostUsedOssChartObject.data.datasets = obj["datasets"];
+           					mostUsedOssChartObject.update();
+           				} else {
+           					mostUsedOssChartObject = getPieChart($('#mostUsedOssChart').get(0).getContext('2d'), obj);
+           				}
+       				},
+       				error: function(data){
+        				alertify.error([[#{msg.common.valid2}]], 0);
+        			}
+        		});
        		},
            	mostUsedLicenseChartOpen : function(){
-           		// change chart library
+        		var params = {};
+        		params["startDate"] = $("#startDate").val();
+        		params["endDate"] = $("#endDate").val();
+        		params["divisionNo"] = "";
+        		params["pieSize"] = $("#mostUsedLicenseChartPieSize").val();
+        		params["chartType"] = "LICENSE";
+        		params["isRawData"] = "N";
+
+        		$.ajax({
+        			url : '/statistics/mostUsedChart',
+        			type : 'GET',
+        			dataType : 'json',
+        			cache : false,
+        			data : params,
+        			success : function(data){
+           				var obj = new Object();
+           				var chartData = new Object();
+           				var labels = new Array();
+           				var datasets = new Array();
+           				var dataArr = new Array();
+           				$.each(data.chartData, function(index, value) {
+           					labels.push(value.columnName);
+           					dataArr.push(value.columnCnt);
+           					
+           				});
+           				datasets.push({label:'Count', data:dataArr, backgroundColor:Object.values(CHART_COLORS)});
+           				obj["labels"] = labels;
+           				obj["datasets"] = datasets;
+
+           				if(mostUsedLicenseChartObject) {
+           					mostUsedLicenseChartObject.data.labels = obj["labels"];
+           					mostUsedLicenseChartObject.data.datasets = obj["datasets"];
+           					mostUsedLicenseChartObject.update();
+           				} else {
+           					mostUsedLicenseChartObject = getPieChart($('#mostUsedLicenseChart').get(0).getContext('2d'), obj);
+           				}
+        			},
+        			error: function(data){
+        				alertify.error([[#{msg.common.valid2}]], 0);
+        			}
+        		});
         	}
         }
 

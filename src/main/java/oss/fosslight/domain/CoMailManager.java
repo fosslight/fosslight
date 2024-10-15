@@ -3652,7 +3652,7 @@ public class CoMailManager extends CoTopComponent {
 					String filePath = (String) fileInfo.get("filePath");
 					log.debug("filepath: " + fileInfo.get("filePath"));
 					DataSource dataSource = new FileDataSource(filePath);
-					helper.addAttachment(MimeUtility.encodeText(fileName, "UTF-8", "B"), dataSource);
+					helper.addAttachment(new String(fileName.getBytes("UTF-8"),"UTF-8"), dataSource);
 				}catch(Exception e){
 					// Don't Exist Pdf
 					log.debug(e.getMessage(), e);

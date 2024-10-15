@@ -35,7 +35,7 @@ public interface ProjectMapper {
 	
 	List<String> selectCategoryCode(String code); 
 
-	Project selectProjectMaster(Project project);
+	Project selectProjectMaster(String prjId);
 	
 	List<Project> selectModelList(String prjId);
 	
@@ -133,7 +133,7 @@ public interface ProjectMapper {
 
 	void insertOssComponentsLicense(OssComponentsLicense ossComponentsLicense);
 
-	Project selectProjectMaster2(Project project);
+	Project selectProjectMaster2(String prjId);
 
 	void updateProjectMaster(Project project);
 
@@ -398,4 +398,19 @@ public interface ProjectMapper {
 	void updateProjectForSecurity(Project project);
 
 	List<String> selectProjectForSecurity();
+	
+	/**
+	 * Delete Component and license row from OSS_COMPONENTS and OSS_COMPONENTS_LICENSE Table
+	 * @param referenceId
+	 * @param referenceDiv
+	 * @return
+	 */
+	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+	int resetSecurityData(@Param("prjId")String prjId);
+	
+	void insertOssComponentListWithComponentId(@Param("list")List<ProjectIdentification> OssComponentList);
+	void insertOssComponentList(@Param("list") List<ProjectIdentification> OssComponentList);
+	void insertOssComponentLicenseList(@Param("list")List<OssComponentsLicense> ossComponentLicenseList);
+
+	List<Map<String, Object>> getCpeInfoAndRangeForProject(ProjectIdentification identification);
 }

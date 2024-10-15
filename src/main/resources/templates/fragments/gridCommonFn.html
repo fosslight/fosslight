@@ -250,6 +250,57 @@
                 }
                 return display;
             },
+            obligationTypeNoticeFormat: function (cellvalue, options, rowObject) {
+                var display = "";
+                switch (rowObject.obligationType) {
+                    case "10" :
+                    case "11" :
+                        display = "<i class=\"fas fa-check fa-2xs mr-2\" title=\"Notice\"></i>";
+                        break;
+                    default:
+                        display = '';
+
+                        break;
+                }
+                return display;
+            },
+            obligationTypeSourceCodeFormat: function (cellvalue, options, rowObject) {
+                var display = "";
+                switch (rowObject.obligationType) {
+                    case "11" :
+                        display = "<i class=\"fas fa-check fa-2xs mr-2\" title=\"Source Code\"></i>";
+                        break;
+                    default:
+                        display = '';
+                        break;
+                }
+                return display;
+            },
+            licenseNoticeFormat: function (cellvalue, options, rowObject) {
+                var display = "";
+                switch (cellvalue) {
+                    case "Y" :
+                        display = "<i class=\"fas fa-check fa-2xs mr-2\" title=\"Source Code\"></i>";
+                        break;
+                    default:
+                        display = '';
+
+                        break;
+                }
+                return display;
+            },
+            licenseSourceCodeFormat: function (cellvalue, options, rowObject) {
+                var display = "";
+                switch (cellvalue) {
+                    case "Y" :
+                        display = "<i class=\"fas fa-check fa-2xs mr-2\" title=\"Source Code\"></i>";
+                        break;
+                    default:
+                        display = '';
+                        break;
+                }
+                return display;
+            },
             // 공통 언포메터
             unformatter: function (cellvalue, options, rowObject) {
                 return cellvalue;

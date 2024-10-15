@@ -2135,7 +2135,7 @@ var fn = {
 		var obligationType = rowObject["obligationType"];
 		
 		if (obligationLicense == 10 || obligationLicense == 11) {
-			display="<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
+			display="<i class=\"fas fa-check fa-2xs mr-1\" title=\"Notice\"></i>";
 		} else if(obligationLicense == 90) {
 			display = '<select id="'+options.rowId+'_notify" onchange="fn.onNotifyCboxClick(' + options.rowId + ')">'
 				+ '<option value=""></option>'
@@ -2152,7 +2152,7 @@ var fn = {
 		var obligationType = rowObject["obligationType"];
 		
 		if(obligationLicense == 11) {
-			display="<i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\"></i>";
+			display="<i class=\"fas fa-check fa-2xs\" title=\"Source Code\"></i>";
 		} else if(obligationLicense == 90) {
 			display = '<select id="'+options.rowId+'_source" onchange="fn.onSourceCboxClick(' + options.rowId + ')">'
 				+ '<option value=""></option>'
@@ -2749,14 +2749,6 @@ var datas = {
 			partySubData = [];
 		}
 		
-		var deliveryForm = partnerData.deliveryForm||'';
-		
-		if ('' == deliveryForm) {
-		} else {
-			$('select[name=deliveryForm]').val(deliveryForm).attr('selected', 'true');
-			$('select[name=deliveryForm]').trigger('change');	
-		}
-
 		var userDivision = $('#division');
  		if (partnerData != null) {
  			if (partnerData.partnerId != null && partnerData.division != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
@@ -3162,8 +3154,26 @@ var grid = {
 				{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
 				{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
 				{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
-				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : false, search : false},
-				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : false, search : false},
+				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, search : false,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.obligationType;
+						if(rtnVal == '10' || rtnVal == '11') {
+							return 0;
+						} else {
+							return 99;
+						}
+                    }
+				},
+				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, search : false,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.obligationType;
+						if(rtnVal == '11') {
+							return 0;
+						} else {
+							return 99;
+						}
+                    }
+				},
 				{name: 'restriction', index: 'restriction', width: 70, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
 				{name: 'tlsh', index: 'tlsh', editable:false, hidden:true},
 				{name: 'checkSum', index: 'checkSum', editable:false, hidden:true}

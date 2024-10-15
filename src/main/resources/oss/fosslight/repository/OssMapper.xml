@@ -66,6 +66,12 @@
 					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_DATE', sidx)">
 						DATE_FORMAT(T1.MODIFIED_DATE, '%Y%m%d')
 					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals('OBLIGATION_NOTIFICATION_YN', sidx)">
+						CASE WHEN OBLIGATION_TYPE IN ('10', '11') THEN 0 ELSE 99 END
+					</when>
+					<when test="@oss.fosslight.util.StringUtil@equals('OBLIGATION_DISCLOSING_SRC_YN', sidx)">
+						CASE WHEN OBLIGATION_TYPE = '11' THEN 0 ELSE 99 END
+					</when>
 				</choose>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
 					<choose>

@@ -295,17 +295,17 @@
                     "<div style=\"float:left\">" +
                         "<strong class=\"mr-1 text-danger\">Multi</strong>" +
                         "<strong>Multi License</strong>" +
-                        "<br>The OSS contains source codes under multiple licenses.<br />蹂� OSS�뒗 �뿬�윭 License �븯�쓽 Source Code瑜� �룷�븿�븯怨� �엳�뒿�땲�떎.<br />(e.g. lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> src is GPL-2.0)</p>" +
+                        "<br>The OSS contains source codes under multiple licenses.<br />본 OSS는 여러 License 하의 Source Code를 포함하고 있습니다.<br />(e.g. lib is LGPL-2.1 <span style=\"text-decoration : underline;\">and</span> src is GPL-2.0)</p>" +
                     "</div>" +
                     "<div>" +
                         "<strong class=\"mr-1 text-danger\">Dual</strong>" +
                         "<strong>Dual License</strong>" +
-                        "<br>You can select one of registered licenses.<br />蹂� OSS�뒗 �벑濡앸맂 License 以� �븯�굹瑜� �꽑�깮�븷 �닔 �엳�뒿�땲�떎.<br />(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</p>" +
+                        "<br>You can select one of registered licenses.<br />본 OSS는 등록된 License 중 하나를 선택할 수 있습니다.<br />(e.g. GPL-2.0 <span style=\"text-decoration : underline;\">or</span> MIT)</p>" +
                     "</div>" +
                     "<div>" +
                         "<strong class=\"mr-1 text-danger\">V-Diff</strong>" +
                         "<strong>Version different licenses</strong>" +
-                        "<br>The OSS is distributed under different licenses according to its version<span style=\"text-decoration : underline;\">versions</span>.<br />蹂� OSS�뒗 Version�뿉 �뵲�씪 �떎瑜� License濡� 諛고룷�릺怨� �엳�뒿�땲�떎.<br />(e.g. v1.0 is under GPL-2.0 and v2.0 is under BSD-3-Clause)</p>" +
+                        "<br>The OSS is distributed under different licenses according to its version<span style=\"text-decoration : underline;\">versions</span>.<br />본 OSS는 Version에 따라 다른 License로 배포되고 있습니다.<br />(e.g. v1.0 is under GPL-2.0 and v2.0 is under BSD-3-Clause)</p>" +
                     "</div>" +
                 "</div>",
             obligationInformation:
@@ -497,7 +497,7 @@
         const oss_lst_grid = {
             oldRowNum: 20,
             load: function () {
-            	var colNameArr = ['', 'ID', 'CID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Obligation', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
+            	var colNameArr = ['', 'ID', 'CID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Notice', 'Source', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
 
                 colNameArr.push("Creator");
                 colNameArr.push("Created<br>Date");
@@ -542,7 +542,9 @@
                     , {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
                     , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}
                     , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
-                    , {name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false}
+                    //, {name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false}
+                    , {name: 'obligationNotificationYn', index: 'obligationNotificationYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeNoticeFormat, unformat: fn_grid_com.unformatter}
+                    , {name: 'obligationDisclosingSrcYn', index: 'obligationDisclosingSrcYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeSourceCodeFormat, unformat: fn_grid_com.unformatter}
                     , {
                         name: 'downloadLocation',
                         index: 'downloadLocation',

@@ -49,11 +49,12 @@ public class SchedulerWorkerTask extends CoTopComponent {
 	@Autowired ProjectService projectService;
 	@Autowired ProjectMapper projectMapper;
 	boolean serverLoadFlag = false; 
-	boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+	boolean distributionFlag;
 	
 	@PostConstruct
 	public void init() {
 		serverLoadFlag = true;
+		distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
 		makeInternalLicense();
 	}
 	

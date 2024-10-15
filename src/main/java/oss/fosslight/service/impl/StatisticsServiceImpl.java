@@ -363,53 +363,35 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		}
 		
 		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for (Statistics stat : list) {
-				stat.setTotal();
-			}
+			list.forEach(Statistics::setTotal);
 			
 			titleArray.add("Total");
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			for (Statistics data : list) {
+			list.forEach(data -> {
 				int categoryIdx = 0;
-				
-				if (data.getCategory0Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory1Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory2Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory3Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory4Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory5Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory6Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory7Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory8Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
-				}
-			}
+				if (data.getCategory0Cnt() > -1) {chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);}
+				if (data.getCategory1Cnt() > -1) {chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);}
+				if (data.getCategory2Cnt() > -1) {chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);}
+				if (data.getCategory3Cnt() > -1) {chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);}
+				if (data.getCategory4Cnt() > -1) {chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);}
+				if (data.getCategory5Cnt() > -1) {chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);}
+				if (data.getCategory6Cnt() > -1) {chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);}
+				if (data.getCategory7Cnt() > -1) {chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);}
+				if (data.getCategory8Cnt() > -1) {chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);}
+				if (data.getCategory9Cnt() > -1) {chartData.addCategoryCnt(data.getCategory9Cnt(), categoryIdx++);}
+				if (data.getCategory10Cnt() > -1) {chartData.addCategoryCnt(data.getCategory10Cnt(), categoryIdx++);}
+				if (data.getCategory11Cnt() > -1) {chartData.addCategoryCnt(data.getCategory11Cnt(), categoryIdx++);}
+				if (data.getCategory12Cnt() > -1) {chartData.addCategoryCnt(data.getCategory12Cnt(), categoryIdx++);}
+				if (data.getCategory13Cnt() > -1) {chartData.addCategoryCnt(data.getCategory13Cnt(), categoryIdx++);}
+				if (data.getCategory14Cnt() > -1) {chartData.addCategoryCnt(data.getCategory14Cnt(), categoryIdx++);}
+				if (data.getCategory15Cnt() > -1) {chartData.addCategoryCnt(data.getCategory15Cnt(), categoryIdx++);}
+				if (data.getCategory16Cnt() > -1) {chartData.addCategoryCnt(data.getCategory16Cnt(), categoryIdx++);}
+				if (data.getCategory17Cnt() > -1) {chartData.addCategoryCnt(data.getCategory17Cnt(), categoryIdx++);}
+				if (data.getCategory18Cnt() > -1) {chartData.addCategoryCnt(data.getCategory18Cnt(), categoryIdx++);}
+				if (data.getCategory19Cnt() > -1) {chartData.addCategoryCnt(data.getCategory19Cnt(), categoryIdx++);}
+			});
 
 			chartData.setTitleArray(titleArray); // Chart Title
 			

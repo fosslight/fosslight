@@ -6,14 +6,43 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+## [2.0.2](https://github.com/fosslight/fosslight/releases/tag/v2.0.2) (2024-10-14)
+
+### Changed
+* **Changes to Database Minor**
+  - Added the previously missing Final Review Status to the T2_CODE_DTL table
+  - Foreign key removed from the OSS_COMPONENTS_LICENSE table
+* **Fixed errors occurring during the save process**
+  - Corrected the error in setting the component ID during the license aggregation process 
+    when a new entry is made in the grid data save process.
+  - Fixed issues occurring during identification save due to foreign key constraints
+* **Performance Improvement**
+  - Improved the save process speed for Project, 3rd party, and self-check.
+* **Packaging Bug Fixes and Features Added**
+  - Fixed the bug that occurred during Packaging verify after Project copy.
+  - Changed the Packaging process to disallow blank spaces in the path.
+* **Comment Bug Fixes and Features Added**
+  - Fixed the bug where the confirm process would not proceed if there was a comment message.
+  - Admin can now load draft comments when confirming/rejecting.
+* **Security Tab Bug Fixes and Features Added**
+  - Fixed the error that occurred when no vulnerabilities were detected in the Security tab.
+* Revised the 2.0.0 version release note
+  - Specific content updates regarding the features and fixes included in version 2.0.0.
+
+
+## [2.0.1](https://github.com/fosslight/fosslight/releases/tag/v2.0.1) (2024-09-30)
+
 ### Changed
 * **Switched to using local resources for Jqgrid**
   - Due to the discontinuation of CDN support for jqgrid, it has been changed to use local resources.
 
-# [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
-## NEW
+
+## [2.0.0](https://github.com/fosslight/fosslight/releases/tag/v2.0.0) (2024-09-27)
+
+### NEW
 * **Opensource Database Schema Changes**
-  - The OSS Master has been separated into 'OSS_COMMON' and 'OSS_VERSION'.
+  - For efficient management of open source information, 
+    The OSS Master has been separated into 'OSS_COMMON' and 'OSS_VERSION'.
     - **'OSS_COMMON' Table**: Added to manage the common information of OSS.
     - **'OSS_VERSION' Table**: Added to manage the version information of OSS.
 
@@ -21,13 +50,19 @@ SPDX-License-Identifier: AGPL-3.0-only
   - Restrictions have been updated based on OSORI data.
   - Added Source Code Disclosing Scope information to License.
   - Opensource now includes restriction information.
+  - Comments can be distinguished between the overall version of open source and specific versions.
+  - Download location information of open source is managed as common information.
+  - PURL has been added to the download location.
 
-* **Enhanced Matching of Open-Source Security Vulnerabilities**
-  - Added 'Include CPE', 'Exclude CPE', and 'OSS Version Alias' to Opensource.
+* **Enhanced Matching of Open Source Security Vulnerabilities**
+  - 'Include CPE', 'Exclude CPE', and 'OSS Version Alias' have been added to open source 
+    to enhance security vulnerability matching.
 
 
-## Changed
+### Changed
 * **fosslight_create.sql Updated for Hub Version 2.0**
+  - The fosslight_create.sql has been updated to version 2.0.0.
+
 * **API V2 Updates**
   - Changed the authorization method in the API v2 Swagger UI.
   - Added 3rd party export API.
@@ -39,7 +74,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 * **Performance Improvement**
   - Added a column to PROJECT_MASTER to improve the speed of the Project list screen.
 
-## Notes
+### Notes
 Hub version 2.0.0 is a major update that includes changes to the database schema.
 We provide a migration script to upgrade to Hub version 2.0.0 for existing users.  
 (Filename: 20240725150921_update_v2.0.0.sql)
@@ -47,30 +82,46 @@ We provide a migration script to upgrade to Hub version 2.0.0 for existing users
 This migration script involves several schema changes, so it is recommended to review the overall content.  
 Please note that the migration script only supports normal cases.
 
-The main changes and points to note are summarized as follows:
+Errors may arise during the migration process depending on the data content. 
+**Particular attention should be given to the following points**:
 
-1. **Change of fk in OSS_LICENSE_DECLARED, OSS_LICENSE_DETECTED tables**
-  - If there is invalid data in OSS_ID, an error may occur when changing the fk.
-  - Therefore, it is necessary to check data integrity and perform correction work in advance if necessary.
+1. **Change of foreign key in OSS_LICENSE_DECLARED, OSS_LICENSE_DETECTED tables**
+  - If there is invalid data in OSS_ID, an error may occur when changing the foreign key.
+  - Therefore, it is necessary to check data integrity and perform corrections in advance if necessary.
 
 2. **Deletion and modification of data in T2_CODE, T2_CODE_DTL**
   - The codes to be updated: 913, 230
   - Please check if you have been using these codes by modifying them.
   - This may affect related business logic or data references, so prior review is necessary.
 
-3. **Schema change in LICENSE_NICKNAME table**
-  - The schema has been changed to use LICENSE_ID.
 
-4. **Separation of Opensource related databases**
-  - Separated into 'OSS_COMMON' and 'OSS_VERSION'.
+In addition, the main changes are summarized as follows:
+1. **Separation of Opensource related databases**
+ - Separated into 'OSS_COMMON' and 'OSS_VERSION'.
 
-Before executing the migration script, please make sure to back up the database 
-and run the script in a test environment to ensure there are no issues.
+2. **Addition of OSS_DOWNLOADLOCATION_COMMON and OSS_NICKNAME_COMMON Tables**
+  - The schema has been modified to link open source common information (OSS_COMMON_ID) with the download location.
+  - The schema has been modified to link open source common information (OSS_COMMON_ID) with the nickname.
+
+3. **Addition of OSS_INCLUDE_CPE, OSS_EXCLUDE_CPE, and OSS_VERSION_ALIAS Tables**
+  - Tables have been added to enhance data management for security vulnerability matching.
+
+4. **Schema Change of LICENSE_NICKNAME Table**
+  - The schema has been modified to use LICENSE_ID.
+
+5. **Addition of DISCLOSING_SRC Column in LICENSE_MASTER Table**
+  - A column has been added for DISCLOSING_SRC information.
+
+6. **Addition of Column in PROJECT_MASTER Table**
+  - A column has been added to improve the speed of the project list screen.
+
+Please review the Migration script thoroughly, referring to the above content.
+Before executing the Migration script, please make sure to back up the database,
+and first run the script in a test environment to ensure there are no issues.
 
 
+## [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
 
-
-# [2.0.1.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.1.pre-release) (2024-07-22)
 ### Changed
 * Fix wrong column name in fosslight_create.sql
 * Bug fix in API V2
@@ -81,7 +132,9 @@ and run the script in a test environment to ensure there are no issues.
 * Bug fix in search bar in Opensource menu
 * Bug fix in SPDX document 
 
-# [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
+
+## [2.0.0.pre-release](https://github.com/fosslight/fosslight/releases/tag/v2.0.0.pre-release) (2024-07-02)
+
 ### New
 * UI 2.0 release 
   - Switched UI Framework to Thymeleaf
@@ -97,7 +150,9 @@ and run the script in a test environment to ensure there are no issues.
   - Transitioned to RESTful API architecture.
   - Improved response consistency.
 
-# [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
+
+## [1.6.3](https://github.com/fosslight/fosslight/releases/tag/v1.6.3) (2024-05-21)
+
 ### New
 * Add 'sheetNames' parameter in oss report upload APIs
   - /api/v1/oss_report_bin
@@ -114,7 +169,9 @@ and run the script in a test environment to ensure there are no issues.
   * Apply DEPENDENCIES and REF_OSS_NAME in mapper for component copy
   * Change DEPENDENCIES Column data type as text in DB
 
-# [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-11-23)
+
+## [1.6.1](https://github.com/fosslight/fosslight/releases/tag/v1.6.1) (2023-11-23)
+
 ### New
 * Added new API that can add a watcher in project, 3rd party, self-check. (/api/v1/prj_watcher_add, /api/v1/partner_watcher_add, /api/v1/selfcheck_watcher_add)
 * Added new api /api/v1/prj_not_applicable which is possible to check “N/A” in 3rd, src, bin tab.
@@ -136,6 +193,7 @@ and run the script in a test environment to ensure there are no issues.
   - The automatic selection form for the Operating System field and Category field within the Model Info sheet has also been updated with the latest information.
 * "Notice" shows before login screen.
 * “Not the same as property” warning message is added in copyright column of OSS table.
+
 
 ## [1.6.0](https://github.com/fosslight/fosslight/releases/tag/v1.6.0) (2023-07-28)
 

@@ -594,12 +594,14 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 								
 				String[] checkLicense = paramBean.getCheckLicense().split(",");
 				String licenseDev = checkLicense.length > 1 ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE;
+				List<OssComponentsLicense> ossComponentsLicenseList = new ArrayList<>();
 				
 				for (String licenseName : checkLicense) {
 					ProjectIdentification comLicense = new ProjectIdentification();
 					comLicense.setComponentId(componentId);
 					comLicense.setLicenseName(licenseName);
 					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, licenseDev);
+					ossComponentsLicenseList.add(license);
 					switch(targetName.toUpperCase()) {
 						case CoConstDef.CD_CHECK_OSS_SELF:
 							selfCheckMapper.registComponentLicense(license);
@@ -614,6 +616,9 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					
 					updateCnt++;
 				}
+				
+				oc.setObligationType(CommonFunction.checkObligationSelectedLicense(ossComponentsLicenseList));
+				projectMapper.updateBom(oc);
 			}
 			
 			if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())

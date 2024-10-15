@@ -14,10 +14,8 @@
    			COUNT(*)
    		FROM 
    			LICENSE_MASTER						T1
-   			LEFT OUTER JOIN T2_CODE_DTL 		T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
    			LEFT JOIN (SELECT LICENSE_ID, GROUP_CONCAT(WEBPAGE) AS WEBPAGE FROM LICENSE_WEBPAGE GROUP BY LICENSE_ID) T3 ON T1.LICENSE_ID = T3.LICENSE_ID
 		WHERE T1.USE_YN = 'Y'
-		  AND T2.CD_NO = '201'
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 			AND 
 			(
@@ -112,7 +110,9 @@
 		SELECT 
 			T1.LICENSE_ID
 			, T1.LICENSE_NAME
-			, T2.CD_DTL_NM AS LICENSE_TYPE
+			, (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '201' AND T1.LICENSE_TYPE = CD_DTL_NO ) AS LICENSE_TYPE
+            , T1.OBLIGATION_NOTIFICATION_YN
+            , T1.OBLIGATION_DISCLOSING_SRC_YN
             , CONCAT(
             	IF(		T1.OBLIGATION_NOTIFICATION_YN='Y'	,'<![CDATA[<i class=\"far fa-file-alt fa-1-3x\" title=\"Notice\"></i>]]>',	'')
             	, IF(	T1.OBLIGATION_DISCLOSING_SRC_YN='Y'	,'<![CDATA[<i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\"></i>]]>',	'')
@@ -134,10 +134,8 @@
 			, T1.RESTRICTION
 		FROM 
 			LICENSE_MASTER 						T1
-            LEFT OUTER JOIN T2_CODE_DTL 		T2 ON T1.LICENSE_TYPE = T2.CD_DTL_NO
             LEFT JOIN (SELECT LICENSE_ID, GROUP_CONCAT(WEBPAGE) AS WEBPAGE FROM LICENSE_WEBPAGE GROUP BY LICENSE_ID) T3 ON T1.LICENSE_ID = T3.LICENSE_ID
 		WHERE T1.USE_YN = 'Y'
-		AND T2.CD_NO = '201'
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
 			AND (
 				<choose>
@@ -311,6 +309,22 @@
 			<if test="sortOrder eq 'desc'">
 				ORDER BY 
 				OBLIGATION_CHECKS DESC
+			</if>
+		</if>
+		<if test="sortField eq 'obligationNotificationYn'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.OBLIGATION_NOTIFICATION_YN ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.OBLIGATION_NOTIFICATION_YN DESC
+			</if>
+		</if>
+		<if test="sortField eq 'obligationDisclosingSrcYn'">
+			<if test="sortOrder eq 'asc'">
+				ORDER BY T1.OBLIGATION_DISCLOSING_SRC_YN ASC
+			</if>
+			<if test="sortOrder eq 'desc'">
+				ORDER BY T1.OBLIGATION_DISCLOSING_SRC_YN DESC
 			</if>
 		</if>
 		

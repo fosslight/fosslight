@@ -40,8 +40,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.itextpdf.kernel.pdf.canvas.parser.clipper.Paths;
-
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
@@ -786,7 +784,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		
 		// packaging File comment
 		try {
-			Project project = projectMapper.selectProjectMaster(prjParam);
+			Project project = projectMapper.selectProjectMaster(prjParam.getPrjId());
 			ArrayList<String> origPackagingFileIdList = new ArrayList<String>();
 			origPackagingFileIdList.add(project.getPackageFileId());
 			origPackagingFileIdList.add(project.getPackageFileId2());

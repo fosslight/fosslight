@@ -1,12 +1,12 @@
 package oss.fosslight.api.dto;
 
-import lombok.Builder;
-import lombok.Data;
-
-import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class OssDetailsDto extends OssDto {
     List<String> ossNicknames;
     List<LicenseDto> licenses;

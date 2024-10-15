@@ -361,9 +361,7 @@ public class MailServiceImpl extends CoTopComponent implements MailService {
 					break;
 				case CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_REJECT:
 					String prjId = (String) mailMap.get("paramPrjId");
-					Project prjBean = new Project();
-					prjBean.setPrjId(prjId);
-					prjBean = projectMapper.selectProjectMaster2(prjBean);
+					final Project prjBean = projectMapper.selectProjectMaster2(prjId);
 					
 					mailBean.setParamPrjId(prjId);
 					mailBean.setComment((String) mailMap.get("comment"));

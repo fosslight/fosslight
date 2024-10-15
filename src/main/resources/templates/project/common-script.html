@@ -67,13 +67,16 @@ var com_evt = {
 			if (com_fn.checkStatus()){
 				e.preventDefault();
 				
-				// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-               	
-               	if (typeof alertify.bomConfirmDialog === 'undefined') {
+				if (!isAndroidModel) {
+					// 머지 체크
+					if ("Y" != $("#mergeYn").val()) {
+						alertify.alert([[#{msg.project.required.bomSave}]], function(){});
+						$("#tabMenuBom").trigger("click");
+						return false;
+					}
+				}
+				
+				if (typeof alertify.bomConfirmDialog === 'undefined') {
 					alertify.dialog('bomConfirmDialog', function() {
 						return {
 							setup: function() {
@@ -96,126 +99,126 @@ var com_evt = {
 							}
 						};
 					}, false, 'confirm');
-            	}
+	        	}
 				
 				var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.confirm', true)}]];
-           		innerHtml 		+= '<br><textarea id="bomConfirmEditor"></textarea>';
+	       		innerHtml 		+= '<br><textarea id="bomConfirmEditor"></textarea>';
 				
-           		alertify.bomConfirmDialog()
-           		.set('onok', function(e) {
-           			var editorVal = $("#bomConfirmEditor").summernote('code');
-       				if ("" == $(editorVal).text().trim()) {
-       					editorVal = "";
-       				}
-       				
-       				if (isAndroidModel) {
-    					if ("undefined" !== typeof binAndroidValidMsgData.isValid && "false" == binAndroidValidMsgData.isValid) {
-    						alertify.alert([[#{msg.project.validation.error}]]);
-    						
-    						return false;
-    					}
-    				} else {
-    					if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
-    						var customKeys = [];
-    						var keys = Object.keys(bomValidMsgData);
-    						var unconfirmedLicenseCnt = 0;
-    						
-    						keys.forEach(function(obj){
-    							var warningMsg = bomValidMsgData[obj];
-    							if ("Unconfirmed license" == warningMsg) {
-    								unconfirmedLicenseCnt++;
-    								return false;
-    							}
-    							
-    							if (obj.indexOf(".") > -1) {
-    								var key = obj.split(".")[1];
-    								if (!customKeys.includes(key)) customKeys.push(key);
-    							}
-    						});
-    						
-    						if (unconfirmedLicenseCnt > 0) {
-    							alertify.alert([[#{msg.project.validation.error}]]);
-    							
-    							return false;
-    						}
-    						
-    						var adminCheckList = $("#bomList").jqGrid('getGridParam','data').filter(function(element, index) {
-    							var adminCheckYn = element.adminCheckYn;
-    							return "Y" == adminCheckYn;
-    						});
-    		
-    						if (adminCheckList.length > 0) {
-    							var includeIds = adminCheckList.filter(function(cur) {
-    								return customKeys.includes(cur.componentId);
-    							});
-    			
-    							if (includeIds.length != customKeys.length) {
-    								alertify.alert([[#{msg.project.validation.error}]]);
-    				
-    								return false;
-    							}
-    						} else {
-    							alertify.alert([[#{msg.project.validation.error}]]);
-    			
-    							return false;
-    						}
-    					}
-    				}
-    				
-    				if (com_fn.isAndroidOnly()) {
-    					var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : ""};
-
-    					if ($("#ignoreBinaryDbFlag")) {
-    		 				data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
-    					}
-
-    		 			// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
-    					if(!com_fn.validBomChangeStatus(true)) {
-    						return false;
-    					}
-
-    					com_fn.checkSave(data, "CONF");
-    				} else {
-    					// 머지 체크
-    					if("Y"!= $("#mergeYn").val()){
-    						alertify.alert([[#{msg.project.required.bomSave}]], function(){});
-    						$("#tabMenuBom").trigger("click");
-
-    						return false;
-    					}
+	       		alertify.bomConfirmDialog()
+	       		.set('onok', function(e) {
+	       			// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
+	       			
+	       			var editorVal = $("#bomConfirmEditor").summernote('code');
+	       			if ("" == $(editorVal).text().trim()) {
+	   					editorVal = "";
+	   				}
+	       			
+	   				if (isAndroidModel) {
+						if ("undefined" !== typeof binAndroidValidMsgData.isValid && "false" == binAndroidValidMsgData.isValid) {
+							alertify.alert([[#{msg.project.validation.error}]]);
+							
+							return false;
+						}
+						
+						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : editorVal};
     					
-    					if (Bom_Save_Flg){
-    						if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
-    							alertify.alert([[#{msg.project.required.bomSave}]], function(){});
+    					if ($("#ignoreBinaryDbFlag")) {
+    	 					data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
+    					}
+                        loading.show();
+    	 				com_fn.checkSave(data, "CONF");
+					} else {
+						if ("undefined" !== typeof bomValidMsgData.isValid && "false" == bomValidMsgData.isValid) {
+							var customKeys = [];
+							var keys = Object.keys(bomValidMsgData);
+							var unconfirmedLicenseCnt = 0;
+							
+							keys.forEach(function(obj){
+								var warningMsg = bomValidMsgData[obj];
+								if ("Unconfirmed license" == warningMsg) {
+									unconfirmedLicenseCnt++;
+									return false;
+								}
+								
+								if (obj.indexOf(".") > -1) {
+									var key = obj.split(".")[1];
+									if (!customKeys.includes(key)) customKeys.push(key);
+								}
+							});
+							
+							if (unconfirmedLicenseCnt > 0) {
+								alertify.alert([[#{msg.project.validation.error}]]);
+								
+								return false;
+							}
+							
+							var adminCheckList = $("#bomList").jqGrid('getGridParam','data').filter(function(element, index) {
+								var adminCheckYn = element.adminCheckYn;
+								return "Y" == adminCheckYn;
+							});
+			
+							if (adminCheckList.length > 0) {
+								var includeIds = adminCheckList.filter(function(cur) {
+									return customKeys.includes(cur.componentId);
+								});
+				
+								if (includeIds.length != customKeys.length) {
+									alertify.alert([[#{msg.project.validation.error}]]);
+					
+									return false;
+								}
+							} else {
+								alertify.alert([[#{msg.project.validation.error}]]);
+				
+								return false;
+							}
+						}
+						
+						if (Bom_Save_Flg){
+							if($('#bomList').jqGrid('getDataIDs').length == 0 && "Y"!= $("#mergeYn").val()) {
+								alertify.alert([[#{msg.project.required.bomSave}]], function(){});
 
-    							return false;
-    						}
+								return false;
+							}
 
-    						// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
-    						if (!com_fn.validBomChangeStatus(false)) {
-    							return false;
-    						}
+							// no opensource license를 선택한 경우 bom merge 쿼리에 포함하지 않기 때문에, 3rd, src, bin, binandroid 에 error message가 있는지 확인해야함
+							if (!com_fn.validBomChangeStatus(false)) {
+								return false;
+							}
 
-    						var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : editorVal};
-                        	if ($("#ignoreBinaryDbFlag")) {
-                        		data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
-                        	}
-                        
-                        	loading.show();
-     						com_fn.checkSave(data, "CONF");	
-    					} else {
-    						alertify.alert([[#{msg.project.check.save}]], function(){});
-    					}				
-    				}
-           		})
-           		.set('onshow', function(e){
-           			$("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
-           		})
-           		.set('title', 'Confirm').setContent(innerHtml)
+							var data = {"prjId" : [[${project.prjId}]], "identificationStatus" : "CONF", "userComment" : editorVal};
+	                    	if ($("#ignoreBinaryDbFlag")) {
+	                    		data["ignoreBinaryDbFlag"] = $("#ignoreBinaryDbFlag").val();
+	                    	}
+	                    
+	                    	loading.show();
+	 						com_fn.checkSave(data, "CONF");
+						} else {
+							alertify.alert([[#{msg.project.check.save}]], function(){});
+						}
+					}
+	       		})
+	       		.set('onshow', function(e){
+	       			$("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	       			
+	       			const parameter = {
+	                  	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICATION_USER')}]],
+	                   	"referenceId" : [[${project.prjId}]]
+	                }
+	                var draftUserComment = draftUserComments(parameter);
+	                if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+	                  	$("#bomConfirmEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+	                }
+	       		})
+	       		.set('title', 'Confirm').setContent(innerHtml)
 				.show();
 			} else {
 				alertify.alert([[#{msg.project.warn.project.status}]], function(){});
-			}	
+			}
 		});
 		
 		// bomReject 버튼 
@@ -283,6 +286,15 @@ var com_evt = {
            		})
            		.set('onshow', function(e){
            			$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           			
+           			const parameter = {
+                   		"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICATION_USER')}]],
+                   		"referenceId" : [[${project.prjId}]]
+                   	}
+                   	var draftUserComment = draftUserComments(parameter);
+                   	if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+                   		$("#bomRejectEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+                   	}
            		})
            		.setContent(innerHtml)
 				.show();

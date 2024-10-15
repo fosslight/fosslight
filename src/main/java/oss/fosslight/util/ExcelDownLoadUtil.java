@@ -17,8 +17,6 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-
-import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -29,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -4508,12 +4507,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return true;
 	}
 	
-	@SuppressWarnings({ "unchecked", "serial" })
-	public static String getChartExcel(List<Statistics> chartParams, String filePath) throws Exception {
+	@SuppressWarnings({ "unchecked"})
+	public static String getChartExcel(Statistics chartParams, String filePath) throws Exception {
 		Map<String, Object> chartDataMap = new HashMap<String, Object>();
 		Statistics result = new Statistics();
 		Statistics result2 = new Statistics();
-		Statistics ChartData = chartParams.get(0);
+		Statistics ChartData = chartParams;
 		ChartData.setIsRawData(CoConstDef.FLAG_NO);
 		boolean projectUseFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
 		boolean partnerUseFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
@@ -4533,7 +4532,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			result.getTitleArray().addAll(result2.getTitleArray());
 			chartDataMap.put("divisionalProjectChart", result);
 		}
-		
+
+		ChartData.setPieSize(50);
 		ChartData.setChartType("OSS");
 		ChartData.setCategoryType("REV");
 		chartDataMap.put("mostUsedOssChart", (List<Statistics>) statisticsService.getMostUsedChartData(ChartData).get("chartData"));

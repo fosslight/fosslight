@@ -2448,12 +2448,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 
 	public static OssComponentsLicense reMakeLicenseBean(ProjectIdentification comLicense, String licenseDiv) {
-		OssComponentsLicense license = new OssComponentsLicense();
+		final OssComponentsLicense license = new OssComponentsLicense();
 		// 컴포넌트 ID 설정
 		license.setComponentId(comLicense.getComponentId());
-		
 		// 라이센스 ID 설정
-		// 2017-11-13 yuns 라이선스 ID 및 이름은 DB를 기준으로 재설정함
 		String licenseName = comLicense.getLicenseName();
 		
 		if (!isEmpty(licenseName)) {
@@ -2461,14 +2459,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 		
 		license.setLicenseId(CommonFunction.getLicenseIdByName(licenseName));
-		license.setLicenseName(CommonFunction.getLicenseNameById(license.getLicenseId(), licenseName));
+		license.setLicenseName(StringUtil.trim(avoidNull(CommonFunction.getLicenseNameById(license.getLicenseId(), licenseName))));
 		
 		// 기타 설정
 		//license.setLicenseName(comLicense.getLicenseName());
 		license.setLicenseText(comLicense.getLicenseText());
 		license.setCopyrightText(comLicense.getCopyrightText());
 		
-		//TODO - License ExcludeYn값에 대해서 재점검해야 함. 
 		if (CoConstDef.LICENSE_DIV_SINGLE.equals(licenseDiv)) {
 			license.setExcludeYn(CoConstDef.FLAG_NO);
 		}else {
@@ -3662,13 +3659,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				bean.setOssVersion("");
 			}
 			
-			String findKey = (bean.getOssName().trim() +"_" + avoidNull(bean.getOssVersion()).trim()).toUpperCase();
-			OssMaster masterBean = CoCodeManager.OSS_INFO_UPPER.get(findKey);
-			
+			final OssMaster masterBean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName().trim() +"_" + avoidNull(bean.getOssVersion()).trim()).toUpperCase());
 			if (masterBean != null) {
 				bean.setOssId(masterBean.getOssId());
 				bean.setOssName(masterBean.getOssName());
 			}
+		}
+		
+		if(bean != null && StringUtil.isEmpty(bean.getOssId())) {
+			bean.setOssId(null);
 		}
 		
 		return bean;

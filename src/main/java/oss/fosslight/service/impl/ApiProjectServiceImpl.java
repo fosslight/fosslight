@@ -2916,9 +2916,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		}
 		
 		if(!ossComponent.isEmpty()) {
-			Project projectStatus = new Project();
-			projectStatus.setPrjId(refId);
-			projectStatus = projectMapper.selectProjectMaster(projectStatus);
+			final Project projectStatus = projectMapper.selectProjectMaster(refId);
 			
 			if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
 				projectStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
