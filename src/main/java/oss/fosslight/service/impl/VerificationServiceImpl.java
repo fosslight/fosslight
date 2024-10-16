@@ -699,18 +699,20 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							collectDataDeCompResultList.add(packageFileName + "/" + s);
 						}
 						
-						if (s.startsWith(firstPathName)) {
-							String removeFirstPathName = s.replace(firstPathName, "");
-							if (removeFirstPathName.startsWith("/")) {
-								removeFirstPathName = removeFirstPathName.substring(1);
+						if (!isEmpty(firstPathName) && !packageFileName.equals(firstPathName)) {
+							if (s.startsWith(firstPathName)) {
+								String removeFirstPathName = s.replace(firstPathName, "");
+								if (removeFirstPathName.startsWith("/")) {
+									removeFirstPathName = removeFirstPathName.substring(1);
+								}
+								collectDataDeCompResultList.add(removeFirstPathName);
+								
+								if (s.startsWith("/")) {
+									s = s.substring(1);
+								}
+							} else {
+								collectDataDeCompResultList.add(firstPathName + "/" + s);
 							}
-							collectDataDeCompResultList.add(removeFirstPathName);
-							
-							if (s.startsWith("/")) {
-								s = s.substring(1);
-							}
-						} else {
-							collectDataDeCompResultList.add(firstPathName + "/" + s);
 						}
 						
 						if (s.endsWith("*")) {
@@ -731,6 +733,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 						
 						int cnt = 0;
+						boolean isNotDir = false;
 						
 						//파일 path인 경우, 상위 dir의 파일 count를 +1 한다.
 						if (isFile){
@@ -751,13 +754,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							cnt++;
 							
 							deCompResultMap.put(_dir, cnt);
+							
+							if (_dir.equalsIgnoreCase(s)) isNotDir = true;
 						}
 						
-						if (isEmpty(firstPathName) && !isEmpty(s)) {
-							firstPathName = s;
+						if (!isNotDir) {
+							deCompResultMap.put(s, 0);
+							
+							if (isEmpty(firstPathName) && !isEmpty(s)) {
+								firstPathName = s;
+							}
 						}
-						
-						deCompResultMap.put(s, 0);
 					}
 				}
 				
@@ -781,6 +788,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					}
 					
 					int cnt = 0;
+					boolean isNotDir = false;
 					
 					if (isFile){
 						String _dir = s;
@@ -796,9 +804,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						cnt++;
 						
 						deCompResultMap.put(_dir, cnt);
+						
+						if (_dir.equalsIgnoreCase(s)) isNotDir = true;
 					}
 					
-					deCompResultMap.put(s, 0);
+					if (!isNotDir) deCompResultMap.put(s, 0);
 				}
 				
 				collectDataDeCompResultList = null;
