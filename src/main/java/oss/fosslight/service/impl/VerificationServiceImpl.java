@@ -178,17 +178,21 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				newPackagingFileIdList.add(fileSeqs.size() > 0 ? fileSeqs.get(0) : null);
 				newPackagingFileIdList.add(fileSeqs.size() > 1 ? fileSeqs.get(1) : null);
 				newPackagingFileIdList.add(fileSeqs.size() > 2 ? fileSeqs.get(2) : null);
+				newPackagingFileIdList.add(fileSeqs.size() > 3 ? fileSeqs.get(3) : null);
 				prjParam.setPackageFileId(newPackagingFileIdList.get(0));
 				prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
 				prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
+				prjParam.setPackageFileId4(newPackagingFileIdList.get(3));
 				
 				ArrayList<String> newPackagingFileTypeList = new ArrayList<String>();
 				newPackagingFileTypeList.add(fileTypeSeqs.size() > 0 ? fileTypeSeqs.get(0) : null);
 				newPackagingFileTypeList.add(fileTypeSeqs.size() > 1 ? fileTypeSeqs.get(1) : null);
 				newPackagingFileTypeList.add(fileTypeSeqs.size() > 2 ? fileTypeSeqs.get(2) : null);
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 3 ? fileTypeSeqs.get(3) : null);
 				prjParam.setPackageFileType1(newPackagingFileTypeList.get(0));
 				prjParam.setPackageFileType2(newPackagingFileTypeList.get(1));
 				prjParam.setPackageFileType3(newPackagingFileTypeList.get(2));
+				prjParam.setPackageFileType4(newPackagingFileTypeList.get(3));
 				
 				if (deleteFiles.equals(CoConstDef.FLAG_YES)){
 					prjParam.setStatusVerifyYn(CoConstDef.FLAG_NO);
@@ -203,6 +207,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					origPackagingFileIdList.add(project.getPackageFileId());
 					origPackagingFileIdList.add(project.getPackageFileId2());
 					origPackagingFileIdList.add(project.getPackageFileId3());
+					origPackagingFileIdList.add(project.getPackageFileId4());
 					
 					int idx = 0;
 					
@@ -1330,6 +1335,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					prjParam.setPackageFileId(fileSeqs.get(0));
 					prjParam.setPackageFileId2(fileSeqs.size() >= 2 ? fileSeqs.get(1) : null);
 					prjParam.setPackageFileId3(fileSeqs.size() >= 3 ? fileSeqs.get(2) : null);
+					prjParam.setPackageFileId4(fileSeqs.size() >= 4 ? fileSeqs.get(3) : null);
 
 					if (!isEmpty(prjInfo.getDestributionStatus())){
 						prjParam.setStatusVerifyYn("C");
@@ -1963,6 +1969,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		if (!isEmpty(prjBean.getPackageFileId3())) {
 			packageFileIds.add(prjBean.getPackageFileId3());
+		}
+		
+		if (!isEmpty(prjBean.getPackageFileId4())) {
+			packageFileIds.add(prjBean.getPackageFileId4());
 		}
 
 		int fileSeq = 1;
@@ -2900,7 +2910,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		Project prjParam = new Project(); 
 		prjParam.setPrjId(prjId);
 		  
-		if (fileSeq.equals("4")) {
+		if (fileSeq.equals("5")) {
 			prjParam.setPackageVulDocFileId(registFileId);
 			verificationMapper.updatePackageVulDocFile(prjParam);
 		} else {
@@ -2910,14 +2920,22 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				prjParam.setPackageFileId(registFileId);
 				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
 				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
-			}else if (fileSeq.equals("2")) {
+				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
+			} else if (fileSeq.equals("2")) {
 				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
 				prjParam.setPackageFileId2(registFileId);
 				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
-			}else {
+				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
+			} else if (fileSeq.equals("3")) {
 				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
 				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
 				prjParam.setPackageFileId3(registFileId);
+				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
+			} else {
+				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+				prjParam.setPackageFileId4(registFileId);
 			}
 					
 			List<String> fileSeqs = new ArrayList<String>(); 
@@ -2930,7 +2948,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (prjParam.getPackageFileId3() != null) {
 				fileSeqs.add(prjParam.getPackageFileId3()); 
 			}
-						
+			if (prjParam.getPackageFileId4() != null) {
+				fileSeqs.add(prjParam.getPackageFileId4()); 
+			}
 			Map<Object, Object> map = new HashMap<Object, Object>();
 			map.put("prjId", prjId);
 			map.put("fileSeqs", fileSeqs);
