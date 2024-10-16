@@ -611,6 +611,10 @@ var fn = {
 			if ("" != rowObject.packageFileId3) {
 				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File3\"></i></span>';
 			}
+			
+			if ("" != rowObject.packageFileId4) {
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'4\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File4\"></i></span>';
+			}
 		}
 		
 		return display;
