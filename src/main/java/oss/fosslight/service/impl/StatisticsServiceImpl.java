@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,34 +148,8 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			
-			list.forEach(data -> {
-				int categoryIdx = 0;
-				chartData.addCategoryList(data.getColumnName());
-				
-				if (data.getCategory0Cnt() > -1) {chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);}
-				if (data.getCategory1Cnt() > -1) {chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);}
-				if (data.getCategory2Cnt() > -1) {chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);}
-				if (data.getCategory3Cnt() > -1) {chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);}
-				if (data.getCategory4Cnt() > -1) {chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);}
-				if (data.getCategory5Cnt() > -1) {chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);}
-				if (data.getCategory6Cnt() > -1) {chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);}
-				if (data.getCategory7Cnt() > -1) {chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);}
-				if (data.getCategory8Cnt() > -1) {chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);}
-				if (data.getCategory9Cnt() > -1) {chartData.addCategoryCnt(data.getCategory9Cnt(), categoryIdx++);}
-				if (data.getCategory10Cnt() > -1) {chartData.addCategoryCnt(data.getCategory10Cnt(), categoryIdx++);}
-				if (data.getCategory11Cnt() > -1) {chartData.addCategoryCnt(data.getCategory11Cnt(), categoryIdx++);}
-				if (data.getCategory12Cnt() > -1) {chartData.addCategoryCnt(data.getCategory12Cnt(), categoryIdx++);}
-				if (data.getCategory13Cnt() > -1) {chartData.addCategoryCnt(data.getCategory13Cnt(), categoryIdx++);}
-				if (data.getCategory14Cnt() > -1) {chartData.addCategoryCnt(data.getCategory14Cnt(), categoryIdx++);}
-				if (data.getCategory15Cnt() > -1) {chartData.addCategoryCnt(data.getCategory15Cnt(), categoryIdx++);}
-				if (data.getCategory16Cnt() > -1) {chartData.addCategoryCnt(data.getCategory16Cnt(), categoryIdx++);}
-				if (data.getCategory17Cnt() > -1) {chartData.addCategoryCnt(data.getCategory17Cnt(), categoryIdx++);}
-				if (data.getCategory18Cnt() > -1) {chartData.addCategoryCnt(data.getCategory18Cnt(), categoryIdx++);}
-				if (data.getCategory19Cnt() > -1) {chartData.addCategoryCnt(data.getCategory19Cnt(), categoryIdx++);}
 
-			});
-			
+			addCategoryCnt2(chartData, list);
 			chartData.setTitleArray(titleArray); // Chart Title
 			
 			result.put("chartData", chartData);
@@ -221,7 +196,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			addCategoryCnt(chartData, list);
+			addCategoryCnt2(chartData, list);
 			chartData.setTitleArray(titleArray); // Chart Title
 			
 			result.put("chartData", chartData);
@@ -278,28 +253,53 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	private void addCategoryCnt(Statistics chartData, List<Statistics> list) {
 		list.forEach(data -> {
 			int categoryIdx = 0;
-			if (data.getCategory0Cnt() > -1) {chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);}
-			if (data.getCategory1Cnt() > -1) {chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);}
-			if (data.getCategory2Cnt() > -1) {chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);}
-			if (data.getCategory3Cnt() > -1) {chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);}
-			if (data.getCategory4Cnt() > -1) {chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);}
-			if (data.getCategory5Cnt() > -1) {chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);}
-			if (data.getCategory6Cnt() > -1) {chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);}
-			if (data.getCategory7Cnt() > -1) {chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);}
-			if (data.getCategory8Cnt() > -1) {chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);}
-			if (data.getCategory9Cnt() > -1) {chartData.addCategoryCnt(data.getCategory9Cnt(), categoryIdx++);}
-			if (data.getCategory10Cnt() > -1) {chartData.addCategoryCnt(data.getCategory10Cnt(), categoryIdx++);}
-			if (data.getCategory11Cnt() > -1) {chartData.addCategoryCnt(data.getCategory11Cnt(), categoryIdx++);}
-			if (data.getCategory12Cnt() > -1) {chartData.addCategoryCnt(data.getCategory12Cnt(), categoryIdx++);}
-			if (data.getCategory13Cnt() > -1) {chartData.addCategoryCnt(data.getCategory13Cnt(), categoryIdx++);}
-			if (data.getCategory14Cnt() > -1) {chartData.addCategoryCnt(data.getCategory14Cnt(), categoryIdx++);}
-			if (data.getCategory15Cnt() > -1) {chartData.addCategoryCnt(data.getCategory15Cnt(), categoryIdx++);}
-			if (data.getCategory16Cnt() > -1) {chartData.addCategoryCnt(data.getCategory16Cnt(), categoryIdx++);}
-			if (data.getCategory17Cnt() > -1) {chartData.addCategoryCnt(data.getCategory17Cnt(), categoryIdx++);}
-			if (data.getCategory18Cnt() > -1) {chartData.addCategoryCnt(data.getCategory18Cnt(), categoryIdx++);}
-			if (data.getCategory19Cnt() > -1) {chartData.addCategoryCnt(data.getCategory19Cnt(), categoryIdx++);}
+	        for (int i = 0; i <= 19; i++) {
+	            Function<Statistics, Integer> getCategoryCnt = getCategoryCntFunction(i);
+	            int cnt = getCategoryCnt.apply(data);
+	            if (cnt > -1) {
+	                chartData.addCategoryCnt(cnt, categoryIdx++);
+	            }
+	        }
 		});
-		
+	}
+	
+	private void addCategoryCnt2(Statistics chartData, List<Statistics> list) {
+	    list.forEach(data -> {
+	        int categoryIdx = 0;
+	        chartData.addCategoryList(data.getColumnName());
+	        for (int i = 0; i <= 19; i++) {
+	            Function<Statistics, Integer> getCategoryCnt = getCategoryCntFunction(i);
+	            int cnt = getCategoryCnt.apply(data);
+	            if (cnt > -1) {
+	                chartData.addCategoryCnt(cnt, categoryIdx++);
+	            }
+	        }
+	    });
+	}
+	private Function<Statistics, Integer> getCategoryCntFunction(int i) {
+	    switch (i) {
+	        case 0: return Statistics::getCategory0Cnt;
+	        case 1: return Statistics::getCategory1Cnt;
+	        case 2: return Statistics::getCategory2Cnt;
+	        case 3: return Statistics::getCategory3Cnt;
+	        case 4: return Statistics::getCategory4Cnt;
+	        case 5: return Statistics::getCategory5Cnt;
+	        case 6: return Statistics::getCategory6Cnt;
+	        case 7: return Statistics::getCategory7Cnt;
+	        case 8: return Statistics::getCategory8Cnt;
+	        case 9: return Statistics::getCategory9Cnt;
+	        case 10: return Statistics::getCategory10Cnt;
+	        case 11: return Statistics::getCategory11Cnt;
+	        case 12: return Statistics::getCategory12Cnt;
+	        case 13: return Statistics::getCategory13Cnt;
+	        case 14: return Statistics::getCategory14Cnt;
+	        case 15: return Statistics::getCategory15Cnt;
+	        case 16: return Statistics::getCategory16Cnt;
+	        case 17: return Statistics::getCategory17Cnt;
+	        case 18: return Statistics::getCategory18Cnt;
+	        case 19: return Statistics::getCategory19Cnt;
+	        default: throw new IllegalArgumentException("Invalid category index: " + i);
+	    }
 	}
 
 	public Map<String, Object> getUserRelatedChartData(Statistics statistics){
@@ -334,105 +334,13 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	}
 	
 	public int noneCheck(List<String> titleArray, List<Statistics> list) {
-		int noneSum = 0;
-		
-		switch(titleArray.size()) {
-		case 1:
-			for (Statistics data : list) {
-				noneSum += data.getCategory1Cnt();
-			}
-			break;
-		case 2:
-			for (Statistics data : list) {
-				noneSum += data.getCategory2Cnt();
-			}
-			break;
-		case 3:
-			for (Statistics data : list) {
-				noneSum += data.getCategory3Cnt();
-			}
-			break;
-		case 4:
-			for (Statistics data : list) {
-				noneSum += data.getCategory4Cnt();
-			}
-			break;
-		case 5:
-			for (Statistics data : list) {
-				noneSum += data.getCategory5Cnt();
-			}
-			break;
-		case 6:
-			for (Statistics data : list) {
-				noneSum += data.getCategory6Cnt();
-			}
-			break;
-		case 7:
-			for (Statistics data : list) {
-				noneSum += data.getCategory7Cnt();
-			}
-			break;
-		case 8:
-			for (Statistics data : list) {
-				noneSum += data.getCategory8Cnt();
-			}
-			break;
-		case 9:
-			for (Statistics data : list) {
-				noneSum += data.getCategory9Cnt();
-			}
-			break;
-		case 10:
-			for (Statistics data : list) {
-				noneSum += data.getCategory10Cnt();
-			}
-			break;
-		case 11:
-			for (Statistics data : list) {
-				noneSum += data.getCategory11Cnt();
-			}
-			break;
-		case 12:
-			for (Statistics data : list) {
-				noneSum += data.getCategory12Cnt();
-			}
-			break;
-		case 13:
-			for (Statistics data : list) {
-				noneSum += data.getCategory13Cnt();
-			}
-			break;
-		case 14:
-			for (Statistics data : list) {
-				noneSum += data.getCategory14Cnt();
-			}
-			break;
-		case 15:
-			for (Statistics data : list) {
-				noneSum += data.getCategory15Cnt();
-			}
-			break;
-		case 16:
-			for (Statistics data : list) {
-				noneSum += data.getCategory16Cnt();
-			}
-			break;
-		case 17:
-			for (Statistics data : list) {
-				noneSum += data.getCategory17Cnt();
-			}
-			break;
-		case 18:
-			for (Statistics data : list) {
-				noneSum += data.getCategory18Cnt();
-			}
-			break;
-		case 19:
-			for (Statistics data : list) {
-				noneSum += data.getCategory19Cnt();
-			}
-			break;
-		}
-		return noneSum;
+	    int noneSum = 0;
+	    int titleArraySize = titleArray.size();
+	    for (Statistics data : list) {
+            Function<Statistics, Integer> getCategoryCnt = getCategoryCntFunction(titleArraySize);
+            int cnt = getCategoryCnt.apply(data);
+	        noneSum += cnt;
+	    }
+	    return noneSum;
 	}
 }
