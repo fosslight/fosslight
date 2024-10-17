@@ -189,11 +189,18 @@
         			$("#girdAreaPackaging").hide();
         		}
         	});
+            
+            $('#noticeFileFormat').on('change', function (e) {
+                var selectedList = $(e.target).val();
+                selectedList.push("chkAllowDownloadNoticeHTML");
+                datas.noticeFileFormat = selectedList;
+            });
         });
 
         var datas = {
             verify: [[${verify}]],
             ossList: [[${ossList}]],
+            noticeFileFormat : [],
             init: function () {
             	if (datas.ossList == null) datas.ossList = new Array();
             	
@@ -245,6 +252,7 @@
 */
                 fn.appendEditVisible($("#append"));
                 fn.initNotice();
+                fn.initNoticeFileFormat();
 
                 $("#deleteFlag").val("N");
                 
@@ -729,7 +737,7 @@
                                    	, "useCustomNoticeYn": "N"
                                    	, "userComment": $("#editor3").summernote('code')
                                    	, "referenceDiv": "12"
-                                   	, "noticeFileFormat": $("#noticeFileFormat").val()
+                                   	, "noticeFileFormat": datas.noticeFileFormat
                                 };
      							
                                	fn.exeProjectStatus(data, "PROG");
@@ -785,7 +793,7 @@
                             , "useCustomNoticeYn": $('#useCustomNoticeYn').val()
                             , "userComment": [[${project.userComment}]]
                             , "referenceDiv": "12"
-                            , "noticeFileFormat": $("#noticeFileFormat").val()
+                            , "noticeFileFormat": datas.noticeFileFormat
                         };
 
                         fn.exeProjectStatus(data, "REV");
@@ -2940,6 +2948,52 @@
                     }
                 }, 1);
             },
+            initNoticeFileFormat : function() {
+            	var noticeFileFormat = [[${project.allowDownloadNoticeHTMLYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadNoticeHTML");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadNoticeTextYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadNoticeText");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadSimpleHTMLYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadSimpleHTML");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadSimpleTextYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadSimpleText");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadSPDXSheetYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadSPDXSheet");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadSPDXRdfYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadSPDXRdf");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadSPDXTagYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadSPDXTag");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadSPDXJsonYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadSPDXJson");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadSPDXYamlYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadSPDXYaml");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadCDXJsonYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadCDXJson");
+            	}
+            	noticeFileFormat = [[${project.allowDownloadCDXXmlYn}]];
+            	if ("Y" == noticeFileFormat) {
+            		datas.noticeFileFormat.push("chkAllowDownloadCDXXml");
+            	}
+            },
             procRequest: function (e) {
                 e.preventDefault();
 
@@ -2949,7 +3003,7 @@
                     , "useCustomNoticeYn": $('#useCustomNoticeYn').val()
                     , "userComment": ""
                     , "referenceDiv": "12"
-                    , "noticeFileFormat": $("#noticeFileFormat").val()
+                    , "noticeFileFormat": datas.noticeFileFormat
                 };
 
                 //공개의무 리스트가 있고 파일업로드가 완료된 상태이며 verify가 완료 되었을때
