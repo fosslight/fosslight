@@ -695,13 +695,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							if (removePackageFileName.startsWith("/")) {
 								removePackageFileName = removePackageFileName.substring(1);
 							}
-							collectDataDeCompResultList.add(removePackageFileName);
+							if (!deCompResultMap.containsKey(removePackageFileName)) collectDataDeCompResultList.add(removePackageFileName);
 							
 							if (s.startsWith("/")) {
 								s = s.substring(1);
 							}
 						} else {
-							collectDataDeCompResultList.add(packageFileName + "/" + s);
+							String addPackageFileName = packageFileName + "/" + s;
+							if (!deCompResultMap.containsKey(addPackageFileName)) collectDataDeCompResultList.add(addPackageFileName);
 						}
 						
 						if (!isEmpty(firstPathName) && !packageFileName.equals(firstPathName)) {
@@ -710,13 +711,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 								if (removeFirstPathName.startsWith("/")) {
 									removeFirstPathName = removeFirstPathName.substring(1);
 								}
-								collectDataDeCompResultList.add(removeFirstPathName);
+								if (!deCompResultMap.containsKey(removeFirstPathName)) collectDataDeCompResultList.add(removeFirstPathName);
 								
 								if (s.startsWith("/")) {
 									s = s.substring(1);
 								}
-							} else {
-								collectDataDeCompResultList.add(firstPathName + "/" + s);
 							}
 						}
 						
