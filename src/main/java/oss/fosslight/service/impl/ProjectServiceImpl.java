@@ -6514,109 +6514,85 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		boolean activateFlag;
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(project.getPrjId());
+		identification.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE)));
 		
 		Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
 		if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
 			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			identification.setMerge(CoConstDef.FLAG_NO);
-			
-			List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
-			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-			List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
-			if (notVersionList != null) {
-				bomList.addAll(notVersionList);
-			}
-			identification.setOssVersionEmptyFlag(null);
-			
-			Comparator<ProjectIdentification> compare = Comparator
-					.comparing(ProjectIdentification::getLicenseTypeIdx)
-					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getMergeOrder);
-
-			bomList.sort(compare);
-			list = bomList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
 		} else {
 			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-			List<ProjectIdentification> componentList = projectMapper.selectIdentificationGridList(identification);
-			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-			List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
-			if (notVersionOssComponentList != null) {
-				componentList.addAll(notVersionOssComponentList);
-			}
-			identification.setOssVersionEmptyFlag(null);
-			
-			componentList.sort(Comparator.comparing(ProjectIdentification::getComponentId));
-			list = componentList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
 		}
 		
-		int gridIdx = 1;
-		for (ProjectIdentification pi : list) {
-			activateFlag = false;
-			if (isEmpty(pi.getOssName()) || pi.getOssName().equals("-") || CoConstDef.FLAG_YES.equals(avoidNull(pi.getExcludeYn()))) continue;
-			
-			param.setOssName(avoidNull(pi.getRefOssName(), pi.getOssName()));
-			param.setOssVersion(pi.getOssVersion());
-			
-			List<Vulnerability> vulnList = vulnerabilityService.getSecurityVulnListByOssName(param);
-			if (vulnList != null && !vulnList.isEmpty()) {
-				List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
-				if (securityDatalist != null && !securityDatalist.isEmpty()) {
-					for (OssComponents oss : securityDatalist) {
-						String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
-						securityGridMap.put(key, oss);
+		list = projectMapper.selectSecurityListForProject(identification);
+		
+		if (list != null && !list.isEmpty()) {
+			int gridIdx = 1;
+			for (ProjectIdentification pi : list) {
+				activateFlag = false;
+				if (isEmpty(pi.getOssName()) || pi.getOssName().equals("-") || CoConstDef.FLAG_YES.equals(avoidNull(pi.getExcludeYn()))) continue;
+				
+				param.setOssName(avoidNull(pi.getRefOssName(), pi.getOssName()));
+				param.setOssVersion(pi.getOssVersion());
+				
+				List<Vulnerability> vulnList = vulnerabilityService.getSecurityVulnListByOssName(param);
+				if (vulnList != null && !vulnList.isEmpty()) {
+					List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
+					if (securityDatalist != null && !securityDatalist.isEmpty()) {
+						for (OssComponents oss : securityDatalist) {
+							String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
+							securityGridMap.put(key, oss);
+						}
 					}
-				}
-				
-				if (vulnList != null && !vulnList.isEmpty() && isEmpty(pi.getOssVersion())) {
-					activateFlag = true;
 					
-					vulnList = vulnList.stream().sorted(Comparator.comparing(Vulnerability::getCvssScore).reversed()).collect(Collectors.toList());
-					List<Vulnerability> convertVulnList = new ArrayList<>();
-					convertVulnList.add(vulnList.get(0));
-					vulnList = convertVulnList;
-				} 
-				
-				for (Vulnerability vuln : vulnList) {
-					String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + vuln.getCveId() + "_" + vuln.getCvssScore()).toUpperCase();
-					if (!deduplicatedkey.contains(key)) {
-						deduplicatedkey.add(key);
+					if (vulnList != null && !vulnList.isEmpty() && isEmpty(pi.getOssVersion())) {
+						activateFlag = true;
 						
-						if (securityGridMap.containsKey(key)) {
-							bean = (OssComponents) securityGridMap.get(key);
+						vulnList = vulnList.stream().sorted(Comparator.comparing(Vulnerability::getCvssScore).reversed()).collect(Collectors.toList());
+						List<Vulnerability> convertVulnList = new ArrayList<>();
+						convertVulnList.add(vulnList.get(0));
+						vulnList = convertVulnList;
+					} 
+					
+					for (Vulnerability vuln : vulnList) {
+						String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + vuln.getCveId() + "_" + vuln.getCvssScore()).toUpperCase();
+						if (!deduplicatedkey.contains(key)) {
+							deduplicatedkey.add(key);
+							
+							if (securityGridMap.containsKey(key)) {
+								bean = (OssComponents) securityGridMap.get(key);
+							}
+							
+							if (activateFlag) checkOssNameList.add(pi.getOssName());
+							
+							oc = new OssComponents();
+							oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
+							oc.setOssId(pi.getOssId());
+							oc.setOssName(pi.getOssName());
+							oc.setOssVersion(pi.getOssVersion());
+							
+							if (!activateFlag) {
+								oc.setCveId(vuln.getCveId());
+								oc.setCvssScore(vuln.getCvssScore());
+								oc.setPublDate(vuln.getPublDate());
+							}
+							
+							oc.setVulnerabilityResolution("Unresolved");
+							
+							if (bean != null && !isEmpty(bean.getVulnerabilityResolution())) {
+								oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+							}
+							
+							if (oc.getVulnerabilityResolution().equals("Fixed")) {
+								fixedList.add(oc);
+							} else {
+								notFixedList.add(oc);
+							}
+							
+							totalList.add(oc);
+							
+							bean = null;
+							gridIdx++;
 						}
-						
-						if (activateFlag) checkOssNameList.add(pi.getOssName());
-						
-						oc = new OssComponents();
-						oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
-						oc.setOssId(pi.getOssId());
-						oc.setOssName(pi.getOssName());
-						oc.setOssVersion(pi.getOssVersion());
-						
-						if (!activateFlag) {
-							oc.setCveId(vuln.getCveId());
-							oc.setCvssScore(vuln.getCvssScore());
-							oc.setPublDate(vuln.getPublDate());
-						}
-						
-						oc.setVulnerabilityResolution("Unresolved");
-						
-						if (bean != null && !isEmpty(bean.getVulnerabilityResolution())) {
-							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-						}
-						
-						if (oc.getVulnerabilityResolution().equals("Fixed")) {
-							fixedList.add(oc);
-						} else {
-							notFixedList.add(oc);
-						}
-						
-						totalList.add(oc);
-						
-						bean = null;
-						gridIdx++;
 					}
 				}
 			}
