@@ -146,7 +146,9 @@ public final class PdfUtil extends CoTopComponent {
                 OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(projectIdentification.getOssId());
                 if (oss != null) {
                     if (!avoidNull(oss.getSummaryDescription()).equals("")) {
-                        ossMasterMap.put(oss.getOssName().toUpperCase() + "_" + oss.getOssVersion().toUpperCase(), oss);
+                        if(!ossMasterMap.containsKey(oss.getOssName().toUpperCase())) {
+                            ossMasterMap.put(oss.getOssName().toUpperCase(), oss);
+                        }
                     }
 
                     //VulnerabilityReview
@@ -162,7 +164,11 @@ public final class PdfUtil extends CoTopComponent {
                             vulnerability.setOssName(oss.getOssName());
                             vulnerability.setVersion(oss.getOssVersion());
                             vulnerability.setCvssScore(prjOssMaster.getCvssScore());
-                            vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + oss.getOssVersion());
+                            String version = oss.getOssVersion();
+                            if(oss.getOssVersion().equals("") || oss.getOssVersion() == null) {
+                                version = "-";
+                            }
+                            vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + version);
                             vulnerabilityMap.put(oss.getOssName().toUpperCase() + "_" + oss.getOssVersion().toUpperCase(), vulnerability);
                         }
                     }
@@ -193,6 +199,7 @@ public final class PdfUtil extends CoTopComponent {
         }
 
         for(Vulnerability vulnerability : vulnerabilityMap.values()){
+            vulnerability.setVulnerabilityLink("<a href='" + vulnerability.getVulnerabilityLink() + "' target='_blank'>" + vulnerability.getVulnerabilityLink() + "</a>");
             vulnerabilityReview.add(vulnerability);
         }
 
