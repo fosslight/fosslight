@@ -478,7 +478,7 @@
                 var rowList = rowStr.split(",");
                 var rowNum = [[${@CommonFunction.getCoConstDefVal("DISP_PAGENATION_DEFAULT")}]];
 
-                var colNameArr = ['ID', 'License Name (Identifier)', 'Identifier', 'License Type', 'Restriction', 'Obligation', 'Website', 'User Guide'];
+                var colNameArr = ['ID', 'License Name', 'Identifier', 'License Type', 'Restriction', 'Notice', 'Source', 'Website', 'User Guide'];
  
                 colNameArr.push('Creator');
                 colNameArr.push('Created Date');
@@ -517,8 +517,8 @@
                 colModelArr.push(colModelObj);
                 //colModelObj = {name: 'obligation', index: 'obligation', width: 50, align: 'left', sortable: false};
                 //colModelArr.push(colModelObj);
-                colModelArr.push({name: 'obligationNotificationYn', index: 'obligationNotificationYn', width: 20, align: 'center', formatter: fn_grid_com.licenseNoticeFormat, unformat: fn_grid_com.unformatter});
-                colModelArr.push({name: 'obligationDisclosingSrcYn', index: 'obligationDisclosingSrcYn', width: 20, align: 'center', formatter: fn_grid_com.licenseSourceCodeFormat, unformat: fn_grid_com.unformatter});
+                colModelArr.push({name: 'obligationNotificationYn', index: 'obligationNotificationYn', width: 20, align: 'center', formatter: fn_grid_com.licenseNoticeFormat, unformat: fn_grid_com.unformatter, sortable : true});
+                colModelArr.push({name: 'obligationDisclosingSrcYn', index: 'obligationDisclosingSrcYn', width: 20, align: 'center', formatter: fn_grid_com.licenseSourceCodeFormat, unformat: fn_grid_com.unformatter, sortable : true});
                 colModelObj = {name: 'webpage', index: 'webpage', width: 80, align: 'left', formatter: 'link'};
                 colModelArr.push(colModelObj);
                 colModelObj = {
@@ -570,7 +570,7 @@
 					{'Identifier': 'shortIdentifier'},
 					{'License Type': 'licenseType'},
 					{'Restriction': 'restriction'},
-					{'Notify': 'notify'},
+					{'Notice': 'notice'},
 					{'Source': 'source'},
 					{'Website': 'webpage'},
 					{'User Guide': 'description'},
