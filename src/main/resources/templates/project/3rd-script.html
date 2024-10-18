@@ -246,39 +246,15 @@ var party_evt = {
 			contentType : 'application/json',
 			success : function(data){
 				var data = data.rows;
-				var _tempRandId = "";
-				var newData = {};
-
-				for(var i = 0; i < data.length; i++){
-					_tempRandId = $.jgrid.randId();
-					
-					newData = {
-						  gridId : _tempRandId 
-						, componentId : null 
-						, referenceId : [[${project.prjId}]]
-						, refPartnerName : data[i].refPartnerName
-						, referenceDiv : '10'
-						, ossId : data[i].ossId
-						, ossName : data[i].ossName
-						, ossVersion : data[i].ossVersion
-						, downloadLocation : data[i].downloadLocation
-						, homepage : data[i].homepage
-						, filePath : data[i].filePath
-						, licenseName : data[i].licenseName
-						, copyrightText : data[i].copyrightText
-						, refPartnerId :data[i].referenceId
-						, refComponentId : data[i].refComponentId
-						, excludeYn : data[i].excludeYn
-						, cvssScore : data[i].cvssScore
-						, cveId : data[i].cveId
-					}
-					
-					$('#list3').jqGrid('addRowData', _tempRandId, newData);
+				for (var i = 0; i < data.length; i++) {
+					partMainData.push(data[i]);
 				}
+				
+				$("#list3").jqGrid('GridUnload');
+				part_grid.load();
 				
 				$('.three2list').hide();
 				$("#_3rdAddListContainer").show();
-				
 			},
 			error : function(){
 				alertify.error([[#{msg.common.valid2}]], 0);
@@ -770,7 +746,51 @@ var party_evt = {
         
         $("#list3").jqGrid('GridUnload');
         part_grid.load();
-    }
+    },
+    projectSearch : function () {
+		var searchSelect = $("select[name='3rdProjectSelect'] option:selected").val();
+		var postData = $('#projectSearchForm').serializeObject();
+		switch(searchSelect){
+			case "pNm" : 
+				postData.prjId = "";
+				break;
+			case "pId" :
+				postData.prjVersion = "";
+				postData.prjName = "";
+				break;
+		}
+		
+		$('#_list-1').jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
+		$('.three3list').show();
+		$('.three4list').hide();
+	}, 
+	partnerSearch : function () {
+		var searchSelect = $("select[name='3rdSerarchSelect'] option:selected").val();
+		var searchText = $("input[name='3rdSearchText']").val();
+		switch(searchSelect){
+			case "3rdPartyName" : 
+					$("#3rdSearchForm input[name='partnerName']").val(searchText);
+					$("#3rdSearchForm input[name='softwareName']").val("");
+					$("#3rdSearchForm input[name='partnerId']").val("");
+				break;
+			case "sName" : 
+					$("#3rdSearchForm input[name='softwareName']").val(searchText);
+					$("#3rdSearchForm input[name='partnerName']").val("");
+					$("#3rdSearchForm input[name='partnerId']").val("");
+				break;
+			case "3rdPartyId" : 
+					$("#3rdSearchForm input[name='partnerId']").val(searchText);
+					$("#3rdSearchForm input[name='partnerName']").val("");
+					$("#3rdSearchForm input[name='softwareName']").val("");
+				break;
+		}
+		var postData = $('#3rdSearchForm').serializeObject();
+		
+		$('#_list').jqGrid('setGridParam', {postData:postData}).trigger('reloadGrid');
+		$('.three1list').show();
+		$('.three2list').hide();
+		$("#gridAreaParty").show();
+	}
 }
 
 var part_grid = {
