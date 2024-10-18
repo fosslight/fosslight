@@ -5193,9 +5193,11 @@ public class ProjectController extends CoTopComponent {
 		ossComponents = (List<OssComponents>) fromJson(gridString, collectionType);
 		
 		Map<String, String> resMap = new HashMap<>();
+		Project project = new Project();
+		project.setPrjId(prjId);
 		
 		try {
-			projectService.registSecurity(prjId, tabName, ossComponents);
+			projectService.registSecurity(project, tabName, ossComponents);
 			projectService.updateSecurityDataForProject(prjId);
 			Project param = new Project();
 			param.setPrjId(prjId);

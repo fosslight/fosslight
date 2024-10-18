@@ -357,6 +357,7 @@ public final class Url {
 		public static final String BIN_CSV_FILE = PATH + "/binCsvFile";
 		public static final String CSV_FILE = PATH + "/csvFile";
 		public static final String SHEET_DATA = PATH + "/getSheetData";
+		public static final String SECURITY_SHEET_DATA = PATH + "/getSecuritySheetData";
 		
 		public static final String SEND_COMMENT = PATH + "/sendComment";
 		public static final String ANALYSIS = PATH + "/analysis";

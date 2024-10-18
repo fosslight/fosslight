@@ -806,6 +806,14 @@ public class ExcelUtil extends CoTopComponent {
 		int checkSumCol = -1;
 		// Package URL
 		int packageUrlCol = -1;
+		// CVE ID
+		int cveIdCol = -1;
+		// Vulnerability Resolution
+		int vulnerabilityResolutionCol = -1;
+		// Official CVE Security Patch Link
+		int securityPatchLinkCol = -1;
+		// Security Comments 
+		int securityCommentsCol = -1;
 
 		Map<String, String> errMsg = new HashMap<>();
 		
@@ -1048,6 +1056,34 @@ public class ExcelUtil extends CoTopComponent {
 
 						checkSumCol = colIdx;
 						break;
+					case "VULNERABILITY RESOLUTION":
+						if (vulnerabilityResolutionCol > -1) {
+							dupColList.add(value);
+						}
+
+						vulnerabilityResolutionCol = colIdx;
+						break;
+					case "SECURITY PATCH LINK FOR INTERNAL":
+						if (securityPatchLinkCol > -1) {
+							dupColList.add(value);
+						}
+
+						securityPatchLinkCol = colIdx;
+						break;
+					case "SECURITY COMMENTS":
+						if (securityCommentsCol > -1) {
+							dupColList.add(value);
+						}
+
+						securityCommentsCol = colIdx;
+						break;
+					case "CVE ID":
+						if (cveIdCol > -1) {
+							dupColList.add(value);
+						}
+
+						cveIdCol = colIdx;
+						break;
 					default:
 						break;
 				}
@@ -1078,7 +1114,7 @@ public class ExcelUtil extends CoTopComponent {
 					colNames.add("OSS VERSION");
 				}
 			}
-			if (!colNames.isEmpty()) {
+			if (!colNames.isEmpty() && !avoidNull(readType).equalsIgnoreCase("total")) {
 				String msg = colNames.toString();
 				msg = "No required fields were found. Sheet Name : [".concat(sheet.getSheetName()).concat("],  Filed Name : ").concat(msg);
 				errMsg.put("reqCol", msg);
@@ -1146,23 +1182,32 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setOssName(ossNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossNameCol))).trim().replaceAll("\t", ""));
     					bean.setOssVersion(ossVersionCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossVersionCol))).trim().replaceAll("\t", ""));
     					
-    					String downloadLocation = avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\t", "");
-    					if (downloadLocation.equals("NONE") || downloadLocation.equals("NOASSERTION") || downloadLocationCol < 0) {
+    					if (downloadLocationCol < 0) {
     						bean.setDownloadLocation("");
     					} else {
-    						bean.setDownloadLocation(downloadLocation);
+    						String downloadLocation = avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\t", "");
+    						if (downloadLocation.equals("NONE") || downloadLocation.equals("NOASSERTION")) {
+    							bean.setDownloadLocation("");
+        					} else {
+        						bean.setDownloadLocation(downloadLocation);
+        					}
     					}
     					
     					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\t", ""));
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
     
-    					String copyrightText = getCellData(row.getCell(copyrightTextCol));
-    					if (copyrightText.equals("NONE") || copyrightText.equals("NOASSERTION") || copyrightTextCol < 0) {
+    					if (downloadLocationCol < 0) {
     						bean.setCopyrightText("");
     					} else {
-    						bean.setCopyrightText(copyrightText);
+    						String copyrightText = getCellData(row.getCell(copyrightTextCol));
+        					if (copyrightText.equals("NONE") || copyrightText.equals("NOASSERTION")) {
+        						bean.setCopyrightText("");
+        					} else {
+        						bean.setCopyrightText(copyrightText);
+        					}
     					}
+    					
     					bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
     					bean.setSpdxIdentifier(spdxIdentifierCol < 0 ? "" : getCellData(row.getCell(spdxIdentifierCol)));
     				}
@@ -1178,53 +1223,57 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setReportKey(getCellData(row.getCell(noCol)));
     				}
 
-    				String licenseConcluded = getCellData(row.getCell(licenseCol));
-    				if (isSPDXSpreadsheet(sheet) && (licenseConcluded.contains("AND") || licenseConcluded.contains("OR"))) {
-    					String licenseComment = getCellData(row.getCell(commentCol));
-    					String comment = "";
+    				if (licenseCol > 0) {
+    					String licenseConcluded = getCellData(row.getCell(licenseCol));
+        				if (isSPDXSpreadsheet(sheet) && (licenseConcluded.contains("AND") || licenseConcluded.contains("OR"))) {
+        					String licenseComment = getCellData(row.getCell(commentCol));
+        					String comment = "";
 
-    					if (!licenseConcluded.isEmpty()) {
-    						comment += licenseConcluded;
-    					}
+        					if (!licenseConcluded.isEmpty()) {
+        						comment += licenseConcluded;
+        					}
 
-    					if (!licenseComment.isEmpty()) {
-    						if (licenseConcluded.isEmpty()) {
-    							comment += licenseComment;
-    						} else {
-    							comment += " / " + licenseComment;
-    						}
-    					}
+        					if (!licenseComment.isEmpty()) {
+        						if (licenseConcluded.isEmpty()) {
+        							comment += licenseComment;
+        						} else {
+        							comment += " / " + licenseComment;
+        						}
+        					}
 
-    					bean.setComments(commentCol < 0 ? "" : comment.trim());
-    				} else {
-    					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)).trim());
+        					bean.setComments(commentCol < 0 ? "" : comment.trim());
+        				} else {
+        					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)).trim());
+        				}
     				}
     
     				// oss Name을 입력하지 않거나, 이전 row와 oss name, oss version이 동일한 경우, 멀티라이선스로 판단
     				OssComponentsLicense subBean = new OssComponentsLicense();
-    				String licenseName = getCellData(row.getCell(licenseCol));
-    				if (isSPDXSpreadsheet(sheet)){
-    					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
-    				} else if (licenseName.contains(",")) {
-    					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
+    				if (licenseCol > 0) {
+    					String licenseName = getCellData(row.getCell(licenseCol));
+        				if (isSPDXSpreadsheet(sheet)){
+        					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
+        				} else if (licenseName.contains(",")) {
+        					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
+        				}
+        				
+        				if (!licenseName.matches("\\A\\p{ASCII}*\\z")) {
+    						byte[] asciiValues = licenseName.getBytes(StandardCharsets.US_ASCII);
+    						byte[] asciiValuesRetry = new byte[asciiValues.length];
+    						for (int i=0; i < asciiValues.length ; i++) {
+    							if (asciiValues[i] == 63) {
+    								asciiValuesRetry[i] = 32;
+    							} else {
+    								asciiValuesRetry[i] = asciiValues[i];
+    							}
+    						}
+    	    				
+    						licenseName = new String(asciiValuesRetry);
+    					}
+        				
+        				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);
+        				subBean.setLicenseText(licenseTextCol < 0 ? "" : getCellData(row.getCell(licenseTextCol)));
     				}
-    				
-    				if (!licenseName.matches("\\A\\p{ASCII}*\\z")) {
-						byte[] asciiValues = licenseName.getBytes(StandardCharsets.US_ASCII);
-						byte[] asciiValuesRetry = new byte[asciiValues.length];
-						for (int i=0; i < asciiValues.length ; i++) {
-							if (asciiValues[i] == 63) {
-								asciiValuesRetry[i] = 32;
-							} else {
-								asciiValuesRetry[i] = asciiValues[i];
-							}
-						}
-	    				
-						licenseName = new String(asciiValuesRetry);
-					}
-    				
-    				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);
-    				subBean.setLicenseText(licenseTextCol < 0 ? "" : getCellData(row.getCell(licenseTextCol)));
     				
     				if ("false".equals(subBean.getLicenseText()) || "-".equals(subBean.getLicenseText())) {
     					subBean.setLicenseText("");
@@ -1281,6 +1330,22 @@ public class ExcelUtil extends CoTopComponent {
     				if (checkSumCol > -1) {
 						bean.setCheckSum(checkSumCol < 0 ? "" : avoidNull(getCellData(row.getCell(checkSumCol))).trim().replaceAll("\t", ""));
 					}
+    				
+    				if (cveIdCol > -1) {
+    					bean.setCveId(cveIdCol < 0 ? "" : avoidNull(getCellData(row.getCell(cveIdCol))).trim());
+    				}
+    				
+    				if (vulnerabilityResolutionCol > -1) {
+    					bean.setVulnerabilityResolution(vulnerabilityResolutionCol < 0 ? "" : avoidNull(getCellData(row.getCell(vulnerabilityResolutionCol))).trim());
+    				}
+    				
+    				if (securityPatchLinkCol > -1) {
+    					bean.setSecurityPatchLink(securityPatchLinkCol < 0 ? "" : avoidNull(getCellData(row.getCell(securityPatchLinkCol))).trim());
+    				}
+
+    				if (securityCommentsCol > -1) {
+    					bean.setSecurityComments(securityCommentsCol < 0 ? "" : avoidNull(getCellData(row.getCell(securityCommentsCol))).trim());
+    				}
     				
     				// homepage와 download location이 http://로 시작하지 않을 경우 자동으로 체워줌
 //    				if (!isEmpty(bean.getHomepage()) 

@@ -1489,7 +1489,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 			
-			// OSC-486
 			// version 정보가 자동으로 변경된 Data 체크
 			if (convertObj.containsKey("versionChangeList")) {
 				resultMap.put("versionChangedList",convertObj.get("versionChangeList"));
@@ -1575,6 +1574,58 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 		
 		return true;
+	}
+	
+	public static Map<String, Object> makeSecurityGridDataFromReport(List<OssComponents> ossComponents, List<OssComponents> reportData, String fileSeq, String readType) {
+		Map<String, Object> resultMap = new HashMap<>();
+		List<OssComponents> fixedList = new ArrayList<>();
+		List<OssComponents> notFixedList = new ArrayList<>();
+		
+		if (reportData != null) {
+			Map<String, OssComponents> reportMap = new HashMap<>();
+			for (OssComponents report : reportData) {
+				String key = (report.getOssName() + "_" + report.getOssVersion() + "_" + report.getCveId()).toUpperCase();
+				reportMap.put(key, report);
+			}
+			
+			for (OssComponents bean : ossComponents) {
+				String key = (bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getCveId()).toUpperCase();
+				
+				if (reportMap.containsKey(key)) {
+					OssComponents reportBean = reportMap.get(key);
+					
+					String vulnerabilityResolution = reportBean.getVulnerabilityResolution();
+					String securityPatchLink = reportBean.getSecurityPatchLink();
+					String securityComments = reportBean.getSecurityComments();
+					
+					if (!isEmpty(vulnerabilityResolution)) {
+						bean.setVulnerabilityResolution(vulnerabilityResolution);
+					}
+					if (!isEmpty(securityPatchLink)) {
+						if (avoidNull(vulnerabilityResolution).equalsIgnoreCase("fixed")) {
+							bean.setSecurityPatchLink("N/A");
+						} else {
+							bean.setSecurityPatchLink(securityPatchLink);
+						}
+					}
+					if (!isEmpty(securityComments)) {
+						bean.setSecurityComments(securityComments);
+					}
+				}
+				
+				if (bean.getVulnerabilityResolution().equalsIgnoreCase("fixed")) {
+					fixedList.add(bean);
+				} else {
+					notFixedList.add(bean);
+				}
+			}	
+		}
+		
+		resultMap.put("totalGridData", ossComponents);
+		resultMap.put("fixedGridData", fixedList);
+		resultMap.put("notFixedGridData", notFixedList);
+
+		return resultMap;
 	}
 	
 	public static Object identificationSortByValidInfo(List<ProjectIdentification> list, Map<String, String> validMap, Map<String, String> validDiffMap) {

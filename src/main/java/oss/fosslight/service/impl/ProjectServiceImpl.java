@@ -375,6 +375,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		project.setAndroidNoticeFile(projectMapper.selectAndroidNoticeFile(project));
 		project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
 		
+		if (!isEmpty(project.getTotalCsvFileId())) {
+			project.setTotalCsvFile(projectMapper.selectCsvFile(project.getTotalCsvFileId()));
+		}
+		
 		//  button(삭제/복사/저장) view 여부
 		if (CommonFunction.isAdmin()) {
 			project.setViewOnlyFlag(CoConstDef.FLAG_NO);
@@ -6627,10 +6631,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registSecurity(String prjId, String tabName, List<OssComponents> ossComponents) {
+	public void registSecurity(Project project, String tabName, List<OssComponents> ossComponents) {
 		Map<String, OssComponents> securityGridMap = new HashMap<>();
 		List<OssComponents> deleteDataList = new ArrayList<>();
 		
+		String prjId = project.getPrjId();
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(prjId);
 		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
@@ -6687,6 +6692,16 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				 }
 				 
 				 sqlSession.commit();
+			}
+		}
+		
+		if (!isEmpty(project.getTotalCsvFileId())) {
+			projectMapper.updateFileId(project);
+			
+			if (project.getCsvFileSeq() != null) {
+				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
+					projectMapper.updateFileBySeq(project.getCsvFileSeq().get(i));
+				}				
 			}
 		}
 	}
