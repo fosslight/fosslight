@@ -418,8 +418,8 @@ public class Project extends ComBean implements Serializable {
 	/** The src android result file id. */
 	private String srcAndroidResultFileId;
 	
-	/** The security(total) csv file id. */
-	private String totalCsvFileId;
+	/** The security csv file id. */
+	private String scrtCsvFileId;
 	
 	/** The notice file id. */
 	private String noticeFileId; // 라이센스 파일ID
@@ -475,8 +475,8 @@ public class Project extends ComBean implements Serializable {
 	/** The android result file. */
 	private List<T2File> androidResultFile; // 안드로이드 Result 파일 객체
 
-	/** The security(total) csv file. */
-	private List<T2File> totalCsvFile; // csv 파일 객체
+	/** The security csv file. */
+	private List<T2File> scrtCsvFile; // csv 파일 객체
 	
 	/** The notice file info. */
 	private T2File noticeFileInfo; // 라이센스 파일객체
@@ -4620,19 +4620,19 @@ public class Project extends ComBean implements Serializable {
 		this.reuseRefPrjId4 = reuseRefPrjId4;
 	}
 
-	public String getTotalCsvFileId() {
-		return totalCsvFileId;
+	public String getScrtCsvFileId() {
+		return scrtCsvFileId;
 	}
 
-	public void setTotalCsvFileId(String totalCsvFileId) {
-		this.totalCsvFileId = totalCsvFileId;
+	public void setScrtCsvFileId(String scrtCsvFileId) {
+		this.scrtCsvFileId = scrtCsvFileId;
 	}
 
-	public List<T2File> getTotalCsvFile() {
-		return totalCsvFile;
+	public List<T2File> getScrtCsvFile() {
+		return scrtCsvFile;
 	}
 
-	public void setTotalCsvFile(List<T2File> totalCsvFile) {
-		this.totalCsvFile = totalCsvFile;
+	public void setScrtCsvFile(List<T2File> scrtCsvFile) {
+		this.scrtCsvFile = scrtCsvFile;
 	}
 }

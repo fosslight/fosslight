@@ -698,7 +698,7 @@
 			, A.SRC_ANDROID_NOTICE_FILE_ID
 			, A.SRC_ANDROID_NOTICE_XML_ID
 			, A.SRC_ANDROID_RESULT_FILE_ID
-			, A.TOTAL_CSV_FILE_ID
+			, A.SCRT_CSV_FILE_ID
 			, A.PACKAGE_FILE_ID
 			, A.PACKAGE_FILE_ID2
 			, A.PACKAGE_FILE_ID3
@@ -1632,8 +1632,8 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcAndroidResultFileId)">
 			SRC_ANDROID_RESULT_FILE_ID = #{srcAndroidResultFileId}
 			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(totalCsvFileId)">
-			TOTAL_CSV_FILE_ID = #{totalCsvFileId}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(scrtCsvFileId)">
+			SCRT_CSV_FILE_ID = #{scrtCsvFileId}
 			</if>
 		</set>
 		WHERE 

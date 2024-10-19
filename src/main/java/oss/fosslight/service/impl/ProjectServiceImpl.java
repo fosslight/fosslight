@@ -375,8 +375,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		project.setAndroidNoticeFile(projectMapper.selectAndroidNoticeFile(project));
 		project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
 		
-		if (!isEmpty(project.getTotalCsvFileId())) {
-			project.setTotalCsvFile(projectMapper.selectCsvFile(project.getTotalCsvFileId()));
+		if (!isEmpty(project.getScrtCsvFileId())) {
+			project.setScrtCsvFile(projectMapper.selectCsvFile(project.getScrtCsvFileId()));
 		}
 		
 		//  button(삭제/복사/저장) view 여부
@@ -6695,7 +6695,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 		}
 		
-		if (!isEmpty(project.getTotalCsvFileId())) {
+		if (!isEmpty(project.getScrtCsvFileId())) {
 			projectMapper.updateFileId(project);
 			
 			if (project.getCsvFileSeq() != null) {
