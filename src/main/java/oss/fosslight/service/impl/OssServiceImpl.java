@@ -4335,7 +4335,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if (CoConstDef.FLAG_YES.equals(CoCodeManager.OSS_INFO_UPPER.get(key).getInCpeMatchFlag())) checkInCpeMatchFlag = true;
 		}
 		
-		List<Vulnerability> list = vulnerabilityMapper.selectOssVulnerabilityListByVersionAlias(param);
+		List<Vulnerability> list = null; // vulnerabilityMapper.selectOssVulnerabilityListByVersionAlias(param);
 		
 		if ("N/A".equals(ossMaster.getOssVersion()) || isEmpty(ossMaster.getOssVersion())) {
 			param.setOssVersion("-");
