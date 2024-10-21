@@ -749,7 +749,7 @@ public class ExcelUtil extends CoTopComponent {
 		
 		
 		// 사용자 입력 값을 기준으로 OSS Master 정보를 비교 ID를 설정한다.
-		if (checkId && list != null && !list.isEmpty()) {
+		if (checkId && list != null && !list.isEmpty() && !readType.equalsIgnoreCase("total")) {
 
 			// AutoIdentification  처리중 라이선스명이 사용자설정 명칭(닉네임)이 DB에 등록된 정식명칭등으로 치환되는 내용을 사용자에게 표시하기 위해 
 			// 엑셀 파일의 원본 내용을 보관한다.
