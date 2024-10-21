@@ -1578,8 +1578,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	
 	public static Map<String, Object> makeSecurityGridDataFromReport(List<OssComponents> ossComponents, List<OssComponents> reportData, String fileSeq, String readType) {
 		Map<String, Object> resultMap = new HashMap<>();
-		List<OssComponents> fixedList = new ArrayList<>();
-		List<OssComponents> notFixedList = new ArrayList<>();
 		
 		if (reportData != null) {
 			Map<String, OssComponents> reportMap = new HashMap<>();
@@ -1602,28 +1600,21 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						bean.setVulnerabilityResolution(vulnerabilityResolution);
 					}
 					if (!isEmpty(securityPatchLink)) {
-						if (avoidNull(vulnerabilityResolution).equalsIgnoreCase("fixed")) {
+						if (!avoidNull(vulnerabilityResolution).equalsIgnoreCase("fixed")) {
 							bean.setSecurityPatchLink("N/A");
 						} else {
 							bean.setSecurityPatchLink(securityPatchLink);
 						}
+					} else {
+						bean.setSecurityPatchLink("N/A");
 					}
-					if (!isEmpty(securityComments)) {
-						bean.setSecurityComments(securityComments);
-					}
-				}
-				
-				if (bean.getVulnerabilityResolution().equalsIgnoreCase("fixed")) {
-					fixedList.add(bean);
-				} else {
-					notFixedList.add(bean);
+					
+					bean.setSecurityComments(avoidNull(securityComments));
 				}
 			}	
 		}
 		
 		resultMap.put("totalGridData", ossComponents);
-		resultMap.put("fixedGridData", fixedList);
-		resultMap.put("notFixedGridData", notFixedList);
 
 		return resultMap;
 	}
