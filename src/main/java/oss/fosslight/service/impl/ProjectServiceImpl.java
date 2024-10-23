@@ -1756,6 +1756,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			project.setPublicYn(avoidNull(project.getPublicYn(), CoConstDef.FLAG_YES));
+			project.setSecMailYn(avoidNull(project.getSecMailYn(), CoConstDef.FLAG_YES));
+			if(project.getSecMailYn().equals("Y")) {
+				project.setSecMailDesc("");
+			} else {
+				project.setSecMailDesc(avoidNull(project.getSecMailDesc()));
+			}
 			
 			// if complete value equals 'Y', set
 			if (!isNew) {

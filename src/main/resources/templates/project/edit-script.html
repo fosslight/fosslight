@@ -453,26 +453,19 @@
 					arr[index] = obj.userId+":"+obj.userName;
 				});
 			});
-			
-			// project security setting 임시 처리
-			if([[${project.prjId}]] != "" && [[${project.viewOnlyFlag}]] == 'N'){
-				$("[name='publicYn']").on('change',function(e){
-					var param = {prjId : [[${project.prjId}]], publicYn : ($("[name='publicYn']:checked").val())};
-					
-					$.ajax({
-						url : '/project/updatePublicYn',
-						type : 'POST',
-						data : JSON.stringify(param),
-						dataType : 'json',
-						cache : false,
-						contentType : 'application/json',
-						success: function(){
-							alertify.success([[#{msg.common.success}]]);
-						},
-						error : fn.onError
-					});
-				});
-			}
+
+            if ("" != [[${project.prjId}]] && "N" == [[${project.viewOnlyFlag}]]){
+                $("[name='secMailYn']").on('change',function(e){
+                    var checked = $("[name='secMailYn']:checked").val();
+                    if(checked == 'Y') {
+                        $("#secMailDesc").hide();
+                        $(".retxt").text("");
+                    } else {
+                        $("#secMailDesc").show();
+                    }
+
+                });
+            }
 			
 			/* 2018-07-19 choye 추가  */
 			$("#reqToOpen").click(function(e){
@@ -2486,6 +2479,14 @@
 						}
 					}
 				});
+
+                // Security Mail
+                var checked = $("[name='secMailYn']:checked").val();
+                if(checked == 'Y') {
+                    $("#secMailDesc").hide();
+                } else {
+                    $("#secMailDesc").show();
+                }
 				
 				// Complete 버튼 처리 
 				var status = ["PROG","REQ","REV"];

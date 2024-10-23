@@ -117,17 +117,40 @@
                                 </div>
                                 <div class="row">
                                     <div th:if="${project.viewOnlyFlag != 'Y'}" class="col-md-12">
-                                        <div class="form-group">
-                                            <label for="inputName" th:text="#{msg.common.field.permission}"></label>
+                                        <div class="col-md-6 mb-0">
                                             <div class="form-group">
-                                                <div class="col-sm-12">
-                                                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                                        <label class="btn btn-sm btn-onOff px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio1" value="Y" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="" th:text="Everyone" th:disabled="${isReadOnly}">
-                                                        </label>
-                                                        <label class="btn btn-sm btn-onOff active px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Watcher'" th:disabled="${isReadOnly}">
-                                                        </label>
+                                                <label for="inputName" th:text="#{msg.common.field.permission}"></label>
+                                                <div class="form-group">
+                                                    <div class="col-sm-12">
+                                                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                            <label class="btn btn-sm btn-onOff px-3">
+                                                                <input type="radio" name="publicYn" id="permissionRadio1" value="Y" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="" th:text="Everyone" th:disabled="${isReadOnly}">
+                                                            </label>
+                                                            <label class="btn btn-sm btn-onOff active px-3">
+                                                                <input type="radio" name="publicYn" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Watcher'" th:disabled="${isReadOnly}">
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-0">
+                                            <div class="form-group">
+                                                <label for="inputName" th:text="#{msg.common.field.security.mail}"></label>
+                                                <div class="form-group">
+                                                    <div class="col-sm-12">
+                                                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                            <label class="btn btn-sm btn-onOff px-3">
+                                                                <input type="radio" name="secMailYn" id="secMailRadio1" value="Y" th:checked="${project != null && project.secMailYn != 'N'}" autocomplete="off" checked="" th:text="Enable">
+                                                            </label>
+                                                            <label class="btn btn-sm btn-onOff active px-3">
+                                                                <input type="radio" name="secMailYn" id="secMailRadio2" value="N" th:checked="${project != null && project.secMailYn == 'N'}" autocomplete="off" th:text="'Disable'">
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <input type="text" id="secMailDesc" name="secMailDesc" class="form-control mt-2" th:disabled="${isReadOnly}" th:value="${project.secMailDesc}">
+                                                        <span class="retxt text-danger text-sm"></span>
                                                     </div>
                                                 </div>
                                             </div>

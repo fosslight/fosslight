@@ -145,7 +145,7 @@ public interface ProjectService extends HistoryConfig{
 	public void insertProjectModel(Project project);
 	
 	public void updatePublicYn(Project project);
-	
+
 	Map<String, Object> getProjectToAddList(OssComponents ossComponents);
 	
 	Map<String, Object> getAddList(Project project);

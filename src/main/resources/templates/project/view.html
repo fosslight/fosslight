@@ -57,6 +57,17 @@
 												</td>
 											</tr>
 											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.security.mail}"></th>
+												<td>
+													<th:block th:if="${project != null and project.secMailYn != 'N'}">
+														<span th:text="'Enable'"></span><br>
+													</th:block>
+													<th:block th:unless="${project != null and project.secMailYn != 'N'}">
+														<span th:text="${'Diable (' + project.secMailDesc + ')'}"></span><br>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.OS}"></th>
 												<td>
 													<th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">

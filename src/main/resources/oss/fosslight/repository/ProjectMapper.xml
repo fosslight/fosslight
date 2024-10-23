@@ -664,7 +664,9 @@
 			, A.COMPLETE_YN 
 			, A.DROP_YN
 			, A.REVIEWER 
-			, A.USE_YN 
+			, A.USE_YN
+		    , A.SECMAIL_YN
+		    , A.SECMAIL_DESC
 			, A.COPY_PRJ_ID
 			, A.WITHOUT_VERIFY_YN
 			
@@ -839,6 +841,8 @@
 			, IDENTIFICATION_SUB_STATUS_BIN
 			, IDENTIFICATION_SUB_STATUS_ANDROID
 			, PUBLIC_YN
+			, SECMAIL_YN
+			, SECMAIL_DESC
 			, PRIORITY
 			, DIVISION
 		)
@@ -867,6 +871,8 @@
 			, #{identificationSubStatusBin}
 			, #{identificationSubStatusAndroid}
 			, #{publicYn}
+			, #{secMailYn}
+			, #{secMailDesc}
 			, #{priority}
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
 		) ON DUPLICATE KEY UPDATE
@@ -885,6 +891,9 @@
 			, COMPLETE_YN                 = #{completeYn}
 			, MODIFIER                    = #{loginUserName}
 			, MODIFIED_DATE = now()
+		    , PUBLIC_YN                   = #{publicYn}
+		    , SECMAIL_YN                  = #{secMailYn}
+		    , SECMAIL_DESC                = #{secMailDesc}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			, CREATOR                    = #{creator}
 			</if>
@@ -2632,6 +2641,12 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(dropYn)">
 			, DROP_YN = #{dropYn}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(secMailYn)">
+			, SECMAIL_YN = #{secMailYn}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(secMailDesc)">
+			, SECMAIL_DESC = #{secMailDesc}
+			</if>
 			/* 2018-07-20 choye 추가 */
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(commId)">
 			, COMM_ID = #{commId}
@@ -4284,7 +4299,7 @@
 		   SET PUBLIC_YN = #{publicYn}
 		 WHERE PRJ_ID = #{prjId}
 	</update>
-	
+
 	<select id="getModelCategoryTemplateArray" parameterType="String" resultType="String">
 		SELECT CONCAT(RESULT.Category, ' CHAR(62) ', RESULT.SubCategory) AS 'Desc'
 		FROM (

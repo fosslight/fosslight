@@ -681,6 +681,10 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The publicYn. */
 	private String publicYn;
+
+	private String secMailYn;
+
+	private String secMailDesc;
 	
 	/** The viewOnlyFlag. */
 	private String viewOnlyFlag;
@@ -3879,6 +3883,22 @@ public class Project extends ComBean implements Serializable {
 
 	public void setPublicYn(String publicYn) {
 		this.publicYn = publicYn;
+	}
+
+	public String getSecMailYn() {
+		return secMailYn;
+	}
+
+	public void setSecMailYn(String secMailYn) {
+		this.secMailYn = secMailYn;
+	}
+
+	public String getSecMailDesc() {
+		return secMailDesc;
+	}
+
+	public void setSecMailDesc(String secMailDesc) {
+		this.secMailDesc = secMailDesc;
 	}
 	
 	public String getViewOnlyFlag() {

@@ -4662,6 +4662,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "Before : " + beforeBean.getComment() + "<br />";
 				comment += "After : " + afterBean.getComment() + "</p>";
 			}
+
+			before = avoidNull(beforeBean.getSecMailDesc()).replaceAll("(\r\n|\r|\n|\n\r)", "");
+			after = avoidNull(afterBean.getSecMailDesc()).replaceAll("(\r\n|\r|\n|\n\r)", "");
+
+			if (!avoidNull(beforeBean.getSecMailYn()).equals(avoidNull(afterBean.getSecMailYn())) || !before.equals(after)) {
+				comment += "<p><strong>Security Mail</strong><br />";
+				comment += "Before : " + (beforeBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + before+ ")") + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + (afterBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + after + ")") + "</span><br /></p>";
+			}
 		} else {
 			// Project Division
 			if (!avoidNull(beforeBean.getDivision()).equals(avoidNull(afterBean.getDivision()))) {

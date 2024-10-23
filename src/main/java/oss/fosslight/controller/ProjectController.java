@@ -3699,27 +3699,6 @@ public class ProjectController extends CoTopComponent {
 		return makeJsonResponseHeader();
 	}
 	
-	/**
-	 * updatePublicYn
-	 *
-	 * @param project the project
-	 * @param req the req
-	 * @param res the res
-	 * @param model the model
-	 * @return the response entity
-	 */
-	@PostMapping(value = PROJECT.UPDATE_PUBLIC_YN)
-	public @ResponseBody ResponseEntity<Object> updatePublicYn(@RequestBody Project project,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
-		try {
-			projectService.updatePublicYn(project);
-		} catch (Exception e) {
-			return makeJsonResponseHeader(false, null);
-		}
-		
-		return makeJsonResponseHeader();
-	}
-	
 	@GetMapping(value = PROJECT.PROJECT_TO_ADD_LIST)
 	public @ResponseBody ResponseEntity<Object> projectToAddList(@ModelAttribute OssComponents ossComponents, HttpServletRequest req,
 			HttpServletResponse res, Model model) {

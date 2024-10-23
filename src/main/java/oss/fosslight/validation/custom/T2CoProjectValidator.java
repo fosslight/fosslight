@@ -1695,6 +1695,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 		String networkServerType = map.get("NETWORK_SERVER_TYPE");
 		boolean isAdmin = CommonFunction.isAdmin();
 		//String prjDate = map.get("OSS_NOTICE_DUE_DATE");
+		String secMailYn = map.get("SEC_MAIL_YN");
+		String secMailDec = map.get("SEC_MAIL_DESC");
 		
 		// -- 프로젝트 기본정보 유효성 체크 start --------------------------------
 		// 1. 신규인경우 프로젝트명 유니크 체크 -> 수정인 경우에도 체크
@@ -1771,6 +1773,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 		targetName = "NETWORK_SERVER_TYPE";
 		if (!errMap.containsKey(targetName)) {
 			if (isEmpty(networkServerType)) errMap.put(targetName, targetName + ".REQUIRED");
+		}
+
+		targetName = "SECMAIL_DESC";
+		if(!errMap.containsKey(targetName)) {
+			if(isEmpty(secMailDec) && secMailYn.equals("N")) errMap.put(targetName, targetName + ".REQUIRED");
 		}
 		
 		if (isAdmin) {
