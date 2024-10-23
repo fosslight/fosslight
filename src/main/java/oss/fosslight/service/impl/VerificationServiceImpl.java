@@ -2251,11 +2251,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		oss.fosslight.domain.File reviewReportFile = null;
 
-		if (!isEmpty(project.getZipFileId())) {
-			reviewReportFile = verificationMapper.selectVerificationFile(project.getZipFileId());
-			fileName =  reviewReportFile.getOrigNm();
-			filePath += File.separator+fileName;
-		} else {
+		if (!isEmpty(project.getReviewReportFileId())) {
 			reviewReportFile = verificationMapper.selectVerificationFile(project.getReviewReportFileId());
 			fileName =  reviewReportFile.getOrigNm();
 			filePath += File.separator+prjId+File.separator+fileName;
