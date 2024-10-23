@@ -3048,7 +3048,11 @@
 							}
 
 							if (deactivateFlag == "Y" && localDeactivateFlag == "N"){ // deactivate Flag unchecked
-								alertify.alert([[#{msg.oss.required.activate}]], function(){});
+								if (ossId != null) {
+									alertify.alert([[#{msg.oss.required.activate}]], function(){});
+								} else {
+									alertify.alert([[#{msg.oss.required.deactivate.unchecked}]], function(){});
+								}
 								return false;
 							}
 						}
