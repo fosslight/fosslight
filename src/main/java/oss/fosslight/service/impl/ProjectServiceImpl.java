@@ -3340,7 +3340,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 					
 					// merge 결과 (src/bat/3rd) 일시
-					if (copyCheckKey.contains(copyCheckKey2)){
+					if (copyCheckKey2.contains(copyCheckKey)){
 						bean.setMergePreDiv(gridData.getMergePreDiv());
 						
 						// BOM에 초기표시된 obligation을 초기 값으로 설정
