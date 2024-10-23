@@ -464,6 +464,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 						if (returnSuccess > 0){
 							log.debug(filePath + "/" + _fName + " is delete success.");
+							fileService.deletePhysicalFile(file, "verify");
 						}else{
 							log.debug(filePath + "/" + _fName + " is delete failed.");
 						}

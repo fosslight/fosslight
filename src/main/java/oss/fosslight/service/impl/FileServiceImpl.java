@@ -1173,6 +1173,15 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			} catch(Exception e) {
 				log.info(e.getMessage(), e);
 			}
+		} else {
+			try {
+				File LogiFile = new File(filePath);
+				if (LogiFile.exists()) {
+					LogiFile.delete();
+				}
+			} catch (Exception e) {
+				log.info(e.getMessage(), e);
+			}
 		}
 	}
 
