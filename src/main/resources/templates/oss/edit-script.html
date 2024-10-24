@@ -1403,6 +1403,7 @@
 	// 그리드 삭제 버튼
 	function exeDelete(rowId){
 		// lastsel save
+		gLicenseData[lastsel] = "Y";
 		$('#_licenseChoice').jqGrid('saveRow',lastsel);
 		var list = [];
 		data.copyData ? list = data.copyData.ossLicenses : list = data.list.rows;
