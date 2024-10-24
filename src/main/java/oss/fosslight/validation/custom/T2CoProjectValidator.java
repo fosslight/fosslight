@@ -3030,8 +3030,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 		if (!isEmpty(key)) {
 			switch (key) {
 				case "totalList":
-				case "fixedList":
-				case "notFixedList":
+				case "fullDiscoveredList":
 					ossComponetSecurityList = (List<OssComponents>) obj;
 				break;
 				case "mainList":

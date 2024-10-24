@@ -5147,8 +5147,28 @@ public class ProjectController extends CoTopComponent {
 		try {
 			result = projectService.getSecurityGridList(project);
 			rtnMap.put("totalGridData", (List<OssComponents>) result.get("totalList"));
-			rtnMap.put("fixedGridData", (List<OssComponents>) result.get("fixedList"));
-			rtnMap.put("notFixedGridData", (List<OssComponents>) result.get("notFixedList"));
+			rtnMap.put("fullDiscoveredGridData", (List<OssComponents>) result.get("fullDiscoveredList"));
+			
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+			pv.setProcType(pv.PROC_TYPE_SECURITY);
+			pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+			
+			for (int i = 0; i < 2; i++) {
+				if (i == 0) {
+					pv.setAppendix("totalList", (List<OssComponents>) result.get("totalList"));
+				} else {
+					pv.setAppendix("fullDiscoveredList", (List<OssComponents>) result.get("fullDiscoveredList"));
+				}
+				T2CoValidationResult vr = pv.validate(new HashMap<>());
+				if (!vr.isValid()) {
+					if (i == 0) {
+						rtnMap.put("totalValidData", vr.getValidMessageMap());
+					} else {
+						rtnMap.put("fullDiscoveredValidData", vr.getValidMessageMap());
+					}
+				}
+			}
+			
 			if (result.containsKey("msg")) {
 				rtnMap.put("msg", result.get("msg"));
 			}
