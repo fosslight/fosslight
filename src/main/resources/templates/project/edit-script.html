@@ -454,18 +454,16 @@
 				});
 			});
 
-            if ("" != [[${project.prjId}]] && "N" == [[${project.viewOnlyFlag}]]){
-                $("[name='secMailYn']").on('change',function(e){
-                    var checked = $("[name='secMailYn']:checked").val();
-                    if(checked == 'Y') {
-                        $("#secMailDesc").hide();
-                        $(".retxt").text("");
-                    } else {
-                        $("#secMailDesc").show();
-                    }
+            $("[name='secMailYn']").on('change',function(e){
+                var checked = $("[name='secMailYn']:checked").val();
+                if(checked == 'Y') {
+                    $("#secMailDesc").hide();
+                    $(".retxt").text("");
+                } else {
+                    $("#secMailDesc").show();
+                }
 
-                });
-            }
+            });
 			
 			/* 2018-07-19 choye 추가  */
 			$("#reqToOpen").click(function(e){
