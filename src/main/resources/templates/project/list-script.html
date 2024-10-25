@@ -62,12 +62,13 @@ var evt = {
 		$('#division').select2({placeholder: "Division", allowClear: true});
 		$('#statuses').select2({placeholder: "Status", allowClear: true});
         $('#distributionTypeSelect').select2({placeholder: "Distribution Type", allowClear: true});
+        $('#secMailYnSelect').select2({placeholder: "Security Mail(Vulnerabiltiy)", allowClear: true});
 
         var startDate;
         var endDate;
         
         var input = ["prjIdName", "publicYn", "schStartDate", "schEndDate", "creator", "reviewer", "watchers", "modelName", "schBinaryName", "ossName", "ossVersion", "licenseName", "refPartnerName", "prjDivision"];
-		var singleSelect = ["networkServerType", "priority", "distributionType", "noticeType"];
+		var singleSelect = ["networkServerType", "priority", "distributionType", "noticeType", "secMailYn"];
 		var multiSelect = ["statuses"];
 		var textarea = ["comment", "userComment"];
 		
