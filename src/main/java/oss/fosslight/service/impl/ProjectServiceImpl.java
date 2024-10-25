@@ -7554,6 +7554,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		for (OssComponents row : rows) {
 			row.setGridId("jqg" + String.valueOf(idx));
 			row.setComponentId(null);
+			row.setRefPartnerId(row.getReferenceId());
 			row.setReferenceId(prjId);
 			row.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 			

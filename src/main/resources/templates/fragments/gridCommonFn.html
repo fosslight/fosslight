@@ -1544,6 +1544,12 @@
         		target.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
             	fn_grid_com.saveCellData(target.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
             	target.jqGrid('saveRow', _mainLastsel);
+       		},
+       		partnerFormat : function(cellvalue, options, rowObject){
+       			var partnerId = rowObject.refPartnerId;
+       			var partnerName = rowObject.refPartnerName;
+       			
+       			return "("+partnerId+") " + partnerName;
        		}
         }
 
