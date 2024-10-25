@@ -3433,7 +3433,7 @@ var com_fn = {
 						}
 							
 						if ([[${detail.partnerId}]] != null) {
-							$("input[name=creatorNm]").val([[${detail.creatorName}]]);
+							$("input[name=creatorName]").val($("#creatorNm").val());
 							fn.publicChange();
 						}
 					}
