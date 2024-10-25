@@ -1416,6 +1416,9 @@ public class CoMailManager extends CoTopComponent {
 			convBean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, convBean.getDivision()));
 		}
 
+		String secMail = convBean.getSecMailYn().equals("Y") ? "Enable" : "Disable" ;
+		convBean.setSecMailDesc(secMail + " (" + avoidNull(convBean.getSecMailDesc()) + ")");
+
 		return convBean;
 	}
 
