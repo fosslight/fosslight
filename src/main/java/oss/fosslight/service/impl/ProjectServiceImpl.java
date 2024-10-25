@@ -6537,7 +6537,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		identification.setStandardScore(Float.valueOf("0.1"));
 		fullList = projectMapper.selectSecurityListForProject(identification);
 		
-		if (list != null && !list.isEmpty()) {
+		if (fullList != null && !fullList.isEmpty()) {
 			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
 			if (securityDatalist != null && !securityDatalist.isEmpty()) {
 				for (OssComponents oss : securityDatalist) {
@@ -6547,51 +6547,6 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 			
 			int gridIdx = 1;
-			for (ProjectIdentification pi : list) {
-				activateFlag = false;
-				if (isEmpty(pi.getOssVersion())) {
-					activateFlag = true;
-				} 
-				
-				String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
-				String key2 = (pi.getCveId() + "_" + pi.getOssName().replaceAll(" ", "_")).toUpperCase();
-				if (!deduplicatedkey.contains(key)) {
-					deduplicatedkey.add(key);
-					
-					if (securityGridMap.containsKey(key)) {
-						bean = (OssComponents) securityGridMap.get(key);
-					}
-					
-					if (activateFlag) checkOssNameList.add(pi.getOssName());
-					
-					oc = new OssComponents();
-					oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
-					oc.setOssId(pi.getOssId());
-					oc.setOssName(pi.getOssName());
-					oc.setOssVersion(pi.getOssVersion());
-					
-					if (!activateFlag) {
-						oc.setCveId(pi.getCveId());
-						oc.setCvssScore(pi.getCvssScore());
-						oc.setPublDate(pi.getPublDate());
-					}
-					
-					oc.setVulnerabilityResolution("Unresolved");
-					
-					if (bean != null && !isEmpty(bean.getVulnerabilityResolution())) {
-						oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-					}
-					
-					totalList.add(oc);
-					
-					bean = null;
-					gridIdx++;
-				}
-			}
-			
-			gridIdx = 1;
-			deduplicatedkey.clear();
-			
 			for (ProjectIdentification pi : fullList) {
 				activateFlag = false;
 				if (isEmpty(pi.getOssVersion())) {
@@ -6599,7 +6554,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				} 
 					
 				String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
-				String key2 = (pi.getCveId() + "_" + pi.getOssName().replaceAll(" ", "_")).toUpperCase();
+				
 				if (!deduplicatedkey.contains(key)) {
 					deduplicatedkey.add(key);
 					
@@ -6631,6 +6586,53 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					
 					bean = null;
 					gridIdx++;
+				}
+			}
+			
+			if (list != null && !list.isEmpty()) {
+				gridIdx = 1;
+				deduplicatedkey.clear();
+				
+				for (ProjectIdentification pi : list) {
+					activateFlag = false;
+					if (isEmpty(pi.getOssVersion())) {
+						activateFlag = true;
+					} 
+					
+					String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
+					
+					if (!deduplicatedkey.contains(key)) {
+						deduplicatedkey.add(key);
+						
+						if (securityGridMap.containsKey(key)) {
+							bean = (OssComponents) securityGridMap.get(key);
+						}
+						
+						if (activateFlag) checkOssNameList.add(pi.getOssName());
+						
+						oc = new OssComponents();
+						oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
+						oc.setOssId(pi.getOssId());
+						oc.setOssName(pi.getOssName());
+						oc.setOssVersion(pi.getOssVersion());
+						
+						if (!activateFlag) {
+							oc.setCveId(pi.getCveId());
+							oc.setCvssScore(pi.getCvssScore());
+							oc.setPublDate(pi.getPublDate());
+						}
+						
+						oc.setVulnerabilityResolution("Unresolved");
+						
+						if (bean != null && !isEmpty(bean.getVulnerabilityResolution())) {
+							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+						}
+						
+						totalList.add(oc);
+						
+						bean = null;
+						gridIdx++;
+					}
 				}
 			}
 		}
