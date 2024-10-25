@@ -325,10 +325,10 @@
     
     <!-- NVD 정보 등록 -->
     <insert id="insertNvdDataV3" parameterType="HashMap">
-    	INSERT INTO NVD_DATA_V3(CVE_ID, PRODUCT, VERSION)VALUES
-    	(#{cveId}, #{product}, #{version})
+    	INSERT INTO NVD_DATA_V3(CVE_ID, PRODUCT, VERSION, VENDOR) VALUES
+    	(#{cveId}, #{product}, #{version}, #{vendor})
     	ON DUPLICATE KEY UPDATE
-    	CVE_ID = #{cveId}, PRODUCT = #{product}, VERSION = #{version} 
+    	CVE_ID = #{cveId}, PRODUCT = #{product}, VERSION = #{version}, VENDOR = #{vendor}
     </insert>
     <insert id="insertBulkNvdDataV3">
     	INSERT INTO NVD_DATA_V3 (CVE_ID, PRODUCT, VERSION) VALUES
@@ -621,41 +621,27 @@
 	
 	<insert id="insertCpeMatchData">
 		INSERT
-		INTO NVD_CPE_MATCH_TEMP (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
-		VALUES (#{cpeSeq},#{cpe23Uri},#{versionStartIncluding},#{versionEndIncluding},#{versionStartExcluding},#{versionEndExcluding})
+		INTO NVD_CPE_MATCH_TEMP (MATCH_CRITERIA_ID, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
+		VALUES (#{matchCriteriaId},#{cpe23Uri},#{versionStartIncluding},#{versionEndIncluding},#{versionStartExcluding},#{versionEndExcluding})
+		ON DUPLICATE KEY UPDATE
+    	MATCH_CRITERIA_ID = #{matchCriteriaId}, CPE23URI = #{cpe23Uri}, VER_START_INC = #{versionStartIncluding}, VER_END_INC = #{versionEndIncluding}, VER_START_EXC = #{versionStartExcluding}, VER_END_EXC = #{versionEndExcluding}
 	</insert>
 	<insert id="insertCpeMatchNameData">
 		INSERT
-		INTO NVD_CPE_MATCH_NAMES_TEMP (SEQ, IDX, CPE23URI)
-		VALUES (#{cpeSeq}, #{idx}, #{cpe23Uri})
+		INTO NVD_CPE_MATCH_NAMES_TEMP (MATCH_CRITERIA_ID, IDX, CPE23URI)
+		VALUES (#{matchCriteriaId}, #{idx}, #{cpe23Uri})
+		ON DUPLICATE KEY UPDATE
+    	MATCH_CRITERIA_ID = #{matchCriteriaId}, IDX = #{idx}, CPE23URI = #{cpe23Uri}
 	</insert>
 	
 	<select id="selectNvdMatchList" parameterType="hashmap" resultType="String">
 		SELECT 
-			T2.CPE23URI 
+			IFNULL(T2.CPE23URI, T1.CPE23URI) AS CPE23URI
 		FROM NVD_CPE_MATCH T1 
-				INNER JOIN NVD_CPE_MATCH_NAMES T2 
+				LEFT JOIN NVD_CPE_MATCH_NAMES T2 
 					ON T1.MATCH_CRITERIA_ID = T2.MATCH_CRITERIA_ID 
 		WHERE 
-			T1.CPE23URI = #{cpe23Uri}
-		AND
 			T1.MATCH_CRITERIA_ID = #{matchCriteriaId}
-			<choose>
-				<when test="versionStartIncluding != null">AND T1.VER_START_INC = #{versionStartIncluding}</when>
-				<otherwise>AND T1.VER_START_INC IS NULL</otherwise>
-			</choose>
-			<choose>
-				<when test="versionEndIncluding != null">AND T1.VER_END_INC = #{versionEndIncluding}</when>
-				<otherwise>AND T1.VER_END_INC IS NULL</otherwise>
-			</choose>
-			<choose>
-				<when test="versionStartExcluding != null">AND T1.VER_START_EXC = #{versionStartExcluding}</when>
-				<otherwise>AND T1.VER_START_EXC IS NULL</otherwise>
-			</choose>
-			<choose>
-				<when test="versionEndExcluding != null">AND T1.VER_END_EXC = #{versionEndExcluding}</when>
-				<otherwise>AND T1.VER_END_EXC IS NULL</otherwise>
-			</choose>
 		ORDER BY T2.IDX
 	</select>
 	
@@ -751,12 +737,100 @@
     	DELETE FROM NVD_DATA_PATCH_LINK WHERE CVE_ID = #{cveId}
     </delete>
     
-    <select id="selectNvdCpeMatch" parameterType="String" resultType="int">
-		SELECT COUNT(*) FROM NVD_CPE_MATCH WHERE MATCH_CRITERIA_ID = #{matchCriteriaId}
+    <select id="selectNvdCpeMatch" resultType="int">
+		SELECT COUNT(*) 
+		FROM NVD_CPE_MATCH
+		WHERE 
+			CPE23URI = #{cpe23Uri}
+			<choose>
+				<when test="versionStartIncluding != null">AND VER_START_INC = #{versionStartIncluding}</when>
+				<otherwise>AND VER_START_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndIncluding != null">AND VER_END_INC = #{versionEndIncluding}</when>
+				<otherwise>AND VER_END_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionStartExcluding != null">AND VER_START_EXC = #{versionStartExcluding}</when>
+				<otherwise>AND VER_START_EXC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndExcluding != null">AND VER_END_EXC = #{versionEndExcluding}</when>
+				<otherwise>AND VER_END_EXC IS NULL</otherwise>
+			</choose>
+	</select>
+	
+	<select id="selectNvdCpeMatchTemp" resultType="int">
+		SELECT COUNT(*) 
+		FROM NVD_CPE_MATCH_TEMP
+		WHERE 
+			CPE23URI = #{cpe23Uri}
+			<choose>
+				<when test="versionStartIncluding != null">AND VER_START_INC = #{versionStartIncluding}</when>
+				<otherwise>AND VER_START_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndIncluding != null">AND VER_END_INC = #{versionEndIncluding}</when>
+				<otherwise>AND VER_END_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionStartExcluding != null">AND VER_START_EXC = #{versionStartExcluding}</when>
+				<otherwise>AND VER_START_EXC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndExcluding != null">AND VER_END_EXC = #{versionEndExcluding}</when>
+				<otherwise>AND VER_END_EXC IS NULL</otherwise>
+			</choose>
 	</select>
 	
 	<delete id="deleteNvdCpeMatch" parameterType="String">
-    	DELETE FROM NVD_CPE_MATCH WHERE MATCH_CRITERIA_ID = #{matchCriteriaId}
+    	DELETE T1, T2
+    	FROM NVD_CPE_MATCH T1
+    	LEFT JOIN NVD_CPE_MATCH_NAMES T2
+    	ON T1.MATCH_CRITERIA_ID = T2.MATCH_CRITERIA_ID
+    	WHERE 
+			T1.CPE23URI = #{cpe23Uri}
+			<choose>
+				<when test="versionStartIncluding != null">AND T1.VER_START_INC = #{versionStartIncluding}</when>
+				<otherwise>AND T1.VER_START_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndIncluding != null">AND T1.VER_END_INC = #{versionEndIncluding}</when>
+				<otherwise>AND T1.VER_END_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionStartExcluding != null">AND T1.VER_START_EXC = #{versionStartExcluding}</when>
+				<otherwise>AND T1.VER_START_EXC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndExcluding != null">AND T1.VER_END_EXC = #{versionEndExcluding}</when>
+				<otherwise>AND T1.VER_END_EXC IS NULL</otherwise>
+			</choose>
+    </delete>
+    
+    <delete id="deleteNvdCpeMatchTemp" parameterType="String">
+    	DELETE T1, T2
+    	FROM NVD_CPE_MATCH_TEMP T1
+    	LEFT JOIN NVD_CPE_MATCH_NAMES_TEMP T2
+    	ON T1.MATCH_CRITERIA_ID = T2.MATCH_CRITERIA_ID
+    	WHERE 
+			T1.CPE23URI = #{cpe23Uri}
+			<choose>
+				<when test="versionStartIncluding != null">AND T1.VER_START_INC = #{versionStartIncluding}</when>
+				<otherwise>AND T1.VER_START_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndIncluding != null">AND T1.VER_END_INC = #{versionEndIncluding}</when>
+				<otherwise>AND T1.VER_END_INC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionStartExcluding != null">AND T1.VER_START_EXC = #{versionStartExcluding}</when>
+				<otherwise>AND T1.VER_START_EXC IS NULL</otherwise>
+			</choose>
+			<choose>
+				<when test="versionEndExcluding != null">AND T1.VER_END_EXC = #{versionEndExcluding}</when>
+				<otherwise>AND T1.VER_END_EXC IS NULL</otherwise>
+			</choose>
     </delete>
     
     <delete id="deleteNvdCpeMatchNames" parameterType="String">

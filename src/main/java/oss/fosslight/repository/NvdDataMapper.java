@@ -31,6 +31,7 @@ public interface NvdDataMapper {
 	Map<String, Object> selectOneCveInfoV3(Map<String, Object> params);
 	List<String> selectNvdMatchList(Map<String, String> params);
 	void insertCveInfoV3(Map<String, Object> params);
+	void insertNvdDataV3(Map<String, String> params);
 	void insertBulkNvdDataV3(List<Map<String, String>> params);
 	void deleteCveDataV3(Map<String, Object> params);
 	void deleteNvdDataV3(Map<String, Object> params);
@@ -67,8 +68,10 @@ public interface NvdDataMapper {
 	List<Map<String, Object>> selectUseMetaDataUrlConnection(HashMap<String, Object> param);
 	void insertNvdDataPatchLink(Map<String, Object> param);
 	void deleteNvdDataPatchLink(@Param(value = "cveId") String cveId);
-	int selectNvdCpeMatch(@Param(value = "matchCriteriaId") String matchCriteriaId);
-	void deleteNvdCpeMatch(@Param(value = "matchCriteriaId") String matchCriteriaId);
+	int selectNvdCpeMatch(Map<String, Object> param);
+	int selectNvdCpeMatchTemp(Map<String, Object> param);
+	void deleteNvdCpeMatch(Map<String, Object> param);
+	void deleteNvdCpeMatchTemp(Map<String, Object> param);
 	void deleteNvdCpeMatchNames(@Param(value = "matchCriteriaId") String matchCriteriaId);
 	void insertNvdDataConfigurationsTemp(Map<String, String> param);
 	void truncateNvdDataConfigurations();
