@@ -2993,10 +2993,11 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 			
-			String customOssId = "";
 			String ossId = (String) dataMap.get("OSS_ID");
+			String ossName = (String) dataMap.get("OSS_NAME");
+			
 			if (!isEmpty(ossId)) {
-				customOssId = "<a href='" + appEnv.getProperty("server.domain") + "/oss/edit/" + ossId + "' target='_blank'>" + ossId + "</a>";
+				ossName = "<a href='" + appEnv.getProperty("server.domain") + "/oss/edit/" + ossId + "' target='_blank'>" + ossName + "</a>";
 			}
 			
 			bean = new OssMaster();
@@ -3008,8 +3009,8 @@ public class CoMailManager extends CoTopComponent {
 				bean.setComponentId((String) dataMap.get("COMPONENT_ID"));
 			}
 			
-			bean.setOssId(customOssId);
-			bean.setOssName((String) dataMap.get("OSS_NAME"));
+			bean.setOssId(ossId);
+			bean.setOssName(ossName);
 			bean.setOssVersion((String) dataMap.get("OSS_VERSION"));
 			bean.setCveId(customCveId);
 			bean.setCvssScore(String.valueOf(dataMap.get("CVSS_SCORE")));
