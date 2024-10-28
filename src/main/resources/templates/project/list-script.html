@@ -632,11 +632,7 @@ var fn = {
 			if ("Need to resolve" == vulnerabilityResolution) {
 				display = '<span type="button" class="badge badge-dark-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 			} else {
-				if (cvssScoreMax - standardScore >= 0) {
-					display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
-				} else {
-					display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Discovered('+cvssScoreMax+')</span>';
-				}
+				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 			}
 		} else {
 			if (typeof cvssScoreMax !== "undefined") {

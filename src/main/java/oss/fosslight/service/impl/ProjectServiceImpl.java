@@ -609,16 +609,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				if (setCveInfoFlag) {
-					// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
-					if (isEmpty(ll.getCveId()) 
-							&& isEmpty(ll.getOssVersion()) 
-							&& !isEmpty(ll.getCvssScoreMax())
-							&& !("-".equals(ll.getOssName()))){ 
-						String[] cvssScoreMax = ll.getCvssScoreMax().split("\\@");
-						ll.setCvssScore(cvssScoreMax[3]);
-						ll.setCveId(cvssScoreMax[4]);
-					}
-					
 					if (ll.getCvssScoreMax() != null) {
 						String cveId = ll.getCvssScoreMax().split("\\@")[4];
 						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
@@ -635,12 +625,32 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
 						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
 					}
-					String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
-						ll.setCvssScore(conversionCveData[3]);
-						ll.setCveId(conversionCveData[4]);
+					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+						if (cvssScoreMaxList.size() > 1) {
+							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+								@Override
+								public int compare(String o1, String o2) {
+									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+										return -1;
+									}else {
+										return 1;
+									}
+								}
+							});
+						}
+						
+						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+						ll.setCvssScore(cveData[3]);
+						ll.setCveId(cveData[4]);
 						ll.setVulnYn(CoConstDef.FLAG_YES);
+					} else {
+						String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
+						if (conversionCveInfo != null) {
+							String[] conversionCveData = conversionCveInfo.split("\\@");
+							ll.setCvssScore(conversionCveData[3]);
+							ll.setCveId(conversionCveData[4]);
+							ll.setVulnYn(CoConstDef.FLAG_YES);
+						}
 					}
 					
 					cvssScoreMaxList.clear();
