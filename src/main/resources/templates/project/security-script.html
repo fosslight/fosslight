@@ -743,8 +743,8 @@ var total = {
 	            	var appendBtn = "";
 	                
 	            	if ([[${@CommonFunction.isAdmin()}]]) {
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('total')\"><i class=\"fas fa-plus\"></i></button>";
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('total', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('total')\"><i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('total', 'main')\"><i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
 	                }
 	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('total')\"><i class=\"fas fa-pencil-alt\"></i></button>";
 	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('total')\"><i class=\"fas fa-download\"></i></button>";
