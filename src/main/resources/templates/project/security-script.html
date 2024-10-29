@@ -80,6 +80,7 @@ var sec_com_evt = {
 	dataInit : function(){
 		commentsParam.height = $(window).height() - 120;
 		fn_comment.getCommentList(commentsParam);
+		$("#tabMenuTotal").trigger("click");
 		sec_data.getJqGrid();
 	}
 }
@@ -389,6 +390,33 @@ var sec_com_fn = {
   				adjustMultiPageGridSize();
   			}, 100);
      	}
+  	},
+  	checkReqEntrySecurity : function () {
+  		var reqEntryFlag = false;
+		var data = {
+			"prjId" : prjId,
+			"tabMenu" : tabMenu
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: '/project/checkReqEntrySecurity',
+			data: JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("true" == data.isValid) {
+					reqEntryFlag = true;
+			   }
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+		
+		return reqEntryFlag;
   	}
 }
 
@@ -410,9 +438,24 @@ var com_fn = {
 		$("#gridAreaTotal").show();
 	},
 	exeSave : function(data, target){
+		var scrtCsvFileId = $('#scrtCsvFileId').val();
+		var scrtCsvFiles = $(".scrtFileArea").find("input[type=hidden]");
+		var fileSeq = [];
+		
+		for (var i = 0; i < scrtCsvFiles.length; i++){
+			var obj = {fileSeq : scrtCsvFiles.eq(i).val()};
+			fileSeq.push(obj);
+		}
+		if (fileSeq.length == 0) {
+			$("#scrtCsvFileId").val("");
+			scrtCsvFileId = "";
+		}
+		
 		var finalData = {
 			referenceId : [[${project.prjId}]],
 			targetName : target,
+			scrtCsvFileId : scrtCsvFileId,
+			scrtCsvFiles : JSON.stringify(fileSeq),
 			gridData : JSON.stringify(data)
 		};
 		
@@ -434,6 +477,25 @@ var com_fn = {
 				}
 			}
 		});
+	},
+	checkDownloadExcel : function(target) {
+		loading.show();
+		
+		var prjId = [[${project.prjId}]];
+		var tabMenu = target;
+		
+		if (sec_com_fn.checkReqEntrySecurity(prjId, tabMenu)) {
+			com_fn.downloadExcel(tabMenu);
+		} else {
+			loading.hide();
+			alertify.confirm([[#{msg.project.security.check.export}]], function (e) {
+				if (e) {
+					com_fn.downloadExcel(tabMenu);
+				} else {
+					return false;
+				}
+			});
+		}
 	},
 	downloadExcel : function(target){
 		var data = {
@@ -562,7 +624,7 @@ var total = {
 	exeLoadReportData : function(finalData) {
 		try {
 			$.ajax({
-				url : suffixUrl + '/project/getSecuritySheetData',
+				url : '/project/getSecuritySheetData',
 				type : 'POST',
 				data : JSON.stringify(finalData),
 				dataType : 'json',
@@ -743,7 +805,7 @@ var total = {
 			formData:{"registFileId" : $('#scrtCsvFileId').val(), "tabNm" : "SECURITY"},
 			onSuccess:function(files,data,xhr,pd) {
 				var result = jQuery.parseJSON(data);
-				
+				console.log("result", result);
 				if (result[1] == null) {
 					if (result[0] == "TAB_GUBN_ERROR") {
 						alertify.error([[#{msg.common.upload.failed.separator}]], 0);
