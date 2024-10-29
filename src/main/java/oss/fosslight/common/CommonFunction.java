@@ -4626,8 +4626,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			// Distribution Type
 			if (!avoidNull(beforeBean.getDistributionType()).equals(avoidNull(afterBean.getDistributionType()))) {
 				comment += "<p><strong>Distribution Type</strong><br />";
-				comment += "Before : " + beforeBean.getDistributionType() + "<br />";
-				comment += "After : " + afterBean.getDistributionType() + "<br /></p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, beforeBean.getDistributionType()) + "<br />";
+				comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType()) + "<br /></p>";
 			}
 			
 			
@@ -4645,8 +4645,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			if (!avoidNull(beforeBean.getNoticeType()).equals(avoidNull(afterBean.getNoticeType()))) {
 				comment += "<p><strong>OSS Notice</strong><br />";
-				comment += "Before : " + beforeBean.getNoticeType() + "<br />";
-				comment += "After : " + afterBean.getNoticeType() + "<br /></p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, beforeBean.getNoticeType()) + "<br />";
+				comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, afterBean.getNoticeType()) + "<br /></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getPriority()).equals(avoidNull(afterBean.getPriority()))) {
