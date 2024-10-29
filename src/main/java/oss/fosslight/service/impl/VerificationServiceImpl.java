@@ -764,7 +764,15 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 						
 						if (!isNotDir) {
-							deCompResultMap.put(s, 0);
+							int fileCnt = 0;
+							
+							if (deCompResultMap.containsKey(s)) {
+								fileCnt = deCompResultMap.get(s);
+							}
+							
+							fileCnt++;
+							
+							deCompResultMap.put(s, fileCnt);
 							
 							if (isEmpty(firstPathName) && !isEmpty(s)) {
 								firstPathName = s;
@@ -813,7 +821,17 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						if (_dir.equalsIgnoreCase(s)) isNotDir = true;
 					}
 					
-					if (!isNotDir) deCompResultMap.put(s, 0);
+					if (!isNotDir) {
+						int fileCnt = 0;
+						
+						if (deCompResultMap.containsKey(s)) {
+							fileCnt = deCompResultMap.get(s);
+						}
+						
+						fileCnt++;
+						
+						deCompResultMap.put(s, fileCnt);
+					}
 				}
 				
 				collectDataDeCompResultList = null;
