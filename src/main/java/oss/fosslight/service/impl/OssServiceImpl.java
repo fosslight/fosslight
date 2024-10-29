@@ -4298,6 +4298,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				List<Vulnerability> list2 = vulnDataForNotIncludeCpeMatch(convertFlag, ossMaster, nicknameList, convertNameList, dashOssNameList, param);
 				if (list2 != null && !list2.isEmpty()) {
+					if (list == null) list = new ArrayList<>();
 					list.addAll(list2);
 				}
 			} else {
