@@ -4329,13 +4329,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	private List<Vulnerability> vulnDataForNotIncludeCpeMatch(Boolean convertFlag, OssMaster ossMaster, String[] nicknameList, List<String> convertNameList, List<String> dashOssNameList, OssMaster param) {
-		boolean checkInCpeMatchFlag = false;
-		String key = (param.getOssName() + "_" + avoidNull(param.getOssVersion())).toUpperCase();
-		if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
-			if (CoConstDef.FLAG_YES.equals(CoCodeManager.OSS_INFO_UPPER.get(key).getInCpeMatchFlag())) checkInCpeMatchFlag = true;
-		}
-		
-		List<Vulnerability> list = null; // vulnerabilityMapper.selectOssVulnerabilityListByVersionAlias(param);
+		List<Vulnerability> list = null;
 		
 		if ("N/A".equals(ossMaster.getOssVersion()) || isEmpty(ossMaster.getOssVersion())) {
 			param.setOssVersion("-");
@@ -4386,12 +4380,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			list = ossMapper.getOssVulnerabilityList2(param);
 		}
 		
-		if (!checkInCpeMatchFlag) {
-			List<String> includeCpeList = ossMapper.selectOssIncludeCpeList(param);
+		if (ossMaster.getExcludeCpes() != null) {
+			List<String> excludeCpeList = Arrays.asList(ossMaster.getExcludeCpes());
 			List<Vulnerability> customList = new ArrayList<>();
 			
 			for (Vulnerability vuln : list) {
-				if (!includeCpeList.contains(vuln.getCriteria())) {
+				if (!excludeCpeList.contains(vuln.getCriteria())) {
 					customList.add(vuln);
 				}
 			}
