@@ -2990,6 +2990,10 @@
 		</if>
 	</select>
 	
+	<select id="notExistsOssIncludeCpeListByOssCommonId" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+		SELECT CPE23URI FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID != #{ossCommonId}
+	</select>
+	
 	<select id="selectOssExcludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
 		SELECT CPE23URI FROM OSS_EXCLUDE_CPE
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">

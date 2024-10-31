@@ -4369,15 +4369,30 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		
 		list = ossMapper.getOssVulnerabilityList2(param);
 		
-		for (String ossVersionAlias : ossMaster.getOssVersionAliases()) {
-			param.setOssVersion(ossVersionAlias);
-			List<Vulnerability> list2 = ossMapper.getOssVulnerabilityList2(param);
-			if (list2 != null && !list2.isEmpty()) {
-				list.addAll(list2);
+		if (ossMaster.getOssVersionAliases() != null) {
+			for (String ossVersionAlias : ossMaster.getOssVersionAliases()) {
+				param.setOssVersion(ossVersionAlias);
+				List<Vulnerability> list2 = ossMapper.getOssVulnerabilityList2(param);
+				if (list2 != null && !list2.isEmpty()) {
+					list.addAll(list2);
+				}
 			}
 		}
 		
-		if (list != null && !list.isEmpty()) list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
+		if (list != null && !list.isEmpty()) {
+			list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
+			
+			List<String> includeCpeList = ossMapper.notExistsOssIncludeCpeListByOssCommonId(ossMaster);
+			List<Vulnerability> customList = new ArrayList<>();
+			
+			for (Vulnerability vuln : list) {
+				if (!includeCpeList.contains(vuln.getCriteria())) {
+					customList.add(vuln);
+				}
+			}
+			
+			list = customList;
+		}
 		
 		if (ossMaster.getExcludeCpes() != null) {
 			List<String> excludeCpeList = Arrays.asList(ossMaster.getExcludeCpes());

@@ -274,6 +274,8 @@ public interface OssMapper {
 	void insertOssExcludeCpe(OssMaster ossMaster);
 
 	List<String> selectOssIncludeCpeList(OssMaster ossMaster);
+	
+	List<String> notExistsOssIncludeCpeListByOssCommonId(OssMaster ossMaster);
 
 	List<String> selectOssExcludeCpeList(OssMaster ossMaster);
 
