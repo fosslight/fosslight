@@ -339,6 +339,20 @@
     	CVE_ID = values(cve_id), PRODUCT = values(product), VERSION = values(version) 
     </insert>
     
+    <insert id="insertNvdDataV3Temp" parameterType="HashMap">
+    	INSERT INTO NVD_DATA_TEMP_V3 (PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE, VENDOR)
+		VALUES
+		(#{PRODUCT}, #{VERSION}, #{CVE_ID}, #{CVSS_SCORE}, #{VULN_SUMMARY}, #{MODI_DATE}, #{VENDOR})
+		ON DUPLICATE KEY UPDATE 
+		PRODUCT = values(PRODUCT)
+		, VERSION = values(VERSION)
+		, CVE_ID = values(CVE_ID)
+		, CVSS_SCORE = values(CVSS_SCORE)
+		, VULN_SUMMARY = values(VULN_SUMMARY)
+		, MODI_DATE = values(MODI_DATE)
+		, VENDOR = values(VENDOR)
+    </insert>
+    
 	<delete id="deleteNvdDataTempV3">TRUNCATE TABLE NVD_DATA_TEMP_V3</delete>
 	<insert id="insertNvdDataTempV3">
 		INSERT INTO NVD_DATA_TEMP_V3
@@ -650,28 +664,29 @@
 	
 	<select id="getProducVerCnt" resultType="int">
 		SELECT COUNT(*) FROM (
-			SELECT PRODUCT FROM NVD_DATA_V3 GROUP BY PRODUCT
+			SELECT PRODUCT FROM NVD_DATA_V3 
+			GROUP BY PRODUCT, VERSION
 		) AS RESULT
 	</select>
 	
 	<select id="getProducVerList" resultType="hashmap">
-		SELECT PRODUCT, VERSION FROM NVD_DATA_V3 
+		SELECT PRODUCT, VERSION, GROUP_CONCAT(DISTINCT(VENDOR)) AS VENDOR
+		FROM NVD_DATA_V3 
 		GROUP BY PRODUCT, VERSION 
 		ORDER BY PRODUCT, VERSION LIMIT #{pageIdx}, #{pageCnt}
 	</select>
 	
 	<select id="getMaxScoreProductVer" resultType="hashmap">
-		SELECT T2.PRODUCT, T2.VERSION, T1.CVE_ID, T1.CVSS_SCORE, T1.VULN_SUMMARY, T1.MODI_DATE 
+		SELECT T2.PRODUCT, T2.VERSION, T2.VENDOR, T1.CVE_ID, T1.CVSS_SCORE, T1.VULN_SUMMARY, T1.MODI_DATE 
 		FROM NVD_CVE_V3 T1, NVD_DATA_V3 T2 
 		WHERE 
 			T1.CVE_ID = T2.CVE_ID 
 			AND T2.PRODUCT = #{ossName} 
 			AND T2.VERSION = #{ossVersion}
-			AND T1.CVSS_SCORE = (	
-											SELECT MAX(CVSS_SCORE) AS CVSS_SCORE  FROM NVD_CVE_V3 WHERE CVE_ID IN (
-												SELECT CVE_ID FROM NVD_DATA_V3 WHERE PRODUCT = #{ossName} AND VERSION = #{ossVersion}
-											)
-										)
+			AND T2.VENDOR = #{vendor}
+			AND T1.CVSS_SCORE = (SELECT MAX(CVSS_SCORE) AS CVSS_SCORE
+								FROM NVD_CVE_V3 
+								WHERE CVE_ID IN (SELECT CVE_ID FROM NVD_DATA_V3 WHERE PRODUCT = #{ossName} AND VERSION = #{ossVersion} AND VENDOR = #{vendor}))
 		ORDER BY CVE_ID DESC LIMIT 1
 	</select>
 	

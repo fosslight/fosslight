@@ -961,125 +961,30 @@ public class NvdDataService {
 		// 위험성 : truncate는 transaction 으로 관리 할 수 없다. truncate이후에 insert 실패시 data 없을 수 있음
 		
 		if (restApiFlag){
-			String insertQuery = "INSERT INTO NVD_DATA_TEMP_V3 (PRODUCT, VERSION, VENDOR, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE ) VALUES (?,?,?,?,?,?,?) "
-					+ "ON DUPLICATE KEY UPDATE PRODUCT = values(PRODUCT), VERSION = values(VERSION), VENDOR = values(VENDOR), CVE_ID = values(CVE_ID), CVSS_SCORE = values(CVSS_SCORE), VULN_SUMMARY = values(VULN_SUMMARY), MODI_DATE = values(MODI_DATE)";
-			
-			String selectQuery = "SELECT NVD.PRODUCT, NVD.VERSION, GROUP_CONCAT(DISTINCT(NVD.VENDOR)) AS VENDOR FROM (SELECT T2.* FROM (SELECT @ROWNUM:=@ROWNUM+1 AS SEQ, T1.PRODUCT FROM ("
-					+ "SELECT PRODUCT FROM NVD_DATA_V3 GROUP BY PRODUCT ORDER BY PRODUCT ) T1, (SELECT @ROWNUM:=0) AS R ) T2 WHERE T2.SEQ BETWEEN ? AND ? ) NVD_PRODUCT JOIN NVD_DATA_V3 NVD ON NVD_PRODUCT.PRODUCT = NVD.PRODUCT GROUP BY NVD.PRODUCT, NVD.VERSION";
-			
-			String selectQuery2 = "SELECT T2.PRODUCT, T2.VERSION, T1.CVE_ID, T1.CVSS_SCORE, T1.VULN_SUMMARY, T1.MODI_DATE FROM NVD_CVE_V3 T1, NVD_DATA_V3 T2 WHERE T1.CVE_ID = T2.CVE_ID AND T2.PRODUCT = ? AND T2.VERSION = ? "
-					+ "AND T1.CVSS_SCORE = (SELECT MAX(CVSS_SCORE) AS CVSS_SCORE  FROM NVD_CVE_V3 WHERE CVE_ID IN (SELECT CVE_ID FROM NVD_DATA_V3 WHERE PRODUCT = ? AND VERSION = ?)) ORDER BY CVE_ID DESC LIMIT 1";
 			// temp table에 data insert 이후, real table로 copy
 			nvdDataMapper.deleteNvdDataTempV3();
 			
 			int cnt = nvdDataMapper.getProducVerCnt();
 			List<Map<String, Object>> itemList = new ArrayList<>();
-			List<Map<String, Object>> params = new ArrayList<>();
-			int endIdx = BATCH_SIZE;
-						
-			Connection conn = null;
-			Connection conn1 = null;
-			Connection conn2 = null;
 			
-			PreparedStatement getProductStmt = null;
-			PreparedStatement getMaxScoreProductVerStmt = null;
-			PreparedStatement insertStmt = null;
-			
-			try {
-				Class.forName(JDBC_DRIVER);
-				
-				conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
-				conn.setAutoCommit(false);
-				
-				conn1 = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
-				conn1.setAutoCommit(false);
-				
-				conn2 = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
-				conn2.setAutoCommit(false);
-				
-				getProductStmt = conn.prepareStatement(selectQuery);
-				getMaxScoreProductVerStmt = conn1.prepareStatement(selectQuery2);
-				insertStmt = conn2.prepareStatement(insertQuery);
-				
+			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+				NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
 				for (int idx = 0; idx < cnt; ) {
-					if (endIdx >= cnt) {
-						endIdx = cnt;
+					itemList = nvdDataMapper.getProducVerList(idx, BATCH_SIZE);
+					for (Map<String, Object> item : itemList) {
+						String vendorList = (String) item.get("VENDOR");
+						for (String vendor : vendorList.split(",")) {
+							Map<String, Object> nvdDataMap = nvdDataMapper.getMaxScoreProductVer((String)item.get("PRODUCT"), (String)item.get("VERSION"), vendor);
+							mapper.insertNvdDataV3Temp(nvdDataMap);
+							sqlSession.flushStatements();
+						}
 					}
-					preparedStatementGetProductList(conn2, itemList, params, getProductStmt, getMaxScoreProductVerStmt, insertStmt, idx, endIdx);
 					
-					idx = idx+BATCH_SIZE;
-					endIdx = idx+BATCH_SIZE;
-					
-					if (idx % 10000 == 0) {
-						log.info("NVD_DATA_TEMP_V3 process : " + idx + " / " + cnt);
-					}
+					idx = idx + BATCH_SIZE;
+					itemList.clear();
 				}
-				log.info("NVD_DATA_TEMP_V3 process : " + cnt + " / " + cnt);
-			} catch(Exception e) {
-				log.error(e.getMessage(), e);
 				
-				try {
-					if (insertStmt != null) {
-						insertStmt.close();
-					}
-				} catch(SQLException e1) {}
-				try {
-					if (getMaxScoreProductVerStmt != null) {
-						getMaxScoreProductVerStmt.close();
-					}
-				} catch(SQLException e1) {}
-				try{
-					if (getMaxScoreProductVerStmt != null) {
-						getMaxScoreProductVerStmt.close();
-					}
-				} catch(SQLException e1) {}
-				try{
-					if (conn2 != null) {
-						conn2.rollback();
-						conn2.close();
-					}
-				} catch(SQLException e1) {}
-				try {
-					if (conn1 != null) {
-						conn1.close();
-					}
-				} catch(SQLException e1) {}
-				try{
-					if (conn != null) {
-						conn.close();
-					}
-				}catch(SQLException e1){}
-			} finally {
-				try{
-					if (insertStmt != null) {
-						insertStmt.close();
-					}
-				} catch(SQLException e1) {}
-				try{
-					if (getMaxScoreProductVerStmt != null) {
-						getMaxScoreProductVerStmt.close();
-					}
-				} catch(SQLException e1) {}
-				try{
-					if (getMaxScoreProductVerStmt != null) {
-						getMaxScoreProductVerStmt.close();
-					}
-				} catch(SQLException e1) {}
-				try {
-					if (conn2 != null) {
-						conn2.close();
-					}
-				} catch(SQLException e1) {}
-				try {
-					if (conn1 != null) {
-						conn1.close();
-					}
-				} catch(SQLException e1) {}
-				try{
-					if (conn != null) {
-						conn.close();
-					}
-				} catch(SQLException e1) {}
+				sqlSession.commit();
 			}
 			
 			nvdDataMapper.deleteNvdDataScoreV3();

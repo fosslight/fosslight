@@ -33,12 +33,13 @@ public interface NvdDataMapper {
 	void insertCveInfoV3(Map<String, Object> params);
 	void insertNvdDataV3(Map<String, String> params);
 	void insertBulkNvdDataV3(List<Map<String, String>> params);
+	void insertNvdDataV3Temp(Map<String, Object> params);
 	void deleteCveDataV3(Map<String, Object> params);
 	void deleteNvdDataV3(Map<String, Object> params);
 	void deleteNvdDataTempV3();
 	int getProducVerCnt();
 	List<Map<String, Object>> getProducVerList(@Param(value = "pageIdx")int pageIdx, @Param(value = "pageCnt")int pageCnt);
-	public Map<String, Object> getMaxScoreProductVer(@Param(value = "ossName")String ossName, @Param(value = "ossVersion")String ossVersion, @Param(value = "vendor")String vendor);
+	public Map<String, Object> getMaxScoreProductVer(@Param(value = "ossName")String ossName, @Param(value = "ossVersion")String ossVersion, @Param(value = "vendor") String vendor);
 	void insertNvdDataListTempV3(List<Map<String, Object>> params);
 	void deleteNvdDataScoreV3();
 	void insertNvdDataScoreV3();
