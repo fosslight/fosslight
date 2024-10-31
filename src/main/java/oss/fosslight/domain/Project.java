@@ -561,6 +561,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The except file content. */
 	private String exceptFileContent;
+
+	/** The binary file yn. */
+	private String binaryFileYn;
 	
 	/** The sch start date. */
 	// OTHER
@@ -2227,6 +2230,24 @@ public class Project extends ComBean implements Serializable {
 	 */
 	public void setExceptFileContent(String exceptFileContent) {
 		this.exceptFileContent = exceptFileContent;
+	}
+
+	/**
+	 * Gets the binary file yn.
+	 *
+	 * @return the binary file yn
+	 */
+	public String getBinaryFileYn() {
+		return binaryFileYn;
+	}
+
+	/**
+	 * Sets the binary file yn.
+	 *
+	 * @param binaryFileYn the new binary file yn
+	 */
+	public void setBinaryFileYn(String binaryFileYn) {
+		this.binaryFileYn = binaryFileYn;
 	}
 
 	/**

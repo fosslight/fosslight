@@ -72,3 +72,6 @@ find $6/decompression/$2/ | xargs grep 2> /dev/null -w -i "$3"  > $6/output/$2/e
 chmod -R 777 $6/output/$2/verify_chk_list_$5
 chmod -R 777 $6/output/$2/verify_chk_list
 chmod -R 777 $6/output/$2/except_file_result
+
+cd $7
+./bin/fosslight_binary -s -p $6/decompression/$2 -o $6/output/$2/binary.txt

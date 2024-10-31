@@ -835,6 +835,17 @@
                     }
                 });
 
+                $('#btnBinaryFileYn').click(function (e) {
+                    e.preventDefault();
+
+                    var fileNm = $("#binaryFile").val();
+                    var downloadFlag = $(this).hasClass("btn-outline-primary");
+
+                    if (downloadFlag) {
+                        location.href = '/project/verification/downloadFile?prjId=' + [[${project.prjId}]] + '&fileNm=' + fileNm;
+                    }
+                });
+
                 //wgetUrl send
                 $('#send_1').on('click', function () {
                     var wgetUrl = $("#sendWgetUrl_1").val();
@@ -3286,6 +3297,12 @@
                                 $("#btnVerifyFileContent").addClass("btn-outline-primary");
                             } else {
                                 $("#btnVerifyFileContent").removeClass("btn-outline-primary");
+                            }
+
+                            if (verifyBinary.length > 0) {
+                                $("#btnBinaryFileYn").addClass("btn-outline-primary");
+                            } else {
+                                $("#btnBinaryFileYn").removeClass("btn-outline-primary");
                             }
 
                             $("#deleteFlag").val("N");

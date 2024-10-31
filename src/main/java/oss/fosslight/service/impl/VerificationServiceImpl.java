@@ -82,7 +82,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private static String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output");
 	private static String NOTICE_PATH = CommonFunction.emptyCheckProperty("notice.path", "/notice");
 	private static String EXPORT_TEMPLATE_PATH = CommonFunction.emptyCheckProperty("export.template.path", "/template");
-	private static String REVIEW_REPORT_PATH=CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport");
+	private static String REVIEW_REPORT_PATH = CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport");
+	private static String FOSSLIGHT_BINARY_SCANNER_PATH = CommonFunction.emptyCheckProperty("verify.fosslight.binary.scanner.path", "/fosslight_binary");
 	
 	@Override
 	public Map<String, Object> getVerificationOne(Project project) {
@@ -612,7 +613,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			projectNm +="_"+Integer.toString(packagingFileIdx)+"("+(file.getOrigNm()).replace(" ", "@@")+")";
 			
-			String commandStr = VERIFY_BIN_PATH+"/verify "+filePath+" "+prjId+" "+exceptionWordsPatten+" "+projectNm+" "+packagingFileIdx+" "+VERIFY_HOME_PATH;
+			String commandStr = VERIFY_BIN_PATH+"/verify "+filePath+" "+prjId+" "+exceptionWordsPatten+" "+projectNm+" "+packagingFileIdx+" "+VERIFY_HOME_PATH+" "+FOSSLIGHT_BINARY_SCANNER_PATH ;
 			log.info("VERIFY COMMAND : " + commandStr);
 
 			log.info("VERIFY START : " + prjId);
@@ -1316,6 +1317,21 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				log.info("VERIFY writeFile verify_chk_list file END -----------------");
 			}
+
+			log.info("VERIFY Read fosslight_binary result file START -----------------");
+			String binaryFile = VERIFY_PATH_OUTPUT +"/" + prjId + "/binary.txt";
+			File f = new File(binaryFile);
+			if(f.exists() && !f.isDirectory()) {
+				project.setBinaryFileYn(CoConstDef.FLAG_YES);
+			} else {
+				project.setBinaryFileYn("");
+			}
+
+			if (doUpdate) {
+				projectService.registVerifyContents(project);
+			}
+
+			log.info("VERIFY Read fosslight_binary result file END -----------------");
 			
 			resCd="10";
 			if (separatorErrFlag) {
@@ -1330,6 +1346,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			resMap.put("verifyReadme", readmeFileName);
 			resMap.put("verifyCheckList", !isEmpty(verify_chk_list) ? CoConstDef.FLAG_YES : "");
 			resMap.put("verifyProprietary", !isEmpty(exceptFileContent) ? CoConstDef.FLAG_YES : "");
+			resMap.put("verifyBinary", project.getBinaryFileYn().equals(CoConstDef.FLAG_YES) ? CoConstDef.FLAG_YES : "");
 			
 			//path not found.가 1건이라도 있으면 status_verify_yn의 flag는 N으로 저장함.
 			// packagingFileId, filePath는 1번만 저장하며, gValidIdxlist의 값때문에 마지막 fileSeq일때 저장함.
