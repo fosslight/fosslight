@@ -1068,8 +1068,8 @@
                         }
                     }
                 },
-                {name:'restriction',index:'restriction', width:120, formatter: displayRestriction, template: searchStringOptions, editable:false},
-                {name:'ossCopyright',index:'ossCopyright', width:250, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}},
+                {name:'restriction',index:'restriction', width:150, formatter: displayRestriction, template: searchStringOptions, editable:false},
+                {name:'ossCopyright',index:'ossCopyright', width:220, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}},
 //              {name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons},
                 {name:'licenseName',index:'licenseName', width:50, hidden:true},
                 {name:'licenseId',index:'licenseId', width:50, hidden:true},
@@ -1384,6 +1384,8 @@
 						}
 					}
 				}
+			} else {
+				restriction = cellvalue;
 			}
 		}
 		return restriction;
