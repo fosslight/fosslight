@@ -2219,6 +2219,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						, bean.getPublDate()
 						, bean.getCvssScore()
 						, bean.getVulnerabilityResolution()
+						, bean.getVulnerabilityLink()
+						, bean.getSecurityComments()
 					};
 					
 					rowDatas.add(rowParam);

@@ -24,9 +24,23 @@
 											<td class="text-center" style="vertical-align:middle;" th:text="'Vulnerability Resolution'"></td>
 											<td>
 												<select class="form-control select2" name="vulnerabilityResolution" style="width: 100%;">
+													<option value=""></option>
 													<option th:value="Unresolved" th:text="Unresolved"></option>
 													<option th:value="Fixed" th:text="Fixed"></option>
 												</select>
+											</td>
+										</tr>
+										<tr>
+											<td class="text-center" style="vertical-align:middle;" th:text="|Security Comments|"></td>
+											<td>
+												<div class="form-group mb-2 d-flex align-items-center">
+													<input type="text" id="securityComments" name="securityComments" class="form-control mr-1"/>
+                                                    <div class="form-check mb-1" style="font-size: .85rem">
+                                                        <input class="form-check-input text-orange save-value bulkEditCheck" type="checkbox" id="checkbox" value="Y"/>
+                                                        <label class="form-check-label text-lg-gray" for="checkbox" th:text="|only edit|"></label>
+                                                        <input type="hidden" name="onlyEditCommentFlag" value="N"/>
+                                                    </div>
+                                                </div>
 											</td>
 										</tr>
 									</tbody>
@@ -34,11 +48,11 @@
 							</form>
 							</div>
 						</div>
-					</div>
-					<div class="row float-right">
-						<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|com_fn.bulkEditClose()|"></button>
-						<button type="button" class="btn btn-dark btn-sm width-6rem mr-xm px-3" th:text="Reset" th:onclick="|com_fn.bulkEditReset()|"></button>
-						<button type="button" class="btn btn-dark btn-sm width-6rem px-3" th:text="Change" th:onclick="|com_fn.bulkEditChange()|"></button>
+						<div class="col-12">
+							<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 float-right" th:text="Cancel" th:onclick="|com_fn.bulkEditClose()|"></button>
+							<button type="button" class="btn btn-dark btn-sm width-6rem mr-xm px-3 float-right" th:text="Reset" th:onclick="|com_fn.bulkEditReset()|"></button>
+							<button type="button" class="btn btn-dark btn-sm width-6rem mr-xm px-3 float-right" th:text="Change" th:onclick="|com_fn.bulkEditChange()|"></button>
+						</div>
 					</div>
 				</div>
 			</section>

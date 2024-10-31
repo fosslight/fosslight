@@ -30,6 +30,14 @@ $(function () {
 			$("#save").hide();
 		}
 	});
+	
+	$(document).on('change', ".bulkEditCheck", function() {
+		if (this.checked) {
+			$("input[name='onlyEditCommentFlag']").val("Y");
+		} else {
+			$("input[name='onlyEditCommentFlag']").val("N");
+		}
+	});
 });
 
 var sec_data = {
@@ -294,18 +302,20 @@ var sec_com_fn = {
 									
 									return setup;
 								},
-								settings: {
-									oncontinue: null
-								},
-								callback: function(closeEvent) {
-									alertify.confirm().callback.call(this, closeEvent);
+								hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '760px';
+							        }
 								}
 							};
 						}, false, 'confirm');
                 	}
                 	
-                	alertify.secBulkEdit(res, function(){}).set('title', 'Bulk Edit Security').set('resizable', true).resizeTo('760px', '340px');
+                	alertify.secBulkEdit(res, function(){}).set('title', 'Bulk Edit Security');
                 	$("select[name=vulnerabilityResolution] option:eq(0)").prop("selected", true);
+                	$(".bulkEditCheck").prop("checked", false);
+                	$("input[name=onlyEditCommentFlag]").val("N");
                 },
                 error : function(){
                     alertify.error([[#{msg.common.valid2}]], 0);
@@ -322,6 +332,7 @@ var sec_com_fn = {
   			var ossArr = [];
           	var gridId = obj["gridId"];
           	var target = obj["target"];
+          	var onlyEditCommentFlag = obj["onlyEditCommentFlag"];
           	var gridParam = $('#'+target).jqGrid('getGridParam','data');
           	var customParam = [];
           	var param = [];
@@ -348,7 +359,11 @@ var sec_com_fn = {
                   		if (param[i]["gridId"] == gridIdArr[idx]) {
                           	for (var key in obj) {
                               	if ("rowId" != key && "target" != key && "gridId" != key) {
-                              		param[i][key] = obj[key];
+                              		if ("Y" == onlyEditCommentFlag && "vulnerabilityResolution" != key) {
+                          				param[i][key] = obj[key];
+                          			} else {
+                              			param[i][key] = obj[key];
+                          			}
                               	}
                           	}
                       	}
@@ -359,7 +374,11 @@ var sec_com_fn = {
                   	if (param[i]["gridId"] == gridId) {
                       	for (var key in obj) {
                       		if ("rowId" != key && "target" != key && "gridId" != key) {
-                      			param[i][key] = obj[key];
+                      			if ("Y" == onlyEditCommentFlag && "vulnerabilityResolution" != key) {
+                      				param[i][key] = obj[key];
+                      			} else {
+                          			param[i][key] = obj[key];
+                      			}
                           	}
                       	}
                   	}
@@ -417,7 +436,63 @@ var sec_com_fn = {
 		});
 		
 		return reqEntryFlag;
-  	}
+  	},
+	displayVulnerabilityLink : function(cellvalue, options, rowObject){
+		var url = "";
+		if(cellvalue != null && cellvalue !== undefined && "" != cellvalue){
+			if (cellvalue.indexOf("vulnpopup?") > -1){
+				var ossName = rowObject.ossName;
+				var ossVersion = rowObject.ossVersion;
+				if ("" == ossVersion){
+					ossVersion = "-";
+				}
+				url = '<a href=\'#\' onclick=\'javascript:sec_com_fn.showVulnViewPage(\"'+encodeURIComponent(ossName)+'\",\"'+encodeURIComponent(ossVersion)+'\")\' class=\'urlLink\'>'+cellvalue+'</a>';
+			} else if ("N/A" == cellvalue) {
+				url = cellvalue;
+			} else {
+				var httpVal = cellvalue;
+				if( !(
+						cellvalue.toLowerCase().startsWith("http://") 
+						|| cellvalue.toLowerCase().startsWith("https://") 
+						|| cellvalue.toLowerCase().startsWith("ftp://") 
+						|| cellvalue.toLowerCase().startsWith("git://") 
+					) ) {
+					httpVal = "https://" + cellvalue;
+				}
+				if (httpVal.indexOf(",") > -1){
+					httpVal = httpVal.split(",");
+					var cnt = httpVal.length;
+					for (var i=0; i < httpVal.length; i++){
+						var _href = httpVal[i];
+						url += "<a href=\""+_href+"\" class=\"urlLink\" target=\"_blank\">"+httpVal[i]+"</a>";
+						if (i < httpVal.length-1){
+							url += "\n";
+						}
+					}
+				} else {
+					url = "<a href=\""+httpVal+"\" class=\"urlLink\" target=\"_blank\">"+cellvalue+"</a>";
+				}
+			}
+		}
+		
+		return url;
+	},
+	showVulnViewPage : function(_ossName, _ossVersion){
+		var prjId = [[${project.prjId}]];
+		var _url = '/vulnerability/vulnpopup?prjId='+prjId+'&ossName='+_ossName+'&ossVersion='+_ossVersion;
+		
+		if(_popupVuln == null || _popupVuln.closed) {
+			_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=950, height=600, toolbar=no, location=no, left=100, top=100");
+
+			if(!_popupVuln || _popupVuln.closed || typeof _popupVuln.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		} else {
+			_popupVuln.close();
+			
+			_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=900, height=600, toolbar=no, location=no, left=100, top=100");
+		}
+	}
 }
 
 var com_fn = {
@@ -527,12 +602,32 @@ var com_fn = {
 		});
 	},
 	bulkEditChange : function(){
+		$("select[name=vulnerabilityResolution]").removeClass("is-invalid");
+		
 		alertify.confirm([[#{msg.oss.change.bulkedit}]], function (e) {
 			if (e){
+				var changeFlag = false;
 				var obj = $("#secBulkEditForm").serializeObject();
-				obj["vulnerabilityResolution"] = $("select[name=vulnerabilityResolution] option:selected").val();
-				sec_com_fn.bulkEditDataInfo(obj, "mod");
-				com_fn.bulkEditClose();
+				var vulnerabilityResolution = $("select[name=vulnerabilityResolution] option:selected").val();
+				obj["securityComments"] = $("#securityComments").val();
+ 				var onlyEditCommentFlag = $("input[name=onlyEditCommentFlag]").val();
+ 				obj["onlyEditCommentFlag"] = onlyEditCommentFlag;
+ 				
+ 				if ("N" == onlyEditCommentFlag) {
+ 					if ("" == vulnerabilityResolution) {
+ 						$("select[name=vulnerabilityResolution]").addClass("is-invalid");
+ 					} else {
+ 						obj["vulnerabilityResolution"] = vulnerabilityResolution;
+ 						changeFlag = true;
+ 					}
+ 				} else {
+ 					changeFlag = true;
+ 				}
+ 				
+ 				if (changeFlag) {
+ 					sec_com_fn.bulkEditDataInfo(obj, "mod");
+ 					com_fn.bulkEditClose();
+ 				}
 			} else {
 				return false;
 			}
@@ -543,6 +638,7 @@ var com_fn = {
 			if (e){
 				var obj = $("#secBulkEditForm").serializeObject();
 				obj["vulnerabilityResolution"] = "Unresolved";
+				obj["securityComments"] = "";
 				sec_com_fn.bulkEditDataInfo(obj, "reset");
 				com_fn.bulkEditClose();
 			} else {
@@ -661,7 +757,7 @@ var total = {
 		totalList.jqGrid({
 			datatype: 'local',
 			data: totalMainData,
-			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
 				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
@@ -680,7 +776,9 @@ var total = {
 							}
 						}]
 					}
-				}
+				},
+				{name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false},
+				{name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true}
 			],
 		   	editurl:'clientArray',
  			autowidth: true,
@@ -901,7 +999,7 @@ var fullDiscovered = {
 			fullDiscoveredList.jqGrid({ 
 				datatype: 'local',  
 				data: fullDiscoveredMainData,
-				colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+				colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
 				colModel: [
 					{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
 					{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
@@ -920,7 +1018,9 @@ var fullDiscovered = {
 								}
 							}]
 						}
-					}
+					},
+					{name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false},
+					{name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true}
 				],
 				editurl:'clientArray',
 	 			autowidth: true,

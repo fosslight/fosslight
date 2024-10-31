@@ -6528,10 +6528,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		List<ProjectIdentification> list = null;
 		List<ProjectIdentification> fullList = null;
 		
-		OssMaster param = new OssMaster();
 		OssComponents oc = null;
 		OssComponents bean = null;
 		boolean activateFlag;
+		String ossVersion = "";
+		String vulnerabilityLink = "";
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(project.getPrjId());
 		identification.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE)));
@@ -6572,13 +6573,18 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						bean = (OssComponents) securityGridMap.get(key);
 					}
 					
-					if (activateFlag) checkOssNameList.add(pi.getOssName());
+					if (activateFlag) {
+						checkOssNameList.add(pi.getOssName());
+						vulnerabilityLink = CommonFunction.getProperty("server.domain");
+						vulnerabilityLink += "/vulnerability/vulnpopup?ossName=" + pi.getOssName() + "&ossVersion=" + ossVersion;
+					} else {
+						vulnerabilityLink = "https://nvd.nist.gov/vuln/detail/" + pi.getCveId();
+					}
 					
 					oc = new OssComponents();
 					oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
 					oc.setOssName(pi.getOssName());
 					oc.setOssVersion(pi.getOssVersion());
-					oc.setCvssScore(pi.getCvssScore());
 					
 					if (!activateFlag) {
 						oc.setCveId(pi.getCveId());
@@ -6586,10 +6592,13 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 						oc.setPublDate(pi.getPublDate());
 					}
 					
+					oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+					oc.setVulnerabilityLink(vulnerabilityLink);
 					oc.setVulnerabilityResolution("Unresolved");
 					
-					if (bean != null && !isEmpty(bean.getVulnerabilityResolution())) {
+					if (bean != null) {
 						oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+						oc.setSecurityComments(bean.getSecurityComments());
 					}
 							
 					fullDiscoveredList.add(oc);
@@ -6600,6 +6609,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 			
 			if (list != null && !list.isEmpty()) {
+				vulnerabilityLink = "";
 				gridIdx = 1;
 				deduplicatedkey.clear();
 				
@@ -6618,7 +6628,13 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 							bean = (OssComponents) securityGridMap.get(key);
 						}
 						
-						if (activateFlag) checkOssNameList.add(pi.getOssName());
+						if (activateFlag) {
+							checkOssNameList.add(pi.getOssName());
+							vulnerabilityLink = CommonFunction.getProperty("server.domain");
+							vulnerabilityLink += "/vulnerability/vulnpopup?ossName=" + pi.getOssName() + "&ossVersion=" + ossVersion;
+						} else {
+							vulnerabilityLink = "https://nvd.nist.gov/vuln/detail/" + pi.getCveId();
+						}
 						
 						oc = new OssComponents();
 						oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
@@ -6632,10 +6648,13 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 							oc.setPublDate(pi.getPublDate());
 						}
 						
+						oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+						oc.setVulnerabilityLink(vulnerabilityLink);
 						oc.setVulnerabilityResolution("Unresolved");
 						
-						if (bean != null && !isEmpty(bean.getVulnerabilityResolution())) {
+						if (bean != null) {
 							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+							oc.setSecurityComments(bean.getSecurityComments());
 						}
 						
 						totalList.add(oc);
