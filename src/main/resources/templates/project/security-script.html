@@ -185,8 +185,14 @@ var sec_com_fn = {
 		} else {
 			if (rowid && rowid !== lastsel){
 				$("#" + target).setColProp('vulnerabilityResolution', {editable:true});
+				$("#" + target).setColProp('securityComments', {editable:true});
 				$("#" + target).jqGrid('editRow',rowid);
 				lastsel=rowid;
+			}
+			
+			var _securityComments = $('#'+rowid+'_securityComments').val();
+			if (typeof _securityComments !== "undefined") {
+				if (_securityComments.indexOf("<input") > -1) $('#'+rowid+'_securityComments').val("");
 			}
 		}
 		
@@ -203,7 +209,11 @@ var sec_com_fn = {
 			for (var j=0; j<totalGridDataLength; j++) {
 				if (rowDatas[i].gridId == totalGridData[j].gridId) {
 					totalGridData[j].vulnerabilityResolution = rowDatas[i].vulnerabilityResolution;
-					continue;
+					var securityComments = rowDatas[i].securityComments;
+					if (securityComments.indexOf("<input") > -1) {
+						securityComments = $('#'+rowDatas[i].gridId+'_securityComments').val();
+					}
+					totalGridData[j].securityComments = securityComments;
 				}
 			}
 		}
