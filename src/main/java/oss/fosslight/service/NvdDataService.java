@@ -975,8 +975,10 @@ public class NvdDataService {
 						String vendorList = (String) item.get("VENDOR");
 						for (String vendor : vendorList.split(",")) {
 							Map<String, Object> nvdDataMap = nvdDataMapper.getMaxScoreProductVer((String)item.get("PRODUCT"), (String)item.get("VERSION"), vendor);
-							mapper.insertNvdDataV3Temp(nvdDataMap);
-							sqlSession.flushStatements();
+							if (nvdDataMap != null) {
+								mapper.insertNvdDataV3Temp(nvdDataMap);
+								sqlSession.flushStatements();
+							}
 						}
 					}
 					
