@@ -6,9 +6,51 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
+## [2.1.0](https://github.com/fosslight/fosslight/releases/tag/v2.1.0) (2024-10-31)
+
+### New
+
+* **Security 탭 기능 추가**
+  - Need to Resolve / Full Discovered 로 내부 탭명 변경
+    - 기존 Total / Fixed / Not Fixed 3개로 구분되는 방식에서 Need to Resolve / Full Discovered 2개의 탭으로 구분 되도록 변경
+    - Need to Resolve: 기준 점수 이상의 CVE ID 표시. 
+                       기준 점수는 Code management 메뉴에서 Security Vulnerability Standard Score로 설정
+    - Full Discovered: 검출된 전체 CVE ID 표시
+  - Column 추가 : Vulnerability Link, Security Comments 컬럼 추가
+    - Vulnerability Link: 
+    - Security Comments: Vulnerability Resolution 결과에 대한 Comments를 남길 수 있도록 Security Comments 컬럼을 추가함
+  - 엑셀 업로드 기능 추가
+* **Security Mail Enable/Disable 기능 추가**
+  - 프로젝트의 Security Mail 수신여부를 설정할 수 있는 항목 추가
+  - Project Information에서 설정 가능
+  - Security Mail Disable 이유는 필수 입력
+* **Packaging > Source 탭 Binary List 추가**
+  - Packaging 과정에서 source code가 아닌 binary가 취합되는 것을 방지하기 위해 binary list 기능을 추가
+* **v2.1.0 Migration script 추가**
+  - v2.1.0 변경사항에 맞춰 20241025020001_update_v2.1.0.sql 추가
+
+### Changed
+
+* **fosslight_create.sql 데이터 추가**
+  - fosslight_create.sql에 License 데이터 추가
+  - License 데이터가 누락되어 Opensource List가 전체 데이터 중 일부만 보여지는 버그가 있었음
+* **Packaging탭 업로드 파일 개수 추가**
+  - 업로드 용량을 20GB까지 지원할 수 있도록, packaging 파일 업로드 개수 4개로 증가
+* **버그 수정**
+  - Packaging verify버그로 file count가 정상적으로 되지 않던 버그 수정
+  - Statistics 엑셀 파일로 Export할 때 버그 수정
+  - OSS Component ID 매칭 문제로 Project > Identification > Admin check되어있을 때 저장 안되는 버그 수정
+  - License / Open Source List에서 보여지는 Default column 명 오류 수정 (Obligation -> Notice/Source)
+  - Project > Identification 에서 3rd party data load 할 때 3rd party 명이 나오지 않는 오류 수정
+  - Vulnerability matching 관련 버그 수정
+
+
 ## [2.0.2](https://github.com/fosslight/fosslight/releases/tag/v2.0.2) (2024-10-14)
 
 ### Changed
+* **License / Open Source obligation 표기 방식 변경**
+  - Obligation column을 분리: Obligation -> Notice / Source
+  - Notice / Source 의 의무사항이 있는 경우 체크표시로 변경
 * **Database minor 변경사항**
   - 누락되었던 Final Review Status를 T2_CODE_DTL 테이블에 추가
   - OSS_COMPONENTS_LICENSE table에서 foreign key 삭제됨

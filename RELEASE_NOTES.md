@@ -6,9 +6,50 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
+## [2.1.0](https://github.com/fosslight/fosslight/releases/tag/v2.1.0) (2024-10-31)
+
+### New
+
+* **Added Security Tab Features**
+  - Renamed internal tabs to Need to Resolve / Full Discovered
+    - Changed from the previous Total / Fixed / Not Fixed classification to Need to Resolve / Full Discovered
+    - Need to Resolve: Displays CVE IDs above the standard score.
+      The standard score can be set in the Code management menu under Security Vulnerability Standard Score
+    - Full Discovered: Displays all detected CVE IDs
+  - Added Columns: Vulnerability Link, Security Comments
+    - Vulnerability Link:
+    - Security Comments: Added a Security Comments column to leave comments on the results of Vulnerability Resolution
+  - Added Excel upload feature
+* **Added Security Mail Enable/Disable Feature**
+  - Added an option to set whether to receive Security Mail for the project
+  - Can be set in Project Information
+  - Reason for disabling Security Mail is mandatory
+* **Added Binary List to Packaging > Source Tab**
+  - Added a binary list feature to prevent binaries from being collected instead of source code during the packaging process
+* **Added v2.1.0 Migration Script**
+  - Added 20241025020001_update_v2.1.0.sql to match the changes in v2.1.0
+
+### Changed
+
+* **Added Data to fosslight_create.sql**
+  - Added License data to fosslight_create.sql
+  - There was a bug where the Opensource List only showed part of the data due to missing License data
+* **Increased Number of Upload Files in Packaging Tab**
+  - Increased the number of packaging file uploads to 4 to support up to 20GB of upload capacity
+* **Bug Fixes**
+  - Fixed a bug where the file count was not correct due to a Packaging verify bug
+  - Fixed a bug when exporting Statistics to an Excel file
+  - Fixed a bug where saving was not possible when Project > Identification > Admin was checked due to OSS Component ID matching issues
+  - Fixed an error in the default column names displayed in License / Open Source List (Obligation -> Notice/Source)
+  - Fixed an error where the 3rd party name did not appear when loading 3rd party data in Project > Identification
+  - Fixed bugs related to Vulnerability matching
+
 ## [2.0.2](https://github.com/fosslight/fosslight/releases/tag/v2.0.2) (2024-10-14)
 
 ### Changed
+* **Changed License / Open Source Obligation Notation**
+  - Separated the Obligation column: Obligation -> Notice / Source
+  - Changed to a checkmark for cases where there are obligations in Notice / Source
 * **Changes to Database Minor**
   - Added the previously missing Final Review Status to the T2_CODE_DTL table
   - Foreign key removed from the OSS_COMPONENTS_LICENSE table
