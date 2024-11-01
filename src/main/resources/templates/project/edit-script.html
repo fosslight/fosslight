@@ -148,6 +148,79 @@
 				$("#_modelList").jqGrid('clearGridData');
 			});
 			
+			// 컴플리트 버튼 
+			$('#complete').click(function(){
+				var innerHtml 	= 'Are you to enter a comment when complete?<br>';
+                innerHtml 		+= '<textarea id="completeEditor"></textarea>';
+				
+                if(!alertify.completeDialog){
+					alertify.dialog('completeDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								var buttons = setup.buttons;
+								var customButtons = [];
+								for (var i in buttons) {
+									if ('OK' == buttons[i].text) {
+										customButtons.push(buttons[i]);
+									}
+								}
+								setup.buttons = customButtons;
+								setup.focus.element = 0;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
+							}
+						};
+					}, false, 'confirm');
+            	}
+                
+                alertify.completeDialog()
+           		.set('onok', function(e) {
+           			// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
+           			
+					if (e) {
+						var editorVal = $("#completeEditor").summernote('code');
+						if ("" == $(editorVal).text().trim()) {
+	       					editorVal = "";
+	       				}
+						
+						fn.exeProjectComplete('Y', editorVal);
+					} else {
+						return false;
+					}
+           		})
+           		.set('onshow', function(e){
+           			$("#completeEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                    
+                    const parameter = {
+    		          	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_USER')}]],
+    		            "referenceId" : [[${project.prjId}]]
+    		       	}
+    		        var draftUserComment = draftUserComments(parameter);
+    		        if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+    		           	$("#completeEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+    		        }
+           		})
+           		.setContent(innerHtml)
+				.show();
+			});
+			
 			$('#drop').on ('click', function(){
 				var innerHtml 	= 'Are you to enter a comment when drop?<br><br>';
                 innerHtml 		+= '<textarea id="dropEditor"></textarea>';
@@ -263,7 +336,7 @@
 			
 			// 저장
 			$("#reopen").click(function(){
-				fn.exeProjectComplete('N');
+				fn.exeProjectComplete('N', "");
 			});
 			
 			// 삭제
@@ -1011,8 +1084,8 @@
 				return rows;
 			},
 			// 컴플리트 처리
-			exeProjectComplete : function(flag){
-				var data = {"prjId" : $('input[name=prjId]').val() , "completeYn" : flag, "userComment":""};
+			exeProjectComplete : function(flag, userComment){
+				var data = {"prjId" : $('input[name=prjId]').val() , "completeYn" : flag, "userComment":userComment};
 				
 				$.ajax({
 					url : '/project/updateProjectStatus',
