@@ -267,14 +267,14 @@ var fn = {
 					if (cvssScoreMax - standardScore >= 0) {
 						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 					} else {
-						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered('+cvssScoreMax+')</span>';
+						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">Discovered('+cvssScoreMax+')</span>';
 					}
 				}
 			} else {
 				if (typeof cvssScoreMax !== "undefined") {
-					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered(' + cvssScoreMax + ')</span>';
+					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">Discovered(' + cvssScoreMax + ')</span>';
 				} else {
-					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered(N/A)</span>';
+					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>';
 				}
 			}
 			
