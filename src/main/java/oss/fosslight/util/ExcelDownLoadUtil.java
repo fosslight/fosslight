@@ -2165,9 +2165,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		switch (code) {
 			case "total" : securityGridList = (List<OssComponents>) result.get("totalList");
 				break;
-			case "fixed" : securityGridList = (List<OssComponents>) result.get("fixedList");
-				break;
-			default : securityGridList = (List<OssComponents>) result.get("notFixedList");
+			default : securityGridList = (List<OssComponents>) result.get("fullDiscoveredList");
 				break;
 		}
 		
