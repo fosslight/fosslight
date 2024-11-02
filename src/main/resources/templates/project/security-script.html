@@ -420,7 +420,7 @@ var sec_com_fn = {
   			}, 100);
      	}
   	},
-  	checkReqEntrySecurity : function () {
+  	checkReqEntrySecurity : function (prjId, tabMenu) {
   		var reqEntryFlag = false;
 		var data = {
 			"prjId" : prjId,
@@ -568,8 +568,11 @@ var com_fn = {
 		
 		var prjId = [[${project.prjId}]];
 		var tabMenu = target;
-		
+
+        console.log("aaa");
+        console.log(`prjId: ${prjId} / ${tabMenu}`);
 		if (sec_com_fn.checkReqEntrySecurity(prjId, tabMenu)) {
+            console.log("bbb")
 			com_fn.downloadExcel(tabMenu);
 		} else {
 			loading.hide();
