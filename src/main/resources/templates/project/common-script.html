@@ -16,6 +16,13 @@ var licenseNames = [];
 //==========================================================================================
 //COMMON
 //==========================================================================================
+
+// prevent clicking the OK button on Enter
+let keyCode;
+$(document).on('keydown', function (event) {
+	keyCode = event.keyCode;
+});
+	
 var com_evt = {
 	// init
 	init: function(){
@@ -229,13 +236,7 @@ var com_evt = {
 				var innerHtml 	= 'Are you sure you want to reject?<br>';
                	innerHtml 		+= '<textarea id="bomRejectEditor"></textarea>';
 				
-             	// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-               	
-               	if (typeof alertify.bomRejectDialog === 'undefined') {
+             	if (typeof alertify.bomRejectDialog === 'undefined') {
 					alertify.dialog('bomRejectDialog', function() {
 						return {
 							setup: function() {
@@ -2115,12 +2116,6 @@ var com_fn = {
 					return false;
 				}
 			}
-			console.log("bomReqeustStart");
-			// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
 			
 			if (typeof alertify.bomRequestDialog === 'undefined') {
 				alertify.dialog('bomRequestDialog', function() {

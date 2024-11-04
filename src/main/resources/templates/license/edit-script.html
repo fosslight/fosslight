@@ -6,6 +6,12 @@
         var commentsParam = {referenceDiv : 'license'};
         var isNew = false;
 
+     	// prevent clicking the OK button on Enter
+		let keyCode;
+		$(document).on('keydown', function (event) {
+			keyCode = event.keyCode;
+		});
+        
         $(window).load(function () {
             lic_edit_data.init();
 
@@ -69,13 +75,7 @@
                 $("#save").on('click',function(){
                 	fn.checkValidMsg();
                 	
-                	// prevent clicking the OK button on Enter
-    				let keyCode;
-    				$(document).on('keydown', function (event) {
-    					keyCode = event.keyCode;
-    				});
-                   	
-                   	if (typeof alertify.licenseSaveDialog === 'undefined') {
+                	if (typeof alertify.licenseSaveDialog === 'undefined') {
     					alertify.dialog('licenseSaveDialog', function() {
     						return {
     							setup: function() {
@@ -133,12 +133,6 @@
                 $('#delete').on('click', function(){
                     var innerHtml 	= [[#{msg.license.confirm.delete}]] + '<br>';
                     innerHtml 		+= '<textarea id="delLicenseEditor"></textarea>';
-
-                    // prevent clicking the OK button on Enter
-                    let keyCode;
-                    $(document).on('keydown', function (event) {
-                        keyCode = event.keyCode;
-                    });
 
                     if (!alertify.delLicenseDialog){
                         alertify.dialog('delLicenseDialog', function() {

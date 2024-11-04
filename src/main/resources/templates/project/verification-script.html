@@ -23,6 +23,12 @@
         var appendReadOnlyFlag = false;
         var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
 
+     	// prevent clicking the OK button on Enter
+		let keyCode;
+		$(document).on('keydown', function (event) {
+			keyCode = event.keyCode;
+		});
+        
         $(document).ready(function () {
             'use strict';
             $('.select2').select2();
@@ -582,13 +588,7 @@
                         var innerHtml 	= 'Are you sure you want to confirm?<br>';
                         innerHtml 		+= '<textarea id="verConfirmEditor"></textarea>';
                         
-                     	// prevent clicking the OK button on Enter
-            			let keyCode;
-            			$(document).on('keydown', function (event) {
-            				keyCode = event.keyCode;
-            			});
-                        
-                        if(!alertify.verConfirmDialog){
+                     	if(!alertify.verConfirmDialog){
     						alertify.dialog('verConfirmDialog', function() {
     							return {
     								setup: function() {
@@ -2153,12 +2153,6 @@
                 if (result.isValid == 'false') {
                     alertify.error([[#{msg.common.valid2}]], 0);
                 } else {
-                	// prevent clicking the OK button on Enter
-    				let keyCode;
-    				$(document).on('keydown', function (event) {
-    					keyCode = event.keyCode;
-    				});
-                	
                 	var contents = '<textarea cols="80" id="noticeEditPop" name="noticeEditPop" rows="10"></textarea>';
         			alertify.confirm()
         					.set({'resizable': true, 'startMaximized':true}).resizeTo('650', '480')

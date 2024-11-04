@@ -15,6 +15,12 @@ const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConst
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var changeWatcherArr = [];
 
+//prevent clicking the OK button on Enter
+let keyCode;
+$(document).on('keydown', function (event) {
+	keyCode = event.keyCode;
+});
+
 $(document).ready(function () {
 	evt.init();
 	fn.getUserIdList("Y", "REVIEWER"); // 근무자
@@ -1860,13 +1866,7 @@ var fn = {
 				var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
 	           	innerHtml 		+= '<textarea id="delPrjListEditor"></textarea>';
 				
-				// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-				
-	           	if (!alertify.delPrjListDialog){
+				if (!alertify.delPrjListDialog){
 					alertify.dialog('delPrjListDialog', function() {
 						return {
 							setup: function() {

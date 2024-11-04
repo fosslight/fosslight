@@ -23,6 +23,12 @@
 	var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
     var isReadOnly = [[${isReadOnly}]];
 	
+ 	// prevent clicking the OK button on Enter
+	let keyCode;
+	$(document).on('keydown', function (event) {
+		keyCode = event.keyCode;
+	});
+    
 	$(document).ready(function() {
 		'use strict';
 		data.init();
@@ -225,13 +231,7 @@
 				var innerHtml 	= 'Are you to enter a comment when drop?<br><br>';
                 innerHtml 		+= '<textarea id="dropEditor"></textarea>';
 				
-             	// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-                
-                if(!alertify.dropDialog){
+             	if(!alertify.dropDialog){
 					alertify.dialog('dropDialog', function() {
 						return {
 							setup: function() {
@@ -349,13 +349,7 @@
 					var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
 	               	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';
 					
-					// prevent clicking the OK button on Enter
-					let keyCode;
-					$(document).on('keydown', function (event) {
-						keyCode = event.keyCode;
-					});
-					
-	               	if(!alertify.deletePrjDialog){
+					if(!alertify.deletePrjDialog){
 						alertify.dialog('deletePrjDialog', function() {
 							return {
 								setup: function() {
@@ -814,12 +808,6 @@
 				confirmMsg = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
 				confirmMsg += innerHtml;
 			}
-			
-			// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
 			
 			if (typeof alertify.prjSaveDialog === 'undefined') {
 				alertify.dialog('prjSaveDialog', function() {

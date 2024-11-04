@@ -19,7 +19,13 @@
     var isReadOnly = [[${isReadOnly}]] || null;
     var userRole = [[${#authentication.authorities[0].authority}]];
     var isSaveButtonClicked = false;
-      
+    
+ 	// prevent clicking the OK button on Enter
+    let keyCode;
+    $(document).on('keydown', function (event) {
+        keyCode = event.keyCode;
+    });
+    
 	//데이터 객체
 	var data = {
 		detail : [[${detail}]],
@@ -541,13 +547,7 @@
 				var innerHtml 	= 'Are you want to delete the oss?<br><br>';
                	innerHtml 		+= '<textarea id="deleteOssEditor"></textarea>';
 
-                // prevent clicking the OK button on Enter
-                let keyCode;
-                $(document).on('keydown', function (event) {
-                    keyCode = event.keyCode;
-                });
-
-               	if (!alertify.delOssDialog){
+                if (!alertify.delOssDialog){
 					alertify.dialog('delOssDialog', function() {
 						return {
 							setup: function() {
@@ -2997,13 +2997,7 @@
 					return false;
 				}
 
-				// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-               	
-               	if (typeof alertify.ossSaveDialog === 'undefined') {
+				if (typeof alertify.ossSaveDialog === 'undefined') {
 					alertify.dialog('ossSaveDialog', function() {
 						return {
 							setup: function() {

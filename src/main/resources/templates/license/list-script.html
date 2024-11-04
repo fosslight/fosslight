@@ -8,6 +8,12 @@
         var totalRow = 0;
         const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT'))}]];
 
+     	// prevent clicking the OK button on Enter
+        let keyCode;
+        $(document).on('keydown', function (event) {
+            keyCode = event.keyCode;
+        });
+        
         $(document).ready(function () {
             'use strict';
             setMaxRowCnt(G_ROW_CNT);
@@ -367,12 +373,6 @@
                 if (ids.length > 0) {
                     var innerHtml 	= [[#{msg.license.confirm.delete}]] + '<br><br>';
                     innerHtml 		+= '<textarea id="deleteLicenseEditor"></textarea>';
-
-                    // prevent clicking the OK button on Enter
-                    let keyCode;
-                    $(document).on('keydown', function (event) {
-                        keyCode = event.keyCode;
-                    });
 
                     if (!alertify.deleteLicenseDialog){
                         alertify.dialog('deleteLicenseDialog', function() {

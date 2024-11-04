@@ -27,6 +27,12 @@ var ossFileObj;
 var partnerStatus = [[${detail.status}]];
 var partnerId = [[${detail.partnerId}]];
 
+//prevent clicking the OK button on Enter
+let keyCode;
+$(document).on('keydown', function (event) {
+	keyCode = event.keyCode;
+});
+
 $(document).ready(function () {
 	'use strict';
 	evt.init();
@@ -822,12 +828,6 @@ var fn = {
 		if (fn.checkStatus()){
 			com_fn.exitCell(_mainLastsel, "list");
 			
-			// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
-			
 			if (typeof alertify.parSaveDialog === 'undefined') {
 				alertify.dialog('parSaveDialog', function() {
 					return {
@@ -1317,13 +1317,7 @@ var fn = {
 			var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
            	innerHtml 		+= '<textarea id="parDelEditor"></textarea>';
            	
-       		// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
-				
-           	if(!alertify.deleteParDialog){
+       		if(!alertify.deleteParDialog){
 				alertify.dialog('deleteParDialog', function() {
 					return {
 						setup: function() {
@@ -1490,13 +1484,7 @@ var fn = {
 			var innerHtml 	= 'Are you sure you want to reject?<br><br>';
            	innerHtml 		+= '<textarea id="partnerRejectEditor"></textarea>';
 			
-         	// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
-           	
-           	if (!alertify.partnerRejectDialog){
+         	if (!alertify.partnerRejectDialog){
 				alertify.dialog('partnerRejectDialog', function() {
 					return {
 						setup: function() {
@@ -1623,13 +1611,7 @@ var fn = {
 			var innerHtml 	= 'Are you sure you want to confirm?<br><br>';
            	innerHtml 		+= '<textarea id="partnerConfirmEditor"></textarea>';
            	
-         	// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
-           	
-           	if (!alertify.partnerConfirmDialog){
+         	if (!alertify.partnerConfirmDialog){
 				alertify.dialog('partnerConfirmDialog', function() {
 					return {
 						setup: function() {
