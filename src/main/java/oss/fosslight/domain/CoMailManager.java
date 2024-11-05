@@ -1270,17 +1270,18 @@ public class CoMailManager extends CoTopComponent {
     			bean.setBccIds(BAT_FAILED_BCC);
     		}
     		
-    		if ((Boolean) convertDataMap.get("isModify")
-    				&& !isEmpty(bean.getComment())
-    				&& ( CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType()) 
-    						|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
-    						|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType()) 
-    						||  CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE.equals(bean.getMsgType())
-    						||  CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType()))) {
-    			convertDataMap.put("isModify", false);
+    		if ((Boolean) convertDataMap.get("isModify")) {
+    			if (CoConstDef.CD_MAIL_TYPE_LICENSE_UPDATE.equals(bean.getMsgType())
+						||  CoConstDef.CD_MAIL_TYPE_LICENSE_RENAME.equals(bean.getMsgType())) {
+    				convertDataMap.put("isModify", false);
+    			} else if ((CoConstDef.CD_MAIL_TYPE_OSS_UPDATE.equals(bean.getMsgType()) 
+						|| CoConstDef.CD_MAIL_TYPE_ADDNICKNAME_UPDATE.equals(bean.getMsgType())
+						|| CoConstDef.CD_MAIL_TYPE_OSS_CHANGE_NAME.equals(bean.getMsgType()))
+    					&& !isEmpty(bean.getComment())) {
+    				convertDataMap.put("isModify", false);
+    			}
     		}
     		
-
     		if (!(Boolean) convertDataMap.get("isModify")){
     			// 수신자 중복문제 수정
     			try {
