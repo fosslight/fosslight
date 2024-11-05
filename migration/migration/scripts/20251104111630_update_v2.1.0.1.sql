@@ -1,4 +1,5 @@
 -- OSS data reset
+set FOREIGN_KEY_CHECKS = 0;
 DELETE FROM `OSS_DOWNLOADLOCATION`;
 DELETE FROM `OSS_LICENSE_DECLARED`;
 DELETE FROM `OSS_NICKNAME`;
@@ -337,7 +338,9 @@ INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DI
 	(141, 92, '2.19', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'wonjae.park', '2024-07-10 15:00:23', NULL, '9.8', 'CVE-2014-9761', 'Y', 'N', '2024-09-18 23:43:19', 'WCP', '11', 'Copyright (C) 1989-2013 Free Software Foundation, Inc.', '', NULL, NULL),
 	(142, 92, '2.18', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'wonjae.park', '2024-07-10 15:00:23', NULL, '9.8', 'CVE-2014-9761', 'Y', 'N', '2024-09-18 23:43:19', 'WCP', '11', '', '', NULL, NULL),
 	(143, 92, '2.17', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'wonjae.park', '2024-07-10 15:00:23', NULL, '10.0', 'CVE-2015-0235', 'Y', 'N', '2023-03-29 03:07:05', 'WCP', '11', '', '', NULL, NULL),
-	(144, 115, '1.20.6-r0', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'oscAdmin', '2017-02-12 15:27:41', NULL, NULL, NULL, NULL, 'N', NULL, 'CP', '11', '', NULL, NULL, NULL),
+	(144, 115, '1.20.6-r0', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'oscAdmin', '2017-02-12 15:27:41', NULL, NULL, NULL, NULL, 'N', NULL, 'CP', '11', '', NULL, NULL, NULL);
+
+INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DIV`, `USE_YN`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`, `VULN_CPE_NM`, `CVSS_SCORE`, `CVE_ID`, `VULN_YN`, `VULN_RECHECK`, `VULN_DATE`, `LICENSE_TYPE`, `OBLIGATION_TYPE`, `COPYRIGHT`, `ATTRIBUTION`, `RESTRICTION`, `IN_CPE_MATCH_FLAG`) VALUES
 	(145, 116, '', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'soim.kim', '2017-08-29 02:07:36', NULL, '5.8', 'CVE-2010-3879', 'Y', 'N', '2024-08-21 10:24:20', 'CP', '11', 'Copyright (C) 2001-2007  Miklos Szeredi <miklos@szeredi.hu>\nCopyright (C) 2011       Sebastian Pipping <sebastian@pipping.org>\nCopyright (c) 2006-2008 Amit Singh/Google Inc.\nCopyright (c) 2011-2017 Benjamin Fleischer\nCopyright (C) 2008       SUSE Linux Products GmbH\nCopyright (C) 2008       Tejun Heo <teheo@suse.de>\nCopyright (c) 2012 Anatol Pomozov\nCopyright (C) 2000,02 Free Software Foundation, Inc.', NULL, NULL, NULL),
 	(146, 117, '1.4', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'oscAdmin', '2017-02-12 15:27:41', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', 'Copyright (c) 2001-2008 The Apache Software Foundation', NULL, NULL, NULL),
 	(147, 92, '2.15', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:41', 'wonjae.park', '2024-07-10 15:00:23', NULL, '10.0', 'CVE-2015-0235', 'Y', 'N', '2023-03-29 03:07:05', 'WCP', '11', '', '', NULL, NULL),
@@ -424,7 +427,9 @@ INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DI
 	(241, 186, '1.0.3', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, '7.5', 'CVE-2017-20165', 'Y', 'N', '2023-01-14 01:42:53', 'PMS', '10', 'Copyright (c) 2011 TJ Holowaychuk <tj@vision-media.ca>', NULL, NULL, NULL),
 	(242, 186, '1.0.4', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, '7.5', 'CVE-2017-20165', 'Y', 'N', '2023-01-14 01:42:53', 'PMS', '10', 'Copyright (c) 2011 TJ Holowaychuk <tj@vision-media.ca>', NULL, NULL, NULL),
 	(243, 184, '1.42.11', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'soim.kim', '2023-07-27 21:46:07', NULL, '4.6', 'CVE-2015-0247', 'Y', 'N', '2024-09-06 15:03:35', 'CP', '11', 'Copyright (c) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 by Theodore Ts\'o\nCopyright (c) 1987, 1988, 1989 Massachusetts Institute of Technology Student Information Processing Board', '', NULL, 'Y'),
-	(244, 187, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-13 21:21:46', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', '', NULL, NULL, NULL),
+	(244, 187, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-13 21:21:46', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', '', NULL, NULL, NULL);
+
+INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DIV`, `USE_YN`, `CREATOR`, `CREATED_DATE`, `MODIFIER`, `MODIFIED_DATE`, `VULN_CPE_NM`, `CVSS_SCORE`, `CVE_ID`, `VULN_YN`, `VULN_RECHECK`, `VULN_DATE`, `LICENSE_TYPE`, `OBLIGATION_TYPE`, `COPYRIGHT`, `ATTRIBUTION`, `RESTRICTION`, `IN_CPE_MATCH_FLAG`) VALUES
 	(245, 188, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', 'Copyright (c) 2010 Robbie Hanson', NULL, NULL, NULL),
 	(246, 189, '0.1.3', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', 'Copyright (c) 2015 dt-workshop', NULL, NULL, NULL),
 	(247, 190, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, NULL, NULL, NULL, 'N', NULL, 'CP', '11', '', NULL, NULL, NULL),
@@ -433,7 +438,7 @@ INSERT INTO `OSS_VERSION` (`OSS_ID`, `OSS_COMMON_ID`, `OSS_VERSION`, `LICENSE_DI
 	(251, 193, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', 'Copyright (c) 2015 Jeduan Cornejo', NULL, NULL, NULL),
 	(252, 143, '1.5.3', 'M', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'kyoungae.kim', '2021-11-10 14:23:34', NULL, NULL, NULL, NULL, 'N', NULL, 'CP', '11', 'Copyright (c) 2000 Werner Koch (dd9jn)\nCopyright (c) 2001, 2002, 2003, 2004, 2005, 2007, 2012, 2014, 2015 g10 Code GmbH', '', NULL, NULL),
 	(253, 183, '1.0.4', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', 'Copyright (c) Isaac Z. Schlueter', NULL, NULL, NULL),
-	(255, 194, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'wonjae.park', '2017-11-08 16:41:17', NULL, '10.0', 'CVE-2004-1304', 'Y', 'N', '2024-08-21 10:24:22', 'PMS', '10', 'Copyright (c) Ian F. Darwin 1986, 1987, 1989, 1990, 1991, 1992, 1994, 1995.\nSoftware written by Ian F. Darwin and others;\nmaintained 1994- Christos Zoulas.', NULL, NULL, NULL),
+	(255, 194, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'wonjae.park', '2017-11-08 16:41:17', NULL, '10.0', 'CVE-2004-1304', 'Y', 'N', '2024-08-21 10:24:22', 'PMS', '10', 'Copyright (c) Ian F. Darwin 1986, 1987, 1989, 1990, 1991, 1992, 1994, 1995.\nSoftware written by Ian F. Darwin and others\nmaintained 1994- Christos Zoulas.', NULL, NULL, NULL),
 	(256, 93, '0.9.32', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, '9.6', 'CVE-2021-43523', 'Y', 'N', '2021-11-18 02:30:38', 'WCP', '11', '', NULL, NULL, NULL),
 	(257, 195, '3.1.2', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, '9.1', 'CVE-2019-14462', 'Y', 'N', '2024-09-18 23:43:40', 'WCP', '11', 'Stéphane Raimbault <stephane.raimbault@gmail.com>\nTobias Doerffel <tobias.doerffel@gmail.com> - CLA\nFlorian Forster <ff@octo.it>\noldfaber <oldfaber@gmail.com>\nHannu Vuolasaho <vuokkosetae@gmail.com> - CLA\nMichael Heimpold <mhei@heimpold.de> - CLA\nJimmy Bergström <jimmy@ekontroll.com> - CLA', NULL, NULL, NULL),
 	(258, 196, '', 'S', 'Y', 'oscAdmin', '2017-02-12 15:27:42', 'oscAdmin', '2017-02-12 15:27:42', NULL, NULL, NULL, NULL, 'N', NULL, 'PMS', '10', '', NULL, NULL, NULL),
@@ -1640,7 +1645,7 @@ INSERT INTO `OSS_DOWNLOADLOCATION` (`OSS_COMMON_ID`, `DOWNLOAD_LOCATION`, `PURL`
 	(90, 'https://github.com/PolymerElements/iron-meta/tree/v1.1.3', NULL, 3),
 	(91, 'https://github.com/UnboundID/ldapsdk', NULL, 1),
 	(92, 'https://ftp.gnu.org/gnu/glibc', NULL, 1),
-	(92, 'https://sourceware.org/git/?p=glibc.git;a=summary', NULL, 2),
+	(92, 'https://sourceware.org/git/?p=glibc.git', NULL, 2),
 	(92, 'https://sourceware.org/git/glibc.git', NULL, 3),
 	(93, 'https://uclibc.org/downloads', NULL, 1),
 	(94, 'http://zeromq.org/area:download', NULL, 1),
@@ -1688,7 +1693,7 @@ INSERT INTO `OSS_DOWNLOADLOCATION` (`OSS_COMMON_ID`, `DOWNLOAD_LOCATION`, `PURL`
 	(113, 'http://www.di-mgt.com.au/bigdigits.html#download', NULL, 2),
 	(113, 'https://enterprise.dejacode.com/components/public/BigDigits/2.4/#notice', NULL, 3),
 	(114, 'http://www.busybox.net/downloads', NULL, 1),
-	(114, 'http://www.busybox.net/downloads/busybox-1.29.2.tar.bz2;name=tarball', NULL, 2),
+	(114, 'http://www.busybox.net/downloads/busybox-1.29.2.tar.bz2', NULL, 2),
 	(114, 'https://busybox.net', NULL, 3),
 	(114, 'https://busybox.net/downloads', NULL, 4),
 	(114, 'https://busybox.net/downloads/busybox-1.14.1.tar.bz2', NULL, 5),
@@ -1865,3 +1870,6 @@ INSERT INTO `OSS_DOWNLOADLOCATION` (`OSS_COMMON_ID`, `DOWNLOAD_LOCATION`, `PURL`
 	(200, 'https://sourceforge.net/projects/libmtp/files/libmtp/0.3.6/libmtp-0.3.6.tar.gz/download', NULL, 3),
 	(200, 'https://sourceforge.net/projects/libmtp/files/libmtp/1.1.5/libmtp-1.1.5.tar.gz/download', NULL, 4),
 	(200, 'https://sourceforge.net/projects/libmtp/files/libmtp/1.1.6/libmtp-1.1.6.tar.gz/download', NULL, 5);
+
+
+set FOREIGN_KEY_CHECKS = 1;
