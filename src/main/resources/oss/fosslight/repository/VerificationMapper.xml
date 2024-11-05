@@ -434,9 +434,11 @@
 	   SET PACKAGE_FILE_ID = #{packageFileId}
 	     , PACKAGE_FILE_ID2 = #{packageFileId2}
 	     , PACKAGE_FILE_ID3 = #{packageFileId3}
+	     , PACKAGE_FILE_ID4 = #{packageFileId4}
 	     , PACKAGE_FILE_TYPE1 = #{packageFileType1}
 	     , PACKAGE_FILE_TYPE2 = #{packageFileType2}
 	     , PACKAGE_FILE_TYPE3 = #{packageFileType3}
+	     , PACKAGE_FILE_TYPE4 = #{packageFileType4}
 	     <if test="!@oss.fosslight.util.StringUtil@isEmpty(statusVerifyYn)">
 	     , STATUS_VERIFY_YN = #{statusVerifyYn} 
 	     </if>
@@ -529,6 +531,9 @@
 		 </if>
 		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId3)">
 		   AND T2.PACKAGING_FILE_ID != #{packageFileId3}
+		 </if>
+		 <if test="!@oss.fosslight.util.StringUtil@isEmpty(packageFileId4)">
+		   AND T2.PACKAGING_FILE_ID != #{packageFileId4}
 		 </if>
 	</update>
 	

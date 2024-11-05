@@ -15,6 +15,12 @@ var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMP
 var changeWatcherArr = [];
 var role = [[${#authentication.authorities[0].authority}]];
 
+//prevent clicking the OK button on Enter
+let keyCode;
+$(document).on('keydown', function (event) {
+	keyCode = event.keyCode;
+});
+
 $(document).ready(function () {
 	'use strict';
 	setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
@@ -980,12 +986,6 @@ var fn = {
 				var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
 	           	innerHtml 		+= '<textarea id="delParEditor"></textarea>';
 	           	
-	           	// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-					
 	           	if (!alertify.delParDialog){
 	    			alertify.dialog('delParDialog', function() {
 	    				return {

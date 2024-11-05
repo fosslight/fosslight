@@ -4,19 +4,19 @@
 <script th:inline="javascript">
 var lastsel;
 var totalMainData = [];
-var fixedMainData = [];
-var notfixedMainData = [];
+var fullDiscoveredMainData = [];
 var saveFlag = false;
 var prevEditSel;
 var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'security'};
 var totalValidMsgData;
-var fixedValidMsgData;
-var notFixedValidMsgData;
+var fullDiscoveredValidMsgData;
+var _scrtUploadFile;
 
 $(function () {
 	'use strict';
 	sec_com_evt.dataInit();
 	com_fn.tabInit();
+	total.fileUpload();
 	
 	$("[id^=tabMenu]").on("click", function() {
 		var tabId = $(this).attr("id");
@@ -25,19 +25,23 @@ $(function () {
 		$("#gridArea"+tabId).show();
 		
 		if ("Total" == tabId) {
-			$('#save').attr('onclick', "total.save()");
-		} else if ("Fixed" == tabId) {
-			$('#save').attr('onclick', "fixed.save()");
+			$('#save').show();
 		} else {
-			$('#save').attr('onclick', "notFixed.save()");
+			$("#save").hide();
+		}
+	});
+	
+	$(document).on('change', ".bulkEditCheck", function() {
+		if (this.checked) {
+			$("input[name='onlyEditCommentFlag']").val("Y");
+		} else {
+			$("input[name='onlyEditCommentFlag']").val("N");
 		}
 	});
 });
 
-var sec_com_evt = {
-	dataInit : function(){
-		loading.show();
-		
+var sec_data = {
+	getJqGrid : function () {
 		var url = '/project/securityGrid/'+[[${project.prjId}]]+'/total';
 		$.ajax({
 			url : url,
@@ -48,41 +52,44 @@ var sec_com_evt = {
 			success : function(data){
 				loading.hide();
 				
-				totalMainData = data.totalGridData;
-				if (data.totalValidData) {
-					totalValidMsgData = data.totalValidData;
-				}
-				fixedMainData = data.fixedGridData;
-				if (data.fixedValidData) {
-					fixedValidMsgData = data.fixedValidData;
-				}
-				notfixedMainData = data.notFixedGridData;
-				if (data.notFixedValidData) {
-					notFixedValidMsgData = data.notFixedValidData;
-				}
-				
-				// 리로드 대신 그리드 삭제 후 다시 그리기
-				$("#totalList").jqGrid('GridUnload');
-				total.loadSecurityGrid();
-				
-				$("#fixedList").jqGrid('GridUnload');
-				fixed.loadSecurityGrid();
-				
-				$("#notFixedList").jqGrid('GridUnload');
-				notFixed.loadSecurityGrid();
-				
-				if (!saveFlag && data.hasOwnProperty('msg')){
-					alertify.alert(data.msg, function(){});
-				}
-				
-				saveFlag = false;
+				sec_data.loadJqGridData(data);
+			},
+			complete : function() {
+				fn.displayProjectInfo();
 			}
 		});
+	},
+	loadJqGridData : function(data) {
+		totalMainData = data.totalGridData;
+		if (data.totalValidData) {
+			totalValidMsgData = data.totalValidData;
+		}
+		fullDiscoveredMainData = data.fullDiscoveredGridData;
+		if (data.fullDiscoveredValidData) {
+			fullDiscoveredValidMsgData = data.fullDiscoveredValidData;
+		}
 		
+		// 리로드 대신 그리드 삭제 후 다시 그리기
+		$("#totalList").jqGrid('GridUnload');
+		total.loadSecurityGrid();
+		
+		$("#fullDiscoveredList").jqGrid('GridUnload');
+		fullDiscovered.loadSecurityGrid();
+		
+		if (!saveFlag && data.hasOwnProperty('msg')){
+			alertify.alert(data.msg, function(){});
+		}
+		
+		saveFlag = false;
+	}
+}
+
+var sec_com_evt = {
+	dataInit : function(){
 		commentsParam.height = $(window).height() - 120;
 		fn_comment.getCommentList(commentsParam);
-		
-		fn.displayProjectInfo();
+		$("#tabMenuTotal").trigger("click");
+		sec_data.getJqGrid();
 	}
 }
 
@@ -178,8 +185,14 @@ var sec_com_fn = {
 		} else {
 			if (rowid && rowid !== lastsel){
 				$("#" + target).setColProp('vulnerabilityResolution', {editable:true});
+				$("#" + target).setColProp('securityComments', {editable:true});
 				$("#" + target).jqGrid('editRow',rowid);
 				lastsel=rowid;
+			}
+			
+			var _securityComments = $('#'+rowid+'_securityComments').val();
+			if (typeof _securityComments !== "undefined") {
+				if (_securityComments.indexOf("<input") > -1) $('#'+rowid+'_securityComments').val("");
 			}
 		}
 		
@@ -196,7 +209,11 @@ var sec_com_fn = {
 			for (var j=0; j<totalGridDataLength; j++) {
 				if (rowDatas[i].gridId == totalGridData[j].gridId) {
 					totalGridData[j].vulnerabilityResolution = rowDatas[i].vulnerabilityResolution;
-					continue;
+					var securityComments = rowDatas[i].securityComments;
+					if (securityComments.indexOf("<input") > -1) {
+						securityComments = $('#'+rowDatas[i].gridId+'_securityComments').val();
+					}
+					totalGridData[j].securityComments = securityComments;
 				}
 			}
 		}
@@ -295,18 +312,20 @@ var sec_com_fn = {
 									
 									return setup;
 								},
-								settings: {
-									oncontinue: null
-								},
-								callback: function(closeEvent) {
-									alertify.confirm().callback.call(this, closeEvent);
+								hooks: {
+							    	onshow: function() {
+							        	this.elements.dialog.style.maxWidth = 'none';
+							          	this.elements.dialog.style.width = '760px';
+							        }
 								}
 							};
 						}, false, 'confirm');
                 	}
                 	
-                	alertify.secBulkEdit(res, function(){}).set('title', 'Bulk Edit Security').set('resizable', true).resizeTo('760px', '340px');
+                	alertify.secBulkEdit(res, function(){}).set('title', 'Bulk Edit Security');
                 	$("select[name=vulnerabilityResolution] option:eq(0)").prop("selected", true);
+                	$(".bulkEditCheck").prop("checked", false);
+                	$("input[name=onlyEditCommentFlag]").val("N");
                 },
                 error : function(){
                     alertify.error([[#{msg.common.valid2}]], 0);
@@ -323,6 +342,7 @@ var sec_com_fn = {
   			var ossArr = [];
           	var gridId = obj["gridId"];
           	var target = obj["target"];
+          	var onlyEditCommentFlag = obj["onlyEditCommentFlag"];
           	var gridParam = $('#'+target).jqGrid('getGridParam','data');
           	var customParam = [];
           	var param = [];
@@ -349,7 +369,11 @@ var sec_com_fn = {
                   		if (param[i]["gridId"] == gridIdArr[idx]) {
                           	for (var key in obj) {
                               	if ("rowId" != key && "target" != key && "gridId" != key) {
-                              		param[i][key] = obj[key];
+                              		if ("Y" == onlyEditCommentFlag && "vulnerabilityResolution" != key) {
+                          				param[i][key] = obj[key];
+                          			} else {
+                              			param[i][key] = obj[key];
+                          			}
                               	}
                           	}
                       	}
@@ -360,7 +384,11 @@ var sec_com_fn = {
                   	if (param[i]["gridId"] == gridId) {
                       	for (var key in obj) {
                       		if ("rowId" != key && "target" != key && "gridId" != key) {
-                      			param[i][key] = obj[key];
+                      			if ("Y" == onlyEditCommentFlag && "vulnerabilityResolution" != key) {
+                      				param[i][key] = obj[key];
+                      			} else {
+                          			param[i][key] = obj[key];
+                      			}
                           	}
                       	}
                   	}
@@ -391,7 +419,90 @@ var sec_com_fn = {
   				adjustMultiPageGridSize();
   			}, 100);
      	}
-  	}
+  	},
+  	checkReqEntrySecurity : function (prjId, tabMenu) {
+  		var reqEntryFlag = false;
+		var data = {
+			"prjId" : prjId,
+			"tabMenu" : tabMenu
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: '/project/checkReqEntrySecurity',
+			data: JSON.stringify(data),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("true" == data.isValid) {
+					reqEntryFlag = true;
+			   }
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+		
+		return reqEntryFlag;
+  	},
+	displayVulnerabilityLink : function(cellvalue, options, rowObject){
+		var url = "";
+		if(cellvalue != null && cellvalue !== undefined && "" != cellvalue){
+			if (cellvalue.indexOf("vulnpopup?") > -1){
+				var ossName = rowObject.ossName;
+				var ossVersion = rowObject.ossVersion;
+				if ("" == ossVersion){
+					ossVersion = "-";
+				}
+				url = '<a href=\'#\' onclick=\'javascript:sec_com_fn.showVulnViewPage(\"'+encodeURIComponent(ossName)+'\",\"'+encodeURIComponent(ossVersion)+'\")\' class=\'urlLink\'>'+cellvalue+'</a>';
+			} else if ("N/A" == cellvalue) {
+				url = cellvalue;
+			} else {
+				var httpVal = cellvalue;
+				if( !(
+						cellvalue.toLowerCase().startsWith("http://") 
+						|| cellvalue.toLowerCase().startsWith("https://") 
+						|| cellvalue.toLowerCase().startsWith("ftp://") 
+						|| cellvalue.toLowerCase().startsWith("git://") 
+					) ) {
+					httpVal = "https://" + cellvalue;
+				}
+				if (httpVal.indexOf(",") > -1){
+					httpVal = httpVal.split(",");
+					var cnt = httpVal.length;
+					for (var i=0; i < httpVal.length; i++){
+						var _href = httpVal[i];
+						url += "<a href=\""+_href+"\" class=\"urlLink\" target=\"_blank\">"+httpVal[i]+"</a>";
+						if (i < httpVal.length-1){
+							url += "\n";
+						}
+					}
+				} else {
+					url = "<a href=\""+httpVal+"\" class=\"urlLink\" target=\"_blank\">"+cellvalue+"</a>";
+				}
+			}
+		}
+		
+		return url;
+	},
+	showVulnViewPage : function(_ossName, _ossVersion){
+		var prjId = [[${project.prjId}]];
+		var _url = '/vulnerability/vulnpopup?prjId='+prjId+'&ossName='+_ossName+'&ossVersion='+_ossVersion;
+		
+		if(_popupVuln == null || _popupVuln.closed) {
+			_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=950, height=600, toolbar=no, location=no, left=100, top=100");
+
+			if(!_popupVuln || _popupVuln.closed || typeof _popupVuln.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		} else {
+			_popupVuln.close();
+			
+			_popupVuln = window.open(_url, "vulnViewPopup_"+_ossName, "width=900, height=600, toolbar=no, location=no, left=100, top=100");
+		}
+	}
 }
 
 var com_fn = {
@@ -412,9 +523,24 @@ var com_fn = {
 		$("#gridAreaTotal").show();
 	},
 	exeSave : function(data, target){
+		var scrtCsvFileId = $('#scrtCsvFileId').val();
+		var scrtCsvFiles = $(".scrtFileArea").find("input[type=hidden]");
+		var fileSeq = [];
+		
+		for (var i = 0; i < scrtCsvFiles.length; i++){
+			var obj = {fileSeq : scrtCsvFiles.eq(i).val()};
+			fileSeq.push(obj);
+		}
+		if (fileSeq.length == 0) {
+			$("#scrtCsvFileId").val("");
+			scrtCsvFileId = "";
+		}
+		
 		var finalData = {
 			referenceId : [[${project.prjId}]],
 			targetName : target,
+			scrtCsvFileId : scrtCsvFileId,
+			scrtCsvFiles : JSON.stringify(fileSeq),
 			gridData : JSON.stringify(data)
 		};
 		
@@ -436,6 +562,28 @@ var com_fn = {
 				}
 			}
 		});
+	},
+	checkDownloadExcel : function(target) {
+		loading.show();
+		
+		var prjId = [[${project.prjId}]];
+		var tabMenu = target;
+
+        console.log("aaa");
+        console.log(`prjId: ${prjId} / ${tabMenu}`);
+		if (sec_com_fn.checkReqEntrySecurity(prjId, tabMenu)) {
+            console.log("bbb")
+			com_fn.downloadExcel(tabMenu);
+		} else {
+			loading.hide();
+			alertify.confirm([[#{msg.project.security.check.export}]], function (e) {
+				if (e) {
+					com_fn.downloadExcel(tabMenu);
+				} else {
+					return false;
+				}
+			});
+		}
 	},
 	downloadExcel : function(target){
 		var data = {
@@ -467,12 +615,32 @@ var com_fn = {
 		});
 	},
 	bulkEditChange : function(){
+		$("select[name=vulnerabilityResolution]").removeClass("is-invalid");
+		
 		alertify.confirm([[#{msg.oss.change.bulkedit}]], function (e) {
 			if (e){
+				var changeFlag = false;
 				var obj = $("#secBulkEditForm").serializeObject();
-				obj["vulnerabilityResolution"] = $("select[name=vulnerabilityResolution] option:selected").val();
-				sec_com_fn.bulkEditDataInfo(obj, "mod");
-				com_fn.bulkEditClose();
+				var vulnerabilityResolution = $("select[name=vulnerabilityResolution] option:selected").val();
+				obj["securityComments"] = $("#securityComments").val();
+ 				var onlyEditCommentFlag = $("input[name=onlyEditCommentFlag]").val();
+ 				obj["onlyEditCommentFlag"] = onlyEditCommentFlag;
+ 				
+ 				if ("N" == onlyEditCommentFlag) {
+ 					if ("" == vulnerabilityResolution) {
+ 						$("select[name=vulnerabilityResolution]").addClass("is-invalid");
+ 					} else {
+ 						obj["vulnerabilityResolution"] = vulnerabilityResolution;
+ 						changeFlag = true;
+ 					}
+ 				} else {
+ 					changeFlag = true;
+ 				}
+ 				
+ 				if (changeFlag) {
+ 					sec_com_fn.bulkEditDataInfo(obj, "mod");
+ 					com_fn.bulkEditClose();
+ 				}
 			} else {
 				return false;
 			}
@@ -483,6 +651,7 @@ var com_fn = {
 			if (e){
 				var obj = $("#secBulkEditForm").serializeObject();
 				obj["vulnerabilityResolution"] = "Unresolved";
+				obj["securityComments"] = "";
 				sec_com_fn.bulkEditDataInfo(obj, "reset");
 				com_fn.bulkEditClose();
 			} else {
@@ -492,16 +661,116 @@ var com_fn = {
 	},
 	bulkEditClose : function(){
 		$(".ajs-close").trigger("click");
+	},
+	getSheetData : function(seq, tabNm) {
+		var sheetNum = [];
+		
+		$('input:checkbox[name="sheetNameSelect"]').each(function(){
+			if($(this).is(':checked')){
+				sheetNum.push($(this).val());
+			}
+		});
+		
+		if (sheetNum.length == 0) {
+			alert([[#{msg.common.check.sheet}]]);
+			
+			return;
+		} else {
+			loading.show();
+			fn_grid_com.totalGridSaveMode(tabNm + "List");
+			var mainData = sec_com_fn.setSaveGridData(tabNm + "List");
+			var finalData = {"readType" : tabNm,"prjId" : [[${project.prjId}]], "sheetNums" : sheetNum , "fileSeq" : ""+seq, "mainData" : JSON.stringify(mainData)};
+			var object = {fileSeq : seq};
+			
+			if ("total" == tabNm) {
+				total.scrtCsvFileSeq.push(object);
+				total.exeLoadReportData(finalData);
+			}
+		}
+	},
+	closeAlertifyView : function () {
+		$(".ajs-close").trigger("click");
+	},
+	makeFileTag : function (obj) {
+		$('#scrtCsvFileId').val(obj.registFileId);
+		
+		var appendHtml = '<br>'+obj.createdDate;
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
+		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a><input type="hidden" value="'+obj.registSeq+'"/>';
+		uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="com_fn.deleteFiles(this, \'1\')">X</span>'+appendHtml+'</li>';
+		$('.scrtFileArea').append(uploadFileTag);
+	},
+	deleteFiles : function (obj, type) {
+		var FileSeq = [];
+		var seq = $(obj).prev().val();
+		FileSeq.push({fileSeq : seq});
+		var Data = {"csvDelFileIds" : JSON.stringify(FileSeq), "prjId" : [[${project.prjId}]], "referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_SECURITY_HIS')}]]};
+		
+		$.ajax({
+			url : "/project/deleteFiles",
+			type : 'POST',
+			data : JSON.stringify(Data),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				if ("10" == data.resCd){
+					alertify.success([[#{msg.common.success}]]);
+					$(obj).closest('li').remove();
+				} else {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
 	}
 }
 
 var total = {
+	scrtCsvFileSeq : [],
+	exeLoadReportData : function(finalData) {
+		try {
+			$.ajax({
+				url : '/project/getSecuritySheetData',
+				type : 'POST',
+				data : JSON.stringify(finalData),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function(data){
+					loading.hide();
+					
+					if ("false" == data.isValid) {
+						if(data.validMsg) {
+							alertify.alert(data.validMsg, function(){});
+						} else {
+							alertify.error([[#{msg.common.valid}]], 0);
+						}
+					} else {
+						alertify.success([[#{msg.common.success}]]);
+						sec_data.loadJqGridData(data);
+						com_fn.makeFileTag(_scrtUploadFile);
+						_scrtUploadFile = undefined;
+					}
+				},
+				error: function(data){
+					loading.hide();
+					$('.totalFileArea').children().remove();
+					alertify.error([[#{msg.common.valid}]], 0);
+				}
+			});
+		} finally {
+			com_fn.closeAlertifyView();
+		}
+	},
 	loadSecurityGrid : function(){
 		var totalList = $("#totalList");
 		totalList.jqGrid({
 			datatype: 'local',
 			data: totalMainData,
-			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
+			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
 				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
@@ -520,7 +789,9 @@ var total = {
 							}
 						}]
 					}
-				}
+				},
+				{name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false},
+				{name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true}
 			],
 		   	editurl:'clientArray',
  			autowidth: true,
@@ -583,8 +854,8 @@ var total = {
 	            	var appendBtn = "";
 	                
 	            	if ([[${@CommonFunction.isAdmin()}]]) {
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('total')\"><i class=\"fas fa-plus\"></i></button>";
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('total', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('total')\"><i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('total', 'main')\"><i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
 	                }
 	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('total')\"><i class=\"fas fa-pencil-alt\"></i></button>";
 	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('total')\"><i class=\"fas fa-download\"></i></button>";
@@ -623,272 +894,233 @@ var total = {
 				return false;
 			}
 		});
-	}
-}
-
-var fixed = {
-	loadSecurityGrid : function(){
-		var fixedList = $("#fixedList");
-		fixedList.jqGrid({
-			datatype: 'local',  
-			data: fixedMainData,
-			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
-			colModel: [
-				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
-				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
-				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
-						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
-						, dataEvents:[{type:'change',
-							fn: function(e){
-								$("#fixedList").jqGrid('saveRow', lastsel);
-								$("#fixedList").jqGrid("resetSelection");
-								lastsel = -1;
-							}
-						}]
-					}
-				}
-			],
-			editurl:'clientArray',
- 			autowidth: true,
- 			multiselect: true,
- 			multiselectWidth: 35,
-			pager: '#fixedListPager',
-			rowNum: 200,
-			rowList: [200, 500, 1000, 5000],
-			gridview: true,
-			sortable: function (permutation) {
-			},
-			loadonce:true,
-			toppager:true,
-			sortorder: 'desc',
-			height: 'auto',
-			onCellSelect: function(rowid,iCol,cellcontent,e) {
-				sec_com_fn.customOnCellSelect("fixedList", iCol);
-			},
-			beforeSelectRow: function(rowid, e) {
-				if (rowid == prevEditSel) {
-					$("#jqg_fixedList_" + rowid).prop("checked", true);
-				}
-				
-				var $self = $(this), iCol, cm,
-			    $td = $(e.target).closest("tr.jqgrow>td"),
-			    $tr = $td.closest("tr.jqgrow"),
-			    p = $self.jqGrid("getGridParam");
-				
-				if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
-			       	iCol = $.jgrid.getCellIndex($td[0]);
-			       	cm = p.colModel[iCol];
-			       
-				  	if (cm != null && cm.name === "cb") {
-					// multiselect checkbox is clicked
-			        	$self.jqGrid("setSelection", $tr.attr("id"), true ,e);
-				  	}
-				}
-				    
-				return true;
-			},
-			onSelectRow: function(rowid, status, e) {
-				var ossVersion = fixedList.jqGrid("getRowData", rowid)["ossVersion"];
-			    if ("" == ossVersion) $("#jqg_fixedList_" + rowid).prop("checked", false);
-			},
-			ondblClickRow: function(rowid,iRow,iCol,e) {
-				sec_com_fn.customOnDblClickRow("fixedList" ,rowid);
-			},
-			loadComplete: function(data) {
-				lastsel = -1;
-				if(data.records > 0) {
-					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row;
-					for(var _idx=0;_idx<rowsCount;_idx++) {
-						row = rows[_idx];
-						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
-					}
-				}
-				
-				// append button event
-				if ($("#fixedList_toppager_left").find('button').length == 0) {
-	            	var appendBtn = "";
-	                
-	            	if ([[${@CommonFunction.isAdmin()}]]) {
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('fixed')\"><i class=\"fas fa-plus\"></i></button>";
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('fixed', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
-	                }
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('fixed')\"><i class=\"fas fa-pencil-alt\"></i></button>";
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('fixed')\"><i class=\"fas fa-download\"></i></button>";
-	                	                
-	                $("#fixedList_toppager_left").append(appendBtn);
-	            }
-			},
-			gridComplete : function() {
-				if (fixedValidMsgData) {
-					gridValidMsgNew(fixedValidMsgData, "fixedList");
-				}
-				updateGridRowCount('fixedList', 'fixedListPager');
-				adjustMultiPageGridSize();
-			}
-		});
-			
-		fixedList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
-			beforeSearch : function () {
-				if(!this.p.postData.referenceId) {
-					this.p.postData.referenceId = [[${project.prjId}]];
-				}
-			},
-			afterSearch: function () {
-				updateGridRowCount('fixedList', 'fixedListPager'); 
-			}		
-		});
 	},
-	save : function(){
-		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
-			if (e) {
-				fn_grid_com.totalGridSaveMode('fixedList');
-				var gridData = sec_com_fn.setSaveGridData('fixedList');
-				com_fn.exeSave(gridData, "FIXED");
-			} else {
-				return false;
+	fileUpload : function() {
+		var accept1 = '';
+		var fileAccept = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept) {
+			if ('12' == fileAccept[i].cdDtlNo) {
+				accept1 = fileAccept[i].cdDtlExp;
+			}
+		}
+		
+		//파일업로드
+		$('#scrtCsvFile').uploadFile({
+			url:'/project/csvFile',
+			multiple:false,
+			dragDrop:true,
+			fileName:'myfile',
+			allowedTypes:accept1,
+			sequential:true,
+			sequentialCount:1,
+			formData:{"registFileId" : $('#scrtCsvFileId').val(), "tabNm" : "SECURITY"},
+			onSuccess:function(files,data,xhr,pd) {
+				var result = jQuery.parseJSON(data);
+				console.log("result", result);
+				if (result[1] == null) {
+					if (result[0] == "TAB_GUBN_ERROR") {
+						alertify.error([[#{msg.common.upload.failed.separator}]], 0);
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+					}
+					$('.ajax-file-upload-statusbar').fadeOut('slow');
+					$('.ajax-file-upload-statusbar').remove();
+				} else {
+					if(result[0] == "FILE_SIZE_LIMIT_OVER") {
+						alertify.alert(result[1], function(){
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						});
+					} else if(result[2] == "CSV_FILE") {
+						src_fn.getCsvData(result[0][0].registSeq);
+
+						$('#srcCsvFileId').val(result[0][0].registFileId);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+
+						src_fn.makeFileTag(result[0][0]);
+					} else if(result[2] == "EXCEL_FILE") {
+						if(result[1].length != 0) {
+							for(var i = 0; i < result[1].length; i++) {
+								var num = i+1;
+								var checkedTxt = "";
+								
+								var sheetName = result[1][i].name.toUpperCase().trim();
+								if (sheetName.startsWith("SECURITY")){
+									if (sheetName.indexOf("DEP") > -1) {
+									} else {
+										checkedTxt = "checked";
+									}
+								}
+								
+								var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+								sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+								$("#sheetBody").append(sheetTr);
+							}
+							
+							$('#sheetApply').attr('onclick', 'com_fn.getSheetData(' + result[0][0].registSeq + ', "total")');
+						}
+						
+						if (typeof alertify.selectSheet === "undefined") {
+							alertify.dialog('selectSheet', function() {
+								return {
+									setup: function() {
+										var settings = alertify.confirm().settings;
+										
+										for (var prop in settings) {
+											this.settings[prop] = settings[prop];
+										}
+										
+										var setup = alertify.confirm().setup();
+										setup.buttons = [];
+										setup.focus.element = 1;
+										
+										return setup;
+									},
+								    hooks: {
+								    	onshow: function() {
+								        	this.elements.dialog.style.maxWidth = 'none';
+								          	this.elements.dialog.style.width = '365px';
+								        }
+									}
+								};
+							}, false, 'alert');
+	                	}
+						
+						alertify.selectSheet($(".sheetSelectPop").html()).set('title', 'Select Sheet');
+						$("#sheetBody").empty();
+						
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+						
+						_scrtUploadFile = result[0][0];
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
 			}
 		});
 	}
 }
 
-var notFixed = {
-	loadSecurityGrid : function(){
-		var notFixedList = $("#notFixedList");
-		notFixedList.jqGrid({ 
-			datatype: 'local',
-			data: notfixedMainData,
-			colNames: ['ID','OSS ID','OSS Name','OSS Version','CVE ID','CVSS SCORE','Published<br/>Date','Vulnerability<br/>Resolution'],
-			colModel: [
-				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
-				{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
-				{name: 'ossName', index: 'ossName', width: 150, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'cveId', index: 'cveId', width: 70, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'publDate', index: 'publDate', width: 70, align: 'left', template: searchStringOptions, editable:false},
-				{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
+var fullDiscovered = {
+		loadSecurityGrid : function(){
+			var fullDiscoveredList = $("#fullDiscoveredList");
+			fullDiscoveredList.jqGrid({ 
+				datatype: 'local',  
+				data: fullDiscoveredMainData,
+				colNames: ['ID','OSS ID','OSS Name','OSS<br/>Version','CVE ID','CVSS<br/>SCORE','Published<br/>Date','Vulnerability<br/>Resolution','Vulnerabilty<br/>Link','Security<br/>Comments'],
+				colModel: [
+					{name: 'gridId', index: 'gridId', editable:false, hidden:true, key: true},
+					{name: 'ossId', index: 'ossId', width: 150, align: 'left', hidden:true},
+					{name: 'ossName', index: 'ossName', width: 150, align: 'left', editable:false, template: searchStringOptions},
+					{name: 'ossVersion', index: 'ossVersion', width: 50, align: 'left', editable:false, template: searchStringOptions},
+					{name: 'cveId', index: 'cveId', width: 70, align: 'left', editable:false, template: searchStringOptions},
+					{name: 'cvssScore', index: 'cvssScore', width: 70, align: 'left', editable:false, template: searchStringOptions},
+					{name: 'publDate', index: 'publDate', width: 70, align: 'left', editable:false, template: searchStringOptions},
+					{name: 'vulnerabilityResolution', index:'vulnerabilityResolution', width:110, formatter: 'select', editable:true, edittype:"select", template: searchStringOptions, editoptions:{
 						value:{"Unresolved":"Unresolved","Fixed":"Fixed"}
-						, dataEvents:[{type:'change',
-							fn: function(e){
-								$("#notFixedList").jqGrid('saveRow', lastsel);
-								$("#notFixedList").jqGrid("resetSelection");
-								lastsel = -1;
-							}
-						}]
-					}
-				}
-			],
-			editurl:'clientArray',
- 			autowidth: true,
- 			multiselect: true,
- 			multiselectWidth: 35,
-			pager: '#notFixedListPager',
-			rowNum: 200,
-			rowList: [200, 500, 1000, 5000],
-			gridview: true,
-			sortable: function (permutation) {
-			},
-			loadonce:true,
-			toppager:true,
-			sortorder: 'desc',
-			height: 'auto',
-			onCellSelect: function(rowid,iCol,cellcontent,e) {
-				sec_com_fn.customOnCellSelect("notFixedList", iCol);
-			},
-			beforeSelectRow: function(rowid, e) {
-				if (rowid == prevEditSel) {
-					$("#jqg_notFixedList_" + rowid).prop("checked", true);
-				}
-				
-				var $self = $(this), iCol, cm,
-			    $td = $(e.target).closest("tr.jqgrow>td"),
-			    $tr = $td.closest("tr.jqgrow"),
-			    p = $self.jqGrid("getGridParam");
-
-				if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
-					iCol = $.jgrid.getCellIndex($td[0]);
-				    cm = p.colModel[iCol];
+							, dataEvents:[{type:'change',
+								fn: function(e){
+									$("#fullDiscoveredList").jqGrid('saveRow', lastsel);
+									$("#fullDiscoveredList").jqGrid("resetSelection");
+									lastsel = -1;
+								}
+							}]
+						}
+					},
+					{name: 'vulnerabilityLink', index: 'vulnerabilityLink', width: 120, align: 'left', formatter: sec_com_fn.displayVulnerabilityLink, template: searchStringOptions, editable:false},
+					{name: 'securityComments', index: 'securityComments', width: 50, align: 'left', template: searchStringOptions, editable:true}
+				],
+				editurl:'clientArray',
+	 			autowidth: true,
+//	 			multiselect: true,
+//	 			multiselectWidth: 35,
+				pager: '#fullDiscoveredListPager',
+				rowNum: 200,
+				rowList: [200, 500, 1000, 5000],
+				gridview: true,
+				sortable: function (permutation) {
+				},
+				loadonce:true,
+				toppager:true,
+				sortorder: 'desc',
+				height: 'auto',
+				onCellSelect: function(rowid,iCol,cellcontent,e) {
+//					sec_com_fn.customOnCellSelect("fullDiscoveredList", iCol);
+				},
+				beforeSelectRow: function(rowid, e) {
+//	 				if (rowid == prevEditSel) {
+//	 					$("#jqg_fullDiscoveredList_" + rowid).prop("checked", true);
+//	 				}
+					
+//	 				var $self = $(this), iCol, cm,
+//	 			    $td = $(e.target).closest("tr.jqgrow>td"),
+//	 			    $tr = $td.closest("tr.jqgrow"),
+//	 			    p = $self.jqGrid("getGridParam");
+//	 				    if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+//	 			       iCol = $.jgrid.getCellIndex($td[0]);
+//	 			       cm = p.colModel[iCol];
 				       
-				    if (cm != null && cm.name === "cb") {
-				    	// multiselect checkbox is clicked
-				        $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
-				  	}
-				}
+//	 			       if (cm != null && cm.name === "cb") {
+//	 			           // multiselect checkbox is clicked
+//	 			           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+//	 			       }
+//	 			    }
 				    
-				return true;
-			},
-			onSelectRow: function(rowid, status, e) {
-				var ossVersion = notFixedList.jqGrid("getRowData", rowid)["ossVersion"];
-			    if ("" == ossVersion) $("#jqg_notFixedList_" + rowid).prop("checked", false);
-			},
-			ondblClickRow: function(rowid,iRow,iCol,e) {
-				sec_com_fn.customOnDblClickRow("notFixedList" ,rowid);
-			},
-			loadComplete: function(data) {
-				lastsel = -1;
-				if(data.records > 0) {
-					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row;
-					for(var _idx=0;_idx<rowsCount;_idx++) {
-						row = rows[_idx];
-						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+//	 			    return true;
+				},
+				onSelectRow: function(rowid, status, e) {
+//	 				var ossVersion = fixedList.jqGrid("getRowData", rowid)["ossVersion"];
+//	 			    if ("" == ossVersion) $("#jqg_fullDiscoveredList_" + rowid).prop("checked", false);
+				},
+				ondblClickRow: function(rowid,iRow,iCol,e) {
+//	 				sec_com_fn.customOnDblClickRow("fullDiscoveredList" ,rowid);
+				},
+				loadComplete: function(data) {
+					lastsel = -1;
+					if(data.records > 0) {
+						var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row;
+						for(var _idx=0;_idx<rowsCount;_idx++) {
+							row = rows[_idx];
+							$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+						}
 					}
-				}
 				
-				// append button event
-				if ($("#notFixedList_toppager_left").find('button').length == 0) {
-	            	var appendBtn = "";
-	                
-	            	if ([[${@CommonFunction.isAdmin()}]]) {
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridAddFunc('notFixed')\"><i class=\"fas fa-plus\"></i></button>";
-	            		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.gridDelFunc('notFixed', 'main')\"><i class=\"far fa-trash-alt\"></i></button>";
-	                }
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"sec_com_fn.bulkEdit('notFixed')\"><i class=\"fas fa-pencil-alt\"></i></button>";
-	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.downloadExcel('notFixed')\"><i class=\"fas fa-download\"></i></button>";
-	                	                
-	                $("#notFixedList_toppager_left").append(appendBtn);
-	            }
-			},
-			gridComplete : function() {
-				if (notFixedValidMsgData) {
-					gridValidMsgNew(notFixedValidMsgData, "notFixedList");
+					// append button event
+					if ($("#fullDiscoveredList_toppager_left").find('button').length == 0) {
+		            	var appendBtn = "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.checkDownloadExcel('fullDiscovered')\"><i class=\"fas fa-download\"></i></button>";
+		                $("#fullDiscoveredList_toppager_left").append(appendBtn);
+		            }
+					
+					$("#fullDiscoveredList td[aria-describedby=totalList_officialPatchLink]").css("white-space", "nowrap");
+				},
+				gridComplete : function() {
+					if (fullDiscoveredValidMsgData) {
+						gridValidMsgNew(fullDiscoveredValidMsgData, "fullDiscoveredList");
+					}
+					
+					updateGridRowCount('fullDiscoveredList', 'fullDiscoveredListPager'); 
 				}
-				
-				adjustMultiPageGridSize();
-				
-				updateGridRowCount('notFixedList', 'notFixedListPager');
-			}
-		});
-		
-		notFixedList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
-			beforeSearch : function () {
-				if(!this.p.postData.referenceId) {
-					this.p.postData.referenceId = [[${project.prjId}]];
-				}
-			},
-			afterSearch: function () {
-				updateGridRowCount('notFixedList', 'notFixedListPager'); 
-			}			
-		});
-		
-//		notFixedList.jqGrid('navGrid',"#notFixedListPager",{add:false,edit:false,del:true,search:false,refresh:false, cloneToTop:true});
-	},
-	save: function(){
-		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
-			if (e) {
-				fn_grid_com.totalGridSaveMode('notFixedList');
-				var gridData = sec_com_fn.setSaveGridData('notFixedList');
-				com_fn.exeSave(gridData, "NOTFIXED");
-			} else {
-				return false;
-			}
-		});
+			});
+			
+			fullDiscoveredList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+				beforeSearch : function () {
+					if (!this.p.postData.referenceId) {
+						this.p.postData.referenceId = [[${project.prjId}]];
+					}
+				},
+				afterSearch: function () {
+					updateGridRowCount('fullDiscoveredList', 'fullDiscoveredListPager'); 
+				}	
+			});
+			
+			fullDiscoveredList.jqGrid('navGrid',"#fullDiscoveredListPager",{add:false,edit:false,del:false,search:false,refresh:false, cloneToTop:true});
+		}
 	}
-}
 
 var displayInfo;
 var fn = {
@@ -1078,17 +1310,13 @@ var fn = {
 				if ("Need to resolve" == vulnerabilityResolution) {
 					vulnerability += '<span type="button" class="badge badge-dark-gray size-sm width-9rem px-1 ml-2 customShadow" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 				} else {
-					if (cvssScoreMax - standardScore >= 0) {
-						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2 customShadow" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
-					} else {
-						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2 customShadow">Discovered('+cvssScoreMax+')</span>';
-					}
+					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2 customShadow" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 				}
 			} else {
 				if (typeof cvssScoreMax !== "undefined") {
-					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered(' + cvssScoreMax + ')</span>';
+					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">Discovered(' + cvssScoreMax + ')</span>';
 				} else {
-					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered(N/A)</span>';
+					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>';
 				}
 			}
 			
@@ -1207,7 +1435,10 @@ var fn = {
 	},
     mvEditTab : function(prjId){
         createTabInFrame(prjId+'_Project', '/project/edit/'+prjId);
-    }
+    },
+    closeAlertifyView : function () {
+		$(".ajs-close").trigger("click");
+	}
 }
 
 	var fn_comment = {

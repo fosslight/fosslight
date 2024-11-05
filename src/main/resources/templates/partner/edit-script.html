@@ -27,6 +27,12 @@ var ossFileObj;
 var partnerStatus = [[${detail.status}]];
 var partnerId = [[${detail.partnerId}]];
 
+//prevent clicking the OK button on Enter
+let keyCode;
+$(document).on('keydown', function (event) {
+	keyCode = event.keyCode;
+});
+
 $(document).ready(function () {
 	'use strict';
 	evt.init();
@@ -822,12 +828,6 @@ var fn = {
 		if (fn.checkStatus()){
 			com_fn.exitCell(_mainLastsel, "list");
 			
-			// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
-			
 			if (typeof alertify.parSaveDialog === 'undefined') {
 				alertify.dialog('parSaveDialog', function() {
 					return {
@@ -1317,13 +1317,7 @@ var fn = {
 			var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
            	innerHtml 		+= '<textarea id="parDelEditor"></textarea>';
            	
-       		// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
-				
-           	if(!alertify.deleteParDialog){
+       		if(!alertify.deleteParDialog){
 				alertify.dialog('deleteParDialog', function() {
 					return {
 						setup: function() {
@@ -1490,13 +1484,7 @@ var fn = {
 			var innerHtml 	= 'Are you sure you want to reject?<br><br>';
            	innerHtml 		+= '<textarea id="partnerRejectEditor"></textarea>';
 			
-         	// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
-           	
-           	if (!alertify.partnerRejectDialog){
+         	if (!alertify.partnerRejectDialog){
 				alertify.dialog('partnerRejectDialog', function() {
 					return {
 						setup: function() {
@@ -1623,13 +1611,7 @@ var fn = {
 			var innerHtml 	= 'Are you sure you want to confirm?<br><br>';
            	innerHtml 		+= '<textarea id="partnerConfirmEditor"></textarea>';
            	
-         	// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
-           	
-           	if (!alertify.partnerConfirmDialog){
+         	if (!alertify.partnerConfirmDialog){
 				alertify.dialog('partnerConfirmDialog', function() {
 					return {
 						setup: function() {
@@ -2883,7 +2865,7 @@ var grid = {
 			datatype: 'local',
 			data : partyMainData,
 			colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Binary Name or Source Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
-					   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notify','Source','Restriction', 'Tlsh', 'Check Sum'],
+					   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notice','Source','Restriction', 'Tlsh', 'Check Sum'],
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
 				{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
@@ -3154,7 +3136,7 @@ var grid = {
 				{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
 				{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
 				{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
-				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, search : false,
+				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : true, search : false,
 					sorttype: function (cell, rowData) {
 						var rtnVal = rowData.obligationType;
 						if(rtnVal == '10' || rtnVal == '11') {
@@ -3164,7 +3146,7 @@ var grid = {
 						}
                     }
 				},
-				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, search : false,
+				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : true, search : false,
 					sorttype: function (cell, rowData) {
 						var rtnVal = rowData.obligationType;
 						if(rtnVal == '11') {
@@ -3433,7 +3415,7 @@ var com_fn = {
 						}
 							
 						if ([[${detail.partnerId}]] != null) {
-							$("input[name=creatorNm]").val([[${detail.creatorName}]]);
+							$("input[name=creatorName]").val($("#creatorNm").val());
 							fn.publicChange();
 						}
 					}

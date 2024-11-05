@@ -1489,7 +1489,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 			
-			// OSC-486
 			// version 정보가 자동으로 변경된 Data 체크
 			if (convertObj.containsKey("versionChangeList")) {
 				resultMap.put("versionChangedList",convertObj.get("versionChangeList"));
@@ -1575,6 +1574,49 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		}
 		
 		return true;
+	}
+	
+	public static Map<String, Object> makeSecurityGridDataFromReport(List<OssComponents> ossComponents, List<OssComponents> reportData, String fileSeq, String readType) {
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		if (reportData != null) {
+			Map<String, OssComponents> reportMap = new HashMap<>();
+			for (OssComponents report : reportData) {
+				String key = (report.getOssName() + "_" + report.getOssVersion() + "_" + report.getCveId()).toUpperCase();
+				reportMap.put(key, report);
+			}
+			
+			for (OssComponents bean : ossComponents) {
+				String key = (bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getCveId()).toUpperCase();
+				
+				if (reportMap.containsKey(key)) {
+					OssComponents reportBean = reportMap.get(key);
+					
+					String vulnerabilityResolution = reportBean.getVulnerabilityResolution();
+					String securityPatchLink = reportBean.getSecurityPatchLink();
+					String securityComments = reportBean.getSecurityComments();
+					
+					if (!isEmpty(vulnerabilityResolution)) {
+						bean.setVulnerabilityResolution(vulnerabilityResolution);
+					}
+					if (!isEmpty(securityPatchLink)) {
+						if (!avoidNull(vulnerabilityResolution).equalsIgnoreCase("fixed")) {
+							bean.setSecurityPatchLink("N/A");
+						} else {
+							bean.setSecurityPatchLink(securityPatchLink);
+						}
+					} else {
+						bean.setSecurityPatchLink("N/A");
+					}
+					
+					bean.setSecurityComments(avoidNull(securityComments));
+				}
+			}	
+		}
+		
+		resultMap.put("totalGridData", ossComponents);
+
+		return resultMap;
 	}
 	
 	public static Object identificationSortByValidInfo(List<ProjectIdentification> list, Map<String, String> validMap, Map<String, String> validDiffMap) {
@@ -4584,8 +4626,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			// Distribution Type
 			if (!avoidNull(beforeBean.getDistributionType()).equals(avoidNull(afterBean.getDistributionType()))) {
 				comment += "<p><strong>Distribution Type</strong><br />";
-				comment += "Before : " + beforeBean.getDistributionType() + "<br />";
-				comment += "After : " + afterBean.getDistributionType() + "<br /></p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, beforeBean.getDistributionType()) + "<br />";
+				comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType()) + "<br /></p>";
 			}
 			
 			
@@ -4603,8 +4645,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			if (!avoidNull(beforeBean.getNoticeType()).equals(avoidNull(afterBean.getNoticeType()))) {
 				comment += "<p><strong>OSS Notice</strong><br />";
-				comment += "Before : " + beforeBean.getNoticeType() + "<br />";
-				comment += "After : " + afterBean.getNoticeType() + "<br /></p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, beforeBean.getNoticeType()) + "<br />";
+				comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, afterBean.getNoticeType()) + "<br /></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getPriority()).equals(avoidNull(afterBean.getPriority()))) {
@@ -4619,6 +4661,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "<p><strong>Additional Information</strong><br />";
 				comment += "Before : " + beforeBean.getComment() + "<br />";
 				comment += "After : " + afterBean.getComment() + "</p>";
+			}
+
+			before = avoidNull(beforeBean.getSecMailDesc()).replaceAll("(\r\n|\r|\n|\n\r)", "");
+			after = avoidNull(afterBean.getSecMailDesc()).replaceAll("(\r\n|\r|\n|\n\r)", "");
+
+			if (!avoidNull(beforeBean.getSecMailYn()).equals(avoidNull(afterBean.getSecMailYn())) || !before.equals(after)) {
+				comment += "<p><strong>Security Mail</strong><br />";
+				comment += "Before : " + (beforeBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + before+ ")") + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + (afterBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + after + ")") + "</span><br /></p>";
 			}
 		} else {
 			// Project Division

@@ -15,6 +15,12 @@ const G_ROW_CNT = [[${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConst
 var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
 var changeWatcherArr = [];
 
+//prevent clicking the OK button on Enter
+let keyCode;
+$(document).on('keydown', function (event) {
+	keyCode = event.keyCode;
+});
+
 $(document).ready(function () {
 	evt.init();
 	fn.getUserIdList("Y", "REVIEWER"); // 근무자
@@ -62,12 +68,13 @@ var evt = {
 		$('#division').select2({placeholder: "Division", allowClear: true});
 		$('#statuses').select2({placeholder: "Status", allowClear: true});
         $('#distributionTypeSelect').select2({placeholder: "Distribution Type", allowClear: true});
+        $('#secMailYnSelect').select2({placeholder: "Security Mail(Vulnerabiltiy)", allowClear: true});
 
         var startDate;
         var endDate;
         
         var input = ["prjIdName", "publicYn", "schStartDate", "schEndDate", "creator", "reviewer", "watchers", "modelName", "schBinaryName", "ossName", "ossVersion", "licenseName", "refPartnerName", "prjDivision"];
-		var singleSelect = ["networkServerType", "priority", "distributionType", "noticeType"];
+		var singleSelect = ["networkServerType", "priority", "distributionType", "noticeType", "secMailYn"];
 		var multiSelect = ["statuses"];
 		var textarea = ["comment", "userComment"];
 		
@@ -611,6 +618,10 @@ var fn = {
 			if ("" != rowObject.packageFileId3) {
 				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'3\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File3\"></i></span>';
 			}
+			
+			if ("" != rowObject.packageFileId4) {
+				display+='<span style=\"cursor:pointer;\" onclick=\"fn.downloadPackageMulti(this, \'4\','+rowObject.permission+')\"><i class=\"far fa-file-archive hover-icon fa-1-5x mr-1\" title=\"Packaging File4\"></i></span>';
+			}
 		}
 		
 		return display;
@@ -627,17 +638,13 @@ var fn = {
 			if ("Need to resolve" == vulnerabilityResolution) {
 				display = '<span type="button" class="badge badge-dark-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 			} else {
-				if (cvssScoreMax - standardScore >= 0) {
-					display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
-				} else {
-					display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered('+cvssScoreMax+')</span>';
-				}
+				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 			}
 		} else {
 			if (typeof cvssScoreMax !== "undefined") {
-				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered(' + cvssScoreMax + ')</span>';
+				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Discovered(' + cvssScoreMax + ')</span>';
 			} else {
-				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem">Discovered(N/A)</span>';
+				display = '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem" onclick="fn.mvSecurityTab('+ rowObject.prjId +', ' + rowObject.permission + ')">Discovered(N/A)</span>';
 			}
 		}
 		
@@ -1859,13 +1866,7 @@ var fn = {
 				var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
 	           	innerHtml 		+= '<textarea id="delPrjListEditor"></textarea>';
 				
-				// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-				
-	           	if (!alertify.delPrjListDialog){
+				if (!alertify.delPrjListDialog){
 					alertify.dialog('delPrjListDialog', function() {
 						return {
 							setup: function() {

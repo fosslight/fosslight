@@ -2990,8 +2990,15 @@
 		</if>
 	</select>
 	
+	<select id="notExistsOssIncludeCpeListByOssCommonId" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+		SELECT CPE23URI FROM OSS_INCLUDE_CPE WHERE OSS_COMMON_ID != #{ossCommonId}
+	</select>
+	
 	<select id="selectOssExcludeCpeList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
-		SELECT CPE23URI FROM OSS_EXCLUDE_CPE WHERE OSS_COMMON_ID = #{ossCommonId}
+		SELECT CPE23URI FROM OSS_EXCLUDE_CPE
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
+			WHERE OSS_COMMON_ID = #{ossCommonId}
+		</if>
 	</select>
 	
 	<select id="selectOssDetectedLicenseList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
@@ -3928,20 +3935,21 @@
 					 , CVE.MODI_DATE
 					 , DATA.CRITERIA
 				  FROM (
-				  		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID, SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 5), ':', -2) AS CRITERIA
+				  		SELECT NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID, NVD.CRITERIA
 				  		FROM
 				  		(SELECT REPLACE(PRODUCT, ' ', '_') AS PRODUCT
 				 			 , VERSION
 				 			 , CVE_ID
+				 			 , CONCAT(VENDOR, ':', PRODUCT) AS CRITERIA
 				  		  FROM NVD_DATA_V3
 				  		 WHERE (
-				  		 		PRODUCT = #{ossName}
+				  		 		PRODUCT = REPLACE(#{ossName}, ' ', '_')
 				  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNameTemp)">
-				  		 			OR PRODUCT = #{ossNameTemp}
+				  		 			OR PRODUCT = REPLACE(#{ossNameTemp}, ' ', '_')
 				  		 		</if>
 				  		 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossNicknames)">
 					  			    <foreach item="item" index="index" collection="ossNicknames">
-										OR PRODUCT = #{item}
+										OR PRODUCT = REPLACE(#{item}, ' ', '_')
 									</foreach>
 								</if>
 				 				)
@@ -3949,10 +3957,10 @@
 				 		   AND VERSION = #{ossVersion}
 				 		</if>
 				 		) NVD
-				 		LEFT JOIN NVD_DATA_CONFIGURATIONS CONF
+<!-- 			 		LEFT JOIN NVD_DATA_CONFIGURATIONS CONF
 				 		ON NVD.CVE_ID = CONF.CVE_ID
 				 		LEFT JOIN NVD_CPE_MATCH_NAMES MAT
-				 		ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+				 		ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID -->
 				 		GROUP BY NVD.PRODUCT, NVD.VERSION, NVD.CVE_ID
 				 	   ) DATA
 				 INNER JOIN NVD_CVE_V3 CVE
@@ -3961,7 +3969,7 @@
 			) T1
 			GROUP BY T1.PRODUCT, T1.CVSS_SCORE, T1.CVE_ID, T1.VULN_SUMMARY, T1.MODI_DATE
 		</if>
-			ORDER BY CVSS_SCORE DESC, MODI_DATE DESC LIMIT 10
+			ORDER BY CVSS_SCORE DESC, MODI_DATE DESC LIMIT 20
 	</select>
 	
 	<select id="selectMultiOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="string">

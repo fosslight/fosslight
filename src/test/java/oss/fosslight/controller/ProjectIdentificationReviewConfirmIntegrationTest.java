@@ -54,6 +54,7 @@ public class ProjectIdentificationReviewConfirmIntegrationTest {
                 .param("statusRequestYn", "")
                 .param("listId", "")
                 .param("publicYn", "Y")
+                .param("secMailYn","Y")
                 .param("networkServerType", "N")
                 .param("prjDivision", "999")
                 .param("prjUserId", "test2")

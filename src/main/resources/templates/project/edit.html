@@ -33,7 +33,7 @@
                                 		<button type="button" id="reqToOpen" class="btn btn-lg-red btn-sm width-6rem px-1" th:text="Reopen"></button>
                                 	</th:block>
                                 	<button th:if="${project.prjId != null and project.viewOnlyFlag == 'N'}" class="btn btn-lg-red btn-sm width-6rem px-1" style="display: none;" id="drop" th:text="Drop"></button>
-                                	<button th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-outline-lg-red btn-sm width-6rem px-1" id="complete" th:onclick="|fn.exeProjectComplete('Y')|" th:text="Complete"></button>
+                                	<button th:if="${project.viewOnlyFlag == 'N'}" class="btn btn-outline-lg-red btn-sm width-6rem px-1" id="complete" th:text="Complete"></button>
                         			<button th:if="${project.prjId != null}" class="btn btn-outline-secondary btn-sm width-6rem px-1" th:onclick="|fn_comment.activateCommentArea()|"><i class="fas fa-comments pt-1"></i> Comment</button>
                         		</div>
                             </div>
@@ -115,8 +115,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div th:if="${project.viewOnlyFlag != 'Y'}" class="col-md-12">
+                                <div th:if="${project.viewOnlyFlag != 'Y'}" class="row">
+                                    <div class="col-md-6 mb-0">
                                         <div class="form-group">
                                             <label for="inputName" th:text="#{msg.common.field.permission}"></label>
                                             <div class="form-group">
@@ -133,9 +133,30 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <input type="hidden" name="distributeTarget" value="NA"/>
-									<input type="hidden" name="noticeType" value="10"/>
+                                    <div class="col-md-6 mb-0">
+                                        <div class="form-group">
+                                            <label for="inputName" th:text="#{msg.common.field.security.mail}"></label>
+                                            <div class="form-group">
+                                                <div class="col-sm-12">
+                                                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                        <label class="btn btn-sm btn-onOff px-3">
+                                                            <input type="radio" name="secMailYn" id="secMailRadio1" value="Y" th:checked="${project != null && project.secMailYn != 'N'}" autocomplete="off" checked="" th:text="Enable">
+                                                        </label>
+                                                        <label class="btn btn-sm btn-onOff active px-3">
+                                                            <input type="radio" name="secMailYn" id="secMailRadio2" value="N" th:checked="${project != null && project.secMailYn == 'N'}" autocomplete="off" th:text="'Disable'">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-12">
+                                                    <input type="text" id="secMailDesc" name="secMailDesc" style='display: none;' class="form-control mt-2" th:disabled="${isReadOnly}" th:value="${project.secMailDesc}">
+                                                    <span class="retxt text-danger text-sm"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+                                <input type="hidden" name="distributeTarget" value="NA"/>
+                                <input type="hidden" name="noticeType" value="10"/>
                                 <div class="row">
                                 	<div class="col-md-6 mb-0">
                                         <label for="inputName" th:text="#{msg.common.field.OS}"></label><span class="text-orange">*</span>

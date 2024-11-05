@@ -323,6 +323,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(networkServerType)">
 				AND T1.NETWORK_SERVER_TYPE = #{networkServerType}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(secMailYn)">
+				AND T1.SECMAIL_YN = #{secMailYn}
+			</if>
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
@@ -388,6 +391,7 @@
 					, CASE WHEN T1.VERIFICATION_STATUS = 'CONF' THEN IFNULL(T1.PACKAGE_FILE_ID, '') ELSE '' END AS PACKAGE_FILE_ID
 					, CASE WHEN T1.VERIFICATION_STATUS = 'CONF' THEN IFNULL(T1.PACKAGE_FILE_ID2, '') ELSE '' END AS PACKAGE_FILE_ID2
 					, CASE WHEN T1.VERIFICATION_STATUS = 'CONF' THEN IFNULL(T1.PACKAGE_FILE_ID3, '') ELSE '' END AS PACKAGE_FILE_ID3
+					, CASE WHEN T1.VERIFICATION_STATUS = 'CONF' THEN IFNULL(T1.PACKAGE_FILE_ID4, '') ELSE '' END AS PACKAGE_FILE_ID4
 					, CASE WHEN T1.VERIFICATION_STATUS = 'CONF' THEN IFNULL(T1.NOTICE_FILE_ID, '') ELSE '' END AS NOTICE_FILE_ID
 					, CASE WHEN T1.IDENTIFICATION_STATUS = 'CONF' THEN IFNULL(T1.REVIEW_REPORT_FILE_ID, '') ELSE '' END AS REVIEW_REPORT_FILE_ID
 					, T1.REVIEWER
@@ -592,6 +596,9 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(networkServerType)">
 				AND T1.NETWORK_SERVER_TYPE = #{networkServerType}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(secMailYn)">
+				AND T1.SECMAIL_YN = #{secMailYn}
+			</if>
 		) A
 		WHERE 1=1
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjDivision)">
@@ -663,7 +670,9 @@
 			, A.COMPLETE_YN 
 			, A.DROP_YN
 			, A.REVIEWER 
-			, A.USE_YN 
+			, A.USE_YN
+		    , A.SECMAIL_YN
+		    , A.SECMAIL_DESC
 			, A.COPY_PRJ_ID
 			, A.WITHOUT_VERIFY_YN
 			
@@ -698,12 +707,15 @@
 			, A.SRC_ANDROID_NOTICE_FILE_ID
 			, A.SRC_ANDROID_NOTICE_XML_ID
 			, A.SRC_ANDROID_RESULT_FILE_ID
+			, A.SCRT_CSV_FILE_ID
 			, A.PACKAGE_FILE_ID
 			, A.PACKAGE_FILE_ID2
 			, A.PACKAGE_FILE_ID3
+	 		, A.PACKAGE_FILE_ID4
 			, A.PACKAGE_FILE_TYPE1
 			, A.PACKAGE_FILE_TYPE2
 			, A.PACKAGE_FILE_TYPE3
+			, A.PACKAGE_FILE_TYPE4
 			, A.PACKAGE_VUL_DOC_FILE_ID
 			, A.NOTICE_FILE_ID
 			, A.REVIEW_REPORT_FILE_ID
@@ -716,6 +728,7 @@
 			, A.README_FILE_NAME
 			, A.VERIFY_FILE_CONTENT
 			, A.EXCEPT_FILE_CONTENT
+			, A.BINARY_FILE_YN
 			, A.CREATOR 
 			, A.CREATED_DATE
 			, A.MODIFIER 
@@ -835,6 +848,8 @@
 			, IDENTIFICATION_SUB_STATUS_BIN
 			, IDENTIFICATION_SUB_STATUS_ANDROID
 			, PUBLIC_YN
+			, SECMAIL_YN
+			, SECMAIL_DESC
 			, PRIORITY
 			, DIVISION
 		)
@@ -863,6 +878,8 @@
 			, #{identificationSubStatusBin}
 			, #{identificationSubStatusAndroid}
 			, #{publicYn}
+			, #{secMailYn}
+			, #{secMailDesc}
 			, #{priority}
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
 		) ON DUPLICATE KEY UPDATE
@@ -881,6 +898,9 @@
 			, COMPLETE_YN                 = #{completeYn}
 			, MODIFIER                    = #{loginUserName}
 			, MODIFIED_DATE = now()
+		    , PUBLIC_YN                   = #{publicYn}
+		    , SECMAIL_YN                  = #{secMailYn}
+		    , SECMAIL_DESC                = #{secMailDesc}
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			, CREATOR                    = #{creator}
 			</if>
@@ -1628,6 +1648,9 @@
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(srcAndroidResultFileId)">
 			SRC_ANDROID_RESULT_FILE_ID = #{srcAndroidResultFileId}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(scrtCsvFileId)">
+			SCRT_CSV_FILE_ID = #{scrtCsvFileId}
 			</if>
 		</set>
 		WHERE 
@@ -2625,6 +2648,12 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(dropYn)">
 			, DROP_YN = #{dropYn}
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(secMailYn)">
+			, SECMAIL_YN = #{secMailYn}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(secMailDesc)">
+			, SECMAIL_DESC = #{secMailDesc}
+			</if>
 			/* 2018-07-20 choye 추가 */
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(commId)">
 			, COMM_ID = #{commId}
@@ -2820,7 +2849,9 @@
 			PROJECT_MASTER
 		SET
 			EXCEPT_FILE_CONTENT = #{exceptFileContent},
-			VERIFY_FILE_CONTENT = #{verifyFileContent}
+			VERIFY_FILE_CONTENT = #{verifyFileContent},
+			BINARY_FILE_YN = #{binaryFileYn}
+
 		WHERE
 			PRJ_ID	= #{prjId}
 	</update>
@@ -4277,7 +4308,7 @@
 		   SET PUBLIC_YN = #{publicYn}
 		 WHERE PRJ_ID = #{prjId}
 	</update>
-	
+
 	<select id="getModelCategoryTemplateArray" parameterType="String" resultType="String">
 		SELECT CONCAT(RESULT.Category, ' CHAR(62) ', RESULT.SubCategory) AS 'Desc'
 		FROM (
@@ -4982,6 +5013,7 @@
 				     , (SELECT ORIG_NM FROM T2_FILE WHERE FILE_SEQ = T1.PACKAGE_FILE_ID) AS ORIG_NM1
 				     , (SELECT ORIG_NM FROM T2_FILE WHERE FILE_SEQ = T1.PACKAGE_FILE_ID2) AS ORIG_NM2
 				     , (SELECT ORIG_NM FROM T2_FILE WHERE FILE_SEQ = T1.PACKAGE_FILE_ID3) AS ORIG_NM3
+				     , (SELECT ORIG_NM FROM T2_FILE WHERE FILE_SEQ = T1.PACKAGE_FILE_ID4) AS ORIG_NM4
 				  FROM PROJECT_MASTER T1 
 				  LEFT JOIN PROJECT_MODEL T2 ON T1.PRJ_ID = T2.PRJ_ID
 				 INNER JOIN T2_USERS T3 ON T1.CREATOR = T3.USER_ID
@@ -4996,7 +5028,8 @@
 		   	  	OR A.USER_NAME LIKE CONCAT('%',#{reuseKeyword},'%')
 		   	  	OR A.ORIG_NM1 = #{reuseKeyword}
 				OR A.ORIG_NM2 = #{reuseKeyword}
-				OR A.ORIG_NM3 = #{reuseKeyword})
+				OR A.ORIG_NM3 = #{reuseKeyword}
+				OR A.ORIG_NM4 = #{reuseKeyword})
 		 </if>
 	</select>
 	
@@ -5022,6 +5055,7 @@
 				     , (SELECT ORIG_NM FROM T2_FILE WHERE FILE_SEQ = T1.PACKAGE_FILE_ID) AS ORIG_NM1
 				     , (SELECT ORIG_NM FROM T2_FILE WHERE FILE_SEQ = T1.PACKAGE_FILE_ID2) AS ORIG_NM2
 				     , (SELECT ORIG_NM FROM T2_FILE WHERE FILE_SEQ = T1.PACKAGE_FILE_ID3) AS ORIG_NM3
+				     , (SELECT ORIG_NM FROM T2_FILE WHERE FILE_SEQ = T1.PACKAGE_FILE_ID4) AS ORIG_NM4
 				  FROM PROJECT_MASTER T1 
 				  LEFT JOIN PROJECT_MODEL T2 ON T1.PRJ_ID = T2.PRJ_ID
 				 INNER JOIN T2_USERS T3 ON T1.CREATOR = T3.USER_ID
@@ -5036,7 +5070,8 @@
 		   	  	OR A.USER_NAME LIKE CONCAT('%',#{reuseKeyword},'%')
 		   	  	OR A.ORIG_NM1 = #{reuseKeyword}
 				OR A.ORIG_NM2 = #{reuseKeyword}
-				OR A.ORIG_NM3 = #{reuseKeyword})
+				OR A.ORIG_NM3 = #{reuseKeyword}
+				OR A.ORIG_NM4 = #{reuseKeyword})
 		 </if>
 		 <include refid="orderby"/>
 		 <include refid="limitPage"/>

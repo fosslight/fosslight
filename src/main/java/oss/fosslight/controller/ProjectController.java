@@ -3699,27 +3699,6 @@ public class ProjectController extends CoTopComponent {
 		return makeJsonResponseHeader();
 	}
 	
-	/**
-	 * updatePublicYn
-	 *
-	 * @param project the project
-	 * @param req the req
-	 * @param res the res
-	 * @param model the model
-	 * @return the response entity
-	 */
-	@PostMapping(value = PROJECT.UPDATE_PUBLIC_YN)
-	public @ResponseBody ResponseEntity<Object> updatePublicYn(@RequestBody Project project,
-			HttpServletRequest req, HttpServletResponse res, Model model) {
-		try {
-			projectService.updatePublicYn(project);
-		} catch (Exception e) {
-			return makeJsonResponseHeader(false, null);
-		}
-		
-		return makeJsonResponseHeader();
-	}
-	
 	@GetMapping(value = PROJECT.PROJECT_TO_ADD_LIST)
 	public @ResponseBody ResponseEntity<Object> projectToAddList(@ModelAttribute OssComponents ossComponents, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
@@ -5168,8 +5147,28 @@ public class ProjectController extends CoTopComponent {
 		try {
 			result = projectService.getSecurityGridList(project);
 			rtnMap.put("totalGridData", (List<OssComponents>) result.get("totalList"));
-			rtnMap.put("fixedGridData", (List<OssComponents>) result.get("fixedList"));
-			rtnMap.put("notFixedGridData", (List<OssComponents>) result.get("notFixedList"));
+			rtnMap.put("fullDiscoveredGridData", (List<OssComponents>) result.get("fullDiscoveredList"));
+			
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+			pv.setProcType(pv.PROC_TYPE_SECURITY);
+			pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+			
+			for (int i = 0; i < 2; i++) {
+				if (i == 0) {
+					pv.setAppendix("totalList", (List<OssComponents>) result.get("totalList"));
+				} else {
+					pv.setAppendix("fullDiscoveredList", (List<OssComponents>) result.get("fullDiscoveredList"));
+				}
+				T2CoValidationResult vr = pv.validate(new HashMap<>());
+				if (!vr.isValid()) {
+					if (i == 0) {
+						rtnMap.put("totalValidData", vr.getValidMessageMap());
+					} else {
+						rtnMap.put("fullDiscoveredValidData", vr.getValidMessageMap());
+					}
+				}
+			}
+			
 			if (result.containsKey("msg")) {
 				rtnMap.put("msg", result.get("msg"));
 			}
@@ -5186,16 +5185,25 @@ public class ProjectController extends CoTopComponent {
 			HttpServletResponse res, Model model) {
 		String prjId = (String) map.get("referenceId");
 		String tabName = (String) map.get("targetName");
+		String scrtCsvFileId = (String) map.get("scrtCsvFileId");
+		String scrtCsvFiles = (String) map.get("scrtCsvFiles");
 		String gridString = (String) map.get("gridData");
 		
-		Type collectionType = new TypeToken<List<OssComponents>>() {}.getType();
+		Type collectionType = new TypeToken<List<T2File>>() {}.getType();
+		List<T2File> addFile = new ArrayList<T2File>();
+		addFile = (List<T2File>) fromJson(scrtCsvFiles, collectionType);
+		collectionType = new TypeToken<List<OssComponents>>() {}.getType();
 		List<OssComponents> ossComponents = new ArrayList<>();
 		ossComponents = (List<OssComponents>) fromJson(gridString, collectionType);
 		
 		Map<String, String> resMap = new HashMap<>();
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project.setScrtCsvFileId(scrtCsvFileId);
+		project.setCsvFileSeq(addFile);
 		
 		try {
-			projectService.registSecurity(prjId, tabName, ossComponents);
+			projectService.registSecurity(project, tabName, ossComponents);
 			projectService.updateSecurityDataForProject(prjId);
 			Project param = new Project();
 			param.setPrjId(prjId);
@@ -5241,6 +5249,89 @@ public class ProjectController extends CoTopComponent {
 			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&menu=prj&view=false");
 		} else {
 			res.sendRedirect(req.getContextPath() + "/index?id=" + project.getPrjId() + "&menu=prj&view=true");
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PROJECT.SECURITY_SHEET_DATA)
+	public @ResponseBody ResponseEntity<Object> getSecuritySheetData(@RequestBody HashMap<String, Object> map,
+			HttpServletRequest req, HttpServletResponse res, Model model) {
+		log.info("Security Report Read Start");
+
+		try {
+			String fileSeq = (String) map.get("fileSeq");
+			List<String> sheetNums = (List<String>) map.get("sheetNums");
+			String mainDataString = (String) map.get("mainData");
+			String readType = (String) map.get("readType");
+
+			List<String> sheetList = new ArrayList<>();
+			for (String s : sheetNums) {
+				if (!sheetList.contains(s)) {
+					sheetList.add(s);
+				}
+			}
+			
+			Type collectionType2 = new TypeToken<List<OssComponents>>() {
+			}.getType();
+			List<OssComponents> ossComponents = new ArrayList<OssComponents>();
+			ossComponents = (List<OssComponents>) fromJson(mainDataString, collectionType2);
+			
+			String errMsg = "";
+			List<OssComponents> reportData = new ArrayList<OssComponents>();
+			List<String> errMsgList = new ArrayList<>();
+			Map<String, String> emptyErrMsg = new HashMap<>();
+			try {
+				if (!ExcelUtil.readReport(readType, true, sheetList.toArray(new String[sheetList.size()]), fileSeq, reportData, errMsgList, emptyErrMsg)) {
+					// error 처리
+					for (String s : errMsgList) {
+						if (isEmpty(s)) {
+							continue;
+						}
+						if (!isEmpty(errMsg)) {
+							errMsg += "<br/>";
+						}
+						errMsg += s;
+					}
+					
+					return makeJsonResponseHeader(isEmpty(errMsg), errMsg);
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				return makeJsonResponseHeader(false, e.getMessage());
+			}
+			
+			for (String s : errMsgList) {
+				if (isEmpty(s)) {
+					continue;
+				}
+				if (!isEmpty(errMsg)) {
+					errMsg += "<br/>";
+				}
+				errMsg += s;
+			}
+			
+			if (isEmpty(errMsg) && !emptyErrMsg.isEmpty()) {
+				errMsg = emptyErrMsg.get("emptyErrMsg");
+			}
+			
+			Map<String, Object> resultMap = CommonFunction.makeSecurityGridDataFromReport(ossComponents, reportData, fileSeq, readType);
+			
+			T2CoProjectValidator pv = new T2CoProjectValidator();
+			pv.setProcType(pv.PROC_TYPE_SECURITY);
+			pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+			pv.setAppendix("totalList", (List<OssComponents>) resultMap.get("totalGridData"));
+			
+			T2CoValidationResult vr = pv.validate(new HashMap<>());
+			if (!vr.isValid()) {
+				resultMap.put("totalValidData", vr.getValidMessageMap());
+			}
+			
+			resultMap.put("isValid", true);
+			resultMap.put("validMsg", errMsg);
+			return makeJsonResponseHeader(resultMap);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, e.getMessage());
 		}
 	}
 }

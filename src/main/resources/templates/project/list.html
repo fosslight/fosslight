@@ -215,6 +215,14 @@
 												<div th:if="${partnerFlag}" class="form-group mb-2">
 													<input type="search" name="refPartnerName" class="form-control save-value" th:placeholder="|3rd Party Name|" th:value="${searchBean?.refPartnerName}">
 												</div>
+                                                <div class="form-group mb-2">
+                                                    <select class="form-control select2 save-value" name="secMailYn" id="secMailYnSelect"
+                                                            style="width: 100%;">
+                                                        <option value=""></option>
+                                                        <option value="Y" th:selected="${#strings.equals(searchBean.secMailYn, 'Y')}" th:text="|Enable|"></option>
+                                                        <option value="N" th:selected="${#strings.equals(searchBean.secMailYn, 'N')}" th:text="|Disable|"></option>
+                                                    </select>
+                                                </div>
 											</div>
                                     	</div>
                                    		<div class="row">

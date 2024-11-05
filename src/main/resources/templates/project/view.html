@@ -57,6 +57,17 @@
 												</td>
 											</tr>
 											<tr class="text-smaller">
+												<th th:text="#{msg.common.field.security.mail}"></th>
+												<td>
+													<th:block th:if="${project != null and project.secMailYn != 'N'}">
+														<span th:text="'Enable'"></span><br>
+													</th:block>
+													<th:block th:unless="${project != null and project.secMailYn != 'N'}">
+														<span th:text="${'Diable (' + project.secMailDesc + ')'}"></span><br>
+													</th:block>
+												</td>
+											</tr>
+											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.OS}"></th>
 												<td>
 													<th:block th:each="code : ${@CoCodeManager.getValues(@CommonFunction.getCoConstDefVal('CD_OS_TYPE'))}">
@@ -162,6 +173,11 @@
 														<th:block th:if="${project.packageFileId3 != '' and project.packageFileId3 != null}">
 															<span style="cursor:pointer;" th:onclick="fn.downloadPackageMulti(this, '3', [[${project.permission}]])">
 																<i class="far fa-file-archive hover-icon fa-1-5x mr-1" title="Packaging File3"></i>
+															</span>
+														</th:block>
+														<th:block th:if="${project.packageFileId4 != '' and project.packageFileId4 != null}">
+															<span style="cursor:pointer;" th:onclick="fn.downloadPackageMulti(this, '4', [[${project.permission}]])">
+																<i class="far fa-file-archive hover-icon fa-1-5x mr-1" title="Packaging File4"></i>
 															</span>
 														</th:block>
 													</th:block>

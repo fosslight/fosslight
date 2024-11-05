@@ -941,6 +941,11 @@ function createValidMsgComplex(msgData) {
 					$('select[name=' + key + 'Select]').parent().addClass("cus-is-invalid");
 					$('select[name=' + key + 'Select]').parent().next("span.retxt,div.retxt").html(value).show();
 				}
+
+                if ('secmailDesc' == key) {
+                    $('#secMailDesc').addClass("cus-is-invalid");
+                    $('#secMailDesc').focus().next("span.retxt,div.retxt").html(value).show();
+                }
 				
                 if ($('input[name=' + key + ']').length > 0) {
                     $('input[name=' + key + ']').focus().next("span.retxt,div.retxt").html(value).show();

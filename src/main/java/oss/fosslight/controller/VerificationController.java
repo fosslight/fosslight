@@ -139,6 +139,7 @@ public class VerificationController extends CoTopComponent {
 		File packageFile = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId());
 		File packageFile2 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2());
 		File packageFile3 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3());
+		File packageFile4 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId4());
 		
 		if (packageFile != null) {
 			if (!isEmpty(packageFile.getRefPrjId())) projectMaster.setReuseRefPrjId1(packageFile.getRefPrjId());
@@ -152,9 +153,14 @@ public class VerificationController extends CoTopComponent {
 			if (!isEmpty(packageFile3.getRefPrjId())) projectMaster.setReuseRefPrjId3(packageFile3.getRefPrjId());
 			existsFileFlag = true;
 		}
+		if (packageFile4 != null) {
+			if (!isEmpty(packageFile4.getRefPrjId())) projectMaster.setReuseRefPrjId4(packageFile4.getRefPrjId());
+			existsFileFlag = true;
+		}
 		files.add(packageFile);
 		files.add(packageFile2);
 		files.add(packageFile3);
+		files.add(packageFile4);
 		
 		//프로젝트 정보
 		model.addAttribute("project", projectMaster);
@@ -295,7 +301,7 @@ public class VerificationController extends CoTopComponent {
 				file.setCreator(loginUserName());
 
 				//파일 확장자 체크
-				String codeExp = !fileSeq.equals("4") ? codeMapper.getCodeDetail("120", "16").getCdDtlExp() : codeMapper.getCodeDetail("120", "40").getCdDtlExp();
+				String codeExp = !fileSeq.equals("5") ? codeMapper.getCodeDetail("120", "16").getCdDtlExp() : codeMapper.getCodeDetail("120", "40").getCdDtlExp();
 				String[] exts = codeExp.split(",");
 				boolean fileExtCheck = false;
 				for (String s : exts) {

@@ -1317,6 +1317,23 @@ public class CoMailManager extends CoTopComponent {
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
+
+
+				if (!isTest &&
+						(
+								CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT.equals(bean.getMsgType())
+										|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_RECALCULATED.equals(bean.getMsgType()))
+						|| CoConstDef.CD_MAIL_TYPE_VULNERABILITY_PROJECT_REMOVE_RECALCULATED.equals(bean.getMsgType())) {
+					if(!isEmpty(bean.getParamPrjId())) {
+						Project project = new Project();
+						project.setPrjId(bean.getParamPrjId());
+						Project projectDetail = projectService.getProjectDetail(project);
+						if(!avoidNull(projectDetail.getSecMailYn()).equals("Y")) {
+							return false;
+						}
+					}
+				}
+
     			mailManagerMapper.insertEmailHistory(bean);
         		// 발송처리
         		new Thread(() -> sendEmail(bean)).start();
@@ -1398,6 +1415,9 @@ public class CoMailManager extends CoTopComponent {
 		if (!isEmpty(convBean.getDivision())) {
 			convBean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, convBean.getDivision()));
 		}
+
+		String secMail = convBean.getSecMailYn().equals("Y") ? "Enable" : "Disable(" + avoidNull(convBean.getSecMailDesc()) + ")" ;
+		convBean.setSecMailDesc(secMail);
 
 		return convBean;
 	}
@@ -2156,6 +2176,8 @@ public class CoMailManager extends CoTopComponent {
 			isModified = checkEquals(before.getNetworkServerType(), after.getNetworkServerType(), isModified);
 			isModified = checkEquals(before.getPriority(), after.getPriority(), isModified);
 			isModified = checkEquals(before.getDivision(), after.getDivision(), isModified);
+			isModified = checkEquals(before.getSecMailYn(), after.getSecMailYn(), isModified);
+			isModified = checkEquals(before.getSecMailDesc(), after.getSecMailDesc(), isModified);
 			
 			after.setPrjName(appendChangeStyle(before.getPrjName(), after.getPrjName()));
 			after.setPrjVersion(appendChangeStyle(before.getPrjVersion(), after.getPrjVersion()));
@@ -2168,6 +2190,8 @@ public class CoMailManager extends CoTopComponent {
 			after.setNetworkServerType(appendChangeStyle(before.getNetworkServerType(), after.getNetworkServerType()));
 			after.setPriority(appendChangeStyle(before.getPriority(), after.getPriority()));
 			after.setDivision(appendChangeStyle(before.getDivision(), after.getDivision()));
+			after.setSecMailYn(appendChangeStyle(before.getSecMailYn(), after.getSecMailYn()));
+			after.setSecMailDesc(appendChangeStyle(avoidNull(before.getSecMailDesc()), avoidNull(after.getSecMailDesc())));
 			
 
 			if (before.getModelList().size() > 0 || after.getModelList().size() > 0) {
@@ -2969,6 +2993,13 @@ public class CoMailManager extends CoTopComponent {
 				}
 			}
 			
+			String ossId = (String) dataMap.get("OSS_ID");
+			String ossName = (String) dataMap.get("OSS_NAME");
+			
+			if (!isEmpty(ossId)) {
+				ossName = "<a href='" + appEnv.getProperty("server.domain") + "/oss/edit/" + ossId + "' target='_blank'>" + ossName + "</a>";
+			}
+			
 			bean = new OssMaster();
 			
 			if (dataMap.containsKey("PRJ_ID")) {
@@ -2978,8 +3009,8 @@ public class CoMailManager extends CoTopComponent {
 				bean.setComponentId((String) dataMap.get("COMPONENT_ID"));
 			}
 			
-			bean.setOssId((String) dataMap.get("OSS_ID"));
-			bean.setOssName((String) dataMap.get("OSS_NAME"));
+			bean.setOssId(ossId);
+			bean.setOssName(ossName);
 			bean.setOssVersion((String) dataMap.get("OSS_VERSION"));
 			bean.setCveId(customCveId);
 			bean.setCvssScore(String.valueOf(dataMap.get("CVSS_SCORE")));
@@ -3197,6 +3228,8 @@ public class CoMailManager extends CoTopComponent {
 			bean.setNoticeTypeEtc(avoidNull((String) dataMap.get("NOTICE_TYPE_ETC")));
 			bean.setPriority(avoidNull((String) dataMap.get("PRIORITY")));
 			bean.setDivision(avoidNull((String) dataMap.get("DIVISION")));
+			bean.setSecMailYn(avoidNull((String) dataMap.get("SECMAIL_YN")));
+			bean.setSecMailDesc(avoidNull((String) dataMap.get("SECMAIL_DESC")));
 			
 			packageFileName = (String) dataMap.get("PACKAGE_FILE_ID");
 			packageFileName2 = (String) dataMap.get("PACKAGE_FILE_ID2");
@@ -3270,6 +3303,10 @@ public class CoMailManager extends CoTopComponent {
 			
 			if (!isEmpty(bean.getDivision())) {
 				bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
+			}
+
+			if(!isEmpty(bean.getSecMailYn())) {
+				bean.setSecMailDesc(bean.getSecMailYn().equals("Y") ? "Enable" : "Disable(" + bean.getSecMailDesc() + ")");
 			}
 						
 		}

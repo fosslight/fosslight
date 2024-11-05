@@ -23,6 +23,12 @@
 	var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
     var isReadOnly = [[${isReadOnly}]];
 	
+ 	// prevent clicking the OK button on Enter
+	let keyCode;
+	$(document).on('keydown', function (event) {
+		keyCode = event.keyCode;
+	});
+    
 	$(document).ready(function() {
 		'use strict';
 		data.init();
@@ -148,17 +154,84 @@
 				$("#_modelList").jqGrid('clearGridData');
 			});
 			
+			// 컴플리트 버튼 
+			$('#complete').click(function(){
+				var innerHtml 	= 'Are you to enter a comment when complete?<br>';
+                innerHtml 		+= '<textarea id="completeEditor"></textarea>';
+				
+                if(!alertify.completeDialog){
+					alertify.dialog('completeDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								var buttons = setup.buttons;
+								var customButtons = [];
+								for (var i in buttons) {
+									if ('OK' == buttons[i].text) {
+										customButtons.push(buttons[i]);
+									}
+								}
+								setup.buttons = customButtons;
+								setup.focus.element = 0;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
+							}
+						};
+					}, false, 'confirm');
+            	}
+                
+                alertify.completeDialog()
+           		.set('onok', function(e) {
+           			// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
+           			
+					if (e) {
+						var editorVal = $("#completeEditor").summernote('code');
+						if ("" == $(editorVal).text().trim()) {
+	       					editorVal = "";
+	       				}
+						
+						fn.exeProjectComplete('Y', editorVal);
+					} else {
+						return false;
+					}
+           		})
+           		.set('onshow', function(e){
+           			$("#completeEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                    
+                    const parameter = {
+    		          	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_USER')}]],
+    		            "referenceId" : [[${project.prjId}]]
+    		       	}
+    		        var draftUserComment = draftUserComments(parameter);
+    		        if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+    		           	$("#completeEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+    		        }
+           		})
+           		.setContent(innerHtml)
+				.show();
+			});
+			
 			$('#drop').on ('click', function(){
 				var innerHtml 	= 'Are you to enter a comment when drop?<br><br>';
                 innerHtml 		+= '<textarea id="dropEditor"></textarea>';
 				
-             	// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-                
-                if(!alertify.dropDialog){
+             	if(!alertify.dropDialog){
 					alertify.dialog('dropDialog', function() {
 						return {
 							setup: function() {
@@ -263,7 +336,7 @@
 			
 			// 저장
 			$("#reopen").click(function(){
-				fn.exeProjectComplete('N');
+				fn.exeProjectComplete('N', "");
 			});
 			
 			// 삭제
@@ -276,13 +349,7 @@
 					var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
 	               	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';
 					
-					// prevent clicking the OK button on Enter
-					let keyCode;
-					$(document).on('keydown', function (event) {
-						keyCode = event.keyCode;
-					});
-					
-	               	if(!alertify.deletePrjDialog){
+					if(!alertify.deletePrjDialog){
 						alertify.dialog('deletePrjDialog', function() {
 							return {
 								setup: function() {
@@ -453,26 +520,17 @@
 					arr[index] = obj.userId+":"+obj.userName;
 				});
 			});
-			
-			// project security setting 임시 처리
-			if([[${project.prjId}]] != "" && [[${project.viewOnlyFlag}]] == 'N'){
-				$("[name='publicYn']").on('change',function(e){
-					var param = {prjId : [[${project.prjId}]], publicYn : ($("[name='publicYn']:checked").val())};
-					
-					$.ajax({
-						url : '/project/updatePublicYn',
-						type : 'POST',
-						data : JSON.stringify(param),
-						dataType : 'json',
-						cache : false,
-						contentType : 'application/json',
-						success: function(){
-							alertify.success([[#{msg.common.success}]]);
-						},
-						error : fn.onError
-					});
-				});
-			}
+
+            $("[name='secMailYn']").on('change',function(e){
+                var checked = $("[name='secMailYn']:checked").val();
+                if(checked == 'Y') {
+                    $("#secMailDesc").hide();
+                    $(".retxt").text("");
+                } else {
+                    $("#secMailDesc").show();
+                }
+
+            });
 			
 			/* 2018-07-19 choye 추가  */
 			$("#reqToOpen").click(function(e){
@@ -710,17 +768,13 @@
 				if ("Need to resolve" == vulnerabilityResolution) {
 					vulnerability += '<span type="button" class="badge badge-dark-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 				} else {
-					if (cvssScoreMax - standardScore >= 0) {
-						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
-					} else {
-						vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered('+cvssScoreMax+')</span>';
-					}
+					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">' + vulnerabilityResolution + '('+cvssScoreMax+')</span>';
 				}
 			} else {
 				if (typeof cvssScoreMax !== "undefined") {
-					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered(' + cvssScoreMax + ')</span>';
+					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">Discovered(' + cvssScoreMax + ')</span>';
 				} else {
-					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2">Discovered(N/A)</span>';
+					vulnerability += '<span type="button" class="badge badge-cerebral-gray size-sm width-9rem px-1 ml-2" onclick=\"fn.mvSecurity()\">Discovered(N/A)</span>';
 				}
 			}
 			
@@ -754,12 +808,6 @@
 				confirmMsg = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
 				confirmMsg += innerHtml;
 			}
-			
-			// prevent clicking the OK button on Enter
-			let keyCode;
-			$(document).on('keydown', function (event) {
-				keyCode = event.keyCode;
-			});
 			
 			if (typeof alertify.prjSaveDialog === 'undefined') {
 				alertify.dialog('prjSaveDialog', function() {
@@ -1024,8 +1072,8 @@
 				return rows;
 			},
 			// 컴플리트 처리
-			exeProjectComplete : function(flag){
-				var data = {"prjId" : $('input[name=prjId]').val() , "completeYn" : flag, "userComment":""};
+			exeProjectComplete : function(flag, userComment){
+				var data = {"prjId" : $('input[name=prjId]').val() , "completeYn" : flag, "userComment":userComment};
 				
 				$.ajax({
 					url : '/project/updateProjectStatus',
@@ -2486,6 +2534,14 @@
 						}
 					}
 				});
+
+                // Security Mail
+                var checked = $("[name='secMailYn']:checked").val();
+                if(checked == 'Y') {
+                    $("#secMailDesc").hide();
+                } else {
+                    $("#secMailDesc").show();
+                }
 				
 				// Complete 버튼 처리 
 				var status = ["PROG","REQ","REV"];

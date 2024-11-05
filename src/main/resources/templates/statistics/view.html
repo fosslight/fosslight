@@ -22,7 +22,7 @@
                                                     		<span class="input-group-text">
                                                         		<i class="far fa-calendar-alt"></i>
                                                        		</span>
-                                                       		<input type="text" class="form-control" id="searchDate"/>
+                                                       		<input type="text" class="form-control" id="searchDate" th:value="${#calendars.format(#calendars.createNow(), '01/01/yyyy') + ' - ' + #calendars.format(#calendars.createNow(), '12/31/yyyy')}"/>
                                                   			<input name="schStartDate" id="startDate" type="hidden" th:value="${#calendars.format(#calendars.createNow(), 'yyyy0101')}" />
 															<input name="schEndDate" id="endDate" type="hidden" th:value="${#calendars.format(#calendars.createNow(), 'yyyy1231')}" /> 
                                                   			<div class="input-group-append">

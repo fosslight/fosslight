@@ -48,6 +48,7 @@ import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.repository.FileMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
+import oss.fosslight.repository.T2UserMapper;
 import oss.fosslight.service.CacheService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.OssService;
@@ -66,6 +67,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 
 	// Mapper
 	@Autowired private PartnerMapper partnerMapper;
+	@Autowired private T2UserMapper userMapper;
 	@Autowired private CommentMapper commentMapper;
 	@Autowired private FileMapper fileMapper;
 	@Autowired private ProjectMapper projectMapper;
@@ -228,6 +230,16 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			// admin이 아니라면 creator를 변경하지 않는다.
 			if (!CommonFunction.isAdmin()) {
 				partnerMaster.setCreator(null);
+			} else {
+				if (!isEmpty(partnerMaster.getCreator())) {
+					List<T2Users> user = userMapper.getUserListByName(partnerMaster.getCreatorName());
+					if (user != null && !user.isEmpty()) {
+						String creator = user.get(0).getUserId();
+						if (!partnerMaster.getCreator().equalsIgnoreCase(creator)) {
+							partnerMaster.setCreator(creator);
+						}
+					}
+				}
 			}
 		} else {
 			partnerMaster.setCreator(partnerMaster.getLoginUserName());

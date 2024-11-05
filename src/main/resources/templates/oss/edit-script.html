@@ -19,7 +19,13 @@
     var isReadOnly = [[${isReadOnly}]] || null;
     var userRole = [[${#authentication.authorities[0].authority}]];
     var isSaveButtonClicked = false;
-      
+    
+ 	// prevent clicking the OK button on Enter
+    let keyCode;
+    $(document).on('keydown', function (event) {
+        keyCode = event.keyCode;
+    });
+    
 	//데이터 객체
 	var data = {
 		detail : [[${detail}]],
@@ -541,13 +547,7 @@
 				var innerHtml 	= 'Are you want to delete the oss?<br><br>';
                	innerHtml 		+= '<textarea id="deleteOssEditor"></textarea>';
 
-                // prevent clicking the OK button on Enter
-                let keyCode;
-                $(document).on('keydown', function (event) {
-                    keyCode = event.keyCode;
-                });
-
-               	if (!alertify.delOssDialog){
+                if (!alertify.delOssDialog){
 					alertify.dialog('delOssDialog', function() {
 						return {
 							setup: function() {
@@ -1068,8 +1068,8 @@
                         }
                     }
                 },
-                {name:'restriction',index:'restriction', width:120, formatter: displayRestriction, template: searchStringOptions, editable:false},
-                {name:'ossCopyright',index:'ossCopyright', width:250, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}},
+                {name:'restriction',index:'restriction', width:150, formatter: displayRestriction, template: searchStringOptions, editable:false},
+                {name:'ossCopyright',index:'ossCopyright', width:220, editable:true, edittype:"textarea", editoptions:{rows:"10",cols:"50"}},
 //              {name: 'delete', index: 'delete', width:80, align: 'center', sortable:false, formatter: displayButtons},
                 {name:'licenseName',index:'licenseName', width:50, hidden:true},
                 {name:'licenseId',index:'licenseId', width:50, hidden:true},
@@ -1384,6 +1384,8 @@
 						}
 					}
 				}
+			} else {
+				restriction = cellvalue;
 			}
 		}
 		return restriction;
@@ -1403,6 +1405,7 @@
 	// 그리드 삭제 버튼
 	function exeDelete(rowId){
 		// lastsel save
+		gLicenseData[lastsel] = "Y";
 		$('#_licenseChoice').jqGrid('saveRow',lastsel);
 		var list = [];
 		data.copyData ? list = data.copyData.ossLicenses : list = data.list.rows;
@@ -2994,13 +2997,7 @@
 					return false;
 				}
 
-				// prevent clicking the OK button on Enter
-				let keyCode;
-				$(document).on('keydown', function (event) {
-					keyCode = event.keyCode;
-				});
-               	
-               	if (typeof alertify.ossSaveDialog === 'undefined') {
+				if (typeof alertify.ossSaveDialog === 'undefined') {
 					alertify.dialog('ossSaveDialog', function() {
 						return {
 							setup: function() {
@@ -3048,7 +3045,11 @@
 							}
 
 							if (deactivateFlag == "Y" && localDeactivateFlag == "N"){ // deactivate Flag unchecked
-								alertify.alert([[#{msg.oss.required.activate}]], function(){});
+								if (ossId != null) {
+									alertify.alert([[#{msg.oss.required.activate}]], function(){});
+								} else {
+									alertify.alert([[#{msg.oss.required.deactivate.unchecked}]], function(){});
+								}
 								return false;
 							}
 						}

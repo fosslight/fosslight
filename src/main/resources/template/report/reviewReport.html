@@ -109,7 +109,7 @@
             <tbody>
             <tr th:each="licenseReview : ${LicenseReview}">
                 <td th:text="|${licenseReview.licenseName}|"></td>
-                <td th:utext="|${licenseReview.description}|"></td>
+                <td th:utext="|${licenseReview.descriptionHtml}|"></td>
                 <td th:utext="|${licenseReview.restrictionStr}|"></td>
             </tr>
             </tbody>
@@ -123,13 +123,11 @@
             <thead>
             <thead>
             <th width="150">OSS Name</th>
-            <th width="100">OSS Version</th>
             <th width="350">Summary Description</th>
             </thead>
             <tbody>
             <tr th:each="ossReview : ${OssReview}">
                 <td th:text="|${ossReview.ossName}|"></td>
-                <td th:text="|${ossReview.ossVersion}|"></td>
                 <td th:utext="|${ossReview.summaryDescription}|"></td>
             </tr>
             </tbody>
@@ -151,7 +149,7 @@
                 <td th:text="|${vulnerabilityReview.ossName}|"></td>
                 <td th:text="|${vulnerabilityReview.version}|"></td>
                 <td th:text="|${vulnerabilityReview.cvssScore}|"></td>
-                <td th:text="|${vulnerabilityReview.vulnerabilityLink}|"></td>
+                <td th:utext="|${vulnerabilityReview.vulnerabilityLink}|"></td>
             </tr>
             </tbody>
         </table>

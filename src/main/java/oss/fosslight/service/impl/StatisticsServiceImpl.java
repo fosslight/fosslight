@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +38,11 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	
 	@Override
 	public Map<String, Object> getDivisionalProjectChartData(Statistics statistics) {
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 		Statistics chartData = new Statistics();
 		chartData.setColorArray(colorArray);
-		List<Statistics> titleList = new ArrayList<Statistics>();
-		List<String> titleArray = new ArrayList<String>();
+		List<Statistics> titleList = new ArrayList<>();
+		List<String> titleArray = new ArrayList<>();
 		
 		if (!"NET".equals(statistics.getCategoryType())) {
 			titleList = statisticsMapper.getChartTitle(statistics);
@@ -77,58 +78,13 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		}
 				
 		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for (Statistics stat : list) {
-				stat.setTotal();
-			}
+			list.forEach(Statistics::setTotal);
 			
 			titleArray.add("Total");
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			for (Statistics data : list) {
-				int categoryIdx = 0;
-				
-				if (data.getCategory0Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory1Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory2Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory3Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory4Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory5Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory6Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory7Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory8Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory9Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory9Cnt(), categoryIdx++);
-				}
-			}
-			
+			addCategoryCnt(chartData, list);
 			chartData.setTitleArray(titleArray); // Chart Title
 			result.put("chartData", chartData);
 		}
@@ -137,7 +93,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	}
 	
 	public Map<String, Object> getMostUsedChartData(Statistics statistics) {
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 		List<Statistics> list = statisticsMapper.getMostUsedChartData(statistics);
 		
 		/*
@@ -153,13 +109,13 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	}
 	
 	public Map<String, Object> getUpdatedOssChartData(Statistics statistics){
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 		Statistics chartData = new Statistics();
 		chartData.setColorArray(colorArray);
 		
 		List<Statistics> titleList = statisticsMapper.getChartTitle(statistics);
 		
-		List<String> titleArray = new ArrayList<String>();
+		List<String> titleArray = new ArrayList<>();
 		
 		for (Statistics title : titleList) {
 			titleArray.add(title.getTitleNm());
@@ -186,55 +142,14 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		}
 		
 		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for (Statistics stat : list) {
-				stat.setTotal();
-			}
+			list.forEach(Statistics::setTotal);
 			
 			titleArray.add("Total");
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			for (Statistics data : list) {
-				int categoryIdx = 0;
-				chartData.addCategoryList(data.getColumnName());
-				
-				if (data.getCategory0Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory1Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory2Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory3Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory4Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory5Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory6Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory7Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory8Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
-				}
-			}
-			
+
+			addCategoryCnt2(chartData, list);
 			chartData.setTitleArray(titleArray); // Chart Title
 			
 			result.put("chartData", chartData);
@@ -244,11 +159,11 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	}
 	
 	public Map<String, Object> getUpdatedLicenseChartData(Statistics statistics){
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 		Statistics chartData = new Statistics();
 		chartData.setColorArray(colorArray);
 		List<Statistics> titleList = statisticsMapper.getChartTitle(statistics);
-		List<String> titleArray = new ArrayList<String>();
+		List<String> titleArray = new ArrayList<>();
 		
 		for (Statistics title : titleList) {
 			titleArray.add(title.getTitleNm());
@@ -275,55 +190,13 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		}
 		
 		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for (Statistics stat : list) {
-				stat.setTotal();
-			}
+			list.forEach(Statistics::setTotal);
 			
 			titleArray.add("Total");
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			for (Statistics data : list) {
-				int categoryIdx = 0;
-				chartData.addCategoryList(data.getColumnName());
-				
-				if (data.getCategory0Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory1Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory2Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory3Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory4Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory5Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory6Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory7Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);
-				}
-				
-				if (data.getCategory8Cnt() > -1) {
-					chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);
-				}
-			}
-
+			addCategoryCnt2(chartData, list);
 			chartData.setTitleArray(titleArray); // Chart Title
 			
 			result.put("chartData", chartData);
@@ -333,11 +206,11 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	}
 	
 	public Map<String, Object> getTrdPartyRelatedChartData(Statistics statistics){
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 		Statistics chartData = new Statistics();
 		chartData.setColorArray(colorArray);
 		List<Statistics> titleList = statisticsMapper.getChartTitle(statistics);
-		List<String> titleArray = new ArrayList<String>();
+		List<String> titleArray = new ArrayList<>();
 		
 		if ("REV".equals(statistics.getCategoryType())) {
 			titleArray.add("unassigned");
@@ -369,52 +242,78 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-			list.forEach(data -> {
-				int categoryIdx = 0;
-				if (data.getCategory0Cnt() > -1) {chartData.addCategoryCnt(data.getCategory0Cnt(), categoryIdx++);}
-				if (data.getCategory1Cnt() > -1) {chartData.addCategoryCnt(data.getCategory1Cnt(), categoryIdx++);}
-				if (data.getCategory2Cnt() > -1) {chartData.addCategoryCnt(data.getCategory2Cnt(), categoryIdx++);}
-				if (data.getCategory3Cnt() > -1) {chartData.addCategoryCnt(data.getCategory3Cnt(), categoryIdx++);}
-				if (data.getCategory4Cnt() > -1) {chartData.addCategoryCnt(data.getCategory4Cnt(), categoryIdx++);}
-				if (data.getCategory5Cnt() > -1) {chartData.addCategoryCnt(data.getCategory5Cnt(), categoryIdx++);}
-				if (data.getCategory6Cnt() > -1) {chartData.addCategoryCnt(data.getCategory6Cnt(), categoryIdx++);}
-				if (data.getCategory7Cnt() > -1) {chartData.addCategoryCnt(data.getCategory7Cnt(), categoryIdx++);}
-				if (data.getCategory8Cnt() > -1) {chartData.addCategoryCnt(data.getCategory8Cnt(), categoryIdx++);}
-				if (data.getCategory9Cnt() > -1) {chartData.addCategoryCnt(data.getCategory9Cnt(), categoryIdx++);}
-				if (data.getCategory10Cnt() > -1) {chartData.addCategoryCnt(data.getCategory10Cnt(), categoryIdx++);}
-				if (data.getCategory11Cnt() > -1) {chartData.addCategoryCnt(data.getCategory11Cnt(), categoryIdx++);}
-				if (data.getCategory12Cnt() > -1) {chartData.addCategoryCnt(data.getCategory12Cnt(), categoryIdx++);}
-				if (data.getCategory13Cnt() > -1) {chartData.addCategoryCnt(data.getCategory13Cnt(), categoryIdx++);}
-				if (data.getCategory14Cnt() > -1) {chartData.addCategoryCnt(data.getCategory14Cnt(), categoryIdx++);}
-				if (data.getCategory15Cnt() > -1) {chartData.addCategoryCnt(data.getCategory15Cnt(), categoryIdx++);}
-				if (data.getCategory16Cnt() > -1) {chartData.addCategoryCnt(data.getCategory16Cnt(), categoryIdx++);}
-				if (data.getCategory17Cnt() > -1) {chartData.addCategoryCnt(data.getCategory17Cnt(), categoryIdx++);}
-				if (data.getCategory18Cnt() > -1) {chartData.addCategoryCnt(data.getCategory18Cnt(), categoryIdx++);}
-				if (data.getCategory19Cnt() > -1) {chartData.addCategoryCnt(data.getCategory19Cnt(), categoryIdx++);}
-			});
-
+			addCategoryCnt(chartData, list);
 			chartData.setTitleArray(titleArray); // Chart Title
-			
 			result.put("chartData", chartData);
 		}
 		
 		return result;
 	}
 	
+	private void addCategoryCnt(Statistics chartData, List<Statistics> list) {
+		list.forEach(data -> {
+			int categoryIdx = 0;
+	        for (int i = 0; i <= 19; i++) {
+	            Function<Statistics, Integer> getCategoryCnt = getCategoryCntFunction(i);
+	            int cnt = getCategoryCnt.apply(data);
+	            if (cnt > -1) {
+	                chartData.addCategoryCnt(cnt, categoryIdx++);
+	            }
+	        }
+		});
+	}
+	
+	private void addCategoryCnt2(Statistics chartData, List<Statistics> list) {
+	    list.forEach(data -> {
+	        int categoryIdx = 0;
+	        chartData.addCategoryList(data.getColumnName());
+	        for (int i = 0; i <= 19; i++) {
+	            Function<Statistics, Integer> getCategoryCnt = getCategoryCntFunction(i);
+	            int cnt = getCategoryCnt.apply(data);
+	            if (cnt > -1) {
+	                chartData.addCategoryCnt(cnt, categoryIdx++);
+	            }
+	        }
+	    });
+	}
+	private Function<Statistics, Integer> getCategoryCntFunction(int i) {
+	    switch (i) {
+	        case 0: return Statistics::getCategory0Cnt;
+	        case 1: return Statistics::getCategory1Cnt;
+	        case 2: return Statistics::getCategory2Cnt;
+	        case 3: return Statistics::getCategory3Cnt;
+	        case 4: return Statistics::getCategory4Cnt;
+	        case 5: return Statistics::getCategory5Cnt;
+	        case 6: return Statistics::getCategory6Cnt;
+	        case 7: return Statistics::getCategory7Cnt;
+	        case 8: return Statistics::getCategory8Cnt;
+	        case 9: return Statistics::getCategory9Cnt;
+	        case 10: return Statistics::getCategory10Cnt;
+	        case 11: return Statistics::getCategory11Cnt;
+	        case 12: return Statistics::getCategory12Cnt;
+	        case 13: return Statistics::getCategory13Cnt;
+	        case 14: return Statistics::getCategory14Cnt;
+	        case 15: return Statistics::getCategory15Cnt;
+	        case 16: return Statistics::getCategory16Cnt;
+	        case 17: return Statistics::getCategory17Cnt;
+	        case 18: return Statistics::getCategory18Cnt;
+	        case 19: return Statistics::getCategory19Cnt;
+	        default: throw new IllegalArgumentException("Invalid category index: " + i);
+	    }
+	}
+
 	public Map<String, Object> getUserRelatedChartData(Statistics statistics){
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 		Statistics chartData = new Statistics();
 		chartData.setColorArray(colorArray);
 		
 		List<Statistics> list = statisticsMapper.getUserRelatedChartData(statistics);
-		List<String> titleList = new ArrayList<String>();
-		titleList.add("Total");
-		titleList.add("Activator");
+		List<String> titleList = new ArrayList<>();
+		titleList.add("Idle user");
+		titleList.add("Active user");
 		
 		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
-			for (Statistics stat : list) {
-				stat.setTotal();
-			}
+			list.forEach(Statistics::setTotal);
 			
 			titleList.add("Total");
 			result.put("chartData", list);
@@ -435,58 +334,13 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	}
 	
 	public int noneCheck(List<String> titleArray, List<Statistics> list) {
-		int noneSum = 0;
-		
-		switch(titleArray.size()) {
-		case 1:
-			for (int i=0; i<list.size(); i++) {
-				int cnt = list.get(i).getCategory1Cnt();
-				noneSum += cnt;
-			}
-			break;
-		case 2:
-			for (int i=0; i<list.size(); i++) {
-				int cnt = list.get(i).getCategory2Cnt();
-				noneSum += cnt;
-			}
-			break;
-		case 3:
-			for (int i=0; i<list.size(); i++) {
-				int cnt = list.get(i).getCategory3Cnt();
-				noneSum += cnt;
-			}
-			break;
-		case 4:
-			for (int i=0; i<list.size(); i++) {
-				int cnt = list.get(i).getCategory4Cnt();
-				noneSum += cnt;
-			}
-			break;
-		case 5:
-			for (int i=0; i<list.size(); i++) {
-				int cnt = list.get(i).getCategory5Cnt();
-				noneSum += cnt;
-			}
-			break;
-		case 6:
-			for (int i=0; i<list.size(); i++) {
-				int cnt = list.get(i).getCategory6Cnt();
-				noneSum += cnt;
-			}
-			break;
-		case 7:
-			for (int i=0; i<list.size(); i++) {
-				int cnt = list.get(i).getCategory7Cnt();
-				noneSum += cnt;
-			}
-			break;
-		case 8:
-			for (int i=0; i<list.size(); i++) {
-				int cnt = list.get(i).getCategory8Cnt();
-				noneSum += cnt;
-			}
-			break;
-		}
-		return noneSum;
+	    int noneSum = 0;
+	    int titleArraySize = titleArray.size();
+	    for (Statistics data : list) {
+            Function<Statistics, Integer> getCategoryCnt = getCategoryCntFunction(titleArraySize);
+            int cnt = getCategoryCnt.apply(data);
+	        noneSum += cnt;
+	    }
+	    return noneSum;
 	}
 }

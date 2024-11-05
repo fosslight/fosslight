@@ -291,14 +291,18 @@
             },
             licenseSourceCodeFormat: function (cellvalue, options, rowObject) {
                 var display = "";
-                switch (cellvalue) {
-                    case "Y" :
-                        display = "<i class=\"fas fa-check fa-2xs mr-2\" title=\"Source Code\"></i>";
-                        break;
-                    default:
-                        display = '';
-                        break;
+                var disclosingSrc = rowObject["disclosingSrc"];
+                if ("" != disclosingSrc && "NONE" != disclosingSrc) {
+                	display = disclosingSrc;
                 }
+//             	switch (cellvalue) {
+//              	case "Y" :
+//                  	display = "<i class=\"fas fa-check fa-2xs mr-2\" title=\"Source Code\"></i>";
+//                   	break;
+//                	default:
+//                  	display = '';
+//                 	break;
+//            	}
                 return display;
             },
             // 공통 언포메터
@@ -1544,6 +1548,12 @@
         		target.jqGrid("setCell", _mainLastsel, "licenseName", licenseName);
             	fn_grid_com.saveCellData(target.attr("id"), _mainLastsel, "licenseName", licenseName, null, null);
             	target.jqGrid('saveRow', _mainLastsel);
+       		},
+       		partnerFormat : function(cellvalue, options, rowObject){
+       			var partnerId = rowObject.refPartnerId;
+       			var partnerName = rowObject.refPartnerName;
+       			
+       			return "("+partnerId+") " + partnerName;
        		}
         }
 

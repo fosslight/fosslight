@@ -73,6 +73,7 @@ public class PackingRequestTest {
                 .param("statusRequestYn", "")
                 .param("listId", "")
                 .param("publicYn", "Y")
+                .param("secMailYn","Y")
                 .param("networkServerType", "N")
                 .param("prjModelJson", "[]")
                 .param("verificationStatus","REQ")

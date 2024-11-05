@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="oss.fosslight.repository.RefineOssMapper">
+	<sql id="limitPage">
+		LIMIT #{startIndex}, #{pageListSize}
+	</sql>
+	
+	<select id="getRefineOssTotalCnt" resultType="int">
+		SELECT COUNT(1) 
+		FROM OSS_COMMON T1
+		WHERE T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+			AND T1.OSS_NAME = #{ossName}
+		</if>
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(refineType,'reorderGithubUrl')">
+				AND EXISTS(SELECT 1 FROM OSS_DOWNLOADLOCATION T2 WHERE T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.DOWNLOAD_LOCATION LIKE '%github.com%' AND T2.OSS_DL_IDX > 1)
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(refineType,'unsetPurl')">
+				AND EXISTS(SELECT 1 FROM OSS_DOWNLOADLOCATION T2 WHERE T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND IFNULL(T2.PURL, '') = '')
+			</when>
+			<otherwise></otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectRefineOssCommonList" resultType="hashmap">
+		SELECT T1.*
+		FROM OSS_COMMON T1
+		WHERE T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+			AND T1.OSS_NAME = #{ossName}
+		</if>
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(refineType,'reorderGithubUrl')">
+				AND EXISTS(SELECT 1 FROM OSS_DOWNLOADLOCATION T2 WHERE T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.DOWNLOAD_LOCATION LIKE '%github.com%' AND T2.OSS_DL_IDX > 1)
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(refineType,'unsetPurl')">
+				AND EXISTS(SELECT 1 FROM OSS_DOWNLOADLOCATION T2 WHERE T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND IFNULL(T2.PURL, '') = '')
+			</when>
+			<otherwise></otherwise>
+		</choose>
+		ORDER BY OSS_COMMON_ID
+		<include refid="limitPage"/>
+	</select>
+	
+	<select id="selectOssDownloadLocationList" resultType="hashmap">
+		SELECT * FROM OSS_DOWNLOADLOCATION WHERE OSS_COMMON_ID = #{ossCommonId} ORDER BY OSS_DL_IDX
+	</select>
+	
+	<update id="updateOssCommonDownloadLocation">
+		UPDATE OSS_COMMON SET DOWNLOAD_LOCATION = #{downloadLocation}, MODIFIED_DATE = MODIFIED_DATE
+		WHERE OSS_COMMON_ID = #{ossCommonId}
+	</update>
+	
+	<delete id="deleteOssDownloadLocation">DELETE FROM OSS_DOWNLOADLOCATION WHERE OSS_COMMON_ID = #{ossCommonId}</delete>
+	<insert id="insertOssDownloadLocation">
+		INSERT INTO OSS_DOWNLOADLOCATION (OSS_COMMON_ID, DOWNLOAD_LOCATION, PURL, OSS_DL_IDX)
+		VALUES
+		<foreach item="item" index="index" collection="list" separator=",">
+		(#{ossCommonId}, #{item.DOWNLOAD_LOCATION}, #{item.PURL}, #{index}+1)
+		</foreach>
+	</insert>
+</mapper>

@@ -418,6 +418,9 @@ public class Project extends ComBean implements Serializable {
 	/** The src android result file id. */
 	private String srcAndroidResultFileId;
 	
+	/** The security csv file id. */
+	private String scrtCsvFileId;
+	
 	/** The notice file id. */
 	private String noticeFileId; // 라이센스 파일ID
 
@@ -428,11 +431,13 @@ public class Project extends ComBean implements Serializable {
 	private String packageFileId; // 오픈소스 파일ID
 	private String packageFileId2; // 오픈소스 파일ID
 	private String packageFileId3; // 오픈소스 파일ID
+	private String packageFileId4; // 오픈소스 파일ID
 	private String packageVulDocFileId;
 
 	private String packageFileType1; // 오픈소스 파일type
 	private String packageFileType2; // 오픈소스 파일type
 	private String packageFileType3; // 오픈소스 파일type
+	private String packageFileType4; // 오픈소스 파일type
 
 	/** The notice file. */
 	private List<T2File> noticeFile; // 라이센스 파일객체
@@ -444,6 +449,7 @@ public class Project extends ComBean implements Serializable {
 	private List<T2File> packageFile; // 오픈소스 파일객체
 	private List<T2File> packageFile2; // 오픈소스 파일객체
 	private List<T2File> packageFile3; // 오픈소스 파일객체
+	private List<T2File> packageFile4; // 오픈소스 파일객체
 	
 	/** The dep csv file. */
 	private List<T2File> depCsvFile; // csv 파일 객체
@@ -469,6 +475,9 @@ public class Project extends ComBean implements Serializable {
 	/** The android result file. */
 	private List<T2File> androidResultFile; // 안드로이드 Result 파일 객체
 
+	/** The security csv file. */
+	private List<T2File> scrtCsvFile; // csv 파일 객체
+	
 	/** The notice file info. */
 	private T2File noticeFileInfo; // 라이센스 파일객체
 	
@@ -476,6 +485,7 @@ public class Project extends ComBean implements Serializable {
 	private T2File packageFileInfo; // 오픈소스 파일객체
 	private T2File packageFileInfo2; // 오픈소스 파일객체
 	private T2File packageFileInfo3; // 오픈소스 파일객체
+	private T2File packageFileInfo4; // 오픈소스 파일객체
 	private T2File packageVulDocFileInfo;
 	
 	/** The notice text file id. */
@@ -551,6 +561,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The except file content. */
 	private String exceptFileContent;
+
+	/** The binary file yn. */
+	private String binaryFileYn;
 	
 	/** The sch start date. */
 	// OTHER
@@ -650,6 +663,9 @@ public class Project extends ComBean implements Serializable {
 	/** The osdd source file name. */
 	private String osddSourceFileName3;
 	
+	/** The osdd source file name. */
+	private String osddSourceFileName4;
+	
 	/** The osdd source file E-TAG. */
 	private String osddSourceFileEtag;
 	
@@ -658,6 +674,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The osdd source file E-TAG. */
 	private String osddSourceFileEtag3;
+	
+	/** The osdd source file E-TAG. */
+	private String osddSourceFileEtag4;
 
 	private String stage;
 	
@@ -665,6 +684,10 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The publicYn. */
 	private String publicYn;
+
+	private String secMailYn;
+
+	private String secMailDesc;
 	
 	/** The viewOnlyFlag. */
 	private String viewOnlyFlag;
@@ -705,6 +728,7 @@ public class Project extends ComBean implements Serializable {
 	private String reuseRefPrjId1;
 	private String reuseRefPrjId2;
 	private String reuseRefPrjId3;
+	private String reuseRefPrjId4;
 	
 	private String ossAnalysisStatus;
 	
@@ -2206,6 +2230,24 @@ public class Project extends ComBean implements Serializable {
 	 */
 	public void setExceptFileContent(String exceptFileContent) {
 		this.exceptFileContent = exceptFileContent;
+	}
+
+	/**
+	 * Gets the binary file yn.
+	 *
+	 * @return the binary file yn
+	 */
+	public String getBinaryFileYn() {
+		return binaryFileYn;
+	}
+
+	/**
+	 * Sets the binary file yn.
+	 *
+	 * @param binaryFileYn the new binary file yn
+	 */
+	public void setBinaryFileYn(String binaryFileYn) {
+		this.binaryFileYn = binaryFileYn;
 	}
 
 	/**
@@ -3863,6 +3905,22 @@ public class Project extends ComBean implements Serializable {
 	public void setPublicYn(String publicYn) {
 		this.publicYn = publicYn;
 	}
+
+	public String getSecMailYn() {
+		return secMailYn;
+	}
+
+	public void setSecMailYn(String secMailYn) {
+		this.secMailYn = secMailYn;
+	}
+
+	public String getSecMailDesc() {
+		return secMailDesc;
+	}
+
+	public void setSecMailDesc(String secMailDesc) {
+		this.secMailDesc = secMailDesc;
+	}
 	
 	public String getViewOnlyFlag() {
 		return viewOnlyFlag;
@@ -4545,5 +4603,77 @@ public class Project extends ComBean implements Serializable {
 
 	public void setCvssScoreMax(String cvssScoreMax) {
 		this.cvssScoreMax = cvssScoreMax;
+	}
+
+	public String getPackageFileId4() {
+		return packageFileId4;
+	}
+
+	public void setPackageFileId4(String packageFileId4) {
+		this.packageFileId4 = packageFileId4;
+	}
+
+	public String getPackageFileType4() {
+		return packageFileType4;
+	}
+
+	public void setPackageFileType4(String packageFileType4) {
+		this.packageFileType4 = packageFileType4;
+	}
+
+	public List<T2File> getPackageFile4() {
+		return packageFile4;
+	}
+
+	public void setPackageFile4(List<T2File> packageFile4) {
+		this.packageFile4 = packageFile4;
+	}
+
+	public T2File getPackageFileInfo4() {
+		return packageFileInfo4;
+	}
+
+	public void setPackageFileInfo4(T2File packageFileInfo4) {
+		this.packageFileInfo4 = packageFileInfo4;
+	}
+
+	public String getOsddSourceFileName4() {
+		return osddSourceFileName4;
+	}
+
+	public void setOsddSourceFileName4(String osddSourceFileName4) {
+		this.osddSourceFileName4 = osddSourceFileName4;
+	}
+
+	public String getOsddSourceFileEtag4() {
+		return osddSourceFileEtag4;
+	}
+
+	public void setOsddSourceFileEtag4(String osddSourceFileEtag4) {
+		this.osddSourceFileEtag4 = osddSourceFileEtag4;
+	}
+
+	public String getReuseRefPrjId4() {
+		return reuseRefPrjId4;
+	}
+
+	public void setReuseRefPrjId4(String reuseRefPrjId4) {
+		this.reuseRefPrjId4 = reuseRefPrjId4;
+	}
+
+	public String getScrtCsvFileId() {
+		return scrtCsvFileId;
+	}
+
+	public void setScrtCsvFileId(String scrtCsvFileId) {
+		this.scrtCsvFileId = scrtCsvFileId;
+	}
+
+	public List<T2File> getScrtCsvFile() {
+		return scrtCsvFile;
+	}
+
+	public void setScrtCsvFile(List<T2File> scrtCsvFile) {
+		this.scrtCsvFile = scrtCsvFile;
 	}
 }

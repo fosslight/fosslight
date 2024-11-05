@@ -34,89 +34,88 @@
             	<div class="contents-area col-9">
             		<input type="hidden" name="prjId" th:value="${project.prjId}"/>
             		<div class="topper-content">
-                    <div class="card card-secondary card-tabs">
-                        <div class="card-header d-flex p-0 pt-1">
-                        	<div class="d-flex align-items-center">
-                            	<ul class="nav nav-tabs" id="menu-tab" role="tablist">
-                                	<li class="nav-item">
-                                    	<a class="nav-link active" id="tabMenuTotal" data-toggle="pill" href="#menu-total" role="tab" aria-controls="menu-total" aria-selected="true" th:text="Total"></a>
-                                	</li>
-                                	<li class="nav-item">
-                                    	<a class="nav-link" id="tabMenuFixed" data-toggle="pill" href="#menu-fixed" role="tab" aria-controls="menu-fixed" aria-selected="false" th:text="Fixed"></a>
-                                	</li>
-                                	<li class="nav-item">
-                                    	<a class="nav-link" id="tabMenuNotFixed" data-toggle="pill" href="#menu-not-fixed" role="tab" aria-controls="menu-not-fixed" aria-selected="false" th:text="'Not Fixed'"></a>
-                                	</li>
-                            	</ul>
+                    	<div class="card card-secondary card-tabs">
+                       		<div class="card-header d-flex p-0 pt-1">
+                        		<div class="d-flex align-items-center">
+                            		<ul class="nav nav-tabs" id="menu-tab" role="tablist">
+                                		<li class="nav-item">
+                                    		<a class="nav-link" id="tabMenuTotal" data-toggle="pill" href="#menu-total" role="tab" aria-controls="menu-total" aria-selected="true" th:text="|Need to resolve|"></a>
+                                		</li>
+                                		<li class="nav-item">
+	                                    	<a class="nav-link" id="tabMenuFullDiscovered" data-toggle="pill" href="#menu-fullDiscovered" role="tab" aria-controls="menu-fullDiscovered" aria-selected="true" th:text="|Full Discovered|"></a>
+	                                	</li>
+                            		</ul>
+                        		</div>
+                        		<div class="d-flex-align" style="margin-left: auto;">
+	                        		<span th:if="${project.statusPermission > 0}" class="ml-2 mr-2 px-2 pointer" id="save" th:onclick="|total.save()|" title="save">
+										<i class="fas fa-save customIcon2"></i>
+									</span>
+	                        	</div>
                         	</div>
-                        	<div class="d-flex-align" style="margin-left: auto;">
-	                        	<span th:if="${project.statusPermission > 0}" class="ml-2 mr-2 px-2 pointer" id="save" th:onclick="|total.save()|" title="save">
-									<i class="fas fa-save customIcon2"></i>
-								</span>
+                        	<div class="card-body">
+	                        	<div class="tab-content" id="security-tabContent">
+	                        		<div class="tab-pane fade" id="menu-total" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+	                        			<div class="ml-2 mb-1" th:text="${@CommonFunction.getCustomMessage('msg.project.security.tab.resolve', @CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_SCORE'), @CommonFunction.getCoConstDefVal('CD_SECURITY_VULNERABILITY_DETAIL_SCORE')))}"></div>
+	                        			<div class="card-body bg-ivory">
+		                        			<div name="content_total" id="totalUploadSearch">
+		                        				<form id="totalUploadForm" class="totalBtn">
+													<input type="hidden" id="scrtCsvFileId" th:value="${project.scrtCsvFileId}"/>
+												</form>
+												<div class="row mt-4" id="content-total">
+													<div class="col-12">
+														<div class="row">
+															<div class="col-lg-3 pl-3 mt-1">
+																<strong th:text="'FOSSLight Security Report'"></strong>
+															</div>
+															<div class="col-lg-4 fileUploader">
+																<div class="row">
+																	<div class="col-lg-12">
+																		<div class="fileuploader" id="scrtCsvFile" th:text="Upload"></div>
+																	</div>
+																</div>
+															</div>
+															<div class="col-lg-5">
+																<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
+																	<ul class="scrtFileArea">
+																		<th:block th:if="${project.scrtCsvFile != null}">
+																			<th:block th:each="scrtCsvFile : ${project.scrtCsvFile}">
+																				<li th:if="${scrtCsvFile.delYn eq 'N'}">
+																					<a class="ajax-file-upload-filename" th:text="${scrtCsvFile.origNm}" th:href="@{'/download/' + ${scrtCsvFile.fileSeq} + '/' + ${scrtCsvFile.logiNm}}"></a>
+																					<input type="hidden" class="scrtCsvFileSeq" th:value="${scrtCsvFile.fileSeq}" />
+																					<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '1')|" th:text="X"></span>
+																					<br>[[${scrtCsvFile.createdDate}]]</li>
+																			</th:block>
+																		</th:block>
+																	</ul>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+	                        			</div>
+	                        		</div>
+	                        		<div class="tab-pane fade" id="menu-fullDiscovered" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+	                        			<div class="ml-2" th:text="#{msg.project.security.tab.discovered}"></div>
+	                        		</div>
+	                        	</div>
 	                        </div>
-                        </div>
-                    </div>
+                    	</div>
                     </div>
 					<div class="bottom-component">
-					<div class="row pl-2 grid-area" name="gridArea" id="gridAreaTotal" style="width: 100%; display: none;">
-                        <!-- buttons -->
- <!--                  	<div class="col-md-12 mb-3 pl-2">
-                            <div class="row">
-                                <div class="col-md-6">
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row float-right">
-                                        <button type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:onclick="|total.save()|" th:text="Save"></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-                        <!-- grids -->
-                        <div class="col-md-12 jqGridSet">
-                            <table id="totalList"><tr><td></td></tr></table>
-                            <div id="totalListPager"></div>
-                        </div>
-                    </div>
+						<div class="row pl-2 grid-area" name="gridArea" id="gridAreaTotal" style="width: 100%; display: none;">
+                        	<div class="col-md-12 jqGridSet">
+                            	<table id="totalList"><tr><td></td></tr></table>
+                            	<div id="totalListPager"></div>
+                        	</div>
+                    	</div>
                     
-                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaFixed" style="width: 100%;display: none;">
-                        <!-- buttons -->
-<!--                   	<div class="col-md-12 mb-3 pl-2">
-                            <div class="row">
-                            	<div class="col-md-6">
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row float-right">
-                                        <button type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:onclick="|fixed.save()|" th:text="Save"></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-                        <!-- grids -->
-                        <div class="col-md-12 jqGridSet">
-                            <table id="fixedList"><tr><td></td></tr></table>
-                            <div id="fixedListPager"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="row pl-2 grid-area" name="gridArea" id="gridAreaNotFixed" style="width: 100%; display: none;">
-                        <!-- buttons -->
-<!--                   	<div class="col-md-12 mb-3 pl-2">
-                            <div class="row">
-                            	<div class="col-md-6">
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="row float-right">
-                                        <button type="button" class="btn btn-lg-teal btn-sm width-6rem px-3" th:onclick="|notFixed.save()|" th:text="Save"></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
-                        <!-- grids -->
-                        <div class="col-md-12 jqGridSet">
-                            <table id="notFixedList"><tr><td></td></tr></table>
-                            <div id="notFixedListPager"></div>
-                        </div>
-                    </div>
+                  		<div class="row pl-2 grid-area" name="gridArea" id="gridAreaFullDiscovered" style="width: 100%;display: none;">
+	                    	<div class="col-md-12 jqGridSet">
+	                            <table id="fullDiscoveredList"><tr><td></td></tr></table>
+ 	                            <div id="fullDiscoveredListPager"></div>
+ 	                        </div>
+	                    </div>
                     </div>
                 </div>
                 <div class="col-lg-3 comment-area">
@@ -142,6 +141,8 @@
             </section>
         </div>
     </div>
+    
+    <th:block th:replace="project/view/sheetSelectView"></th:block>
     
     <form id="secBulkEditForm">
 		<input type="hidden" name="rowId" value=""/>

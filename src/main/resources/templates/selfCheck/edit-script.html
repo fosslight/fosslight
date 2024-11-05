@@ -2047,10 +2047,8 @@ var src_fn = {
 			}
 			
 			display = "<i class=\"fas fa-question-circle\" style=\"font-size: 1.2rem; cursor: pointer;\" title=\"Obligation is unclear\"></i>";
-		} else if (obligationType == 10){
-			display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
-		} else if (obligationType == 11) {
-			display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i><i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\"></i>";
+		} else if (obligationType == 10 || obligationType == 11){
+			display = "<i class=\"fas fa-check fa-2xs\" title=\"Notice\"></i>";
 		}
 		
 		return display;
@@ -2060,8 +2058,16 @@ var src_fn = {
 		var obligationType = rowObject["obligationType"];
 		var obligationGrayFlag = rowObject["obligationGrayFlag"];
 
-		if(obligationType == 11){
-			display="<span class=\"iconSet man\"></span>";
+		if (obligationGrayFlag == "Y") {
+			var _obligationMsg = rowObject["obligationMsg"];
+			
+			if(!_obligationMsg || _obligationMsg == "") {
+				_obligationMsg = "unknown obligation";
+			}
+			
+			display = "<i class=\"fas fa-question-circle\" style=\"font-size: 1.2rem; cursor: pointer;\" title=\"Obligation is unclear\"></i>";
+		} else if (obligationType == 11){
+			display = "<i class=\"fas fa-check fa-2xs\" title=\"Source\"></i>";
 		}
 		
 		return display;
@@ -2353,7 +2359,7 @@ var src_grid = {
 			data : srcMainData,
 			colNames: ['gridId', 'ID', 'ReferenceId', 'ReferenceDiv', 'ComponentIdx', 'Binary Name or Source Path', 'OssId', 'OSS Name','OSS Version','License', 'OSS Name Exists', 'License Exists'
 			           ,'LicenseId','Download Location','Homepage','Copyright Text','OSS Detail','License Detail','User<br/>Guide','CVE ID'
-			           ,'Vulnera<br/>bility','Obligation','Notify','Source','Restriction','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'srcList\');">Exclude','LicenseDiv', 'licenseUserGuideYn', 'licenseUserGuideStr','obligationGrayFlag', 'obligationMsg'],
+			           ,'Vulnera<br/>bility','Obligation','Notice','Source','Restriction','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'srcList\');">Exclude','LicenseDiv', 'licenseUserGuideYn', 'licenseUserGuideStr','obligationGrayFlag', 'obligationMsg'],
 			colModel: [
 				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
 				{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype : 'int', search: false},
@@ -2640,7 +2646,7 @@ var src_grid = {
 			            return rtnVal;
                     }
 				},
-				{name: 'obligation', index: 'obligation', width: 50, align: 'center', formatter: src_fn.displayNotify, unformat: src_fn.unDisplayNotify, search : false, //template: searchStringOptions, 
+				{name: 'obligation', index: 'obligation', width: 50, align: 'center', formatter: src_fn.displayNotify, unformat: src_fn.unDisplayNotify, search : false, hidden: true, 
 					sorttype: function (cell, rowData) {
 						var rtnVal = rowData.obligationType;
 
@@ -2651,8 +2657,26 @@ var src_grid = {
 			            return rtnVal;
                     }
 				},
-				{name: 'notify', index: 'notify', width: 40, align: 'center', hidden:true},
-				{name: 'source', index: 'source', width: 40, align: 'center', hidden:true},
+				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: src_fn.displayNotify, unformat: src_fn.unDisplayNotify, search : false, sortable : true,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.obligationType;
+						if (rtnVal == '10' || rtnVal == '11') {
+							return 0;
+						} else {
+							return 99;
+						}
+                    }
+				},
+				{name: 'source', index: 'source', width: 40, align: 'center', formatter: src_fn.displaySource, unformat: src_fn.unDisplaySource, search : false, sortable : true,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.obligationType;
+						if(rtnVal == '11') {
+							return 0;
+						} else {
+							return 99;
+						}
+                    }
+				},
 				{name: 'restriction', index: 'restriction', width: 50, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false},
 				{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false,
  					editoptions: {

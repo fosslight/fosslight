@@ -929,6 +929,8 @@
 			, A.IDENTIFICATION_SUB_STATUS_ANDROID  
 			, A.COMPLETE_YN 
 			, A.DROP_YN
+			, A.SECMAIL_YN
+		    , A.SECMAIL_DESC
 			, A.REVIEWER 
 			, A.USE_YN 
 			, A.COPY_PRJ_ID
@@ -976,6 +978,7 @@
 			, A.README_FILE_NAME
 			, A.VERIFY_FILE_CONTENT
 			, A.EXCEPT_FILE_CONTENT
+			, A.BINARY_FILE_YN
 			, A.CREATOR 
 			, A.CREATED_DATE
 			, A.MODIFIER 
@@ -1308,7 +1311,8 @@
 			PROJECT_MASTER
 		SET
 			EXCEPT_FILE_CONTENT = #{exceptFileContent},
-			VERIFY_FILE_CONTENT = #{verifyFileContent}
+			VERIFY_FILE_CONTENT = #{verifyFileContent},
+			BINARY_FILE_YN = #{binaryFileYn}
 		WHERE
 			PRJ_ID	= #{prjId}
 	</update>

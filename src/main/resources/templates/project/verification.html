@@ -85,7 +85,7 @@
                                     <div id="packageFileArea">
                                         <div class="card card-widget bg-ivory mb-3">
                                             <div class="card-body multiSet">
-                                            <th:block th:each="i : ${#numbers.sequence(1,3)}">
+                                            <th:block th:each="i : ${#numbers.sequence(1,4)}">
                                             <div th:id="fileUploader_+${i}">
                                             	<th:block th:if="${i > 1}">
                                         			<hr class="my-3">
@@ -99,6 +99,7 @@
                                                         	<input type="hidden" name="packageFileType1" th:value="${project.packageFileType1}"/>
                                                         	<input type="hidden" name="packageFileType2" th:value="${project.packageFileType2}"/>
                                                         	<input type="hidden" name="packageFileType3" th:value="${project.packageFileType3}"/>
+                                                        	<input type="hidden" name="packageFileType4" th:value="${project.packageFileType4}"/>
                                                         	
                                                             <select class="custom-select package text-center packageSelect" id="packagefile_select" th:name="selectOption_+${i}" th:onchange="|fn.changeSelectOption(this, true)|">
                                                             	<th:block th:if="${i == 1}">
@@ -115,6 +116,11 @@
                                                             		<option value="1" th:selected="${project.reuseRefPrjId3 == null or project.packageFileType3 == '1'}" th:text="Upload"></option>
                                                             		<option value="2" th:selected="${project.packageFileType3 == '2'}" th:text="URL"></option>
                                                                 	<option value="3" th:selected="${project.reuseRefPrjId3 != null or project.packageFileType3 == '3'}" th:text="'Project Search'"></option>
+                                                            	</th:block>
+                                                            	<th:block th:if="${i == 4}">
+                                                            		<option value="1" th:selected="${project.reuseRefPrjId4 == null or project.packageFileType4 == '1'}" th:text="Upload"></option>
+                                                            		<option value="2" th:selected="${project.packageFileType4 == '2'}" th:text="URL"></option>
+                                                                	<option value="3" th:selected="${project.reuseRefPrjId4 != null or project.packageFileType4 == '3'}" th:text="'Project Search'"></option>
                                                             	</th:block>
                                                             </select>
                                                         </div>
@@ -199,7 +205,7 @@
                                                         </div>
                                                     </div>
                                                     <div th:if="${project.verificationStatus != 'CONF'}" class="col-md-1" th:id="BtnSetDynamicCreate_+${i}">
-                                                        <button th:if="${i < 3}" type="button" class="btn btn-outline-danger btn-sm float-right" th:id="uploadAdd_+${i}" th:text="Add" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
+                                                        <button th:if="${i < 4}" type="button" class="btn btn-outline-danger btn-sm float-right" th:id="uploadAdd_+${i}" th:text="Add" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
                                                         <button type="button" class="btn btn-outline-secondary btn-sm float-right" th:id="uploadRemove_+${i}" th:text="Remove" style="display: none;"><i class="fas fa-plus mr-2"></i></button>
                                                     </div>
                                                 </div>
@@ -456,10 +462,12 @@
 									<input type="hidden" id="readmeFile" th:value="${project.readmeFileName}" />
 									<input type="hidden" id="exceptFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_PROPRIETARY')}" />
 									<input type="hidden" id="verifyFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_FILE_LIST')}" />
-									<span id="verifyBtnSet">
+                                    <input type="hidden" id="binaryFile" th:value="${@CommonFunction.getCoConstDefVal('PACKAGING_VERIFY_FILENAME_BINARY_LIST')}"/>
+                                    <span id="verifyBtnSet">
 										<button type="button" th:class="'btn btn-sm width-6rem float-left' +  ${#strings.isEmpty(project.readmeFileName) ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnReadme" th:text="README"></button>
                                     	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${#strings.isEmpty(project.verifyFileContent) ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnVerifyFileContent" th:text="'File List'"></button>
                                     	<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${#strings.isEmpty(project.exceptFileContent) ? ' btn-default disabled' : ' btn-outline-primary' }" id="btnProprietary" th:text="'Banned List'"></button>
+										<button type="button" th:class="'btn btn-sm width-6rem float-left ml-1' +  ${#strings.isEmpty(project.binaryFileYn) ? ' btn-default disabled' : ' btn-outline-primary'}" id="btnBinaryFileYn" th:text="'Binary List'"></button>
 									</span>
                                 </div>
                             </div>

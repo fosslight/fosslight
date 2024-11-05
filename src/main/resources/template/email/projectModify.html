@@ -66,12 +66,21 @@
 										<td style="padding:5px;" th:utext="${after.priority}"></td>
 									</tr>
 									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Security Mail</th>
+										<td style="padding:5px;" th:utext="${before.secMailDesc}"></td>
+										<td style="padding:5px;" th:utext="${after.secMailDesc}"></td>
+									</tr>
+									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Model Information</th>
 										<td style="padding:5px;">
-											<span th:each="modelInfo : ${before.modelListInfo}" th:utext="${modelInfo}"></span><br />
+											<th:block th:each="modelInfo, status : ${before.modelListInfo}">
+												<span th:utext="${modelInfo}"></span><th:block th:if="${status.count != status.size}"><br /></th:block>
+											</th:block>
 										</td>
 										<td style="padding:5px;">
-											<span th:each="modelInfo : ${after.modelListInfo}" th:utext="${modelInfo}"></span><br />
+											<th:block th:each="modelInfo, status : ${after.modelListInfo}">
+												<span th:utext="${modelInfo}"></span><th:block th:if="${status.count != status.size}"><br /></th:block>
+											</th:block>
 										</td>
 									</tr>
 									<tr>

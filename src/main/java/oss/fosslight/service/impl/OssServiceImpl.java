@@ -4268,7 +4268,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 				}
 				
-				Map<String, Object> maxScoreVulnMap = null;
 				if (filteredVendorProductInfoList != null && !filteredVendorProductInfoList.isEmpty()) {
 					Collections.sort(filteredVendorProductInfoList, new Comparator<Map<String, Object>>() {
 						@Override
@@ -4281,23 +4280,22 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						}
 					});
 					
-					maxScoreVulnMap = filteredVendorProductInfoList.get(0);
-				}
-				
-				if (maxScoreVulnMap != null && !maxScoreVulnMap.isEmpty()) {
 					list = new ArrayList<>();
 					
-					Vulnerability vuln = new Vulnerability();
-					vuln.setProduct((String) maxScoreVulnMap.get("PRODUCT"));
-					vuln.setCveId((String) maxScoreVulnMap.get("CVE_ID"));
-					vuln.setCvssScore(String.valueOf((Float) maxScoreVulnMap.get("CVSS_SCORE")));
-					vuln.setVulnSummary((String) maxScoreVulnMap.get("VULN_SUMMARY"));
-					vuln.setModiDate(String.valueOf((Timestamp) maxScoreVulnMap.get("MODI_DATE")));
-					list.add(vuln);
+					for (Map<String, Object> maxScoreVulnMap : filteredVendorProductInfoList) {
+						Vulnerability vuln = new Vulnerability();
+						vuln.setProduct((String) maxScoreVulnMap.get("PRODUCT"));
+						vuln.setCveId((String) maxScoreVulnMap.get("CVE_ID"));
+						vuln.setCvssScore(String.valueOf((Float) maxScoreVulnMap.get("CVSS_SCORE")));
+						vuln.setVulnSummary((String) maxScoreVulnMap.get("VULN_SUMMARY"));
+						vuln.setModiDate(String.valueOf((Timestamp) maxScoreVulnMap.get("MODI_DATE")));
+						list.add(vuln);
+					}
 				}
 				
 				List<Vulnerability> list2 = vulnDataForNotIncludeCpeMatch(convertFlag, ossMaster, nicknameList, convertNameList, dashOssNameList, param);
 				if (list2 != null && !list2.isEmpty()) {
+					if (list == null) list = new ArrayList<>();
 					list.addAll(list2);
 				}
 			} else {
@@ -4329,13 +4327,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	private List<Vulnerability> vulnDataForNotIncludeCpeMatch(Boolean convertFlag, OssMaster ossMaster, String[] nicknameList, List<String> convertNameList, List<String> dashOssNameList, OssMaster param) {
-		boolean checkInCpeMatchFlag = false;
-		String key = (param.getOssName() + "_" + avoidNull(param.getOssVersion())).toUpperCase();
-		if (CoCodeManager.OSS_INFO_UPPER.containsKey(key)) {
-			if (CoConstDef.FLAG_YES.equals(CoCodeManager.OSS_INFO_UPPER.get(key).getInCpeMatchFlag())) checkInCpeMatchFlag = true;
-		}
-		
-		List<Vulnerability> list = vulnerabilityMapper.selectOssVulnerabilityListByVersionAlias(param);
+		List<Vulnerability> list = new ArrayList<>();
 		
 		if ("N/A".equals(ossMaster.getOssVersion()) || isEmpty(ossMaster.getOssVersion())) {
 			param.setOssVersion("-");
@@ -4375,23 +4367,39 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			param.setDashOssNameList(dashOssNameList.toArray(new String[dashOssNameList.size()]));
 		}
 		
-		if (list != null && !list.isEmpty()) {
-			param.setVulnerabilityCheckFlag(CoConstDef.FLAG_YES);
-			List<Vulnerability> list2 = ossMapper.getOssVulnerabilityList2(param);
-			if (list2 != null && !list2.isEmpty()) {
-				list.addAll(list2);
-				list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
+		list = ossMapper.getOssVulnerabilityList2(param);
+		
+		if (ossMaster.getOssVersionAliases() != null) {
+			for (String ossVersionAlias : ossMaster.getOssVersionAliases()) {
+				param.setOssVersion(ossVersionAlias);
+				List<Vulnerability> list2 = ossMapper.getOssVulnerabilityList2(param);
+				if (list2 != null && !list2.isEmpty()) {
+					list.addAll(list2);
+				}
 			}
-		} else {
-			list = ossMapper.getOssVulnerabilityList2(param);
 		}
 		
-		if (!checkInCpeMatchFlag) {
-			List<String> includeCpeList = ossMapper.selectOssIncludeCpeList(param);
+		if (list != null && !list.isEmpty()) {
+			list = list.stream().filter(CommonFunction.distinctByKey(e -> e.getCveId())).collect(Collectors.toList());
+			
+			List<String> includeCpeList = ossMapper.notExistsOssIncludeCpeListByOssCommonId(ossMaster);
 			List<Vulnerability> customList = new ArrayList<>();
 			
 			for (Vulnerability vuln : list) {
 				if (!includeCpeList.contains(vuln.getCriteria())) {
+					customList.add(vuln);
+				}
+			}
+			
+			list = customList;
+		}
+		
+		if (ossMaster.getExcludeCpes() != null) {
+			List<String> excludeCpeList = Arrays.asList(ossMaster.getExcludeCpes());
+			List<Vulnerability> customList = new ArrayList<>();
+			
+			for (Vulnerability vuln : list) {
+				if (!excludeCpeList.contains(vuln.getCriteria())) {
 					customList.add(vuln);
 				}
 			}

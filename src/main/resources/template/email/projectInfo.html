@@ -26,7 +26,7 @@
 							<td style="padding:40px;">
 								<div th:if="${contentsTitle != null && contentsTitle != ''}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
 								<p th:if="${mailType != '38' && contentsSubTitle != null && contentsSubTitle != ''}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
-								<div th:if="${comment != null && comment != '' and (mailType == '51' or mailType == '50' or mailType == '40' or mailType == '41' or mailType == '68' or mailType == '38' or mailType == '33' or mailType == '46' or mailType == '100')}">
+								<div th:if="${comment != null && comment != '' and (mailType == '51' or mailType == '50' or mailType == '40' or mailType == '41' or mailType == '68' or mailType == '38' or mailType == '33' or mailType == '46' or mailType == '100' or mailType == '90' or mailType == '92' or mailType == '94')}">
 									<h2 style="margin:0;padding:25px 10px 0;font-size:16px;">Comment</h2>
 									<div style="padding:10px;font-size:12px;" th:utext="${comment}"></div>
 								</div>
@@ -45,6 +45,10 @@
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Project Version</th>
 										<td style="padding:5px;" th:utext="${project_basic_info?.prjVersion}"></td>
+									</tr>
+									<tr>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Security Mail</th>
+										<td style="padding:5px;" th:utext="|${project_basic_info?.secMailDesc} |"></td>
 									</tr>
 									<tr>
 										<th align="left" style="padding:5px;background:#f0f0f0;">Operating System</th>
@@ -140,6 +144,7 @@
 												<p th:if="${distribution_info.packageFileId != null && distribution_info.packageFileId != ''}" th:utext="${distribution_info.packageFileId}" style="margin:0"></p>
 												<p th:if="${distribution_info.packageFileId2 != null && distribution_info.packageFileId2 != ''}" th:utext="${distribution_info.packageFileId2}" style="margin:0"></p>
 												<p th:if="${distribution_info.packageFileId3 != null && distribution_info.packageFileId3 != ''}" th:utext="${distribution_info.packageFileId3}" style="margin:0"></p>
+												<p th:if="${distribution_info.packageFileId4 != null && distribution_info.packageFileId4 != ''}" th:utext="${distribution_info.packageFileId4}" style="margin:0"></p>
 											</td>
 										</tr>
 									</table>

@@ -6,13 +6,13 @@
 <mapper namespace="oss.fosslight.repository.StatisticsMapper">
 	<select id="getChartTitle" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
 		<if test="@oss.fosslight.util.StringUtil@equals('STT', categoryType)">
-			SELECT CD_DTL_NO AS TITLE_NM
+			SELECT CD_DTL_NM AS TITLE_NM
 			  FROM T2_CODE_DTL 
 			 WHERE CD_NO = '205' 
 			 ORDER BY CD_ORDER ASC
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('3rdSTT', categoryType)">
-			SELECT CD_DTL_NO AS TITLE_NM
+			SELECT CD_DTL_NM AS TITLE_NM
 			  FROM T2_CODE_DTL 
 			 WHERE CD_NO = '211' 
 			 ORDER BY CD_ORDER ASC
@@ -86,14 +86,14 @@
 			<if test="@oss.fosslight.util.StringUtil@equals('STT', categoryType)">
 				  LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
 				  				  , CASE 
-										WHEN PM.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
-										WHEN PM.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
-										WHEN PM.IDENTIFICATION_STATUS = 'REV' OR PM.VERIFICATION_STATUS = 'REV' THEN 'REV'
-										WHEN PM.IDENTIFICATION_STATUS = 'REQ' OR PM.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y' THEN 'REQ'
-										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
-										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'REV' 
-										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'NA' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'REV' 
-										ELSE 'PROG' 
+										WHEN PM.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'Complete'
+										WHEN PM.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'Drop'
+										WHEN PM.IDENTIFICATION_STATUS = 'REV' OR PM.VERIFICATION_STATUS = 'REV' THEN 'Review'
+										WHEN PM.IDENTIFICATION_STATUS = 'REQ' OR PM.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y' THEN 'Request'
+										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'DONE' THEN 'Final Review'
+										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'Final Review' 
+										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'NA' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'Final Review' 
+										ELSE 'Progress' 
 								  	END CATEGORY 
 							   FROM PROJECT_MASTER PM
 							   <!-- 
@@ -509,7 +509,12 @@
 			<if test="@oss.fosslight.util.StringUtil@equals('3rdSTT', categoryType)">
 				  LEFT JOIN (SELECT 
 				  				(SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
-								  , PM.STATUS AS CATEGORY 
+								  , CASE 
+										WHEN PM.STATUS = 'CONF' THEN 'Confirm'
+										WHEN PM.STATUS = 'REQ' THEN 'Request'
+										WHEN PM.STATUS = 'REV' THEN 'Review'
+										ELSE 'Progress' 
+								  	END CATEGORY 
 							   FROM PARTNER_MASTER PM
 							   WHERE PM.USE_YN = 'Y'
 							   <!-- 

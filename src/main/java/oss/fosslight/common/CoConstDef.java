@@ -222,6 +222,8 @@ public class CoConstDef {
 	
 	public static final String PACKAGING_VERIFY_FILENAME_PROPRIETARY = "proprietaryCheckList.txt";
 	public static final String PACKAGING_VERIFY_FILENAME_FILE_LIST = "packageStructureInfo.txt";
+
+	public static final String PACKAGING_VERIFY_FILENAME_BINARY_LIST = "binary.txt";
 	
 	/** 페이지 설정 코드 */
 	public static final String CD_PAGENATION = "100";
