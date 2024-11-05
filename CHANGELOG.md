@@ -1,5 +1,48 @@
 # Changelog
 
+## v2.1.0 (05/11/2024)
+## Changes
+## 🚀 Features
+
+- Release version 2.1.0 @FOSSLight-dev @Min-Kyungsun  (#1088)
+  * **Added Security Tab Features**
+    - Renamed internal tabs to Need to Resolve / Full Discovered
+      - Changed from the previous Total / Fixed / Not Fixed classification to Need to Resolve / Full Discovered
+      - Need to Resolve: Displays CVE IDs above the standard score.
+        The standard score can be set in the Code management menu under Security Vulnerability Standard Score
+      - Full Discovered: Displays all detected CVE IDs
+    - Added Columns: Vulnerability Link, Security Comments
+      - Vulnerability Link:
+      - Security Comments: Added a Security Comments column to leave comments on the results of Vulnerability Resolution
+    - Added Excel upload feature
+  * **Added Security Mail Enable/Disable Feature**
+    - Added an option to set whether to receive Security Mail for the project
+    - Can be set in Project Information
+    - Reason for disabling Security Mail is mandatory
+  * **Added Binary List to Packaging > Source Tab**
+    - Added a binary list feature to prevent binaries from being collected instead of source code during the packaging process
+  * **Added v2.1.0 Migration Script**
+    - 20241025020001_update_v2.1.0.sql: Migration script for v2.1.0 changes
+    - 20241104111630_update_v2.1.0_update_license_data.sql: Migration script to update license data used in open source
+  * **Added Data to fosslight_create.sql**
+    - Added License data to fosslight_create.sql
+    - There was a bug where the Opensource List only showed part of the data due to missing License data
+  * **Increased Number of Upload Files in Packaging Tab**
+    - Increased the number of packaging file uploads to 4 to support up to 20GB of upload capacity
+
+## 🐛 Hotfixes
+
+- Release version 2.1.0 @FOSSLight-dev @Min-Kyungsun  (#1088)
+  - Fixed a bug where the file count was not correct due to a Packaging verify bug
+  - Fixed a bug when exporting Statistics to an Excel file
+  - Fixed a bug where saving was not possible when Project > Identification > Admin was checked due to OSS Component ID matching issues
+  - Fixed an error in the default column names displayed in License / Open Source List (Obligation -> Notice/Source)
+  - Fixed an error where the 3rd party name did not appear when loading 3rd party data in Project > Identification
+  - Fixed bugs related to Vulnerability matching
+
+
+---
+
 ## v2.0.2 (15/10/2024)
 ## Changes
 ## 🐛 Hotfixes
@@ -755,20 +798,3 @@
 ## 🔧 Maintenance
 
 - Add a commit message checker @soimkim (#471)
-
----
-
-## v1.3.1 (01/04/2022)
-## 🚀 Features
-
-- Load user information from LDAP @FOSSLight-dev (#456)
-- Adopt docker-compose Variable substitution @darjeeling (#453)
-
-## 🐛 Hotfixes
-
-- Fix bugs in `Check License` and `Check OSS Name`. @FOSSLight-dev (#463)
-
-## 🔧 Maintenance
-
-- Update OSS Type Mark > VersionDiff Service Transactional Declaration @FOSSLight-dev (#465)
-- Change the sheet name of the 3rd party checklist @soimkim (#455)
