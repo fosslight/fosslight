@@ -26,8 +26,9 @@ SPDX-License-Identifier: AGPL-3.0-only
   - Security Mail Disable 이유는 필수 입력
 * **Packaging > Source 탭 Binary List 추가**
   - Packaging 과정에서 source code가 아닌 binary가 취합되는 것을 방지하기 위해 binary list 기능을 추가
-* **v2.1.0 Migration script 추가**
-  - v2.1.0 변경사항에 맞춰 20241025020001_update_v2.1.0.sql 추가
+* **Migration script 추가**
+  - 20241025020001_update_v2.1.0.sql: v2.1.0 변경 사항 적용을 위한 migration script
+  - 20241104111630_update_v2.1.0_update_license_data.sql: Opensource 에서 사용한 License 데이터 중 누락된 값을 추가를 위한 migration script
 
 ### Changed
 

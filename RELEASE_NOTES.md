@@ -27,7 +27,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 * **Added Binary List to Packaging > Source Tab**
   - Added a binary list feature to prevent binaries from being collected instead of source code during the packaging process
 * **Added v2.1.0 Migration Script**
-  - Added 20241025020001_update_v2.1.0.sql to match the changes in v2.1.0
+  - 20241025020001_update_v2.1.0.sql: Migration script for v2.1.0 changes
+  - 20241104111630_update_v2.1.0_update_license_data.sql: Migration script to update license data used in open source
 
 ### Changed
 
