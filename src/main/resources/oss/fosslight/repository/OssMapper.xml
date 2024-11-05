@@ -361,6 +361,8 @@
 		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'			/*Code Table*/
+		LEFT OUTER JOIN OSS_INCLUDE_CPE T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
+		LEFT OUTER JOIN OSS_EXCLUDE_CPE T7 ON T1.OSS_COMMON_ID = T7.OSS_COMMON_ID
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>
@@ -444,6 +446,21 @@
 					OR T1.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
 					OR DOWN.DOWNLOAD_LOCATION LIKE CONCAT('%',REGEXP_REPLACE(#{homepage}, '_', '\\\\_'),'%')
 					)
+				</otherwise>
+			</choose>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpe)">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(cpeAllSearchFlag,'Y')">
+					(
+						UPPER(T6.CPE23URI) = UPPER(#{includeCpe}) OR UPPER(T7.CPE23URI) = UPPER(#{includeCpe})
+					)	
+				</when>
+				<otherwise>
+					(
+						UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%') OR UPPER(T7.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
+					)	
 				</otherwise>
 			</choose>
 		</if>
@@ -698,6 +715,8 @@
 		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
 		LEFT OUTER JOIN T2_CODE_DTL 	T5 ON T3.LICENSE_TYPE	= T5.CD_DTL_NO AND T5.CD_NO = '201'				/*Code Table*/
+		LEFT OUTER JOIN OSS_INCLUDE_CPE T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
+		LEFT OUTER JOIN OSS_EXCLUDE_CPE T7 ON T1.OSS_COMMON_ID = T7.OSS_COMMON_ID
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>
@@ -798,6 +817,21 @@
 				</if>
 			</foreach>
 			)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpe)">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(cpeAllSearchFlag,'Y')">
+					(
+						UPPER(T6.CPE23URI) = UPPER(#{includeCpe}) OR UPPER(T7.CPE23URI) = UPPER(#{includeCpe})
+					)	
+				</when>
+				<otherwise>
+					(
+						UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%') OR UPPER(T7.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
+					)	
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
@@ -1002,6 +1036,8 @@
 		INNER JOIN LICENSE_MASTER 		T3 ON T2.LICENSE_ID = T3.LICENSE_ID AND T3.USE_YN = 'Y'
 		INNER JOIN (SELECT OSS_ID, CONCAT(IF(MULTI_LICENSE_FLAG = 'N', '0', '1'), IF(DUAL_LICENSE_FLAG = 'N', '0', '1'), IF(VERSION_DIFF_FLAG = 'N', '0', '1') ) AS OSS_TYPE FROM OSS_MASTER_LICENSE_FLAG ) SUB1 ON T1.OSS_ID = SUB1.OSS_ID
 		LEFT OUTER JOIN T2_CODE_DTL 	T4 ON T4.CD_NO = '201' AND T1.LICENSE_TYPE	= T4.CD_DTL_NO			/*Code Table*/
+		LEFT OUTER JOIN OSS_INCLUDE_CPE T5 ON T1.OSS_COMMON_ID = T5.OSS_COMMON_ID
+		LEFT OUTER JOIN OSS_EXCLUDE_CPE T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 		LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 		</if>			
@@ -1078,6 +1114,21 @@
 				</if>
 			</foreach>
 			)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpe)">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(cpeAllSearchFlag,'Y')">
+					(
+						UPPER(T5.CPE23URI) = UPPER(#{includeCpe}) OR UPPER(T6.CPE23URI) = UPPER(#{includeCpe})
+					)	
+				</when>
+				<otherwise>
+					(
+						UPPER(T5.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%') OR UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
+					)	
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')
@@ -1256,6 +1307,8 @@
 			LEFT OUTER JOIN LICENSE_MASTER 		 T3 ON T2.LICENSE_ID 	= T3.LICENSE_ID AND T3.USE_YN = 'Y' 		/*License Master Table*/
             LEFT OUTER JOIN T2_CODE_DTL 		 T4 ON T3.LICENSE_TYPE	= T4.CD_DTL_NO			/*Code Table*/
             LEFT OUTER JOIN OSS_NICKNAME		 T5 ON T1.OSS_COMMON_ID	= T5.OSS_COMMON_ID			/*OSS Nickname Table*/
+            LEFT OUTER JOIN OSS_INCLUDE_CPE		 T6 ON T1.OSS_COMMON_ID = T6.OSS_COMMON_ID
+            LEFT OUTER JOIN OSS_EXCLUDE_CPE		 T7 ON T1.OSS_COMMON_ID = T7.OSS_COMMON_ID
             <if test="!@oss.fosslight.util.StringUtil@isEmpty(homepage)">
 			LEFT OUTER JOIN OSS_DOWNLOADLOCATION DOWN ON T1.OSS_COMMON_ID = DOWN.OSS_COMMON_ID
 			</if>
@@ -1293,6 +1346,21 @@
 					T2.OSS_COPYRIGHT LIKE CONCAT('%',#{copyright},'%')
 				</if>
 			</foreach>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpe)">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(cpeAllSearchFlag,'Y')">
+					(
+						UPPER(T6.CPE23URI) = UPPER(#{includeCpe}) OR UPPER(T7.CPE23URI) = UPPER(#{includeCpe})
+					)	
+				</when>
+				<otherwise>
+					(
+						UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%') OR UPPER(T7.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
+					)	
+				</otherwise>
+			</choose>
 		</if>
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 			AND T1.CREATOR LIKE CONCAT('%',#{creator},'%')

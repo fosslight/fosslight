@@ -332,6 +332,8 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String[] existExcludeCpes;
 	
+	private String cpeAllSearchFlag;
+	
 	private String purlJson;
 	
 	private int ossDlIdx;
@@ -2316,5 +2318,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setOssVersionAliasWithColon(String[] ossVersionAliasWithColon) {
 		this.ossVersionAliasWithColon = ossVersionAliasWithColon;
+	}
+
+	public String getCpeAllSearchFlag() {
+		return cpeAllSearchFlag;
+	}
+
+	public void setCpeAllSearchFlag(String cpeAllSearchFlag) {
+		this.cpeAllSearchFlag = cpeAllSearchFlag;
 	}
 }

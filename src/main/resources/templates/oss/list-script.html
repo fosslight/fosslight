@@ -285,6 +285,10 @@
                 $("#deactivateFlag").on("click", function () {
                     $("input[name='deactivateFlag']").val($(this).is(":checked") ? "Y" : "N");
                 });
+                
+                $("#cpeAllSearchFlag").on("click", function () {
+                    $("input[name='cpeAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
+                });
 
                 $("#cvssScoreInput").on("input", function () {
                     return oss_lst_fn.validateCvssScore();
