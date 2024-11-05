@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1128,6 +1129,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			log.info("VERIFY Path Check START -----------------");
 			
+			Iterator<String> deCompResultMapKeys = deCompResultMap.keySet().iterator();
+			
 			for (String gridPath : gridFilePaths){
 				if (gridPath.contains("?")) {
 					gridPath = gridPath.replaceAll("[?]", "0x3F");
@@ -1161,7 +1164,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					 */
 					boolean resultFlag = false;
 					
-					int fileCount = checkGridPath(gridPath, deCompResultMap, decompressionDirName, packageFileName, decompressionRootPath, firstPathName);
+					int fileCount = checkGridPath(gridPath, deCompResultMapKeys, deCompResultMap, decompressionDirName, packageFileName, decompressionRootPath, firstPathName);
 					if (fileCount > 0) {
 						resultFlag = true;
 						gFileCount = fileCount;
@@ -1414,13 +1417,15 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		return resMap;
 	}
 	
-	private int checkGridPath(String gridPath, Map<String, Integer> deCompResultMap, String decompressionDirName, String packageFileName, String decompressionRootPath, String firstPathName) {
+	private int checkGridPath(String gridPath, Iterator<String> deCompResultMapKeys, Map<String, Integer> deCompResultMap, String decompressionDirName, String packageFileName, String decompressionRootPath, String firstPathName) {
 		List<String> checkPathList = new ArrayList<>();
 		String matchPath = "";
 		int fileCount = 0;
 		
-		for (String s : deCompResultMap.keySet()) {
-			String path = s;
+		while (deCompResultMapKeys.hasNext()) {
+			boolean matchFlag = false;
+			
+			String path = deCompResultMapKeys.next();
 			checkPathList.add(path);
 			checkPathList.add("/" + path);
 			checkPathList.add(path + "/");
@@ -1537,11 +1542,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			for (String checkPath : checkPathList) {
 				if (checkPath.equalsIgnoreCase(gridPath)) {
 					matchPath = checkPath;
+					matchFlag = true;
 					break;
 				}
 			}
 			
 			checkPathList.clear();
+			if (matchFlag) break;
 		}
 		
 		if (!isEmpty(matchPath) && deCompResultMap.containsKey(matchPath)) {
