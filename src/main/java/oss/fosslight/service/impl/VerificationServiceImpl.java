@@ -983,153 +983,151 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 //			}
 			
 			// 통합 Map 에 모든 허용 패턴을 저장
-//			int idx = 0;
+			Map<String, Integer> checkResultMap = new HashMap<>();
 			
-//			for (String s : deCompResultMap.keySet()) {
-//				String path = s;
-//				String path2 = "/" + path;
-//				String path3 = path + "/";
-//				String path4 = "/"+ path + "/";
-//				
-//				String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
-//				
-//				if (replaceFilePath.startsWith("/")) {
-//					replaceFilePath = replaceFilePath.substring(1);
-//				}
-//				
-//				if (replaceFilePath.endsWith("/")) {
-//					replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
-//				}
-//				
-//				String path5 = replaceFilePath;
-//				String path6 = "/" + replaceFilePath;
-//				String path7 = replaceFilePath + "/";
-//				String path8 = "/"+ replaceFilePath + "/";
-//				
-//				String addRootDir = decompressionDirName + "/" + path;
-//				
-//				if (addRootDir.startsWith("/")) {
-//					addRootDir = addRootDir.substring(1);
-//				}
-//				
-//				if (addRootDir.endsWith("/")) {
-//					addRootDir = addRootDir.substring(0, addRootDir.length()-1);
-//				}
-//				
-//				String path9 = addRootDir;
-//				String path10 = "/" + addRootDir;
-//				String path11 = addRootDir + "/";
-//				String path12 = "/" + addRootDir + "/";
-//				
-//				String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
-//				
-//				if (addRootDirReplaceFilePath.startsWith("/")) {
-//					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
-//				}
-//				
-//				if (addRootDirReplaceFilePath.endsWith("/")) {
-//					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
-//				}
-//				
-//				String path13 = addRootDirReplaceFilePath;
-//				String path14 = "/" + addRootDirReplaceFilePath;
-//				String path15 = addRootDirReplaceFilePath + "/";
-//				String path16 = "/" + addRootDirReplaceFilePath + "/";
-//
-//				String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
-//				if (replaceRootDir.startsWith("/")) {
-//					replaceRootDir = replaceRootDir.substring(1);
-//				}
-//				
-//				if (replaceRootDir.endsWith("/")) {
-//					replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
-//				}
-//				
-//				String path17 = replaceRootDir;
-//				String path18 = "/" + replaceRootDir;
-//				String path19 = replaceRootDir + "/";
-//				String path20 = "/"+replaceRootDir + "/";
-//				
-//				String replaceRootDirReplaceFilePath = replaceRootDir;
-//				
-//				if (replaceRootDirReplaceFilePath.endsWith("*")) {
-//					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
-//				}
-//				
-//				if (replaceRootDirReplaceFilePath.endsWith("/")) {
-//					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
-//				}
-//				
-//				String path21 = replaceRootDirReplaceFilePath;
-//				String path22 = "/" + replaceRootDirReplaceFilePath;
-//				String path23 = replaceRootDirReplaceFilePath + "/";
-//				String path24 = "/"+replaceRootDirReplaceFilePath + "/";
-//				
-//				String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
-//				
-//				if (replaceDecomFileRootDir.startsWith("/")) {
-//					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
-//				}
-//				
-//				if (replaceDecomFileRootDir.endsWith("/")) {
-//					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
-//				}
-//				
-//				String path25 = replaceDecomFileRootDir;
-//				String path26 = "/" + replaceDecomFileRootDir;
-//				String path27 = replaceDecomFileRootDir + "/";
-//			    String path28 = "/"+replaceDecomFileRootDir + "/";
-//				
-//				checkResultMap.put(s, deCompResultMap.containsKey(s) ? deCompResultMap.get(s) : 0);
-//				checkResultMap.put(path2, deCompResultMap.containsKey(path2) ? deCompResultMap.get(path2) : 0);
-//				checkResultMap.put(path3, deCompResultMap.containsKey(path3) ? deCompResultMap.get(path3) : 0);
-//				checkResultMap.put(path4, deCompResultMap.containsKey(path4) ? deCompResultMap.get(path4) : 0);
-//
-//				checkResultMap.put(path5, deCompResultMap.containsKey(path5) ? deCompResultMap.get(path5) : 0);
-//				checkResultMap.put(path6, deCompResultMap.containsKey(path6) ? deCompResultMap.get(path6) : 0);
-//				checkResultMap.put(path7, deCompResultMap.containsKey(path7) ? deCompResultMap.get(path7) : 0);
-//				checkResultMap.put(path8, deCompResultMap.containsKey(path8) ? deCompResultMap.get(path8) : 0);
-//
-//				checkResultMap.put(path9, deCompResultMap.containsKey(path9) ? deCompResultMap.get(path9) : 0);
-//				checkResultMap.put(path10, deCompResultMap.containsKey(path10) ? deCompResultMap.get(path10) : 0);
-//				checkResultMap.put(path11, deCompResultMap.containsKey(path11) ? deCompResultMap.get(path11) : 0);
-//				checkResultMap.put(path12, deCompResultMap.containsKey(path12) ? deCompResultMap.get(path12) : 0);
-//
-//				checkResultMap.put(path13, deCompResultMap.containsKey(path13) ? deCompResultMap.get(path13) : 0);
-//				checkResultMap.put(path14, deCompResultMap.containsKey(path14) ? deCompResultMap.get(path14) : 0);
-//				checkResultMap.put(path15, deCompResultMap.containsKey(path15) ? deCompResultMap.get(path15) : 0);
-//				checkResultMap.put(path16, deCompResultMap.containsKey(path16) ? deCompResultMap.get(path16) : 0);
-//
-//				checkResultMap.put(path17, deCompResultMap.containsKey(path17) ? deCompResultMap.get(path17) : 0);
-//				checkResultMap.put(path18, deCompResultMap.containsKey(path18) ? deCompResultMap.get(path18) : 0);
-//				checkResultMap.put(path19, deCompResultMap.containsKey(path19) ? deCompResultMap.get(path19) : 0);
-//				checkResultMap.put(path20, deCompResultMap.containsKey(path20) ? deCompResultMap.get(path20) : 0);
-//
-//				checkResultMap.put(path21, deCompResultMap.containsKey(path21) ? deCompResultMap.get(path21) : 0);
-//				checkResultMap.put(path22, deCompResultMap.containsKey(path22) ? deCompResultMap.get(path22) : 0);
-//				checkResultMap.put(path23, deCompResultMap.containsKey(path23) ? deCompResultMap.get(path23) : 0);
-//				checkResultMap.put(path24, deCompResultMap.containsKey(path24) ? deCompResultMap.get(path24) : 0);
-//
-//				String _tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path25), path25);
-//				checkResultMap.put(path25, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-//				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path26), path26);
-//				checkResultMap.put(path26, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-//				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path27), path27);
-//				checkResultMap.put(path27, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-//				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path28), path28);
-//				checkResultMap.put(path28, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-//				
-//				idx ++;
-//			}
+			for (String s : deCompResultMap.keySet()) {
+				String path = s;
+				String path2 = "/" + path;
+				String path3 = path + "/";
+				String path4 = "/"+ path + "/";
+				
+				String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+				
+				if (replaceFilePath.startsWith("/")) {
+					replaceFilePath = replaceFilePath.substring(1);
+				}
+				
+				if (replaceFilePath.endsWith("/")) {
+					replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
+				}
+				
+				String path5 = replaceFilePath;
+				String path6 = "/" + replaceFilePath;
+				String path7 = replaceFilePath + "/";
+				String path8 = "/"+ replaceFilePath + "/";
+				
+				String addRootDir = decompressionDirName + "/" + path;
+				
+				if (addRootDir.startsWith("/")) {
+					addRootDir = addRootDir.substring(1);
+				}
+				
+				if (addRootDir.endsWith("/")) {
+					addRootDir = addRootDir.substring(0, addRootDir.length()-1);
+				}
+				
+				String path9 = addRootDir;
+				String path10 = "/" + addRootDir;
+				String path11 = addRootDir + "/";
+				String path12 = "/" + addRootDir + "/";
+				
+				String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+				
+				if (addRootDirReplaceFilePath.startsWith("/")) {
+					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
+				}
+				
+				if (addRootDirReplaceFilePath.endsWith("/")) {
+					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
+				}
+				
+				String path13 = addRootDirReplaceFilePath;
+				String path14 = "/" + addRootDirReplaceFilePath;
+				String path15 = addRootDirReplaceFilePath + "/";
+				String path16 = "/" + addRootDirReplaceFilePath + "/";
 
+				String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
+				if (replaceRootDir.startsWith("/")) {
+					replaceRootDir = replaceRootDir.substring(1);
+				}
+				
+				if (replaceRootDir.endsWith("/")) {
+					replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
+				}
+				
+				String path17 = replaceRootDir;
+				String path18 = "/" + replaceRootDir;
+				String path19 = replaceRootDir + "/";
+				String path20 = "/"+replaceRootDir + "/";
+				
+				String replaceRootDirReplaceFilePath = replaceRootDir;
+				
+				if (replaceRootDirReplaceFilePath.endsWith("*")) {
+					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+				}
+				
+				if (replaceRootDirReplaceFilePath.endsWith("/")) {
+					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+				}
+				
+				String path21 = replaceRootDirReplaceFilePath;
+				String path22 = "/" + replaceRootDirReplaceFilePath;
+				String path23 = replaceRootDirReplaceFilePath + "/";
+				String path24 = "/"+replaceRootDirReplaceFilePath + "/";
+				
+				String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
+				
+				if (replaceDecomFileRootDir.startsWith("/")) {
+					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
+				}
+				
+				if (replaceDecomFileRootDir.endsWith("/")) {
+					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
+				}
+				
+				String path25 = replaceDecomFileRootDir;
+				String path26 = "/" + replaceDecomFileRootDir;
+				String path27 = replaceDecomFileRootDir + "/";
+			    String path28 = "/"+replaceDecomFileRootDir + "/";
+				
+				checkResultMap.put(s, deCompResultMap.containsKey(s) ? deCompResultMap.get(s) : 0);
+				checkResultMap.put(path2, deCompResultMap.containsKey(path2) ? deCompResultMap.get(path2) : 0);
+				checkResultMap.put(path3, deCompResultMap.containsKey(path3) ? deCompResultMap.get(path3) : 0);
+				checkResultMap.put(path4, deCompResultMap.containsKey(path4) ? deCompResultMap.get(path4) : 0);
+
+				checkResultMap.put(path5, deCompResultMap.containsKey(path5) ? deCompResultMap.get(path5) : 0);
+				checkResultMap.put(path6, deCompResultMap.containsKey(path6) ? deCompResultMap.get(path6) : 0);
+				checkResultMap.put(path7, deCompResultMap.containsKey(path7) ? deCompResultMap.get(path7) : 0);
+				checkResultMap.put(path8, deCompResultMap.containsKey(path8) ? deCompResultMap.get(path8) : 0);
+
+				checkResultMap.put(path9, deCompResultMap.containsKey(path9) ? deCompResultMap.get(path9) : 0);
+				checkResultMap.put(path10, deCompResultMap.containsKey(path10) ? deCompResultMap.get(path10) : 0);
+				checkResultMap.put(path11, deCompResultMap.containsKey(path11) ? deCompResultMap.get(path11) : 0);
+				checkResultMap.put(path12, deCompResultMap.containsKey(path12) ? deCompResultMap.get(path12) : 0);
+
+				checkResultMap.put(path13, deCompResultMap.containsKey(path13) ? deCompResultMap.get(path13) : 0);
+				checkResultMap.put(path14, deCompResultMap.containsKey(path14) ? deCompResultMap.get(path14) : 0);
+				checkResultMap.put(path15, deCompResultMap.containsKey(path15) ? deCompResultMap.get(path15) : 0);
+				checkResultMap.put(path16, deCompResultMap.containsKey(path16) ? deCompResultMap.get(path16) : 0);
+
+				checkResultMap.put(path17, deCompResultMap.containsKey(path17) ? deCompResultMap.get(path17) : 0);
+				checkResultMap.put(path18, deCompResultMap.containsKey(path18) ? deCompResultMap.get(path18) : 0);
+				checkResultMap.put(path19, deCompResultMap.containsKey(path19) ? deCompResultMap.get(path19) : 0);
+				checkResultMap.put(path20, deCompResultMap.containsKey(path20) ? deCompResultMap.get(path20) : 0);
+
+				checkResultMap.put(path21, deCompResultMap.containsKey(path21) ? deCompResultMap.get(path21) : 0);
+				checkResultMap.put(path22, deCompResultMap.containsKey(path22) ? deCompResultMap.get(path22) : 0);
+				checkResultMap.put(path23, deCompResultMap.containsKey(path23) ? deCompResultMap.get(path23) : 0);
+				checkResultMap.put(path24, deCompResultMap.containsKey(path24) ? deCompResultMap.get(path24) : 0);
+
+				String _tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path25), path25);
+				checkResultMap.put(path25, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path26), path26);
+				checkResultMap.put(path26, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path27), path27);
+				checkResultMap.put(path27, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path28), path28);
+				checkResultMap.put(path28, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+			}
+
+			deCompResultMap.clear();
+			
 			int gridIdx = 0;
 			ArrayList<String> gValidIdxlist = new ArrayList<>();
 			HashMap<String,Object> gFileCountMap = new HashMap<>();
 			boolean separatorErrFlag = false;
 			
 			log.info("VERIFY Path Check START -----------------");
-			
-			Iterator<String> deCompResultMapKeys = deCompResultMap.keySet().iterator();
 			
 			for (String gridPath : gridFilePaths){
 				if (gridPath.contains("?")) {
@@ -1163,11 +1161,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					 * 존재하지 않을 경우 grid index 저장 
 					 */
 					boolean resultFlag = false;
-					
-					int fileCount = checkGridPath(gridPath, deCompResultMapKeys, deCompResultMap, decompressionDirName, packageFileName, decompressionRootPath, firstPathName);
-					if (fileCount > 0) {
+					if (checkResultMap.containsKey(gridPath)) {
 						resultFlag = true;
-						gFileCount = fileCount;
+						gFileCount = checkResultMap.get(gridPath);
 					}
 					
 					if (!resultFlag) {//path가 존재하지않을 때
@@ -1186,6 +1182,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				gridIdx++;
 			}
+			
+			checkResultMap.clear();
 			
 			log.info("VERIFY Path Check END -----------------");
 			
