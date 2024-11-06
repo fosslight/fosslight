@@ -44,19 +44,13 @@ var bom_fn = {
 	},
 	beforeSave : function () {
 		if (com_fn.checkStatus()) {
- 			alertify.confirm([[#{msg.common.confirm.bomSave}]], function (e) {
-				if (e) {
-					$("#mergeYn").val("Y");
-					Bom_Save_Flg = false;
-					
-					// 메인, 서브 그리드 세이브 모드
-					fn_grid_com.totalGridSaveMode('bomList');
-					
-					bom_fn.save();
-				} else {
-					return false;
-				}
-			});
+			$("#mergeYn").val("Y");
+			Bom_Save_Flg = false;
+			
+			// 메인, 서브 그리드 세이브 모드
+			fn_grid_com.totalGridSaveMode('bomList');
+			
+			bom_fn.save();
 		} else {
 			alertify.alert([[#{msg.project.warn.project.status}]], function(){});
 		}
