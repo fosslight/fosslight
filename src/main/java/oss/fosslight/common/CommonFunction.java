@@ -4606,61 +4606,64 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			if (!avoidNull(beforeBean.getPrjName()).equals(avoidNull(afterBean.getPrjName()))) {
 				comment += "<p><strong>Project Name</strong><br />";
 				comment += "Before : " + beforeBean.getPrjName() + "<br />";
-				comment += "After : " + afterBean.getPrjName() + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + afterBean.getPrjName() + "</span></p>";
 			}
 
 			// Project Version
 			if (!avoidNull(beforeBean.getPrjVersion()).equals(avoidNull(afterBean.getPrjVersion()))) {
+				String beforePrjVersion = isEmpty(beforeBean.getPrjVersion()) ? "N/A" : beforeBean.getPrjVersion();
+				String afterPrjVersion = isEmpty(afterBean.getPrjVersion()) ? "N/A" : afterBean.getPrjVersion();
+				
 				comment += "<p><strong>Project Version</strong><br />";
-				comment += "Before : " + beforeBean.getPrjVersion() + "<br />";
-				comment += "After : " + afterBean.getPrjVersion() + "<br /></p>";
+				comment += "Before : " + beforePrjVersion + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + afterPrjVersion + "</span></p>";
 			}
 			
 			// Operating System
 			if (!avoidNull(beforeBean.getOsType()).equals(avoidNull(afterBean.getOsType()))) {
 				comment += "<p><strong>Operating System</strong><br />";
-				comment += "Before : " + beforeBean.getOsType() + "<br />";
-				comment += "After : " + afterBean.getOsType() + "<br /></p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, beforeBean.getOsType()) + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, afterBean.getOsType()) + "</span></p>";
 			}
 			
 			// Distribution Type
 			if (!avoidNull(beforeBean.getDistributionType()).equals(avoidNull(afterBean.getDistributionType()))) {
 				comment += "<p><strong>Distribution Type</strong><br />";
 				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, beforeBean.getDistributionType()) + "<br />";
-				comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType()) + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType()) + "</span></p>";
 			}
 			
 			
 			if (!avoidNull(beforeBean.getNetworkServerType()).equals(avoidNull(afterBean.getNetworkServerType()))) {
 				comment += "<p><strong>Network Service only?</strong><br />";
 				comment += "Before : " + beforeBean.getNetworkServerType() + "<br />";
-				comment += "After : " + afterBean.getNetworkServerType() + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + afterBean.getNetworkServerType() + "</span></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getDistributeTarget()).equals(avoidNull(afterBean.getDistributeTarget()))) {
 				comment += "<p><strong>Distribution Site</strong><br />";
 				comment += "Before : " + beforeBean.getDistributeTarget() + "<br />";
-				comment += "After : " + afterBean.getDistributeTarget() + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + afterBean.getDistributeTarget() + "</span></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getNoticeType()).equals(avoidNull(afterBean.getNoticeType()))) {
 				comment += "<p><strong>OSS Notice</strong><br />";
 				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, beforeBean.getNoticeType()) + "<br />";
-				comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, afterBean.getNoticeType()) + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, afterBean.getNoticeType()) + "</span></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getPriority()).equals(avoidNull(afterBean.getPriority()))) {
 				comment += "<p><strong>Priority</strong><br />";
-				comment += "Before : " + beforeBean.getPriority() + "<br />";
-				comment += "After : " + afterBean.getPriority() + "</p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, beforeBean.getPriority()) + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, afterBean.getPriority()) + "</span></p>";
 			}
 			
-			String before = beforeBean.getComment().replaceAll("(\r\n|\r|\n|\n\r)", "");
-			String after = afterBean.getComment().replaceAll("(\r\n|\r|\n|\n\r)", "");
+			String before = beforeBean.getComment().replaceAll("<p>", "").replaceAll("</p>", "<br/>");
+			String after = afterBean.getComment().replaceAll("<p>", "").replaceAll("</p>", "<br/>");
 			if (!before.equals(after)) {
 				comment += "<p><strong>Additional Information</strong><br />";
-				comment += "Before : " + beforeBean.getComment() + "<br />";
-				comment += "After : " + afterBean.getComment() + "</p>";
+				comment += "Before : <br/>" + before + "<br/>";
+				comment += "After : <span style='background-color:yellow'><br/>" + after + "</span></p>";
 			}
 
 			before = avoidNull(beforeBean.getSecMailDesc()).replaceAll("(\r\n|\r|\n|\n\r)", "");
