@@ -337,7 +337,7 @@ var fn = {
                     if("Y" == rowObject.androidFlag) {
                         display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
                     } else {
-                        display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                        display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                     }
                 }
 				break;
@@ -355,7 +355,7 @@ var fn = {
 					if ("Y" == rowObject.androidFlag) {
 						display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
 					} else {
-						display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+						display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
 					}
 				} else {
 					if ("Y" == rowObject.androidFlag) {
@@ -370,14 +370,14 @@ var fn = {
 						}
 					} else {
                         if ("Confirm" == identificationStatus) {
-                            display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                            display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                         } else {
                             if (projectStatus == progress) {
-                                display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                                display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                             } else if (projectStatus == request) {
-                                display += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                                display += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                             } else if (review == projectStatus) {
-                                display += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                                display += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                             }
                         }
 					}
