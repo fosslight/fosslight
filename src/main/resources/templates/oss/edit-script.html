@@ -874,6 +874,8 @@
 					$('#'+lastsel+' > td:eq(10)').text(ui.item.licenseType); // licenseType
 					$('#'+lastsel+' > td:eq(11)').text(ui.item.obligationChecks); // obligationChecks
 					$('#'+lastsel+' > td:eq(8)').text(ui.item.licenseId); // licenseId
+					$('#'+lastsel+' > td:eq(5)').text(ui.item.restriction); // restriction
+					$('#'+lastsel+' > td:eq(5)').css("white-space", "break-spaces");
 					showLicenseText(licenseName);
 					gLicenseData[lastsel] = "Y";
 					return false;
@@ -893,6 +895,7 @@
 					$("div.retxt._licenseChoice_"+lastsel).remove();
 					if(_item == null) {
 						$("#"+lastsel+"_licenseNameEx").after('<div class=\"'+gridStr+"_"+lastsel+' retxt\">'+ [[#{msg.oss.unknown.license}]] +'</div>');
+						$("#"+lastsel+"_licenseNameEx").parent().next().html("");
 						$("div.retxt._licenseChoice_"+lastsel).show();
 					} else {
 						var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName; 
@@ -908,6 +911,7 @@
 						rowData['licenseType'] = _item.licenseType;
 						rowData['obligation'] = _item.obligation;
 						rowData['obligationChecks'] = _item.obligationChecks;
+						rowData['restriction'] = _item.restriction;
 						rowData['ossLicenseIdx'] = lastsel;
 						rowData['no'] = lastsel;
 						
