@@ -2652,12 +2652,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						List<OssMaster> ossNameList = ossMapper.checkOssNameUrl2(bean);
 						String checkName = "";
 						
-						for (OssMaster ossBean : ossNameList) {
-							if (!isEmpty(checkName)) {
-								checkName += "|";
+						if (ossNameList != null && !ossNameList.isEmpty()) {
+							for (OssMaster ossBean : ossNameList) {
+								if (!isEmpty(checkName)) {
+									checkName += "|";
+								}
+								
+								checkName += ossBean.getOssName();
 							}
-							
-							checkName += ossBean.getOssName();
 						}
 						
 						if (!isEmpty(checkName)) {
