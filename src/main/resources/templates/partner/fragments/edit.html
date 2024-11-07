@@ -57,7 +57,7 @@
 														th:checked="${(detail != null && detail.publicYn != 'N') || detail == null}" th:disabled="${detail.status == 'CONF'}" />
 											</label>
 											<label class="btn btn-sm btn-onOff px-3">
-												<input type="radio" name="publicYn" id="checkbox3" autocomplete="off" value="N" th:text="'Creator & Watcher'"
+												<input type="radio" name="publicYn" id="checkbox3" autocomplete="off" value="N" th:text="'Creator & Editor'"
 														th:checked="${detail != null && detail.publicYn == 'N'}" th:disabled="${detail.status == 'CONF'}" />
 											</label>
 										</div>
@@ -338,7 +338,7 @@
 											<span class="text-sm" th:text="Everyone"></span>
 										</th:block>
 										<th:block th:unless="${detail?.publicYn != 'N'}">
-											<span class="text-sm" th:text="'Creator & Watcher'"></span>
+											<span class="text-sm" th:text="'Creator & Editor'"></span>
 										</th:block>
 										<input type="hidden" id="publicYn" name="publicYn" th:value="${detail?.publicYn}" />
 									</td>
