@@ -675,6 +675,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 사용자 입력과 packaging 파일의 디렉토리 정보 비교를 위해
 			// 분석 결과를 격납 (dir or file n	ame : count)
 			Map<String, Integer> deCompResultMap = new HashMap<>();
+			Map<String, Integer> deCompResultFileMap = new HashMap<>();
+			Map<String, Integer> secondDeCompResultMap = new HashMap<>();
+			Map<String, Integer> secondDeCompResultFileMap = new HashMap<>();
 			List<String> readmePathList = new ArrayList<String>();
 			if (result != null) {
 				boolean isFirst = true;
@@ -699,10 +702,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 								removePackageFileName = removePackageFileName.substring(1);
 							}
 							if (!deCompResultMap.containsKey(removePackageFileName)) collectDataDeCompResultList.add(removePackageFileName);
-							
-							if (s.startsWith("/")) {
-								s = s.substring(1);
-							}
 						} else {
 							String addPackageFileName = packageFileName + "/" + s;
 							if (!deCompResultMap.containsKey(addPackageFileName)) collectDataDeCompResultList.add(addPackageFileName);
@@ -714,10 +713,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 								if (removeFirstPathName.startsWith("/")) {
 									removeFirstPathName = removeFirstPathName.substring(1);
 								}
-								if (!deCompResultMap.containsKey(removeFirstPathName)) collectDataDeCompResultList.add(removeFirstPathName);
-								
-								if (s.startsWith("/")) {
-									s = s.substring(1);
+								if (!deCompResultMap.containsKey(removeFirstPathName)) {
+									collectDataDeCompResultList.add(removeFirstPathName);
 								}
 							}
 						}
@@ -752,33 +749,36 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							
 							if (s.indexOf("/") > -1) {
 								_dir = s.substring(0, s.lastIndexOf("/"));
+								if (isEmpty(firstPathName) && !isEmpty(s)) {
+									firstPathName = _dir;
+								}
 							}
 							
-							if (deCompResultMap.containsKey(_dir)) {
-								cnt = deCompResultMap.get(_dir);
-							}
-							
-							cnt++;
+//							if (deCompResultMap.containsKey(_dir)) {
+//								cnt = deCompResultMap.get(_dir);
+//							}
+//							
+//							cnt++;
 							
 							deCompResultMap.put(_dir, cnt);
 							
-							if (_dir.equalsIgnoreCase(s)) isNotDir = true;
+							if (!_dir.equalsIgnoreCase(s)) {
+								isNotDir = true;
+							}
+						} else {
+							deCompResultMap.put(s, 0);
 						}
 						
-						if (!isNotDir) {
+						if (isNotDir) {
 							int fileCnt = 0;
 							
-							if (deCompResultMap.containsKey(s)) {
-								fileCnt = deCompResultMap.get(s);
+							if (deCompResultFileMap.containsKey(s)) {
+								fileCnt = deCompResultFileMap.get(s);
 							}
 							
 							fileCnt++;
 							
-							deCompResultMap.put(s, fileCnt);
-							
-							if (isEmpty(firstPathName) && !isEmpty(s)) {
-								firstPathName = s;
-							}
+							deCompResultFileMap.put(s, fileCnt);
 						}
 					}
 				}
@@ -805,47 +805,79 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					int cnt = 0;
 					boolean isNotDir = false;
 					
-					if (isFile){
-						String _dir = s;
-						
-						if (s.indexOf("/") > -1) {
-							_dir = s.substring(0, s.lastIndexOf("/"));
+					if (!deCompResultMap.containsKey(s)) {
+						if (isFile){
+							String _dir = s;
+							
+							if (s.toUpperCase().indexOf("README") > -1) {
+								continue;
+							}
+							
+							if (s.indexOf("/") > -1) {
+								_dir = s.substring(0, s.lastIndexOf("/"));
+							}
+							
+//							if (secondDeCompResultMap.containsKey(_dir)) {
+//								cnt = secondDeCompResultMap.get(_dir);
+//							}
+//							
+//							cnt++;
+							
+							secondDeCompResultMap.put(_dir, cnt);
+							
+							if (!_dir.equalsIgnoreCase(s)) {
+								isNotDir = true;
+							}
+						} else {
+							secondDeCompResultMap.put(s, 0);
 						}
 						
-						if (deCompResultMap.containsKey(_dir)) {
-							cnt = deCompResultMap.get(_dir);
+						if (isNotDir) {
+							int fileCnt = 0;
+							
+							if (secondDeCompResultFileMap.containsKey(s)) {
+								fileCnt = secondDeCompResultFileMap.get(s);
+							}
+							
+							fileCnt++;
+							
+							secondDeCompResultFileMap.put(s, fileCnt);
 						}
-						
-						cnt++;
-						
-						deCompResultMap.put(_dir, cnt);
-						
-						if (_dir.equalsIgnoreCase(s)) isNotDir = true;
-					}
-					
-					if (!isNotDir) {
-						int fileCnt = 0;
-						
-						if (deCompResultMap.containsKey(s)) {
-							fileCnt = deCompResultMap.get(s);
-						}
-						
-						fileCnt++;
-						
-						deCompResultMap.put(s, fileCnt);
 					}
 				}
 				
 				collectDataDeCompResultList = null;
 			}
 			
-			List<String> paths = sortByValue(deCompResultMap);
-			
-			for (String path : paths){
-				if (deCompResultMap.get(path) != null){
-					deCompResultMap = setAddFileCount(deCompResultMap, path, (int)deCompResultMap.get(path));
+			if (!secondDeCompResultMap.isEmpty()) {
+				for (String path : secondDeCompResultMap.keySet()) {
+					if (!deCompResultMap.containsKey(path)) {
+						deCompResultMap.put(path, secondDeCompResultMap.get(path));
+					}
 				}
 			}
+			
+			secondDeCompResultMap.clear();
+			
+			if (!secondDeCompResultFileMap.isEmpty()) {
+				for (String path : secondDeCompResultFileMap.keySet()) {
+					if (!deCompResultFileMap.containsKey(path)) {
+						deCompResultFileMap.put(path, secondDeCompResultFileMap.get(path));
+					}
+				}
+			}
+			
+			secondDeCompResultFileMap.clear();
+			
+			List<String> paths = sortByValue(deCompResultFileMap);
+			
+			for (String path : paths){
+				deCompResultMap = setAddFileCount(deCompResultMap, path, deCompResultFileMap.get(path));
+			}
+			
+			deCompResultMap.putAll(deCompResultFileMap);
+			
+			deCompResultFileMap.clear();
 			
 			paths = null;
 			
