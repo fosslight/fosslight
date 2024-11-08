@@ -3028,7 +3028,9 @@
 				
 				var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
            		innerHtml 		+= '<br><textarea id="ossSaveEditor"></textarea>';
-				
+           		innerHtml 		+= '<span class="ml-4"><input class="form-check-input" type="radio" name="checkComment" value="42"><label class="form-check-label">All version</label></span>';
+           		innerHtml 		+= '<span class="ml-5"><input class="form-check-input" type="radio" name="checkComment" value="40" checked><label class="form-check-label">Current version</label></span>';
+           		
            		alertify.ossSaveDialog()
            		.set('onok', function(e) {
            			// prevent clicking the OK button on Enter
@@ -3057,6 +3059,12 @@
 								return false;
 							}
 						}
+           				
+           				var referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}]];
+    			        if ("42" == $('input[name=checkComment]:checked').val()) {
+    			        	referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS_COMMON')}]];
+    			        }
+    			        $("input[name='referenceDiv']").val(referenceDiv);
            				
            				// 세이브 전 그리드 처리
     					$('#_licenseChoice').jqGrid('saveRow',lastsel);

@@ -454,6 +454,11 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					String[] ossDownloadLocations = new String(sb).split("[,]");
 					bean.setDownloadLocations(ossDownloadLocations);
 					bean.setPurl(sb1.toString());
+				} else {
+					if (!isEmpty(bean.getDownloadLocation())) {
+						String purl = generatePurlByDownloadLocation(bean);
+						bean.setPurl(purl);
+					}
 				}
 				
 				if (isMailFormat) {
@@ -1179,7 +1184,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if (!isEmpty(avoidNull(ossMaster.getComment()).trim())) {
 				CommentsHistory param = new CommentsHistory();
 				param.setReferenceId(ossMaster.getOssId());
-				param.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS);
+				param.setReferenceDiv(ossMaster.getReferenceDiv());
 				param.setContents(ossMaster.getComment());
 				
 				commentService.registComment(param);
