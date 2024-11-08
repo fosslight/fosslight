@@ -142,6 +142,8 @@ public class CoMail extends ComBean {
 	
 	private boolean toIdsCheckDivision = false;
 	
+	private String paramReferenceDiv;
+	
 	/**
 	 * Gets the snd seq.
 	 *
@@ -948,5 +950,13 @@ public class CoMail extends ComBean {
 
 	public void setParamStandardScore(String paramStandardScore) {
 		this.paramStandardScore = paramStandardScore;
+	}
+
+	public String getParamReferenceDiv() {
+		return paramReferenceDiv;
+	}
+
+	public void setParamReferenceDiv(String paramReferenceDiv) {
+		this.paramReferenceDiv = paramReferenceDiv;
 	}
  } 

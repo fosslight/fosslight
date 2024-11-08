@@ -845,6 +845,7 @@ public class OssController extends CoTopComponent{
 		
 		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT);
 		mailBean.setParamOssId(commentsHistory.getReferenceId());
+		mailBean.setParamReferenceDiv(commentsHistory.getReferenceDiv());
 		mailBean.setComment(commentsHistory.getContents());
 		
 		CoMailManager.getInstance().sendMail(mailBean);

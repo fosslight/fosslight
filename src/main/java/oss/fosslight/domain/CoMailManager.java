@@ -1515,8 +1515,12 @@ public class CoMailManager extends CoTopComponent {
 					linkUrl += "/oss/list/" + ossInfo.getOssName();
 					_s = "<a href='" + linkUrl + "' style='font-size:16px;' target='_blank'>" + _s + "</a>";
 					
-					if (!isEmpty(ossInfo.getOssVersion())) {
-						_s += " (" + ossInfo.getOssVersion() +")";
+					if (CoConstDef.CD_DTL_COMMENT_OSS_COMMON.equals(avoidNull(bean.getParamReferenceDiv()))) {
+						_s += " (All version)";
+					} else {
+						if (!isEmpty(ossInfo.getOssVersion())) {
+							_s += " (" + ossInfo.getOssVersion() +")";
+						}
 					}
 				}
 			}
