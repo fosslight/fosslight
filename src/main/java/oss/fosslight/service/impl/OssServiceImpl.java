@@ -444,13 +444,16 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(param);
 				if (ossDownloadLocation.size() > 0) {
 					StringBuilder sb = new StringBuilder();
+					StringBuilder sb1 = new StringBuilder();
 					
 					for (OssMaster location : ossDownloadLocation) {
 						sb.append(location.getDownloadLocation()).append(",");
+						sb1.append(location.getPurl()).append(",");
 					}
 					
 					String[] ossDownloadLocations = new String(sb).split("[,]");
 					bean.setDownloadLocations(ossDownloadLocations);
+					bean.setPurl(sb1.toString());
 				}
 				
 				if (isMailFormat) {
@@ -1291,6 +1294,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		OssMaster master = new OssMaster();
 		
 		if (downloadLocations != null){
+			List<String> purls = new ArrayList<>();
+			
 			for (String url : downloadLocations){
 				if (!isEmpty(url)){ // 공백의 downloadLocation은 save하지 않음.
 					master.setOssCommonId(ossMaster.getOssCommonId());
@@ -1308,9 +1313,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						purlString = generatePurlByDownloadLocation(master);
 					}
 					
+					purls.add(purlString);
 					master.setPurl(purlString);
 					ossMapper.insertOssDownloadLocation(master);
 				}
+			}
+			
+			if (!purls.isEmpty()) {
+				ossMaster.setPurl(String.join(",", purls));
 			}
 		}
 	}
