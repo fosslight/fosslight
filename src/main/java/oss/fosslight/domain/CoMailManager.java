@@ -3790,6 +3790,9 @@ public class CoMailManager extends CoTopComponent {
 				int x = src.indexOf( srcToken );
 		        int y = src.indexOf( "\"", x + srcToken.length());
 		        String srcText = src.substring(x + srcToken.length(), y);
+		        
+		        if (srcText.startsWith("http://") || srcText.startsWith("https://")) continue;
+		        
 		        String cid = "image" + i;
 		        String newSrc = src.replace(srcText, "cid:" + cid);
 		        inlineImage.put(cid, srcText.split("[,]")[1]);
