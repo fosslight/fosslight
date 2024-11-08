@@ -2232,7 +2232,11 @@ var fn = {
 		$(obj).closest('li').remove();
 		delDocumentsFile.push(fileSeq);
 		$("#delDocumentsFile").val(delDocumentsFile);
-		if ($(".documentsFileArea > li").length < 5) {
+		
+		var fileCnt = $(".documentsFileArea > li").length;
+		if (fileCnt == 0) {
+			$("#documentsFileId").val("");
+		} else if ( < 5) {
 			$(".documentsUploader").attr("style", "display: flex !important");
 		}
 	},
