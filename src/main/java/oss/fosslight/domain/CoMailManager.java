@@ -3727,10 +3727,9 @@ public class CoMailManager extends CoTopComponent {
 
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_COREVIEWER_FINISHED.equals(coMail.getMsgType())
 					|| CoConstDef.CD_MAIL_TYPE_PARTNER_COREVIEWER_FINISHED.equals(coMail.getMsgType())){
+				String prjId = "";
 				if((ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null && ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()).equals("SUCCESS"))
 				    || (ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()) != null && ossMapper.getOssAnalysisStatus("3rd_" + coMail.getParamPartnerId()).equals("SUCCESS"))){
-
-					String prjId = "";
 					if(ossMapper.getOssAnalysisStatus(coMail.getParamPrjId()) != null) {
 						prjId = coMail.getParamPrjId();
 					} else {
@@ -3751,6 +3750,7 @@ public class CoMailManager extends CoTopComponent {
 
 					}
 				}
+				log.info("[CoReviewer][PRJ-" + prjId + "] Send Mail");
 			}
 
 			if(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_COREVIEWER_FINISHED.equals(coMail.getMsgType())) {
