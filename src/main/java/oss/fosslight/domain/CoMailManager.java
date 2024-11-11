@@ -2253,45 +2253,47 @@ public class CoMailManager extends CoTopComponent {
 				_beforeList = new ArrayList<>(_newBeforeList);
 				_afterList = new ArrayList<>(_newAfterList);
 
-				// delete case
-				int b_size = _beforeList.size();
-				for (int i=0; i<b_size; i++) {
-					String s = _beforeList.get(i);
-					if (!isEmpty(s) && !s.equals(_afterList.get(i))) {
-						// 동일한 position에 값이 다른 경우 삭제로 판단
-						_newAfterList.add(i, "");
-						_newBeforeList.add(i+1,""); // size를 맞춰준다.
-					}					
-				}
+				if (!CoConstDef.CD_MAIL_TYPE_PROJECT_COPIED.equals(msgType)) {
+					// delete case
+					int b_size = _beforeList.size();
+					for (int i=0; i<b_size; i++) {
+						String s = _beforeList.get(i);
+						if (!isEmpty(s) && !s.equals(_afterList.get(i))) {
+							// 동일한 position에 값이 다른 경우 삭제로 판단
+							_newAfterList.add(i, "");
+							_newBeforeList.add(i+1,""); // size를 맞춰준다.
+						}					
+					}
 
-				_beforeList = new ArrayList<>(_newBeforeList);
-				_afterList = new ArrayList<>(_newAfterList);
-				
-				// add
-				int a_size = _afterList.size();
-				for (int i=0; i<a_size; i++) {
-					String s = _afterList.get(i);
-					if (!isEmpty(s) && !s.equals(_beforeList.get(i))) {
-						if (!isEmpty(_beforeList.get(i))){
-							_newBeforeList.add(i, "");
-							appendChangeStyle(_newAfterList.get(i));
-							isModified = true;
-							_newAfterList.add(i-1,"");
+					_beforeList = new ArrayList<>(_newBeforeList);
+					_afterList = new ArrayList<>(_newAfterList);
+					
+					// add
+					int a_size = _afterList.size();
+					for (int i=0; i<a_size; i++) {
+						String s = _afterList.get(i);
+						if (!isEmpty(s) && !s.equals(_beforeList.get(i))) {
+							if (!isEmpty(_beforeList.get(i))){
+								_newBeforeList.add(i, "");
+								appendChangeStyle(_newAfterList.get(i));
+								isModified = true;
+								_newAfterList.add(i-1,"");
+							}
+						}
+					}
+					
+					_beforeList = _newBeforeList;
+					_afterList = _newAfterList;
+					
+					// before and after 모두 공백인 row는 삭제
+					for (int i=0; i<_beforeList.size(); i++) {
+						if (isEmpty(_beforeList.get(i)) && isEmpty(_afterList.get(i))) {
+							_newBeforeList.remove(i);
+							_newAfterList.remove(i);
 						}
 					}
 				}
 				
-				_beforeList = _newBeforeList;
-				_afterList = _newAfterList;
-				
-				// before and after 모두 공백인 row는 삭제
-				for (int i=0; i<_beforeList.size(); i++) {
-					if (isEmpty(_beforeList.get(i)) && isEmpty(_afterList.get(i))) {
-						_newBeforeList.remove(i);
-						_newAfterList.remove(i);
-					}
-				}
-
 				for (int i=0; i<_newBeforeList.size(); i++) {
 					if (isEmpty(_newAfterList.get(i))){
 						_newBeforeList.set(i, appendChangeStyle(_newBeforeList.get(i), _newAfterList.get(i)));
@@ -2785,14 +2787,16 @@ public class CoMailManager extends CoTopComponent {
 	
 	private String changeStyle(String s, String tp, boolean useLineDeco) {
 		String appendHtml = "";
-		if (tp == "del"){
-			if (useLineDeco) {
-				appendHtml = "<span style=\"background-color:red;text-decoration:line-through;\">" + s + "</span>";
-			} else {
-				appendHtml = "<span style=\"background-color:red\">" + s + "</span>";
+		if (!isEmpty(s)) {
+			if (tp == "del"){
+				if (useLineDeco) {
+					appendHtml = "<span style=\"background-color:red;text-decoration:line-through;\">" + s + "</span>";
+				} else {
+					appendHtml = "<span style=\"background-color:red\">" + s + "</span>";
+				}
+			} else if (tp == "mod"){
+				appendHtml = "<span style=\"background-color:yellow\">" + s + "</span>";
 			}
-		}else if (tp == "mod"){
-			appendHtml = "<span style=\"background-color:yellow\">" + s + "</span>";
 		}
 		return appendHtml;
 	}
