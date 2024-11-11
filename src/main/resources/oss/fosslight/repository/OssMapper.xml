@@ -452,15 +452,22 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpe)">
 			AND
 			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(cpeAllSearchFlag,'Y')">
-					(
-						UPPER(T6.CPE23URI) = UPPER(#{includeCpe}) OR UPPER(T7.CPE23URI) = UPPER(#{includeCpe})
-					)	
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(includeCpeAllSearchFlag,'Y')">
+					UPPER(T6.CPE23URI) = UPPER(#{includeCpe})
 				</when>
 				<otherwise>
-					(
-						UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%') OR UPPER(T7.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
-					)	
+					UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
+				</otherwise>
+			</choose>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(excludeCpe)">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(excludeCpeAllSearchFlag,'Y')">
+					UPPER(T7.CPE23URI) = UPPER(#{excludeCpe})
+				</when>
+				<otherwise>
+					UPPER(T7.CPE23URI) LIKE CONCAT('%', UPPER(#{excludeCpe}), '%')
 				</otherwise>
 			</choose>
 		</if>
@@ -821,15 +828,22 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpe)">
 			AND
 			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(cpeAllSearchFlag,'Y')">
-					(
-						UPPER(T6.CPE23URI) = UPPER(#{includeCpe}) OR UPPER(T7.CPE23URI) = UPPER(#{includeCpe})
-					)	
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(includeCpeAllSearchFlag,'Y')">
+					UPPER(T6.CPE23URI) = UPPER(#{includeCpe})
 				</when>
 				<otherwise>
-					(
-						UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%') OR UPPER(T7.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
-					)	
+					UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
+				</otherwise>
+			</choose>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(excludeCpe)">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(excludeCpeAllSearchFlag,'Y')">
+					UPPER(T7.CPE23URI) = UPPER(#{excludeCpe})	
+				</when>
+				<otherwise>
+					UPPER(T7.CPE23URI) LIKE CONCAT('%', UPPER(#{excludeCpe}), '%')
 				</otherwise>
 			</choose>
 		</if>
@@ -1118,15 +1132,22 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpe)">
 			AND
 			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(cpeAllSearchFlag,'Y')">
-					(
-						UPPER(T5.CPE23URI) = UPPER(#{includeCpe}) OR UPPER(T6.CPE23URI) = UPPER(#{includeCpe})
-					)	
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(includeCpeAllSearchFlag,'Y')">
+					UPPER(T5.CPE23URI) = UPPER(#{includeCpe})
 				</when>
 				<otherwise>
-					(
-						UPPER(T5.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%') OR UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
-					)	
+					UPPER(T5.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
+				</otherwise>
+			</choose>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(excludeCpe)">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(excludeCpeAllSearchFlag,'Y')">
+					UPPER(T6.CPE23URI) = UPPER(#{excludeCpe})
+				</when>
+				<otherwise>
+					UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{excludeCpe}), '%')
 				</otherwise>
 			</choose>
 		</if>
@@ -1350,15 +1371,22 @@
 		<if test="!@oss.fosslight.util.StringUtil@isEmpty(includeCpe)">
 			AND
 			<choose>
-				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(cpeAllSearchFlag,'Y')">
-					(
-						UPPER(T6.CPE23URI) = UPPER(#{includeCpe}) OR UPPER(T7.CPE23URI) = UPPER(#{includeCpe})
-					)	
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(includeCpeAllSearchFlag,'Y')">
+					UPPER(T6.CPE23URI) = UPPER(#{includeCpe})
 				</when>
 				<otherwise>
-					(
-						UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%') OR UPPER(T7.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
-					)	
+					UPPER(T6.CPE23URI) LIKE CONCAT('%', UPPER(#{includeCpe}), '%')
+				</otherwise>
+			</choose>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(excludeCpe)">
+			AND
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(excludeCpeAllSearchFlag,'Y')">
+					UPPER(T7.CPE23URI) = UPPER(#{excludeCpe})
+				</when>
+				<otherwise>
+					UPPER(T7.CPE23URI) LIKE CONCAT('%', UPPER(#{excludeCpe}), '%')
 				</otherwise>
 			</choose>
 		</if>

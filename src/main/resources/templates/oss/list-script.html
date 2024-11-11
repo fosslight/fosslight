@@ -87,8 +87,8 @@
                     $('#modifiedDate').attr('placeholder', 'Modified Date');
                	});
                 
-                var input = ["ossName", "licenseName", "homepage", "cvssScore", "cStartDate", "cEndDate", "mStartDate", "mEndDate"];
-        		var checkbox = ["ossNameAllSearchFlag", "licenseNameAllSearchFlag", "homepageAllSearchFlag", "deactivateFlag"];
+                var input = ["ossName", "licenseName", "homepage", "cvssScore", "cStartDate", "cEndDate", "mStartDate", "mEndDate", "includeCpe", "excludeCpe"];
+        		var checkbox = ["ossNameAllSearchFlag", "licenseNameAllSearchFlag", "homepageAllSearchFlag", "deactivateFlag", "includeCpeAllSearchFlag", "excludeCpeAllSearchFlag"];
         		var singleSelect = ["creator", "modifier", "licenseType"];
         		var multiSelect = ["ossTypeSearch"];
         		var textarea = ["copyrights", "summaryDescription"];
@@ -286,8 +286,12 @@
                     $("input[name='deactivateFlag']").val($(this).is(":checked") ? "Y" : "N");
                 });
                 
-                $("#cpeAllSearchFlag").on("click", function () {
-                    $("input[name='cpeAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
+                $("#includeCpeAllSearchFlag").on("click", function () {
+                    $("input[name='includeCpeAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
+                });
+                
+                $("#excludeCpeAllSearchFlag").on("click", function () {
+                    $("input[name='excludeCpeAllSearchFlag']").val($(this).is(":checked") ? "Y" : "N");
                 });
 
                 $("#cvssScoreInput").on("input", function () {
