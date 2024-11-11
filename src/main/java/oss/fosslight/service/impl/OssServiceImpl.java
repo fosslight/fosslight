@@ -500,6 +500,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					bean.setAttribution(CommonFunction.lineReplaceToBR(bean.getAttribution()));
 					bean.setSummaryDescription(CommonFunction.lineReplaceToBR(bean.getSummaryDescription()));
 					bean.setCopyright(CommonFunction.lineReplaceToBR(bean.getCopyright()));
+					bean.setImportantNotes(CommonFunction.lineReplaceToBR(bean.getImportantNotes()));
 				}
 				
 				return bean;
@@ -1542,6 +1543,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				currentBean.setCopyright(CommonFunction.lineReplaceToBR(ossBean.getCopyright()));
 				currentBean.setSummaryDescription(CommonFunction.lineReplaceToBR(ossBean.getSummaryDescription()));
+				currentBean.setImportantNotes(CommonFunction.lineReplaceToBR(ossBean.getImportantNotes()));
 				
 				String detectedLicense = avoidNull(ossBean.getDetectedLicense());
 				List<String> detectedLicenseList = Arrays.asList(detectedLicense.split(","));

@@ -1827,6 +1827,8 @@ public class CoMailManager extends CoTopComponent {
 			after.setSummaryDescription(CommonFunction.htmlEscape(after.getSummaryDescription()));
 			before.setAttribution(CommonFunction.htmlEscape(before.getAttribution()));
 			after.setAttribution(CommonFunction.htmlEscape(after.getAttribution()));
+			before.setImportantNotes(CommonFunction.htmlEscape(before.getImportantNotes()));
+			after.setImportantNotes(CommonFunction.htmlEscape(after.getImportantNotes()));
 			
 			after.setOssName(appendChangeStyleMultiLine(before.getOssName(), after.getOssName()));
 			isModified = checkEquals(before.getOssName(), after.getOssName(), isModified);
@@ -1957,23 +1959,21 @@ public class CoMailManager extends CoTopComponent {
 			after.setCopyright(appendChangeStyleMultiLine(before.getCopyright(), after.getCopyright(), true));
 			isModified = checkEquals(before.getCopyright(), after.getCopyright(), isModified);
 			
-			before.setDownloadLocationLinkFormat(appendChangeStyleLinkFormatArray(before.getDownloadLocation()));
 			String[] beforeUrl = before.getDownloadLocation().split(",");
+			String[] beforePurl = before.getPurl().split(",");
+			before.setDownloadLocationLinkFormat(appendChangeStyleLinkFormatArray(beforeUrl, beforePurl));
 			String[] afterUrl = after.getDownloadLocation().split(",");
-			String resultDownloadLocation = appendChangeStyleLinkFormatArray(beforeUrl, afterUrl, 0);
+			String[] afterPurl = after.getPurl().split(",");
+			String resultDownloadLocation = appendChangeStyleLinkFormatArray(beforeUrl, afterUrl, beforePurl, afterPurl, 0);
 			after.setDownloadLocationLinkFormat(resultDownloadLocation);
 			isModified = checkEquals(before.getDownloadLocation(), after.getDownloadLocation(), isModified);
-			String[] beforePurl = before.getPurl().split(",");
-			String[] afterPurl = after.getPurl().split(",");
-			isModified = checkEquals(before.getPurl(), after.getPurl(), isModified);
-			before.setPurl(appendChangeStyleLinkFormatArray(before.getPurl(), true));
-			String resultPurl = appendChangeStyleLinkFormatArray(beforePurl, afterPurl, 0, true);
-			after.setPurl(resultPurl);
 			before.setHomepageLinkFormat(appendChangeStyleLinkFormat(before.getHomepage()));
 			after.setHomepageLinkFormat(appendChangeStyleLinkFormat(before.getHomepage(), after.getHomepage()));
 			isModified = checkEquals(before.getHomepage(), after.getHomepage(), isModified);
 			after.setSummaryDescription(appendChangeStyleMultiLine(before.getSummaryDescription(), after.getSummaryDescription(), true));
 			isModified = checkEquals(before.getSummaryDescription(), after.getSummaryDescription(), isModified);
+			after.setImportantNotes(appendChangeStyleMultiLine(before.getImportantNotes(), after.getImportantNotes(), true));
+			isModified = checkEquals(before.getImportantNotes(), after.getImportantNotes(), isModified);
 			after.setAttribution(appendChangeStyleMultiLine(before.getAttribution(), after.getAttribution(), true));
 			isModified = checkEquals(before.getAttribution(), after.getAttribution(), isModified);
 			
@@ -2675,6 +2675,21 @@ public class CoMailManager extends CoTopComponent {
 		
 		return result;
 	}
+	
+	private String appendChangeStyleLinkFormatArray(String[] downloadLocations, String[] purls){
+		String result = "";
+		
+		for (int idx = 0; idx < downloadLocations.length; idx++){
+			if (idx > 0){
+				result += "<br>";
+			}
+			
+			result += appendChangeStyleLinkFormat(downloadLocations[idx]) + " / " + purls[idx];
+		}
+		
+		return result;
+	}
+	
 	private String appendChangeStyleLinkFormat(String before, String after) {
 		return "<a href='"+after+"' target='_blank'>" + appendChangeStyle(before, after) + "</a>";
 	}
@@ -2706,6 +2721,27 @@ public class CoMailManager extends CoTopComponent {
 		return result;
 	}
 	
+	private String appendChangeStyleLinkFormatArray(String[] before, String[] after, String[] before2, String[] after2, int seq) {
+		int length = before.length > after.length ? before.length : after.length;
+		String result = "";
+		String beforeVal = (before.length > seq ? before[seq] : "");
+		String afterVal = (after.length > seq ? after[seq] : "");
+		String beforeVal2 = (before2.length > seq ? before2[seq] : "");
+		String afterVal2 = (after2.length > seq ? after2[seq] : "");
+		
+		if (length == seq) {
+			return result;
+		} else {
+			if (seq > 0) {
+				result = "<br>";
+			}
+		}
+		
+		result += "<a href='"+afterVal+"' target='_blank'>" + appendChangeStyle(beforeVal, afterVal) + "</a>" + " / " + appendChangeStyle(beforeVal2, afterVal2) + appendChangeStyleLinkFormatArray(before, after, before2, after2, ++seq);
+		
+		return result;
+	}
+	
 	private String appendChangeStyle(String before, String after) {
 		before = avoidNull(before).trim();
 		after = avoidNull(after).trim();
@@ -2723,14 +2759,11 @@ public class CoMailManager extends CoTopComponent {
 	}
 	
 	private String appendChangeStyleMultiLine(String before, String after, boolean brFlag) {
-		
 		List<String> original = Arrays.asList(CommonFunction.brReplaceToLine(before).split("\n"));
 		List<String> revised = Arrays.asList(CommonFunction.brReplaceToLine(after).split("\n"));
 		
-
         Patch<String> patch = DiffUtils.diff(original, revised);
-        List<String> udiff = DiffUtils.generateUnifiedDiff("original", "revised",
-                original, patch, 100);
+        List<String> udiff = DiffUtils.generateUnifiedDiff("original", "revised", original, patch, 100);
         // 변경된 부분이 있다면, after에 삭제와 추가를 모푸 포함해서 return 한다.
         if (udiff != null && udiff.size() > 0) {
         	String changeStr = "";
@@ -3116,8 +3149,12 @@ public class CoMailManager extends CoTopComponent {
 			bean.setPrjId((String) dataMap.get("PRJ_ID"));
 			bean.setCategory(CommonFunction.makeCategoryFormat((String) dataMap.get("DISTRIBUTE_TARGET"),  (String) dataMap.get("CATEGORY"), (String) dataMap.get("SUBCATEGORY")));
 			bean.setModelName((String) dataMap.get("MODEL_NAME"));
-			bean.setReleaseDate(CommonFunction.formatDateSimple((String) dataMap.get("RELEASE_DATE")));
-			bean.setModifier((String) dataMap.get("MODIFIER"));
+			if (dataMap.get("RELEASE_DATE") != null && !isEmpty((String) dataMap.get("RELEASE_DATE"))) {
+				bean.setReleaseDate(CommonFunction.formatDateSimple((String) dataMap.get("RELEASE_DATE")));
+			}
+			if (dataMap.get("MODIFIER") != null && !isEmpty((String) dataMap.get("MODIFIER"))) {
+				bean.setModifier((String) dataMap.get("MODIFIER"));
+			}
 			if (dataMap.get("MODIFIED_DATE") != null && !isEmpty((String) dataMap.get("MODIFIED_DATE"))) {
 				bean.setModifiedDate(CommonFunction.formatDateSimple((String) dataMap.get("MODIFIED_DATE")));
 			}
@@ -3432,12 +3469,13 @@ public class CoMailManager extends CoTopComponent {
 				bean.setOssName((String) dataMap.get("OSS_NAME"));
 				bean.setOssVersion((String) dataMap.get("OSS_VERSION"));
 				bean.setOssType(avoidNull((String) dataMap.get("OSS_TYPE")));
-				String result = appendChangeStyleLinkFormatArray((String) dataMap.get("DOWNLOAD_LOCATION"));
+				String[] downloadLocations = ((String) dataMap.get("DOWNLOAD_LOCATION")).split(",");
+				String[] purl = ((String) dataMap.get("PURL")).split(",");
+				String result = appendChangeStyleLinkFormatArray(downloadLocations, purl);
 				bean.setDownloadLocation(result);
-				String purl = appendChangeStyleLinkFormatArray((String) dataMap.get("PURL"), true);
-				bean.setPurl(purl);
 				bean.setHomepage(avoidNull((String) dataMap.get("HOMEPAGE")));
 				bean.setSummaryDescription(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("SUMMARY_DESCRIPTION"))));
+				bean.setImportantNotes(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("IMPORTANT_NOTES"))));
 				bean.setAttribution(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("ATTRIBUTION"))));
 				bean.setCopyright(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("COPYRIGHT")))); // copyright 는 tag 를 포함하고 있기 때문에, 메일 발송시는 (html) escape 처리함
 				bean.setLicenseType(CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_TYPE, avoidNull((String) dataMap.get("OSS_LICENSE_TYPE"))));

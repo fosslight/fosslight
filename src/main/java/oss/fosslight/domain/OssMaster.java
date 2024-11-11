@@ -76,6 +76,9 @@ public class OssMaster extends ComBean implements Serializable{
 	/** The summary description. */
 	private String summaryDescription;
 	
+	/** The important notes. */
+	private String importantNotes;
+	
 	/** The oss type. */
 	private String ossType;
 	
@@ -2336,5 +2339,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setExcludeCpeAllSearchFlag(String excludeCpeAllSearchFlag) {
 		this.excludeCpeAllSearchFlag = excludeCpeAllSearchFlag;
+	}
+	
+	public String getImportantNotes() {
+		return importantNotes;
+	}
+
+	public void setImportantNotes(String importantNotes) {
+		this.importantNotes = importantNotes;
 	}
 }
