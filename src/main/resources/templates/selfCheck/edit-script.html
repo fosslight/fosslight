@@ -1246,15 +1246,41 @@ var fn = {
             }
         });
     },
-    exportList:function(){
-        var buttonId = event.target.id;
-        var exportListId = "#" + $("#" + buttonId).siblings("div").attr("id");
-        if ($(exportListId).css('display')=='none') {
-            $(exportListId).show();
-        } else {
-            $(exportListId).hide();
-        }
-        $(exportListId).menu();
+    downloadCycloneDX : function(type) {
+    	var prjId = [[${project.prjId}]];
+    	
+    	if (prjId != null && "" != prjId) {
+    		prjId = "self_" + prjId;
+    		
+    		$.ajax({
+				type: "POST",
+				url: "/cyclonedxdownload/getCycloneDXPost",
+				data: JSON.stringify({"type":type, "prjId": prjId}),
+				dataType : 'json',
+				cache : false,
+				contentType : 'application/json',
+				success: function (data) {
+					loadingIden.hide();
+					
+					if("false" == data.isValid) {
+						if (typeof data.validMsg !== "undefined") {
+							if (data.validMsg.indexOf("generation failed") != -1) {
+								alertify.error(data.validMsg, 0);
+							} else {
+								alertify.error([[#{msg.common.valid2}]], 0);
+							}
+						} else {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					} else {
+						window.location = '/cyclonedxdownload/getFile?id='+data.validMsg;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+    	}
     },
     selectDownloadFile : function(targetFileId) {
     	loadingIden.show();
@@ -1270,6 +1296,8 @@ var fn = {
                 else if (targetFileId === "JSON_sub") fn.downloadSpdxJson();
                 else if (targetFileId === "YAML_sub") fn.downloadSpdxYaml();
                 else if (targetFileId === "YAML") fn.downloadYaml();
+                else if (targetFileId === "cdxJSON") fn.downloadCycloneDX("cycloneDXJson");
+                else if (targetFileId === "cdxXML") fn.downloadCycloneDX("cycloneDXXml");
         	} else {
         		loadingIden.hide();
         		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
@@ -2802,7 +2830,9 @@ var src_grid = {
                     appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('RDF_sub')\">SPDX (RDF)</span>";
                     appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('TAG_sub')\">SPDX (TAG)</span>";
                     appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('JSON_sub')\">SPDX ((JSON))</span>";
-                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML_sub')\">SPDX ((YAML))</span></div>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML_sub')\">SPDX ((YAML))</span>";
+                    appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('cdxJSON')\">CycloneDX (JSON)</span>";
+                	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('cdxXML')\">CycloneDX (XML)</span></div>";
 
                     $("#srcList_toppager_left").append(appendBtn);
                 }

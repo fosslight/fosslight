@@ -3575,58 +3575,60 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 			// sheetRelationships
 			{
-				int rowIdx = 1;
+				if (dependenciesDataList != null) {
+					int rowIdx = 1;
 
-				for (String _identifierB : packageInfoidentifierList) {
-					int cellIdx = 0;
+					for (String _identifierB : packageInfoidentifierList) {
+						int cellIdx = 0;
 
-					Row row = sheetRelationships.getRow(rowIdx);
-					if (row == null) {
-						row = sheetRelationships.createRow(rowIdx);
+						Row row = sheetRelationships.getRow(rowIdx);
+						if (row == null) {
+							row = sheetRelationships.createRow(rowIdx);
+						}
+						// SPDX Identifier A
+						Cell spdxIdentifierA = getCell(row, cellIdx); cellIdx++;
+						spdxIdentifierA.setCellValue("SPDXRef-DOCUMENT");
+
+						// Relationship
+						Cell relationship = getCell(row, cellIdx); cellIdx++;
+						relationship.setCellValue("DESCRIBES");
+
+						// SPDX Identifier B
+						Cell spdxIdentifierB = getCell(row, cellIdx); cellIdx++;
+						spdxIdentifierB.setCellValue(_identifierB);
+
+						rowIdx++;
 					}
-					// SPDX Identifier A
-					Cell spdxIdentifierA = getCell(row, cellIdx); cellIdx++;
-					spdxIdentifierA.setCellValue("SPDXRef-DOCUMENT");
+					
+					for (OssComponents oss : dependenciesDataList) {
+						String key = oss.getPackageUrl();
+						if (!isEmpty(key) && relationshipsMap.containsKey(key)) {
+							String spdxElementId = (String) relationshipsMap.get(key);
+							String[] dependencies = oss.getDependencies().split(",");
+							for (String dependency : dependencies) {
+								String relatedSpdxElementKey = dependency;
+								if (relationshipsMap.containsKey(relatedSpdxElementKey)) {
+									String relatedSpdxElement = (String) relationshipsMap.get(relatedSpdxElementKey);
+									int cellIdx = 0;
 
-					// Relationship
-					Cell relationship = getCell(row, cellIdx); cellIdx++;
-					relationship.setCellValue("DESCRIBES");
+									Row row = sheetRelationships.getRow(rowIdx);
+									if (row == null) {
+										row = sheetRelationships.createRow(rowIdx);
+									}
+									// SPDX Identifier A
+									Cell spdxIdentifierA = getCell(row, cellIdx); cellIdx++;
+									spdxIdentifierA.setCellValue(spdxElementId);
 
-					// SPDX Identifier B
-					Cell spdxIdentifierB = getCell(row, cellIdx); cellIdx++;
-					spdxIdentifierB.setCellValue(_identifierB);
+									// Relationship
+									Cell relationship = getCell(row, cellIdx); cellIdx++;
+									relationship.setCellValue("DEPENDS_ON");
 
-					rowIdx++;
-				}
-				
-				for (OssComponents oss : dependenciesDataList) {
-					String key = oss.getPackageUrl();
-					if (!isEmpty(key) && relationshipsMap.containsKey(key)) {
-						String spdxElementId = (String) relationshipsMap.get(key);
-						String[] dependencies = oss.getDependencies().split(",");
-						for (String dependency : dependencies) {
-							String relatedSpdxElementKey = dependency;
-							if (relationshipsMap.containsKey(relatedSpdxElementKey)) {
-								String relatedSpdxElement = (String) relationshipsMap.get(relatedSpdxElementKey);
-								int cellIdx = 0;
+									// SPDX Identifier B
+									Cell spdxIdentifierB = getCell(row, cellIdx); cellIdx++;
+									spdxIdentifierB.setCellValue(relatedSpdxElement);
 
-								Row row = sheetRelationships.getRow(rowIdx);
-								if (row == null) {
-									row = sheetRelationships.createRow(rowIdx);
+									rowIdx++;
 								}
-								// SPDX Identifier A
-								Cell spdxIdentifierA = getCell(row, cellIdx); cellIdx++;
-								spdxIdentifierA.setCellValue(spdxElementId);
-
-								// Relationship
-								Cell relationship = getCell(row, cellIdx); cellIdx++;
-								relationship.setCellValue("DEPENDS_ON");
-
-								// SPDX Identifier B
-								Cell spdxIdentifierB = getCell(row, cellIdx); cellIdx++;
-								spdxIdentifierB.setCellValue(relatedSpdxElement);
-
-								rowIdx++;
 							}
 						}
 					}
@@ -4904,10 +4906,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		String prjId = dataStr;
 		boolean thirdPartyCheckFlag = false;
+		boolean selfCheckFlag = false;
 		
 		if (prjId.startsWith("3rd_")) {
 			thirdPartyCheckFlag = true;
 			String[] prjIdSplit = dataStr.split("_");
+			prjId = prjIdSplit[1];
+		} else if (prjId.startsWith("self_")) {
+			selfCheckFlag = true;
+			String[] prjIdSplit = prjId.split("_");
 			prjId = prjIdSplit[1];
 		}
 		
@@ -4928,7 +4935,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			if (!thirdPartyCheckFlag) {
 				Project projectInfo = new Project();
 				projectInfo.setPrjId(prjId);
-				projectInfo = projectService.getProjectDetail(projectInfo);
+				
+				if (!selfCheckFlag) {
+					projectInfo = projectService.getProjectDetail(projectInfo);
+				} else {
+					projectInfo = selfCheckService.getProjectDetail(projectInfo);
+				}
+				
 				String createDate = projectInfo.getCreatedDate();
 				
 				timeStamp = sdformat.parse(createDate.replace(" ", "T") + ".000");
@@ -4941,23 +4954,29 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				downloadFileName += FileUtil.makeValidFileName(strPrjName, "_").replaceAll(" ", "").replaceAll("--", "-");
 				
-				if (verifyFlag) {
-					packageInfo = verificationService.getNoticeHtmlInfo(ossNotice);
+				if (!selfCheckFlag) {
+					if (verifyFlag) {
+						packageInfo = verificationService.getNoticeHtmlInfo(ossNotice);
+					} else {
+						packageInfo = projectService.getExportDataForSBOMInfo(ossNotice);
+					}
+					
+					projectInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+					dependenciesDataList = projectService.getDependenciesDataList(projectInfo);
 				} else {
-					packageInfo = projectService.getExportDataForSBOMInfo(ossNotice);
+					packageInfo = selfCheckService.getExportDataForSBOMInfo(ossNotice);
 				}
-				
-				projectInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-				dependenciesDataList = projectService.getDependenciesDataList(projectInfo);
 			} else {
 				PartnerMaster partner = new PartnerMaster();
 				partner.setPartnerId(prjId);
 				partner = partnerService.getPartnerMasterOne(partner);
 				
-				timeStamp = sdformat.parse(partner.getCreatedDate());
+				timeStamp = sdformat.parse(partner.getCreatedDate().replace(" ", "T") + ".000");
 				
 				creator = partner.getCreator();
 				strPrjName = partner.getPartnerName();
+				
+				downloadFileName += FileUtil.makeValidFileName(strPrjName, "_").replaceAll(" ", "").replaceAll("--", "-");
 				
 				packageInfo = partnerService.getExportDataForSbomInfo(partner);
 			}
@@ -5194,30 +5213,32 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 		}
 		
-		List<Dependency> depList = null;
-		// dependency
-		for (OssComponents oss : dependenciesDataList) {
-			String key = oss.getPackageUrl();
-			if (!isEmpty(key) && relationshipsMap.containsKey(key)) {
-				depList = new ArrayList<>();
-				
-				String componentId = (String) relationshipsMap.get(key);
-				String[] dependencies = oss.getDependencies().split(",");
-				Dependency bomRefDep = new Dependency(componentId);
-				
-				for (String dependency : dependencies) {
-					if (relationshipsMap.containsKey(dependency)) {
-						String relatedComponentId = (String) relationshipsMap.get(dependency);
-						Dependency dep = new Dependency(relatedComponentId);
-						bomRefDep.addDependency(dep);
+		if (dependenciesDataList != null && !dependenciesDataList.isEmpty()) {
+			List<Dependency> depList = null;
+			// dependency
+			for (OssComponents oss : dependenciesDataList) {
+				String key = oss.getPackageUrl();
+				if (!isEmpty(key) && relationshipsMap.containsKey(key)) {
+					depList = new ArrayList<>();
+					
+					String componentId = (String) relationshipsMap.get(key);
+					String[] dependencies = oss.getDependencies().split(",");
+					Dependency bomRefDep = new Dependency(componentId);
+					
+					for (String dependency : dependencies) {
+						if (relationshipsMap.containsKey(dependency)) {
+							String relatedComponentId = (String) relationshipsMap.get(dependency);
+							Dependency dep = new Dependency(relatedComponentId);
+							bomRefDep.addDependency(dep);
+						}
 					}
+					
+					depList.add(bomRefDep);
 				}
 				
-				depList.add(bomRefDep);
-			}
-			
-			if (depList != null) {
-				dependencyList.addAll(depList);
+				if (depList != null) {
+					dependencyList.addAll(depList);
+				}
 			}
 		}
 		
