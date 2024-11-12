@@ -103,6 +103,9 @@ public class CoMail extends ComBean {
 	/** The param prj info. */
 	private Project paramPrjInfo;
 	
+	/** The param license info. */
+	private LicenseMaster paramLicenseInfo;
+	
 	/** The param oss list. */
 	private List<OssMaster> paramOssList;
 	
@@ -958,5 +961,13 @@ public class CoMail extends ComBean {
 
 	public void setParamReferenceDiv(String paramReferenceDiv) {
 		this.paramReferenceDiv = paramReferenceDiv;
+	}
+
+	public LicenseMaster getParamLicenseInfo() {
+		return paramLicenseInfo;
+	}
+
+	public void setParamLicenseInfo(LicenseMaster paramLicenseInfo) {
+		this.paramLicenseInfo = paramLicenseInfo;
 	}
  } 
