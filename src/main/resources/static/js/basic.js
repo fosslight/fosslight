@@ -2684,8 +2684,10 @@ function getBarChart(target, obj) {
 							        return previousValue + currentValue;
 							      });
 							let currentValue = context.raw;
-							let percentage = Math.floor(((currentValue/total) * 100)+0.5);
-							
+							let percentage = 0;
+							if (total > 0) {
+								percentage = Math.floor(((currentValue/total) * 100)+0.5);
+							}
 							let value = ': ' + context.formattedValue + '(' + percentage + '%)';
 							return dataLabel += value;
 						}
@@ -2716,7 +2718,10 @@ function getPieChart(target, obj) {
 							        return previousValue + currentValue;
 							      });
 							let currentValue = context.raw;
-							let percentage = Math.floor(((currentValue/total) * 100)+0.5);
+							let percentage = 0;
+							if (total > 0) {
+								percentage = Math.floor(((currentValue/total) * 100)+0.5);
+							}
 							let value = ': ' + context.formattedValue + '(' + percentage + '%)';
 							return dataLabel += value;
 						}
