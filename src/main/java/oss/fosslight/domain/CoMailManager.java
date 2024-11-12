@@ -371,6 +371,11 @@ public class CoMailManager extends CoTopComponent {
     				convertModifiedData(convertDataMap, bean.getMsgType());
 				}
     			
+    			if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(bean.getMsgType())) {
+    				convertDataMap.put("paramLicenseInfo", bean.getParamLicenseInfo());
+    				convertModifiedData(convertDataMap, bean.getMsgType());
+    			}
+    			
     			// as-is, to-be 비교 메일의 경우, 변경 부분 서식을 위한 처리추가
     			if (bean.getCompareDataBefore() != null || bean.getCompareDataAfter() != null) {
     				convertModifiedData(convertDataMap, bean.getMsgType());
@@ -2147,6 +2152,11 @@ public class CoMailManager extends CoTopComponent {
 			String resultWebPage = appendChangeStyleLinkFormatArray(beforeWebPage, afterWebPage, 0);
 			after.setWebpageLinkFormat(resultWebPage);
 			isModified = checkEquals(before.getWebpage(), after.getWebpage(), isModified);
+			String beforeInternalUrl = before.getInternalUrl();
+			before.setInternalUrl(appendChangeStyleLinkFormat(beforeInternalUrl));
+			String afterInternalUrl = after.getInternalUrl();
+			after.setInternalUrl(appendChangeStyleLinkFormat(beforeInternalUrl, afterInternalUrl));
+			isModified = checkEquals(beforeInternalUrl, afterInternalUrl, isModified);
 			after.setDescription(appendChangeStyleMultiLine(before.getDescription(), after.getDescription(), true));
 			isModified = checkEquals(before.getDescription(), after.getDescription(), isModified);
 			after.setAttribution(appendChangeStyleMultiLine(before.getAttribution(), after.getAttribution(), true));
@@ -2456,6 +2466,13 @@ public class CoMailManager extends CoTopComponent {
 			
 			convertDataMap.replace("before", before);
 			convertDataMap.replace("after", after);
+		} else if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(msgType)) {
+			LicenseMaster lm = (LicenseMaster) convertDataMap.get("paramLicenseInfo");
+			if (lm != null && !isEmpty(lm.getInternalUrl())) {
+				LicenseMaster licenseBasicInfo = (LicenseMaster) convertDataMap.get("license_basic_info");
+				licenseBasicInfo.setInternalUrl(appendChangeStyleLinkFormat(lm.getInternalUrl()));
+				convertDataMap.replace("license_basic_info", licenseBasicInfo);
+			}
 		}
 		return convertDataMap;
 	}
