@@ -220,11 +220,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							fileInfo.setFileSeq(fileId);
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
-							
-							oss.fosslight.domain.File packageFile = verificationMapper.selectVerificationFile(fileId);
-							if (packageFile != null && CoConstDef.FLAG_NO.equals(packageFile.getReuseFlag())) {
+
+							log.info("[Prj " + prjId + "] fileSeq(" +  fileInfo.getFileSeq() + ") " + deleteComment);
+
+							if (verificationMapper.countSameLogiFile(fileInfo) == 1) {
 								deletePhysicalFileList.add(fileInfo);
 							}
+							//delete logic path
+							verificationMapper.deletePackagingFileInfo(fileInfo);
+							verificationMapper.deleteReuseFileInfo(fileInfo);
+
 						}
 						
 						if (!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
@@ -234,8 +239,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							
 							if (CoConstDef.FLAG_YES.equals(result.getReuseFlag())){
 								uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was loaded from Project ID: "+result.getRefPrjId()+" by "+loginUserName()+". <br>";
+								log.info("[Prj " + prjId + "] fileSeq(" +  fileInfo.getFileSeq() + ") " + uploadComment);
 							}else{
 								uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was uploaded by "+loginUserName()+". <br>";
+								log.info("[Prj " + prjId + "] fileSeq(" +  fileInfo.getFileSeq() + ") " + uploadComment);
 							}
 						}
 						
@@ -252,12 +259,14 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					log.error(e.getMessage());
 				}
 				
-				verificationMapper.updatePackagingReuseMap(prjParam);
+//				verificationMapper.updatePackagingReuseMap(prjParam);
 				verificationMapper.updatePackageFile(prjParam);
 				
 				// delete physical file
 				for (T2File delFile : deletePhysicalFileList){
 					fileService.deletePhysicalFile(delFile, "VERIFY");
+					log.info("[Prj " + prjId + "] "+ "Remove physical file for " + delFile.getOrigNm() + " : "
+							+ delFile.getLogiPath() + "/" + delFile.getLogiNm());
 				}
 				
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){

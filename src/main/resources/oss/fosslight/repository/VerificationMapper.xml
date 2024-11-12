@@ -557,4 +557,25 @@
 		ORDER BY T2.OSS_ID DESC
 		LIMIT 1
  	</select>
+
+	<delete id="deletePackagingFileInfo" parameterType="oss.fosslight.domain.T2File">
+		DELETE
+		FROM
+			T2_FILE
+		WHERE FILE_SEQ = #{fileSeq}
+	</delete>
+
+	<delete id="deleteReuseFileInfo" parameterType="oss.fosslight.domain.T2File">
+		DELETE
+		FROM
+			PACKAGING_REUSE_MAP
+		WHERE PACKAGING_FILE_ID = #{fileSeq}
+	</delete>
+
+	<select id="countSameLogiFile" parameterType="oss.fosslight.domain.T2File" resultType="int">
+		SELECT count(*)
+		FROM T2_FILE
+		WHERE LOGI_PATH = #{logiPath}
+			AND LOGI_NM = #{logiNm}
+	</select>
 </mapper>
