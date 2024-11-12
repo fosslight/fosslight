@@ -427,6 +427,7 @@
 				detectedLicenseHtml 		+= 	'</div>';
 				
 				$(".detectedLicensesDiv").append(detectedLicenseHtml);
+				$("#input_detectedLicense").val('');
 				setCustomAutoComplete("single");
 			});
 			
@@ -2916,6 +2917,60 @@
 			}
 			return true;
 		},
+		checkAddData : function () {
+			let matchFlag = false;
+    		let inputValue = $("#input_ossNicknames").val();
+    		
+    		if ("" != inputValue) {
+    			$("input[name='ossNicknames']").each(function (i) {
+    				let ossNickname = $("input[name='ossNicknames']").eq(i).attr("value");
+    				if (inputValue == ossNickname) {
+    					matchFlag = true;
+    				}
+    			});
+    			if (!matchFlag) {
+    				$("#nickAdd").trigger("click");
+    			} else {
+    				$("#input_ossNicknames").val("");
+    			}
+    		}
+    		
+    		matchFlag = false;
+    		inputValue = "";
+    		inputValue = $("#input_detectedLicense").val();
+    		
+    		if ("" != inputValue) {
+    			$("input[name='webpages']").each(function (i) {
+    				let detectedLicense = $("input[name='detectedLicenses']").eq(i).attr("value");
+    				if (inputValue == detectedLicense) {
+    					matchFlag = true;
+    				}
+    			});
+    			if (!matchFlag) {
+    				$("#detectedLicenseAdd").trigger("click");
+    			} else {
+    				$("#input_detectedLicense").val("");
+    			}
+    		}
+    		
+    		matchFlag = false;
+    		inputValue = "";
+    		inputValue = $("#input_downloadLocations").val();
+    		
+    		if ("" != inputValue) {
+    			$("input[name='downloadLocations']").each(function (i) {
+    				let downloadLocation = $("input[name='downloadLocations']").eq(i).attr("value");
+    				if (inputValue == downloadLocation) {
+    					matchFlag = true;
+    				}
+    			});
+    			if (!matchFlag) {
+    				$("#downloadLocationAdd").trigger("click");
+    			} else {
+    				$("#input_downloadLocations").val("");
+    			}
+    		}
+		},
 		checkNickName : function(target){
 			var targetVal = $(target).val();
 
@@ -2952,7 +3007,9 @@
 				$("div.retxt").remove();
 				// remove input error class
 				$("input").removeClass("is-invalid");
-			
+				
+				fn.checkAddData();
+				
 				// 멀티 일경우 라이센스는 1건 이상이어야 한다.
 				var licenseDiv = "";
 				var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;

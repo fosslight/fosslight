@@ -75,6 +75,8 @@
                 $("#save").on('click',function(){
                 	fn.checkValidMsg();
                 	
+                	fn.checkAddData();
+                	
                 	if (typeof alertify.licenseSaveDialog === 'undefined') {
     					alertify.dialog('licenseSaveDialog', function() {
     						return {
@@ -294,6 +296,42 @@
         };
 
         var fn = {
+        	checkAddData : function () {
+            	let matchFlag = false;
+            	let inputValue = $("#input_licenseNicknames").val();
+            	
+            	if ("" != inputValue) {
+            		$("input[name='licenseNicknames']").each(function (i) {
+            			let licenseNickname = $("input[name='licenseNicknames']").eq(i).attr("value");
+            			if (inputValue == licenseNickname) {
+            				matchFlag = true;
+            			}
+            		});
+            		if (!matchFlag) {
+            			$("#licenseNicknames").trigger("click");
+            		} else {
+            			$("#input_licenseNicknames").val("");
+            		}
+            	}
+            	
+            	matchFlag = false;
+            	inputValue = "";
+            	inputValue = $("#input_webpages").val();
+            	
+            	if ("" != inputValue) {
+            		$("input[name='webpages']").each(function (i) {
+            			let webpages = $("input[name='webpages']").eq(i).attr("value");
+            			if (inputValue == webpages) {
+            				matchFlag = true;
+            			}
+            		});
+            		if (!matchFlag) {
+            			$("#webpageAdd").trigger("click");
+            		} else {
+            			$("#input_webpages").val("");
+            		}
+            	}
+            },
         	checkValidMsg : function () {
         		$("#licenseNameInput").removeClass("is-invalid");
         		$("#licenseType").removeClass("is-invalid");
