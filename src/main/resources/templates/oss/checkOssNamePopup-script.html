@@ -144,9 +144,9 @@ var Ctrl_fn = {
 					var rowId = idArry[i];
 					
 					cleanErrMsg("ossList", rowId);
-					
+
 					var rowdata = target.getRowData(rowId);
- 					rowdata["checkName"] = rowdata["checkName"].split("redirect")[0];
+ 					rowdata["checkName"] = rowdata["checkName"].split("redirect url")[0];
  					if (rowdata["checkName"].indexOf("<div") > -1) {
 						var checkName = rowdata["checkName"];
 						var divHtml = checkName.substr(checkName.indexOf("<div"), checkName.indexOf("</div>"));

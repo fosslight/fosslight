@@ -2246,8 +2246,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	private String appendCheckOssName(List<OssMaster> ossNameList, Map<String, String> ossInfoNames, String checkOssName) {
 		List<String> checkName = new ArrayList<>();
 
-		for (OssMaster ossBean : ossNameList) {
-			checkName.add(ossBean.getOssName());
+		if(ossNameList != null) {
+			for (OssMaster ossBean : ossNameList) {
+				if(ossBean != null) {
+					checkName.add(ossBean.getOssName());
+				}
+			}
 		}
 		
 		if (ossInfoNames.containsKey(checkOssName.toUpperCase())) {
