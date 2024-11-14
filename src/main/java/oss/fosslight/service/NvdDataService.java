@@ -99,21 +99,21 @@ public class NvdDataService {
 			lastModEndDate = endTime + "%2B01:00";
 		}
 		
-//		try {
-//			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_META_REST_URL, 1, 0);
-//			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
-//				rtnMap = nvdMetaDataApiJob(NVD_META_REST_URL, rtnMap);
-//				if (!(boolean) rtnMap.get("connectionFlag")) {
-//					log.info("nvd meta api connection error");
-//					schlog.info("nvd meta api connection error");
-//					return "91";
-//				}
-//			}
-//		} catch (Exception e) {
-//			log.error(e.getMessage(), e);
-//			schlog.error(e.getMessage(), e);
-//			return "91";
-//		}
+		try {
+			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_META_REST_URL, 1, 0);
+			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
+				rtnMap = nvdMetaDataApiJob(NVD_META_REST_URL, rtnMap);
+				if (!(boolean) rtnMap.get("connectionFlag")) {
+					log.info("nvd meta api connection error");
+					schlog.info("nvd meta api connection error");
+					return "91";
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			schlog.error(e.getMessage(), e);
+			return "91";
+		}
 		
 		try {
 			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_CVE_REST_URL, 1, 0);
