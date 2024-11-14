@@ -75,8 +75,6 @@
                 $("#save").on('click',function(){
                 	fn.checkValidMsg();
                 	
-                	fn.checkAddData();
-                	
                 	if (typeof alertify.licenseSaveDialog === 'undefined') {
     					alertify.dialog('licenseSaveDialog', function() {
     						return {
@@ -238,6 +236,8 @@
             	} else {
             		$('input[name=disclosingSrc]').val('');
             	}
+                
+                fn.checkAddData();
                 
                 $("#licenseForm").ajaxForm({
                     url :"/license/validation",

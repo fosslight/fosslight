@@ -1904,6 +1904,8 @@
 	//OSS등록로직
 	function registSubmit(){
 		if(validationDataSet()){
+			fn.checkAddData();
+			
 			$("#ossForm").ajaxForm({
 				url :'/oss/validation',
 	            type : 'POST',
@@ -3007,8 +3009,6 @@
 				$("div.retxt").remove();
 				// remove input error class
 				$("input").removeClass("is-invalid");
-				
-				fn.checkAddData();
 				
 				// 멀티 일경우 라이센스는 1건 이상이어야 한다.
 				var licenseDiv = "";
