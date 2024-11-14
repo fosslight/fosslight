@@ -1185,7 +1185,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			if (!isEmpty(avoidNull(ossMaster.getComment()).trim())) {
 				CommentsHistory param = new CommentsHistory();
 				param.setReferenceId(ossMaster.getOssId());
-				param.setReferenceDiv(ossMaster.getReferenceDiv());
+				param.setReferenceDiv(avoidNull(ossMaster.getReferenceDiv(), CoConstDef.CD_DTL_COMMENT_OSS_USER));
 				param.setContents(ossMaster.getComment());
 				
 				commentService.registComment(param);

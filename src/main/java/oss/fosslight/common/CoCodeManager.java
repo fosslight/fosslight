@@ -216,6 +216,7 @@ public class CoCodeManager extends CoTopComponent {
 						bean.setMultiLicenseFlag(sourceBean.getMultiLicenseFlag());
 						bean.setDualLicenseFlag(sourceBean.getDualLicenseFlag());
 						bean.setVersionDiffFlag(sourceBean.getVersionDiffFlag());
+						bean.setImportantNotes(sourceBean.getImportantNotes());
 						if (sourceBean.getDetectedLicenses() != null) {
 							bean.setDetectedLicenses(sourceBean.getDetectedLicenses());
 						}
