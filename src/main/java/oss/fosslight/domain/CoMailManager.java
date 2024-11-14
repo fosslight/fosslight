@@ -2302,17 +2302,23 @@ public class CoMailManager extends CoTopComponent {
 							_newAfterList.remove(i);
 						}
 					}
-				}
-				
-				for (int i=0; i<_newBeforeList.size(); i++) {
-					if (isEmpty(_newAfterList.get(i))){
-						_newBeforeList.set(i, appendChangeStyle(_newBeforeList.get(i), _newAfterList.get(i)));
-					}else{
-						_newAfterList.set(i, appendChangeStyle(_newBeforeList.get(i), _newAfterList.get(i)));
-					}
-
-					isModified = checkEquals(_newBeforeList.get(i), _newAfterList.get(i),  isModified);
 					
+					for (int i=0; i<_newBeforeList.size(); i++) {
+						if (isEmpty(_newAfterList.get(i))){
+							_newBeforeList.set(i, appendChangeStyle(_newBeforeList.get(i), _newAfterList.get(i)));
+						}else{
+							_newAfterList.set(i, appendChangeStyle(_newBeforeList.get(i), _newAfterList.get(i)));
+						}
+
+						isModified = checkEquals(_newBeforeList.get(i), _newAfterList.get(i),  isModified);
+						
+					}
+				} else {
+					for (int i=0; i<_newBeforeList.size(); i++) {
+						_newBeforeList.set(i, appendChangeStyle(_newBeforeList.get(i), ""));
+						_newAfterList.set(i, appendChangeStyle(_newBeforeList.get(i), _newAfterList.get(i)));
+						isModified = checkEquals(_newBeforeList.get(i), _newAfterList.get(i),  isModified);
+					}
 				}
 				
 				before.setModelListInfo(_newBeforeList);
