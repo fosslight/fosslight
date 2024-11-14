@@ -195,9 +195,9 @@
 <!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)"> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
-						T1.CREATOR = #{loginUserName}	
+						T1.CREATOR = #{loginUserName}
 						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
-							OR T1.REVIEWER = #{loginUserName}	
+							OR T1.REVIEWER = #{loginUserName}
 						</if>
 						OR EXISTS (
 						SELECT 1
@@ -251,34 +251,38 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName) 
 					  or !@oss.fosslight.util.StringUtil@isEmpty(licenseName)
 			          or !@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
-				AND EXISTS(SELECT 1 
+				AND EXISTS (SELECT 1
+								FROM
+								(
+									SELECT DISTINCT REFERENCE_ID
 		                            FROM OSS_COMPONENTS X 
-		                   LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
+		                       	<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+		                   			LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
 		                                ON X.COMPONENT_ID = Y.COMPONENT_ID 
-		                   LEFT OUTER JOIN LICENSE_MASTER Z ON Y.LICENSE_ID = Z.LICENSE_ID
-		                  WHERE  T1.PRJ_ID = X.REFERENCE_ID
-		                  		AND X.EXCLUDE_YN <![CDATA[<>]]> 'Y' AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y' AND X.REFERENCE_DIV != '20'
+		                   			LEFT OUTER JOIN LICENSE_MASTER Z ON Y.LICENSE_ID = Z.LICENSE_ID
+		                   		</if>
+		                  			WHERE X.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+		                  		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+		                  			AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+		                  		</if>
+		                  			AND X.REFERENCE_DIV != '20'
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-		                         AND ( X.OSS_NAME = #{ossName}
-		                         	<if test="ossNickNames != null">
-										<foreach item="item" index="index" collection="ossNickNames">
-											OR X.OSS_NAME = #{item}
-										</foreach>
-		                         	</if>
-		                         )
+		                     		AND X.OSS_NAME = #{ossName}
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
-								AND X.OSS_VERSION = #{ossVersion}
+									AND X.OSS_VERSION = #{ossVersion}
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
-		                         AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
+		                       		AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
-		                         AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
+		                         	AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
 		                                                    FROM PARTNER_MASTER P
 		                                                   WHERE P.USE_YN = 'Y' AND P.STATUS = 'CONF'
 		                                                     AND P.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{refPartnerName}, '_', '\\\\_'),'%'))
 								</if>
+								) TBL
+								WHERE TBL.REFERENCE_ID = T1.PRJ_ID
 							)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
@@ -467,9 +471,9 @@
 <!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)"> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
-						T1.CREATOR = #{loginUserName}	
+						T1.CREATOR = #{loginUserName}
 						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
-							OR T1.REVIEWER = #{loginUserName}	
+							OR T1.REVIEWER = #{loginUserName}
 						</if>
 						OR EXISTS (
 						SELECT 1
@@ -523,34 +527,38 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName) 
 					  or !@oss.fosslight.util.StringUtil@isEmpty(licenseName)
 			          or !@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
-				AND EXISTS(SELECT 1 
+				AND EXISTS (SELECT 1
+								FROM
+								(
+									SELECT DISTINCT X.REFERENCE_ID 
 		                            FROM OSS_COMPONENTS X 
-		                   LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
+		               			<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+		                   			LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
 		                                ON X.COMPONENT_ID = Y.COMPONENT_ID 
-		                   LEFT OUTER JOIN LICENSE_MASTER Z ON Y.LICENSE_ID = Z.LICENSE_ID
-		                  WHERE  T1.PRJ_ID = X.REFERENCE_ID
-		                  		AND X.EXCLUDE_YN <![CDATA[<>]]> 'Y' AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y' AND X.REFERENCE_DIV != '20'
-								<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-		                         AND ( X.OSS_NAME = #{ossName}
-		                         	<if test="ossNickNames != null">
-										<foreach item="item" index="index" collection="ossNickNames">
-											OR X.OSS_NAME = #{item}
-										</foreach>
-		                         	</if>
-		                         )
+		                   			LEFT OUTER JOIN LICENSE_MASTER Z ON Y.LICENSE_ID = Z.LICENSE_ID
+		            			</if>
+		                  			WHERE X.EXCLUDE_YN <![CDATA[<>]]> 'Y' 
+		               			<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+		                  			AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y' 
+		              			</if>
+		              				AND X.REFERENCE_DIV != '20'
+		               			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+		                        	AND X.OSS_NAME = #{ossName}
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
-								AND X.OSS_VERSION = #{ossVersion}
+									AND X.OSS_VERSION = #{ossVersion}
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
-		                         AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
+		                      		AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
-		                         AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
+		                      		AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
 		                                                    FROM PARTNER_MASTER P
 		                                                   WHERE P.USE_YN = 'Y' AND P.STATUS = 'CONF'
 		                                                     AND P.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{refPartnerName}, '_', '\\\\_'),'%'))
 								</if>
+								) TBL
+								WHERE TBL.REFERENCE_ID = T1.PRJ_ID
 							)
 			</if>
 			<!-- 어디서 사용하는 것인지 확인할 필요가 있음 -->
