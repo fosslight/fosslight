@@ -166,7 +166,7 @@ public class ApiOssController extends CoTopComponent {
 				, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
 	}
 	
-	@ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL의 경우 다음 순서대로 처리합니다. <ol><li>1.REMOVE DUPLICATED URL</li><li>2.PUT PURL</li><li>3.REMOVE DUPLICATED PURL</li><li>4.REORDER GITHUB PRIORITY</li></ol><br>* doUpdateFlag가 N인 경우 Database를 Update하지 않습니다.")
+	@ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL의 경우 다음 순서대로 처리합니다. <ol><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* doUpdateFlag가 N인 경우 Database를 Update하지 않습니다.")
     @ApiImplicitParams({
         @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
     })
@@ -175,7 +175,7 @@ public class ApiOssController extends CoTopComponent {
     		@RequestHeader String _token,
     		@ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
     		@ApiParam(value = "Do Update Database", required = true, defaultValue = "N", allowableValues = "N,Y") @RequestParam(required = true) String doUpdateFlag,
-    		@ApiParam(value = "Refine Type", required = true, defaultValue = "Check on error for purl generation", allowableValues = "Check on error for purl generation,Remove duplicated Downloadlocation,Remove duplicated PURL,Reorder Github Priority,Put PURL,Refine ALL") @RequestParam(required = true) String refineType){
+    		@ApiParam(value = "Refine Type", required = true, allowableValues = "1.REMOVE DUPLICATED DOWNLOAD LOCATION,2.PUT PURL,3.REMOVE DUPLICATED PURL,4.REORDER GITHUB PRIORITY,5.REFINE ALL") @RequestParam(required = true) String refineType){
 		
 		// 사용자 인증
 		try {

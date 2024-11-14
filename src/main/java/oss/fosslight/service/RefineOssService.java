@@ -51,35 +51,35 @@ public class RefineOssService {
 	public Map<String, Object> refineDownloadLocation(String ossName, String refineType, boolean doUpdateFlag) {
 		
 		final Map<String, Object> resultMap = new HashMap<>();
-		try(SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+		try(SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false)) {
 			
 			switch (refineType.toUpperCase()) {
-			case "REMOVE DUPLICATED DOWNLOADLOCATION":
+			case "1.REMOVE DUPLICATED DOWNLOAD LOCATION":
 				// 하나의 OSS 내 중복 Download location 제거
-				resultMap.put("remove-duplicated-url", removeDuplicatedUrl(sqlSession, doUpdateFlag, ossName));
+				resultMap.put("REMOVE-DUPLICATED-DOWNLOAD-LOCATION", removeDuplicatedUrl(sqlSession, doUpdateFlag, ossName));
 				break;
-			case "REMOVE DUPLICATED PURL":
+			case "3.REMOVE DUPLICATED PURL":
 				// 하나의 OSS 내 중복 PURL 제거
-				resultMap.put("remove-duplicated-purl", removeDuplicatedPurl(sqlSession, doUpdateFlag, ossName));
+				resultMap.put("REMOVE-DUPLICATED-PURL", removeDuplicatedPurl(sqlSession, doUpdateFlag, ossName));
 				break;
-			case "REORDER GITHUB PRIORITY":
+			case "4.REORDER GITHUB PRIORITY":
 				// github.com이 포함된 경우 우선순위 최우선으로 변경
-				resultMap.put("reorder-github-priority", reorderGithubPriority(sqlSession, doUpdateFlag, ossName));
+				resultMap.put("REORDER-GITHUB-PRIORITY", reorderGithubPriority(sqlSession, doUpdateFlag, ossName));
 				break;
-			case "PUT PURL":
+			case "2.PUT PURL":
 				// purl 설정
-				resultMap.put("put-purl", trySetPurl(sqlSession, doUpdateFlag, ossName));
+				resultMap.put("PUT-PURL", trySetPurl(sqlSession, doUpdateFlag, ossName));
 				break;
 			case "CHECK ON ERROR FOR PURL GENERATION":
 				// purl 설정
 				doUpdateFlag = false;
-				resultMap.put("on-error-make-purl", preChecFailedMakePurl(sqlSession, ossName));
+				resultMap.put("CHECK-ON-ERROR-FOR-PURL-GENERATION", preChecFailedMakePurl(sqlSession, ossName));
 				break;
-			case "REFINE ALL":
-				resultMap.put("remove-duplicated-url", removeDuplicatedUrl(sqlSession, doUpdateFlag, ossName));
-				resultMap.put("try-set-purl", trySetPurl(sqlSession, doUpdateFlag, ossName));
-				resultMap.put("remove-duplicated-purl", removeDuplicatedPurl(sqlSession, doUpdateFlag, ossName));
-				resultMap.put("reorder-github-priority", reorderGithubPriority(sqlSession, doUpdateFlag, ossName));
+			case "5.REFINE ALL":
+				resultMap.put("REMOVE-DUPLICATED-DOWNLOAD-LOCATION", removeDuplicatedUrl(sqlSession, doUpdateFlag, ossName));
+				resultMap.put("PUT-PURL", trySetPurl(sqlSession, doUpdateFlag, ossName));
+				resultMap.put("REMOVE-DUPLICATED-PURL", removeDuplicatedPurl(sqlSession, doUpdateFlag, ossName));
+				resultMap.put("REORDER-GITHUB-PRIORITY", reorderGithubPriority(sqlSession, doUpdateFlag, ossName));
 				break;
 			default:
 				break;
