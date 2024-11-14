@@ -3,77 +3,12 @@
 
 <mapper namespace="oss.fosslight.repository.NvdDataMapper">
 
-	<select id="getCodeExp" resultType="String">
-		SELECT CD_DTL_EXP FROM T2_CODE_DTL WHERE USE_YN = 'Y' AND CD_NO = #{cdNo} AND CD_DTL_NO = #{cdDtlNo} 
-	</select>
-	<select id="getCodeString" resultType="String">
-		SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE USE_YN = 'Y' AND CD_NO = #{cdNo} AND CD_DTL_NO = #{cdDtlNo}
-	</select>
-
-	<!-- 사용중인 메타 데이터 조회 -->
-    <select id="selectUseMetaData" parameterType="HashMap" resultType="HashMap">
-    	SELECT 
-    		FILE_NM		AS fileNm
-    		, FILE_TYPE	AS fileType
-    		, MODI_DATE	AS modiDate
-    		, SIZE		AS size
-    		, USE_YN	AS useYn
-    		, JOB_STATUS AS jobStatus
-    	FROM NVD_META
-		WHERE FILE_TYPE = #{fileType} 
-			AND FILE_NM = #{fileNm}
-			AND USE_YN = 'Y'
-			AND JOB_STATUS = 'C' 
-			AND MODI_DATE IS NOT NULL
-		ORDER BY IDX DESC
-    </select>
-    
-    <!-- 메타 데이터 신규 등록 -->
-    <insert id="insertNewMetaData" parameterType="HashMap">
-    	INSERT INTO NVD_META
-			(FILE_NM, FILE_TYPE, MODI_DATE, SIZE, ZIP_SIZE, GZ_SIZE, SHA256, USE_YN) VALUES
-			(#{fileNm}, #{fileType}, #{modiDate}, #{size}, #{zipSize}, #{gzSize}, #{sha256}, 'Y')
-    </insert>
-    
     <insert id="insertNewMetaDataUrlConnection" parameterType="HashMap">
     	INSERT INTO NVD_META
 			(FILE_NM, FILE_TYPE, MODI_DATE, USE_YN, JOB_STATUS) VALUES
 			(#{fileNm}, #{fileType}, #{modiDate}, 'Y', 'C')
     </insert>
-    
-    <insert id="insertErrorMetaData" parameterType="HashMap">
-    	INSERT INTO NVD_META
-			(FILE_NM, FILE_TYPE, MODI_DATE, SIZE, ZIP_SIZE, GZ_SIZE, SHA256, USE_YN, JOB_STATUS) VALUES
-			(#{fileNm}, #{fileType}, #{modiDate}, #{size}, #{zipSize}, #{gzSize}, #{sha256}, 'Y', 'E')
-    </insert>
-    
-    <!-- 메타 데이터 사용유무 변경 -->
-    <update id="updateUseYN" parameterType="HashMap">
-    	UPDATE NVD_META SET USE_YN = #{useYn} WHERE FILE_TYPE = #{fileType} AND FILE_NM = #{fileNm}
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(modiDate)">
-    		AND MODI_DATE = #{modiDate}
-    	</if>
-    	<if test="@oss.fosslight.util.StringUtil@isEmpty(modiDate)">
-    		AND MODI_DATE IS NULL
-    	</if>
-    </update>
-    
-    <!-- 메타 데이터 Wait Job 데이터 조회 -->
-    <select id="selectWaitJobData" parameterType="HashMap" resultType="HashMap">
-    	SELECT 
-			FILE_NM		AS fileNm
-			, FILE_TYPE	AS fileType
-			, MODI_DATE	AS modiDate
-			, SIZE		AS size
-			, USE_YN	AS useYn
-			, JOB_STATUS AS jobStatus
-		FROM NVD_META
-		WHERE FILE_TYPE = #{fileType} 
-			AND USE_YN = 'Y' 
-		    AND JOB_STATUS = 'W'
-		ORDER BY MODI_DATE DESC, SIZE DESC
-    </select>
-    
+
     <!-- 메타 데이터 Delete Job 데이터 조회 -->
     <select id="selectDeleteJobData" parameterType="HashMap" resultType="HashMap">
     	SELECT 
@@ -89,17 +24,6 @@
 		    AND JOB_STATUS = 'D'
 		ORDER BY FILE_NM
     </select>
-    
-    <!-- 메타 데이터 Job 상태 변경 -->
-    <update id="updateJobStatus" parameterType="HashMap">
-    	UPDATE NVD_META SET JOB_STATUS = #{jobStatus} WHERE FILE_TYPE = #{fileType} AND FILE_NM = #{fileNm}
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(modiDate)">
-    		AND MODI_DATE = #{modiDate}
-    	</if>
-    	<if test="@oss.fosslight.util.StringUtil@isEmpty(modiDate)">
-    		AND MODI_DATE IS NULL
-    	</if>
-    </update>
     
     <!-- CVE 데이터 삭제 -->
     <delete id="deleteCveData" parameterType="HashMap">
@@ -287,21 +211,7 @@
 		ORDER BY FILE_NM
 	</select>
 	
-	<delete id="deleteNvdDataTemp">TRUNCATE TABLE NVD_DATA_TEMP</delete>
 	<delete id="deleteNvdData">TRUNCATE TABLE NVD_DATA</delete>
-	<insert id="insertNvdDataTemp">
-		INSERT INTO NVD_DATA_TEMP
-		SELECT C.CVE_ID, D.VENDOR, D.PRODUCT, D.VERSION, D.TITLE, C.CVSS_SCORE, C.VULN_SUMMARY, IFNULL(C.MODI_DATE, C.PUBL_DATE)
-		FROM NVD_CVE C 
-			INNER JOIN (
-					SELECT T2.CVE_ID, T1.VENDOR, T1.PRODUCT, T1.VERSION, T1.TITLE
-					FROM NVD_CPE_DICTIONARY T1 
-						INNER JOIN NVD_VULN_SW T2 ON T1.CPE_NM = T2.CPE_NM
-					GROUP BY T2.CVE_ID, T1.VENDOR, T1.PRODUCT, T1.VERSION  ) D ON C.CVE_ID = D.CVE_ID
-	</insert>
-	<insert id="copyNvdDataFromTemp">
-	INSERT INTO NVD_DATA SELECT * FROM NVD_DATA_TEMP
-	</insert>
 	<delete id="deleteNvdDataScore">TRUNCATE TABLE NVD_DATA_SCORE</delete>
 	<insert id="insertNvdDataScore">INSERT INTO NVD_DATA_SCORE SELECT CVE_ID, PRODUCT, VERSION, MAX(CVSS_SCORE) FROM NVD_DATA GROUP BY PRODUCT, VERSION</insert>
 	
@@ -313,6 +223,11 @@
     <!-- CVE 정보 등록 -->
     <insert id="insertCveInfoV3" parameterType="HashMap">
     	INSERT INTO NVD_CVE_V3(CVE_ID, PUBL_DATE, MODI_DATE, CVSS_SCORE, VULN_SUMMARY, BASE_METRIC)VALUES
+    	(#{cveId}, #{publDate}, #{modiDate}, #{cvssScore}, #{summary}, #{baseMetric})
+    </insert>
+    
+    <insert id="insertCveInfoV3Temp" parameterType="HashMap">
+    	INSERT INTO NVD_CVE_V3_TEMP(CVE_ID, PUBL_DATE, MODI_DATE, CVSS_SCORE, VULN_SUMMARY, BASE_METRIC)VALUES
     	(#{cveId}, #{publDate}, #{modiDate}, #{cvssScore}, #{summary}, #{baseMetric})
     </insert>
     
@@ -339,8 +254,8 @@
     	CVE_ID = values(cve_id), PRODUCT = values(product), VERSION = values(version) 
     </insert>
     
-    <insert id="insertNvdDataV3Temp" parameterType="HashMap">
-    	INSERT INTO NVD_DATA_TEMP_V3 (PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE, VENDOR)
+    <insert id="insertNvdDataScoreV3Temp" parameterType="HashMap">
+    	INSERT INTO NVD_DATA_SCORE_V3_TEMP (PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE, VENDOR)
 		VALUES
 		(#{PRODUCT}, #{VERSION}, #{CVE_ID}, #{CVSS_SCORE}, #{VULN_SUMMARY}, #{MODI_DATE}, #{VENDOR})
 		ON DUPLICATE KEY UPDATE 
@@ -353,32 +268,9 @@
 		, VENDOR = values(VENDOR)
     </insert>
     
-	<delete id="deleteNvdDataTempV3">TRUNCATE TABLE NVD_DATA_TEMP_V3</delete>
-	<insert id="insertNvdDataTempV3">
-		INSERT INTO NVD_DATA_TEMP_V3
-		SELECT RTN.PRODUCT, RTN.VERSION, RTN.CVE_ID, TEMP.CVSS_SCORE, RTN.VULN_SUMMARY, RTN.MODI_DATE 
-		FROM (
-		SELECT T32.PRODUCT, T32.VERSION, T31.CVE_ID, T31.CVSS_SCORE, T31.VULN_SUMMARY, T31.MODI_DATE 
-		FROM NVD_CVE_V3 T31
-		INNER JOIN NVD_DATA_V3 T32 ON T31.CVE_ID = T32.CVE_ID
-		) RTN 
-		INNER JOIN (
-			SELECT A1.PRODUCT, A1.VERSION, MAX(A1.CVE_ID) AS CVE_ID, A1.CVSS_SCORE
-			FROM (
-					SELECT T12.PRODUCT, T12.VERSION, T11.CVE_ID, T11.CVSS_SCORE
-					FROM NVD_CVE_V3 T11 
-						INNER JOIN NVD_DATA_V3 T12 ON T11.CVE_ID = T12.CVE_ID) A1 
-					INNER JOIN (
-						SELECT T21.PRODUCT, T21.VERSION, MAX(T22.CVSS_SCORE) AS CVSS_SCORE
-						FROM NVD_DATA_V3 T21
-							INNER JOIN NVD_CVE_V3 T22 ON T21.CVE_ID = T22.CVE_ID
-						GROUP BY T21.PRODUCT, VERSION
-					) A2 ON A1.PRODUCT = A2.PRODUCT AND A1.VERSION = A2.VERSION AND A1.CVSS_SCORE = A2.CVSS_SCORE
-					GROUP BY PRODUCT, VERSION
-				) TEMP ON RTN.PRODUCT = TEMP.PRODUCT AND RTN.VERSION = TEMP.VERSION AND RTN.CVE_ID = TEMP.CVE_ID
-	</insert>
+	<delete id="deleteNvdDataScoreV3Temp">TRUNCATE TABLE NVD_DATA_SCORE_V3_TEMP</delete>
 	<delete id="deleteNvdDataScoreV3">DELETE FROM NVD_DATA_SCORE_V3</delete>
-	<insert id="insertNvdDataScoreV3">INSERT INTO NVD_DATA_SCORE_V3 SELECT * FROM NVD_DATA_TEMP_V3</insert>
+	<insert id="insertNvdDataScoreV3">INSERT INTO NVD_DATA_SCORE_V3 SELECT * FROM NVD_DATA_SCORE_V3_TEMP</insert>
 	
 	
     <!-- OSS 배치 타겟 조회 -->
@@ -615,21 +507,13 @@
 	
 	<update id="truncateCpeMatch">TRUNCATE TABLE NVD_CPE_MATCH_NAMES</update>
 	<update id="truncateCpeMatchNames">TRUNCATE TABLE NVD_CPE_MATCH</update>
-	<insert id="insertBulkCpeMatchData" flushCache="true">
-		INSERT
-		INTO NVD_CPE_MATCH_TEMP (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
-		VALUES
-		<foreach collection="list" item="item" index="index" separator=",">
-			(#{item.cpeSeq},#{item.cpe23Uri},#{item.versionStartIncluding},#{item.versionEndIncluding},#{item.versionStartExcluding},#{item.versionEndExcluding})
-		</foreach>
-	</insert>
 	
 	<insert id="insertBulkCpeMatchNameData" flushCache="true">
 		INSERT
-		INTO NVD_CPE_MATCH_NAMES_TEMP (SEQ, IDX, CPE23URI)
+		INTO NVD_CPE_MATCH_NAMES_TEMP (MATCH_CRITERIA_ID, IDX, CPE23URI)
 		VALUES
 		<foreach collection="list" item="item" index="index" separator=",">
-			(#{item.cpeSeq}, #{item.idx}, #{item.cpe23Uri})
+			(#{item.matchCriteriaId}, #{item.idx}, #{item.cpe23Uri})
 		</foreach>
 	</insert>
 	
@@ -637,27 +521,21 @@
 		INSERT
 		INTO NVD_CPE_MATCH_TEMP (MATCH_CRITERIA_ID, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) 
 		VALUES (#{matchCriteriaId},#{cpe23Uri},#{versionStartIncluding},#{versionEndIncluding},#{versionStartExcluding},#{versionEndExcluding})
+		<!-- 
 		ON DUPLICATE KEY UPDATE
     	MATCH_CRITERIA_ID = #{matchCriteriaId}, CPE23URI = #{cpe23Uri}, VER_START_INC = #{versionStartIncluding}, VER_END_INC = #{versionEndIncluding}, VER_START_EXC = #{versionStartExcluding}, VER_END_EXC = #{versionEndExcluding}
+    	 -->
+    	
 	</insert>
 	<insert id="insertCpeMatchNameData">
 		INSERT
 		INTO NVD_CPE_MATCH_NAMES_TEMP (MATCH_CRITERIA_ID, IDX, CPE23URI)
 		VALUES (#{matchCriteriaId}, #{idx}, #{cpe23Uri})
+		<!-- 
 		ON DUPLICATE KEY UPDATE
     	MATCH_CRITERIA_ID = #{matchCriteriaId}, IDX = #{idx}, CPE23URI = #{cpe23Uri}
+    	 -->
 	</insert>
-	
-	<select id="selectNvdMatchList" parameterType="hashmap" resultType="String">
-		SELECT 
-			IFNULL(T2.CPE23URI, T1.CPE23URI) AS CPE23URI
-		FROM NVD_CPE_MATCH T1 
-				LEFT JOIN NVD_CPE_MATCH_NAMES T2 
-					ON T1.MATCH_CRITERIA_ID = T2.MATCH_CRITERIA_ID 
-		WHERE 
-			T1.MATCH_CRITERIA_ID = #{matchCriteriaId}
-		ORDER BY T2.IDX
-	</select>
 	
 	<update id="nvdBulkDataCleanCVE">TRUNCATE TABLE NVD_CVE_V3</update>
 	<update id="nvdBulkDataCleanData">TRUNCATE TABLE NVD_DATA_V3</update>
@@ -689,22 +567,6 @@
 								WHERE CVE_ID IN (SELECT CVE_ID FROM NVD_DATA_V3 WHERE PRODUCT = #{ossName} AND VERSION = #{ossVersion} AND VENDOR = #{vendor}))
 		ORDER BY CVE_ID DESC LIMIT 1
 	</select>
-	
-	<insert id="insertNvdDataListTempV3" >
-		INSERT INTO NVD_DATA_TEMP_V3 (PRODUCT, VERSION, CVE_ID, CVSS_SCORE, VULN_SUMMARY, MODI_DATE )
-		VALUES
-		<foreach collection="list" item="item" index="index" separator=",">
-		(#{item.PRODUCT}, #{item.VERSION}, #{item.CVE_ID}, #{item.CVSS_SCORE}, #{item.VULN_SUMMARY}, #{item.MODI_DATE})
-		</foreach>
-		ON DUPLICATE KEY UPDATE 
-		PRODUCT = values(PRODUCT)
-		, VERSION = values(VERSION)
-		, CVE_ID = values(CVE_ID)
-		, CVSS_SCORE = values(CVSS_SCORE)
-		, VULN_SUMMARY = values(VULN_SUMMARY)
-		, MODI_DATE = values(MODI_DATE)
-	</insert>
-	
 	<update id="createTableCpeMatchTemp">CREATE TABLE IF NOT EXISTS NVD_CPE_MATCH_TEMP LIKE NVD_CPE_MATCH</update>
 	<update id="createTableCpeMatchNameTemp">CREATE TABLE IF NOT EXISTS NVD_CPE_MATCH_NAMES_TEMP LIKE NVD_CPE_MATCH_NAMES</update>
 	<update id="truncateCpeMatchTemp">TRUNCATE TABLE NVD_CPE_MATCH_TEMP</update>
@@ -746,6 +608,9 @@
     
     <insert id="insertNvdDataPatchLink" parameterType="HashMap">
     	INSERT INTO NVD_DATA_PATCH_LINK (CVE_ID, PATCH_LINK, PUBL_DATE) VALUES (#{cveId}, #{patchLink}, #{publDate})
+    </insert>
+    <insert id="insertNvdDataPatchLinkTemp" parameterType="HashMap">
+    	INSERT INTO NVD_DATA_PATCH_LINK_TEMP (CVE_ID, PATCH_LINK, PUBL_DATE) VALUES (#{cveId}, #{patchLink}, #{publDate})
     </insert>
     
     <delete id="deleteNvdDataPatchLink" parameterType="String">
@@ -823,6 +688,14 @@
 			</choose>
     </delete>
     
+	<delete id="deleteNvdDataMatchExistingInTemp">
+    	DELETE T1, T2
+    	FROM NVD_CPE_MATCH T1
+    		LEFT JOIN NVD_CPE_MATCH_NAMES T2
+    			ON T1.MATCH_CRITERIA_ID = T2.MATCH_CRITERIA_ID
+    	WHERE EXISTS(SELECT 1 FROM NVD_CPE_MATCH_TEMP TMP WHERE TMP.MATCH_CRITERIA_ID = T1.MATCH_CRITERIA_ID) 
+    </delete>
+    
     <delete id="deleteNvdCpeMatchTemp" parameterType="String">
     	DELETE T1, T2
     	FROM NVD_CPE_MATCH_TEMP T1
@@ -860,18 +733,10 @@
     		, VENDOR
     		, PRODUCT
     		, VERSION
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionStartIncluding)">
     		, VER_START_INC
-    	</if>
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionEndIncluding)">
     		, VER_END_INC
-    	</if>
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionStartExcluding)">
     		, VER_START_EXC
-    	</if>
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionEndExcluding)">
     		, VER_END_EXC
-    	</if>
     	) VALUE (
     		#{cveId}
     		, #{matchCriteriaId}
@@ -879,32 +744,81 @@
     		, #{vendor}
     		, #{product}
     		, #{version}
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionStartIncluding)">
     		, #{versionStartIncluding}
-    	</if>
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionEndIncluding)">
     		, #{versionEndIncluding}
-    	</if>
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionStartExcluding)">
     		, #{versionStartExcluding}
-    	</if>
-    	<if test="!@oss.fosslight.util.StringUtil@isEmpty(versionEndExcluding)">
     		, #{versionEndExcluding}
-    	</if>
     	)
     </insert>
     
-    <update id="truncateNvdDataConfigurations">TRUNCATE TABLE NVD_DATA_CONFIGURATIONS</update>
-	<insert id="copyNvdDataConfigurationsFromTemp">INSERT INTO NVD_DATA_CONFIGURATIONS SELECT * FROM NVD_DATA_CONFIGURATIONS_TEMP</insert>
+	
+	<update id="createTableNvdCveV3Temp">CREATE TABLE IF NOT EXISTS NVD_CVE_V3_TEMP LIKE NVD_CVE_V3</update>
+	<update id="createTableNvdDataV3Temp">CREATE TABLE IF NOT EXISTS NVD_DATA_V3_TEMP LIKE NVD_DATA_V3</update>
+	<update id="createTableConfigurationsTemp">CREATE TABLE IF NOT EXISTS NVD_DATA_CONFIGURATIONS_TEMP LIKE NVD_DATA_CONFIGURATIONS</update>
+	<update id="createTablePatchLinkTemp">CREATE TABLE IF NOT EXISTS NVD_DATA_PATCH_LINK_TEMP LIKE NVD_DATA_PATCH_LINK</update>
+	
+	<update id="truncateNvdCveV3Temp">TRUNCATE TABLE NVD_CVE_V3_TEMP</update>
+	<update id="truncateNvdDataV3Temp">TRUNCATE TABLE NVD_DATA_V3_TEMP</update>
 	<update id="truncateNvdDataConfigurationsTemp">TRUNCATE TABLE NVD_DATA_CONFIGURATIONS_TEMP</update>
+	<update id="truncateNvdDataPatchLinkTemp">TRUNCATE TABLE NVD_DATA_PATCH_LINK_TEMP</update>
+	
+    <update id="truncateNvdDataConfigurations">TRUNCATE TABLE NVD_DATA_CONFIGURATIONS</update>
+    <update id="truncateNvdDataPatchLink">TRUNCATE TABLE NVD_DATA_PATCH_LINK</update>
+    
+	<insert id="copyNvdCveV3FromTemp">INSERT INTO NVD_CVE_V3 SELECT * FROM NVD_CVE_V3_TEMP</insert>
+	<insert id="copyNvdDataV3FromTemp">INSERT INTO NVD_DATA_V3 SELECT * FROM NVD_DATA_V3_TEMP</insert>
+	<insert id="copyNvdDataConfigurationsFromTemp">INSERT INTO NVD_DATA_CONFIGURATIONS SELECT * FROM NVD_DATA_CONFIGURATIONS_TEMP</insert>
+	<insert id="copyNvdDataPatchLinkFromTemp">INSERT INTO NVD_DATA_PATCH_LINK SELECT * FROM NVD_DATA_PATCH_LINK_TEMP</insert>
+	
+	<update id="createTableNvdDavaScoreV3Temp">CREATE TABLE IF NOT EXISTS NVD_DATA_SCORE_V3_TEMP LIKE NVD_DATA_SCORE_V3</update>
 	
 	<delete id="deleteNvdDataConfigurations" parameterType="HashMap">
 		DELETE FROM NVD_DATA_CONFIGURATIONS
 		WHERE CVE_ID = #{cveId}
 		AND MATCH_CRITERIA_ID = #{matchCriteriaId}
-<!-- 	AND CRITERIA = #{criteria} -->
+<!-- 	AND CRITERIA = #{criteria}
 		AND VENDOR = #{vendor}
 		AND PRODUCT = #{product}
-		AND VERSION = #{version}
+		AND VERSION = #{version} -->
 	</delete>
+	
+	<delete id="deleteNvdDataConfigurationsExistingInTemp">
+    	DELETE T1
+    	FROM NVD_DATA_CONFIGURATIONS T1
+    	WHERE EXISTS(SELECT 1 FROM NVD_DATA_CONFIGURATIONS_TEMP TMP WHERE TMP.CVE_ID = T1.CVE_ID) 
+    </delete>
+    
+	<delete id="deleteNvdDataPatchLinkExistingInTemp">
+    	DELETE T1
+    	FROM NVD_DATA_PATCH_LINK T1
+    	WHERE EXISTS(SELECT 1 FROM NVD_DATA_PATCH_LINK_TEMP TMP WHERE TMP.CVE_ID = T1.CVE_ID) 
+    </delete>
+    
+    <delete id="deleteNvdCveV3ExistingInTemp">
+    	DELETE T1
+    	FROM NVD_CVE_V3 T1
+    	WHERE EXISTS(SELECT 1 FROM NVD_CVE_V3_TEMP TMP WHERE TMP.CVE_ID = T1.CVE_ID) 
+    </delete>
+    
+    <delete id="deleteNvdDataV3ExistingInTemp">
+    	DELETE T1
+    	FROM NVD_DATA_V3 T1
+    	WHERE EXISTS(SELECT 1 FROM NVD_DATA_V3_TEMP TMP WHERE TMP.CVE_ID = T1.CVE_ID) 
+    </delete>
+    
+    <insert id="insertNvdDataV3Temp">
+		INSERT INTO NVD_DATA_V3_TEMP(CVE_ID, VENDOR, PRODUCT, VERSION, VENDORPRODUCT)
+		SELECT A.CVE_ID, A.VENDOR, A.PRODUCT, A.VERSION, CONCAT(A.VENDOR, '-', A.PRODUCT) FROM 
+		(
+			SELECT DISTINCT
+				T1.CVE_ID
+				, SUBSTRING_INDEX(SUBSTRING_INDEX(T2.CPE23URI, ':', -10), ':', 1) AS VENDOR
+				, SUBSTRING_INDEX(SUBSTRING_INDEX(T2.CPE23URI, ':', -9), ':', 1) AS PRODUCT
+				, SUBSTRING_INDEX(SUBSTRING_INDEX(T2.CPE23URI, ':', -8), ':', 1) AS VERSION
+			FROM NVD_DATA_CONFIGURATIONS_TEMP T1 
+				INNER JOIN NVD_CPE_MATCH_NAMES T2 
+					ON T1.MATCH_CRITERIA_ID = T2.MATCH_CRITERIA_ID 
+			WHERE T1.CVE_ID = #{cveId}
+		) A
+    </insert>
 </mapper>

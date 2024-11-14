@@ -1,21 +1,12 @@
 package oss.fosslight.service;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.UnknownHostException;
-import java.nio.file.Paths;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,21 +14,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.TimeZone;
 
-import javax.annotation.PostConstruct;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -47,52 +33,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.NvdDataMapper;
 import oss.fosslight.util.DateUtil;
-import oss.fosslight.util.FileUtil;
 import oss.fosslight.util.StringUtil;
 
 @Service("NvdDataService")
+@Slf4j
 public class NvdDataService {
-	final static Logger log = LoggerFactory.getLogger("SCHEDULER_LOG");
-	
-	private final String NVD_DATA_FILE_NAME_CPEMATCH = "nvdcpematch-1.0";
-	private final String NVD_DATA_FILE_NAME_NVDCVE = "nvdcve-1.1-modified";
-	
-	private final String NVD_META_URL = "https://nvd.nist.gov/feeds/json/cpematch/1.0/";
-	private final String NVD_CVE_URL = "https://nvd.nist.gov/feeds/json/cve/1.1/";
+	static final Logger schlog = LoggerFactory.getLogger("SCHEDULER_LOG");
 	
 	private final String NVD_META_REST_URL = "https://services.nvd.nist.gov/rest/json/cpematch/2.0";
 	private final String NVD_CVE_REST_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0";
 	private final String NVD_API_KEY = CommonFunction.getProperty("nvd.nist.gov.api.key");
 	
 	private final int BATCH_SIZE = 1000;
-	
-	private String JDBC_DRIVER;  
-	private String DB_URL;
-	private String USERNAME;
-	private String PASSWORD;
+	private static final String NVD_REST_BASE_URL = "https://services.nvd.nist.gov";
+	private static final String NVD_REST_CPE_MATCH_URL = "/rest/json/cpematch/2.0";
+	private static final String NVD_REST_CPE_URL = "/rest/json/cves/2.0";
+	private static final int API_MATCH_CHUNK_SIZE = 500;
+	private static final int API_CPE_CHUNK_SIZE = 2000;
 	
 	private String lastModStartDate;
 	private String lastModEndDate;
@@ -104,42 +73,11 @@ public class NvdDataService {
 	@Autowired Environment env;
 	@Autowired SqlSessionFactory sqlSessionFactory;
 	
-	@PostConstruct
-	public void setResourcePathPrefix(){
-		JDBC_DRIVER = env.getRequiredProperty("spring.datasource.driver-class-name");
-		DB_URL = env.getRequiredProperty("spring.datasource.url");
-		if (!DB_URL.startsWith("jdbc:mariadb")) DB_URL = "jdbc:mariadb://" + DB_URL;
-		USERNAME = env.getRequiredProperty("spring.datasource.username");
-		PASSWORD = env.getRequiredProperty("spring.datasource.password");
-	}
-	
 	public String executeNvdDataSync() throws IOException {
 		
-		// GET Nvd Meta Data
-		// 작업등록
-//		try {
-//			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH");
-//			if (!fileCheck) {
-//				fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_CPEMATCH, "MATCH", fileCheck, 0);
-//			}
-//			
-//			if (fileCheck) {
-//				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_CPEMATCH);
-//				nvdMetaDataSyncJob();
-//			}
-//		} catch (Exception e) {
-//			log.error(e.getMessage(), e);
-//			return "91";
-//		}
-		
-		try {
-			// rest api NVD Data
-			// check initialize flag
-			if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
-				initializeFlag = true;
-			}
-		} catch (Exception e) {
-			log.error("Failed to NVD Data initiallize", e);
+		// check initialize flag
+		if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
+			initializeFlag = true;
 		}
 		
 		if (!initializeFlag) {
@@ -161,62 +99,49 @@ public class NvdDataService {
 			lastModEndDate = endTime + "%2B01:00";
 		}
 		
-		try {
-			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_META_REST_URL, 1, 0);
-			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
-				rtnMap = nvdMetaDataApiJob(NVD_META_REST_URL, 500, rtnMap);
-				if (!(boolean) rtnMap.get("connectionFlag")) {
-					log.info("nvd meta api connection error");
-					return "91";
-				}
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			return "91";
-		}
+//		try {
+//			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_META_REST_URL, 1, 0);
+//			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
+//				rtnMap = nvdMetaDataApiJob(NVD_META_REST_URL, rtnMap);
+//				if (!(boolean) rtnMap.get("connectionFlag")) {
+//					log.info("nvd meta api connection error");
+//					schlog.info("nvd meta api connection error");
+//					return "91";
+//				}
+//			}
+//		} catch (Exception e) {
+//			log.error(e.getMessage(), e);
+//			schlog.error(e.getMessage(), e);
+//			return "91";
+//		}
 		
 		try {
 			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_CVE_REST_URL, 1, 0);
 			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
-				rtnMap = nvdCveDataApiJob(NVD_CVE_REST_URL, 2000, rtnMap);
-				if ((boolean) rtnMap.get("connectionFlag")) {
-					nvdCveDataSyncJob(true);
-				} else {
+				rtnMap = nvdCveDataApiJob(NVD_CVE_REST_URL, rtnMap);
+				if (!(boolean) rtnMap.get("connectionFlag")) {
 					log.info("nvd meta api connection error");
+					schlog.info("nvd meta api connection error");
 					return "91";
 				}
 			}
-//			boolean fileCheck = nvdMetaCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE");
-//			if (!fileCheck) {
-//				fileCheck = nvdMetaRetryCheckJob(NVD_DATA_FILE_NAME_NVDCVE, "CVE", fileCheck, 0);
-//			}
-//			
-//			if (fileCheck) {
-//				nvdFeedDataDownloadJob(NVD_DATA_FILE_NAME_NVDCVE);
-//				nvdCveDataSyncJob();
-//			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+			schlog.error(e.getMessage(), e);
 			return "92";
 		}
 		
+		if (initializeFlag) {
+			codeMapper.updateCodeDtlNm("990", "100", "N");
+			initializeFlag = false;
+		}
+		
 		try {
-			// initialize NVD Data Feed
-			// check initialize flag
-			if (initializeFlag) {
-				codeMapper.updateCodeDtlNm("990", "100", "N");
-
-				initializeFlag = false;
-				
-				// delete all NVD Data and Max Score
-//				resetNvdFeedData();
-				
-				// Put NVD Data feed from CPE2002 ~ current date year
-//				initNvdDataFeed();
-				
-			}
+			nvdCveDataSyncJob(true);
 		} catch (Exception e) {
-			log.error("Failed to NVD Data initiallize", e);
+			log.error(e.getMessage(), e);
+			schlog.error(e.getMessage(), e);
+			return "93";
 		}
 		
 		return "00";
@@ -224,197 +149,233 @@ public class NvdDataService {
 	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	public Map<String, Object> nvdCveDataApiJob(String restApiUrl, int resultsPerPage, Map<String, Object> rtnMap) {
-		int totalResults = (int) rtnMap.get("totalResults");
-		String urlConnTimestamp = (String) rtnMap.get("timestamp");
-		String format = (String) rtnMap.get("format");
-		String fileNm = restApiUrl.replace("https://services.nvd.nist.gov", "");
+	public Map<String, Object> nvdCveDataApiJob(String restApiUrl, Map<String, Object> rtnMap) {
+		final int totalResults = (int) rtnMap.get("totalResults");
+		final String urlConnTimestamp = (String) rtnMap.get("timestamp");
+		final String format = (String) rtnMap.get("format");
+		final String fileNm = restApiUrl.replace("https://services.nvd.nist.gov", "");
 		
 		Map<String, Object> responseMap = new HashMap<>();
 		boolean httpsUrlConnectionFlag = false;
 		
 		List<Map<String, Object>> vulnerabilities = null;
 		Map<String, Object> cveInfo = null;
-		Map<String, Object> comapare = null;
-		List<Map<String, String>> ossList = new ArrayList<>();
-		List<Map<String, String>> insertDataList = new ArrayList<>();
 		List<Map<String, Object>> cpe_match_all = null;
 		List<Map<String, Object>> cvePatchList = null;
 		log.info("nvdCveDataApiJob start");
-		try {
-			if (initializeFlag) {
-				resetNvdFeedData();
-			}
+		schlog.info("nvdCveDataApiJob start");
+
+		nvdDataMapper.createTableNvdCveV3Temp();
+		nvdDataMapper.createTableNvdDataV3Temp();
+		nvdDataMapper.createTableConfigurationsTemp();
+		nvdDataMapper.createTablePatchLinkTemp();
+		
+		nvdDataMapper.truncateNvdCveV3Temp();
+		nvdDataMapper.truncateNvdDataV3Temp();
+		nvdDataMapper.truncateNvdDataConfigurationsTemp();
+		nvdDataMapper.truncateNvdDataPatchLinkTemp();
+		
+//		if (initializeFlag) {
+//			resetNvdFeedData();
+//		}
+
+		int totalCnt = totalResults;
+		if(totalCnt < API_CPE_CHUNK_SIZE) {
+			totalCnt = API_CPE_CHUNK_SIZE;
+		}
+		
+		String cveId = null;
+		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH,false)) {
+			final NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
 			
-			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-				NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
-				
-				for (int i=0; i < totalResults; i+=2000) {if (i > totalResults) break;
-					for (int j=0; j<5; j++) {
-						responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, i, j);
-						httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
-						if (httpsUrlConnectionFlag) {
-							break;
-						}
-					}
-					log.info("nvdCveData index : "+i +" / " + "totalResults : " + totalResults);
-					
+			for(int limitIndex = 0; limitIndex <= totalCnt/API_CPE_CHUNK_SIZE; limitIndex++) {
+				log.info("getNvdCpeMatchData in progress {}/{}", API_CPE_CHUNK_SIZE*limitIndex, totalCnt);
+				for (int i = 0; i < 5; i++) {
+					responseMap = getDataForRestApiConnection(NVD_REST_BASE_URL + NVD_REST_CPE_URL, API_CPE_CHUNK_SIZE, API_CPE_CHUNK_SIZE * limitIndex, 1);
+					httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
 					if (httpsUrlConnectionFlag) {
-						if (responseMap.containsKey("vulnerabilities")) {
-							vulnerabilities = (List<Map<String, Object>>) responseMap.get("vulnerabilities");
-							if (vulnerabilities != null) {
-								for (Map<String, Object> vulnerability : vulnerabilities) {
-									cveInfo = restApiCveDatajsonReader(vulnerability);
-									if (cveInfo == null || cveInfo.isEmpty()) {
-										continue;
-									}
-									
-									String cveId = (String) cveInfo.get("cveId");
-									List<String> matchNames = null;
-									cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
-									ossList.clear();
-									for (Map<String, Object> cpe_match_data : cpe_match_all) {
-										// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
-										// Version Range 조건 취득
-										// 검색 조건 설정
-										Map<String, String> _matchNameParams = new HashMap<>();
-										String criteria = (String) cpe_match_data.get("criteria");
-										String matchCriteriaId = (String) cpe_match_data.get("matchCriteriaId");
-										_matchNameParams.put("cpe23Uri", criteria);
-										_matchNameParams.put("matchCriteriaId", matchCriteriaId);
-										
-										String versionStartIncluding = null;
-										String versionEndIncluding = null;
-										String versionStartExcluding = null;
-										String versionEndExcluding = null;
-										
-										if (cpe_match_data.containsKey("versionStartIncluding")) {
-											versionStartIncluding = (String) cpe_match_data.get("versionStartIncluding");
-											_matchNameParams.put("versionStartIncluding", versionStartIncluding);
-										}
-										if (cpe_match_data.containsKey("versionEndIncluding")) {
-											versionEndIncluding = (String) cpe_match_data.get("versionEndIncluding");
-											_matchNameParams.put("versionEndIncluding", versionEndIncluding);
-										}
-										if (cpe_match_data.containsKey("versionStartExcluding")) {
-											versionStartExcluding = (String) cpe_match_data.get("versionStartExcluding");
-											_matchNameParams.put("versionStartExcluding", versionStartExcluding);
-										}
-										if (cpe_match_data.containsKey("versionEndExcluding")) {
-											versionEndExcluding = (String) cpe_match_data.get("versionEndExcluding");
-											_matchNameParams.put("versionEndExcluding", versionEndExcluding);
-										}
-	
-										matchNames = nvdDataMapper.selectNvdMatchList(_matchNameParams);
-	
-										// 만약 cpe match에서 cpe23uri로 조회된 결과가 없을 경우 해당 cpe23uri 만 설정한다.
-										if (matchNames == null || matchNames.isEmpty()) {
-											log.warn("unmatchNames : " + matchCriteriaId);
-											// api 호출 여부 확인
-											continue;
-										}
-	
-										// cpe23uri에서 product, version 정보를 추출한다.
-										for (String cpe23uri : matchNames) {
-											String[] cpeInfoArr = cpe23uri.split(":");
-	
-											Map<String, String> _productInfo = new HashMap<>();
-											_productInfo.put("cveId", cveId);
-											_productInfo.put("vendor", cpeInfoArr[3]);
-											_productInfo.put("product", cpeInfoArr[4]);
-											_productInfo.put("version", cpeInfoArr[5]);
-											
-											mapper.insertNvdDataV3(_productInfo);
-											sqlSession.flushStatements();
-										}
-										
-										Map<String, String> configurationInsertParam = new HashMap<>();
-										configurationInsertParam.put("cveId", cveId);
-										configurationInsertParam.put("matchCriteriaId", (String) cpe_match_data.get("matchCriteriaId"));
-										configurationInsertParam.put("criteria", criteria);
-										String[] criteriaArr = criteria.split(":");
-										configurationInsertParam.put("vendor", criteriaArr[3]);
-										configurationInsertParam.put("product", criteriaArr[4]);
-										configurationInsertParam.put("version", criteriaArr[5]);
-										if (versionStartIncluding != null) {
-											configurationInsertParam.put("versionStartIncluding", versionStartIncluding);
-										}
-										if (versionEndIncluding != null) {
-											configurationInsertParam.put("versionEndIncluding", versionEndIncluding);
-										}
-										if (versionStartExcluding != null) {
-											configurationInsertParam.put("versionStartExcluding", versionStartExcluding);
-										}
-										if (versionEndExcluding != null) {
-											configurationInsertParam.put("versionEndExcluding", versionEndExcluding);
-										}
-										
-										if (!initializeFlag) {
-											nvdDataMapper.deleteNvdDataConfigurations(configurationInsertParam);
-										}
-										nvdDataMapper.insertNvdDataConfigurationsTemp(configurationInsertParam);
-									}
-									
-									cvePatchList = (List<Map<String, Object>>) cveInfo.get("cvePatchList");
-									if (cvePatchList != null) {
-										nvdDataMapper.deleteNvdDataPatchLink(cveId);
-										for (Map<String, Object> cvePatchInfo : cvePatchList) {
-											Map<String, Object> _patchInfo = new HashMap<>();
-											_patchInfo.put("cveId", cveId);
-											_patchInfo.put("patchLink", cvePatchInfo.get("url"));
-											_patchInfo.put("publDate", cveInfo.get("publDate"));
-											
-											nvdDataMapper.insertNvdDataPatchLink(_patchInfo);
-										}
-										cvePatchList = null;
-									}
-									
-									comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
-									// 신규등록
-									if (comapare == null || comapare.isEmpty()){
-										nvdDataMapper.insertCveInfoV3(cveInfo);
-									}
-									// 변경(delete > insert)
-									else if (!DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
-											|| !((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore"))) ){
-										// 기존 데이터 삭제
-										nvdDataMapper.deleteCveDataV3(cveInfo);
-										nvdDataMapper.deleteNvdDataV3(cveInfo);
-										// 변경 데이터 등록
-										nvdDataMapper.insertCveInfoV3(cveInfo);
-									} else if (DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
-											&& ((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore")))) {
-										// NVD_CVE_V3는 변경 대상이 아니지만 NVD_DATA_V3에 적용 될 대상이 존재 한 경우
-										
-									}
-								}
-							}
-						}
-					} else {
-						log.error("url connection attempts exceeded");
 						break;
 					}
 				}
-				
-				sqlSession.commit();
+
+				if (httpsUrlConnectionFlag) {
+					if (responseMap.containsKey("vulnerabilities")) {
+						vulnerabilities = (List<Map<String, Object>>) responseMap.get("vulnerabilities");
+						if (vulnerabilities != null) {
+							for (Map<String, Object> vulnerability : vulnerabilities) {
+								cveInfo = restApiCveDatajsonReader(vulnerability);
+								if (cveInfo == null || cveInfo.isEmpty()) {
+									continue;
+								}
+								
+								cveId = (String) cveInfo.get("cveId");
+								
+								mapper.insertCveInfoV3Temp(cveInfo);
+								
+								cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
+								
+								if (cpe_match_all == null || cpe_match_all.isEmpty()) {
+									continue;
+								}
+								
+								List<String> matchCriteriaIdDuplicatedList = new ArrayList<>();
+
+								for (Map<String, Object> cpe_match_data : cpe_match_all) {
+									// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
+									// Version Range 조건 취득
+									// 검색 조건 설정
+//									Map<String, String> _matchNameParams = new HashMap<>();
+									final String criteria = (String) cpe_match_data.get("criteria");
+									final String matchCriteriaId = (String) cpe_match_data.get("matchCriteriaId");
+//									_matchNameParams.put("cpe23Uri", criteria);
+//									_matchNameParams.put("matchCriteriaId", matchCriteriaId);
+									
+
+									// configurations의 operator (AND/OR)에 따라 동일한 CVE ID에 matchCriteriaId 가 여러번 등장할 수 있음
+									// FL-Hub에서는 operator 조건을 확인하지 않기 때문에, CVEID + matchCriteriaId를 PK로 사용하는 경우 중복 오류가 발생할 수 있음
+									// ex) https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2001-1104
+									if(matchCriteriaIdDuplicatedList.contains(cveId + "-" + matchCriteriaId)) {
+										continue;
+									}
+									matchCriteriaIdDuplicatedList.add(cveId + "-" + matchCriteriaId);
+									
+									String versionStartIncluding = null;
+									String versionEndIncluding = null;
+									String versionStartExcluding = null;
+									String versionEndExcluding = null;
+									
+									if (cpe_match_data.containsKey("versionStartIncluding")) {
+										versionStartIncluding = (String) cpe_match_data.get("versionStartIncluding");
+//										_matchNameParams.put("versionStartIncluding", versionStartIncluding);
+									}
+									if (cpe_match_data.containsKey("versionEndIncluding")) {
+										versionEndIncluding = (String) cpe_match_data.get("versionEndIncluding");
+//										_matchNameParams.put("versionEndIncluding", versionEndIncluding);
+									}
+									if (cpe_match_data.containsKey("versionStartExcluding")) {
+										versionStartExcluding = (String) cpe_match_data.get("versionStartExcluding");
+//										_matchNameParams.put("versionStartExcluding", versionStartExcluding);
+									}
+									if (cpe_match_data.containsKey("versionEndExcluding")) {
+										versionEndExcluding = (String) cpe_match_data.get("versionEndExcluding");
+//										_matchNameParams.put("versionEndExcluding", versionEndExcluding);
+									}
+
+//									matchNames = nvdDataMapper.selectNvdMatchList(_matchNameParams);
+//
+//									// 만약 cpe match에서 cpe23uri로 조회된 결과가 없을 경우 해당 cpe23uri 만 설정한다.
+//									if (matchNames == null || matchNames.isEmpty()) {
+//										log.warn("unmatchNames matchCriteriaId : {}, criteria : {}" , matchCriteriaId, criteria);
+//										// api 호출 여부 확인
+//										continue;
+//									}
+//
+//									// cpe23uri에서 product, version 정보를 추출한다.
+//									List<Map<String, String>> nvdDataV3TempList = new ArrayList<>();
+//									matchNames.forEach(cpe23uri -> {
+//										final String[] cpeInfoArr = cpe23uri.split(":");
+//
+//										final Map<String, String> _productInfo = new HashMap<>();
+//										_productInfo.put("cveId", cveId);
+//										_productInfo.put("vendor", cpeInfoArr[3]);
+//										_productInfo.put("product", cpeInfoArr[4]);
+//										_productInfo.put("version", cpeInfoArr[5]);
+//										nvdDataV3TempList.add(_productInfo);
+//									});
+//									
+//									if(!CollectionUtils.isEmpty(nvdDataV3TempList)) {
+//										mapper.insertBulkNvdDataV3Temp(nvdDataV3TempList);
+//									}
+									
+									final Map<String, String> configurationInsertParam = new HashMap<>();
+									configurationInsertParam.put("cveId", cveId);
+									configurationInsertParam.put("matchCriteriaId", matchCriteriaId);
+									configurationInsertParam.put("criteria", criteria);
+									final String[] criteriaArr = criteria.split(":");
+									configurationInsertParam.put("vendor", criteriaArr[3]);
+									configurationInsertParam.put("product", criteriaArr[4]);
+									configurationInsertParam.put("version", criteriaArr[5]);
+									if (versionStartIncluding != null) {
+										configurationInsertParam.put("versionStartIncluding", versionStartIncluding);
+									}
+									if (versionEndIncluding != null) {
+										configurationInsertParam.put("versionEndIncluding", versionEndIncluding);
+									}
+									if (versionStartExcluding != null) {
+										configurationInsertParam.put("versionStartExcluding", versionStartExcluding);
+									}
+									if (versionEndExcluding != null) {
+										configurationInsertParam.put("versionEndExcluding", versionEndExcluding);
+									}
+
+									mapper.insertNvdDataConfigurationsTemp(configurationInsertParam);
+								}
+								
+								cvePatchList = (List<Map<String, Object>>) cveInfo.get("cvePatchList");
+								if (!CollectionUtils.isEmpty(cvePatchList)) {
+									for (Map<String, Object> cvePatchInfo : cvePatchList) {
+										final Map<String, Object> _patchInfo = new HashMap<>();
+										_patchInfo.put("cveId", cveId);
+										_patchInfo.put("patchLink", cvePatchInfo.get("url"));
+										_patchInfo.put("publDate", cveInfo.get("publDate"));
+										
+										mapper.insertNvdDataPatchLinkTemp(_patchInfo);
+									}
+									cvePatchList = null;
+								}
+								
+								int cnt = mapper.insertNvdDataV3Temp(cveId);
+								if(cnt == 0) {
+									System.out.println(cveId);
+								}
+							}
+
+							sqlSession.flushStatements();
+
+						}
+					}
+				} else {
+					throw new RuntimeException("url connection attempts exceeded");
+				}
 			}
-		} catch(Exception e) {
-			log.error(e.getMessage(), e);
-			httpsUrlConnectionFlag = false;
+
+			sqlSession.flushStatements();
+			sqlSession.commit();
 		}
+
+//		// 업데이트 대상 CVE ID별 configuration가 모두 등록된 이후에
+//		// configuration정보를 이용하여 MATCH_CRITERIA_ID 포함되는 모든 product, version 정보를 추출하여 등록한다.
+//		nvdDataMapper.insertNvdDataV3Temp();
+		
 		
 		if (httpsUrlConnectionFlag) {
 			// configuration data delete & insert
 			if (initializeFlag) {
+				nvdDataMapper.resetCveDataV3();
+				nvdDataMapper.resetNvdDataV3();
 				nvdDataMapper.truncateNvdDataConfigurations();
+				nvdDataMapper.truncateNvdDataPatchLink();
+			} else {
+				// 최신정보 재등록을 위한 Copy 대상 data 삭제
+				nvdDataMapper.deleteNvdCveV3ExistingInTemp();
+				nvdDataMapper.deleteNvdDataV3ExistingInTemp();
+				nvdDataMapper.deleteNvdDataConfigurationsExistingInTemp();
+				nvdDataMapper.deleteNvdDataPatchLinkExistingInTemp();
 			}
-			
+			nvdDataMapper.copyNvdCveV3FromTemp();
+			nvdDataMapper.copyNvdDataV3FromTemp();
 			nvdDataMapper.copyNvdDataConfigurationsFromTemp();
-			nvdDataMapper.truncateNvdDataConfigurationsTemp();
+			nvdDataMapper.copyNvdDataPatchLinkFromTemp();
+
+//			nvdDataMapper.truncateNvdCveV3Temp();
+//			nvdDataMapper.truncateNvdDataV3Temp();
+//			nvdDataMapper.truncateNvdDataConfigurationsTemp();
+//			nvdDataMapper.truncateNvdDataPatchLinkTemp();
 			
 			int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
 			if (vendorProductNvdDataV3Cnt > 0) {
-				log.info("Vendor Product Nvd Data V3 Update Count : " + vendorProductNvdDataV3Cnt);
+				log.info("Vendor Product Nvd Data V3 Update Count : {}", vendorProductNvdDataV3Cnt);
+				schlog.info("Vendor Product Nvd Data V3 Update Count : {}", vendorProductNvdDataV3Cnt);
 				nvdDataMapper.updateVendorProductNvdDataV3();
 			}
 			
@@ -426,6 +387,7 @@ public class NvdDataService {
 			
 			nvdDataMapper.insertNewMetaDataUrlConnection(param);
 			log.info("nvdCveDataApiJob end");
+			schlog.info("nvdCveDataApiJob end");
 		}
 		
 		responseMap.put("connectionFlag", httpsUrlConnectionFlag);
@@ -434,100 +396,91 @@ public class NvdDataService {
 
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> restApiCveDatajsonReader(Map<String, Object> vulnerability) {
-		Map<String, Object> resultMap = new HashMap<>();
-		try {
-			Map<String, Object> cveItem = (Map<String, Object>) vulnerability.get("cve");
-			String publishedDate = (String) cveItem.get("published");
-			String lastModifiedDate = (String) cveItem.get("lastModified");
-			String cveId = (String) cveItem.get("id");
-			
-			// summary
-			List<Map<String, Object>> descriptions = (List<Map<String, Object>>) cveItem.get("descriptions");
-			String descriptionStr = "";
-			for (Map<String, Object> description : descriptions) {
-				if (!StringUtil.isEmpty(descriptionStr)) {
-					descriptionStr += "\n";
-				}
-				descriptionStr += description.get("value");
-			}
-			
-			// metrics
-			Map<String, Object> metrics = (Map<String, Object>) cveItem.get("metrics");
-			// CVSS V3가 없는 경우 V2 Score를 사용
-			String baseScore = "0";
-			String baseMetric = "";
-			if (metrics.containsKey("cvssMetricV31")) {
-				List<Map<String, Object>> cvssMetricV3 = (List<Map<String, Object>>) metrics.get("cvssMetricV31");
-				Map<String, Object> cvssV3 = (Map<String, Object>) cvssMetricV3.get(0);
-				Map<String, Object> cvssData = (Map<String, Object>) cvssV3.get("cvssData");
-				baseScore = String.valueOf(cvssData.get("baseScore"));
-				baseMetric = "V3";					
-			} else if (metrics.containsKey("cvssMetricV30")){
-				List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV30");
-				Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
-				Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
-				baseScore = String.valueOf(cvssData.get("baseScore"));
-				baseMetric = "V3";
-			} else if (metrics.containsKey("cvssMetricV2")){
-				List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV2");
-				Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
-				Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
-				baseScore = String.valueOf(cvssData.get("baseScore"));
-				baseMetric = "V2";
-			}
-			
-			List<Map<String, String>> ossList = new ArrayList<>();
-			List<Map<String, Object>> cpe_match_all = new ArrayList<>();
+		final Map<String, Object> resultMap = new HashMap<>();
+
+		final Map<String, Object> cveItem = (Map<String, Object>) vulnerability.get("cve");
+		final String publishedDate = (String) cveItem.get("published");
+		final String lastModifiedDate = (String) cveItem.get("lastModified");
+		final String cveId = (String) cveItem.get("id");
 		
-			if (cveItem.containsKey("configurations")) {
-				List<Map<String, Object>> configurationsInfo = (List<Map<String, Object>>) cveItem.get("configurations");
-				for (Map<String, Object> configurations : configurationsInfo) {
-					List<Map<String, Object>> configurations_nodes = (List<Map<String, Object>>) configurations.get("nodes");
-					
-					// 정의된 모든 cpe match 정보
-					for (Map<String, Object> node_data : configurations_nodes) {
-						// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
-						if (node_data.containsKey("cpeMatch")) {
-							cpe_match_all.addAll((List<Map<String, Object>>) node_data.get("cpeMatch"));
-						}
-					}
-				}
+		// summary
+		final List<Map<String, Object>> descriptions = (List<Map<String, Object>>) cveItem.get("descriptions");
+		String descriptionStr = "";
+		for (Map<String, Object> description : descriptions) {
+			if (!StringUtil.isEmpty(descriptionStr)) {
+				descriptionStr += "\n";
 			}
-			
-			List<Map<String, Object>> cvePatchList = new ArrayList<>();
-			if (cveItem.containsKey("references")) {
-				List<Map<String, Object>> referencesInfo = (List<Map<String, Object>>) cveItem.get("references");
-				
-				for (Map<String, Object> references : referencesInfo) {
-					if (references.containsKey("tags")) {
-						boolean checkPatchLinkFlag = false;
-						List<String> tagsList = (List<String>) references.get("tags");
-						for (String tag : tagsList) {
-							tag = tag.toUpperCase();
-							if (tag.equals("PATCH") || tag.equals("MITIGATION") || tag.equals("RELEASE NOTES")) {
-								checkPatchLinkFlag = true;
-								break;
-							}
-						}
-						if (checkPatchLinkFlag) {
-							cvePatchList.add(references);
-						}
-					}
-				}
-			}
-			
-			resultMap.put("ossList", ossList);
-			resultMap.put("cveId", cveId);
-			resultMap.put("publDate", DateUtil.convertStringToTimestamp((publishedDate), "yyyy-MM-dd'T'HH:mm:ss.SSS"));
-			resultMap.put("modiDate", DateUtil.convertStringToTimestamp((lastModifiedDate), "yyyy-MM-dd'T'HH:mm:ss.SSS"));
-			resultMap.put("cvssScore", baseScore);
-			resultMap.put("summary", descriptionStr);
-			resultMap.put("baseMetric", baseMetric);
-			resultMap.put("cpe_match_all", cpe_match_all);
-			resultMap.put("cvePatchList", cvePatchList);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+			descriptionStr += description.get("value");
 		}
+		
+		// metrics
+		final Map<String, Object> metrics = (Map<String, Object>) cveItem.get("metrics");
+		// CVSS V3가 없는 경우 V2 Score를 사용
+		String baseScore = "0";
+		String baseMetric = "";
+		if (metrics.containsKey("cvssMetricV31")) {
+			List<Map<String, Object>> cvssMetricV3 = (List<Map<String, Object>>) metrics.get("cvssMetricV31");
+			Map<String, Object> cvssV3 = (Map<String, Object>) cvssMetricV3.get(0);
+			Map<String, Object> cvssData = (Map<String, Object>) cvssV3.get("cvssData");
+			baseScore = String.valueOf(cvssData.get("baseScore"));
+			baseMetric = "V3";					
+		} else if (metrics.containsKey("cvssMetricV30")){
+			List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV30");
+			Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
+			Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
+			baseScore = String.valueOf(cvssData.get("baseScore"));
+			baseMetric = "V3";
+		} else if (metrics.containsKey("cvssMetricV2")){
+			List<Map<String, Object>> cvssMetricV2 = (List<Map<String, Object>>) metrics.get("cvssMetricV2");
+			Map<String, Object> cvssV2 = (Map<String, Object>) cvssMetricV2.get(0);
+			Map<String, Object> cvssData = (Map<String, Object>) cvssV2.get("cvssData");
+			baseScore = String.valueOf(cvssData.get("baseScore"));
+			baseMetric = "V2";
+		}
+		
+		List<Map<String, String>> ossList = new ArrayList<>();
+		List<Map<String, Object>> cpe_match_all = new ArrayList<>();
+	
+		if (cveItem.containsKey("configurations")) {
+			for (Map<String, Object> configurations : (List<Map<String, Object>>) cveItem.get("configurations")) {
+				// 정의된 모든 cpe match 정보
+				for (Map<String, Object> node_data : (List<Map<String, Object>>) configurations.get("nodes")) {
+					// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
+					if (node_data.containsKey("cpeMatch")) {
+						cpe_match_all.addAll((List<Map<String, Object>>) node_data.get("cpeMatch"));
+					}
+				}
+			}
+		}
+		
+		final List<Map<String, Object>> cvePatchList = new ArrayList<>();
+		if (cveItem.containsKey("references")) {
+			for (Map<String, Object> references : (List<Map<String, Object>>) cveItem.get("references")) {
+				if (references.containsKey("tags")) {
+					boolean checkPatchLinkFlag = false;
+					for (String tag : (List<String>) references.get("tags")) {
+						tag = tag.toUpperCase();
+						if ("PATCH".equals(tag) || "MITIGATION".equals(tag) || "RELEASE NOTES".equals(tag)) {
+							checkPatchLinkFlag = true;
+							break;
+						}
+					}
+					if (checkPatchLinkFlag) {
+						cvePatchList.add(references);
+					}
+				}
+			}
+		}
+		
+		resultMap.put("ossList", ossList);
+		resultMap.put("cveId", cveId);
+		resultMap.put("publDate", DateUtil.convertStringToTimestamp((publishedDate), "yyyy-MM-dd'T'HH:mm:ss.SSS"));
+		resultMap.put("modiDate", DateUtil.convertStringToTimestamp((lastModifiedDate), "yyyy-MM-dd'T'HH:mm:ss.SSS"));
+		resultMap.put("cvssScore", baseScore);
+		resultMap.put("summary", descriptionStr);
+		resultMap.put("baseMetric", baseMetric);
+		resultMap.put("cpe_match_all", cpe_match_all);
+		resultMap.put("cvePatchList", cvePatchList);
 	
 		return resultMap;
 	}
@@ -554,171 +507,160 @@ public class NvdDataService {
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
+			schlog.error(e.getMessage());
 			responseMap.put("connectionFlag", false);
 		}
 		
 		return responseMap;
 	}
 
+	/**
+	 * CPEMATCH Data API Job
+	 * @param restApiUrl
+	 * @param rtnMap
+	 * @return
+	 * @throws SSLException 
+	 * @throws JsonProcessingException 
+	 */
 	@SuppressWarnings("unchecked")
 	@Transactional
-	public Map<String, Object> nvdMetaDataApiJob(String restApiUrl, int resultsPerPage, Map<String, Object> rtnMap) {
+	public Map<String, Object> nvdMetaDataApiJob(String restApiUrl, Map<String, Object> rtnMap) throws JsonProcessingException, SSLException {
 		log.info("nvdMetaDataApiJob start");
+		schlog.info("nvdMetaDataApiJob start");
 		
-		int totalResults = (int) rtnMap.get("totalResults");
-		String urlConnTimestamp = (String) rtnMap.get("timestamp");
-		String format = (String) rtnMap.get("format");
-		String fileNm = restApiUrl.replace("https://services.nvd.nist.gov", "");
+		final int totalResults = (int) rtnMap.get("totalResults");
+		final String urlConnTimestamp = (String) rtnMap.get("timestamp");
+		final String format = (String) rtnMap.get("format");
+		final String fileNm = restApiUrl.replace("https://services.nvd.nist.gov", "");
 		
 		Map<String, Object> responseMap = new HashMap<>();
 		
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		PreparedStatement stmt2 = null;
-		
 		List<Map<String, Object>> matchStrings = null;
 		boolean httpsUrlConnectionFlag = false;
-		boolean deleteCpeMatchDataFlag = false;
-		
 		responseMap.put("totalResults", totalResults);
-		int seq = 1;
 		
-		try {
-			String SQL_INSERT = "INSERT INTO NVD_CPE_MATCH_TEMP (MATCH_CRITERIA_ID, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) VALUES (?,?,?,?,?,?)";
-			String SQL_INSERT2 = "INSERT INTO NVD_CPE_MATCH_NAMES_TEMP (MATCH_CRITERIA_ID, IDX, CPE23URI) VALUES (?,?,?)";
+		int totalCnt = totalResults;
+		if(totalCnt < API_MATCH_CHUNK_SIZE) {
+			totalCnt = API_MATCH_CHUNK_SIZE;
+		}
+		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false)) {
+			NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
+
+			nvdDataMapper.createTableCpeMatchTemp();
+			nvdDataMapper.createTableCpeMatchNameTemp();
+			nvdDataMapper.truncateCpeMatchTemp();
+			nvdDataMapper.truncateCpeMatchNameTemp();
 			
-			List<Map<String, Object>> cpeMatchDataList = new ArrayList<>();
-			List<Map<String, Object>> cpeMatchNamesDataList = new ArrayList<>();
-			
-			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
-				NvdDataMapper mapper = sqlSession.getMapper(NvdDataMapper.class);
+			for(int limitIndex = 0; limitIndex <= totalCnt/API_MATCH_CHUNK_SIZE; limitIndex++) {
+				log.info("getNvdCpeMatchData in progress {}/{}", API_MATCH_CHUNK_SIZE*limitIndex, totalCnt);
 				
-				for (int i=0; i < totalResults; i+=500) {if (i > totalResults) break;
-					log.info("nvdMetaMatch index : " + i + " / " + "totalResults : " + totalResults);
-					for (int j=0; j<5; j++) {
-						responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, i, j);
-						httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
-						if (httpsUrlConnectionFlag) break;
-					}
-					
+				
+				for (int i = 0; i < 5; i++) {
+					responseMap = getDataForRestApiConnection(NVD_REST_BASE_URL + NVD_REST_CPE_MATCH_URL, API_MATCH_CHUNK_SIZE, API_MATCH_CHUNK_SIZE * limitIndex, 1);
+					httpsUrlConnectionFlag = (boolean) responseMap.get("connectionFlag");
 					if (httpsUrlConnectionFlag) {
-						if (responseMap.containsKey("matchStrings")) {
-							if (i == 0) {
-								// truncate table for first order
-								nvdDataMapper.createTableCpeMatchTemp();
-								nvdDataMapper.createTableCpeMatchNameTemp();
-								nvdDataMapper.truncateCpeMatchTemp();
-								nvdDataMapper.truncateCpeMatchNameTemp();
-							}
-							
-							matchStrings = (List<Map<String, Object>>) responseMap.get("matchStrings");
-							if (matchStrings != null) {
-								int seq2 = 1;
-								
-								for (Map<String, Object> matchStringObj : matchStrings) {
-									if (matchStringObj.containsKey("matchString")) {
-										Map<String, Object> matchString = (Map<String, Object>) matchStringObj.get("matchString");
-										String matchCriteriaId = (String) matchString.get("matchCriteriaId");
-										String cpe23Uri = (String) matchString.get("criteria");
-										
-										Map<String, Object> cpeMatchMap = new HashMap<>();
-										cpeMatchMap.put("matchCriteriaId", matchCriteriaId);
-										cpeMatchMap.put("cpe23Uri", cpe23Uri);
-										
-										if (matchString.containsKey("versionStartIncluding")) {
-											cpeMatchMap.put("versionStartIncluding", (String) matchString.get("versionStartIncluding"));
-										} else {
-											cpeMatchMap.put("versionStartIncluding", null);
-										}
-										if (matchString.containsKey("versionEndIncluding")) {
-											cpeMatchMap.put("versionEndIncluding", (String) matchString.get("versionEndIncluding"));
-										} else {
-											cpeMatchMap.put("versionEndIncluding", null);
-										}
-										if (matchString.containsKey("versionStartExcluding")) {
-											cpeMatchMap.put("versionStartExcluding", (String) matchString.get("versionStartExcluding"));
-										} else {
-											cpeMatchMap.put("versionStartExcluding", null);
-										}
-										if (matchString.containsKey("versionEndExcluding")) {
-											cpeMatchMap.put("versionEndExcluding", (String) matchString.get("versionEndExcluding"));
-										} else {
-											cpeMatchMap.put("versionEndExcluding", null);
-										}
-										
-										int deleteCnt = nvdDataMapper.selectNvdCpeMatchTemp(cpeMatchMap);
-										if (deleteCnt > 0) { // delete
-											nvdDataMapper.deleteNvdCpeMatchTemp(cpeMatchMap);
-										}
-										
-										deleteCnt = 0;
-										deleteCnt = nvdDataMapper.selectNvdCpeMatch(cpeMatchMap);
-										if (deleteCnt > 0) { // delete
-											nvdDataMapper.deleteNvdCpeMatch(cpeMatchMap);
-										}
-										
-										mapper.insertCpeMatchData(cpeMatchMap);
-										sqlSession.flushStatements();
-										
-										if (matchString.containsKey("matches")) {
-											List<Map<String, Object>> matches = (List<Map<String, Object>>) matchString.get("matches");
-											
-											int nameIdx = 0;
-											for (Map<String, Object> match : matches) {
-												if (match.containsKey("cpeName")) {
-													Map<String, Object> cpeMatchNamesMap = new HashMap<>();
-													cpeMatchNamesMap.put("matchCriteriaId", matchCriteriaId);
-													cpeMatchNamesMap.put("idx", nameIdx);
-													cpeMatchNamesMap.put("cpe23Uri", (String) match.get("cpeName"));
-													
-													mapper.insertCpeMatchNameData(cpeMatchNamesMap);
-													sqlSession.flushStatements();
-													
-													nameIdx++;
-													seq2++;
-												}
-											}
-										}
-										seq++;
-										deleteCpeMatchDataFlag = false;
-									}
-								}
-							}
-						}
-					} else {
-						log.error("url connection attempts exceeded");
 						break;
 					}
 				}
+//				String searchUrl = MessageFormat.format(NVD_REST_CPE_MATCH_URL + "?resultsPerPage={0}&startIndex={1}", API_MATCH_CHUNK_SIZE, API_MATCH_CHUNK_SIZE*limitIndex);
+//				if (!initializeFlag) {
+//					searchUrl += "&lastModStartDate=" + lastModStartDate + "&lastModEndDate=" + lastModEndDate;
+//				}
+//				responseMap = getNvdData(searchUrl);
+//				httpsUrlConnectionFlag = responseMap != null && responseMap.containsKey("matchStrings");
 				
-				sqlSession.commit();
+				if (httpsUrlConnectionFlag) {
+					if (responseMap.containsKey("matchStrings")) {
+						matchStrings = (List<Map<String, Object>>) responseMap.get("matchStrings");
+						if (matchStrings != null) {
+							
+							for (Map<String, Object> matchStringObj : matchStrings) {
+								if (matchStringObj.containsKey("matchString")) {
+									Map<String, Object> matchString = (Map<String, Object>) matchStringObj.get("matchString");
+									String matchCriteriaId = (String) matchString.get("matchCriteriaId");
+									String cpe23Uri = (String) matchString.get("criteria");
+									
+									Map<String, Object> cpeMatchMap = new HashMap<>();
+									cpeMatchMap.put("matchCriteriaId", matchCriteriaId);
+									cpeMatchMap.put("cpe23Uri", cpe23Uri);
+									
+									if (matchString.containsKey("versionStartIncluding")) {
+										cpeMatchMap.put("versionStartIncluding", (String) matchString.get("versionStartIncluding"));
+									} else {
+										cpeMatchMap.put("versionStartIncluding", null);
+									}
+									if (matchString.containsKey("versionEndIncluding")) {
+										cpeMatchMap.put("versionEndIncluding", (String) matchString.get("versionEndIncluding"));
+									} else {
+										cpeMatchMap.put("versionEndIncluding", null);
+									}
+									if (matchString.containsKey("versionStartExcluding")) {
+										cpeMatchMap.put("versionStartExcluding", (String) matchString.get("versionStartExcluding"));
+									} else {
+										cpeMatchMap.put("versionStartExcluding", null);
+									}
+									if (matchString.containsKey("versionEndExcluding")) {
+										cpeMatchMap.put("versionEndExcluding", (String) matchString.get("versionEndExcluding"));
+									} else {
+										cpeMatchMap.put("versionEndExcluding", null);
+									}
+									
+									mapper.insertCpeMatchData(cpeMatchMap);
+									
+									if (matchString.containsKey("matches")) {
+										List<Map<String, Object>> matches = (List<Map<String, Object>>) matchString.get("matches");
+										
+										int nameIdx = 0;
+										List<Map<String, Object>> matchNameList = new ArrayList<>();
+										for (Map<String, Object> match : matches) {
+											if (match.containsKey("cpeName")) {
+												Map<String, Object> cpeMatchNamesMap = new HashMap<>();
+												cpeMatchNamesMap.put("matchCriteriaId", matchCriteriaId);
+												cpeMatchNamesMap.put("idx", nameIdx);
+												cpeMatchNamesMap.put("cpe23Uri", match.get("cpeName"));
+												matchNameList.add(cpeMatchNamesMap);
+												nameIdx++;
+											}
+										}
+										if (!CollectionUtils.isEmpty(matchNameList)) {
+											mapper.insertBulkCpeMatchNameData(matchNameList);
+										}
+									} else {
+										// matche range가 제공되지 않을 수 있음, 아마도 CVSS Version이 2.0 인 경우 제공되지 않는 Case가 있는듯
+										// https://services.nvd.nist.gov/rest/json/cpematch/2.0?cveId=CVE-2000-0564
+										// 이후 처리에서 matchCriteriaId 에 해당하는 version range를 조회를 일관된 방법으로 처리할 수 있도록
+										// matchString의 criteria 를 matches의 cpeName 와 동일하게 처리한다.
+										Map<String, Object> cpeMatchNamesMap = new HashMap<>();
+										cpeMatchNamesMap.put("matchCriteriaId", matchCriteriaId);
+										cpeMatchNamesMap.put("idx", 0);
+										cpeMatchNamesMap.put("cpe23Uri", cpe23Uri);
+										
+										mapper.insertCpeMatchNameData(cpeMatchNamesMap);
+									}
+									sqlSession.flushStatements();
+								}
+							}
+						}
+					}
+				} else {
+					throw new RuntimeException("url connection attempts exceeded");
+				}
 			}
-		} catch(Exception e) {
-			log.error(e.getMessage(), e);
-			httpsUrlConnectionFlag = false;
-		} finally {
-			try {
-				if (stmt != null) {
-					stmt.close();
-				}
-			} catch(SQLException e) {}
-			try {
-				if (stmt2 != null) {
-					stmt2.close();
-				}
-			} catch(SQLException e) {}
-			try{
-				if (conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e) {}
+
+			sqlSession.flushStatements();
+			sqlSession.commit();
 		}
-		
-		log.info("httpsUrlConnectionFlag : "+httpsUrlConnectionFlag);
-		if (httpsUrlConnectionFlag) {
-			if (initializeFlag && totalResults > 0) {
+			
+		log.info("httpsUrlConnectionFlag : {}", httpsUrlConnectionFlag);
+		schlog.info("httpsUrlConnectionFlag : {}", httpsUrlConnectionFlag);
+		if (httpsUrlConnectionFlag && totalResults > 0) {
+			if (initializeFlag) {
 				nvdDataMapper.truncateCpeMatch();
 				nvdDataMapper.truncateCpeMatchNames();
+			} else {
+				// 최신정보 재등록을 위한 Copy 대상 data 삭제
+				// delete CpeMatch and CpeMatchNames
+				nvdDataMapper.deleteNvdDataMatchExistingInTemp();
 			}
 
 			nvdDataMapper.copyNvdDataMatchFromTemp();
@@ -727,127 +669,20 @@ public class NvdDataService {
 			nvdDataMapper.truncateCpeMatchNameTemp();
 			
 			// success data insert > nvd_meta table
-			HashMap<String, Object> param = new HashMap<String, Object>();
+			HashMap<String, Object> param = new HashMap<>();
 			param.put("fileNm", fileNm);
 			param.put("fileType", format);
 			param.put("modiDate", urlConnTimestamp);
 			
 			nvdDataMapper.insertNewMetaDataUrlConnection(param);
 			log.info("nvdMetaDataApiJob end");
+			schlog.info("nvdMetaDataApiJob end");
 		}
 		
 		responseMap.put("connectionFlag", httpsUrlConnectionFlag);
 		return responseMap;
 	}
 
-	private void prepareStatementUpdateCpeMatchData(Connection conn, PreparedStatement stmt, String query, List<Map<String, Object>> cpeMatchDataList) {
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
-			conn.setAutoCommit(false);
-			stmt = conn.prepareStatement(query);
-			
-			for (Map<String, Object> cpeMatchData : cpeMatchDataList) {
-				stmt.setString(1, (String) cpeMatchData.get("matchCriteriaId"));
-				stmt.setString(2, (String) cpeMatchData.get("criteria"));
-				if (cpeMatchData.containsKey("versionStartIncluding")) {
-					stmt.setString(3, (String) cpeMatchData.get("versionStartIncluding"));
-				} else {
-					stmt.setString(3, null);
-				}
-				if (cpeMatchData.containsKey("versionEndIncluding")) {
-					stmt.setString(4, (String) cpeMatchData.get("versionEndIncluding"));
-				} else {
-					stmt.setString(4, null);
-				}
-				if (cpeMatchData.containsKey("versionStartExcluding")) {
-					stmt.setString(5, (String) cpeMatchData.get("versionStartExcluding"));
-				} else {
-					stmt.setString(5, null);
-				}
-				if (cpeMatchData.containsKey("versionEndExcluding")) {
-					stmt.setString(6, (String) cpeMatchData.get("versionEndExcluding"));
-				} else {
-					stmt.setString(6, null);
-				}
-				stmt.addBatch();
-				stmt.clearParameters();
-			}
-			
-			stmt.executeBatch(); // Batch 실행
-			stmt.clearBatch(); // Batch 초기화
-            conn.commit(); // 커밋
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			try{
-				if (stmt != null) {
-					stmt.close();
-				}
-			} catch(SQLException e1){}
-			try{
-				if (conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e1){}
-		} finally {
-			try{
-				if (stmt != null) {
-					stmt.close();
-				}
-			} catch(SQLException e){}
-			
-			try{
-				if (conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e){}
-		}
-	}
-	
-	private void prepareStatementUpdateCpeMatchNamesData(Connection conn, PreparedStatement stmt2, String query, List<Map<String, Object>> cpeMatchNamesDataList) {
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
-			conn.setAutoCommit(false);
-			stmt2 = conn.prepareStatement(query);
-			
-			for (Map<String, Object> cpeMatchData : cpeMatchNamesDataList) {
-				stmt2.setString(1, (String) cpeMatchData.get("matchCriteriaId"));
-				stmt2.setInt(2, (int) cpeMatchData.get("idx"));
-				stmt2.setString(3, (String) cpeMatchData.get("cpeName"));
-				stmt2.addBatch();
-				stmt2.clearParameters();
-			}
-			
-			stmt2.executeBatch(); // Batch 실행
-			stmt2.clearBatch(); // Batch 초기화
-            conn.commit(); // 커밋
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			try{
-				if (stmt2 != null) {
-					stmt2.close();
-				}
-			} catch(SQLException e1){}
-			try{
-				if (conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e1){}
-		} finally {
-			try{
-				if (stmt2 != null) {
-					stmt2.close();
-				}
-			} catch(SQLException e){}
-			
-			try{
-				if (conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e){}
-		}
-	}
 
 	private Map<String, Object> getDataForRestApiConnection(String restApiUrl, int resultsPerPage, int startIndex, int cnt) {
 		HttpsURLConnection httpsURLConnection = null;
@@ -878,13 +713,16 @@ public class NvdDataService {
 				}
 			} else {
 				log.error("httpsURLConnection error : " + CommonFunction.httpCodePrint(httpsURLConnection.getResponseCode()));
+				schlog.error("httpsURLConnection error : " + CommonFunction.httpCodePrint(httpsURLConnection.getResponseCode()));
 				connectionFlag = false;
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			connectionFlag = false;
 		} finally {
-			httpsURLConnection.disconnect();
+			if(httpsURLConnection != null) {
+				httpsURLConnection.disconnect();
+			}
 			if (connectionFlag) {
 				try {
 					Thread.sleep(1000 * 6);
@@ -925,7 +763,7 @@ public class NvdDataService {
 	}
 
 	@Transactional
-	public String nvdCveDataSyncJob(boolean restApiFlag) throws JsonParseException, JsonMappingException, IOException {
+	public String nvdCveDataSyncJob(boolean restApiFlag) throws IOException {
 		String resCd = "00";
 		log.info("Start CVE Data Sync Job");
 //		// 1. Wait Job 데이터 조회
@@ -962,7 +800,8 @@ public class NvdDataService {
 		
 		if (restApiFlag){
 			// temp table에 data insert 이후, real table로 copy
-			nvdDataMapper.deleteNvdDataTempV3();
+			nvdDataMapper.createTableNvdDavaScoreV3Temp();
+			nvdDataMapper.deleteNvdDataScoreV3Temp();
 			
 			int cnt = nvdDataMapper.getProducVerCnt();
 			List<Map<String, Object>> itemList = new ArrayList<>();
@@ -976,22 +815,23 @@ public class NvdDataService {
 						for (String vendor : vendorList.split(",")) {
 							Map<String, Object> nvdDataMap = nvdDataMapper.getMaxScoreProductVer((String)item.get("PRODUCT"), (String)item.get("VERSION"), vendor);
 							if (nvdDataMap != null) {
-								mapper.insertNvdDataV3Temp(nvdDataMap);
-								sqlSession.flushStatements();
+								mapper.insertNvdDataScoreV3Temp(nvdDataMap);
 							}
 						}
 					}
-					
+
+					sqlSession.flushStatements();
 					idx = idx + BATCH_SIZE;
 					itemList.clear();
 				}
-				
+
+				sqlSession.flushStatements();
 				sqlSession.commit();
 			}
 			
 			nvdDataMapper.deleteNvdDataScoreV3();
 			nvdDataMapper.insertNvdDataScoreV3();
-			nvdDataMapper.deleteNvdDataTempV3();
+			nvdDataMapper.deleteNvdDataScoreV3Temp();
 
 			log.info("End CVE Data Sync Job");
 		}
@@ -1039,789 +879,6 @@ public class NvdDataService {
 		return resCd;
 	}
 	
-	private void preparedStatementGetProductList(Connection conn2, List<Map<String, Object>> itemList, List<Map<String, Object>> params, 
-			PreparedStatement getProductStmt, PreparedStatement getMaxScoreProductVerStmt, PreparedStatement insertStmt, int batchIdx, int batchEndIdx) {
-		ResultSet rs = null;
-		Map<String, Object> itemMap = null;
-		
-		try {
-			getProductStmt.setInt(1, batchIdx);
-			getProductStmt.setInt(2, batchEndIdx);
-			
-			rs = getProductStmt.executeQuery();
-			
-			getProductStmt.clearParameters();
-			
-			while (rs.next()) {
-				itemMap = new HashMap<>();
-				itemMap.put("ossName", rs.getString(1));
-				itemMap.put("ossVersion", rs.getString(2));
-				itemMap.put("vendor", rs.getString(3));
-				
-				itemList.add(itemMap);
-				
-				if (itemList.size() % BATCH_SIZE == 0) {
-					preparedStatementGetMaxScoreProductVer(conn2, getMaxScoreProductVerStmt, insertStmt, itemList, params);
-					itemList.clear();
-				}
-			}
-			
-			if (itemList.size() > 0) {
-				preparedStatementGetMaxScoreProductVer(conn2, getMaxScoreProductVerStmt, insertStmt, itemList, params);
-			}
-		} catch(Exception e) {
-			itemList.clear();
-			log.error(e.getMessage(), e);
-			try{
-				if (rs != null) {
-					rs.close();
-				}
-			} catch(SQLException e1) {}
-		} finally {
-			itemList.clear();
-			try{
-				if (rs != null) {
-					rs.close();
-				}
-			} catch(SQLException e1) {}
-		}
-	}
-	
-	private void preparedStatementGetMaxScoreProductVer(Connection conn2, PreparedStatement getMaxScoreProductVerStmt, PreparedStatement insertStmt, List<Map<String, Object>> itemList, List<Map<String, Object>> params) {
-		ResultSet getMaxScoreProductVerRs = null;
-		Map<String, Object> paramMap = null;
-		
-		try {
-			String vendor = "";
-			List<String> vendorList = new ArrayList<>();
-			
-			for (Map<String, Object> item : itemList) {
-				vendor = (String) item.get("vendor");
-				for (String chk : vendor.split(",")) {
-					if (!StringUtil.isEmpty(chk)) {
-						vendorList.add(chk);
-					}
-				}
-				
-				getMaxScoreProductVerStmt.setString(1, (String) item.get("ossName"));
-				getMaxScoreProductVerStmt.setString(2, (String) item.get("ossVersion"));
-				getMaxScoreProductVerStmt.setString(3, (String) item.get("ossName"));
-				getMaxScoreProductVerStmt.setString(4, (String) item.get("ossVersion"));
-				
-				getMaxScoreProductVerRs = getMaxScoreProductVerStmt.executeQuery();
-				
-				getMaxScoreProductVerStmt.clearParameters();
-				
-				if (vendorList.size() > 0) {
-					while (getMaxScoreProductVerRs.next()) {
-						for (String vn : vendorList) {
-							paramMap = new HashMap<>();
-							paramMap.put("PRODUCT", getMaxScoreProductVerRs.getString(1));
-							paramMap.put("VERSION", getMaxScoreProductVerRs.getString(2));
-							paramMap.put("VENDOR", vn);
-							paramMap.put("CVE_ID", getMaxScoreProductVerRs.getString(3));
-							paramMap.put("CVSS_SCORE", getMaxScoreProductVerRs.getFloat(4));
-							paramMap.put("VULN_SUMMARY", getMaxScoreProductVerRs.getString(5));
-							paramMap.put("MODI_DATE", getMaxScoreProductVerRs.getTimestamp(6));
-							
-							params.add(paramMap);
-							
-							if (params.size() % BATCH_SIZE == 0) {
-								preparedStatementInsertNvdDataListTempV3(conn2, insertStmt, params);
-								params.clear();
-							}
-						}
-					}
-				} else {
-					while (getMaxScoreProductVerRs.next()) {
-						paramMap = new HashMap<>();
-						paramMap.put("PRODUCT", getMaxScoreProductVerRs.getString(1));
-						paramMap.put("VERSION", getMaxScoreProductVerRs.getString(2));
-						paramMap.put("VENDOR", "");
-						paramMap.put("CVE_ID", getMaxScoreProductVerRs.getString(3));
-						paramMap.put("CVSS_SCORE", getMaxScoreProductVerRs.getFloat(4));
-						paramMap.put("VULN_SUMMARY", getMaxScoreProductVerRs.getString(5));
-						paramMap.put("MODI_DATE", getMaxScoreProductVerRs.getTimestamp(6));
-						
-						params.add(paramMap);
-						
-						if (params.size() % BATCH_SIZE == 0) {
-							preparedStatementInsertNvdDataListTempV3(conn2, insertStmt, params);
-							params.clear();
-						}
-					}
-				}
-				
-				vendorList.clear();
-			}
-			
-			if (params.size() > 0) {
-				preparedStatementInsertNvdDataListTempV3(conn2, insertStmt, params);
-				params.clear();
-			}
-		} catch(Exception e) {
-			params.clear();
-			log.error(e.getMessage(), e);
-			try {
-				if (getMaxScoreProductVerRs != null) {
-					getMaxScoreProductVerRs.close();
-				}
-			} catch(SQLException e1) {}
-			try {
-				if (getMaxScoreProductVerStmt != null) {
-					getMaxScoreProductVerStmt.close();
-				}
-			} catch(SQLException e1) {}
-		} finally {
-			params.clear();
-			try{
-				if (getMaxScoreProductVerRs != null) {
-					getMaxScoreProductVerRs.close();
-				}
-			} catch(SQLException e) {}
-		}
-	}
-	
-	private void preparedStatementInsertNvdDataListTempV3(Connection conn2, PreparedStatement insertStmt, List<Map<String, Object>> params) {
-		try{
-			for (Map<String, Object> item : params) {
-				insertStmt.setString(1, (String) item.get("PRODUCT"));
-				insertStmt.setString(2, (String) item.get("VERSION"));
-				insertStmt.setString(3, (String) item.get("VENDOR"));
-				insertStmt.setString(4, (String) item.get("CVE_ID"));
-				insertStmt.setFloat(5, (float) item.get("CVSS_SCORE"));
-				insertStmt.setString(6, (String) item.get("VULN_SUMMARY"));
-				insertStmt.setTimestamp(7, Timestamp.valueOf(item.get("MODI_DATE").toString()));
-				insertStmt.addBatch();
-				insertStmt.clearParameters();
-			}
-
-			// 커밋되지 못한 나머지 구문에 대하여 커밋
-			insertStmt.executeBatch() ;
-			conn2.commit();
-		} catch(Exception e) {
-			log.error(e.getMessage(), e);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private boolean updateNvdData(String cpeFileRootPath, String cpeFileName) throws JsonParseException, JsonMappingException, IOException {
-
-		boolean updateFlag = false;
-		
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> map = mapper.readValue(  new File(cpeFileRootPath + File.separator + cpeFileName + ".json") , new TypeReference<Map<String, Object>>() { });
-		
-		if (map.containsKey("CVE_Items")) {
-			List<Map<String, Object>> cveItems = (List<Map<String, Object>>) map.get("CVE_Items");
-			Map<String, Object> cveInfo = null;
-			Map<String, Object> comapare = null;
-			List<Map<String, String>> ossList = new ArrayList<>();
-			List<Map<String, String>> insertDataList = new ArrayList<>();
-			
-			List<Map<String, Object>> cpe_match_all = null;
-			
-			for (Map<String, Object> cveItem : cveItems) {
-				
-				cveInfo = cveDatajsonReader(cveItem);
-				if (cveInfo == null || cveInfo.isEmpty()) {
-					continue;
-				}
-				
-				String cveId = (String) cveInfo.get("cveId");
-				
-				// 전체 cpe match 정보에서 vulnerable 가 false인 경우는 제외한다.
-				// 적용대상 cpe match list
-				List<String> matchNames = null;
-				cpe_match_all = (List<Map<String, Object>>) cveInfo.get("cpe_match_all");
-				
-//				if (cpe_match_all.isEmpty()) {
-//					log.info("REJECTED CVE " + cveId);
-//				}
-				
-				ossList.clear();
-				for (Map<String, Object> cpe_match_data : cpe_match_all) {
-					// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
-					// Version Range 조건 취득
-					// 검색 조건 설정
-					Map<String, String> _matchNameParams = new HashMap<>();
-					_matchNameParams.put("cpe23Uri", (String) cpe_match_data.get("cpe23Uri"));
-					if (cpe_match_data.containsKey("versionStartIncluding")) {
-						_matchNameParams.put("versionStartIncluding",
-								(String) cpe_match_data.get("versionStartIncluding"));
-					}
-					if (cpe_match_data.containsKey("versionEndIncluding")) {
-						_matchNameParams.put("versionEndIncluding",
-								(String) cpe_match_data.get("versionEndIncluding"));
-					}
-					if (cpe_match_data.containsKey("versionStartExcluding")) {
-						_matchNameParams.put("versionStartExcluding",
-								(String) cpe_match_data.get("versionStartExcluding"));
-					}
-					if (cpe_match_data.containsKey("versionEndExcluding")) {
-						_matchNameParams.put("versionEndExcluding",
-								(String) cpe_match_data.get("versionEndExcluding"));
-					}
-
-					matchNames = nvdDataMapper.selectNvdMatchList(_matchNameParams);
-
-					// 만약 cpe match에서 cpe23uri로 조회된 결과가 없을 경우 해당 cpe23uri 만 설정한다.
-					if (matchNames == null) {
-						matchNames = new ArrayList<>();
-					}
-
-					if (matchNames.isEmpty()) {
-						matchNames.add((String) cpe_match_data.get("cpe23Uri"));
-					}
-
-					// cpe23uri에서 product, version 정보를 추출한다.
-					for (String cpe23uri : matchNames) {
-						String[] cpeInfoArr = cpe23uri.split(":");
-
-						Map<String, String> _productInfo = new HashMap<>();
-						_productInfo.put("cveId", cveId);
-						_productInfo.put("vendor", cpeInfoArr[3]);
-						_productInfo.put("product", cpeInfoArr[4]);
-						_productInfo.put("version", cpeInfoArr[5]);
-
-						ossList.add(_productInfo);
-					}
-				}
-
-				comapare = nvdDataMapper.selectOneCveInfoV3(cveInfo);
-				// 신규등록
-				if (comapare == null){
-					nvdDataMapper.insertCveInfoV3(cveInfo);
-					
-					if (!ossList.isEmpty()) {
-						insertDataList.addAll(ossList);
-					}
-					
-					updateFlag = true;
-				}
-				// 변경(delete > insert)
-				else if (!DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
-						|| !((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore"))) ){
-					// 기존 데이터 삭제
-					nvdDataMapper.deleteCveDataV3(cveInfo);
-					nvdDataMapper.deleteNvdDataV3(cveInfo);
-					// 변경 데이터 등록
-					nvdDataMapper.insertCveInfoV3(cveInfo);
-					if (!ossList.isEmpty()) {
-						insertDataList.addAll(ossList);
-					}
-				} else if (DateUtil.equals((Date)comapare.get("modiDate"), (Date) cveInfo.get("modiDate"))
-						&& ((Float)comapare.get("cvssScore")).equals(Float.valueOf((String)cveInfo.get("cvssScore")))) {
-					// NVD_CVE_V3는 변경 대상이 아니지만 NVD_DATA_V3에 적용 될 대상이 존재 한 경우
-					
-					if (!ossList.isEmpty()) {
-						insertDataList.addAll(ossList);
-					}
-				}
-				
-				if (insertDataList.size() % BATCH_SIZE == 0) {
-					prepareStatementUpdateNvdData(insertDataList);
-					insertDataList.clear();
-				}
-			}
-			
-			if (insertDataList.size() > 0) {
-				prepareStatementUpdateNvdData(insertDataList);
-			}
-			
-			int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
-			if (vendorProductNvdDataV3Cnt > 0) {
-				log.info("Vendor Product Nvd Data V3 Update Count : " + vendorProductNvdDataV3Cnt);
-				nvdDataMapper.updateVendorProductNvdDataV3();
-			}
-		}
-	
-		return updateFlag;
-	}
-
-	private void prepareStatementUpdateNvdData(List<Map<String, String>> insertDataList) {
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		
-		try {
-			Class.forName(JDBC_DRIVER);
-			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
-			conn.setAutoCommit(false);
-			
-			String SQL_INSERT = "INSERT INTO NVD_DATA_V3 (CVE_ID, PRODUCT, VERSION, VENDOR) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE CVE_ID = values(cve_id), PRODUCT = values(product), VERSION = values(version), VENDOR = values(vendor)";
-			stmt = conn.prepareStatement(SQL_INSERT);
-			
-			int seq = 1;
-			
-			for (Map<String, String> item : insertDataList){
-				stmt.setString(1, (String) item.get("cveId"));
-				stmt.setString(2, (String) item.get("product"));
-				stmt.setString(3, (String) item.get("version"));
-				stmt.setString(4, (String) item.get("vendor"));
-				stmt.addBatch();
-				stmt.clearParameters();
-				
-				if ((seq % BATCH_SIZE) == 0 ) {
-					stmt.executeBatch();
-					stmt.clearBatch();
-					conn.commit();
-				}
-				
-				seq++;
-			}
-			
-			stmt.executeBatch();
-			conn.commit();
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			if (conn != null) {
-				try {
-					conn.rollback();
-				} catch (Exception e2) {
-					log.error(e2.getMessage(), e2);
-				}
-			}
-		} finally {
-			try{
-				if (stmt != null) {
-					stmt.close();
-				}
-			} catch(SQLException e){}
-			
-			try{
-				if (conn != null) {
-					conn.close();
-				}
-			} catch(SQLException e){}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private Map<String, Object> cveDatajsonReader(Map<String, Object> cveItem) throws JsonParseException, JsonMappingException, IOException {	
-
-		String publishedDate = (String) cveItem.get("publishedDate");
-		String lastModifiedDate = (String) cveItem.get("lastModifiedDate");
-		
-		Map<String, Object> cveInfo = (Map<String, Object>) cveItem.get("cve");
-		
-		Map<String, Object> cveDataInfo = (Map<String, Object>) cveInfo.get("CVE_data_meta");
-		String cveId = (String) cveDataInfo.get("ID");
-		// impact
-		Map<String, Object> impact = (Map<String, Object>) cveItem.get("impact");
-
-//		if (!impact.containsKey("baseMetricV3") && !impact.containsKey("baseMetricV2")) {
-//			// REJECT
-//			return null;
-//		}
-		
-		// CVSS V3가 없는 경우 V2 Score를 사용
-		String baseScore = "0";
-		String baseMetric = "";
-		if (impact.containsKey("baseMetricV3")) {
-			Map<String, Object> baseMetricV3 = (Map<String, Object>) impact.get("baseMetricV3");
-			Map<String, Object> cvssV3 = (Map<String, Object>) baseMetricV3.get("cvssV3");
-			baseScore = String.valueOf(cvssV3.get("baseScore"));
-			baseMetric = "V3";					
-		} else if (impact.containsKey("baseMetricV2")){
-			Map<String, Object> baseMetricV2 = (Map<String, Object>) impact.get("baseMetricV2");
-			Map<String, Object> cvssV2 = (Map<String, Object>) baseMetricV2.get("cvssV2");
-			baseScore = String.valueOf(cvssV2.get("baseScore"));
-			baseMetric = "V2";
-		}
-
-		List<Map<String, String>> ossList = new ArrayList<>();
-		List<Map<String, Object>> cpe_match_all = new ArrayList<>();
-	
-		Map<String, Object> configurationsInfo = (Map<String, Object>) cveItem.get("configurations");
-		List<Map<String, Object>> configurations_nodes = (List<Map<String, Object>>) configurationsInfo.get("nodes");
-		
-		// 정의된 모든 cpe match 정보
-		for (Map<String, Object> node_data : configurations_nodes) {
-			// children cpe_match 대신 children 노드가 존재하는 경우, children 노드 하위에서 cpe_match 정보를 취득한다.
-			if (node_data.containsKey("cpe_match")) {
-				cpe_match_all.addAll((List<Map<String, Object>>) node_data.get("cpe_match"));
-			}
-			
-			if (node_data.containsKey("children")) {
-				List<Map<String, Object>> children = (List<Map<String, Object>>) node_data.get("children");
-				// 스키마 구조상으로는 children 하위 노드에서 다시 operator AND 조건이 발생할 수 있지만, 실제 Data 존재하지 않았기 때문에
-				// 재귀처리는 생략하고 1Depth 까지만 찾는다.
-				for (Map<String, Object> children_data : children) {
-					cpe_match_all.addAll((List<Map<String, Object>>) children_data.get("cpe_match"));
-				}
-			}
-			
-		}
-		
-		Map<String, Object> description = (Map<String, Object>) cveInfo.get("description");
-		List<Map<String, Object>> description_datas = (List<Map<String, Object>>) description.get("description_data");
-		String descriptionStr = "";
-		for (Map<String, Object> description_data : description_datas) {
-			if (!StringUtil.isEmpty(descriptionStr)) {
-				descriptionStr += "\n";
-			}
-			descriptionStr += description_data.get("value");
-		}
-		
-		Map<String, Object> resultMap = new HashMap<>();
-		resultMap.put("ossList", ossList);
-		resultMap.put("cveId", cveId);
-		resultMap.put("publDate", DateUtil.convertStringToTimestamp((publishedDate), "yyyy-MM-dd'T'HH:mmZ"));
-		resultMap.put("modiDate", DateUtil.convertStringToTimestamp((lastModifiedDate), "yyyy-MM-dd'T'HH:mmZ"));
-		resultMap.put("cvssScore", baseScore);
-		resultMap.put("summary", descriptionStr);
-		resultMap.put("baseMetric", baseMetric);
-		resultMap.put("cpe_match_all", cpe_match_all);
-	
-		return resultMap;
-	}
-
-	private boolean nvdMetaCheckJob(String FILE_NM, String FILE_TYPE) throws IOException {
-		HashMap<String, String> metaInfo = nvdMetaData(FILE_NM);
-		if (metaInfo != null){
-			// 1. 사용중인 메타 데이터 조회
-			HashMap<String, Object> param = new HashMap<String, Object>();
-			param.put("fileType", FILE_TYPE);
-			param.put("fileNm", FILE_NM);
-			List<HashMap<String, Object>> useList = nvdDataMapper.selectUseMetaData(param);
-			// 2. 메타 데이터를 비교한다.
-			// 2.1. 신규 파일면 메타 데이터를 신규 등록한다.
-			if ( useList.size() == 0 || !metaInfo.get("modiDate").equals(useList.get(0).get("modiDate")) ){
-				param.put("modiDate", metaInfo.get("modiDate"));
-				param.put("size", Integer.parseInt(metaInfo.get("size")));
-				param.put("zipSize",Integer.parseInt(metaInfo.get("zipSize")));
-				param.put("gzSize", Integer.parseInt(metaInfo.get("gzSize")));
-				param.put("sha256", metaInfo.get("sha256"));
-				nvdDataMapper.insertNewMetaData(param);
-				return true;
-			}
-			// 2.2. 변경된 파일이면 메타 데이터를 삭제한다.
-			if ( useList.size() > 0 && !metaInfo.get("modiDate").equals(useList.get(0).get("modiDate")) ){
-				param.put("fileNm", FILE_NM);
-				param.put("modiDate", useList.get(0).get("modiDate"));
-				param.put("useYn", "N");
-				nvdDataMapper.updateUseYN(param);
-				nvdDataMapper.updateJobStatus(param);
-				return true;
-			}
-		} else {
-			HashMap<String, Object> param = new HashMap<String, Object>();
-			param.put("fileType", FILE_TYPE);
-			param.put("fileNm", FILE_NM);
-			nvdDataMapper.insertErrorMetaData(param);
-		}
-		
-		return false;
-	}
-	
-	private boolean nvdMetaRetryCheckJob(String FILE_NM, String FILE_TYPE, boolean fileCheck, int cnt) {
-		int maxCnt = 3;
-		
-		log.warn("Try again in 5 minutes...");
-		try {
-			Thread.sleep(1000 * 60 * 5);
-		} catch (InterruptedException e) {
-			log.error(e.getMessage());
-		}
-		
-		try {
-			fileCheck = nvdMetaCheckJob(FILE_NM, FILE_TYPE);
-		} catch (IOException ioe) {
-			log.error(ioe.getMessage(), ioe);
-		}
-		
-		if (!fileCheck && cnt < maxCnt) {
-			fileCheck = nvdMetaRetryCheckJob(FILE_NM, FILE_TYPE, fileCheck, ++cnt);
-		}
-		
-		return fileCheck;
-	}
-	
-	/**
-	 * Nvd feed data download job.
-	 *
-	 * @param FILE_NAME the file name
-	 * @throws Exception the exception
-	 */
-	private void nvdFeedDataDownloadJob(String FILE_NAME) throws Exception  {
-		String NVD_CVE_PATH = env.getProperty("root.dir");
-		if (StringUtil.isEmpty(NVD_CVE_PATH)) {
-			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
-		}
-		String NVD_DATA_BACKUP_PATH = NVD_CVE_PATH;
-		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
-		NVD_DATA_BACKUP_PATH = Paths.get(NVD_DATA_BACKUP_PATH, "nvd/backup").toString();
-		try {
-			FileUtil.backupRawData(NVD_CVE_PATH + File.separator + FILE_NAME + ".json.zip", NVD_DATA_BACKUP_PATH);
-		} catch(Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		
-		String downloadUrl = (NVD_DATA_FILE_NAME_CPEMATCH.equals(FILE_NAME) ? NVD_META_URL : NVD_CVE_URL) + FILE_NAME + ".json.zip";
-		try {
-			FileUtil.downloadFile(downloadUrl, NVD_CVE_PATH);
-		} catch (Exception e) {
-			log.warn(e.getMessage(), e);
-			Thread.sleep(1000 * 30);
-			log.info("Retry downloading the NVD data file. FILE_NAME : " + FILE_NAME);
-			if (Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().exists()) {
-				try {
-					Paths.get(NVD_CVE_PATH, FILE_NAME + ".json.zip").toFile().delete();
-				} catch (Exception e2) {}
-			}
-			FileUtil.downloadFile(downloadUrl, NVD_CVE_PATH);
-		}
-		FileUtil.decompress(NVD_CVE_PATH + File.separator + FILE_NAME + ".json.zip", NVD_CVE_PATH);		// 압축해제
-	}
-	
-	
-	@SuppressWarnings("unchecked")
-	public String nvdMetaDataSyncJob() throws Exception {
-		String resCd = "00";
-
-		// 1. Wait Job 데이터 조회
-		HashMap<String, Object> param = new HashMap<String, Object>();
-		param.put("fileType", "MATCH");
-		List<HashMap<String, Object>> waitList = nvdDataMapper.selectWaitJobData(param);
-
-		
-		String NVD_CVE_PATH = env.getProperty("root.dir");
-		if (StringUtil.isEmpty(NVD_CVE_PATH)) {
-			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
-		}
-		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
-
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		PreparedStatement stmt2 = null;
-
-		String SQL_INSERT = "INSERT INTO NVD_CPE_MATCH_TEMP (SEQ, CPE23URI, VER_START_INC, VER_END_INC, VER_START_EXC, VER_END_EXC) VALUES (?,?,?,?,?,?)";
-		String SQL_INSERT2 = "INSERT INTO NVD_CPE_MATCH_NAMES_TEMP (SEQ, IDX, CPE23URI) VALUES (?,?,?)";
-		
-		// 2. Json File -> DB Insert
-		for (Map<String, Object> wMetaMap : waitList) {
-			param.put("fileNm", wMetaMap.get("fileNm"));
-			param.put("modiDate", wMetaMap.get("modiDate"));
-			param.put("jobStatus", "G");
-			// JobStatus가 W인 대상이 작업이 들어갔다면 G로 변경을 하여 추후에 다시 loop 돌지 않도록 처리함.
-			
-			log.info("Start NVD Meta Job");
-			
-			nvdDataMapper.updateJobStatus(param);
-
-			int totSize = 0;
-			try {
-				log.info("Read NVD Meta Data, fileName: " + wMetaMap.get("fileNm"));
-				Map<String, Object> dataMap = new ObjectMapper().readValue(new File(
-						NVD_CVE_PATH + File.separator + ((String) wMetaMap.get("fileNm")).toLowerCase() + ".json"),
-						new TypeReference<Map<String, Object>>() {
-						});
-
-				if (dataMap.containsKey("matches")) {
-					List<Map<String, Object>> matchItems = (List<Map<String, Object>>) dataMap.get("matches");
-					int seq = 1;
-					totSize = matchItems.size();
-					log.info("Find NVD Meta matches item : " + totSize);
-					
-					// 조건이 변경되거나, 삭제되는 경우를 고려하여 전체 데이터를 삭제하고 다시 등록한다.
-					// truncate table
-					nvdDataMapper.createTableCpeMatchTemp();
-					nvdDataMapper.createTableCpeMatchNameTemp();
-					nvdDataMapper.truncateCpeMatchTemp();
-					nvdDataMapper.truncateCpeMatchNameTemp();
-					
-					try {
-						Class.forName(JDBC_DRIVER);
-						conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
-						conn.setAutoCommit(false);
-						stmt = conn.prepareStatement(SQL_INSERT);
-						stmt2 = conn.prepareStatement(SQL_INSERT2);
-						
-						int seq2 = 1;
-						
-						for (Map<String, Object> matchItem : matchItems) {
-							
-							// cpe23uri (key)
-							String cpe23Uri = (String) matchItem.get("cpe23Uri");
-							// version range conditions
-							String versionStartIncluding = null;
-							String versionEndIncluding = null;
-							String versionStartExcluding = null;
-							String versionEndExcluding = null;
-
-							if (matchItem.containsKey("versionStartIncluding")) {
-								versionStartIncluding = (String) matchItem.get("versionStartIncluding");
-							}
-							if (matchItem.containsKey("versionEndIncluding")) {
-								versionEndIncluding = (String) matchItem.get("versionEndIncluding");
-							}
-							if (matchItem.containsKey("versionStartExcluding")) {
-								versionStartExcluding = (String) matchItem.get("versionStartExcluding");
-							}
-							if (matchItem.containsKey("versionEndExcluding")) {
-								versionEndExcluding = (String) matchItem.get("versionEndExcluding");
-							}
-
-							stmt.setInt(1, seq);
-							stmt.setString(2, cpe23Uri);
-							stmt.setString(3, versionStartIncluding);
-							stmt.setString(4, versionEndIncluding);
-							stmt.setString(5, versionStartExcluding);
-							stmt.setString(6, versionEndExcluding);
-							stmt.addBatch();
-							stmt.clearParameters();
-
-							// CPE Names
-							if (matchItem.containsKey("cpe_name")) {
-								int nameIdx = 0;
-								for (Map<String, Object> cpe_name : (List<Map<String, Object>>) matchItem.get("cpe_name")) {
-									stmt2.setInt(1, seq);
-									stmt2.setInt(2, nameIdx);
-									stmt2.setString(3, (String) cpe_name.get("cpe23Uri"));
-									stmt2.addBatch();
-									stmt2.clearParameters();
-									
-									if (seq2 % BATCH_SIZE == 0) {
-										stmt2.executeBatch(); // Batch 실행
-										stmt2.clearBatch(); // Batch 초기화
-					                    conn.commit(); // 커밋
-									}
-									nameIdx++;
-									seq2++;
-								}
-							}
-							
-							if (seq % BATCH_SIZE == 0) {
-								stmt.executeBatch(); // Batch 실행
-			                    stmt.clearBatch(); // Batch 초기화
-			                    conn.commit(); // 커밋
-								log.info("In progress : " + seq + "/" + totSize);
-							}
-
-							seq++;
-						}
-						
-						stmt.executeBatch(); // Batch 실행
-						stmt2.executeBatch(); // Batch 실행
-						conn.commit();
-					} catch (Exception e) {
-						log.error(e.getMessage(), e);
-						if (conn != null) {
-							try {
-								conn.rollback();
-							} catch (Exception e2) {
-								log.error(e2.getMessage(), e2);
-							}
-						}
-					} finally {
-						try {
-							if (stmt != null) {
-								stmt.close();
-							}
-						} catch(SQLException e) {}
-						try {
-							if (stmt2 != null) {
-								stmt2.close();
-							}
-						} catch(SQLException e) {}
-						try{
-							if (conn != null) {
-								conn.close();
-							}
-						} catch(SQLException e) {}
-					}
-				}
-
-				if (totSize > 0) {
-					nvdDataMapper.truncateCpeMatch();
-					nvdDataMapper.truncateCpeMatchNames();
-					nvdDataMapper.copyNvdDataMatchFromTemp();
-					nvdDataMapper.copyNvdDataMatchNameFromTemp();
-				}
-
-				nvdDataMapper.truncateCpeMatchTemp();
-				nvdDataMapper.truncateCpeMatchNameTemp();
-				
-				param.put("jobStatus", "C");
-				nvdDataMapper.updateJobStatus(param);
-				
-				log.info("End NVD Meta Job");
-				
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-				throw e;
-			}
-		}
-		
-		return resCd;
-	}
-
-	
-	private HashMap<String, String> nvdMetaData(String FILE_NM) throws IOException{
-		HashMap<String, String> metaInfo = null;
-		HttpsURLConnection con = null;
-		Scanner s = null;
-		try {
-			URL url = new URL( (NVD_DATA_FILE_NAME_CPEMATCH.equals(FILE_NM) ? NVD_META_URL : NVD_CVE_URL) +FILE_NM+".meta");
-			ignoreSsl();
-			con = (HttpsURLConnection)url.openConnection();
-			con.setRequestMethod("HEAD");
-			if (con.getResponseCode() == HttpURLConnection.HTTP_OK){
-				s = new Scanner(url.openConnection().getInputStream());
-				metaInfo = new HashMap<String, String>();
-				while (s.hasNext()){
-					String txt = s.next();
-					String[] d = txt.split(":");
-					String k = d[0].equals("lastModifiedDate") ? "modiDate" : d[0];
-					String v = txt.substring(d[0].length()+1, txt.length());
-					metaInfo.put(k, v);
-				}
-			}else{
-				log.warn("connection error : " + CommonFunction.httpCodePrint(con.getResponseCode()) + " - " + con.getResponseCode() + ", file name:" + FILE_NM);
-			}
-		} catch(UnknownHostException e) {
-			log.error("unknownHost connection error : " + CommonFunction.httpCodePrint(con.getResponseCode()) + " - " + con.getResponseCode() + ", file name:" + FILE_NM);
-			return metaInfo;
-		} finally {
-			if (s != null) {
-				try {s.close();} catch (Exception e) {}
-			}
-			if (con != null) {
-				try {con.disconnect();} catch (Exception e) {}
-			}
-		}
-		
-		return metaInfo;
-	}
-	
-	@Transactional
-	private void initNvdDataFeed() throws Exception {
-
-		int nvdBeginDateYear = 2002;
-		int currentDateYear = StringUtil.string2integer(DateUtil.getCurrentDateAsString("yyyy")) ;
-		for (int year = nvdBeginDateYear; year <= currentDateYear; year ++) {
-			nvdFeedDataDownloadJob("nvdcve-1.1-" + year);
-		}
-		
-		String NVD_CVE_PATH = env.getProperty("root.dir");
-		if (StringUtil.isEmpty(NVD_CVE_PATH)) {
-			NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
-		}
-		NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
-		for (int year = nvdBeginDateYear; year <= currentDateYear; year ++) {
-			updateNvdData(NVD_CVE_PATH, "nvdcve-1.1-" + year);
-		}
-		
-	}
-
-
-	/**
-	 * Reset ALL NVD Feed Data 
-	 */
-	private void resetNvdFeedData() {
-		nvdDataMapper.resetCveDataV3();
-		nvdDataMapper.resetNvdDataV3();
-	}
 	
 	private void ignoreSsl() {
 		HostnameVerifier hv = new HostnameVerifier() {
@@ -1869,4 +926,39 @@ public class NvdDataService {
             return;
         }
     }
+	
+	
+//	@SuppressWarnings("unchecked")
+//	private Map<String, Object> getNvdData(String uri) throws SSLException, JsonProcessingException {
+//		final String responseString = getNvdRestWebClient().method(HttpMethod.GET).uri(uri)
+//				.header("Accept", "application/json")
+//				.header("apiKey", NVD_API_KEY).retrieve()
+//				.onStatus(HttpStatus::is4xxClientError,clientResponse -> clientResponse.createException().map(it -> new RuntimeException("code : " + clientResponse.statusCode())))
+//				.bodyToMono(String.class)
+//				.timeout(Duration.ofMillis(1000 * 10))
+//				.retryWhen(Retry.fixedDelay(5, Duration.ofSeconds(15)))
+//				.block();
+//		
+//		log.debug("getNvdData URL:{}, result:{}", uri, responseString);
+//		
+//		return new ObjectMapper().readValue(responseString, Map.class);
+//	}
+//	
+//	private WebClient getNvdRestWebClient() throws SSLException {
+//		return WebClient.builder()
+//				.codecs(c -> c.defaultCodecs().maxInMemorySize(1024 * 1024 * 1024))
+//				.clientConnector(new ReactorClientHttpConnector(getHttpClient()))
+//				.baseUrl(NVD_REST_BASE_URL)
+//				.build();
+//	}
+//	
+//	private HttpClient getHttpClient() throws SSLException {
+//		
+//	    final SslContext sslContext = SslContextBuilder
+//	            .forClient()
+//	            .trustManager(InsecureTrustManagerFactory.INSTANCE)
+//	            .build();
+//
+//	    return HttpClient.create().secure(t -> t.sslContext(sslContext));
+//	}
 }
