@@ -59,6 +59,7 @@
 														<thead>
                                                     		<tr>
                                                         		<th class="text-center" th:text="''"></th>
+                                                        		<th class="text-center" th:text="LicenseId"></th>
                                                         		<th class="text-center" th:text="License"></th>
                                                        		 	<th class="text-center" th:text="Copyright"></th>
                                                     		</tr>
@@ -68,12 +69,7 @@
 											</tr>
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.detectedLicense}"></th>
-												<td>
-													<th:block th:if="${detail?.detectedLicenses != null}" th:each="license, status : ${detail?.detectedLicenses}">
-														<span th:text="${license}"></span>
-														<span th:if="${status.count != status.size}" th:text="|, |"></span>
-													</th:block>
-												</td>
+												<td name="detectedLicenses"></td>
 											</tr>
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.licenseType}"></th>
