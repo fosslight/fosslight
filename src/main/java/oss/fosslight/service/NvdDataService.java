@@ -175,10 +175,6 @@ public class NvdDataService {
 		nvdDataMapper.truncateNvdDataConfigurationsTemp();
 		nvdDataMapper.truncateNvdDataPatchLinkTemp();
 		
-//		if (initializeFlag) {
-//			resetNvdFeedData();
-//		}
-
 		int totalCnt = totalResults;
 		if(totalCnt < API_CPE_CHUNK_SIZE) {
 			totalCnt = API_CPE_CHUNK_SIZE;
@@ -324,10 +320,7 @@ public class NvdDataService {
 									cvePatchList = null;
 								}
 								
-								int cnt = mapper.insertNvdDataV3Temp(cveId);
-								if(cnt == 0) {
-									System.out.println(cveId);
-								}
+								mapper.insertNvdDataV3Temp(cveId);
 							}
 
 							sqlSession.flushStatements();
@@ -343,11 +336,6 @@ public class NvdDataService {
 			sqlSession.commit();
 		}
 
-//		// 업데이트 대상 CVE ID별 configuration가 모두 등록된 이후에
-//		// configuration정보를 이용하여 MATCH_CRITERIA_ID 포함되는 모든 product, version 정보를 추출하여 등록한다.
-//		nvdDataMapper.insertNvdDataV3Temp();
-		
-		
 		if (httpsUrlConnectionFlag) {
 			// configuration data delete & insert
 			if (initializeFlag) {
@@ -367,10 +355,10 @@ public class NvdDataService {
 			nvdDataMapper.copyNvdDataConfigurationsFromTemp();
 			nvdDataMapper.copyNvdDataPatchLinkFromTemp();
 
-//			nvdDataMapper.truncateNvdCveV3Temp();
-//			nvdDataMapper.truncateNvdDataV3Temp();
-//			nvdDataMapper.truncateNvdDataConfigurationsTemp();
-//			nvdDataMapper.truncateNvdDataPatchLinkTemp();
+			nvdDataMapper.truncateNvdCveV3Temp();
+			nvdDataMapper.truncateNvdDataV3Temp();
+			nvdDataMapper.truncateNvdDataConfigurationsTemp();
+			nvdDataMapper.truncateNvdDataPatchLinkTemp();
 			
 			int vendorProductNvdDataV3Cnt = nvdDataMapper.selectVendorProductNvdDataV3Cnt();
 			if (vendorProductNvdDataV3Cnt > 0) {
