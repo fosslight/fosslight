@@ -3492,10 +3492,14 @@ public class CoMailManager extends CoTopComponent {
 				bean.setOssName((String) dataMap.get("OSS_NAME"));
 				bean.setOssVersion((String) dataMap.get("OSS_VERSION"));
 				bean.setOssType(avoidNull((String) dataMap.get("OSS_TYPE")));
-				String[] downloadLocations = ((String) dataMap.get("DOWNLOAD_LOCATION")).split(",");
-				String[] purl = ((String) dataMap.get("PURL")).split(",");
-				String result = appendChangeStyleLinkFormatArray(downloadLocations, purl);
-				bean.setDownloadLocation(result);
+				if (dataMap.get("DOWNLOAD_LOCATION") != null) {
+					String[] downloadLocations = ((String) dataMap.get("DOWNLOAD_LOCATION")).split(",");
+					String[] purl = ((String) dataMap.get("PURL")).split(",");
+					String result = appendChangeStyleLinkFormatArray(downloadLocations, purl);
+					bean.setDownloadLocation(result);
+				} else {
+					bean.setDownloadLocation(avoidNull((String) dataMap.get("DOWNLOAD_LOCATION")));
+				}
 				bean.setHomepage(avoidNull((String) dataMap.get("HOMEPAGE")));
 				bean.setSummaryDescription(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("SUMMARY_DESCRIPTION"))));
 				bean.setImportantNotes(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("IMPORTANT_NOTES"))));
