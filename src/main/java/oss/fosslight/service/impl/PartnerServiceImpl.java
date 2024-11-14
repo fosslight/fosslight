@@ -546,14 +546,16 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		param.setReferenceId(partnerMaster.getPartnerId());
 		param.setReferenceDiv("20");
 		commentMapper.deleteCommentByReferenceId(param);
-		//ossComponents
-		List<OssComponents> componentId = partnerMapper.selectComponentId(partnerMaster.getPartnerId());
 		
-		for (int i = 0; i<componentId.size(); i++){
-			partnerMapper.deleteOssComponentsLicense(componentId.get(i));
-		}
-		
-		partnerMapper.deleteOssComponents(partnerMaster.getPartnerId());
+		partnerMapper.resetOssComponentsAndLicense(partnerMaster.getPartnerId(), CoConstDef.CD_DTL_COMPONENT_PARTNER);
+//		//ossComponents
+//		List<OssComponents> componentId = partnerMapper.selectComponentId(partnerMaster.getPartnerId());
+//		
+//		for (int i = 0; i<componentId.size(); i++){
+//			partnerMapper.deleteOssComponentsLicense(componentId.get(i));
+//		}
+//		
+//		partnerMapper.deleteOssComponents(partnerMaster.getPartnerId());
 	}
 	
 	@Override

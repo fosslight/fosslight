@@ -98,5 +98,7 @@ public interface ApiProjectMapper {
 	void insertWatcher(Map<String, Object> paramMap);
 
 	void updateProjectSubStatus(Map<String, Object> param);
+	
+	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
 
 }

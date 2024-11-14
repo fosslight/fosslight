@@ -1907,22 +1907,24 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		// delete component
 		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("referenceId", (String) prjId);
-		paramMap.put("referenceDiv", (String) CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-		paramMap.put("merge", (String) merge);
-		paramMap.put("roleOutLicense", (String) CoCodeManager.CD_ROLE_OUT_LICENSE);
-		paramMap.put("saveBomFlag", (String) CoConstDef.FLAG_YES);
+		paramMap.put("referenceId", prjId);
+		paramMap.put("referenceDiv", CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		paramMap.put("merge", merge);
+		paramMap.put("roleOutLicense", CoCodeManager.CD_ROLE_OUT_LICENSE);
+		paramMap.put("saveBomFlag", CoConstDef.FLAG_YES);
 		
-		List<String> componentId = apiProjectMapper.selectComponentId(paramMap);
 		
-		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
-		if (componentId.size() > 0){
-			for (int i = 0; i < componentId.size(); i++) {
-				apiProjectMapper.deleteOssComponentsLicense(componentId.get(i));
-			}
-			
-			apiProjectMapper.deleteOssComponents(paramMap);
-		}
+		apiProjectMapper.resetOssComponentsAndLicense(prjId, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+//		List<String> componentId = apiProjectMapper.selectComponentId(paramMap);
+//		
+//		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
+//		if (componentId.size() > 0){
+//			for (int i = 0; i < componentId.size(); i++) {
+//				apiProjectMapper.deleteOssComponentsLicense(componentId.get(i));
+//			}
+//			
+//			apiProjectMapper.deleteOssComponents(paramMap);
+//		}
 		
 		HashMap<String, Object> mergeListMap = getIdentificationGridList(paramMap);
 		
@@ -3147,13 +3149,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	public void updateSubStatus(Map<String, Object> param) {
 		apiProjectMapper.updateProjectSubStatus(param);
 
-		List<String> componentIds = apiProjectMapper.selectComponentId(param);
+		apiProjectMapper.resetOssComponentsAndLicense((String)param.get("referenceId"), (String)param.get("referenceDiv"));
 		
-		for (String componentId : componentIds) {
-			apiProjectMapper.deleteOssComponentsLicense(componentId);
-		}
-		
-		apiProjectMapper.deleteOssComponents(param);
+//		List<String> componentIds = apiProjectMapper.selectComponentId(param);
+//		
+//		for (String componentId : componentIds) {
+//			apiProjectMapper.deleteOssComponentsLicense(componentId);
+//		}
+//		
+//		apiProjectMapper.deleteOssComponents(param);
 	}
 
 	@SuppressWarnings("unchecked")

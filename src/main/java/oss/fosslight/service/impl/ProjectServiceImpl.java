@@ -1940,17 +1940,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public void updateSubStatus(Project project) {
 		projectMapper.updateProjectSubStatus(project);
 
-		ProjectIdentification components = new ProjectIdentification();
-		components.setReferenceId(project.getPrjId());
-		components.setReferenceDiv(project.getReferenceDiv());
-		
-		List<OssComponents> componentsLicense = projectMapper.selectComponentId(components);
-		
-		for (OssComponents oc : componentsLicense) {
-			projectMapper.deleteOssComponentsLicense(oc);
-		}
-		
-		projectMapper.deleteOssComponents(components);
+//		ProjectIdentification components = new ProjectIdentification();
+//		components.setReferenceId(project.getPrjId());
+//		components.setReferenceDiv(project.getReferenceDiv());
+//		
+//		List<OssComponents> componentsLicense = projectMapper.selectComponentId(components);
+//		
+//		for (OssComponents oc : componentsLicense) {
+//			projectMapper.deleteOssComponentsLicense(oc);
+//		}
+//		
+//		projectMapper.deleteOssComponents(components);
+		projectMapper.resetOssComponentsAndLicense(project.getPrjId(), project.getReferenceDiv());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -3301,11 +3302,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
 		if (componentId.size() > 0){
-			for (int i = 0; i < componentId.size(); i++) {
-				projectMapper.deleteOssComponentsLicense(componentId.get(i));
-			}
-			
-			projectMapper.deleteOssComponents(identification);
+			projectMapper.resetOssComponentsAndLicense(identification.getReferenceId(), identification.getReferenceDiv());
+//			for (int i = 0; i < componentId.size(); i++) {
+//				projectMapper.deleteOssComponentsLicense(componentId.get(i));
+//			}
+//			
+//			projectMapper.deleteOssComponents(identification);
 		}
 		
 		identification.setMerge(merge);
@@ -3953,16 +3955,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			// 1) packaging components delete 처리
-			ProjectIdentification delParam = new ProjectIdentification();
-			delParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
-			delParam.setReferenceId(project.getPrjId());
-			List<OssComponents> componentId = projectMapper.selectComponentId(delParam);
-			
-			for (int i = 0; i < componentId.size(); i++) {
-				projectMapper.deleteOssComponentsLicense(componentId.get(i));
-			}
-			
-			projectMapper.deleteOssComponents(delParam);
+//			ProjectIdentification delParam = new ProjectIdentification();
+//			delParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
+//			delParam.setReferenceId(project.getPrjId());
+//			List<OssComponents> componentId = projectMapper.selectComponentId(delParam);
+//			
+//			for (int i = 0; i < componentId.size(); i++) {
+//				projectMapper.deleteOssComponentsLicense(componentId.get(i));
+//			}
+//			
+//			projectMapper.deleteOssComponents(delParam);
+			projectMapper.resetOssComponentsAndLicense(project.getPrjId(), CoConstDef.CD_DTL_COMPONENT_PACKAGING);
 			
 			// 2) get bom list
 			ProjectIdentification bomParam = new ProjectIdentification();
