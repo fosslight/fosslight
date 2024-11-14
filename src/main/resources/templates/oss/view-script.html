@@ -8,6 +8,7 @@
 	
 	var data = {
 		detail : [[${detail}]],
+		detectedLicenseIdByName : [[${detectedLicenseIdByName}]],
 		list : [[${list}]],
 		components : [[${components}]],
 		componentsPartner : [[${componentsPartner}]],
@@ -76,6 +77,17 @@
                         break;
 				}
 			});
+			
+			$.each(detail.detectedLicenses, function(idx, cur){
+				if (idx == 0){
+					$("[name='detectedLicenses']").empty();
+				}
+				if ("" != cur){
+					var tagForTab = '<a href="#none" onclick=createTabInFrame("'+data.detectedLicenseIdByName[cur]+'_License","#/license/edit/'+data.detectedLicenseIdByName[cur]+'")>'+cur+'</a>'
+					if ($("[name='detectedLicenses']").find("a").length > 0) $("[name='detectedLicenses']:last").append(", ");
+					$("[name='detectedLicenses']:last").append(tagForTab);
+				}	
+			});
 		}
 	}
 	
@@ -92,8 +104,13 @@
 		    	data : list,
 		    	columns : [ {
 		    		data : "ossLicenseComb"
+		    	},{
+		    		data : "licenseId"
 		    	}, {
-		      		data : "licenseNameEx"
+		      		data : "licenseNameEx",
+					render : function(data, type, row, meta){
+						return '<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","#/license/edit/'+row.licenseId+'")>'+data+'</a>';
+					}
 		    	}, {
 		      		data : "ossCopyright"
 		    	}],
@@ -105,11 +122,15 @@
 			      	},
 			      	{
 			      		targets : [1],
+	        			visible: false
+			      	},
+			      	{
+			      		targets : [2],
 			      		className : "text-center",
 			      		width: "30%"
 			      	},
 			      	{
-			      		targets : [2],
+			      		targets : [3],
 			      		className : "text-left"
 			      	}
 			    ]
