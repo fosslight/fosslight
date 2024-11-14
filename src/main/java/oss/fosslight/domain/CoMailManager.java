@@ -1963,12 +1963,25 @@ public class CoMailManager extends CoTopComponent {
 			}
 			after.setCopyright(appendChangeStyleMultiLine(before.getCopyright(), after.getCopyright(), true));
 			isModified = checkEquals(before.getCopyright(), after.getCopyright(), isModified);
-			
-			String[] beforeUrl = before.getDownloadLocation().split(",");
-			String[] beforePurl = before.getPurl().split(",");
+			String[] beforeUrl = null;
+			String[] beforePurl = null;
+			if (!isEmpty(before.getDownloadLocation())) {
+				beforeUrl = before.getDownloadLocation().split(",");
+				beforePurl = before.getPurl().split(",");
+			} else {
+				beforeUrl = new String[0];
+				beforePurl = new String[0];
+			}
 			before.setDownloadLocationLinkFormat(appendChangeStyleLinkFormatArray(beforeUrl, beforePurl));
-			String[] afterUrl = after.getDownloadLocation().split(",");
-			String[] afterPurl = after.getPurl().split(",");
+			String[] afterUrl = null;
+			String[] afterPurl = null;
+			if (!isEmpty(after.getDownloadLocation())) {
+				afterUrl = after.getDownloadLocation().split(",");
+				afterPurl = after.getPurl().split(",");
+			} else {
+				afterUrl = new String[0];
+				afterPurl = new String[0];
+			}
 			String resultDownloadLocation = appendChangeStyleLinkFormatArray(beforeUrl, afterUrl, beforePurl, afterPurl, 0);
 			after.setDownloadLocationLinkFormat(resultDownloadLocation);
 			isModified = checkEquals(before.getDownloadLocation(), after.getDownloadLocation(), isModified);
