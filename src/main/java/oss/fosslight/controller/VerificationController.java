@@ -189,29 +189,34 @@ public class VerificationController extends CoTopComponent {
 		
 		Project projectMaster = projectService.getProjectDetail(project);
 		projectMaster.setVulDocInfo(CommonFunction.getMessageForVulDOC(req, "info"));
-		projectMaster.setVulDocInst(CommonFunction.getMessageForVulDOC(req, "inst"));
+		projectMaster.setVulDocInst(CommonFunction.getMessageForVulDOC(req, "inst").replace("<br />", " "));
 		
 		if (!StringUtil.isEmpty(projectMaster.getCreator())){
 			projectMaster.setPrjDivision(projectService.getDivision(projectMaster));	
 		}
 		
-		CommentsHistory comHisBean = new CommentsHistory();
-		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
-		comHisBean.setReferenceId(projectMaster.getPrjId());
-		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
+//		CommentsHistory comHisBean = new CommentsHistory();
+//		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
+//		comHisBean.setReferenceId(projectMaster.getPrjId());
+//		projectMaster.setUserComment(commentService.getUserComment(comHisBean));
 		
 		//프로젝트 정보
 		model.addAttribute("project", projectMaster);
 		
 		OssNotice _noticeInfo = projectService.setCheckNotice(projectMaster);
 		
-		if (_noticeInfo != null && CoConstDef.FLAG_NO.equals(projectMaster.getUseCustomNoticeYn())) {
+		if (_noticeInfo != null) {
 			// Notice Type: Accompanied with source code인 경우 Default Company Name, Email 세팅
 			model.addAttribute("ossNotice", _noticeInfo);
 		}
 		
-		List<OssComponents> list = verificationService.getVerifyOssList(projectMaster);
-		list = verificationService.setMergeGridData(list);
+		List<OssComponents> list = null;
+		try {
+			list = verificationService.getVerifyOssList(projectMaster);
+			if (list != null) list = verificationService.setMergeGridData(list);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		List<LicenseMaster> userGuideLicenseList = new ArrayList<>();
 		// 중목제거용
@@ -226,12 +231,12 @@ public class VerificationController extends CoTopComponent {
 					for (String license : bean.getLicenseName().split(",", -1)) {
 						licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
 						if (licenseBean != null && !isEmptyWithLineSeparator(licenseBean.getDescription()) 
-								&& !duplLicenseCheckList.contains(licenseBean.getLicenseId())) {
+								&& !duplLicenseCheckList.contains(licenseBean.getLicenseId())
+								&& CoConstDef.FLAG_YES.equals(avoidNull(licenseBean.getObligationDisclosingSrcYn()))) {
 							userGuideLicenseList.add(licenseBean);
 							duplLicenseCheckList.add(licenseBean.getLicenseId());
 						}
 					}
-					
 				}
 			}
 		}
@@ -242,6 +247,7 @@ public class VerificationController extends CoTopComponent {
 		File packageFile = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId());
 		File packageFile2 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2());
 		File packageFile3 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3());
+		File packageFile4 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId4());
 		
 		if (packageFile != null) {
 			if (!isEmpty(packageFile.getRefPrjId())) projectMaster.setReuseRefPrjId1(packageFile.getRefPrjId());
@@ -255,9 +261,14 @@ public class VerificationController extends CoTopComponent {
 			if (!isEmpty(packageFile3.getRefPrjId())) projectMaster.setReuseRefPrjId3(packageFile3.getRefPrjId());
 			existsFileFlag = true;
 		}
+		if (packageFile4 != null) {
+			if (!isEmpty(packageFile4.getRefPrjId())) projectMaster.setReuseRefPrjId4(packageFile4.getRefPrjId());
+			existsFileFlag = true;
+		}
 		files.add(packageFile);
 		files.add(packageFile2);
 		files.add(packageFile3);
+		files.add(packageFile4);
 		
 		if (!isEmpty(projectMaster.getPackageVulDocFileId())) {
 			File file = verificationMapper.selectVerificationVulDocFile(projectMaster.getPackageVulDocFileId());

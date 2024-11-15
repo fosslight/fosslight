@@ -21,6 +21,7 @@
         var deleteFileList = new Array();
         var isAndroid = [[${project.androidFlag}]];
         var appendReadOnlyFlag = false;
+        var activeTab = null;
         var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
 
      	// prevent clicking the OK button on Enter
@@ -176,6 +177,7 @@
         		if ("Packaging" == tabId && datas.ossList.length < 1) {
     				alertify.alert([[#{msg.project.verification.confirm.package}]], function(){
     					$("#tabMenuNotice").click();
+    					activeTab = "1";
     					if ('CONF' == curIdenStatus) $("#save").hide();
     				});
     			} else if("Notice" == tabId && isAndroid == "Y") {
@@ -184,11 +186,13 @@
     			}
         		
         		if ("Packaging" == tabId) {
+        			activeTab = null;
         			$("#save").hide();
         			$("#btnSavePath").show();
         			$("#verify").show();
         			$("#girdAreaPackaging").show();
         		} else {
+        			activeTab = "1";
         			$("#verify").hide();
         			$("#btnSavePath").hide();
         			$("#save").show();
@@ -655,9 +659,14 @@
 
                                         var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
                                         fn.defaultNotice(checkedFlag);
-
+                                        
+                                        var _iframeUrl = "/project/verification/";
+                                    	if (activeTab != null) _iframeUrl += "1/";
+                                    	_iframeUrl += [[${project.prjId}]];
+                                        
                                         alertify.alert([[#{msg.common.success}]], function () {
-                                            deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
+                                        	activeDeleteTabInFrame();
+                                            createTabInFrame([[${project.prjId}]] + '_Packaging', _iframeUrl);
                                             activeTabInFrameList("PROJECT");
                                         });
                                     }
@@ -1577,7 +1586,7 @@
                                     alertify.error([[#{msg.common.valid2}]], 0);
                                 } else {
                                     alertify.alert([[#{msg.common.success}]], function () {
-                                    	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
+                                    	activeDeleteTabInFrame();
                                         createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/' + [[${project.prjId}]]);
                                     });
                                 }
@@ -1866,9 +1875,13 @@
                         fn.procRequest(tempHandler);
                         tempHandler = ""; // temp clear
                     } else {
+                    	var _iframeUrl = "/project/verification/";
+                    	if (activeTab != null) _iframeUrl += "1/";
+                    	_iframeUrl += [[${project.prjId}]];
+                    	
                         alertify.alert([[#{msg.common.success}]], function () {
-                        	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
-							createTabInFrame([[${project.prjId}]] + '_Packaging', "/project/verification/1/" + [[${project.prjId}]]);
+                        	activeDeleteTabInFrame();
+							createTabInFrame([[${project.prjId}]] + '_Packaging', _iframeUrl);
                         });
                     }
                 }
@@ -2085,10 +2098,14 @@
                     success: function (data) {
                         fn.btnCtl(userRole, status);
                         reloadTabInframe('/project/list');
-
+                        
+                        var _iframeUrl = "/project/verification/";
+                    	if (activeTab != null) _iframeUrl += "1/";
+                    	_iframeUrl += [[${project.prjId}]];
+                        
                         alertify.alert([[#{msg.common.success}]], function () {
-                        	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
-							createTabInFrame([[${project.prjId}]] + '_Packaging', "/project/verification/" + [[${project.prjId}]]);
+                        	activeDeleteTabInFrame();
+							createTabInFrame([[${project.prjId}]] + '_Packaging', _iframeUrl);
                         });
                     },
                     error: function (data) {
