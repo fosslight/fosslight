@@ -4524,6 +4524,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			CoMail mailBean = new CoMail(mailType);
 			mailBean.setParamOssId(ossId);
 			mailBean.setComment(ossMaster.getComment());
+			mailBean.setParamReferenceDiv(ossMaster.getReferenceDiv());
 
 			if (!isNew && !isDeactivateFlag) {
 				mailBean.setCompareDataBefore((OssMaster) resMap.get("beforeBean"));
