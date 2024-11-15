@@ -217,6 +217,11 @@ public class NvdDataService {
 								List<String> matchCriteriaIdDuplicatedList = new ArrayList<>();
 
 								for (Map<String, Object> cpe_match_data : cpe_match_all) {
+									boolean vulnerable = (boolean) cpe_match_data.get("vulnerable");
+									if (!vulnerable) {
+										continue;
+									}
+									
 									// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
 									// Version Range 조건 취득
 									// 검색 조건 설정
