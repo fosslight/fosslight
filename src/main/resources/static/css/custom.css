@@ -830,6 +830,10 @@ div.jqcloud span.w1 { color: #feb24c; }
 	white-space: nowrap;
 }
 
+.ui-jqgrid tr.jqgrow td[aria-describedby$="licenseName"] {
+	white-space: pre;
+}
+
 .ui-jqgrid tr.jqgrow td .btnCLight {
     background-color: #999;
     color: #fff;
