@@ -827,10 +827,6 @@ div.jqcloud span.w1 { color: #feb24c; }
 
 .ui-jqgrid tr.jqgrow td {
 	overflow: hidden;
-	white-space: nowrap;
-}
-
-.ui-jqgrid tr.jqgrow td[aria-describedby$="licenseName"] {
 	white-space: pre;
 }
 
