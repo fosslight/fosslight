@@ -39,15 +39,7 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.ShellCommander;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.History;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssComponents;
-import oss.fosslight.domain.OssComponentsLicense;
-import oss.fosslight.domain.OssNotice;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.UploadFile;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.ApiFileMapper;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.repository.ApiProjectMapper;
@@ -124,7 +116,22 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		return result;
 	}
-	
+
+	public boolean checkUserPermissionForProject(T2Users userInfo,String prjId){
+		Map<String, Object> paramMap = new HashMap<>();
+		List<String> prjIdList = new ArrayList<String>();
+		prjIdList.add(prjId);
+		paramMap.put("userId", userInfo.getUserId());
+		paramMap.put("loginUserName", userInfo.getUserName());
+		paramMap.put("userRole", userRole(userInfo));
+		paramMap.put("prjId", prjIdList);
+		paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
+		paramMap.put("distributionType", "normal");
+		paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+		return existProjectCnt(paramMap);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean existProjectCnt(Map<String, Object> paramMap) {

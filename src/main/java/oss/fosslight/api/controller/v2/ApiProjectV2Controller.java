@@ -6,6 +6,7 @@
 package oss.fosslight.api.controller.v2;
 
 import com.google.common.collect.Lists;
+import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
@@ -42,6 +43,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
+import java.lang.reflect.Type;
 import java.util.*;
 
 @Api(tags = {"3. Project"})
@@ -600,6 +602,61 @@ public class ApiProjectV2Controller extends CoTopComponent {
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
+    @ApiImplicitParams ({
+        @ApiImplicitParam(name = "id", value = "Project id", required = true, paramType = "header"),
+        @ApiImplicitParam(name = "tab_name", value = "Upload Target Tab Name (Valid Input: dep, src, bin)",
+                required = true, allowableValues = "dep, src, bin", paramType = "path")
+    })
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_IDENTIFICATION_RESET})
+    public ResponseEntity<Map<String, Object>> identificationReset(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @PathVariable(name = "id") String prjId,
+            @PathVariable(name = "tab_name") String tabName
+    ){
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
+
+        if (!apiProjectService.checkUserPermissionForProject(userInfo, prjId)) {
+            return responseService.errorResponse(HttpStatus.NOT_FOUND);
+        }
+
+        tabName = tabName.toUpperCase();
+
+        Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {
+        }.getType();
+        List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
+        ossComponents = (List<ProjectIdentification>) fromJson("[]", collectionType2);
+        List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
+
+        Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
+        ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+        ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+
+        Project project = new Project();
+        project.setPrjId(prjId);
+
+
+        switch(tabName) {
+            case "DEP":
+                project.setIdentificationSubStatusDep("Y");
+                projectService.registDepOss(ossComponents, ossComponentsLicense, project);
+                break;
+            case "SRC":
+                project.setIdentificationSubStatusSrc("Y");
+                projectService.registSrcOss(ossComponents, ossComponentsLicense, project);
+                break;
+            case "BIN":
+                project.setIdentificationSubStatusBin("Y");
+                projectService.registBinOss(ossComponents, ossComponentsLicense, project);
+                break;
+        }
+
+
+
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
     @ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")

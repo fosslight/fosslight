@@ -1013,8 +1013,13 @@ public final class Url {
 			/** API Project Add Watcher */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/projects/{id}/watchers";
 
+
+			/** API OSS Report upload */
+			public static final String FOSSLIGHT_API_IDENTIFICATION_RESET = "/projects/{id}/{tab_name}/reset";
+
 			/** API OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT = "/projects/{id}/{tab_name}/reports";
+
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/projects/{id}/src";
 			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/projects/{id}/bin";
 			public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/projects/{id}/report-android";
