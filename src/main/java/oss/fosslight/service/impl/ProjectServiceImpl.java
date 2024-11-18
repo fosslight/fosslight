@@ -589,71 +589,66 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
 				boolean setCveInfoFlag = false;
+				
+				if (ll.getCvssScoreMax() != null) {
+					String cveId = ll.getCvssScoreMax().split("\\@")[4];
+					if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
+				}
+				if (ll.getCvssScoreMax1() != null) {
+					String cveId = ll.getCvssScoreMax1().split("\\@")[4];
+					if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
+				}
+				if (ll.getCvssScoreMax2() != null) {
+					String cveId = ll.getCvssScoreMax2().split("\\@")[4];
+					if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
+				}
+				if (ll.getCvssScoreMax3() != null) {
+					String cveId = ll.getCvssScoreMax3().split("\\@")[4];
+					if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
+				}
+				if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+					if (cvssScoreMaxList.size() > 1) {
+						Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+							@Override
+							public int compare(String o1, String o2) {
+								if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+									return -1;
+								}else {
+									return 1;
+								}
+							}
+						});
+					}
+					
+					String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+					ll.setCvssScore(cveData[3]);
+					ll.setCveId(cveData[4]);
+					ll.setVulnYn(CoConstDef.FLAG_YES);
+				} else {
+					String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
+					if (conversionCveInfo != null) {
+						String[] conversionCveData = conversionCveInfo.split("\\@");
+						ll.setCvssScore(conversionCveData[3]);
+						ll.setCveId(conversionCveData[4]);
+						ll.setVulnYn(CoConstDef.FLAG_YES);
+					} else {
+						setCveInfoFlag = true;
+					}
+				}
+				
+				cvssScoreMaxList.clear();
+				
 				if (ossInfoMap.containsKey(key)) {
 					OssMaster om = ossInfoMap.get(key);
-					if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag()))) {
+					if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
 						String cveId = om.getCveId();
 						String cvssScore = om.getCvssScore();
 						if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
 							ll.setCvssScore(cvssScore);
 							ll.setCveId(cveId);
 							ll.setVulnYn(CoConstDef.FLAG_YES);
-						} else {
-							setCveInfoFlag = true;
-						}
-					} else {
-						setCveInfoFlag = true;
-					}
-				} else {
-					setCveInfoFlag = true;
-				}
-				
-				if (setCveInfoFlag) {
-					if (ll.getCvssScoreMax() != null) {
-						String cveId = ll.getCvssScoreMax().split("\\@")[4];
-						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
-					}
-					if (ll.getCvssScoreMax1() != null) {
-						String cveId = ll.getCvssScoreMax1().split("\\@")[4];
-						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
-					}
-					if (ll.getCvssScoreMax2() != null) {
-						String cveId = ll.getCvssScoreMax2().split("\\@")[4];
-						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
-					}
-					if (ll.getCvssScoreMax3() != null) {
-						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
-						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
-					}
-					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
-						if (cvssScoreMaxList.size() > 1) {
-							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
-								@Override
-								public int compare(String o1, String o2) {
-									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
-										return -1;
-									}else {
-										return 1;
-									}
-								}
-							});
-						}
-						
-						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
-						ll.setCvssScore(cveData[3]);
-						ll.setCveId(cveData[4]);
-						ll.setVulnYn(CoConstDef.FLAG_YES);
-					} else {
-						String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
-						if (conversionCveInfo != null) {
-							String[] conversionCveData = conversionCveInfo.split("\\@");
-							ll.setCvssScore(conversionCveData[3]);
-							ll.setCveId(conversionCveData[4]);
-							ll.setVulnYn(CoConstDef.FLAG_YES);
 						}
 					}
-					
-					cvssScoreMaxList.clear();
 				}
 				
 				if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(ll.getRefDiv())) {
@@ -921,71 +916,65 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
 					boolean setCveInfoFlag = false;
 					
+					if (bean.getCvssScoreMax() != null) {
+						String cveId = bean.getCvssScoreMax().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax());
+					}
+					if (bean.getCvssScoreMax1() != null) {
+						String cveId = bean.getCvssScoreMax1().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax1());
+					}
+					if (bean.getCvssScoreMax2() != null) {
+						String cveId = bean.getCvssScoreMax2().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax2());
+					}
+					if (bean.getCvssScoreMax3() != null) {
+						String cveId = bean.getCvssScoreMax3().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax3());
+					}
+					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+						if (cvssScoreMaxList.size() > 1) {
+							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+								@Override
+								public int compare(String o1, String o2) {
+									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+										return -1;
+									}else {
+										return 1;
+									}
+								}
+							});
+						}
+						
+						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+						bean.setCvssScore(cveData[3]);
+						bean.setCveId(cveData[4]);
+						bean.setVulnYn(CoConstDef.FLAG_YES);
+					} else {
+						String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, null, cvssScoreMaxList, true);
+						if (conversionCveInfo != null) {
+							String[] conversionCveData = conversionCveInfo.split("\\@");
+							bean.setCvssScore(conversionCveData[3]);
+							bean.setCveId(conversionCveData[4]);
+							bean.setVulnYn(CoConstDef.FLAG_YES);
+						} else {
+							setCveInfoFlag = true;
+						}
+					}
+					
+					cvssScoreMaxList.clear();
+					
 					if (ossInfoMap.containsKey(key)) {
 						OssMaster om = ossInfoMap.get(key);
-						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag()))) {
+						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
 							String cveId = om.getCveId();
 							String cvssScore = om.getCvssScore();
 							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
 								bean.setCvssScore(cvssScore);
 								bean.setCveId(cveId);
 								bean.setVulnYn(CoConstDef.FLAG_YES);
-							} else {
-								setCveInfoFlag = true;
-							}
-						} else {
-							setCveInfoFlag = true;
-						}
-					} else {
-						setCveInfoFlag = true;
-					}
-					
-					if (setCveInfoFlag) {
-						if (bean.getCvssScoreMax() != null) {
-							String cveId = bean.getCvssScoreMax().split("\\@")[4];
-							if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax());
-						}
-						if (bean.getCvssScoreMax1() != null) {
-							String cveId = bean.getCvssScoreMax1().split("\\@")[4];
-							if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax1());
-						}
-						if (bean.getCvssScoreMax2() != null) {
-							String cveId = bean.getCvssScoreMax2().split("\\@")[4];
-							if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax2());
-						}
-						if (bean.getCvssScoreMax3() != null) {
-							String cveId = bean.getCvssScoreMax3().split("\\@")[4];
-							if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax3());
-						}
-						if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
-							if (cvssScoreMaxList.size() > 1) {
-								Collections.sort(cvssScoreMaxList, new Comparator<String>() {
-									@Override
-									public int compare(String o1, String o2) {
-										if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
-											return -1;
-										}else {
-											return 1;
-										}
-									}
-								});
-							}
-							
-							String[] cveData = cvssScoreMaxList.get(0).split("\\@");
-							bean.setCvssScore(cveData[3]);
-							bean.setCveId(cveData[4]);
-							bean.setVulnYn(CoConstDef.FLAG_YES);
-						} else {
-							String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, null, cvssScoreMaxList, true);
-							if (conversionCveInfo != null) {
-								String[] conversionCveData = conversionCveInfo.split("\\@");
-								bean.setCvssScore(conversionCveData[3]);
-								bean.setCveId(conversionCveData[4]);
-								bean.setVulnYn(CoConstDef.FLAG_YES);
 							}
 						}
-						
-						cvssScoreMaxList.clear();
 					}
 				}
 				
