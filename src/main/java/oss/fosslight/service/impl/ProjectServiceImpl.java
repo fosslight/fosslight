@@ -590,9 +590,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
 					boolean setCveInfoFlag = false;
-					if (key.equals("_")) {
-						System.out.println(key);
-					}
+					
 					if (ll.getCvssScoreMax() != null) {
 						String cveId = ll.getCvssScoreMax().split("\\@")[4];
 						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
