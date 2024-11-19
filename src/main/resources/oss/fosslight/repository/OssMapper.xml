@@ -97,6 +97,7 @@
 			, DOWNLOAD_LOCATION
 			, HOMEPAGE
 			, SUMMARY_DESCRIPTION
+			, IMPORTANT_NOTES
 		)
 		VALUES
 		(
@@ -107,6 +108,7 @@
 			, #{downloadLocation}
 			, #{homepage}
 			, #{summaryDescription}
+			, #{importantNotes}
 		) ON DUPLICATE KEY UPDATE
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossCommonId)">
 			OSS_COMMON_ID					= #{ossCommonId},
@@ -115,6 +117,7 @@
 			, DOWNLOAD_LOCATION             = #{downloadLocation}                
 			, HOMEPAGE                      = #{homepage}                
 			, SUMMARY_DESCRIPTION           = #{summaryDescription}      
+			, IMPORTANT_NOTES				= #{importantNotes}
 	</insert>
 	
 	<insert id="insertOssMaster" parameterType="oss.fosslight.domain.OssMaster" useGeneratedKeys="true" keyProperty="ossId" >
@@ -139,7 +142,6 @@
 			, LICENSE_TYPE
 			, OBLIGATION_TYPE
 			, RESTRICTION
-			, IMPORTANT_NOTES
 		)
 		VALUES
 		(
@@ -162,7 +164,6 @@
 			, #{licenseType}
 			, #{obligationType}
 			, #{restriction}
-			, #{importantNotes}
 		) ON DUPLICATE KEY UPDATE
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossId)">
 			OSS_ID						  	= #{ossId} ,
@@ -183,7 +184,6 @@
 			, VULN_RECHECK					= 'Y'   
 			</if>
 			, RESTRICTION					= #{restriction}
-			, IMPORTANT_NOTES				= #{importantNotes}
 	</insert>
 	
 	<insert id="insertOssLicenseDeclared" parameterType="oss.fosslight.domain.OssMaster">
@@ -1016,7 +1016,7 @@
 				OV.MODIFIER,
 				OV.MODIFIED_DATE,
 				OV.RESTRICTION,
-				OV.IMPORTANT_NOTES,
+				OC.IMPORTANT_NOTES,
 				OV.IN_CPE_MATCH_FLAG
   			FROM OSS_COMMON OC
   			LEFT JOIN OSS_VERSION OV
@@ -1576,7 +1576,7 @@
 				OV.MODIFIER,
 				OV.MODIFIED_DATE,
 				OV.RESTRICTION,
-				OV.IMPORTANT_NOTES,
+				OC.IMPORTANT_NOTES,
 				OV.IN_CPE_MATCH_FLAG
   			FROM OSS_COMMON OC
   			LEFT JOIN OSS_VERSION OV
@@ -1657,7 +1657,7 @@
 				OV.MODIFIER,
 				OV.MODIFIED_DATE,
 				OV.RESTRICTION,
-				OV.IMPORTANT_NOTES,
+				OC.IMPORTANT_NOTES,
 				OV.IN_CPE_MATCH_FLAG
   			FROM OSS_COMMON OC
   			LEFT JOIN OSS_VERSION OV
@@ -2457,7 +2457,7 @@
 				OV.MODIFIER,
 				OV.MODIFIED_DATE,
 				OV.RESTRICTION,
-				OV.IMPORTANT_NOTES,
+				OC.IMPORTANT_NOTES,
 				OV.IN_CPE_MATCH_FLAG
   			FROM OSS_COMMON OC
   			LEFT OUTER JOIN OSS_VERSION OV
@@ -2867,7 +2867,7 @@
 					OV.MODIFIER,
 					OV.MODIFIED_DATE,
 					OV.RESTRICTION,
-					OV.IMPORTANT_NOTES,
+					OC.IMPORTANT_NOTES,
 					OV.IN_CPE_MATCH_FLAG
   				FROM OSS_COMMON OC
   				LEFT JOIN OSS_VERSION OV
