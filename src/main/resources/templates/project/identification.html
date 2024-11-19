@@ -165,7 +165,7 @@
                                         <span class="dropdown-icon"></span>Pre-Review
                                    	</button>
                                    	<div class="dropdown-menu" role="menu">
-                                       	<span th:class="'custom-layout dropdown-item ' + ${!@CommonFunction.isAdmin() ? 'disabled' : '' + ' pointer ' }" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Open Source'"></span>
+                                       	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssViewPage('DEP')|" th:text="'Open Source'"></span>
                                        	<span class="dropdown-item pointer" th:onclick="|com_fn.CheckOssLicenseViewPage('DEP')|" th:text="'License'"></span>
                                    	</div>
                                 </div>
