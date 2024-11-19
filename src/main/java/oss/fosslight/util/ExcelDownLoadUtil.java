@@ -212,19 +212,21 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			}
 			
 			//BIN(ANDROID)
-			if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
 				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 				
 				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, wb.getSheetAt(6), projectService.getIdentificationGridList(ossListParam), projectInfo);
 			}
 			
 			//bom
-			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
-				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
+				ossListParam.setReferenceDiv(isEmpty(type) ? CoConstDef.CD_DTL_COMPONENT_ID_BOM : type);
 				ossListParam.setMerge(CoConstDef.FLAG_NO);
 				
 				Map<String, Object> map = projectService.getIdentificationGridList(ossListParam);
-				map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
+				if (!CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
+					map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
+				}
 				
 				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BOM, wb.getSheetAt(7), map, projectInfo);
 			}
@@ -293,7 +295,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			//Excell export sort
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 
-			if (!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+			if (!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) && !CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
 				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
 				pv.setAppendix("mainList", list);
 				
@@ -387,7 +389,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			String currentGroupKey = null;
 			
 			for (ProjectIdentification bean : list) {
-				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
 					if (currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
 						for (String[] editRow : rows) {
 							if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-")
@@ -408,6 +410,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 										break;
 									case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
 										referenceDivChk = "BIN";
+										
+										break;
+									case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID:
+										if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("1")) {
+											referenceDivChk = "BIN(ANDROID)";
+										} else if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("2")) {
+											referenceDivChk = "BIN(YOCTO)";
+										}
 										
 										break;
 									default:
@@ -435,7 +445,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					List<String> params = new ArrayList<>();
 					// main 정보
-					params.add(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : "");
+					params.add(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : "");
 					params.add(bean.getOssName()); // OSS Name
 					params.add(bean.getOssVersion()); // OSS Version
 					params.add(bean.getLicenseName()); // LICENSE
@@ -486,6 +496,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
 								if (!isEmpty(refSrcTab)) refSrcTab += ",";
 								refSrcTab += "BIN";
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+								if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("1")) {
+									refSrcTab += "BIN(ANDROID)";
+								} else if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("2")) {
+									refSrcTab += "BIN(YOCTO)";
+								}
 								break;
 							default:
 								break;
@@ -1912,6 +1930,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 				
 				break;
+			case "binAndroidBom" :	//bin android bom List
+				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+				
+				break;
 			case "partner" :		//identification > 3rd List
 				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 				
@@ -3021,10 +3043,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					strPrjName += "-" + projectInfo.getPrjVersion();
 				}
 				
+				ossNotice.setRefDiv(projectInfo.getReferenceDiv());
 				packageInfo = projectService.getExportDataForSBOMInfo(ossNotice);
 				
-				projectInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
-				dependenciesDataList = projectService.getDependenciesDataList(projectInfo);
+				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(projectInfo.getReferenceDiv())) {
+					projectInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+					dependenciesDataList = projectService.getDependenciesDataList(projectInfo);
+				}
 			} else {
 				PartnerMaster partner = new PartnerMaster();
 				partner.setPartnerId(prjId);

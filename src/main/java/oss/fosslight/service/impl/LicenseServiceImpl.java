@@ -75,6 +75,16 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 
 	@Override
 	public int selectLicenseMasterTotalCount(LicenseMaster licenseMaster) {
+		if (licenseMaster.getRestrictions() != null) {
+			String restrictions = licenseMaster.getRestrictions();
+						
+			if (!isEmpty(restrictions)){
+				String[] arrRestrictions = restrictions.split(",");
+				
+				licenseMaster.setArrRestriction(arrRestrictions);
+			}
+		}
+		
 		return licenseMapper.selectLicenseMasterTotalCount(licenseMaster);
 	}
 	

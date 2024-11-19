@@ -297,6 +297,7 @@ public final class Url {
 		public static final String SAVE_BINANDROID = PATH + "/saveBinAndroid";
 		public static final String DELETE_FILEANDROID = PATH + "/deleteFileAndroid";
 		public static final String SAVE_BOM = PATH + "/saveBom";
+		public static final String SAVE_ANDROID_BOM = PATH + "/saveAndroidBom";
 		public static final String SAVE_BAT = PATH + "/saveBat";
 		
 		public static final String IDENTIFICATION_GRID_ID_CD = PATH + "/identificationGrid/{prjId}/{code}";

@@ -111,6 +111,8 @@ public interface ProjectMapper {
 
 	List<ProjectIdentification> selectBomList(ProjectIdentification projectIdentification);
 	
+	List<ProjectIdentification> selectAndroidBomList(ProjectIdentification projectIdentification);
+	
 	List<OssComponents> selectOssRefPrjList1(OssMaster ossMaster);
 	
 	List<Project> selectUnlimitedOssComponentBomList(Project project);

@@ -457,381 +457,527 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 
 		// bom 일시
-		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv())) {
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(identification.getReferenceDiv())) {
 			Map<String, String> obligationTypeMergeMap = new HashMap<>();
 			final String reqMergeFlag = identification.getMerge();
-
-			list = projectMapper.selectBomList(identification);
-			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-			final List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);
-			if (!CollectionUtils.isEmpty(notVersionList)) {
-				list.addAll(notVersionList);
-			}
-			identification.setOssVersionEmptyFlag(null);
 			
-			final Comparator<ProjectIdentification> compare = Comparator
-					.comparing(ProjectIdentification::getLicenseTypeIdx)
-					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
-					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getMergeOrder);
-
-			list.sort(compare);
-			
-			// For loading 3rd Party ID
-			ProjectIdentification thirdPartyOssListParam = new ProjectIdentification();
-			thirdPartyOssListParam.setReferenceId(identification.getReferenceId());
-			thirdPartyOssListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-
-			List<ProjectIdentification> thirdList = null;
-			Map<String, Object> thirdlistMap = getIdentificationGridList(thirdPartyOssListParam);
-			Map<String, String> thirdPartyNameListByOssMap = new HashMap<>();
-			final String keySeparater = ":::";
-			if (thirdlistMap != null && (thirdlistMap.containsKey("mainData") || thirdlistMap.containsKey("rows"))) {
-				thirdList = (List<ProjectIdentification>) thirdlistMap.get(thirdlistMap.containsKey("mainData") ? "mainData" : "rows");
-				if (thirdList != null) {
-					thirdList.stream().filter(bean -> CoConstDef.FLAG_NO.equals(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO))).forEach(bean -> {
-						String value = bean.getRefPartnerId();
-						if (value != null) {
-							String rowOssName = avoidNull(bean.getOssName()).toUpperCase();
-							String rowOssVersion = avoidNull(bean.getOssVersion()).toUpperCase();
-							String strKey = rowOssName + keySeparater + rowOssVersion + keySeparater;
-							if (isEmpty(rowOssName) || "-".equals(rowOssName)) {
-								String rowOssLicense = avoidNull(bean.getLicenseName()).toUpperCase();
-								strKey = rowOssName + keySeparater + rowOssVersion + keySeparater + rowOssLicense;
-							}
-							thirdPartyNameListByOssMap.put(strKey, thirdPartyNameListByOssMap.containsKey(strKey) ? thirdPartyNameListByOssMap.get(strKey) + "," + value : value);
-						}
-					});
-				}
-			}
-			
-			// bom merge 버튼을 클릭하고, 표시대상이 있을 경우, 기존에 저장되어 있는 내용을 취득한다.
-			// need check의 저장값을 유지하기 위함
-			if (CoConstDef.FLAG_YES.equals(reqMergeFlag) && list != null && !list.isEmpty()) {
-				identification.setMerge(CoConstDef.FLAG_NO);
-				List<ProjectIdentification> bomBeforeList = projectMapper.selectBomList(identification);
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv())) {
+				list = projectMapper.selectBomList(identification);
 				identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-				List<ProjectIdentification> bomBeforeNotVersionList = projectMapper.selectBomList(identification);;
-				if (bomBeforeNotVersionList != null) {
-					bomBeforeList.addAll(bomBeforeNotVersionList);
+				final List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);
+				if (!CollectionUtils.isEmpty(notVersionList)) {
+					list.addAll(notVersionList);
 				}
 				identification.setOssVersionEmptyFlag(null);
-				bomBeforeList.sort(compare);
 				
-				if (bomBeforeList != null) {
-					bomBeforeList.forEach(_orgIdentificationBean -> {
-						obligationTypeMergeMap.put(_orgIdentificationBean.getRefComponentId(), _orgIdentificationBean.getObligationType());
-					});
-				}
-			}
-			
-			Map<String, ProjectIdentification> mergeDepMap = new HashMap<>();
-			Map<String, ProjectIdentification> batMergeSrcMap = new HashMap<>();
-			Map<String, ProjectIdentification> batMergePartnerMap = new HashMap<>();
-			
-			// convert max score
-			List<String> cvssScoreMaxList = new ArrayList<>();
-			
-			Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
-			List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
-			
-			bomLicenseList.forEach(ocl -> {
-				String key = ocl.getComponentId();
-				List<OssComponentsLicense> bomLicenses = null;
-				if (bomLicenseMap.containsKey(key)) {
-					bomLicenses = bomLicenseMap.get(ocl.getComponentId());
-				} else {
-					bomLicenses = new ArrayList<>();
-				}
-				bomLicenses.add(ocl);
-				bomLicenseMap.put(key, bomLicenses);
-			});
-			
-			list.forEach(ll -> {
-				ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
-				ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
-  				ll.setCopyrightText(ll.getCopyrightText());
-				ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+				final Comparator<ProjectIdentification> compare = Comparator
+						.comparing(ProjectIdentification::getLicenseTypeIdx)
+						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getMergeOrder);
 
-				if (bomLicenseMap.containsKey(ll.getComponentId())) {
-					ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
-					ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
-				}
-//				listLicense = projectMapper.selectBomLicense(ll);
-//				ll.setOssComponentsLicenseList(listLicense);
-//				ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
+				list.sort(compare);
 				
-				if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
-					if (obligationTypeMergeMap.containsKey(ll.getComponentId())) {
-						ll.setObligationType(obligationTypeMergeMap.get(ll.getComponentId()));
-					} else {
-						ll.setObligationType(ll.getObligationLicense());
-					}
-				}
-				
-				// grouping 된 file path를 br tag로 변경
-				ll.setFilePath(CommonFunction.lineReplaceToBR(ll.getFilePath()));
-				
-				if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(ll.getReferenceDiv())) {
-					if (!batMergeSrcMap.containsKey(ll.getOssName().toUpperCase())) {
-						batMergeSrcMap.put(ll.getOssName().toUpperCase(), ll);
-					} else if (StringUtil.compareTo(ll.getOssVersion(), batMergeSrcMap.get(ll.getOssName().toUpperCase()).getOssVersion()) > 0) {
-						batMergeSrcMap.replace(ll.getOssName().toUpperCase(), ll);
-					}
-				} else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(ll.getReferenceDiv())) {
-					if (!batMergePartnerMap.containsKey(ll.getOssName().toUpperCase())) {
-						batMergePartnerMap.put(ll.getOssName().toUpperCase(), ll);
-					} else if (StringUtil.compareTo(ll.getOssVersion(), batMergePartnerMap.get(ll.getOssName().toUpperCase()).getOssVersion()) > 0) {
-						batMergePartnerMap.replace(ll.getOssName().toUpperCase(), ll);
-					}
-				}
-				
-				String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
-				boolean setCveInfoFlag = false;
-				
-				if (ll.getCvssScoreMax() != null) {
-					String cveId = ll.getCvssScoreMax().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
-				}
-				if (ll.getCvssScoreMax1() != null) {
-					String cveId = ll.getCvssScoreMax1().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
-				}
-				if (ll.getCvssScoreMax2() != null) {
-					String cveId = ll.getCvssScoreMax2().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
-				}
-				if (ll.getCvssScoreMax3() != null) {
-					String cveId = ll.getCvssScoreMax3().split("\\@")[4];
-					if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
-				}
-				if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
-					if (cvssScoreMaxList.size() > 1) {
-						Collections.sort(cvssScoreMaxList, new Comparator<String>() {
-							@Override
-							public int compare(String o1, String o2) {
-								if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
-									return -1;
-								}else {
-									return 1;
+				// For loading 3rd Party ID
+				ProjectIdentification thirdPartyOssListParam = new ProjectIdentification();
+				thirdPartyOssListParam.setReferenceId(identification.getReferenceId());
+				thirdPartyOssListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+
+				List<ProjectIdentification> thirdList = null;
+				Map<String, Object> thirdlistMap = getIdentificationGridList(thirdPartyOssListParam);
+				Map<String, String> thirdPartyNameListByOssMap = new HashMap<>();
+				final String keySeparater = ":::";
+				if (thirdlistMap != null && (thirdlistMap.containsKey("mainData") || thirdlistMap.containsKey("rows"))) {
+					thirdList = (List<ProjectIdentification>) thirdlistMap.get(thirdlistMap.containsKey("mainData") ? "mainData" : "rows");
+					if (thirdList != null) {
+						thirdList.stream().filter(bean -> CoConstDef.FLAG_NO.equals(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO))).forEach(bean -> {
+							String value = bean.getRefPartnerId();
+							if (value != null) {
+								String rowOssName = avoidNull(bean.getOssName()).toUpperCase();
+								String rowOssVersion = avoidNull(bean.getOssVersion()).toUpperCase();
+								String strKey = rowOssName + keySeparater + rowOssVersion + keySeparater;
+								if (isEmpty(rowOssName) || "-".equals(rowOssName)) {
+									String rowOssLicense = avoidNull(bean.getLicenseName()).toUpperCase();
+									strKey = rowOssName + keySeparater + rowOssVersion + keySeparater + rowOssLicense;
 								}
+								thirdPartyNameListByOssMap.put(strKey, thirdPartyNameListByOssMap.containsKey(strKey) ? thirdPartyNameListByOssMap.get(strKey) + "," + value : value);
 							}
 						});
 					}
+				}
+				
+				// bom merge 버튼을 클릭하고, 표시대상이 있을 경우, 기존에 저장되어 있는 내용을 취득한다.
+				// need check의 저장값을 유지하기 위함
+				if (CoConstDef.FLAG_YES.equals(reqMergeFlag) && list != null && !list.isEmpty()) {
+					identification.setMerge(CoConstDef.FLAG_NO);
+					List<ProjectIdentification> bomBeforeList = projectMapper.selectBomList(identification);
+					identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+					List<ProjectIdentification> bomBeforeNotVersionList = projectMapper.selectBomList(identification);;
+					if (bomBeforeNotVersionList != null) {
+						bomBeforeList.addAll(bomBeforeNotVersionList);
+					}
+					identification.setOssVersionEmptyFlag(null);
+					bomBeforeList.sort(compare);
 					
-					String[] cveData = cvssScoreMaxList.get(0).split("\\@");
-					ll.setCvssScore(cveData[3]);
-					ll.setCveId(cveData[4]);
-					ll.setVulnYn(CoConstDef.FLAG_YES);
-				} else {
-					String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
-						ll.setCvssScore(conversionCveData[3]);
-						ll.setCveId(conversionCveData[4]);
-						ll.setVulnYn(CoConstDef.FLAG_YES);
-					} else {
-						setCveInfoFlag = true;
+					if (bomBeforeList != null) {
+						bomBeforeList.forEach(_orgIdentificationBean -> {
+							obligationTypeMergeMap.put(_orgIdentificationBean.getRefComponentId(), _orgIdentificationBean.getObligationType());
+						});
 					}
 				}
 				
-				cvssScoreMaxList.clear();
+				Map<String, ProjectIdentification> mergeDepMap = new HashMap<>();
+				Map<String, ProjectIdentification> batMergeSrcMap = new HashMap<>();
+				Map<String, ProjectIdentification> batMergePartnerMap = new HashMap<>();
 				
-				if (ossInfoMap.containsKey(key)) {
-					OssMaster om = ossInfoMap.get(key);
-					if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
-						String cveId = om.getCveId();
-						String cvssScore = om.getCvssScore();
-						if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-							ll.setCvssScore(cvssScore);
-							ll.setCveId(cveId);
-							ll.setVulnYn(CoConstDef.FLAG_YES);
+				// convert max score
+				List<String> cvssScoreMaxList = new ArrayList<>();
+				
+				Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+				List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
+				
+				bomLicenseList.forEach(ocl -> {
+					String key = ocl.getComponentId();
+					List<OssComponentsLicense> bomLicenses = null;
+					if (bomLicenseMap.containsKey(key)) {
+						bomLicenses = bomLicenseMap.get(ocl.getComponentId());
+					} else {
+						bomLicenses = new ArrayList<>();
+					}
+					bomLicenses.add(ocl);
+					bomLicenseMap.put(key, bomLicenses);
+				});
+				
+				list.forEach(ll -> {
+					ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
+					ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
+	  				ll.setCopyrightText(ll.getCopyrightText());
+					ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+
+					if (bomLicenseMap.containsKey(ll.getComponentId())) {
+						ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
+						ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
+					}
+//					listLicense = projectMapper.selectBomLicense(ll);
+//					ll.setOssComponentsLicenseList(listLicense);
+//					ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
+					
+					if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
+						if (obligationTypeMergeMap.containsKey(ll.getComponentId())) {
+							ll.setObligationType(obligationTypeMergeMap.get(ll.getComponentId()));
+						} else {
+							ll.setObligationType(ll.getObligationLicense());
 						}
 					}
-				}
-				
-				if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(ll.getRefDiv())) {
-					String _key = ll.getOssName() + "-" + avoidNull(ll.getOssVersion());
-					mergeDepMap.put(_key, ll);
-				}
-			});
-			
-			// bat merget
-			// bat 분석 결과 중에서 oss version이 명시되지 않고, src 또는 3rd party에 동일한 oss 가 존재하는 경우
-			// bat 분석 결과를 src 또는 3rd party에 merge 한다.
-			List<ProjectIdentification> _list = new ArrayList<>();
-			List<String> adminCheckList = new ArrayList<>();
-			List<ProjectIdentification> groupList = null;
-			Map<String, List<ProjectIdentification>> srcSameLicenseMap = new HashMap<>();
-			List<String> egnoreList = new ArrayList<>();
-			
-			for (ProjectIdentification ll : list) {
-				
-				// 이미 추가된 oss의 경우
-				if (egnoreList.contains(ll.getComponentId())) {
-					continue;
-				}
-				
-				int addIdx = -1;
-				String ossRestriction = "";
-				
-				if (!isEmpty(ll.getOssName())) {
+					
+					// grouping 된 file path를 br tag로 변경
+					ll.setFilePath(CommonFunction.lineReplaceToBR(ll.getFilePath()));
+					
+					if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(ll.getReferenceDiv())) {
+						if (!batMergeSrcMap.containsKey(ll.getOssName().toUpperCase())) {
+							batMergeSrcMap.put(ll.getOssName().toUpperCase(), ll);
+						} else if (StringUtil.compareTo(ll.getOssVersion(), batMergeSrcMap.get(ll.getOssName().toUpperCase()).getOssVersion()) > 0) {
+							batMergeSrcMap.replace(ll.getOssName().toUpperCase(), ll);
+						}
+					} else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(ll.getReferenceDiv())) {
+						if (!batMergePartnerMap.containsKey(ll.getOssName().toUpperCase())) {
+							batMergePartnerMap.put(ll.getOssName().toUpperCase(), ll);
+						} else if (StringUtil.compareTo(ll.getOssVersion(), batMergePartnerMap.get(ll.getOssName().toUpperCase()).getOssVersion()) > 0) {
+							batMergePartnerMap.replace(ll.getOssName().toUpperCase(), ll);
+						}
+					}
+					
 					String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
+					boolean setCveInfoFlag = false;
+					if (key.equals("_")) {
+						System.out.println(key);
+					}
+					if (ll.getCvssScoreMax() != null) {
+						String cveId = ll.getCvssScoreMax().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
+					}
+					if (ll.getCvssScoreMax1() != null) {
+						String cveId = ll.getCvssScoreMax1().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
+					}
+					if (ll.getCvssScoreMax2() != null) {
+						String cveId = ll.getCvssScoreMax2().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
+					}
+					if (ll.getCvssScoreMax3() != null) {
+						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
+					}
+					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+						if (cvssScoreMaxList.size() > 1) {
+							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+								@Override
+								public int compare(String o1, String o2) {
+									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+										return -1;
+									}else {
+										return 1;
+									}
+								}
+							});
+						}
+						
+						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+						ll.setCvssScore(cveData[3]);
+						ll.setCveId(cveData[4]);
+						ll.setVulnYn(CoConstDef.FLAG_YES);
+					} else {
+						String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
+						if (conversionCveInfo != null) {
+							String[] conversionCveData = conversionCveInfo.split("\\@");
+							ll.setCvssScore(conversionCveData[3]);
+							ll.setCveId(conversionCveData[4]);
+							ll.setVulnYn(CoConstDef.FLAG_YES);
+						} else {
+							setCveInfoFlag = true;
+						}
+					}
+					
+					cvssScoreMaxList.clear();
+					
+					if (!isEmpty(ll.getOssName()) && ossInfoMap.containsKey(key)) {
+						OssMaster om = ossInfoMap.get(key);
+						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
+							String cveId = om.getCveId();
+							String cvssScore = om.getCvssScore();
+							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+								ll.setCvssScore(cvssScore);
+								ll.setCveId(cveId);
+								ll.setVulnYn(CoConstDef.FLAG_YES);
+							}
+						}
+					}
+					
+					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(ll.getRefDiv())) {
+						String _key = ll.getOssName() + "-" + avoidNull(ll.getOssVersion());
+						mergeDepMap.put(_key, ll);
+					}
+				});
+				
+				// bat merget
+				// bat 분석 결과 중에서 oss version이 명시되지 않고, src 또는 3rd party에 동일한 oss 가 존재하는 경우
+				// bat 분석 결과를 src 또는 3rd party에 merge 한다.
+				List<ProjectIdentification> _list = new ArrayList<>();
+				List<String> adminCheckList = new ArrayList<>();
+				List<ProjectIdentification> groupList = null;
+				Map<String, List<ProjectIdentification>> srcSameLicenseMap = new HashMap<>();
+				List<String> egnoreList = new ArrayList<>();
+				
+				for (ProjectIdentification ll : list) {
+					
+					// 이미 추가된 oss의 경우
+					if (egnoreList.contains(ll.getComponentId())) {
+						continue;
+					}
+					
+					int addIdx = -1;
+					String ossRestriction = "";
+					
+					if (!isEmpty(ll.getOssName())) {
+						String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
+						if (ossInfoMap.containsKey(key)) {
+							ossRestriction = ossInfoMap.get(key).getRestriction();
+						}
+						
+						String mergeKey = ll.getOssName().toUpperCase();
+						// main oss로 표시되는 bat oss의 version이 명시되어 있지 않은 경우
+						if (CoConstDef.CD_DTL_COMPONENT_ID_BAT.equals(ll.getReferenceDiv()) && isEmpty(ll.getMergePreDiv()) && isEmpty(ll.getOssVersion())) {
+							ProjectIdentification refBean = null;
+							
+							if ( batMergeSrcMap.containsKey(mergeKey)) {
+								// bat => src
+								refBean = batMergeSrcMap.get(mergeKey);
+								
+								// 설정된 license가 상이하고, bat와 동일한 license가 src에 존재한다면 (최상위 버전이 아닌경우)
+								// continue하고 다음 loop에서 merge
+								if (!CommonFunction.isSameLicense(refBean.getOssComponentsLicenseList(), ll.getOssComponentsLicenseList())) {
+									String ossNameAndVersion = findBatOssOtherVersionWithLicense(ll, refBean, list);
+									
+									if (!isEmpty(ossNameAndVersion)) {
+										List<ProjectIdentification> _batList = null;
+										
+										if (srcSameLicenseMap.containsKey(ossNameAndVersion)) {
+											_batList = srcSameLicenseMap.get(ossNameAndVersion);
+											_batList.add(ll);
+											srcSameLicenseMap.replace(ossNameAndVersion, _batList);
+										} else {
+											_batList = new ArrayList<>();
+											_batList.add(ll);
+											srcSameLicenseMap.put(ossNameAndVersion, _batList);
+										}
+										
+										continue;
+									}
+								}
+								
+								ll.setOssId(refBean.getOssId());
+								ll.setOssName(refBean.getOssName());
+								ll.setOssVersion(refBean.getOssVersion());
+								ll.setOssComponentsLicenseList(refBean.getOssComponentsLicenseList());
+								
+								// 순서 정렬
+								addIdx = findOssAppendIndex(CoConstDef.CD_DTL_COMPONENT_ID_SRC, refBean.getComponentId(), list);
+								
+								if (addIdx > -1) {
+									addIdx = addIdx +1;
+									ll.setGroupingColumn(refBean.getOssName() + refBean.getOssVersion());
+								}					
+							} else if ( batMergePartnerMap.containsKey(mergeKey)) {
+								// 3rd => bat
+								refBean = batMergePartnerMap.get(mergeKey);
+
+								// 3rd에 같은 그룹으로 묶여 있는 모든 oss list를 취득
+								ll.setGroupingColumn(refBean.getOssName() + refBean.getOssVersion());
+								ll.setOssName(refBean.getOssName());
+								ll.setOssVersion(refBean.getOssVersion());
+								ll.setOssId(refBean.getOssId());
+								
+								// bin 에 누락된 정보를 3rd의 첫번재 row에서 채워 넣는다.
+								// DOWNLOAD_LOCATION
+								if (isEmpty(ll.getDownloadLocation())) {
+									ll.setDownloadLocation(refBean.getDownloadLocation());
+								}
+								
+								// HOMEPAGE
+								if (isEmpty(ll.getHomepage())) {
+									ll.setHomepage(refBean.getHomepage());
+								}
+								
+								// license 정보
+								ll.setOssComponentsLicenseList(refBean.getOssComponentsLicenseList());
+								ll.setLicenseName(refBean.getLicenseName());
+								ll.setCopyrightText(refBean.getCopyrightText());
+								
+								ll.setObligationLicense(refBean.getObligationLicense());
+								ll.setObligationType(refBean.getObligationType());
+								
+								// 3rd party의 우선순위가 가장 낮기 때문에, 복수건을 취득하는 경우는 없지만, 기능 확장을 고려해서 list 형으로 반환
+								groupList = findOssGroupList(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, batMergePartnerMap.get(mergeKey).getOssName(), batMergePartnerMap.get(mergeKey).getOssVersion(), list);
+								
+								if (groupList != null && !groupList.isEmpty()) {
+									for (ProjectIdentification _groupBean : groupList) {
+										egnoreList.add(_groupBean.getComponentId());
+									}
+								}
+							}
+						} 
+						// 3rd party의 경우, bat에 동일한 oss가 없을 경우만 추가 (정렬)
+						else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(ll.getReferenceDiv()) && isEmpty(ll.getMergePreDiv()) ) {
+							if (existsBatOSS(ll.getOssName(), list)) {
+								continue;
+							}
+						}
+					}
+
+					// Set 3rd Party IDs
+					String rowOssName = avoidNull(ll.getOssName()).toUpperCase();
+					String rowOssVersion = avoidNull(ll.getOssVersion()).toUpperCase();
+					String strKey = rowOssName + keySeparater + rowOssVersion + keySeparater;
+					if (isEmpty(rowOssName) || rowOssName.equals("-")) {
+						String rowOssLicense = avoidNull(ll.getLicenseName()).toUpperCase();
+						strKey = rowOssName + keySeparater + rowOssVersion + keySeparater + rowOssLicense;
+					}
+					if (thirdPartyNameListByOssMap.containsKey(strKey)) {
+						ll.setRefPartnerId(thirdPartyNameListByOssMap.get(strKey));
+					}
+					// License Restriction 저장
+					ll.setRestriction(CommonFunction.setLicenseRestrictionListById(ll.getLicenseId(), ossRestriction));
+					
+					if (addIdx > -1) {
+						if (addIdx > _list.size() -1) {
+							_list.add(ll);
+						} else {
+							_list.add(addIdx, ll);
+						}
+					} else {
+						_list.add(ll);
+						
+						if (groupList != null && !groupList.isEmpty()) {
+							_list.addAll(groupList);
+						}
+					}
+					
+					if (CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn())) {
+						adminCheckList.add(ll.getComponentId());
+					}
+				}
+				
+				// src oss중에서 bat와 merge할 수 있는 동일한 oss에 최신 version 외 라이선스까지 동일한 bat가 존재하는 경우
+				if (!srcSameLicenseMap.isEmpty()) {
+					List<ProjectIdentification> _tmp = new ArrayList<>();
+					
+					for (ProjectIdentification bean : _list) {
+						_tmp.add(bean);
+						String _key = bean.getOssName() + "-" + avoidNull(bean.getOssVersion());
+						
+						if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(bean.getReferenceDiv()) && srcSameLicenseMap.containsKey(_key)) {
+							for (ProjectIdentification _mergeBean : srcSameLicenseMap.get(_key)) {
+								_mergeBean.setOssId(bean.getOssId());
+								_mergeBean.setOssName(bean.getOssName());
+								_mergeBean.setOssVersion(bean.getOssVersion());
+								_mergeBean.setOssComponentsLicenseList(bean.getOssComponentsLicenseList());
+								_mergeBean.setGroupingColumn(bean.getGroupingColumn()); // 순서 정렬
+								
+								_tmp.add(_mergeBean);
+							}
+						}
+					}
+					
+					_list = _tmp;
+				}
+				map.put("rows", _list);
+
+				if (adminCheckList.size() > 0) {
+					map.put("adminCheckList", adminCheckList);
+				}
+			} else {
+				list = projectMapper.selectAndroidBomList(identification);
+				identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+				final List<ProjectIdentification> notVersionList = projectMapper.selectAndroidBomList(identification);
+				if (!CollectionUtils.isEmpty(notVersionList)) {
+					list.addAll(notVersionList);
+				}
+				identification.setOssVersionEmptyFlag(null);
+				
+				final Comparator<ProjectIdentification> compare = Comparator
+						.comparing(ProjectIdentification::getLicenseTypeIdx)
+						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getMergeOrder);
+
+				list.sort(compare);
+				
+				// convert max score
+				List<String> cvssScoreMaxList = new ArrayList<>();
+				List<String> adminCheckList = new ArrayList<>();
+				
+				Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+				List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
+				
+				bomLicenseList.forEach(ocl -> {
+					String key = ocl.getComponentId();
+					List<OssComponentsLicense> bomLicenses = null;
+					if (bomLicenseMap.containsKey(key)) {
+						bomLicenses = bomLicenseMap.get(ocl.getComponentId());
+					} else {
+						bomLicenses = new ArrayList<>();
+					}
+					bomLicenses.add(ocl);
+					bomLicenseMap.put(key, bomLicenses);
+				});
+				
+				list.forEach(ll -> {
+					String ossRestriction = "";
+					String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
+					
 					if (ossInfoMap.containsKey(key)) {
 						ossRestriction = ossInfoMap.get(key).getRestriction();
 					}
 					
-					String mergeKey = ll.getOssName().toUpperCase();
-					// main oss로 표시되는 bat oss의 version이 명시되어 있지 않은 경우
-					if (CoConstDef.CD_DTL_COMPONENT_ID_BAT.equals(ll.getReferenceDiv()) && isEmpty(ll.getMergePreDiv()) && isEmpty(ll.getOssVersion())) {
-						ProjectIdentification refBean = null;
-						
-						if ( batMergeSrcMap.containsKey(mergeKey)) {
-							// bat => src
-							refBean = batMergeSrcMap.get(mergeKey);
-							
-							// 설정된 license가 상이하고, bat와 동일한 license가 src에 존재한다면 (최상위 버전이 아닌경우)
-							// continue하고 다음 loop에서 merge
-							if (!CommonFunction.isSameLicense(refBean.getOssComponentsLicenseList(), ll.getOssComponentsLicenseList())) {
-								String ossNameAndVersion = findBatOssOtherVersionWithLicense(ll, refBean, list);
-								
-								if (!isEmpty(ossNameAndVersion)) {
-									List<ProjectIdentification> _batList = null;
-									
-									if (srcSameLicenseMap.containsKey(ossNameAndVersion)) {
-										_batList = srcSameLicenseMap.get(ossNameAndVersion);
-										_batList.add(ll);
-										srcSameLicenseMap.replace(ossNameAndVersion, _batList);
-									} else {
-										_batList = new ArrayList<>();
-										_batList.add(ll);
-										srcSameLicenseMap.put(ossNameAndVersion, _batList);
+					ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
+					ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
+	  				ll.setCopyrightText(ll.getCopyrightText());
+					ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+
+					if (bomLicenseMap.containsKey(ll.getComponentId())) {
+						ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
+						ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
+					}
+					
+					if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
+						if (obligationTypeMergeMap.containsKey(ll.getComponentId())) {
+							ll.setObligationType(obligationTypeMergeMap.get(ll.getComponentId()));
+						} else {
+							ll.setObligationType(ll.getObligationLicense());
+						}
+					}
+					
+					// grouping 된 file path를 br tag로 변경
+					ll.setFilePath(CommonFunction.lineReplaceToBR(ll.getFilePath()));
+					
+					// License Restriction 저장
+					ll.setRestriction(CommonFunction.setLicenseRestrictionListById(ll.getLicenseId(), ossRestriction));
+					
+					boolean setCveInfoFlag = false;
+					
+					if (ll.getCvssScoreMax() != null) {
+						String cveId = ll.getCvssScoreMax().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
+					}
+					if (ll.getCvssScoreMax1() != null) {
+						String cveId = ll.getCvssScoreMax1().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
+					}
+					if (ll.getCvssScoreMax2() != null) {
+						String cveId = ll.getCvssScoreMax2().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
+					}
+					if (ll.getCvssScoreMax3() != null) {
+						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
+					}
+					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+						if (cvssScoreMaxList.size() > 1) {
+							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+								@Override
+								public int compare(String o1, String o2) {
+									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+										return -1;
+									}else {
+										return 1;
 									}
-									
-									continue;
 								}
-							}
-							
-							ll.setOssId(refBean.getOssId());
-							ll.setOssName(refBean.getOssName());
-							ll.setOssVersion(refBean.getOssVersion());
-							ll.setOssComponentsLicenseList(refBean.getOssComponentsLicenseList());
-							
-							// 순서 정렬
-							addIdx = findOssAppendIndex(CoConstDef.CD_DTL_COMPONENT_ID_SRC, refBean.getComponentId(), list);
-							
-							if (addIdx > -1) {
-								addIdx = addIdx +1;
-								ll.setGroupingColumn(refBean.getOssName() + refBean.getOssVersion());
-							}					
-						} else if ( batMergePartnerMap.containsKey(mergeKey)) {
-							// 3rd => bat
-							refBean = batMergePartnerMap.get(mergeKey);
-
-							// 3rd에 같은 그룹으로 묶여 있는 모든 oss list를 취득
-							ll.setGroupingColumn(refBean.getOssName() + refBean.getOssVersion());
-							ll.setOssName(refBean.getOssName());
-							ll.setOssVersion(refBean.getOssVersion());
-							ll.setOssId(refBean.getOssId());
-							
-							// bin 에 누락된 정보를 3rd의 첫번재 row에서 채워 넣는다.
-							// DOWNLOAD_LOCATION
-							if (isEmpty(ll.getDownloadLocation())) {
-								ll.setDownloadLocation(refBean.getDownloadLocation());
-							}
-							
-							// HOMEPAGE
-							if (isEmpty(ll.getHomepage())) {
-								ll.setHomepage(refBean.getHomepage());
-							}
-							
-							// license 정보
-							ll.setOssComponentsLicenseList(refBean.getOssComponentsLicenseList());
-							ll.setLicenseName(refBean.getLicenseName());
-							ll.setCopyrightText(refBean.getCopyrightText());
-							
-							ll.setObligationLicense(refBean.getObligationLicense());
-							ll.setObligationType(refBean.getObligationType());
-							
-							// 3rd party의 우선순위가 가장 낮기 때문에, 복수건을 취득하는 경우는 없지만, 기능 확장을 고려해서 list 형으로 반환
-							groupList = findOssGroupList(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, batMergePartnerMap.get(mergeKey).getOssName(), batMergePartnerMap.get(mergeKey).getOssVersion(), list);
-							
-							if (groupList != null && !groupList.isEmpty()) {
-								for (ProjectIdentification _groupBean : groupList) {
-									egnoreList.add(_groupBean.getComponentId());
-								}
-							}
+							});
 						}
-					} 
-					// 3rd party의 경우, bat에 동일한 oss가 없을 경우만 추가 (정렬)
-					else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(ll.getReferenceDiv()) && isEmpty(ll.getMergePreDiv()) ) {
-						if (existsBatOSS(ll.getOssName(), list)) {
-							continue;
-						}
-					}
-				}
-
-				// Set 3rd Party IDs
-				String rowOssName = avoidNull(ll.getOssName()).toUpperCase();
-				String rowOssVersion = avoidNull(ll.getOssVersion()).toUpperCase();
-				String strKey = rowOssName + keySeparater + rowOssVersion + keySeparater;
-				if (isEmpty(rowOssName) || rowOssName.equals("-")) {
-					String rowOssLicense = avoidNull(ll.getLicenseName()).toUpperCase();
-					strKey = rowOssName + keySeparater + rowOssVersion + keySeparater + rowOssLicense;
-				}
-				if (thirdPartyNameListByOssMap.containsKey(strKey)) {
-					ll.setRefPartnerId(thirdPartyNameListByOssMap.get(strKey));
-				}
-				// License Restriction 저장
-				ll.setRestriction(CommonFunction.setLicenseRestrictionListById(ll.getLicenseId(), ossRestriction));
-				
-				if (addIdx > -1) {
-					if (addIdx > _list.size() -1) {
-						_list.add(ll);
+						
+						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+						ll.setCvssScore(cveData[3]);
+						ll.setCveId(cveData[4]);
+						ll.setVulnYn(CoConstDef.FLAG_YES);
 					} else {
-						_list.add(addIdx, ll);
-					}
-				} else {
-					_list.add(ll);
-					
-					if (groupList != null && !groupList.isEmpty()) {
-						_list.addAll(groupList);
-					}
-				}
-				
-				if (CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn())) {
-					adminCheckList.add(ll.getComponentId());
-				}
-			}
-			
-			// src oss중에서 bat와 merge할 수 있는 동일한 oss에 최신 version 외 라이선스까지 동일한 bat가 존재하는 경우
-			if (!srcSameLicenseMap.isEmpty()) {
-				List<ProjectIdentification> _tmp = new ArrayList<>();
-				
-				for (ProjectIdentification bean : _list) {
-					_tmp.add(bean);
-					String _key = bean.getOssName() + "-" + avoidNull(bean.getOssVersion());
-					
-					if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(bean.getReferenceDiv()) && srcSameLicenseMap.containsKey(_key)) {
-						for (ProjectIdentification _mergeBean : srcSameLicenseMap.get(_key)) {
-							_mergeBean.setOssId(bean.getOssId());
-							_mergeBean.setOssName(bean.getOssName());
-							_mergeBean.setOssVersion(bean.getOssVersion());
-							_mergeBean.setOssComponentsLicenseList(bean.getOssComponentsLicenseList());
-							_mergeBean.setGroupingColumn(bean.getGroupingColumn()); // 순서 정렬
-							
-							_tmp.add(_mergeBean);
+						String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
+						if (conversionCveInfo != null) {
+							String[] conversionCveData = conversionCveInfo.split("\\@");
+							ll.setCvssScore(conversionCveData[3]);
+							ll.setCveId(conversionCveData[4]);
+							ll.setVulnYn(CoConstDef.FLAG_YES);
+						} else {
+							setCveInfoFlag = true;
 						}
 					}
-				}
+					
+					cvssScoreMaxList.clear();
+					
+					if (ossInfoMap.containsKey(key)) {
+						OssMaster om = ossInfoMap.get(key);
+						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
+							String cveId = om.getCveId();
+							String cvssScore = om.getCvssScore();
+							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+								ll.setCvssScore(cvssScore);
+								ll.setCveId(cveId);
+								ll.setVulnYn(CoConstDef.FLAG_YES);
+							}
+						}
+					}
+					
+					if (CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn())) {
+						adminCheckList.add(ll.getComponentId());
+					}
+				});
 				
-				_list = _tmp;
-			}
-			map.put("rows", _list);
+				map.put("rows", list);
 
-			if (adminCheckList.size() > 0) {
-				map.put("adminCheckList", adminCheckList);
+				if (adminCheckList.size() > 0) {
+					map.put("adminCheckList", adminCheckList);
+				}
 			}
 		} else { // bom 외 서브 그리드
 			// bat oss list를 대상
@@ -3206,13 +3352,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList) {
-		registBom(prjId, merge, projectIdentification, checkGridBomList, null, false);
+		registBom(prjId, merge, projectIdentification, checkGridBomList, null, false, false);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm) {
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid) {
 		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 		List<ProjectIdentification> includeVulnInfoNewBomList = new ArrayList<>();
 		List<ProjectIdentification> includeVulnInfoOldBomList = new ArrayList<>();
@@ -3221,13 +3367,29 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// 컴포넌트 삭제
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(prjId);
-		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		if (!isAndroid) {
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		} else {
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+		}
 		identification.setMerge(CoConstDef.FLAG_NO);
 		
 		// 기존 bom data get
-		List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
+		List<ProjectIdentification> bomList = null;
+		if (!isAndroid) {
+			bomList = projectMapper.selectBomList(identification);
+		} else {
+			bomList = projectMapper.selectAndroidBomList(identification);
+		}
+		
 		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
+		
+		List<ProjectIdentification> notVersionList = null;
+		if (!isAndroid) {
+			notVersionList = projectMapper.selectBomList(identification);
+		} else {
+			notVersionList = projectMapper.selectAndroidBomList(identification);
+		}
 		if (notVersionList != null && !notVersionList.isEmpty()) {
 			bomList.addAll(notVersionList);
 		}
@@ -3319,7 +3481,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			for (ProjectIdentification bean : (List<ProjectIdentification>)mergeListMap.get("rows")) {
 				bean.setRefDiv(bean.getReferenceDiv());
-				bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				if (!isAndroid) {
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				} else {
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+				}
 				bean.setRefComponentId(bean.getComponentId());
 				if (adminCheckComponentIds.contains(bean.getRefComponentId())) {
 					bean.setAdminCheckYn(CoConstDef.FLAG_YES);
@@ -6796,6 +6962,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(ossNotice.getPrjId());
+		identification.setReferenceDiv(!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(ossNotice.getRefDiv()) ? CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM : ossNotice.getRefDiv());
 		
 		List<OssComponents> ossComponentList = projectMapper.selectOssComponentsSbomList(identification);
 		
@@ -7134,7 +7301,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		Map<String, Object> resMap = new HashMap<>();
 		boolean emptyCheckFlag = false;
 		
-		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(project.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(project.getReferenceDiv())) {
 			List<ProjectIdentification> list = projectMapper.checkSelectDownloadFileForBOM(project);
 			if (list != null) {
 				for (ProjectIdentification bean : list) {
