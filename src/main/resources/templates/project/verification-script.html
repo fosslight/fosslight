@@ -3254,6 +3254,8 @@
                             var isReq = true;
                             var validArray = json.verifyValid;
                             var validMsg = json.verifyValidMsg;
+                            var validCheckSourcePathArray = json.verifyCheckSourcePath;
+                            var validCheckSourcePathMsg = json.verifyCheckSourcePathMsg;
                             var fileCountsMap = json.fileCounts;
                             var readmeFileName = json.verifyReadme;
                             var proprietary = json.verifyProprietary;
@@ -3271,6 +3273,18 @@
                                 isReq = false;
                             });
 
+                            validCheckSourcePathArray.forEach(function (id) {
+                                var errRow = $("#" + id + " > td[aria-describedby='list_filePath']");
+
+                                if (errRow) {
+                                    errRow.append('<div class=\"list_filePath_' + id + ' retxt"\">' + validCheckSourcePathMsg + '</div>');
+                                }
+
+                                $("#list").jqGrid("setCell", id, "verifyFileCount", " ");
+
+                                isReq = false;
+                            });
+                            
                             $.each(fileCountsMap, function (key, value) {
                                 $("#list").jqGrid("setCell", key, "verifyFileCount", value);
                             });

@@ -1165,6 +1165,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			int gridIdx = 0;
 			ArrayList<String> gValidIdxlist = new ArrayList<>();
+			ArrayList<String> checkSourcePathlist = new ArrayList<>();
 			HashMap<String,Object> gFileCountMap = new HashMap<>();
 			boolean separatorErrFlag = false;
 			
@@ -1179,46 +1180,50 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					separatorErrFlag = gridPath.contains("\\") ? true : false;
 				}
 				
-				//사용자가 * 입력했을때
-				if (!gridPath.trim().equals("/*") && !gridPath.trim().equals("/")){
-					if (gridPath.endsWith("*")) {
-						gridPath = gridPath.substring(0, gridPath.length()-1);
-					}
-					if (gridPath.startsWith(".")) {
-						gridPath = gridPath.substring(1, gridPath.length());
-					}
-					// 앞뒤 path구분 제거
-					if (gridPath.endsWith("/")) {
-						gridPath = gridPath.substring(0, gridPath.length()-1);
-					}
-					if (gridPath.startsWith("/")) {
-						gridPath = gridPath.substring(1);
-					}
-					
-					int gFileCount = 0;
-					
-					/*
-					 * SUB_STEP 1. verify 결과 배열을 받아온 grid filepath와 비교하여 실제로 그 path가 존재하는지 확인후 
-					 * 존재하지 않을 경우 grid index 저장 
-					 */
-					boolean resultFlag = false;
-					if (checkResultMap.containsKey(gridPath)) {
-						resultFlag = true;
-						gFileCount = checkResultMap.get(gridPath);
-					}
-					
-					if (!resultFlag) {//path가 존재하지않을 때
-						gValidIdxlist.add(gridComponentIds.get(gridIdx));
-					} else {//path가 존재할 때
-						// file을 직접 비교하는 경우 count되지 않기 때문에, 1로 고정
-						// resultFlag == true 인경우는 존재하기 해당 path or file 대상이 존재한다는 의미이기 때문에 0이 될 수 없다.
-						if (gFileCount == 0) {
-							gFileCount = 1;
-						}
-						gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(gFileCount));
-					}
+				if (gridPath.equals("/")) {
+					checkSourcePathlist.add(gridComponentIds.get(gridIdx));
 				} else {
-					gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(allFileCount));
+					//사용자가 * 입력했을때
+					if (!gridPath.trim().equals("/*") && !gridPath.trim().equals("/")){
+						if (gridPath.endsWith("*")) {
+							gridPath = gridPath.substring(0, gridPath.length()-1);
+						}
+						if (gridPath.startsWith(".")) {
+							gridPath = gridPath.substring(1, gridPath.length());
+						}
+						// 앞뒤 path구분 제거
+						if (gridPath.endsWith("/")) {
+							gridPath = gridPath.substring(0, gridPath.length()-1);
+						}
+						if (gridPath.startsWith("/")) {
+							gridPath = gridPath.substring(1);
+						}
+						
+						int gFileCount = 0;
+						
+						/*
+						 * SUB_STEP 1. verify 결과 배열을 받아온 grid filepath와 비교하여 실제로 그 path가 존재하는지 확인후 
+						 * 존재하지 않을 경우 grid index 저장 
+						 */
+						boolean resultFlag = false;
+						if (checkResultMap.containsKey(gridPath)) {
+							resultFlag = true;
+							gFileCount = checkResultMap.get(gridPath);
+						}
+						
+						if (!resultFlag) {//path가 존재하지않을 때
+							gValidIdxlist.add(gridComponentIds.get(gridIdx));
+						} else {//path가 존재할 때
+							// file을 직접 비교하는 경우 count되지 않기 때문에, 1로 고정
+							// resultFlag == true 인경우는 존재하기 해당 path or file 대상이 존재한다는 의미이기 때문에 0이 될 수 없다.
+							if (gFileCount == 0) {
+								gFileCount = 1;
+							}
+							gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(gFileCount));
+						}
+					} else {
+						gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(allFileCount));
+					}
 				}
 				
 				gridIdx++;
@@ -1383,7 +1388,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 			resMap.put("verifyValid", gValidIdxlist);
+			resMap.put("verifyCheckSourcePath", checkSourcePathlist);
 			resMap.put("verifyValidMsg", "path not found.");
+			resMap.put("verifyCheckSourcePathMsg", getMessage("msg.package.check.source.code.path"));
 			resMap.put("fileCounts", gFileCountMap);
 			resMap.put("verifyReadme", readmeFileName);
 			resMap.put("verifyCheckList", !isEmpty(verify_chk_list) ? CoConstDef.FLAG_YES : "");
