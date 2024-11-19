@@ -1260,6 +1260,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, CommonFunction.makeOssTypeStr(param.getOssType())
 					, param.getLicenseName()
 					, param.getLicenseType()
+					, param.getRestriction()
 					, CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, param.getObligationType())
 					, param.getDetectedLicense()
 					, param.getHomepage()

@@ -111,6 +111,18 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+										<div class="col-md-10">
+											<div class="form-group mb-2">
+												<select class="select2 save-value" id="restrictionSelect" multiple="multiple" name="arrRestriction" style="width: 100%;">
+													<option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+															th:text="${code.cdDtlNm}"
+															th:value="${code.cdDtlNo}">
+													</option>
+												</select>
+											</div>
+										</div>
+									</div>
                                    	<div class="row mb-2">
                                      	<div class="col-md-3">
                                            	<div class="form-group mb-2">

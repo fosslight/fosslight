@@ -52,7 +52,12 @@
                     placeholder: "OSS Type",
                     allowClear: true,
                 });
-
+                
+                $('#restrictionSelect').select2({
+                    placeholder: "Restriction",
+                    allowClear: true,
+                });
+                
                 /* created date & modified date event */
                 let cStartDate = [[${searchBean.cStartDate}]];
                 let cEndDate = [[${searchBean.cEndDate}]];
@@ -348,6 +353,13 @@
                     postData.ossTypeSearch = "";
                 }
 				
+                if (postData.arrRestriction != null) {
+                	postData.arrRestriction = JSON.stringify(postData.arrRestriction);
+                	postData.arrRestriction = postData.arrRestriction.replace(/\"|\[|\]/gi, "");
+                } else {
+                	postData.arrRestriction = null;
+                }
+                
                 return postData;
             },
             deleteOss: function () {
@@ -497,6 +509,23 @@
             	 
                 return display;
             },
+            displayLicenseRestriction : function (cellvalue, options, rowObject) {
+            	var display = "";
+
+                if (cellvalue != "" && cellvalue != undefined) {
+                	cellvalue = cellvalue.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+                	display =
+                        '<span class="badge badge-warning text-xm d-inline-block" data-toggle="tooltip" data-html="true" data-placement="left" title="' +
+                        cellvalue +
+                        '" onclick="src_fn_com.showLicenseRestrictionViewPage(\'' +
+                        options.gid +
+                        "','" +
+                        options.rowId +
+                        "')\" style=\"cursor: pointer\">R</span>";
+                }
+                
+                return display;
+            },
             mvEdit : function (url, ossId) {
             	createTabInFrame(ossId+'_Opensource', url);
             }
@@ -505,7 +534,7 @@
         const oss_lst_grid = {
             oldRowNum: 20,
             load: function () {
-            	var colNameArr = ['', 'ID', 'CID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Notice', 'Source', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
+            	var colNameArr = ['', 'ID', 'CID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Restriction', 'Notice', 'Source', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
 
                 colNameArr.push("Creator");
                 colNameArr.push("Created<br>Date");
@@ -550,7 +579,16 @@
                     , {name: 'ossVersion', index: 'ossVersion', width: 70, align: 'left'}
                     , {name: 'licenseName', index: 'licenseName', width: 200, align: 'left'}
                     , {name: 'licenseType', index: 'licenseType', width: 70, align: 'center'}
-                    //, {name: 'obligation', index: 'obligation', width: 70, align: 'left', sortable: false}
+                    , {
+                        name: 'restriction',
+                        index: 'restriction',
+                        width: 30,
+                        align: 'center',
+                        formatter: oss_lst_fn.displayLicenseRestriction,
+                        unformat: fn_grid_com.unformatter,
+                        sortable: false,
+                        search: false
+                    }
                     , {name: 'obligationNotificationYn', index: 'obligationNotificationYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeNoticeFormat, unformat: fn_grid_com.unformatter, sortable : true}
                     , {name: 'obligationDisclosingSrcYn', index: 'obligationDisclosingSrcYn', width: 30, align: 'center', formatter: fn_grid_com.obligationTypeSourceCodeFormat, unformat: fn_grid_com.unformatter, sortable : true}
                     , {
@@ -632,6 +670,7 @@
                     {'OSS Version': 'ossVersion'},
                     {'License Name': 'licenseName'},
                     {'LicenseType': 'licenseType'},
+                    {'Restriction': 'restriction'},
                     {'Notice': 'notice'},
                     {'Source': 'source'},
                     {'DownloadLocation': 'downloadLocation'},
@@ -919,7 +958,14 @@
             } else {
                 postData.ossTypeSearch = "";
             }
-
+            
+            if (postData.arrRestriction != null) {
+            	postData.arrRestriction = JSON.stringify(postData.arrRestriction);
+            	postData.arrRestriction = postData.arrRestriction.replace(/\"|\[|\]/gi, "");
+            } else {
+            	postData.arrRestriction = null;
+            }
+            
             return postData;
         }
 

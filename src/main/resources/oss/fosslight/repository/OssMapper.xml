@@ -9,68 +9,68 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-    	ORDER BY T1.DEACTIVATE_FLAG ASC, 
+    	ORDER BY TBL.DEACTIVATE_FLAG ASC, 
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 			CASE
-    	    WHEN T1.OSS_NAME = #{ossName} THEN 1
-			WHEN T1.OSS_NAME LIKE CONCAT('%', #{ossName}, '%') THEN 2
+    	    WHEN TBL.OSS_NAME = #{ossName} THEN 1
+			WHEN TBL.OSS_NAME LIKE CONCAT('%', #{ossName}, '%') THEN 2
 			ELSE 3
 			END ASC,
     	</if>
     	<choose>
-    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)"> OSS_ID desc</when>
+    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)"> TBL.OSS_ID desc</when>
    			<otherwise>
 				<choose>
 					<when test="@oss.fosslight.util.StringUtil@equals('OSS_ID', sidx)">
-						OSS_ID
+						TBL.OSS_ID
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('OSS_TYPE', sidx)">
-						OSS_TYPE
+						TBL.OSS_TYPE
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('OSS_NAME', sidx)">
-						OSS_NAME
+						TBL.OSS_NAME
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('OSS_VERSION', sidx)">
-						OSS_VERSION
+						TBL.OSS_VERSION
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_NAME', sidx)">
-						LICENSE_NAME
+						TBL.LICENSE_NAME
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('LICENSE_TYPE', sidx)">
-						LICENSE_TYPE
+						TBL.LICENSE_TYPE
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('OBLIGATION', sidx)">
-						OBLIGATION
+						TBL.OBLIGATION
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('DOWNLOAD_LOCATION', sidx)">
-						DOWNLOAD_LOCATION
+						TBL.DOWNLOAD_LOCATION
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('HOMEPAGE', sidx)">
-						HOMEPAGE
+						TBL.HOMEPAGE
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('SUMMARY_DESCRIPTION', sidx)">
-						SUMMARY_DESCRIPTION
+						TBL.SUMMARY_DESCRIPTION
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('CVSS_SCORE', sidx)">
-						CVSS_SCORE
+						TBL.CVSS_SCORE
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('CREATOR', sidx)">
-						CREATOR
+						TBL.CREATOR
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('CREATED_DATE', sidx)">
-						DATE_FORMAT(T1.CREATED_DATE, '%Y%m%d')
+						DATE_FORMAT(TBL.CREATED_DATE, '%Y%m%d')
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIER', sidx)">
-						MODIFIER
+						TBL.MODIFIER
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('MODIFIED_DATE', sidx)">
-						DATE_FORMAT(T1.MODIFIED_DATE, '%Y%m%d')
+						DATE_FORMAT(TBL.MODIFIED_DATE, '%Y%m%d')
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('OBLIGATION_NOTIFICATION_YN', sidx)">
-						CASE WHEN OBLIGATION_TYPE IN ('10', '11') THEN 0 ELSE 99 END
+						CASE WHEN TBL.OBLIGATION_TYPE IN ('10', '11') THEN 0 ELSE 99 END
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals('OBLIGATION_DISCLOSING_SRC_YN', sidx)">
-						CASE WHEN OBLIGATION_TYPE = '11' THEN 0 ELSE 99 END
+						CASE WHEN TBL.OBLIGATION_TYPE = '11' THEN 0 ELSE 99 END
 					</when>
 				</choose>
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
@@ -328,6 +328,12 @@
             , SUB1.OSS_TYPE AS OSS_TYPE
 			, IFNULL((SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO= '201' AND CD_DTL_NO = T1.LICENSE_TYPE), T5.CD_DTL_NM ) AS LICENSE_TYPE
 			, T1.DEACTIVATE_FLAG
+			, CASE WHEN IFNULL(T1.RESTRICTION, '') != '' AND IFNULL(T3.RESTRICTION, '') != ''
+				THEN CONCAT(T1.RESTRICTION, T3.RESTRICTION)
+				WHEN IFNULL(T1.RESTRICTION, '') != '' AND IFNULL(T3.RESTRICTION, '') = ''
+				THEN T1.RESTRICTION
+				ELSE T3.RESTRICTION
+				END RESTRICTION
 		FROM (
 			SELECT
     			OV.OSS_ID,
@@ -538,6 +544,12 @@
 		</if>
 		GROUP BY T1.OSS_NAME
 		) RESULT
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrRestriction)">
+			WHERE
+			<foreach collection="arrRestriction" item="item" open="(" close=")" separator="OR">
+				FIND_IN_SET(#{item}, RESULT.RESTRICTION)
+			</foreach>
+		</if>
    	</select>
 	<select id="selectOssPopupTotalCount" parameterType="oss.fosslight.domain.OssMaster" resultType="int">
 		SELECT 
@@ -647,7 +659,38 @@
 	</select>
 	
 	<select id="selectOssList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT
+		SELECT TBL.OSS_COMMON_ID 
+			, TBL.OSS_ID
+			, TBL.OSS_NAME
+			, TBL.OSS_VERSION
+			, TBL.LICENSE_DIV
+			, TBL.HOMEPAGE
+			, TBL.DOWNLOAD_LOCATION
+			, TBL.SUMMARY_DESCRIPTION
+			, TBL.CREATOR
+			, TBL.MODIFIER
+            , TBL.CVSS_SCORE      
+            , TBL.CVE_ID      
+			, TBL.CREATED_DATE
+			, TBL.MODIFIED_DATE
+			, TBL.LICENSE_NAME
+			, TBL.OBLIGATION
+			, TBL.OBLIGATION_TYPE
+			, TBL.OBLIGATION_CHECKS
+			, TBL.OSS_TYPE
+			, TBL.LICENSE_TYPE
+			, TBL.OSS_NICKNAME
+			, TBL.COPYRIGHT
+			, TBL.ATTRIBUTION
+			, TBL.DEACTIVATE_FLAG
+			<if test="@oss.fosslight.util.StringUtil@equals(versionCheck,'N')">
+			, TBL.RESTRICTION
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
+			, GROUP_CONCAT(TBL.RESTRICTION) AS RESTRICTION
+			</if>
+		FROM
+		(SELECT
 			T1.OSS_COMMON_ID 
 			, T1.OSS_ID
 			, T1.OSS_NAME
@@ -665,7 +708,6 @@
 			</otherwise>
 		</choose>
 			, T1.SUMMARY_DESCRIPTION
-			, T1.ATTRIBUTION
 			, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
 			, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.MODIFIER = USER_ID), T1.MODIFIER) AS MODIFIER
             , T1.CVSS_SCORE      
@@ -689,6 +731,12 @@
 			, T1.COPYRIGHT
 			, T1.ATTRIBUTION
 			, T1.DEACTIVATE_FLAG
+			, CASE WHEN IFNULL(T1.RESTRICTION, '') != '' AND IFNULL(T3.RESTRICTION, '') != ''
+				THEN CONCAT(T1.RESTRICTION, T3.RESTRICTION)
+				WHEN IFNULL(T1.RESTRICTION, '') != '' AND IFNULL(T3.RESTRICTION, '') = ''
+				THEN T1.RESTRICTION
+				ELSE T3.RESTRICTION
+				END RESTRICTION
 		FROM (
 			SELECT
     			OV.OSS_ID,
@@ -897,8 +945,15 @@
 			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
 			]]>
 		</if>
+		) TBL
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrRestriction)">
+			WHERE
+			<foreach collection="arrRestriction" item="item" open="(" close=")" separator="OR">
+				FIND_IN_SET(#{item}, TBL.RESTRICTION)
+			</foreach>
+		</if>
 		<if test="@oss.fosslight.util.StringUtil@notEquals(versionCheck,'N')">
-		GROUP BY T1.OSS_NAME
+			GROUP BY TBL.OSS_NAME
 		</if>
 		<include refid="orderby"/>
 		<include refid="limitPage"/>
@@ -977,7 +1032,34 @@
 		AND T1.OSS_ID = #{ossId}
 	</select>
 	<select id="selectOssSubList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssMaster">
-		SELECT
+		SELECT T1.OSS_COMMON_ID
+			, T1.REF_OSS_ID 
+			, T1.OSS_ID
+			, T1.OSS_NAME
+			, T1.OSS_VERSION
+			, T1.LICENSE_DIV
+			, T1.HOMEPAGE
+			, T1.DOWNLOAD_LOCATION
+			, T1.SUMMARY_DESCRIPTION
+			, T1.ATTRIBUTION
+			, T1.CREATOR
+			, T1.MODIFIER
+            , T1.CVE_ID
+            , T1.CVSS_SCORE      
+			, T1.CREATED_DATE
+			, T1.MODIFIED_DATE
+			, T1.LICENSE_NAME
+			, T1.OBLIGATION
+			, T1.OBLIGATION_TYPE
+			, T1.OBLIGATION_CHECKS
+			, T1.OSS_TYPE
+			, T1.LICENSE_TYPE
+			, T1.OSS_NICKNAME
+			, T1.COPYRIGHT
+			, T1.DEACTIVATE_FLAG
+			, GROUP_CONCAT(T1.RESTRICTION) AS RESTRICTION
+		FROM
+		(SELECT
 			T1.OSS_COMMON_ID
 			, #{ossId} AS REF_OSS_ID 
 			, T1.OSS_ID
@@ -1019,6 +1101,12 @@
 			, (SELECT GROUP_CONCAT(OSS_NICKNAME SEPARATOR '|') FROM OSS_NICKNAME WHERE OSS_COMMON_ID = T1.OSS_COMMON_ID) AS OSS_NICKNAME
 			, T1.COPYRIGHT
 			, T1.DEACTIVATE_FLAG
+			, CASE WHEN IFNULL(T1.RESTRICTION, '') != '' AND IFNULL(T3.RESTRICTION, '') != ''
+				THEN CONCAT(T1.RESTRICTION, T3.RESTRICTION)
+				WHEN IFNULL(T1.RESTRICTION, '') != '' AND IFNULL(T3.RESTRICTION, '') = ''
+				THEN T1.RESTRICTION
+				ELSE T3.RESTRICTION
+				END RESTRICTION
 		FROM (
 			SELECT
     			OV.OSS_ID,
@@ -1179,9 +1267,15 @@
 			AND CAST(T1.CVSS_SCORE AS FLOAT ) >= CAST(#{cvssScore} AS FLOAT )
 			]]>
 		</if>
+		) T1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(arrRestriction)">
+			WHERE
+			<foreach collection="arrRestriction" item="item" open="(" close=")" separator="OR">
+				FIND_IN_SET(#{item}, T1.RESTRICTION)
+			</foreach>
+		</if>
 		GROUP BY T1.OSS_ID
-		ORDER BY
-		T1.OSS_VERSION DESC
+		ORDER BY T1.OSS_VERSION DESC
 	</select>
 	<select id="selectOssLicenseList" parameterType="oss.fosslight.domain.OssMaster" resultType="oss.fosslight.domain.OssLicense">
 		SELECT

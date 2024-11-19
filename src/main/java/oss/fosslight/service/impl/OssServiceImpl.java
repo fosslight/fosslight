@@ -198,6 +198,23 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 					bean.setDetectedLicense(String.valueOf(sb));
 				}
+				
+				String restriction = bean.getRestriction();
+				if (!isEmpty(restriction)) {
+					List<String> restrictionList = new ArrayList<>();
+					for (String res : restriction.split(",")) {
+						if (!isEmpty(res) && !restrictionList.contains(res)) {
+							restrictionList.add(res);
+						}
+					}
+					if (!restrictionList.isEmpty()) {
+						bean.setRestriction(CommonFunction.setLicenseRestrictionList(restrictionList.stream().distinct().collect(Collectors.joining(","))));
+					} else {
+						bean.setRestriction("");
+					}
+				} else {
+					bean.setRestriction("");
+				}
 			}
 		}
 		
