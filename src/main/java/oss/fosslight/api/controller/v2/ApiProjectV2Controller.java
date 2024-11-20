@@ -605,19 +605,20 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
+    @ApiOperation(value = "Reset specific identification tab", notes = "Identification > reset")
     @ApiImplicitParams ({
-        @ApiImplicitParam(name = "id", value = "Project id", required = true, paramType = "header"),
-        @ApiImplicitParam(name = "tab_name", value = "Upload Target Tab Name (Valid Input: dep, src, bin)",
+        @ApiImplicitParam(name="id", value = "Project id", required = true, paramType = "path"),
+        @ApiImplicitParam(name="tab_name", value = "Upload Target Tab Name (Valid Input: dep, src, bin)",
                 required = true, allowableValues = "dep, src, bin", paramType = "path")
     })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_IDENTIFICATION_RESET})
     public ResponseEntity<Map<String, Object>> identificationReset(
             @ApiParam(hidden=true) @RequestHeader String authorization,
-            @PathVariable(name = "id") String prjId,
-            @PathVariable(name = "tab_name") String tabName
+            @PathVariable(name="id") String prjId,
+            @PathVariable(name="tab_name") String tabName
     ){
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info(String.format("/api/v2/projects/%s/%s/reset called by %s",prjId,tabName, userInfo.getUserId()));
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         if (!apiProjectService.checkUserPermissionForProject(userInfo, prjId)) {
@@ -661,17 +662,27 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
+    @ApiImplicitParams ({
+            @ApiImplicitParam(name = "id", value = "Project id", paramType = "path"),
+            @ApiImplicitParam(name = "tab_name", value = "Upload Target Tab Name (Valid Input: dep, src, bin)",
+                    required = true, allowableValues = "dep, src, bin", paramType = "path"),
+            @ApiImplicitParam(name = "oss_report", value = "OSS Report", required = true, dataType = "file", paramType = "form"),
+            @ApiImplicitParam(name = "comment", value = "Comment", paramType = "query"),
+            @ApiImplicitParam(name = "reset_flag", value = "Reset Flag (YES : Y, NO : N, Default : Y)",
+                    allowableValues = "Y,N", paramType = "query"),
+            @ApiImplicitParam(name = "sheet_names", value = "Sheet Names", paramType = "query")
+    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT})
     public ResponseEntity<Map<String, Object>> ossReportAll(
             @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin") @PathVariable(name = "tab_name") String tabName,
-            @ApiParam(value = "OSS Report", required = true) @RequestPart(required = true) MultipartFile ossReport,
-            @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
-            @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
-
+            @PathVariable(name="id") String prjId,
+            @PathVariable(name="tab_name") String tabName,
+            @RequestPart(name="oss_report", required = true) MultipartFile ossReport,
+            @RequestParam(name="comment", required = false) String comment,
+            @RequestParam(name="reset_flag", required = false) String resetFlag,
+            @RequestParam(name="sheet_names", required = false) String sheetNames) {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info(String.format("/api/v2/projects/%s/%s/reports called by %s",prjId,tabName, userInfo.getUserId()));
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         tabName = tabName == null? null : tabName.toUpperCase();

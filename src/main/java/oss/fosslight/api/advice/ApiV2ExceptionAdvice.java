@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.RestResponseService;
@@ -33,6 +34,13 @@ import java.util.Set;
 @Slf4j
 public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     private final RestResponseService responseService;
+
+    @ExceptionHandler(MultipartException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ResponseEntity<Map<String, Object>> fileParameterMissiongException(HttpServletRequest request, MultipartException e) {
+        return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                "A 'file' parameter is mandatory, though its name may differ depending on the API.");
+    }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
