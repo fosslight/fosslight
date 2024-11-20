@@ -61,6 +61,7 @@
                                                         		<th class="text-center" th:text="''"></th>
                                                         		<th class="text-center" th:text="LicenseId"></th>
                                                         		<th class="text-center" th:text="License"></th>
+                                                        		<th class="text-center" th:text="Restriction"></th>
                                                        		 	<th class="text-center" th:text="Copyright"></th>
                                                     		</tr>
                                                 		</thead>
@@ -106,6 +107,10 @@
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.summaryDescription}"></th>
 												<td style="white-space: pre;"><span th:utext="${detail?.summaryDescription}"></span></td>
+											</tr>
+											<tr class="text-smaller">
+												<th style="width: 30%" th:text="#{msg.common.field.importantNotes}"></th>
+												<td style="white-space: pre;"><span th:utext="${detail?.importantNotes}"></span></td>
 											</tr>
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.attribution}"></th>

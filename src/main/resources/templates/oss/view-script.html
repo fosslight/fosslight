@@ -112,6 +112,15 @@
 						return '<a href="#none" onclick=createTabInFrame("'+row.licenseId+'_License","#/license/edit/'+row.licenseId+'")>'+data+'</a>';
 					}
 		    	}, {
+    				data : "restriction",
+    				render : function(data, type, row, meta){
+						let restriction = data;
+						if ("" != restriction) {
+							restriction = data.replaceAll(",", "<br>");
+						}
+						return restriction;
+					}
+				}, {
 		      		data : "ossCopyright"
 		    	}],
 			  	columnDefs : [
@@ -132,7 +141,11 @@
 			      	{
 			      		targets : [3],
 			      		className : "text-left"
-			      	}
+			      	},
+	        		{
+	        			targets : [4],
+	        			className : "text-left"
+	        		}
 			    ]
 		    });
 		},
