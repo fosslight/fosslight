@@ -2599,7 +2599,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							// 6) OSS NAME은 다르나, LICENSE 는 동일
 							else if(!isSameOssName && isSameLicense) {
 								// Same binary : <OSS Name> <OSS Version> /
-								diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " /"));
+								infoMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " /"));
 							} 
 							// 7) OSS NAME LICENSE 모두 다른 경우
 							else {
