@@ -40,6 +40,15 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
         return responseService.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage().split(":")[1].trim());
     }
 
+    @ExceptionHandler(CUserHasNoPermissionException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    protected ResponseEntity<Map<String, Object>> userNoPermission(HttpServletRequest request, CUserHasNoPermissionException e){
+        return responseService.errorResponse(HttpStatus.NOT_FOUND,
+                "The user does not have edit permissions for Project " + e.getMessage());
+    }
+
+
+
     @ExceptionHandler(CUserNotFoundException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     protected ResponseEntity<Map<String, Object>> userNotFound(HttpServletRequest request, CUserNotFoundException e) {

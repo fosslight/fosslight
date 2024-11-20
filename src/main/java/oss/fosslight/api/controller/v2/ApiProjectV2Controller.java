@@ -21,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.advice.CUserHasNoPermissionException;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
@@ -620,7 +621,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         if (!apiProjectService.checkUserPermissionForProject(userInfo, prjId)) {
-            return responseService.errorResponse(HttpStatus.NOT_FOUND);
+            throw new CUserHasNoPermissionException(prjId);
         }
 
         tabName = tabName.toUpperCase();
