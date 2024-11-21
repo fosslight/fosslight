@@ -3347,7 +3347,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			Map<String, OssMaster> ossMap = getBasicOssInfoList(ossMaster);
 			
 			if (ossMap == null || ossMap.isEmpty()) {
-				OssMaster bean = ossMapper.checkExistsOss(ossMaster);
+				OssMaster bean = ossMapper.checkExistsOssname(ossMaster);
 				if (bean != null) {
 					ossMaster.setOssCommonId(bean.getOssCommonId());
 				} else {
