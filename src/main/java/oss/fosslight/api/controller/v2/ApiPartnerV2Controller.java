@@ -12,8 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.advice.CProjectNotAvailableException;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -27,15 +29,14 @@ import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Api(tags = {"2. 3rd Party"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
+@Validated
 public class ApiPartnerV2Controller extends CoTopComponent {
 
     private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
@@ -115,21 +116,11 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
 
+        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
+            throw new CProjectNotAvailableException(partnerId);
+        }
+
         try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> partnerIdList = new ArrayList<String>();
-            partnerIdList.add(partnerId);
-            String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
-
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("partnerIdList", partnerIds);
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
-
-            boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
-            if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.FORBIDDEN);
-            }
             for (String email : emailList) {
                 boolean ldapCheck = true;
                 if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
@@ -164,33 +155,24 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     public ResponseEntity<FileSystemResource> get3rdDownload(
             @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
-            @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) {
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
 
         String downloadId = "";
         T2File fileInfo = new T2File();
         T2Users userInfo = userService.checkApiUserAuth(authorization);
 
+        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
+            throw new CProjectNotAvailableException(partnerId);
+        }
+
         try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> partnerIdList = new ArrayList<String>();
-            partnerIdList.add(partnerId);
-            String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
-
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("partnerIdList", partnerIds);
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
-
-            boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
-            if (searchFlag) {
-                downloadId = ExcelDownLoadUtil.getExcelDownloadId("partnerCheckList", partnerId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
-                fileInfo = fileService.selectFileInfo(downloadId);
-            }
+            downloadId = ExcelDownLoadUtil.getExcelDownloadId("partnerCheckList", partnerId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+            fileInfo = fileService.selectFileInfo(downloadId);
 
             return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error(e.getMessage(), e);
-            return null;
+            throw e;
         }
     }
 
@@ -203,21 +185,13 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
+        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
+            throw new CProjectNotAvailableException(partnerId);
+        }
+
         try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> partnerIdList = new ArrayList<String>();
-            partnerIdList.add(partnerId);
-            String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
+            resultMap = apiPartnerService.getExportJson(partnerId);
 
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("partnerIdList", partnerIds);
-            paramMap.put("readOnly", CoConstDef.FLAG_YES);
-
-            boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
-            if (searchFlag) {
-                resultMap = apiPartnerService.getExportJson(partnerId);
-            }
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST);

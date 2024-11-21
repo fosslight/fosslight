@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jsonldjava.shaded.com.google.common.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -117,19 +115,27 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		return result;
 	}
 
-	public boolean checkUserPermissionForProject(T2Users userInfo,String prjId){
+	@Override
+	public boolean checkProjectAvailability(T2Users userInfo, String prjId, String needToUploadReport){
 		Map<String, Object> paramMap = new HashMap<>();
-		List<String> prjIdList = new ArrayList<String>();
-		prjIdList.add(prjId);
 		paramMap.put("userId", userInfo.getUserId());
 		paramMap.put("loginUserName", userInfo.getUserName());
 		paramMap.put("userRole", userRole(userInfo));
-		paramMap.put("prjId", prjIdList);
-		paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
-		paramMap.put("distributionType", "normal");
-		paramMap.put("readOnly", CoConstDef.FLAG_NO);
+		paramMap.put("prjId", prjId);
+//		paramMap.put("distributionType", projectType);
+		paramMap.put("needToUploadReport", needToUploadReport);
+//		paramMap.put("readOnly", CoConstDef.FLAG_NO);
 
-		return existProjectCnt(paramMap);
+		return apiProjectMapper.checkProjectExist(paramMap);
+	}
+
+	public boolean checkUserAvailableToEditProject(T2Users userInfo, String prjId){
+		return checkProjectAvailability(userInfo, prjId, CoConstDef.FLAG_YES);
+	}
+
+	@Override
+	public boolean checkUserHasProject(T2Users userInfo, String prjId){
+		return checkProjectAvailability(userInfo, prjId, CoConstDef.FLAG_NO);
 	}
 
 	@SuppressWarnings("unchecked")

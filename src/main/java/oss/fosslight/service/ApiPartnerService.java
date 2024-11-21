@@ -5,14 +5,15 @@
 
 package oss.fosslight.service;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import oss.fosslight.domain.T2Users;
 
 @Service
 public interface ApiPartnerService {
 	Map<String, Object> getPartnerMasterList(Map<String, Object> paramMap);
+	boolean checkUserHasPartnerProject(T2Users userInfo, String partnerId);
 	boolean existPartnertCnt(Map<String, Object> paramMap);
 	boolean existLdapUserToEmail(String email);
 	boolean existsWatcherByEmail(String partnerId, String email);

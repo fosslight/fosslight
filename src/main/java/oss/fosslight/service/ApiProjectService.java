@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
@@ -21,8 +20,12 @@ import oss.fosslight.domain.UploadFile;
 public interface ApiProjectService {
 	public Map<String, Object> selectProjectList(Map<String, Object> paramMap);
 
-	public boolean checkUserPermissionForProject(T2Users userInfo, String prjId);
-	
+	public boolean checkUserHasProject(T2Users userInfo, String prjId);
+
+	public boolean checkUserAvailableToEditProject(T2Users userInfo, String prjId);
+
+	public boolean checkProjectAvailability(T2Users userInfo, String prjId, String needToUploadReport);
+
 	public boolean existProjectCnt(Map<String, Object> paramMap);
 
 	public Map<String, Object> getSheetData(UploadFile ufile, String prjId, String readType, String[] sheet);

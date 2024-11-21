@@ -6,7 +6,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -16,17 +15,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @RequiredArgsConstructor
 @ControllerAdvice(basePackages = {"oss.fosslight.api.controller.v2", "oss.fosslight.api.controller.lite"})
@@ -48,9 +44,9 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
         return responseService.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage().split(":")[1].trim());
     }
 
-    @ExceptionHandler(CUserHasNoPermissionException.class)
+    @ExceptionHandler(CProjectNotAvailableException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    protected ResponseEntity<Map<String, Object>> userNoPermission(HttpServletRequest request, CUserHasNoPermissionException e){
+    protected ResponseEntity<Map<String, Object>> userNoPermission(HttpServletRequest request, CProjectNotAvailableException e){
         return responseService.errorResponse(HttpStatus.NOT_FOUND,
                 "The user does not have edit permissions for Project " + e.getMessage());
     }
