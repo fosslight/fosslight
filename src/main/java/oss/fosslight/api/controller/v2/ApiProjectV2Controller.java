@@ -132,7 +132,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+    @ApiOperation(value = "Retrieve the model list of the project", notes = "Project의 모델 정보 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_MODEL_SEARCH})
     public ResponseEntity<Map<String, Object>> selectModelList(
             @ApiParam(hidden=true) @RequestHeader String authorization,
