@@ -1703,13 +1703,25 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 							warningVerMap.put(_key, _list);
 						}
 					} else {// warning message 가 포함되어 있는 경우 정렬 (우선순위 3)
+						String addValue = "";
+						if (errKey.startsWith("binaryNotice")) {
+							if (msg.equalsIgnoreCase("Found binary in notice.html")) {
+								addValue = "FIND";
+							} else if (msg.equalsIgnoreCase("Can't find binary in notice.htm")) {
+								addValue = "NOTFIND";
+							} else if (msg.equalsIgnoreCase("NOTICE Should be \"ok\" in case OSS is used")) {
+								addValue = "PERMISSIVE";
+							}
+						}
 						if (warningMap.containsKey(_key)) {
 							List<String> _list = warningMap.get(_key);
-							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							String warningValue = errKey.substring(0, errKey.indexOf(".")).toUpperCase();
+							_list.add(!isEmpty(addValue) ? warningValue + "_" + addValue : warningValue);
 							warningMap.replace(_key, _list);
 						} else {
 							List<String> _list = new ArrayList<>();
-							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							String warningValue = errKey.substring(0, errKey.indexOf(".")).toUpperCase();
+							_list.add(!isEmpty(addValue) ? warningValue + "_" + addValue : warningValue);
 							warningMap.put(_key, _list);
 						}
 					}
@@ -1981,7 +1993,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		String rtn = "";
 		// compareArray 순서대로 정렬된다.
 		// 정의되지 않은 경우는 정렬대상에서 제외
-		String[] compareArray = new String[]{"NOTICE", "BINARYNOTICE", "BINARYNAME", "OSSNAME", "OSSVERSION", "LICENSENAME", "LICENSETEXT", "FILEPATH", "DOWNLOADLOCATION", "HOMEPAGE"};
+		String[] compareArray = new String[]{"NOTICE", "BINARYNOTICE", "BINARYNOTICE_FIND", "BINARYNOTICE_NOTFIND", "BINARYNOTICE_PERMISSIVE", "BINARYNAME", "OSSNAME", "OSSVERSION", "LICENSENAME", "LICENSETEXT", "FILEPATH", "DOWNLOADLOCATION", "HOMEPAGE"};
 		Map<String, String> compareSortMap = new LinkedHashMap<>(); // [Identification] Auto ID message있는 Row 정렬 필요.
 		int sortIdx = 0;
 		
