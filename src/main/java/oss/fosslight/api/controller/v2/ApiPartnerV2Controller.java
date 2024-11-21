@@ -160,12 +160,9 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "3rd Party Export report", notes = "3rd Party > Export report")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD})
     public ResponseEntity<FileSystemResource> get3rdDownload(
-            @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) {
 
@@ -198,12 +195,9 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "3rd Party Export Json", notes = "3rd Party > Export Json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_JSON})
     public ResponseEntity<Map<String, Object>> get3rdAsJson(
-            @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
