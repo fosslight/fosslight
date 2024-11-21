@@ -274,14 +274,17 @@ var Ctrl_fn = {
 						async: false,
 						contentType : 'application/json',
 						success: function(resultData){
-							if(resultData.isValid == "true"){
+							if (resultData.isValid == "true") {
 								$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'addFlag', 'Y');
 								$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'Y');
-							}
-							else {
+							} else {
 								$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'addFlag', 'N');
 								$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'N');
-								alertify.error([[#{already.added.nickname}]], 0);
+								if (typeof resultData.validMsg !== "undefined") {
+									alertify.error(resultData.validMsg, 0);
+								} else {
+									alertify.error([[#{already.added.nickname}]], 0);
+								}
 								failFlag = true;
 							}
 							
