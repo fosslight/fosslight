@@ -97,6 +97,9 @@
 			AND IFNULL(T1.OBLIGATION_NOTIFICATION_YN, 'N') = 'N'
 			AND IFNULL(T1.OBLIGATION_DISCLOSING_SRC_YN, 'N') = 'N' 
 		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
+			AND T1.DISCLOSING_SRC = #{disclosingSrc}
+		</if>
 		/* 2018-07-25 choye 추가 */ 
 		<if test="arrRestriction != null">
 			AND
@@ -215,6 +218,9 @@
 			AND IFNULL(T1.OBLIGATION_NEEDS_CHECK_YN, 'N') = 'N'
 			AND IFNULL(T1.OBLIGATION_NOTIFICATION_YN, 'N') = 'N'
 			AND IFNULL(T1.OBLIGATION_DISCLOSING_SRC_YN, 'N') = 'N' 
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(disclosingSrc)">
+			AND T1.DISCLOSING_SRC = #{disclosingSrc}
 		</if>
 		<if test="arrRestriction != null">
 			AND
