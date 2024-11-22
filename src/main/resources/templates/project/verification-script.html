@@ -1507,13 +1507,21 @@
 
                         var filePaths = [];
                         var componentIds = [];
+                        var pathValidMsg = {};
 
                         // empty check
                         for (var i in arr) {
                             var _path = target.jqGrid('getCell', arr[i], 'filePath');
-                            if ("undefined/" == _path) _path = "";
                             var _componentId = target.jqGrid('getCell', arr[i], 'componentId');
-
+                            
+                            if ("" == _path) {
+                            	pathValidMsg["filePath." + _componentId] = "This field is required";
+                            } else if ("undefined/" == _path) {
+                            	_path = "";
+                            } else if ("/" == _path) {
+                        		pathValidMsg["filePath." + _componentId] = [[#{msg.package.check.source.code.path}]];
+                        	}
+                            
                             filePaths.push(_path);
                             componentIds.push(_componentId);
                         }
@@ -1525,6 +1533,11 @@
                         	if ("undefined/" == _path) $("#" + arr[i] + "_filePath").val("");
                         }
 
+                        if (Object.keys(pathValidMsg).length !== 0) {
+                        	gridValidMsgNew(pathValidMsg, "list");
+                        	return false;
+                        }
+                        
                         var fileSeqs = [];
                         var fileTypeSeqs = [];
 
