@@ -1514,9 +1514,7 @@
                             var _path = target.jqGrid('getCell', arr[i], 'filePath');
                             var _componentId = target.jqGrid('getCell', arr[i], 'componentId');
                             
-                            if ("" == _path) {
-                            	pathValidMsg["filePath." + _componentId] = "This field is required";
-                            } else if ("undefined/" == _path) {
+                            if ("undefined/" == _path) {
                             	_path = "";
                             } else if ("/" == _path) {
                         		pathValidMsg["filePath." + _componentId] = [[#{msg.package.check.source.code.path}]];
@@ -3269,6 +3267,8 @@
                             var validMsg = json.verifyValidMsg;
                             var validCheckSourcePathArray = json.verifyCheckSourcePath;
                             var validCheckSourcePathMsg = json.verifyCheckSourcePathMsg;
+                            var validEmptySourcePathArray = json.verifyEmptySourcePath;
+                            var validEmptySourcePathMsg = json.verifyEmptySourcePathMsg;
                             var fileCountsMap = json.fileCounts;
                             var readmeFileName = json.verifyReadme;
                             var proprietary = json.verifyProprietary;
@@ -3291,6 +3291,18 @@
 
                                 if (errRow) {
                                     errRow.append('<div class=\"list_filePath_' + id + ' retxt"\">' + validCheckSourcePathMsg + '</div>');
+                                }
+
+                                $("#list").jqGrid("setCell", id, "verifyFileCount", " ");
+
+                                isReq = false;
+                            });
+                            
+                            validEmptySourcePathArray.forEach(function (id) {
+                                var errRow = $("#" + id + " > td[aria-describedby='list_filePath']");
+
+                                if (errRow) {
+                                    errRow.append('<div class=\"list_filePath_' + id + ' retxt"\">' + validEmptySourcePathMsg + '</div>');
                                 }
 
                                 $("#list").jqGrid("setCell", id, "verifyFileCount", " ");

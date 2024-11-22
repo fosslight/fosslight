@@ -1166,12 +1166,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			int gridIdx = 0;
 			ArrayList<String> gValidIdxlist = new ArrayList<>();
 			ArrayList<String> checkSourcePathlist = new ArrayList<>();
+			ArrayList<String> emptySourcePathlist = new ArrayList<>();
 			HashMap<String,Object> gFileCountMap = new HashMap<>();
 			boolean separatorErrFlag = false;
 			
 			log.info("VERIFY Path Check START -----------------");
 			
 			for (String gridPath : gridFilePaths){
+				if (isEmpty(gridPath)) {
+					emptySourcePathlist.add(gridComponentIds.get(gridIdx));
+					continue;
+				}
+				
 				if (gridPath.contains("?")) {
 					gridPath = gridPath.replaceAll("[?]", "0x3F");
 				}
@@ -1389,8 +1395,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			resMap.put("verifyValid", gValidIdxlist);
 			resMap.put("verifyCheckSourcePath", checkSourcePathlist);
+			resMap.put("verifyEmptySourcePath", emptySourcePathlist);
 			resMap.put("verifyValidMsg", "path not found.");
 			resMap.put("verifyCheckSourcePathMsg", getMessage("msg.package.check.source.code.path"));
+			resMap.put("verifyEmptySourcePathMsg", "This field is required");
 			resMap.put("fileCounts", gFileCountMap);
 			resMap.put("verifyReadme", readmeFileName);
 			resMap.put("verifyCheckList", !isEmpty(verify_chk_list) ? CoConstDef.FLAG_YES : "");
