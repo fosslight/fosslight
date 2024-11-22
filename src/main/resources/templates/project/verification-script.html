@@ -2537,6 +2537,8 @@
                             $('#wgetUrl_' + key).hide();
                             $('#projectSearch_' + key).hide();
                             $("input[name='packageFileType"+key+"']").val(value);
+                            $(".verifyFile_"+key).parent().show();
+                            $(".verifyFile_"+key).show();
                             
                             break;
                         case "2":
