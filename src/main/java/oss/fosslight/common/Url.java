@@ -963,6 +963,7 @@ public final class Url {
 
 			/** API 3rd Party Add Watcher */
 			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partners/{id}/watchers";
+			public static final String FOSSLIGHT_API_PARTNER_ADD_EDITOR			= "/partners/{id}/editors";
 			public static final String FOSSLIGHT_API_PARTNER_EXPORT_DEPRECATED = "/partners/{id}/export";
 			public static final String FOSSLIGHT_API_PARTNER_JSON_DEPRECATED = "/partners/{id}/json";
 
@@ -1012,6 +1013,8 @@ public final class Url {
 
 			/** API Project Add Watcher */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/projects/{id}/watchers";
+
+			public static final String FOSSLIGHT_API_PROJECT_ADD_EDITOR		= "/projects/{id}/editors";
 
 
 			/** API OSS Report upload */

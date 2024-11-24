@@ -106,12 +106,56 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     }
 
-    @ApiOperation(value = "3rd Party Add Watcher", notes = "3rd Party Add Watcher")
+    @ApiOperation(value = "3rd Party Add Watcher (Deprecated)", notes = "3rd Party Add Watcher (Deprecated)")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
             @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<>();
+
+        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
+            throw new CProjectNotAvailableException(partnerId);
+        }
+
+        try {
+            for (String email : emailList) {
+                boolean ldapCheck = true;
+                if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
+                    ldapCheck = apiPartnerService.existLdapUserToEmail(email);
+                }
+                if (!ldapCheck) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+                }
+                boolean watcherFlag = apiPartnerService.existsWatcherByEmail(partnerId, email);
+                if (watcherFlag) {
+                    Map<String, Object> param = new HashMap<>();
+                    param.put("partnerId", partnerId);
+                    param.put("division", "");
+                    param.put("userId", "");
+                    param.put("partnerEmail", email);
+                    apiPartnerService.insertWatcher(param);
+                } else {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+                }
+            }
+            return new ResponseEntity(resultMap, HttpStatus.OK);
+        } catch (Exception e) {
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        }
+    }
+
+    @ApiOperation(value = "3rd Party Add Editor", notes = "3rd Party Add Editor")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_EDITOR})
+    public ResponseEntity<Map<String, Object>> addPrjEditor(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
+            @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();

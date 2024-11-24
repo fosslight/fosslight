@@ -1134,12 +1134,60 @@ public class ApiProjectV2Controller extends CoTopComponent {
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Project Add Watcher", notes = "Project Add Watcher")
+    @ApiOperation(value = "Project Add Watcher (Deprecated)", notes = "Project Add Watcher (Deprecated)")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_WATCHER})
     public ResponseEntity<Map<String, Object>> addPrjWatcher(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<>();
+
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(prjId);
+        }
+
+        try {
+            if (emailList == null) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Email list is required.");
+            }
+            for (String email : emailList) {
+                boolean ldapCheck = true;
+                if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
+                    apiProjectService.existLdapUserToEmail(email);
+                }
+                if (!ldapCheck) {
+                    return responseService.errorResponse(HttpStatus.NOT_FOUND,
+                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_USER_NOTFOUND_MESSAGE));
+                }
+                boolean watcherFlag = apiProjectService.existsWatcherByEmail(prjId, email);
+                if (!watcherFlag) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+                }
+                Map<String, Object> param = new HashMap<>();
+                param.put("prjId", prjId);
+                param.put("division", "");
+                param.put("userId", "");
+                param.put("prjEmail", email);
+                apiProjectService.insertWatcher(param);
+            }
+
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+        } catch (Exception e) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
+        }
+    }
+
+
+    @ApiOperation(value = "Project Add Editor", notes = "Project Add Editor (A person with edit permissions)")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_EDITOR})
+    public ResponseEntity<Map<String, Object>> addPrjEditor(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
+            @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
