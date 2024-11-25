@@ -650,7 +650,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "OSS Report", required = true) @RequestPart(required = true) MultipartFile ossReport,
             @ApiParam(value = "Comment") @RequestParam(name="comment", required = false) String comment,
             @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(name="reset_flag", required = false) String resetFlag,
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false) String resetFlag,
             @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
