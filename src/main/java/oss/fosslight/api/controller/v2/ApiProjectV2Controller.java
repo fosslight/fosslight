@@ -41,6 +41,7 @@ import oss.fosslight.validation.custom.T2CoProjectValidator;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Min;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -86,6 +87,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
+
     @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
@@ -98,7 +100,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
             @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false, allowableValues = "PROG,REQ,REV,COMP,DROP") @RequestParam(required = false) String status,
             @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
-            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator) {
+            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
+            @ApiParam(value = "Count Per Page (max: 1000, default: 1000)", required = false)
+            @Min(value = 1, message="Input value=${validatedValue}. counterPerPage must be larger than {value}")
+            @RequestParam(required = false, defaultValue="1000") int countPerPage,
+            @ApiParam(value = "Page (default 1)", required = false)
+            @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}")
+            @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -119,6 +127,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             paramMap.put("prjIdList", prjIdList);
             paramMap.put("prjName", prjName);
             paramMap.put("prjNameExactYn", prjNameExactYn);
+            paramMap.put("countPerPage", countPerPage);
+            paramMap.put("offset", (page - 1) * countPerPage);
 
             try {
                 resultMap = apiProjectService.selectProjectList(paramMap);

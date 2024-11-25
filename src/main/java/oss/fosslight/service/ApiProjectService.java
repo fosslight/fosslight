@@ -20,6 +20,8 @@ import oss.fosslight.domain.UploadFile;
 public interface ApiProjectService {
 	public Map<String, Object> selectProjectList(Map<String, Object> paramMap);
 
+	public Map<String, Object> selectProjectList_V1(Map<String, Object> paramMap);
+
 	public boolean checkUserHasProject(T2Users userInfo, String prjId);
 
 	public boolean checkUserAvailableToEditProject(T2Users userInfo, String prjId);

@@ -109,9 +109,48 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			}
 		}
 		
+		result.put("list", list);
+		result.put("totalCount", projectCnt);
+		
+		return result;
+	}
+
+	// NOTE: This method needs to be removed when V1 API is fade out
+	@Override
+	public Map<String, Object> selectProjectList_V1(Map<String, Object> paramMap){
+		Map<String, Object> result = new HashMap<String, Object>();
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		int projectCnt = apiProjectMapper.selectProjectTotalCount(paramMap);
+
+		if (projectCnt > 0) {
+			list = apiProjectMapper.selectProject_V1(paramMap);
+
+			for (Map<String, Object> map : list) {
+				String prjId = (String) map.get("prjId").toString();
+				String status = (String) map.get("status");
+				String distributionStatus = (String) map.get("distributionStatus");
+				distributionStatus = CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS.equals(distributionStatus)
+						? CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROGRESS : distributionStatus;
+				String nvdMaxScore = apiProjectMapper.findIdentificationMaxNvdInfo(prjId);
+
+				map.put("DISTRIBUTION_TYPE", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, (String) map.get("distributionType")));
+				map.put("NETWORK_SERVICE", (String) map.get("networkService"));
+				map.put("NOTICE", CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, (String) map.get("notice")));
+				map.put("NOTICE_PLATFORM", CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, (String) map.get("noticePlatform")));
+				map.put("PRIORITY", CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, (String) map.get("priority")));
+				map.put("STATUS",CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, status));
+				map.put("IDENTIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("identificationStatus")));
+				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
+				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));
+				map.put("VULNERABILITY_SCORE", nvdMaxScore);
+//				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
+			}
+		}
+
 		result.put("content", list);
 		result.put("record", projectCnt);
-		
+
 		return result;
 	}
 

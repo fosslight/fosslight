@@ -136,7 +136,7 @@ public class ApiProjectController extends CoTopComponent {
 			paramMap.put("prjIdList", 	prjIdList);
 			
 			try {
-				resultMap = apiProjectService.selectProjectList(paramMap);
+				resultMap = apiProjectService.selectProjectList_V1(paramMap);
 			} catch (Exception e) {
 				return responseService.getFailResult(CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE
 						, CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
