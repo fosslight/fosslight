@@ -1056,8 +1056,12 @@ public final class Url {
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/selfchecks/{id}/export";
 
+			public static final String FOSSLIGHT_API_SELFCHECK_DOWNLOAD		= "/selfchecks/{id}/bom/file";
+
 			/** API SelfCheck Add Watcher */
 			public static final String FOSSLIGHT_API_SELFCHECK_ADD_WATCHER		= "/selfchecks/{id}/watchers";
+
+		public static final String FOSSLIGHT_API_SELFCHECK_ADD_EDITOR		= "/selfchecks/{id}/editors";
 
 			public static final String FOSSLIGHT_API_SELFCHECK_GET		= "/selfchecks/{id}";
 
