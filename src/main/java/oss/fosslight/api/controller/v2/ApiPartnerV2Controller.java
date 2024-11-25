@@ -194,6 +194,32 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         }
     }
 
+    @ApiOperation(value = "3rd Party Export report (Deprecated)", notes = "3rd Party > Export report (Deprecated)")
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD_DEPRECATED})
+    public ResponseEntity<FileSystemResource> get3rdDownload_deprecated(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
+
+        String downloadId = "";
+        T2File fileInfo = new T2File();
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+
+        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
+            throw new CProjectNotAvailableException(partnerId);
+        }
+
+        try {
+            downloadId = ExcelDownLoadUtil.getExcelDownloadId("partnerCheckList", partnerId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+            fileInfo = fileService.selectFileInfo(downloadId);
+
+            return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
+        } catch (java.lang.Exception e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
     @ApiOperation(value = "3rd Party Export report", notes = "3rd Party > Export report")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD})
     public ResponseEntity<FileSystemResource> get3rdDownload(
@@ -217,6 +243,28 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         } catch (java.lang.Exception e) {
             log.error(e.getMessage(), e);
             throw e;
+        }
+    }
+
+    @ApiOperation(value = "3rd Party Export Json (Deprecated)", notes = "3rd Party > Export Json (Deprecated)")
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_JSON_DEPRECATED})
+    public ResponseEntity<Map<String, Object>> get3rdAsJson_deprecated(
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
+            throw new CProjectNotAvailableException(partnerId);
+        }
+
+        try {
+            resultMap = apiPartnerService.getExportJson(partnerId);
+
+            return new ResponseEntity<>(resultMap, HttpStatus.OK);
+        } catch (Exception e) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST);
         }
     }
 
