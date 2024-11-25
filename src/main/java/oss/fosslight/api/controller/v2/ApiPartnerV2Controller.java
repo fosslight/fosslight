@@ -29,6 +29,7 @@ import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 
 import javax.annotation.PostConstruct;
+import javax.validation.constraints.Min;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,8 +66,10 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", required = false, allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
             @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
             @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
-            @ApiParam(value = "Count Per Page (max: 1000, default: 1000)", required = false) @RequestParam(required = false, defaultValue="1000") String countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page) {
+            @ApiParam(value = "Count Per Page (max: 1000, default: 1000)", required = false)
+            @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="1000") int countPerPage,
+            @ApiParam(value = "Page (default 1)", required = false)
+            @Min(value = 1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -74,13 +77,6 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
         try {
-            var _page = Integer.parseInt(page);
-            var _countPerPage = Integer.parseInt(countPerPage);
-            if (_page < 0 || _countPerPage < 0 ) {
-                throw new NumberFormatException();
-            }
-            var _offset = (_page - 1) * _countPerPage;
-
             CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
             CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
 
@@ -91,8 +87,8 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             paramMap.put("division", division);
             paramMap.put("status", status);
             paramMap.put("partnerIdList", partnerIdList);
-            paramMap.put("countPerPage", _countPerPage);
-            paramMap.put("offset", _offset);
+            paramMap.put("countPerPage", countPerPage);
+            paramMap.put("offset", (page - 1) * countPerPage);
 
             resultMap = apiPartnerService.getPartnerMasterList(paramMap);
 

@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.dto.ListLicenseDto;
@@ -26,6 +27,7 @@ import oss.fosslight.service.ApiOssService;
 import oss.fosslight.service.OssService;
 import oss.fosslight.service.T2UserService;
 
+import javax.validation.constraints.Min;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
+@Validated
 public class ApiOssV2Controller extends CoTopComponent {
     private final RestResponseService responseService;
 
@@ -58,16 +61,12 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
             @ApiParam(value = "Download Location", required = false) @RequestParam(required = false) String downloadLocation,
             @ApiParam(value = "Download Location Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String downloadLocationExact,
-            @ApiParam(value = "Count Per Page (max: 10000, default: 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page
+            @ApiParam(value = "Count Per Page (max: 10000, default: 10000)", required = false)
+            @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="10000") int countPerPage,
+            @ApiParam(value = "Page (default 1)", required = false)
+            @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page
     ) {
         try {
-            var _page = Integer.parseInt(page);
-            var _countPerPage = Integer.parseInt(countPerPage);
-            if (_page < 0 || _countPerPage < 0 ) {
-                throw new NumberFormatException();
-            }
-
             ListOssDto.Request ossQuery =
                     ListOssDto.Request.builder()
                             .ossName(ossName)
@@ -76,8 +75,8 @@ public class ApiOssV2Controller extends CoTopComponent {
                             .ossNameExact(Objects.equals(ossNameExact, "Y"))
                             .urlExact(Objects.equals(downloadLocationExact, "Y"))
                             .build();
-            ossQuery.setPage(_page);
-            ossQuery.setCountPerPage(_countPerPage);
+            ossQuery.setPage(page);
+            ossQuery.setCountPerPage(countPerPage);
 
             var map = apiOssService.listOss(ossQuery);
             return ResponseEntity.ok(map);
@@ -96,27 +95,23 @@ public class ApiOssV2Controller extends CoTopComponent {
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "License Name", required = false) @RequestParam(required = false) String licenseName,
             @ApiParam(value = "License Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String licenseNameExact,
-            @ApiParam(value = "Count Per Page (max 10000, default 10000)", required = false) @RequestParam(required = false, defaultValue="10000") String countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page) {
+            @ApiParam(value = "Count Per Page (max 10000, default 10000)", required = false)
+            @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="10000") int countPerPage,
+            @ApiParam(value = "Page (default 1)", required = false)
+            @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증
         userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
         try {
-            var _page = Integer.parseInt(page);
-            var _countPerPage = Integer.parseInt(countPerPage);
-            if (_page < 0 || _countPerPage < 0 ) {
-                throw new NumberFormatException();
-            }
-
             ListLicenseDto.Request licenseQuery =
                     ListLicenseDto.Request.builder()
                             .licenseName(licenseName)
                             .licenseNameExact(Objects.equals(licenseNameExact, "Y"))
                             .build();
-            licenseQuery.setPage(_page);
-            licenseQuery.setCountPerPage(_countPerPage);
+            licenseQuery.setPage(page);
+            licenseQuery.setCountPerPage(countPerPage);
 
             var map = apiLicenseService.listLicenses(licenseQuery);
             return ResponseEntity.ok(map);

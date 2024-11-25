@@ -102,11 +102,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
             @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
             @ApiParam(value = "Count Per Page (max: 1000, default: 1000)", required = false)
-            @Min(value = 1, message="Input value=${validatedValue}. counterPerPage must be larger than {value}")
-            @RequestParam(required = false, defaultValue="1000") int countPerPage,
+            @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="1000") int countPerPage,
             @ApiParam(value = "Page (default 1)", required = false)
-            @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}")
-            @RequestParam(required = false, defaultValue="1") int page) {
+            @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);

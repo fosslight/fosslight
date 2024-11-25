@@ -41,7 +41,7 @@ public class ApiV2ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     protected ResponseEntity<Map<String, Object>> constraintViolationException(HttpServletRequest request, ConstraintViolationException e) {
-        return responseService.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage().split(":")[1].trim());
+        return responseService.errorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(CProjectNotAvailableException.class)
