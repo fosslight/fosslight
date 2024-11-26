@@ -6442,6 +6442,17 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 					fileSeqs.add(file3.get(0).getRegistSeq());
 				}
 			}
+			
+			if (!isEmpty(prj.getPackageFileId4())) {
+				List<UploadFile> file4 = fileService.setReusePackagingFile(prj.getPackageFileId4());
+				fileMap.put("refFileSeq", prj.getPackageFileId4());
+				fileMap.put("fileSeq", file4.get(0).getRegistSeq());
+				reuseCheck = verificationService.setReusePackagingFile(fileMap);
+				
+				if (reuseCheck) {
+					fileSeqs.add(file4.get(0).getRegistSeq());
+				}
+			}
 		}
 		
 		return fileSeqs;
