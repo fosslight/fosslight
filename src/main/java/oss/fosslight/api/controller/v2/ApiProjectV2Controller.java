@@ -583,16 +583,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "Reset specific identification tab", notes = "Identification > reset")
-    @ApiImplicitParams ({
-        @ApiImplicitParam(name="id", value = "Project id", required = true, paramType = "path"),
-        @ApiImplicitParam(name="tab_name", value = "Upload Target Tab Name (Valid Input: dep, src, bin)",
-                required = true, allowableValues = "dep, src, bin", paramType = "path")
-    })
     @PostMapping(value = {APIV2.FOSSLIGHT_API_IDENTIFICATION_RESET})
     public ResponseEntity<Map<String, Object>> identificationReset(
             @ApiParam(hidden=true) @RequestHeader String authorization,
-            @PathVariable(name="id") String prjId,
-            @PathVariable(name="tab_name") String tabName
+            @ApiParam(value = "Project id", required = true) @PathVariable(name="id") String prjId,
+            @ApiParam( value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
+            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name="tab_name") String tabName
     ){
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         log.info(String.format("/api/v2/projects/%s/%s/reset called by %s",prjId,tabName, userInfo.getUserId()));
@@ -655,15 +651,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
         log.info(String.format("/api/v2/projects/%s/%s/reports called by %s",prjId,tabName, userInfo.getUserId()));
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
-        tabName = tabName == null? null : tabName.toUpperCase();
+        tabName = tabName.toUpperCase();
 
         if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
             throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
 
         try {
-            Map<String, Object> paramMap = new HashMap<>();
-
             String oldFileId = "";
             if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
                 Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
@@ -690,12 +684,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
             }
-            boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) src -> bin Android
-            if (!checkDistributionTypeFlag) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE,
-                                CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE)
-                                + " Check Project Distribution Type");
+
+            Map<String, Object> paramMap = new HashMap<>();
+            List<String> prjIdList = new ArrayList<String>();
+            prjIdList.add(prjId);
+            paramMap.put("prjId", prjIdList);
+            paramMap.put("distributionType", "normal");
+
+            try {
+                boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) src -> bin Android
+                if (!checkDistributionTypeFlag) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE,
+                                    CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE)
+                                    + " Check Project Distribution Type");
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(),e);
             }
 
             UploadFile bean = null;
@@ -813,7 +818,6 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
 
         try {
-            Map<String, Object> paramMap = new HashMap<>();
             UploadFile ossReportBean = null;
 
             if (!ossReport.getOriginalFilename().contains("xls")) { // 확장자 xls, xlsx, xlsm 허용
@@ -823,6 +827,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
             } else {
+
+                Map<String, Object> paramMap = new HashMap<>();
+                List<String> prjIdList = new ArrayList<String>();
+                prjIdList.add(prjId);
+                paramMap.put("prjId", prjIdList);
+                paramMap.put("distributionType", "android");
                 boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) bin Android -> bin
                 if (!checkDistributionTypeFlag) {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST,
