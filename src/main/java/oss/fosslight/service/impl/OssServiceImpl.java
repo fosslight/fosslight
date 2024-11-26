@@ -1336,6 +1336,10 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						purlString = generatePurlByDownloadLocation(master);
 					}
 					
+					if (isEmpty(purlString)) {
+						purlString = generatePurlByDownloadLocation(master);
+					}
+					
 					purls.add(purlString);
 					master.setPurl(purlString);
 					ossMapper.insertOssDownloadLocation(master);
