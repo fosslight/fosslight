@@ -3742,6 +3742,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())
 					&& !CoConstDef.FLAG_NO.equals(prjInfo.getIdentificationSubStatusAndroid())
 					&& !CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA.equals(prjInfo.getIdentificationSubStatusAndroid())) {
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 				map = getIdentificationGridList(param);
 
@@ -3763,6 +3764,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 			} else {
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 				param.setMerge(CoConstDef.FLAG_NO);
 				map = getIdentificationGridList(param);
@@ -4052,7 +4054,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> map = null;
 		ProjectIdentification param = new ProjectIdentification();
 		param.setReferenceId(project.getPrjId());
-		param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		param.setReferenceDiv(project.getReferenceDiv());
 		param.setMerge(CoConstDef.FLAG_NO);
 		map = getIdentificationGridList(param);
 		if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
