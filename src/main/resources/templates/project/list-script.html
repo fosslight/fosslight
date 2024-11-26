@@ -1193,6 +1193,24 @@ var fn = {
 		if(chk < 3){
 			var bomCompareArr = $("#list").jqGrid("getGridParam", "selarrrow");
 			
+			var notPermissionIds = "";
+			for (var i in bomCompareArr) {
+				var statusPermission = $("#list").jqGrid("getRowData", bomCompareArr[i]).statusPermission;
+				if ("1" != statusPermission) {
+					if ("" != notPermissionIds) {
+						notPermissionIds += ", ";
+					}
+					notPermissionIds += bomCompareArr[i];
+				}
+			}
+			
+			if ("" != notPermissionIds) {
+				var message = [[#{msg.project.bom.compare.permission}]];
+				message = message.replace("prjId", notPermissionIds);
+				alertify.alert(message, function(){});
+				return false;
+			}
+			
 			var beforePrjId = "";
 			var afterPrjId = "";
 
