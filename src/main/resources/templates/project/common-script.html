@@ -2025,7 +2025,8 @@ var com_fn = {
 					$(obj).closest('li').remove();
 					if ("15" == referenceDiv) {
 						if ("2" == type) {
-							bin_fn.binaryUploadFile();
+//							bin_fn.binaryUploadFile();
+							$(".binBinaryFileDiv").hide();
 						}
 					}
 				} else {
@@ -2340,7 +2341,7 @@ var com_fn = {
 						case "bin" : 
 							if (!resetFlag) {
 								bin_fn.csvUploadFile();
-								bin_fn.binaryUploadFile();
+//								bin_fn.binaryUploadFile();
 								$('#_binAddList').jqGrid(bin_fn.setParamProject3());
 							}
 							

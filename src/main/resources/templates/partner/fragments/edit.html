@@ -114,17 +114,17 @@
 							</div>
 						</div>
 					</div>
-					<div class="row form-group">
+					<div class="row form-group binaryFileDiv" th:if="${binaryFile != null}">
 						<div class="col-lg-3">
 							<label for="inputName" th:text="'fosslight_binary.txt'"></label>
 						</div>
 						<div class="col-lg-9">
-							<div class="col-12 mb-2 d-flex binaryUploader" th:style="${binaryFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
+<!-- 						<div class="col-12 mb-2 d-flex binaryUploader" th:style="${binaryFile == null} or ${isCommited} ? 'display : none;' : 'display : flex;'">
 								<div class="float-left" id="partnerBinaryFile" style="max-width: 100%;"></div>
-							</div>
+							</div> -->
 							<div class="col-12 mb-2 d-flex">
 								<ul class="pl-0 binaryUpload">
-									<li th:if="${binaryFile != null}">
+									<li>
 										<a class="ajax-file-upload-filename" th:text="${binaryFile.origNm}" th:href="@{'/download/' + ${binaryFile.fileSeq} + '/' + ${binaryFile.logiNm}}"></a>
 										<span class="badge bg-danger" th:style="${isCommited} ? 'cursor:pointer; display:none;' : 'cursor:pointer;'" th:onclick="|fn.deleteBinaryFile(this)|" th:text="X"></span>
 										<input type="hidden" id="binaryFileId" name="binaryFileId" th:value="${binaryFile.fileSeq}" /> <br>[[${binaryFile.createdDate}]]
@@ -445,13 +445,13 @@
 										</ul>
 									</td>
 								</tr>
-								<tr style="height: 60px;">
+								<tr style="height: 60px;" th:if="${binaryFile != null}">
 									<th style="width: 35%; vertical-align: middle;">
 										<span th:text="'fosslight_binary.txt'"></span>
 									</th>
 									<td class="text-sm" style="vertical-align: middle;">
 										<ul class="pl-0 mb-0 binaryUpload">
-											<li th:if="${binaryFile != null}">
+											<li>
 												<th:block th:if="${detail.permission > 0}">
 													<a class="ajax-file-upload-filename" th:text="${binaryFile.origNm}" th:href="@{'/download/' + ${binaryFile.fileSeq} + '/' + ${binaryFile.logiNm}}"></a>
 												</th:block>
@@ -460,9 +460,6 @@
 												</th:block>
 												<input type="hidden" id="binaryFileId" name="binaryFileId" th:value="${binaryFile.fileSeq}" />
 												<br>[[${binaryFile.createdDate}]]
-											</li>
-											<li th:unless="${binaryFile != null}">
-												<span th:text="'No File'"></span>
 											</li>
 										</ul>
 									</td>
