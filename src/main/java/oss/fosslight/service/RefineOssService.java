@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
@@ -342,6 +343,21 @@ public class RefineOssService {
 					} else {
 						duplPurlGroupMap = new HashMap<>();
 						List<Map<String, String>> duplcatedList;
+						
+						// db 에 등록된 purl 존재 유무 확인 후 생성
+						int existsCnt = ossDownloadLocationList.stream().filter(e -> e.get(FIELD_PURL) == null).collect(Collectors.toList()).size();
+						if (existsCnt > 0) {
+							try {
+								for (Map<String, String> map : ossDownloadLocationList) {
+									if (map.get(FIELD_PURL) == null) {
+										map.put(FIELD_PURL, generatePurlByDownloadLocation(map.get(FIELD_DOWNLOAD_LOCATION)));
+									}
+								}
+							} catch (MalformedPackageURLException e1) {
+								log.error(e1.getMessage(), e1);
+							}
+						}
+						
 						for(Map<String, String> n : ossDownloadLocationList) {
 							
 							// Purl이 동일한 download location List
