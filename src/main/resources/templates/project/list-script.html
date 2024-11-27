@@ -1195,8 +1195,8 @@ var fn = {
 			
 			var notPermissionIds = "";
 			for (var i in bomCompareArr) {
-				var statusPermission = $("#list").jqGrid("getRowData", bomCompareArr[i]).statusPermission;
-				if ("1" != statusPermission) {
+				var permission = $("#list").jqGrid("getRowData", bomCompareArr[i]).permission;
+				if ("1" != permission) {
 					if ("" != notPermissionIds) {
 						notPermissionIds += ", ";
 					}
