@@ -2257,6 +2257,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				case 9:
 					checkName = "stackoverflow-" + ossNameMatcher.group(3);
 					break;
+				case 11:
+					checkName = "cargo:" + ossNameMatcher.group(3);
+					break;
 				default:
 					break;
 			}
@@ -2322,6 +2325,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				break;
 			case 9:
 				p = Pattern.compile("((http|https)://stackoverflow.com/revisions/([^/]+)/([^/]+))");
+				break;
+			case 11:
+				p = Pattern.compile("((http|https)://crates.io/crates/([^/]+))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");
