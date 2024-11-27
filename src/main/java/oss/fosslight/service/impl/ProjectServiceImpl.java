@@ -5493,19 +5493,21 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				List<OssComponentsLicense> rtnComponentLicenseList = new ArrayList<OssComponentsLicense>();
 				
-				for (OssComponentsLicense list : temp.getOssComponentsLicenseList()) {
-					int equalsItemList = (int) rtnBean.getOssComponentsLicenseList()
-														.stream()
-														.filter(e -> list.getLicenseName().equals(e.getLicenseName())) // 동일한 licenseName을 filter
-														.collect(Collectors.toList()) // return을 list로변환
-														.size(); // 해당 list의 size
-					
-					if (equalsItemList == 0) {
-						rtnComponentLicenseList.add(list);
+				if (!CollectionUtils.isEmpty(temp.getOssComponentsLicenseList())) {
+					for (OssComponentsLicense list : temp.getOssComponentsLicenseList()) {
+						int equalsItemList = (int) rtnBean.getOssComponentsLicenseList()
+															.stream()
+															.filter(e -> list.getLicenseName().equals(e.getLicenseName())) // 동일한 licenseName을 filter
+															.collect(Collectors.toList()) // return을 list로변환
+															.size(); // 해당 list의 size
+						
+						if (equalsItemList == 0) {
+							rtnComponentLicenseList.add(list);
+						}
 					}
+					
+					rtnBean.getOssComponentsLicenseList().addAll(rtnComponentLicenseList);
 				}
-				
-				rtnBean.getOssComponentsLicenseList().addAll(rtnComponentLicenseList);
 				
 				if (!rtnBean.getRefComponentId().contains(temp.getRefComponentId())) {
 					rtnBean.setRefComponentId(rtnBean.getRefComponentId() + "," + temp.getRefComponentId());
