@@ -119,13 +119,17 @@
 
                                     alertify.confirm([[#{msg.project.confirm.load.licenseinfo}]], function (e) {
                                         if (e) {
+                                        	let copyrightText = null;
+											if (typeof data.prjOssMaster.copyrightText !== "undefined") {
+												copyrightText = data.prjOssMaster.copyrightText;
+                                        	}
                                             target.jqGrid('setCell', rowid, 'ossId', data.prjOssMaster.ossId);
                                             target.jqGrid('setCell', rowid, 'licenseDiv', data.prjOssMaster.licenseDiv);
                                             target.jqGrid('setCell', rowid, 'homepage', data.prjOssMaster.homepage);
                                             target.jqGrid('setCell', rowid, 'downloadLocation', data.prjOssMaster.downloadLocation);
                                             target.jqGrid('setCell', rowid, 'cveId', data.prjOssMaster.cveId);
                                             target.jqGrid('setCell', rowid, 'cvssScore', data.prjOssMaster.cvssScore);
-                                            target.jqGrid('setCell', rowid, 'copyrightText', data.prjOssMaster.copyrightText);
+                                            target.jqGrid('setCell', rowid, 'copyrightText', copyrightText);
                                             target.jqGrid('setCell', rowid, 'ossName', ossName);
                                             target.jqGrid('setCell', rowid, 'ossVersion', ossVersion);
                                             // 메인 그리드 로우 저장
@@ -139,7 +143,7 @@
                                             fn_grid_com.saveCellData(div, rowid, 'downloadLocation', data.prjOssMaster.downloadLocation, null, null);
                                             fn_grid_com.saveCellData(div, rowid, 'cveId', data.prjOssMaster.cveId, null, null);
                                             fn_grid_com.saveCellData(div, rowid, 'cvssScore', data.prjOssMaster.cvssScore, null, null);
-                                            fn_grid_com.saveCellData(div, rowid, 'copyrightText', data.prjOssMaster.copyrightText, null, null);
+                                            fn_grid_com.saveCellData(div, rowid, 'copyrightText', copyrightText, null, null);
                                             fn_grid_com.saveCellData(div, rowid, 'licenseName', data.prjOssMaster.licenseName, null, null);
 
                                             // 서브 라이센스 그리드 클리어
