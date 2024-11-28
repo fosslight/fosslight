@@ -373,7 +373,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		project.setAndroidCsvFile(projectMapper.selectAndroidCsvFile(project));
 		project.setAndroidNoticeFile(projectMapper.selectAndroidNoticeFile(project));
-		project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
+		
+		if (!isEmpty(project.getSrcAndroidResultFileId())) {
+			project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
+		}
 		
 		if (!isEmpty(project.getScrtCsvFileId())) {
 			project.setScrtCsvFile(projectMapper.selectCsvFile(project.getScrtCsvFileId()));
