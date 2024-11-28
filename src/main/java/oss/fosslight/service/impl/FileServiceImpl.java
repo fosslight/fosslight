@@ -1218,10 +1218,13 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 					fileInfo.setFileId(newFileId);
 					fileInfo.setFileSeq(orgFile.getFileSeq());
 					fileInfo.setLogiNm(copyFileName);
+					fileInfo.setLogiThumbNm(randomUUID + "_thumb." + orgFile.getExt());
 					if (!isFileId) {
 						fileInfo.setLogiPath(newFile);
-						fileInfo.setLogiThumbNm(randomUUID + "_thumb." + orgFile.getExt());
 						fileInfo.setLogiThumbPath(newFile + "/thumb");
+					} else {
+						fileInfo.setLogiPath(orgFile.getLogiPath());
+						fileInfo.setLogiThumbPath(orgFile.getLogiThumbPath());
 					}
 					
 					fileMapper.insertCopyPhysicalFileInfo(fileInfo);
