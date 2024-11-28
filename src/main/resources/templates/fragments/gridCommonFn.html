@@ -120,7 +120,7 @@
                                     alertify.confirm([[#{msg.project.confirm.load.licenseinfo}]], function (e) {
                                         if (e) {
                                         	let copyrightText = null;
-											if (typeof data.prjOssMaster.copyrightText !== "undefined") {
+											if (typeof data.prjOssMaster.copyrightText !== "undefined" && "" != data.prjOssMaster.copyrightText) {
 												copyrightText = data.prjOssMaster.copyrightText;
                                         	}
                                             target.jqGrid('setCell', rowid, 'ossId', data.prjOssMaster.ossId);
