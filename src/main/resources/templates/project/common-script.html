@@ -1414,38 +1414,17 @@ var com_fn = {
 							deleteTabInFrame('/project/identification/'+prjId);
 							createTabInFrame(prjId+'_Packaging', "/project/verification/"+prjId);
 						});
-					} else if(status == "PROG") { //reject한 경우는 새로고침 (save 버튼등이 문제)
-						alertify.alert([[#{msg.common.success}]], function() {
- 							if(isAndroidModel) {
- 								deleteTabInFrame('/project/identification/'+prjId+'/4');
- 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/4');
- 							} else {
- 								deleteTabInFrame('/project/identification/'+prjId+'/5');
- 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
- 							}
-						});
-					} else if(userRole != "ROLE_ADMIN" && status == "REQ") { // 일반인이 request review한 경우
-						alertify.alert([[#{msg.common.success}]], function() {
-							deleteTabInFrame("/project/identification/"+prjId);
-						});	
-					} else if(userRole == "ROLE_ADMIN" && status == "REQ") { // admin이 request review한 경우
-						alertify.alert([[#{msg.common.success}]], function() {
- 							if (isAndroidModel) {
- 								deleteTabInFrame('/project/identification/'+prjId+'/4');
- 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/4");
-							} else {
-								deleteTabInFrame('/project/identification/'+prjId+'/5');
- 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/5");
- 							}
-						});
-					} else if (status == "CONF") { // Admin이 confirm한 경우
+					} else if (status == "PROG" //reject한 경우는 새로고침 (save 버튼등이 문제)
+						|| (userRole != "ROLE_ADMIN" && status == "REQ") // 일반인이 request review한 경우
+						|| (userRole == "ROLE_ADMIN" && status == "REQ") // admin이 request review한 경우
+						|| status == "CONF") { // Admin이 confirm한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
 							if (isAndroidModel) {
 								deleteTabInFrame('/project/identification/'+prjId+'/4');
-								createTabInFrame(prjId+'_Identify', "/project/identification/" + prjId + "/4");
+								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/4');
 							} else {
 								deleteTabInFrame('/project/identification/'+prjId+'/5');
-								createTabInFrame(prjId+'_Identify', "/project/identification/" + prjId + "/5");
+								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
 							}
 						});
 					} else {
