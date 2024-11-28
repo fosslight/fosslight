@@ -526,7 +526,7 @@ public class RefineOssService {
 						for(Map<String, String> n : ossDownloadLocationList) {
 							if(!checkDuplicationUrl(checkedOssDownloadLocationList,ossDownloadLocationList, n)) {
 								String downloadLocation = downloadlocationFormatter(n.get(FIELD_DOWNLOAD_LOCATION), checkOssNameUrl);
-								if (StringUtil.isEmpty(downloadLocation)) {
+								if (!StringUtil.isEmpty(downloadLocation)) {
 									n.put(FIELD_DOWNLOAD_LOCATION, downloadLocation);
 								}
 								checkedOssDownloadLocationList.add(n);
