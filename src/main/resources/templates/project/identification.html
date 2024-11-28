@@ -250,7 +250,7 @@
                                         		type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenAnalysisResult" th:text="'Analysis Result'" th:onclick="|bom_fn.showAnalysisResult()|"></button>
                                 	</th:block>
                                    	<button th:if="${@CommonFunction.isAdmin() and project.dropYn != 'Y'}"
-                                        	type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenBulkRegist" th:text="'OSS bulk registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
+                                        	type="button" class="btn btn-outline-lg-red btn-sm width-10rem mr-xm px-3 idenBulkRegist" th:text="'OSS Bulk Registration'" th:onclick="fn_grid_com.ossBulkReg([[${project.prjId}]],'13')"></button>
                               	</div>
                             </div>
                             <div class="col-md-6">
