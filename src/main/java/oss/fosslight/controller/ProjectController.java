@@ -4273,7 +4273,7 @@ public class ProjectController extends CoTopComponent {
 					&& req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 				file.setCreator(loginUserName());
 				
-				if (fileId == null) {
+				if (isEmpty(fileId)) {
 					list = fileService.uploadFile(req, file);
 				} else {
 					list = fileService.uploadFile(req, file, null, fileId);

@@ -433,6 +433,7 @@ public class Project extends ComBean implements Serializable {
 	private String packageFileId3; // 오픈소스 파일ID
 	private String packageFileId4; // 오픈소스 파일ID
 	private String packageVulDocFileId;
+	private String noticeAppendFileId;
 
 	private String packageFileType1; // 오픈소스 파일type
 	private String packageFileType2; // 오픈소스 파일type
@@ -487,6 +488,7 @@ public class Project extends ComBean implements Serializable {
 	private T2File packageFileInfo3; // 오픈소스 파일객체
 	private T2File packageFileInfo4; // 오픈소스 파일객체
 	private T2File packageVulDocFileInfo;
+	private T2File noticeAppendFileInfo;
 	
 	/** The notice text file id. */
 	private String noticeTextFileId;
@@ -4675,5 +4677,21 @@ public class Project extends ComBean implements Serializable {
 
 	public void setScrtCsvFile(List<T2File> scrtCsvFile) {
 		this.scrtCsvFile = scrtCsvFile;
+	}
+	
+	public String getNoticeAppendFileId() {
+		return noticeAppendFileId;
+	}
+
+	public void setNoticeAppendFileId(String noticeAppendFileId) {
+		this.noticeAppendFileId = noticeAppendFileId;
+	}
+
+	public T2File getNoticeAppendFileInfo() {
+		return noticeAppendFileInfo;
+	}
+
+	public void setNoticeAppendFileInfo(T2File noticeAppendFileInfo) {
+		this.noticeAppendFileInfo = noticeAppendFileInfo;
 	}
 }

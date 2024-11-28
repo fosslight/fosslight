@@ -81,4 +81,8 @@ public interface VerificationMapper {
 	void deleteReuseFileInfo(T2File file);
 
 	int countSameLogiFile(T2File file);
+	
+	void updateNoticeAppendFile(Project project);
+	
+	List<T2File> selectNoticeAppendFile(@Param("noticeAppendFileId") String noticeAppendFileId);
 }

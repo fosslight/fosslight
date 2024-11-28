@@ -166,6 +166,7 @@
 			, EDIT_EMAIL_YN
 			, HIDE_OSS_VERSION_YN
 			, EDIT_APPENDED_YN
+			, NOTICE_APPEND_TYPE
 		)VALUES(
 			#{prjId}                  
 			, #{noticeType}             
@@ -186,6 +187,7 @@
 			, #{editEmailYn}
 			, #{hideOssVersionYn}
 			, #{editAppendedYn} 		
+			, #{noticeAppendType}
 		) ON DUPLICATE KEY UPDATE
 			PRJ_ID                       	=  #{prjId}                    
 			, NOTICE_TYPE                	=  #{noticeType}            
@@ -206,6 +208,7 @@
 			, EDIT_EMAIL_YN					= #{editEmailYn}
 			, HIDE_OSS_VERSION_YN			= #{hideOssVersionYn}
 			, EDIT_APPENDED_YN				= #{editAppendedYn}
+			, NOTICE_APPEND_TYPE			= #{noticeAppendType}
 	</insert>
 	
 	<select id="selectVerificationNotice" parameterType="oss.fosslight.domain.OssNotice" resultType="oss.fosslight.domain.OssComponents">
@@ -456,6 +459,17 @@
 	 WHERE PRJ_ID = #{prjId}
 	</update>
 	
+	<update id="updateNoticeAppendFile" parameterType="oss.fosslight.domain.Project">
+	UPDATE PROJECT_MASTER
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(noticeAppendFileId)">
+		SET NOTICE_APPEND_FILE_ID = #{noticeAppendFileId}
+		</if>
+		<if test="@oss.fosslight.util.StringUtil@isEmpty(noticeAppendFileId)">
+		SET NOTICE_APPEND_FILE_ID = NULL
+		</if>
+	 WHERE PRJ_ID = #{prjId}
+	</update>
+	
 	<select id="existsOssNotice" parameterType="String" resultType="int">
 		SELECT COUNT(*) FROM OSS_NOTICE WHERE PRJ_ID = #{prjId}
 	</select>
@@ -486,6 +500,7 @@
 			 , EDIT_EMAIL_YN = 'N'
 			 , HIDE_OSS_VERSION_YN = 'N'
 			 , EDIT_APPENDED_YN = 'N'
+			 , NOTICE_APPEND_TYPE = NULL
 		 WHERE PRJ_ID = #{prjId}
 	</update>
 	
@@ -577,5 +592,17 @@
 		FROM T2_FILE
 		WHERE LOGI_PATH = #{logiPath}
 			AND LOGI_NM = #{logiNm}
+	</select>
+	
+	<select id="selectNoticeAppendFile" parameterType="String" resultType="oss.fosslight.domain.T2File">
+		SELECT
+			T1.*
+			, DATE_FORMAT(T1.REG_DT, '%Y-%m-%d %T') AS CREATED_DATE
+		FROM
+			T2_FILE T1
+		WHERE
+			T1.FILE_ID = #{noticeAppendFileId}
+		AND
+			T1.DEL_YN = 'N'
 	</select>
 </mapper>

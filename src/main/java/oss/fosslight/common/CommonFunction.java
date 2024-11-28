@@ -942,6 +942,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 
 	
 	public static String getStringFromFile(String path) {
+		return getStringFromFile(path, true);
+	}
+	
+	public static String getStringFromFile(String path, boolean lineSeparator) {
 		StringBuffer sb = new StringBuffer();
 		File file = new File(path);
 		
@@ -959,7 +963,11 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	            br = new BufferedReader(isr);
 	            // 버퍼를 한줄한줄 읽어들여 내용 추출
 	            while ( (temp = br.readLine()) != null) {
-	            	sb.append(temp).append(System.lineSeparator());
+	            	if (lineSeparator) {
+		            	sb.append(temp).append(System.lineSeparator());
+	            	} else {
+		            	sb.append(temp).append("<br>");
+	            	}
 	            }
 	        } catch (FileNotFoundException e) {
 	        	log.error(e.getMessage(), e);

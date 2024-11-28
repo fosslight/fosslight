@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -2779,8 +2780,26 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String companyNameFull = ossNotice.getCompanyNameFull();
 		String distributionSiteUrl = ossNotice.getDistributionSiteUrl();
 		String email = ossNotice.getEmail();
+		String noticeAppendType = ossNotice.getNoticeAppendType();
 		String appendedContentsTEXT = ossNotice.getAppendedTEXT();
-		String appendedContents = ossNotice.getAppended();
+		String appendedContents = "";;
+		
+		if (avoidNull(noticeAppendType).equals("F") && !isEmpty(project.getNoticeAppendFileId())) {
+			List<T2File> appendFileInfoList = verificationMapper.selectNoticeAppendFile(project.getNoticeAppendFileId());
+			if (!CollectionUtils.isEmpty(appendFileInfoList)) {
+				String customAppendedContents = "";
+				for (int i=0; i<appendFileInfoList.size(); i++) {
+					if (appendFileInfoList.get(i).getExt().equalsIgnoreCase("txt")) {
+						customAppendedContents += "<p class='bdTop'>" + CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm(), false) + "</p>";
+					} else {
+						customAppendedContents += "<p class='bdTop'>" + CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm()) + "</p>";
+					}
+				}
+				appendedContents = customAppendedContents;
+			}
+		} else {
+			appendedContents = "<p class='bdTop'>" + ossNotice.getAppended() + "</p>";
+		}
 		
 		if (!isEmpty(distributionSiteUrl) && !(distributionSiteUrl.startsWith("http://") || distributionSiteUrl.startsWith("https://") || distributionSiteUrl.startsWith("ftp://"))) {
 			distributionSiteUrl = "http://" + distributionSiteUrl;
@@ -3001,8 +3020,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public void setUploadFileSave(String prjId, String fileSeq, String registFileId) throws Exception {
 		Project prjParam = new Project(); 
 		prjParam.setPrjId(prjId);
-		  
-		if (fileSeq.equals("5")) {
+		
+		if (fileSeq.equals("6")) {
+			prjParam.setNoticeAppendFileId(registFileId);
+			verificationMapper.updateNoticeAppendFile(prjParam);
+		} else if (fileSeq.equals("5")) {
 			prjParam.setPackageVulDocFileId(registFileId);
 			verificationMapper.updatePackageVulDocFile(prjParam);
 		} else {
@@ -3149,6 +3171,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public void deleteFile(Map<Object, Object> map) {
 		String delFileSeq = (String) map.get("delFileSeq");
 		String prjId = (String) map.get("prjId");
+		String gubn = (String) map.get("gubn");
 		T2File file = fileService.selectFileInfo(delFileSeq);
 		
 		// delete logical file
@@ -3158,7 +3181,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		// update file id
 		Project project = new Project();
 		project.setPrjId(prjId);
-		project.setPackageVulDocFileId(null);
-		verificationMapper.updatePackageVulDocFile(project);
+		if (gubn.equals("VDF")) {
+			project.setPackageVulDocFileId(null);
+			verificationMapper.updatePackageVulDocFile(project);
+		} else {
+			Project prjInfo = projectMapper.getProjectBasicInfo(project);
+			List<T2File> noticeAppendFile = verificationMapper.selectNoticeAppendFile(prjInfo.getNoticeAppendFileId());
+			if (noticeAppendFile == null || noticeAppendFile.isEmpty()) {
+				project.setNoticeAppendFileId(null);
+				verificationMapper.updateNoticeAppendFile(project);
+			}
+		}
 	}
 }

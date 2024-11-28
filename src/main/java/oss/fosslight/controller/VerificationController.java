@@ -140,6 +140,11 @@ public class VerificationController extends CoTopComponent {
 		File packageFile2 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2());
 		File packageFile3 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3());
 		File packageFile4 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId4());
+		List<T2File> noticeAppendFile = verificationMapper.selectNoticeAppendFile(projectMaster.getNoticeAppendFileId());
+		
+		if (noticeAppendFile != null) {
+			model.addAttribute("noticeAppendFile", noticeAppendFile);
+		}
 		
 		if (packageFile != null) {
 			if (!isEmpty(packageFile.getRefPrjId())) projectMaster.setReuseRefPrjId1(packageFile.getRefPrjId());
@@ -248,6 +253,11 @@ public class VerificationController extends CoTopComponent {
 		File packageFile2 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId2());
 		File packageFile3 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId3());
 		File packageFile4 = verificationMapper.selectVerificationFile(projectMaster.getPackageFileId4());
+		List<T2File> noticeAppendFile = verificationMapper.selectNoticeAppendFile(projectMaster.getNoticeAppendFileId());
+		
+		if (noticeAppendFile != null) {
+			model.addAttribute("noticeAppendFile", noticeAppendFile);
+		}
 		
 		if (packageFile != null) {
 			if (!isEmpty(packageFile.getRefPrjId())) projectMaster.setReuseRefPrjId1(packageFile.getRefPrjId());
@@ -298,6 +308,7 @@ public class VerificationController extends CoTopComponent {
 		if (permission.equals("1")) {
 			//파일 등록
 			List<UploadFile> list = new ArrayList<UploadFile>();
+			boolean appendFileFlag = false;
 			
 			String fileId = StringUtil.isEmpty(req.getParameter("fileId")) ? null : req.getParameter("fileId");
 			String prjId = req.getParameter("prjId");
@@ -312,7 +323,20 @@ public class VerificationController extends CoTopComponent {
 				file.setCreator(loginUserName());
 
 				//파일 확장자 체크
-				String codeExp = !fileSeq.equals("5") ? codeMapper.getCodeDetail("120", "16").getCdDtlExp() : codeMapper.getCodeDetail("120", "40").getCdDtlExp();
+				String codeExp = "";
+				switch (fileSeq) {
+					case "5": 
+						codeExp = codeMapper.getCodeDetail("120", "40").getCdDtlExp();
+						break;
+					case "6": 
+						codeExp = codeMapper.getCodeDetail("120", "41").getCdDtlExp();
+						appendFileFlag = true;
+						break;
+					default : 
+						codeExp = codeMapper.getCodeDetail("120", "16").getCdDtlExp();
+						break;
+				}
+				
 				String[] exts = codeExp.split(",");
 				boolean fileExtCheck = false;
 				for (String s : exts) {
@@ -328,7 +352,11 @@ public class VerificationController extends CoTopComponent {
 					return toJson(resultList);
 				}
 
-				list = fileService.uploadFile(req, file, null, fileId, true, filePath);
+				if (appendFileFlag) {
+					list = fileService.uploadFile(req, file, null, fileId, true, filePath, false);
+				} else {
+					list = fileService.uploadFile(req, file, null, fileId, true, filePath);
+				}
 			}
 			
 			//결과값 resultList에 담기
@@ -336,6 +364,9 @@ public class VerificationController extends CoTopComponent {
 			
 			// 20210625_fileUpload 시 projectMaster table save_START
 			String registFileId = list.get(0).getRegistSeq();
+			if (appendFileFlag) {
+				registFileId = list.get(0).getRegistFileId();
+			}
 			verificationService.setUploadFileSave(prjId, fileSeq, registFileId);
 			// 20210625_fileUpload 시 projectMaster table save_END
 			
