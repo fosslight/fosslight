@@ -5604,5 +5604,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			return getMessage(msgCode, new String[]{contents});
 		}
 	}
+
+	public static void addSystemLogRecords(String prjId, String loginUserName) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		log.info("reset {} / {} / {}", prjId, loginUserName, sdf.format(System.currentTimeMillis()));
+	}
 }
 

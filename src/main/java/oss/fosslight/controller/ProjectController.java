@@ -1904,6 +1904,7 @@ public class ProjectController extends CoTopComponent {
 		String identificationSubStatusPartner = (String) map.get("identificationSubStatusPartner");
 		String mainGrid = (String) map.get("mainData");
 		String thirdPartyGrid = (String) map.get("thirdPartyData");
+		String resetFlag = (String) map.get("resetFlag");
 		
 		// 메인그리드
 		Type collectionType = new TypeToken<List<OssComponents>>() {}.getType();
@@ -1941,6 +1942,17 @@ public class ProjectController extends CoTopComponent {
 					commentHisBean.setContents(changedLicenseName);
 					commentService.registComment(commentHisBean, false);
 				}
+			}
+			
+			if (CoConstDef.FLAG_YES.equals(avoidNull(resetFlag))) {
+				CommentsHistory commentHisBean = new CommentsHistory();
+				commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+				commentHisBean.setReferenceId(prjId);
+				commentHisBean.setExpansion1("3rd party");
+				commentHisBean.setContents("reset all data in 3rd party");
+				commentService.registComment(commentHisBean, false);
+				
+				CommonFunction.addSystemLogRecords(prjId, loginUserName());
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
