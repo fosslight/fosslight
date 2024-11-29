@@ -2790,9 +2790,23 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				String customAppendedContents = "";
 				for (int i=0; i<appendFileInfoList.size(); i++) {
 					if (appendFileInfoList.get(i).getExt().equalsIgnoreCase("txt")) {
-						customAppendedContents += "<p class='bdTop'>" + CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm(), false) + "</p>";
+						if ("text".equals(ossNotice.getFileType())){
+							customAppendedContents += CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm(), false);
+							if (i < appendFileInfoList.size()-1) {
+								customAppendedContents += "<br>_________________________________________________________________________________________________________________________<br><br>";
+							}
+						} else {
+							customAppendedContents += "<p class='bdTop'>" + CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm(), false) + "</p>";
+						}
 					} else {
-						customAppendedContents += "<p class='bdTop'>" + CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm()) + "</p>";
+						if ("text".equals(ossNotice.getFileType())){
+							customAppendedContents += CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm());
+							if (i < appendFileInfoList.size()-1) {
+								customAppendedContents += "<br>_________________________________________________________________________________________________________________________<br><br>";
+							}
+						} else {
+							customAppendedContents += "<p class='bdTop'>" + CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm()) + "</p>";
+						}
 					}
 				}
 				appendedContents = customAppendedContents;
@@ -2842,7 +2856,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		model.put("ossAttributionList", ossAttributionList.isEmpty() ? null : ossAttributionList);
 		
 		if ("text".equals(ossNotice.getFileType())){
-			model.put("appended", avoidNull(appendedContentsTEXT, "").replaceAll("&nbsp;", " "));
+			if (!isEmpty(appendedContentsTEXT)) {
+				model.put("appended", avoidNull(appendedContentsTEXT, "").replaceAll("&nbsp;", " "));
+			} else {
+				model.put("appended", avoidNull(appendedContents, "").replaceAll("&nbsp;", " "));
+			}
 		} else {
 			model.put("appended", appendedContents);
 		}
