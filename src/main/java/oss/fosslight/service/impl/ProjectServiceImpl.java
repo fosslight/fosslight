@@ -850,8 +850,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						.comparing(ProjectIdentification::getLicenseTypeIdx)
 						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
 						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
-						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
-						.thenComparing(ProjectIdentification::getMergeOrder);
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()));
 
 				list.sort(compare);
 				
