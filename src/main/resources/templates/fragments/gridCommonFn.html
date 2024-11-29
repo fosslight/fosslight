@@ -402,8 +402,30 @@
                 var display = "";
 
                 if (cellvalue != "" && cellvalue != undefined) {
-                    display =
-                        '<span class="badge badge-warning text-xm" data-toggle="tooltip" data-placement="bottom" title="' +
+                	let level = "";
+                	if (cellvalue.indexOf("|") > -1) {
+                		level = cellvalue.split("|")[1];
+                		cellvalue = cellvalue.split("|")[0];
+                	}
+                	let colorClass = "";
+                	if ("" != level) {
+                		switch (level) {
+                			case "1" : colorClass = "badge-success";
+                				break;
+                			case "2" :
+                			case "3" : colorClass = "badge-warning";
+                				break;
+                			case "4" :
+                			case "5" : colorClass = "badge-danger";
+                				break;
+                			default : colorClass = "badge-gray";
+                				break;
+                		}
+                	} else {
+                		colorClass = "badge-gray";
+                	}
+                	display =
+                        '<span class="badge ' + colorClass + ' text-xm" data-toggle="tooltip" data-placement="bottom" title="' +
                         cellvalue +
                         '" onclick="src_fn_com.showLicenseRestrictionViewPage(\'' +
                         options.gid +

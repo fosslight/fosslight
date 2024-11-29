@@ -3508,8 +3508,29 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	            }
 	        }
 	        
+	        Map<String, String> restrictionMap = new HashMap<>();
 	        for (String str : distinctList){
-	        	returnStr += (isEmpty(returnStr)?"":"\n") + CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, str.trim().toUpperCase());
+	        	String level = CoCodeManager.getSubCodeNoForCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION, str.trim().toUpperCase());
+	        	if (isEmpty(level)) {
+	        		restrictionMap.put("0", str.trim().toUpperCase());
+	        	} else {
+	        		restrictionMap.put(level, str.trim().toUpperCase());
+	        	}
+	        }
+	        List<String> restrictionMapKeys = new ArrayList<>(restrictionMap.keySet());
+	        Collections.reverse(restrictionMapKeys);
+	        
+	        String level = "";
+	        for (String restrictionKey : restrictionMapKeys) {
+	        	returnStr += (isEmpty(returnStr)?"":"\n") + CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restrictionMap.get(restrictionKey));
+	        	String maxLevel = CoCodeManager.getSubCodeNoForCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION, restrictionMap.get(restrictionKey));
+	        	if (isEmpty(level) && !isEmpty(maxLevel)) {
+	        		level = maxLevel;
+	        	}
+	        }
+	        
+	        if (!isEmpty(level)) {
+	        	returnStr += "|" + level;
 	        }
 		}
 		

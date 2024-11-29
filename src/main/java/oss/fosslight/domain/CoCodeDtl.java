@@ -42,6 +42,10 @@ public class CoCodeDtl {
 		this.useYn = useYn;
 	}
 	
+	public String getCdSubNo() {
+		return cdSubNo;
+	}
+	
 	/** The cd sub no. */
     String cdSubNo;
     
