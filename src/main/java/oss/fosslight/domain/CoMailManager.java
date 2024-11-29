@@ -1517,7 +1517,7 @@ public class CoMailManager extends CoTopComponent {
 						)
 				{
 					String linkUrl = CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org");
-					linkUrl += "/oss/list/" + ossInfo.getOssName();
+					linkUrl += "/oss/list?ossName=" + ossInfo.getOssName();
 					_s = "<a href='" + linkUrl + "' style='font-size:16px;' target='_blank'>" + _s + "</a>";
 					
 					if (CoConstDef.CD_DTL_COMMENT_OSS_COMMON.equals(avoidNull(bean.getParamReferenceDiv()))) {
