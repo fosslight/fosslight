@@ -71,6 +71,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 import org.thymeleaf.TemplateEngine;
@@ -3479,13 +3480,17 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			// String 배열 -> String 리스트
 			for (int i = 0 ; i < restrictionArr.length ; i++){
-				restrictionList.add(restrictionArr[i]);
+				if (!isEmpty(restrictionArr[i])) {
+					restrictionList.add(restrictionArr[i]);
+				}
 			}
 			
 			if (!isEmpty(ossRestriction)) {
 				List<String> ossRestrictionList = Arrays.asList(ossRestriction.split(","));
 				for (String or : ossRestrictionList) {
-					restrictionList.add(or);
+					if (!isEmpty(or)) {
+						restrictionList.add(or);
+					}
 				}
 			}
 		} else {
@@ -3495,12 +3500,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				List<String> ossRestrictionList = Arrays.asList(ossRestriction.split(","));
 				for (String or : ossRestrictionList) {
-					restrictionList.add(or);
+					if (!isEmpty(or)) {
+						restrictionList.add(or);
+					}
 				}
 			}
 		}
 		
-		if (restrictionList != null) {
+		if (!CollectionUtils.isEmpty(restrictionList)) {
 			// 중복 제거
 	        for (String str : restrictionList){
 	            if (!distinctList.contains(str)) {
@@ -3508,29 +3515,38 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	            }
 	        }
 	        
-	        Map<String, String> restrictionMap = new HashMap<>();
+	        Map<String, Integer> restrictionMap = new HashMap<>();
 	        for (String str : distinctList){
-	        	String level = CoCodeManager.getSubCodeNoForCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION, str.trim().toUpperCase());
-	        	if (isEmpty(level)) {
-	        		restrictionMap.put("0", str.trim().toUpperCase());
-	        	} else {
-	        		restrictionMap.put(level, str.trim().toUpperCase());
-	        	}
-	        }
-	        List<String> restrictionMapKeys = new ArrayList<>(restrictionMap.keySet());
-	        Collections.reverse(restrictionMapKeys);
-	        
-	        String level = "";
-	        for (String restrictionKey : restrictionMapKeys) {
-	        	returnStr += (isEmpty(returnStr)?"":"\n") + CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restrictionMap.get(restrictionKey));
-	        	String maxLevel = CoCodeManager.getSubCodeNoForCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION, restrictionMap.get(restrictionKey));
-	        	if (isEmpty(level) && !isEmpty(maxLevel)) {
-	        		level = maxLevel;
+	        	if (!isEmpty(str)) {
+	        		String level = CoCodeManager.getSubCodeNoForCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION, str.trim().toUpperCase());
+		        	if (isEmpty(level)) {
+		        		restrictionMap.put(str.trim().toUpperCase(), 99);
+		        	} else {
+		        		restrictionMap.put(str.trim().toUpperCase(), Integer.parseInt(level));
+		        	}
 	        	}
 	        }
 	        
-	        if (!isEmpty(level)) {
-	        	returnStr += "|" + level;
+	        if (!restrictionMap.isEmpty()) {
+	        	List<String> restrictionMapKeys = new ArrayList<>(restrictionMap.keySet());
+	        	restrictionMapKeys.sort((o1, o2) -> restrictionMap.get(o2).compareTo(restrictionMap.get(o1)));
+		        
+		        String level = "";
+		        for (String restrictionKey : restrictionMapKeys) {
+		        	returnStr += (isEmpty(returnStr)?"":"\n") + CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restrictionKey);
+		        	String maxLevel = CoCodeManager.getSubCodeNoForCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION, restrictionKey);
+		        	if (isEmpty(level)) {
+		        		if (isEmpty(maxLevel) && restrictionMap.get(restrictionKey) == 99) {
+		        			level = String.valueOf(99);
+		        		} else {
+		        			level = maxLevel;
+		        		}
+		        	}
+		        }
+		        
+		        if (!isEmpty(level)) {
+		        	returnStr += "|" + level;
+		        }
 	        }
 		}
 		
