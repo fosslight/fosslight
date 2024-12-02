@@ -122,9 +122,9 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> ossReportSelfCheck(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
-            @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
-            @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
+            @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '") @RequestPart(required = false) MultipartFile ossReport,
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N") @RequestParam(required = false, defaultValue="Y") String resetFlag,
+            @ApiParam(value = "Sheet Names") @RequestParam(required = false) String sheetNames) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;

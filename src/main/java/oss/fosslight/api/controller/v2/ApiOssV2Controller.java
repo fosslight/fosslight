@@ -57,13 +57,13 @@ public class ApiOssV2Controller extends CoTopComponent {
     public @ResponseBody ResponseEntity<ListOssDto.Result> getOssInfo(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
-            @ApiParam(value = "OSS Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String ossNameExact,
+            @ApiParam(value = "OSS Name Exact Flag (values: Y or N)") @RequestParam(required = false, defaultValue="Y") String ossNameExact,
             @ApiParam(value = "OSS Version", required = false) @RequestParam(required = false) String ossVersion,
             @ApiParam(value = "Download Location", required = false) @RequestParam(required = false) String downloadLocation,
-            @ApiParam(value = "Download Location Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String downloadLocationExact,
-            @ApiParam(value = "Count Per Page (max: 10000, default: 10000)", required = false)
+            @ApiParam(value = "Download Location Exact Flag (values: Y or N)", required = false) @RequestParam(required = false, defaultValue="Y") String downloadLocationExact,
+            @ApiParam(value = "Count Per Page (max: 10000)", required = false)
             @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="10000") int countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false)
+            @ApiParam(value = "Page", required = false)
             @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page
     ) {
         try {
@@ -94,10 +94,10 @@ public class ApiOssV2Controller extends CoTopComponent {
     public @ResponseBody ResponseEntity<ListLicenseDto.Result> getLicenseInfo(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "License Name", required = false) @RequestParam(required = false) String licenseName,
-            @ApiParam(value = "License Name Exact Flag (values: Y or N, default: Y)", required = false) @RequestParam(required = false, defaultValue="Y") String licenseNameExact,
-            @ApiParam(value = "Count Per Page (max 10000, default 10000)", required = false)
+            @ApiParam(value = "License Name Exact Flag (values: Y or N)", required = false) @RequestParam(required = false, defaultValue="Y") String licenseNameExact,
+            @ApiParam(value = "Count Per Page (max 10000)", required = false)
             @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="10000") int countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false)
+            @ApiParam(value = "Page", required = false)
             @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증

@@ -60,15 +60,15 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_SEARCH})
     public ResponseEntity<Map<String, Object>> getPartners(
             @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID List", required = false) @RequestParam(required = false) String[] partnerIdList,
-            @ApiParam(value = "Division", required = false) @RequestParam(required = false) String division,
-            @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
-            @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", required = false, allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
-            @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
-            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
-            @ApiParam(value = "Count Per Page (max: 1000, default: 1000)", required = false)
+            @ApiParam(value = "3rd Party ID List") @RequestParam(required = false) String[] partnerIdList,
+            @ApiParam(value = "Division") @RequestParam(required = false) String division,
+            @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)") @RequestParam(required = false) String createDate,
+            @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
+            @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)") @RequestParam(required = false) String updateDate,
+            @ApiParam(value = "Creator") @RequestParam(required = false) String creator,
+            @ApiParam(value = "Count Per Page (max: 1000)")
             @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="1000") int countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false)
+            @ApiParam(value = "Page", required = false)
             @Min(value = 1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증
@@ -220,7 +220,7 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD})
     public ResponseEntity<FileSystemResource> get3rdDownload(
             @ApiParam(hidden = true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id") String partnerId,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
 
         String downloadId = "";
