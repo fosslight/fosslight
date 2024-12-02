@@ -19,4 +19,5 @@ public interface RefineOssMapper {
 
 	int deleteOssDownloadLocation(String ossCommonId);
 	
+	int updateOssCommonDownloadLocation(@Param("ossCommonId")String ossCommonId, @Param("downloadLocation")String downloadLocation);
 }

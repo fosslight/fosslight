@@ -55,6 +55,9 @@ public class RefineOssService {
 		try(SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH, false)) {
 			
 			switch (refineType.toUpperCase()) {
+			case "0.UPDATE DOWNLOAD LOCATION FORMAT":
+				resultMap.put("UPDATE-DOWNLOAD-LOCATION-FORMAT", updateDownloadLocationFormat(sqlSession, doUpdateFlag, ossName));
+				break;
 			case "1.REMOVE DUPLICATED DOWNLOAD LOCATION":
 				// 하나의 OSS 내 중복 Download location 제거
 				resultMap.put("REMOVE-DUPLICATED-DOWNLOAD-LOCATION", removeDuplicatedUrl(sqlSession, doUpdateFlag, ossName));
@@ -77,6 +80,7 @@ public class RefineOssService {
 				resultMap.put("CHECK-ON-ERROR-FOR-PURL-GENERATION", preChecFailedMakePurl(sqlSession, ossName));
 				break;
 			case "5.REFINE ALL":
+				resultMap.put("UPDATE-DOWNLOAD-LOCATION-FORMAT", updateDownloadLocationFormat(sqlSession, doUpdateFlag, ossName));
 				resultMap.put("REMOVE-DUPLICATED-DOWNLOAD-LOCATION", removeDuplicatedUrl(sqlSession, doUpdateFlag, ossName));
 				resultMap.put("PUT-PURL", trySetPurl(sqlSession, doUpdateFlag, ossName));
 				resultMap.put("REMOVE-DUPLICATED-PURL", removeDuplicatedPurl(sqlSession, doUpdateFlag, ossName));
@@ -92,6 +96,88 @@ public class RefineOssService {
 				sqlSession.commit();
 			}
 		}
+		return resultMap;
+	}
+
+	private Object updateDownloadLocationFormat(SqlSession sqlSession, boolean doUpdateFlag, String schOssName) {
+		log.info(LOG_FORMAT_METHOD_START, "updateDownloadLocationFormat");
+		final Map<String, Object> resultMap = new HashMap<>();
+		final Map<String, List<String>> reFineItems = new HashMap<>();
+		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+		
+		final RefineOssMapper refineOssMapper = sqlSession.getMapper(RefineOssMapper.class);
+		int itemTotalCnt = refineOssMapper.getRefineOssTotalCnt(schOssName, "updateDownloadLocation");
+		List<String> refinedItemList;
+		List<Map<String, String>> ossDownloadLocationList;
+		int reFineTotalCnt = 0;
+		if (itemTotalCnt > 0) {
+			if (itemTotalCnt < PROC_CHUNK_SIZE) {
+				itemTotalCnt = PROC_CHUNK_SIZE;
+			}
+			
+			for (int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
+				final List<Map<String, Object>> ossCommonList = refineOssMapper.selectRefineOssCommonList(schOssName, "updateDownloadLocation", limitIndex*PROC_CHUNK_SIZE, PROC_CHUNK_SIZE);
+				String ossCommonId;
+				String ossName;
+				String downloadLocation;
+				for (Map<String, Object> ossCommonInfo : ossCommonList) {
+					boolean updateOssCommon = false;
+					refinedItemList = new ArrayList<>();
+					ossCommonId = Integer.toString((int) ossCommonInfo.get(FIELD_OSS_COMMON_ID));
+					ossName = (String) ossCommonInfo.get(FIELD_OSS_NAME);
+					downloadLocation = (String) ossCommonInfo.get(FIELD_DOWNLOAD_LOCATION);
+					
+					String ossCommonRefinedItem = "";
+					String downloadLocationFormat = downloadlocationFormatter(downloadLocation, checkOssNameUrl);
+					if (!StringUtil.isEmpty(downloadLocationFormat) && !downloadLocation.equalsIgnoreCase(downloadLocationFormat)) {
+						updateOssCommon = true;
+						ossCommonRefinedItem = MessageFormat.format("{0}>{1}", downloadLocation, downloadLocationFormat);
+						refineOssMapper.updateOssCommonDownloadLocation(ossCommonId, downloadLocationFormat);
+					}
+					
+					ossDownloadLocationList = refineOssMapper.selectOssDownloadLocationList(ossCommonId);
+					
+					if (!CollectionUtils.isEmpty(ossDownloadLocationList)) {
+						for (Map<String, String> n : ossDownloadLocationList) {
+							String fieldDownloadLocation = n.get(FIELD_DOWNLOAD_LOCATION);
+							if (!StringUtil.isEmpty(fieldDownloadLocation)) {
+								String downloadLocationFormat2 = downloadlocationFormatter(n.get(FIELD_DOWNLOAD_LOCATION), checkOssNameUrl);
+								if (!StringUtil.isEmpty(downloadLocationFormat2) && !fieldDownloadLocation.equalsIgnoreCase(downloadLocationFormat2)) {
+									n.put(FIELD_DOWNLOAD_LOCATION, downloadLocationFormat2);
+									refinedItemList.add(MessageFormat.format("{0}>{1}", fieldDownloadLocation, downloadLocationFormat2));
+								}
+							}
+						}
+
+						if (!CollectionUtils.isEmpty(refinedItemList)) {
+							if (doUpdateFlag) {
+								refineOssMapper.deleteOssDownloadLocation(ossCommonId);
+								refineOssMapper.insertOssDownloadLocation(ossCommonId, ossDownloadLocationList);
+							}
+							reFineTotalCnt++;
+							if (updateOssCommon) {
+								refinedItemList.add(ossCommonRefinedItem);
+								updateOssCommon = false;
+							}
+							reFineItems.put(ossName, refinedItemList);
+						}
+					}
+					
+					if (updateOssCommon) {
+						reFineTotalCnt++;
+						refinedItemList.add(ossCommonRefinedItem);
+						reFineItems.put(ossName, refinedItemList);
+					}
+				}
+				
+				sqlSession.flushStatements();
+				log.info(LOG_FORMAT_INPROGRESS, (limitIndex*PROC_CHUNK_SIZE) + PROC_CHUNK_SIZE, itemTotalCnt);
+			}
+		}
+		
+		resultMap.put(RESULT_KEY_TOTALCNT, reFineTotalCnt);
+		resultMap.put(RESULT_KEY_ITEMS, reFineItems);
+		log.info(LOG_FORMAT_METHOD_END, "updateDownloadLocationFormat", reFineTotalCnt);
 		return resultMap;
 	}
 
@@ -170,7 +256,6 @@ public class RefineOssService {
 		log.info(LOG_FORMAT_METHOD_START, "trySetPurl");
 		final Map<String, Object> resultMap = new HashMap<>();
 		final Map<String, List<String>> reFineItems = new HashMap<>();
-		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
 		
 		final RefineOssMapper refineOssMapper = sqlSession.getMapper(RefineOssMapper.class);
 		int itemTotalCnt = refineOssMapper.getRefineOssTotalCnt(schOssName, "unsetPurl");
@@ -195,10 +280,7 @@ public class RefineOssService {
 					if(!CollectionUtils.isEmpty(ossDownloadLocationList)) {
 						for(Map<String, String> n : ossDownloadLocationList) {
 							if(StringUtil.isEmpty(n.get(FIELD_PURL))) {
-								String downloadLocation = downloadlocationFormatter(n.get(FIELD_DOWNLOAD_LOCATION), checkOssNameUrl);
-								if (!StringUtil.isEmpty(downloadLocation)) {
-									n.put(FIELD_DOWNLOAD_LOCATION, downloadLocation);
-								}
+								String downloadLocation = n.get(FIELD_DOWNLOAD_LOCATION);
 								try {
 									String purl = generatePurlByDownloadLocation(downloadLocation);
 									if(!StringUtil.isEmpty(purl)) {
@@ -244,7 +326,6 @@ public class RefineOssService {
 		log.info(LOG_FORMAT_METHOD_START, "reorderGithubPriority");
 		final Map<String, Object> resultMap = new HashMap<>();
 		final Map<String, List<String>> reFineItems = new HashMap<>();
-		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
 		
 		final RefineOssMapper refineOssMapper = sqlSession.getMapper(RefineOssMapper.class);
 		int itemTotalCnt = refineOssMapper.getRefineOssTotalCnt(schOssName, "reorderGithubUrl");
@@ -272,21 +353,6 @@ public class RefineOssService {
 					if(!CollectionUtils.isEmpty(ossDownloadLocationList)) {
 						for(Map<String, String> n : ossDownloadLocationList) {
 							if(n.get(FIELD_DOWNLOAD_LOCATION).contains("github.com")) {
-								String downloadLocation = downloadlocationFormatter(n.get(FIELD_DOWNLOAD_LOCATION), checkOssNameUrl);
-								if (!StringUtil.isEmpty(downloadLocation)) {
-									n.put(FIELD_DOWNLOAD_LOCATION, downloadLocation);
-								}
-								
-								if (StringUtil.isEmpty(n.get(FIELD_PURL))) {
-									try {
-										String purl = generatePurlByDownloadLocation(n.get(FIELD_DOWNLOAD_LOCATION));
-										if (!StringUtil.isEmpty(purl)) {
-											n.put(FIELD_PURL, purl);
-										}
-									} catch (Exception e) {
-										log.error("failed to generate purl download location : {}, {}", n.get(FIELD_DOWNLOAD_LOCATION), e.getMessage());
-									}
-								}
 								githubUrlItem = n;
 								break;
 							}
@@ -329,7 +395,6 @@ public class RefineOssService {
 		log.info(LOG_FORMAT_METHOD_START, "removeDuplicatedPurl");
 		final Map<String, Object> resultMap = new HashMap<>();
 		final Map<String, List<String>> reFineItems = new HashMap<>();
-		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
 		
 		final RefineOssMapper refineOssMapper = sqlSession.getMapper(RefineOssMapper.class);
 		
@@ -416,13 +481,6 @@ public class RefineOssService {
 						        }
 						    }
 
-						    for (Map<String, String> map : ossDownloadLocationList) {
-						    	String downloadLocation = downloadlocationFormatter(map.get(FIELD_DOWNLOAD_LOCATION), checkOssNameUrl);
-								if (!StringUtil.isEmpty(downloadLocation)) {
-									map.put(FIELD_DOWNLOAD_LOCATION, downloadLocation);
-								}
-						    }
-						    
 						    if(doUpdateFlag) {
 						    	refineOssMapper.deleteOssDownloadLocation(ossCommonId);
 						    	refineOssMapper.insertOssDownloadLocation(ossCommonId, ossDownloadLocationList);
@@ -490,7 +548,6 @@ public class RefineOssService {
 		log.info(LOG_FORMAT_METHOD_START, "removeDuplicatedUrl");
 		final Map<String, Object> resultMap = new HashMap<>();
 		final Map<String, List<String>> reFineItems = new HashMap<>();
-		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
 		
 		final RefineOssMapper refineOssMapper = sqlSession.getMapper(RefineOssMapper.class);
 		
@@ -525,10 +582,6 @@ public class RefineOssService {
 					} else {
 						for(Map<String, String> n : ossDownloadLocationList) {
 							if(!checkDuplicationUrl(checkedOssDownloadLocationList,ossDownloadLocationList, n)) {
-								String downloadLocation = downloadlocationFormatter(n.get(FIELD_DOWNLOAD_LOCATION), checkOssNameUrl);
-								if (!StringUtil.isEmpty(downloadLocation)) {
-									n.put(FIELD_DOWNLOAD_LOCATION, downloadLocation);
-								}
 								checkedOssDownloadLocationList.add(n);
 							} else {
 								// 중복으로 판단된 경우
