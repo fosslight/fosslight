@@ -101,9 +101,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false, allowableValues = "PROG,REQ,REV,COMP,DROP") @RequestParam(required = false) String status,
             @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
             @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
-            @ApiParam(value = "Count Per Page (max: 1000, default: 1000)", required = false)
+            @ApiParam(value = "Count Per Page (max: 1000)", required = false)
             @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="1000") int countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false)
+            @ApiParam(value = "Page", required = false)
             @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증
@@ -449,7 +449,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag,
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
             @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
 
@@ -643,8 +643,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name="tab_name") String tabName,
             @ApiParam(value = "OSS Report", required = true) @RequestPart(required = true) MultipartFile ossReport,
             @ApiParam(value = "Comment") @RequestParam(name="comment", required = false) String comment,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false) String resetFlag,
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag,
             @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -1020,7 +1020,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile,
-            @ApiParam(value = "Verify when file is uploaded (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String verifyFlag) {
+            @ApiParam(value = "Verify when file is uploaded (YES : Y, NO : N)", allowableValues = "Y,N") @RequestParam(required = false, defaultValue = "N") String verifyFlag) {
 
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
@@ -1297,8 +1297,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Project ID to Load") @RequestParam(required = false) String prjIdToLoad,
             @ApiParam(value = "Project Name to Load") @RequestParam(required = false) String prjNameToLoad,
             @ApiParam(value = "Project Version to Load") @RequestParam(required = false) String prjVersionToLoad,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", defaultValue = "Y", allowableValues = "Y, N")
-            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false) String resetFlag) {
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y, N")
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false, defaultValue = "Y") String resetFlag) {
 
         log.error("/api/v2/oss_load called:" + targetPrjId);
 
