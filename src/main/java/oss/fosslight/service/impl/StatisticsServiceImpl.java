@@ -29,7 +29,7 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 	// Mapper
 	@Autowired StatisticsMapper statisticsMapper;
 	
-	final String[] colorArray = new String[] {"#70ad47", "#ed7d31", "#a5a5a5", "#ffc000", "#5b9bd5", "#5bd597", "#d55bab", "#6f5bd5", "#544fc5"};
+	final String[] colorArray = new String[] {"#70ad47", "#ed7d31", "#a5a5a5", "#ffc000", "#5b9bd5", "#5bd597", "#d55bab", "#d5605c", "#544fc5", "#fcf22f", "#2EFEF7", "#0000FF", "#FF4000", "#FFFF00"};
 	
 	@Override
 	public History work(Object param) {
