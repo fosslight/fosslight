@@ -38,6 +38,7 @@ import javax.mail.util.ByteArrayDataSource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -1968,11 +1969,17 @@ public class CoMailManager extends CoTopComponent {
 			if (!isEmpty(before.getDownloadLocation())) {
 				beforeUrl = before.getDownloadLocation().split(",");
 				beforePurl = before.getPurl().split(",");
+				
+				List<String> downloadLocationList = new ArrayList<>();
+				for (String downloadLocation : beforeUrl) {
+					downloadLocationList.add(appendChangeStyleLinkFormat(downloadLocation));
+				}
+				before.setDownloadLocations(downloadLocationList.toArray(new String[downloadLocationList.size()]));
+				before.setPurls(beforePurl);
 			} else {
 				beforeUrl = new String[0];
 				beforePurl = new String[0];
 			}
-			before.setDownloadLocationLinkFormat(appendChangeStyleLinkFormatArray(beforeUrl, beforePurl));
 			String[] afterUrl = null;
 			String[] afterPurl = null;
 			if (!isEmpty(after.getDownloadLocation())) {
@@ -1982,8 +1989,17 @@ public class CoMailManager extends CoTopComponent {
 				afterUrl = new String[0];
 				afterPurl = new String[0];
 			}
-			String resultDownloadLocation = appendChangeStyleLinkFormatArray(beforeUrl, afterUrl, beforePurl, afterPurl, 0);
-			after.setDownloadLocationLinkFormat(resultDownloadLocation);
+			
+			List<String> changeStyleLinkFormatDownloadLocationList = new ArrayList<>();
+			List<String> changeStyleFormatPurlList = new ArrayList<>();
+			customAppendChangeStyleLinkFormatArray(beforeUrl, afterUrl,  0, false, changeStyleLinkFormatDownloadLocationList);
+			customAppendChangeStyleLinkFormatArray(beforePurl, afterPurl,  0, true, changeStyleFormatPurlList);
+			if (!CollectionUtils.isEmpty(changeStyleLinkFormatDownloadLocationList)) {
+				after.setDownloadLocations(changeStyleLinkFormatDownloadLocationList.toArray(new String[changeStyleLinkFormatDownloadLocationList.size()]));
+			}
+			if (!CollectionUtils.isEmpty(changeStyleFormatPurlList)) {
+				after.setPurls(changeStyleFormatPurlList.toArray(new String[changeStyleFormatPurlList.size()]));
+			}
 			isModified = checkEquals(before.getDownloadLocation(), after.getDownloadLocation(), isModified);
 			before.setHomepageLinkFormat(appendChangeStyleLinkFormat(before.getHomepage()));
 			after.setHomepageLinkFormat(appendChangeStyleLinkFormat(before.getHomepage(), after.getHomepage()));
@@ -2496,6 +2512,22 @@ public class CoMailManager extends CoTopComponent {
 		return convertDataMap;
 	}
 
+
+	private void customAppendChangeStyleLinkFormatArray(String[] before, String[] after, int seq, boolean isPurl, List<String> changeStyleFormatArrayList) {
+		int length = before.length > after.length ? before.length : after.length;
+		String beforeVal = (before.length > seq ? before[seq] : "");
+		String afterVal = (after.length > seq ? after[seq] : "");
+		
+		if (length != seq) {
+			if (isPurl) {
+				changeStyleFormatArrayList.add(appendChangeStyle(beforeVal, afterVal));
+				customAppendChangeStyleLinkFormatArray(before, after, ++seq, true, changeStyleFormatArrayList);
+			} else {
+				changeStyleFormatArrayList.add("<a href='"+afterVal+"' target='_blank'>" + appendChangeStyle(beforeVal, afterVal) + "</a>");
+				customAppendChangeStyleLinkFormatArray(before, after, ++seq, false, changeStyleFormatArrayList);
+			}
+		}
+	}
 
 	private boolean makeRestrictionConversion(Object before, Object after, String beforeRestriction, String afterRestriction, String gubn) {
 		boolean isModified = false;
@@ -3507,11 +3539,13 @@ public class CoMailManager extends CoTopComponent {
 				bean.setOssType(avoidNull((String) dataMap.get("OSS_TYPE")));
 				if (dataMap.get("DOWNLOAD_LOCATION") != null) {
 					String[] downloadLocations = ((String) dataMap.get("DOWNLOAD_LOCATION")).split(",");
+					List<String> downloadLocationList = new ArrayList<>();
+					for (String downloadLocation : downloadLocations) {
+						downloadLocationList.add(appendChangeStyleLinkFormat(downloadLocation));
+					}
+					bean.setDownloadLocations(downloadLocationList.toArray(new String[downloadLocationList.size()]));
 					String[] purl = ((String) dataMap.get("PURL")).split(",");
-					String result = appendChangeStyleLinkFormatArray(downloadLocations, purl);
-					bean.setDownloadLocation(result);
-				} else {
-					bean.setDownloadLocation(avoidNull((String) dataMap.get("DOWNLOAD_LOCATION")));
+					bean.setPurls(purl);
 				}
 				bean.setHomepage(avoidNull((String) dataMap.get("HOMEPAGE")));
 				bean.setSummaryDescription(CommonFunction.htmlEscape(avoidNull((String) dataMap.get("SUMMARY_DESCRIPTION"))));

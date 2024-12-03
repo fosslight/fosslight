@@ -323,6 +323,8 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String purl;
 	
+	private String[] purls;
+	
 	private String includeCpe;
 	
 	private String[] includeCpes;
@@ -2347,5 +2349,13 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setImportantNotes(String importantNotes) {
 		this.importantNotes = importantNotes;
+	}
+
+	public String[] getPurls() {
+		return purls;
+	}
+
+	public void setPurls(String[] purls) {
+		this.purls = purls;
 	}
 }
