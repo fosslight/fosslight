@@ -2708,7 +2708,7 @@ function getPieChart(target, obj) {
 			maintainAspectRatio : false,
 			plugins: {
 				legend: {
-					position: 'right',
+					position: 'bottom',
 				},
 				tooltip: {
 					callbacks: {
