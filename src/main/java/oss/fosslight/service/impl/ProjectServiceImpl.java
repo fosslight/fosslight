@@ -138,7 +138,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public String getReviewerList(String adminYn) {
 		String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
-		List<T2Users> userList = userMapper.selectReviwer(adminYn, ldapFlag);
+		List<T2Users> userList = userMapper.selectReviwer(ldapFlag);
 		StringBuilder sb = new StringBuilder();
 		sb.append( " : " +  ";");
 		
