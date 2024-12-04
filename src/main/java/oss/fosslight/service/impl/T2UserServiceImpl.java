@@ -395,7 +395,7 @@ public class T2UserServiceImpl implements T2UserService {
 	@Override
 	public List<T2Users> getReviwer() {
 		String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
-		return userMapper.selectReviwer(CoConstDef.FLAG_YES, ldapFlag);
+		return userMapper.selectReviwer(ldapFlag);
 	}
 
 	@Override

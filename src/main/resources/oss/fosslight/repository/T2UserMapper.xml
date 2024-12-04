@@ -277,10 +277,10 @@
 		FROM T2_USERS T1
 			INNER JOIN T2_AUTHORITIES T2 
 				ON T1.USER_ID = T2.USER_ID AND T2.AUTHORITY = 'ROLE_ADMIN'
-		WHERE 
-			T1.USE_YN = #{adminYn}
+<!-- 	WHERE 
+			T1.USE_YN = #{adminYn} -->
 		 <if test="@oss.fosslight.util.StringUtil@equals('Y', ldapFlag)">
-			AND T1.PASSWORD IS NULL
+			WHERE T1.PASSWORD IS NULL
 		 </if>
 		ORDER BY USER_NAME
 	</select>
@@ -334,7 +334,8 @@
 		LEFT JOIN T2_CODE_DTL B
 		ON A.DIVISION = B.CD_DTL_NO
 		AND B.CD_NO = '200'
-	WHERE A.USE_YN = 'Y' ORDER BY DIVISION, A.USER_NAME
+<!-- 	WHERE A.USE_YN = 'Y' --> 
+	ORDER BY DIVISION, A.USER_NAME
 	</select>
 	
 	<select id="selectCheckEmail" parameterType="String" resultType="oss.fosslight.domain.T2Users"> 
