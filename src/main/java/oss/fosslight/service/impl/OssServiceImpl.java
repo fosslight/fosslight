@@ -3037,15 +3037,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				isNewVersion = CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase());
 				if (isNewVersion) {
 					ossMaster.setExistOssNickNames(getOssNickNameListByOssName(ossMaster.getOssName()));
-					
-					List<OssMaster> ossList = ossMapper.getBasicOssListByName(ossMaster.getOssName());
-					if (ossList != null && !ossList.isEmpty()) {
-						OssMaster bean = ossList.get(0);
-						bean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
-						ossMaster.setOssCommonId(bean.getOssCommonId());
-						ossMaster.setExistIncludeCpes(bean.getIncludeCpe() != null ? bean.getIncludeCpe().split(",") : null);
-						ossMaster.setExistExcludeCpes(bean.getExcludeCpe() != null ? bean.getExcludeCpe().split(",") : null);
-						ossMaster.setExistArrRestriction(bean.getRestriction() != null ? bean.getRestriction().split(",") : null);
+					OssMaster ossBean = getOssInfo(null, ossMaster.getOssName(), true);
+					if (ossBean != null) {
+						ossMaster.setOssCommonId(ossBean.getOssCommonId());
+						ossMaster.setExistIncludeCpes(ossBean.getIncludeCpe() != null ? ossBean.getIncludeCpe().split(",") : null);
+						ossMaster.setExistExcludeCpes(ossBean.getExcludeCpe() != null ? ossBean.getExcludeCpe().split(",") : null);
+						ossMaster.setExistArrRestriction(ossBean.getRestriction() != null ? ossBean.getRestriction().split(",") : null);
+						ossMaster.setExistDownloadLocations(ossBean.getDownloadLocations());
+						ossMaster.setExistPurls(!isEmpty(ossBean.getPurl()) ? ossBean.getPurl().split(",") : null);
+						ossMaster.setExistHomepage(ossBean.getHomepage());
+						ossMaster.setExistSummaryDescription(ossBean.getSummaryDescription());
+						ossMaster.setExistImportantNotes(ossBean.getImportantNotes());
 					}
 				}
 				ossId = registOssMaster(ossMaster);

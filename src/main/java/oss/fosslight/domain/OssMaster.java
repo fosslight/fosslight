@@ -61,6 +61,8 @@ public class OssMaster extends ComBean implements Serializable{
 
 	/** The download location. */
 	private String[] downloadLocations;
+	
+	private String[] existDownloadLocations;
 
 	private List<String> detectedLicenses;
 
@@ -70,14 +72,20 @@ public class OssMaster extends ComBean implements Serializable{
 	/** The homepage. */
 	private String homepage;
 	
+	private String existHomepage;
+	
 	/** The homepage link format. */
 	private String homepageLinkFormat;
 	
 	/** The summary description. */
 	private String summaryDescription;
 	
+	private String existSummaryDescription;
+	
 	/** The important notes. */
 	private String importantNotes;
+	
+	private String existImportantNotes;
 	
 	/** The oss type. */
 	private String ossType;
@@ -324,6 +332,8 @@ public class OssMaster extends ComBean implements Serializable{
 	private String purl;
 	
 	private String[] purls;
+	
+	private String[] existPurls;
 	
 	private String includeCpe;
 	
@@ -2357,5 +2367,45 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setPurls(String[] purls) {
 		this.purls = purls;
+	}
+
+	public String[] getExistDownloadLocations() {
+		return existDownloadLocations;
+	}
+
+	public void setExistDownloadLocations(String[] existDownloadLocations) {
+		this.existDownloadLocations = existDownloadLocations;
+	}
+
+	public String getExistHomepage() {
+		return existHomepage;
+	}
+
+	public void setExistHomepage(String existHomepage) {
+		this.existHomepage = existHomepage;
+	}
+
+	public String getExistSummaryDescription() {
+		return existSummaryDescription;
+	}
+
+	public void setExistSummaryDescription(String existSummaryDescription) {
+		this.existSummaryDescription = existSummaryDescription;
+	}
+
+	public String getExistImportantNotes() {
+		return existImportantNotes;
+	}
+
+	public void setExistImportantNotes(String existImportantNotes) {
+		this.existImportantNotes = existImportantNotes;
+	}
+
+	public String[] getExistPurls() {
+		return existPurls;
+	}
+
+	public void setExistPurls(String[] existPurls) {
+		this.existPurls = existPurls;
 	}
 }
