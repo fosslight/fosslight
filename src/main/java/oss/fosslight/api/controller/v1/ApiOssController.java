@@ -175,7 +175,7 @@ public class ApiOssController extends CoTopComponent {
     		@RequestHeader String _token,
     		@ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
     		@ApiParam(value = "Do Update Database", required = true, defaultValue = "N", allowableValues = "N,Y") @RequestParam(required = true) String doUpdateFlag,
-    		@ApiParam(value = "Refine Type", required = true, allowableValues = "1.REMOVE DUPLICATED DOWNLOAD LOCATION,2.PUT PURL,3.REMOVE DUPLICATED PURL,4.REORDER GITHUB PRIORITY,5.REFINE ALL") @RequestParam(required = true) String refineType){
+    		@ApiParam(value = "Refine Type", required = true, allowableValues = "0.UPDATE DOWNLOAD LOCATION FORMAT,1.REMOVE DUPLICATED DOWNLOAD LOCATION,2.PUT PURL,3.REMOVE DUPLICATED PURL,4.REORDER GITHUB PRIORITY,5.REFINE ALL") @RequestParam(required = true) String refineType){
 		
 		// 사용자 인증
 		try {
