@@ -129,7 +129,6 @@
                                               	<select class="select2 save-value" id="creatorSelect" name="creator" style="width: 100%;">
                                                  	<option value=""></option>
                                                   	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.creator)}"></th:block>
-                                                   	<option th:text="None" th:value="NONE" th:selected="${searchBean?.modifier == 'NONE'}"></option>
                                              	</select>
                                           	</div>
                                      	</div>
@@ -145,7 +144,6 @@
                                               	<select class="select2 save-value" id="modifierSelect" name="modifier" style="width: 100%;">
                                                 	<option value=""></option>
                                                   	<th:block th:utext="${@CommonFunction.genOptionUsers('ROLE_ADMIN', searchBean?.modifier)}"></th:block>
-                                                   	<option th:text="None" th:value="NONE" th:selected="${searchBean?.modifier == 'NONE'}"></option>
                                              	</select>
                                         	</div>
                                     	</div>

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import io.jsonwebtoken.lang.Collections;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.History;
@@ -121,11 +122,16 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			titleArray.add(title.getTitleNm());
 		}
 		
+		List<String> noneUsers = statisticsMapper.getNoneUser();
+		if (!Collections.isEmpty(noneUsers)) {
+			titleArray.addAll(noneUsers);
+		}
+		
 		titleArray = titleArray.stream().distinct().collect(Collectors.toList());
 		
 		statistics.setTitleArray(titleArray); // Chart Title
 		statistics.setDiffMonthCnt(DateUtil.getDiffMonth(statistics.getStartDate(), statistics.getEndDate()));
-		statistics.setNoneUser(statisticsMapper.getNoneUser());
+//		statistics.setNoneUser(statisticsMapper.getNoneUser());
 		statistics.setCategorySize(titleArray.size());
 		
 		statistics.setUpdateType("ADD");
@@ -137,9 +143,9 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		list = list.stream().sorted(Comparator.comparing((Statistics s) -> s.getColumnName())).collect(Collectors.toList());
 		
 		// Reviewer None Statistic Sum Check
-		if (noneCheck(titleArray, list) > 0) {
-			titleArray.add("NONE");
-		}
+//		if (noneCheck(titleArray, list) > 0) {
+//			titleArray.add("NONE");
+//		}
 		
 		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
 			list.forEach(Statistics::setTotal);
@@ -169,11 +175,16 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			titleArray.add(title.getTitleNm());
 		}
 		
+		List<String> noneUsers = statisticsMapper.getNoneUser();
+		if (!Collections.isEmpty(noneUsers)) {
+			titleArray.addAll(noneUsers);
+		}
+		
 		titleArray = titleArray.stream().distinct().collect(Collectors.toList());
 		
 		statistics.setTitleArray(titleArray); // Chart Title
 		statistics.setDiffMonthCnt(DateUtil.getDiffMonth(statistics.getStartDate(), statistics.getEndDate()));
-		statistics.setNoneUser(statisticsMapper.getNoneUser());
+//		statistics.setNoneUser(statisticsMapper.getNoneUser());
 		statistics.setCategorySize(titleArray.size());
 		
 		statistics.setUpdateType("ADD");
@@ -185,9 +196,9 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		list = list.stream().sorted(Comparator.comparing((Statistics s) -> s.getColumnName())).collect(Collectors.toList());
 		
 		// Reviewer None Statistic Sum Check
-		if (noneCheck(titleArray, list) > 0) {
-			titleArray.add("NONE");
-		}
+//		if (noneCheck(titleArray, list) > 0) {
+//			titleArray.add("NONE");
+//		}
 		
 		if (CoConstDef.FLAG_YES.equals(statistics.getIsRawData())) {
 			list.forEach(Statistics::setTotal);

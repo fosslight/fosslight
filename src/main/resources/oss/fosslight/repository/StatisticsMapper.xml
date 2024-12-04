@@ -297,12 +297,12 @@
 			<foreach collection="titleArray" item="item" index="index">
 			 , MAX(RTN.CATEGORY#{index}) AS CATEGORY#{index}_CNT
 			</foreach>
-			 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT
+<!-- 		 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT -->
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
 	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
-	  			  	 , IF(
+<!--   			  	 , IF(
 					<choose>
 						<when test="noneUser != null and noneUser.size() > 0">
 							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
@@ -313,7 +313,7 @@
 							1 = 0
 						</otherwise>
 					</choose>
-				     , COUNT(1), 0) AS CATEGORY#{categorySize}
+				     , COUNT(1), 0) AS CATEGORY#{categorySize} -->
 				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
@@ -379,23 +379,23 @@
 			<foreach collection="titleArray" item="item" index="index">
 			 , MAX(RTN.CATEGORY#{index}) AS CATEGORY#{index}_CNT
 			</foreach>
-			 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT
+<!-- 		, MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT -->
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
 	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
-	  			     , IF(
-					<choose>
-						<when test="noneUser != null and noneUser.size() > 0">
-							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
-								STAT.CATEGORY = #{user}
-							</foreach>
-						</when>
-						<otherwise>
-							1 = 0
-						</otherwise>
-					</choose>
-				     , COUNT(1), 0) AS CATEGORY#{categorySize}
+<!-- 	  		     , IF(
+ 					<choose>
+ 						<when test="noneUser != null and noneUser.size() > 0">
+ 							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+ 								STAT.CATEGORY = #{user}
+ 							</foreach>
+ 						</when>
+ 						<otherwise>
+ 							1 = 0
+ 						</otherwise>
+ 					</choose>
+				     , COUNT(1), 0) AS CATEGORY#{categorySize} -->
 				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
