@@ -120,12 +120,12 @@
 										</td>
 									</tr>
 									<tr>
-										<th align="left" style="padding:5px;background:#f0f0f0;">Download Location</th>
+										<th align="left" style="padding:5px;background:#f0f0f0;">Download Location / Package Url</th>
 										<td style="padding:5px;">
 											<th:block th:if="${oss_basic_info?.downloadLocations != null}">
 												<table cellspacing="3" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 													<tr>
-														<th></th>
+														<th>Download Location</th>
 														<th>Package Url</th>
 													</tr>
 													<tr th:each="i : ${#numbers.sequence(0, oss_basic_info.downloadLocations.length-1)}">
