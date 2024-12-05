@@ -4000,6 +4000,20 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Override
 	public OssMaster makeEmailSendFormat(OssMaster bean) {
+		StringBuilder sb = new StringBuilder();
+		StringBuilder sb1 = new StringBuilder();
+		for (String downloadLocation : bean.getDownloadLocation().split(",")) {
+			if (downloadLocation.contains("|")) {
+				sb.append(downloadLocation.split("[|]")[0]).append(",");
+				sb1.append(downloadLocation.split("[|]")[1]).append(",");
+			} else {
+				sb.append(downloadLocation);
+			}
+		}
+		String[] ossDownloadLocations = new String(sb).split("[,]");
+		bean.setDownloadLocations(ossDownloadLocations);
+		bean.setPurl(sb1.toString());
+		
 		bean.setLicenseName(CommonFunction.makeLicenseExpression(bean.getOssLicenses()));
 		bean.setOssLicenses(CommonFunction.changeLicenseNameToShort(bean.getOssLicenses()));
 
