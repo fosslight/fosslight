@@ -283,14 +283,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        int createCnt = apiProjectService.getCreateProjectCnt(userInfo.getUserId());
         Map<String, Object> result = new HashMap<String, Object>();
 
         try {
-            if (CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT <= createCnt) {
-                return responseService.errorResponse(HttpStatus.TOO_MANY_REQUESTS,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_CREATE_OVERFLOW_MESSAGE));
-            }
             Map<String, Object> paramMap = new HashMap<String, Object>();
 
             String osTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, osType);
