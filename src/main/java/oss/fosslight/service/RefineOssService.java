@@ -132,7 +132,9 @@ public class RefineOssService {
 					if (!StringUtil.isEmpty(downloadLocationFormat) && !downloadLocation.equalsIgnoreCase(downloadLocationFormat)) {
 						updateOssCommon = true;
 						ossCommonRefinedItem = MessageFormat.format("{0}>{1}", downloadLocation, downloadLocationFormat);
-						refineOssMapper.updateOssCommonDownloadLocation(ossCommonId, downloadLocationFormat);
+						if (doUpdateFlag) {
+							refineOssMapper.updateOssCommonDownloadLocation(ossCommonId, downloadLocationFormat);
+						}
 					}
 					
 					ossDownloadLocationList = refineOssMapper.selectOssDownloadLocationList(ossCommonId);
