@@ -647,10 +647,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
 							String cveId = om.getCveId();
 							String cvssScore = om.getCvssScore();
+							String _cvssScore = ll.getCvssScore();
+							
 							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-								ll.setCvssScore(cvssScore);
-								ll.setCveId(cveId);
-								ll.setVulnYn(CoConstDef.FLAG_YES);
+								if (!isEmpty(_cvssScore)) {
+									if (new BigDecimal(cvssScore).compareTo(new BigDecimal(_cvssScore)) > 0) {
+										ll.setCvssScore(cvssScore);
+										ll.setCveId(cveId);
+										ll.setVulnYn(CoConstDef.FLAG_YES);
+									}
+								} else {
+									ll.setCvssScore(cvssScore);
+									ll.setCveId(cveId);
+									ll.setVulnYn(CoConstDef.FLAG_YES);
+								}
 							}
 						}
 					}
@@ -1115,10 +1125,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
 							String cveId = om.getCveId();
 							String cvssScore = om.getCvssScore();
+							String _cvssScore = bean.getCvssScore();
+							
 							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
-								bean.setCvssScore(cvssScore);
-								bean.setCveId(cveId);
-								bean.setVulnYn(CoConstDef.FLAG_YES);
+								if (!isEmpty(_cvssScore)) {
+									if (new BigDecimal(cvssScore).compareTo(new BigDecimal(_cvssScore)) > 0) {
+										bean.setCvssScore(cvssScore);
+										bean.setCveId(cveId);
+										bean.setVulnYn(CoConstDef.FLAG_YES);
+									}
+								} else {
+									bean.setCvssScore(cvssScore);
+									bean.setCveId(cveId);
+									bean.setVulnYn(CoConstDef.FLAG_YES);
+								}
 							}
 						}
 					}
