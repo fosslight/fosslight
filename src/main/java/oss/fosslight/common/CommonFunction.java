@@ -4245,12 +4245,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						mergeDownloadLocation(totalNewestOssInfo, null, analyzedDownloadLocation, true);
 						latestRegistrationInfoList.add(totalNewestOssInfo); // seq 3 : 취합정보 최신등록 정보
 						latestOssAnalysis = totalNewestOssInfo;
+						latestCnt++;
 					}
 					
 					if (newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
 						mergeDownloadLocation(newestOssInfo, null, analyzedDownloadLocation, true);
 						latestRegistrationInfoList.add(newestOssInfo); // seq 4 : 최신등록 정보
-						latestOssAnalysis = totalNewestOssInfo;
+						latestOssAnalysis = newestOssInfo;
+						latestCnt++;
 						
 						if (newestOssInfo.getOssName().toUpperCase().equals(userData.getOssName().toUpperCase())) {
 							if (newestOssInfo.getOssNickname() != null) {
