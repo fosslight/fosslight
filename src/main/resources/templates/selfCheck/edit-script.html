@@ -2663,8 +2663,8 @@ var src_grid = {
 				},
 				{name: 'cveId', index: 'cveId', hidden:true},
 				//{name: 'cvssScore', index: 'cvssScore', hidden:true},
-				{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', formatter:src_fn.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions,
-					sorttype: function (cell, rowData) {
+				{name: 'cvssScore', index: 'cvssScore', width: 50, align: 'center', sorttype:'float', formatter:src_fn.displayVulnerability, unformatter:fn_grid_com.unformatter, template: searchNumberOptions
+/*					, sorttype: function (cell, rowData) {
 						var rtnVal = rowData.cvssScore;
 
 						if(!rtnVal) {
@@ -2672,7 +2672,7 @@ var src_grid = {
 						}
 						
 			            return rtnVal;
-                    }
+                    } */
 				},
 				{name: 'obligation', index: 'obligation', width: 50, align: 'center', formatter: src_fn.displayNotify, unformat: src_fn.unDisplayNotify, search : false, hidden: true, 
 					sorttype: function (cell, rowData) {
