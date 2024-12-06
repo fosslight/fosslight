@@ -1373,30 +1373,30 @@ var dep_grid = {
 					
                 	var appendBtn = "";
                		appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('DEP', 'depList', "+permission+", '"+identificationStatus+"')\">";
-               		if (!permission || "CONF" == identificationStatus) {
+               		if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 	} else {
-                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
                     		appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
                 		} else {
                     		appendBtn += "<i class=\"fas fa-plus\"></i></button>";
                 		}
                 	}
                 	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('DEP', 'depList', 'main', "+permission+", '"+identificationStatus+"')\">";
-                	if (!permission || "CONF" == identificationStatus) {
+                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
                 	} else {
-                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
                     		appendBtn += "<i class=\"fas fa-trash-alt gridIconDisabled\"></i></button>";
                 		} else {
                     		appendBtn += "<i class=\"fas fa-trash-alt\"></i></button>";
                 		}
                 	}
                 	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit('DEP', "+permission+", '"+identificationStatus+"')\">";
-                	if (!permission || "CONF" == identificationStatus) {
+                	if (!permission || "CONF" == identificationStatus || 'REQ' == identificationStatus) {
                 		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
                 	} else {
-                		if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+                		if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
                     		appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
                 		} else {
                     		appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
@@ -1443,8 +1443,8 @@ var dep_grid = {
 				var permission = [[${project.statusPermission}]] == 1;
             	var identificationStatus = [[${project.identificationStatus}]];
 				
-				if (permission && "CONF" != identificationStatus) {
-					if ('ROLE_USER' == userRole && ('REQ' == identificationStatus || 'REV' == identificationStatus)) {
+				if (permission && "CONF" != identificationStatus && 'REQ' != identificationStatus) {
+					if ('ROLE_USER' == userRole && 'REV' == identificationStatus) {
 					} else {
 						// 체크 박스 영역 제외
 						cleanErrMsg("depList", rowid);

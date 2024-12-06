@@ -565,7 +565,7 @@ var com_fn = {
 					break;
 				case "REQ":
 					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.show();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();btn_Analysis.hide();
 					
 					break;
 				case "REV":
@@ -1695,6 +1695,9 @@ var com_fn = {
     	} else if ("CONF" == status) {
     		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
     		return false
+    	} else if ("REQ" == status) {
+    		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
+    		return false
     	}
 		
     	if (!$(".idenSave").is(":visible")) {
@@ -2167,6 +2170,8 @@ var com_fn = {
 			alertify.alert([[#{msg.common.not.permission}]], function(){});
 		} else if ("CONF" == status) {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+		} else if ("REQ" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
 		} else {
 			var grid = $("#" + targetId);
 			com_fn.saveFlagObject[tab] = false;
@@ -2182,6 +2187,8 @@ var com_fn = {
 			alertify.alert([[#{msg.common.not.permission}]], function(){});
 		} else if ("CONF" == status) {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+		} else if ("REQ" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
 		} else {
 			var grid = $("#" + targetId);
 			var selarrrow = grid.jqGrid("getGridParam", "selarrrow");
