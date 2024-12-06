@@ -3006,6 +3006,7 @@ var grid = {
 									var rowid = (e.id).split('_')[0];
 									var mult = null;
 									var multText = null;
+									let li = e.value;
 									
 									for(var i in licenseNames){
 										if("" != e.value && e.value == licenseNames[i].value){
@@ -3047,11 +3048,22 @@ var grid = {
 									$('#'+rowid+'_licenseName').val("");
 									
 									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									
+									if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
+										alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
+	                                        if (e) {
+	                                        	fn_grid_com.saveCellDataForLicense("list", rowid, "-", null, null);
+	                                        } else {
+	                                        	return false;
+	                                        }
+										});
+									}
 								}).on("keypress", function(evt){
 									if(evt.keyCode == 13){
 										var rowid = (e.id).split('_')[0];
 										var mult = null;
 										var multText = null;
+										let li = e.value;
 										
 										for(var i in licenseNames){
 											if("" != e.value && e.value == licenseNames[i].value){
@@ -3093,6 +3105,16 @@ var grid = {
 										$('#'+rowid+'_licenseName').val("");
 
 										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+										
+										if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
+											alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
+		                                        if (e) {
+		                                        	fn_grid_com.saveCellDataForLicense("list", rowid, "-", null, null);
+		                                        } else {
+		                                        	return false;
+		                                        }
+											});
+										}
 									}
 								});
 							}

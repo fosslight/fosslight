@@ -221,6 +221,11 @@
                         }
                 });
             },
+            saveCellDataForLicense : function (target, rowid, ossName, ossVersion, downloadLocation) {
+            	$("#" + target).find("#" + rowid + "_ossName").val(ossName);
+            	$("#" + target).find("#" + rowid + "_ossVersion").val(ossVersion);
+            	$("#" + target).find("#" + rowid + "_downloadLocation").val(downloadLocation);
+            },
             ossTypeFormat: function (cellvalue, options, rowObject) {
                 var display = "";
 

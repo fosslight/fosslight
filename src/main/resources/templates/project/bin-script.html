@@ -1182,6 +1182,7 @@ var bin_grid = {
 									var rowid = (e.id).split('_')[0];
 									var mult = null;
 									var multText = null;
+									let li = e.value;
 									
 									for(var i in licenseNames){
 										if("" != e.value && e.value == licenseNames[i].value){
@@ -1225,11 +1226,22 @@ var bin_grid = {
 									$('#'+rowid+'_licenseName').val("");
 									
 									fn_grid_com.saveCellData("binList",rowid,e.name,e.value,binValidMsgData,binDiffMsgData, binInfoMsgData);
+									
+									if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
+										alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
+	                                        if (e) {
+	                                        	fn_grid_com.saveCellDataForLicense("binList", rowid, "-", null, null);
+	                                        } else {
+	                                        	return false;
+	                                        }
+										});
+									}
 								}).on("keypress", function(evt){
 									if(evt.keyCode == 13){
 										var rowid = (e.id).split('_')[0];
 										var mult = null;
 										var multText = null;
+										let li = e.value;
 										
 										for(var i in licenseNames){
 											if("" != e.value && e.value == licenseNames[i].value){
@@ -1272,7 +1284,17 @@ var bin_grid = {
 										
 										$('#'+rowid+'_licenseName').val("");
 
-										fn_grid_com.saveCellData("srcList",rowid,e.name,e.value,srcValidMsgData,srcDiffMsgData);
+										fn_grid_com.saveCellData("binList",rowid,e.name,e.value,binValidMsgData,binDiffMsgData, binInfoMsgData);
+										
+										if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
+											alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
+		                                        if (e) {
+		                                        	fn_grid_com.saveCellDataForLicense("binList", rowid, "-", null, null);
+		                                        } else {
+		                                        	return false;
+		                                        }
+											});
+										}
 									}
 								});
 							}
