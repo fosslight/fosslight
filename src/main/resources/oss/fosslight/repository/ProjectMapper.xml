@@ -1707,11 +1707,16 @@
 		AND
 			T1.DEL_YN = 'N'
 	</select>
-	
+
 	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
-		UPDATE T2_FILE 
-			SET DEL_YN = 'Y'
-		 WHERE FILE_SEQ = #{fileSeq} 	
+		DELETE FROM T2_FILE
+			WHERE FILE_SEQ = #{fileSeq}
+	</delete>
+
+	<delete id="updateDeleteYNByFileSeq" parameterType="oss.fosslight.domain.T2File">
+		UPDATE T2_FILE
+		SET DEL_YN = 'Y'
+		WHERE FILE_SEQ = #{fileSeq}
 	</delete>
 	
 	<update id="updateFileBySeq" parameterType="oss.fosslight.domain.T2File">

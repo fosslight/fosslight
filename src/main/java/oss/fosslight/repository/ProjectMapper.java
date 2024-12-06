@@ -99,6 +99,8 @@ public interface ProjectMapper {
 	
 	void deleteFileBySeq(T2File file);
 
+	void updateDeleteYNByFileSeq(T2File file);
+
 	List<T2File> selectAndroidCsvFile(Project project);
 
 	List<T2File> selectAndroidNoticeFile(Project project);

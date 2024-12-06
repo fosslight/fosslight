@@ -2061,6 +2061,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	private void deleteFiles(List<T2File> list) {
 		if(list != null) {
 			for(T2File fileInfo : list) {
+				projectMapper.updateDeleteYNByFileSeq(fileInfo);
 				projectMapper.deleteFileBySeq(fileInfo);
 				fileService.deletePhysicalFile(fileInfo, null);
 			}
@@ -2461,8 +2462,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (project.getCsvFile() != null && project.getCsvFile().size() > 0) {
 			for (int i = 0; i < project.getCsvFile().size(); i++) {
-				projectMapper.deleteFileBySeq(project.getCsvFile().get(i));
+				projectMapper.updateDeleteYNByFileSeq(project.getCsvFile().get(i));
 				fileService.deletePhysicalFile(project.getCsvFile().get(i), "Identification");
+				projectMapper.deleteFileBySeq(project.getCsvFile().get(i));
 			}
 		}
 		
@@ -6653,6 +6655,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				if (i == 0) {
 					fileInfo = fileService.selectFileInfo(project.getCsvFile().get(i).getFileSeq());
 				}
+				projectMapper.updateDeleteYNByFileSeq(project.getCsvFile().get(i));
 				projectMapper.deleteFileBySeq(project.getCsvFile().get(i));
 				fileService.deletePhysicalFile(project.getCsvFile().get(i), physicalFilePath);
 			}
