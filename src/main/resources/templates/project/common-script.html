@@ -1417,6 +1417,7 @@ var com_fn = {
 					} else if (status == "PROG" //reject한 경우는 새로고침 (save 버튼등이 문제)
 						|| (userRole != "ROLE_ADMIN" && status == "REQ") // 일반인이 request review한 경우
 						|| (userRole == "ROLE_ADMIN" && status == "REQ") // admin이 request review한 경우
+						|| status == "REV" // request 시 버튼 hide 처리되어 다시 활성화 하기 위함
 						|| status == "CONF") { // Admin이 confirm한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
 							if (isAndroidModel) {
