@@ -2236,7 +2236,7 @@ var fn = {
 		var fileCnt = $(".documentsFileArea > li").length;
 		if (fileCnt == 0) {
 			$("#documentsFileId").val("");
-		} else if ( < 5) {
+		} else if (fileCnt < 5) {
 			$(".documentsUploader").attr("style", "display: flex !important");
 		}
 	},
