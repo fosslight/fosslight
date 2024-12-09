@@ -97,6 +97,9 @@
     			<when test="@oss.fosslight.util.StringUtil@equals('COMMENT', sidx)">
     				ORDER BY COMMENT
     			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('PRIORITY', sidx)">
+    				ORDER BY PRIORITY
+    			</when>
     		</choose>
     		<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
     			<choose>
