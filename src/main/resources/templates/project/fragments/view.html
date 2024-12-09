@@ -225,7 +225,7 @@
 									<div class="col-lg-9">
 										<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
 											<ul class="depCsvFileArea">
-												<th:block th:if="${project.depCsvFile != null}">
+												<th:block th:if="${!#lists.isEmpty(project.depCsvFile)}">
 													<th:block th:each="csvFile : ${project.depCsvFile}">
 														<li th:if="${csvFile.delYn eq 'N'}">
 															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
@@ -233,7 +233,7 @@
 														</li>
 													</th:block>
 												</th:block>
-												<th:block th:unless="${project.depCsvFile != null}">
+												<th:block th:unless="${!#lists.isEmpty(project.depCsvFile)}">
 													<li class="mt-1" th:text="'No File'"></li>
 												</th:block>
 											</ul>
@@ -370,7 +370,7 @@
 									<div class="col-lg-9">
 										<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
 											<ul class="csvFileArea">
-												<th:block th:if="${project.csvFile != null}">
+												<th:block th:if="${!#lists.isEmpty(project.csvFile)}">
 													<th:block th:each="csvFile : ${project.csvFile}">
 														<li th:if="${csvFile.delYn eq 'N'}">
 															<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
@@ -379,7 +379,7 @@
 														</li>
 													</th:block>
 												</th:block>
-												<th:block th:unless="${project.csvFile != null}">
+												<th:block th:unless="${!#lists.isEmpty(project.csvFile)}">
 													<li class="mt-1" th:text="'No File'"></li>
 												</th:block>
 											</ul>
@@ -519,7 +519,7 @@
 											<div class="col-lg-7">
 												<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
 													<ul class="binFileArea">
-														<th:block th:if="${project.binCsvFile != null}">
+														<th:block th:if="${!#lists.isEmpty(project.binCsvFile)}">
 															<th:block th:each="csvFile : ${project.binCsvFile}">
 																<li th:if="${csvFile.delYn == 'N'}">
 																	<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
@@ -527,7 +527,7 @@
 																</li>
 															</th:block>
 														</th:block>
-														<th:block th:unless="${project.binCsvFile != null}">
+														<th:block th:unless="${!#lists.isEmpty(project.binCsvFile)}">
 															<li th:text="'No File'"></li>
 														</th:block>
 													</ul>
