@@ -16,6 +16,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +42,7 @@ import oss.fosslight.validation.custom.T2CoProjectValidator;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.Min;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -1337,6 +1339,71 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "Delete Target Project", notes = "Delete Project'")
+    @DeleteMapping(value = { Url.APIV2.FOSSLIGHT_API_PROJECT_BY_ID })
+    public ResponseEntity<Map<String, Object>> deleteProject(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String prjId
+    ) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)){
+            throw new CProjectNotAvailableException(prjId);
+        }
+
+        Project project = new Project();
+        project.setPrjId(prjId);
+        Project projectInfo = projectService.getProjectDetail(project);
+
+        if (Objects.equals(projectInfo.getStatus(), CoConstDef.CD_DTL_PROJECT_STATUS_COMPLETE)) {
+            throw new CProjectNotAvailableException(String.format("%s. Cannot delete confirm project", prjId));
+        }
+
+
+        try {
+            History h = new History();
+            h = projectService.work(project);
+            h.sethAction(CoConstDef.ACTION_CODE_DELETE);
+            h.setModifier(userInfo.getUserId());
+            historyService.storeData(h);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        try {
+            CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED);
+            mailBean.setParamPrjId(project.getPrjId());
+
+            if (!isEmpty(project.getUserComment())) {
+                mailBean.setComment(project.getUserComment());
+            }
+
+            CoMailManager.getInstance().sendMail(mailBean);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        try {
+            projectService.deleteProject(project);
+
+            try {
+                // Delete project ref files
+                projectService.deleteProjectRefFiles(projectInfo);
+                resultMap.put("msg", prjId + " is deleted");
+                return new ResponseEntity<>(resultMap, HttpStatus.OK);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                resultMap.put("msg", "Error occurs during remove ref files. Please report this issue");
+                return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            resultMap.put("msg", "Error occurs during remove ref files. Please report this issue");
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

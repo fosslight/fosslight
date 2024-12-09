@@ -988,6 +988,9 @@ public final class Url {
 			/** API create Project  */
 			public static final String FOSSLIGHT_API_PROJECT_CREATE			= "/projects";
 
+			/** API Project by ID */
+			public static final String FOSSLIGHT_API_PROJECT_BY_ID			= "/projects/{id}";
+
 			/** API Project List 조회 */
 			public static final String FOSSLIGHT_API_PROJECT_SEARCH			= "/projects";
 
@@ -1031,7 +1034,7 @@ public final class Url {
 
 			public static final String FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON	    = "/projects/{id}/security/json-data";
 
-      public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
+      		public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
 
     
 		/** VULNABILITY */
