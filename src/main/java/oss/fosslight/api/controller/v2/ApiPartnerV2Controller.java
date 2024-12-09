@@ -102,50 +102,6 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     }
 
-    @ApiOperation(value = "3rd Party Add Watcher (Deprecated)", notes = "3rd Party Add Watcher (Deprecated)")
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_WATCHER})
-    public ResponseEntity<Map<String, Object>> addPrjWatcher(
-            @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
-            @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
-
-        T2Users userInfo = userService.checkApiUserAuth(authorization);
-        Map<String, Object> resultMap = new HashMap<>();
-
-        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
-            throw new CProjectNotAvailableException(partnerId);
-        }
-
-        try {
-            for (String email : emailList) {
-                boolean ldapCheck = true;
-                if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
-                    ldapCheck = apiPartnerService.existLdapUserToEmail(email);
-                }
-                if (!ldapCheck) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
-                }
-                boolean watcherFlag = apiPartnerService.existsWatcherByEmail(partnerId, email);
-                if (watcherFlag) {
-                    Map<String, Object> param = new HashMap<>();
-                    param.put("partnerId", partnerId);
-                    param.put("division", "");
-                    param.put("userId", "");
-                    param.put("partnerEmail", email);
-                    apiPartnerService.insertWatcher(param);
-                } else {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
-                }
-            }
-            return new ResponseEntity(resultMap, HttpStatus.OK);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                    CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE));
-        }
-    }
-
     @ApiOperation(value = "3rd Party Add Editor", notes = "3rd Party Add Editor")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_EDITOR})
     public ResponseEntity<Map<String, Object>> addPrjEditor(
@@ -190,32 +146,6 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "3rd Party Export report (Deprecated)", notes = "3rd Party > Export report (Deprecated)")
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD_DEPRECATED})
-    public ResponseEntity<FileSystemResource> get3rdDownload_deprecated(
-            @ApiParam(hidden = true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
-            @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
-
-        String downloadId = "";
-        T2File fileInfo = new T2File();
-        T2Users userInfo = userService.checkApiUserAuth(authorization);
-
-        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
-            throw new CProjectNotAvailableException(partnerId);
-        }
-
-        try {
-            downloadId = ExcelDownLoadUtil.getExcelDownloadId("partnerCheckList", partnerId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
-            fileInfo = fileService.selectFileInfo(downloadId);
-
-            return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
-        } catch (java.lang.Exception e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
     @ApiOperation(value = "3rd Party Export report", notes = "3rd Party > Export report")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD})
     public ResponseEntity<FileSystemResource> get3rdDownload(
@@ -239,28 +169,6 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         } catch (java.lang.Exception e) {
             log.error(e.getMessage(), e);
             throw e;
-        }
-    }
-
-    @ApiOperation(value = "3rd Party Export Json (Deprecated)", notes = "3rd Party > Export Json (Deprecated)")
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_JSON_DEPRECATED})
-    public ResponseEntity<Map<String, Object>> get3rdAsJson_deprecated(
-            @ApiParam(hidden = true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
-
-        T2Users userInfo = userService.checkApiUserAuth(authorization);
-        Map<String, Object> resultMap = new HashMap<String, Object>();
-
-        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
-            throw new CProjectNotAvailableException(partnerId);
-        }
-
-        try {
-            resultMap = apiPartnerService.getExportJson(partnerId);
-
-            return new ResponseEntity<>(resultMap, HttpStatus.OK);
-        } catch (Exception e) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST);
         }
     }
 

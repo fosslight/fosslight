@@ -961,13 +961,8 @@ public final class Url {
 			/** API 3rd Party 조회 */
 			public static final String FOSSLIGHT_API_PARTNER_SEARCH			= "/partners";
 
-			/** API 3rd Party Add Watcher */
-			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partners/{id}/watchers";
+			/** API 3rd Party Add Editor */
 			public static final String FOSSLIGHT_API_PARTNER_ADD_EDITOR			= "/partners/{id}/editors";
-
-			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD_DEPRECATED		= "/partners/{id}/file";
-
-			public static final String FOSSLIGHT_API_PARTNER_JSON_DEPRECATED			= "/partners/{id}/json-data";
 
 			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD		= "/partners/{id}/bom/file";
 
@@ -1014,9 +1009,7 @@ public final class Url {
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/bom/compare-with/{compareId}";
 
-			/** API Project Add Watcher */
-			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/projects/{id}/watchers";
-
+			/** API Project Add Editor */
 			public static final String FOSSLIGHT_API_PROJECT_ADD_EDITOR		= "/projects/{id}/editors";
 
 
@@ -1056,15 +1049,11 @@ public final class Url {
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT_SELFCHECK		= "/selfchecks/{id}/report";
 
-			/** OSS Report upload */
-			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/selfchecks/{id}/export";
-
+			/** OSS Report download */
 			public static final String FOSSLIGHT_API_SELFCHECK_DOWNLOAD		= "/selfchecks/{id}/bom/file";
 
-			/** API SelfCheck Add Watcher */
-			public static final String FOSSLIGHT_API_SELFCHECK_ADD_WATCHER		= "/selfchecks/{id}/watchers";
-
-		public static final String FOSSLIGHT_API_SELFCHECK_ADD_EDITOR		= "/selfchecks/{id}/editors";
+			/** API SelfCheck Add Editor */
+			public static final String FOSSLIGHT_API_SELFCHECK_ADD_EDITOR		= "/selfchecks/{id}/editors";
 
 			public static final String FOSSLIGHT_API_SELFCHECK_GET		= "/selfchecks/{id}";
 
