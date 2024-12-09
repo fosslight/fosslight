@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -3835,8 +3836,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				currentBean.setAttribution(CommonFunction.lineReplaceToBR(ossBean.getAttribution()));
 			}
 			
-			List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(bean);
-			if (ossDownloadLocation.size() > 0) {
+			List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(ossBean);
+			if (!CollectionUtils.isEmpty(ossDownloadLocation)) {
 				StringBuilder sb = new StringBuilder();
 						
 				for (OssMaster location : ossDownloadLocation) {
@@ -3861,6 +3862,30 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				remakeMap.replace(ossBean.getOssId(), currentBean);
 			} else {
 				remakeMap.put(ossBean.getOssId(), currentBean);
+			}
+			
+			if (ossBean.getRestriction() != null) {
+				T2CodeDtl t2CodeDtl = new T2CodeDtl();
+				List<T2CodeDtl> t2CodeDtlList = new ArrayList<>(); 
+				t2CodeDtl.setCdNo(CoConstDef.CD_LICENSE_RESTRICTION);
+				try {
+					t2CodeDtlList = codeMapper.selectCodeDetailList(t2CodeDtl);
+				} catch (Exception e) {
+					log.error(e.getMessage());
+				}
+				List<String> restrictionList = Arrays.asList(ossBean.getRestriction().split(","));
+				List<String> restrictionCdNoList = new ArrayList<>();
+				String restrictionStr = "";
+				
+				for (T2CodeDtl item: t2CodeDtlList){
+					if (restrictionList.contains(item.getCdDtlNo())) {
+						restrictionStr += (!isEmpty(restrictionStr) ? ", " : "") + item.getCdDtlNm();
+						restrictionCdNoList.add(item.getCdDtlNo());
+					}
+				}
+				
+				ossBean.setRestriction(restrictionStr);
+				ossBean.setRestrictionCdNoList(restrictionCdNoList);
 			}
 		}
 		
@@ -3919,7 +3944,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	}
 
 	@Override
-	public void syncOssMaster(OssMaster ossMaster, boolean declaredLicenseCheckFlag, boolean detectedLicenseCheckFlag, boolean downloadLocationCheckFlag) {
+	public void syncOssMaster(OssMaster ossMaster, boolean declaredLicenseCheckFlag, boolean detectedLicenseCheckFlag, boolean restrictionCheckFlag) {
 		ossMaster.setModifier(ossMaster.getLoginUserName());
 		checkOssLicenseAndObligation(ossMaster);
 
@@ -3977,10 +4002,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			}
 		}
 
-		if (downloadLocationCheckFlag) {
-			registOssDownloadLocation(ossMaster);
-		}
-
 		if (!isEmpty(avoidNull(ossMaster.getComment()).trim())) {
 			CommentsHistory param = new CommentsHistory();
 			param.setReferenceId(ossMaster.getOssId());
@@ -4002,7 +4023,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	public OssMaster makeEmailSendFormat(OssMaster bean) {
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sb1 = new StringBuilder();
-		for (String downloadLocation : bean.getDownloadLocation().split(",")) {
+		for (String downloadLocation : bean.getDownloadLocations()) {
 			if (downloadLocation.contains("|")) {
 				sb.append(downloadLocation.split("[|]")[0]).append(",");
 				sb1.append(downloadLocation.split("[|]")[1]).append(",");

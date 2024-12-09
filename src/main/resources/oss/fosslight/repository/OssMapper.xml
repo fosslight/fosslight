@@ -2412,7 +2412,7 @@
 		/* OssMapper.getOssListByName */
 		SELECT 
 			T1.OSS_COMMON_ID, T1.OSS_ID, T1.OSS_NAME, T1.OSS_VERSION, T1.LICENSE_DIV, T1.DOWNLOAD_LOCATION, T1.HOMEPAGE, T1.SUMMARY_DESCRIPTION, T1.ATTRIBUTION, T1.COPYRIGHT
-			, (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID ) AS DOWNLOAD_LOCATION_GROUP
+			, (SELECT GROUP_CONCAT(D.DOWNLOAD_LOCATION SEPARATOR ',') FROM OSS_DOWNLOADLOCATION D WHERE D.OSS_COMMON_ID = T1.OSS_COMMON_ID) AS DOWNLOAD_LOCATION_GROUP
 			, T1.OBLIGATION_TYPE, T1.LICENSE_TYPE
 			, T2.LICENSE_ID, T2.OSS_LICENSE_IDX, T2.OSS_LICENSE_COMB, T2.OSS_COPYRIGHT
 			, CASE WHEN IFNULL(T3.SHORT_IDENTIFIER, '') <![CDATA[<>]]> '' THEN T3.SHORT_IDENTIFIER ELSE T3.LICENSE_NAME END AS LICENSE_NAME
@@ -2429,6 +2429,7 @@
 			, T1.DEACTIVATE_FLAG
 			, T1.IMPORTANT_NOTES
 			, T1.IN_CPE_MATCH_FLAG
+			, T1.RESTRICTION
 		FROM (
 			SELECT
     			OV.OSS_ID,
@@ -4008,20 +4009,16 @@
     </update>
 
     <update id="updateOssMasterSync" parameterType="oss.fosslight.domain.OssMaster">
-    	UPDATE OSS_VERSION OV
-    	INNER JOIN OSS_COMMON OC ON OV.OSS_COMMON_ID = OC.OSS_COMMON_ID
-		   SET OV.LICENSE_DIV 			= #{licenseDiv},
-		       OV.COPYRIGHT 			= #{copyright},
-		       OC.DOWNLOAD_LOCATION 	= #{downloadLocation},
-		       OC.HOMEPAGE 				= #{homepage},
-		       OC.SUMMARY_DESCRIPTION 	= #{summaryDescription},
-		       OV.ATTRIBUTION 			= #{attribution},
-		       OV.MODIFIED_DATE 		= now(),
-		       OV.MODIFIER 				= #{modifier},
-		       OV.LICENSE_TYPE 			= #{licenseType},
-		       OV.OBLIGATION_TYPE 		= #{obligationType},
-		       OC.DEACTIVATE_FLAG 		= #{deactivateFlag}
-		 WHERE OV.OSS_ID = #{ossId}
+    	UPDATE OSS_VERSION
+		   SET LICENSE_DIV 			= #{licenseDiv},
+		       COPYRIGHT 			= #{copyright},
+		       RESTRICTION 			= #{restriction},
+		       ATTRIBUTION 			= #{attribution},
+		       MODIFIED_DATE 		= now(),
+		       MODIFIER 			= #{modifier},
+		       LICENSE_TYPE 		= #{licenseType},
+		       OBLIGATION_TYPE 		= #{obligationType}
+		 WHERE OSS_ID = #{ossId}
     </update>
 
     <delete id="deleteOssLicenseDeclaredSync" parameterType="oss.fosslight.domain.OssMaster">

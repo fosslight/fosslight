@@ -284,25 +284,10 @@
                 <td class="dCase">[[${ossInfo.copyright}]]</td>
             </tr>
             <tr>
-                <th class="dCase"><input type="checkbox" id="Download Location"></th>
-                <th class="dCase" th:text="#{msg.common.field.downloadLocation}"></th>
-                <td class="dCase">
-                    <th:block th:each="downloadLocation, g : ${ossInfo.downloadLocations}">
-                        <span th:text="${downloadLocation}"></span><br/>
-                    </th:block>
-                </td>
+                <th class="dCase" style="height:50px;"><input type="checkbox" id="Restriction"></th>
+                <th class="dCase" th:text="#{msg.common.field.restriction}"></th>
+                <td class="dCase">[[${ossInfo.restriction}]]</td>
             </tr>
-            <tr>
-                <th class="dCase"><input type="checkbox" id="Home Page"></th>
-                <th class="dCase" th:text="#{msg.common.field.homepage}"></th>
-                <td class="dCase">[[${ossInfo.homepage}]]</td>
-            </tr>
-            <tr>
-                <th class="dCase" style="height:50px;"><input type="checkbox" id="Summary Description"></th>
-                <th class="dCase" th:text="#{msg.common.field.summaryDescription}"></th>
-                <td class="dCase">[[${ossInfo.summaryDescription}]]</td>
-            </tr>
-
             <tr>
                 <th class="dCase" style="height:50px;"><input type="checkbox" id="Attribution"></th>
                 <th class="dCase" th:text="#{msg.common.field.attribution}"></th>

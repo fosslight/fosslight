@@ -88,7 +88,7 @@
 												<th th:text="#{msg.common.field.downloadLocation}"></th>
 												<td>
 													<th:block th:if="${detail?.downloadLocations != null}" th:each="downloadLocation : ${detail?.downloadLocations}">
-														<span class="input-group-append">
+														<span th:if="${downloadLocation != ''}" class="input-group-append">
 															<a th:href="${#strings.setSplit(downloadLocation, '|')[0]}" class="urlLink" target="_blank" th:text="${#strings.setSplit(downloadLocation, '|')[0]}"></a><span class="ml-1" th:text="|(${#strings.setSplit(downloadLocation, '|')[1]})|"></span>
 														</span>
 													</th:block>
