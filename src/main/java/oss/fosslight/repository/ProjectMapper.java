@@ -417,4 +417,6 @@ public interface ProjectMapper {
 	void insertOssComponentLicenseList(@Param("list")List<OssComponentsLicense> ossComponentLicenseList);
 
 	List<Map<String, Object>> getCpeInfoAndRangeForProject(ProjectIdentification identification);
+
+	String selectNvdInfoWithOutVer(OssMaster ossMaster);
 }

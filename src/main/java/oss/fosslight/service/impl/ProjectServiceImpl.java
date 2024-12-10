@@ -1019,8 +1019,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			list = projectMapper.selectIdentificationGridList(identification);
 			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
 			List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
-			if (notVersionOssComponentList != null) {
+			if (!CollectionUtils.isEmpty(notVersionOssComponentList)) {
+				Map<String, String> nvdInfoWithOutVerMap = new HashMap<>();
+				List<ProjectIdentification> outVerOssComponentList = notVersionOssComponentList.stream().filter(CommonFunction.distinctByKey(e -> e.getOssName() + "_" + avoidNull(e.getOssVersion()))).collect(Collectors.toList());
+				for (ProjectIdentification pi : outVerOssComponentList) {
+					String ossInfoKey = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase();
+					if (CoCodeManager.OSS_INFO_UPPER.containsKey(ossInfoKey)) {
+						OssMaster ossInfo = CoCodeManager.OSS_INFO_UPPER.get(ossInfoKey);
+						String cvssScoreMaxString = projectMapper.selectNvdInfoWithOutVer(ossInfo);
+						if (!isEmpty(cvssScoreMaxString)) {
+							nvdInfoWithOutVerMap.put(ossInfoKey, cvssScoreMaxString);
+						}
+					}
+				}
+				for (ProjectIdentification pi : notVersionOssComponentList) {
+					String ossInfoKey = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase();
+					if (nvdInfoWithOutVerMap.containsKey(ossInfoKey)) {
+						pi.setCvssScoreMax(nvdInfoWithOutVerMap.get(ossInfoKey));
+					}
+				}
 				list.addAll(notVersionOssComponentList);
+				nvdInfoWithOutVerMap.clear();
 			}
 			identification.setOssVersionEmptyFlag(null);
 			
@@ -1053,9 +1072,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (!isEmpty(project.getComments())) comments += " " + project.getComments();
 					}
 					
-					if (!isEmpty(comments)) project.setComments(comments);
+					if (!isEmpty(comments)) {
+						project.setComments(comments);
+					}
 					
-					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) project.setDependencies(avoidNull(project.getDependencies()));
+					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) {
+						project.setDependencies(avoidNull(project.getDependencies()));
+					}
 				}
 				
 				ProjectIdentification param = new ProjectIdentification();
@@ -1080,14 +1103,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						String cveId = bean.getCvssScoreMax1().split("\\@")[4];
 						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax1());
 					}
-					if (bean.getCvssScoreMax2() != null) {
-						String cveId = bean.getCvssScoreMax2().split("\\@")[4];
-						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax2());
-					}
-					if (bean.getCvssScoreMax3() != null) {
-						String cveId = bean.getCvssScoreMax3().split("\\@")[4];
-						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax3());
-					}
 					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
 						if (cvssScoreMaxList.size() > 1) {
 							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
@@ -1106,16 +1121,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						bean.setCvssScore(cveData[3]);
 						bean.setCveId(cveData[4]);
 						bean.setVulnYn(CoConstDef.FLAG_YES);
-					} else {
-						String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, null, cvssScoreMaxList, true);
-						if (conversionCveInfo != null) {
-							String[] conversionCveData = conversionCveInfo.split("\\@");
-							bean.setCvssScore(conversionCveData[3]);
-							bean.setCveId(conversionCveData[4]);
-							bean.setVulnYn(CoConstDef.FLAG_YES);
-						} else {
-							setCveInfoFlag = true;
-						}
 					}
 					
 					cvssScoreMaxList.clear();
