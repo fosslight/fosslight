@@ -176,7 +176,7 @@ public final class PdfUtil extends CoTopComponent {
                     LicenseMaster lm = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
                     if(lm != null) {
                         String disclosingSrc = CoCodeManager.getCodeString(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE, lm.getDisclosingSrc());
-                        if (!isEmpty(avoidNull(lm.getRestrictionStr())) || (!isEmpty(avoidNull(lm.getDescription())) && !disclosingSrc.equals("NONE"))) {
+                        if (!isEmpty(avoidNull(lm.getRestrictionStr())) || (!isEmpty(avoidNull(lm.getDescription())) && !disclosingSrc.equals("NONE") && project.getNetworkServerType().equals("N"))) {
                             if(!isEmpty(avoidNull(lm.getShortIdentifier()))) {
                                 lm.setLicenseName(lm.getShortIdentifier());
                             }
