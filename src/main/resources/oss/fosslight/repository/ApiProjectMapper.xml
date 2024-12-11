@@ -311,7 +311,7 @@
 		<choose>
 			<when test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', userRole)">
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', needToUploadReport)">
-					AND T1.IDENTIFICATION_STATUS != 'CONF'
+					AND (T1.IDENTIFICATION_STATUS != 'CONF' OR T1.IDENTIFICATION_STATUS IS NULL)
 				</if>
 			</when>
 			<otherwise>
@@ -330,7 +330,7 @@
 					)
 				)
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', needToUploadReport)">
-					AND T1.IDENTIFICATION_STATUS = 'PROG'
+					AND (T1.IDENTIFICATION_STATUS = 'PROG' OR T1.IDENTIFICATION_STATUS IS NULL)
 				</if>
 			</otherwise>
 		</choose>
