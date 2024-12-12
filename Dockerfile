@@ -14,7 +14,7 @@ FROM eclipse-temurin:11.0.21_9-jre-jammy
 LABEL maintainer="FOSSLight <fosslight-dev@lge.com>"
 
 COPY --from=build /home/gradle/src/build/libs/*.war /app/FOSSLight.war
-COPY ./verify/verify /app/verify/verify
+COPY service/verify/verify /app/verify/verify
 COPY ./db/wait-for /app/wait-for
 COPY ./LICENSES /app/LICENSES
 
