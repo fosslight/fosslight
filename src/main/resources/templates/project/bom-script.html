@@ -405,8 +405,6 @@ var bom_fn = {
 						if (data.includes("git://")) {
 							data = data.replace(/git/g, ",git");
 						}
-						
-						data = data.substr(1);
 					} else if ("homepage" == value) {
 						if(data.indexOf("Not the same as property") > -1){
 							data = data.split("Not the same as property")[0];
