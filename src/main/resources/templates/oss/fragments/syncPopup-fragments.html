@@ -194,12 +194,12 @@
             syncSave: function () {
                 var checkedOssList = $("#_ossList").jqGrid("getGridParam", "selarrrow");
 
-                var ossName = $("#_ossList").jqGrid("getRowData", checkedOssList[0]).ossNameVerStr;
-                ossName = ossName.substring(0, ossName.indexOf(" ("));
-
-                var checkedSyncList = $(".dCase tbody tr").find("input[type=checkbox]:checked");
-
                 if (checkedOssList.length > 0) {
+                	var ossName = $("#_ossList").jqGrid("getRowData", checkedOssList[0]).ossNameVerStr;
+                    ossName = ossName.substring(0, ossName.indexOf(" ("));
+
+                    var checkedSyncList = $(".dCase tbody tr").find("input[type=checkbox]:checked");
+                	
                     var dataLength = $("#syncOssEditor").summernote('code').length;
 
                     if ((checkedSyncList.length > 0) || dataLength > 0) {
