@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
-## [2.1.0](https://github.com/fosslight/fosslight/releases/tag/v2.1.0) (2024-10-31)
+## [2.1.0](https://github.com/fosslight/fosslight/releases/tag/v2.1.0) (2024-11-05)
 
 ### New
 
