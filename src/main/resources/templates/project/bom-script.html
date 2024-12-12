@@ -372,10 +372,10 @@ var bom_fn = {
 		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
 		var adminCheckYn = $("#"+id+"_adminCheck").prop("checked");
 		
-		$("#bomList").jqGrid('setCell', id, 'notify', "10");
-		$("#bomList").jqGrid('setCell', id, 'source', "10");
-		
 		if (adminCheckYn && "ROLE_ADMIN" == userRole) {
+			$("#bomList").jqGrid('setCell', id, 'notify', "10");
+			$("#bomList").jqGrid('setCell', id, 'source', "10");
+			
 			var checkList = ["downloadLocation", "homepage", "copyrightText"];
 			
 			var rowData = $("#bomList").getRowData(id);
