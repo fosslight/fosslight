@@ -67,6 +67,14 @@ ALTER TABLE `PROJECT_MASTER` ADD `NOTICE_APPEND_FILE_ID` INT(11) DEFAULT NULL;
 ALTER TABLE `OSS_NOTICE` ADD `NOTICE_APPEND_TYPE` CHAR(1) DEFAULT 'E';
 INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('120', '41', 'project notice append file', NULL, 'html,htm,txt', 15, 'Y');
 
+-- Modify notice template path
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = 'notice/notice.html' WHERE CD_NO=219 AND CD_DTL_NO=5;
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = 'notice/notice.txt' WHERE CD_NO=219 AND CD_DTL_NO=6;
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = 'notice/supplement_notice.html' WHERE CD_NO=219 AND CD_DTL_NO=8;
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = 'notice/supplement_notice.txt' WHERE CD_NO=219 AND CD_DTL_NO=9;
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = 'notice/selfcheck_notice.html' WHERE CD_NO=219 AND CD_DTL_NO=10;
+UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = 'notice/selfcheck_notice.txt' WHERE CD_NO=219 AND CD_DTL_NO=11;
+
 ALTER TABLE `T2_USERS` ADD `TOKEN` varchar(500) NULL DEFAULT NULL;
 
 -- Added primary key of nvd_data_v3 table
