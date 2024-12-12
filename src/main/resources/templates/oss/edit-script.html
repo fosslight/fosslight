@@ -1177,7 +1177,7 @@
 		});
 
         if(isReadOnly == null) {
-            _licenseChoice.jqGrid('navGrid',"#_licenseChoice_toppager",{edit:false,add:true,del:false,search:false,refresh:false
+            _licenseChoice.jqGrid('navGrid',"#_licenseChoice_toppager",{edit:false,add:true,del:true,search:false,refresh:false
                 , addfunc: function (rowid) {
                     var ids = $("#_licenseChoice").jqGrid("getDataIDs");
                     var newId = ids.length ? Number(ids[ids.length-1])+1 : 1;
