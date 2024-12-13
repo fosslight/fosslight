@@ -77,7 +77,7 @@ ALTER TABLE `NVD_DATA_V3` ADD PRIMARY KEY (`CVE_ID`, `PRODUCT`, `VERSION`, `VEND
 -- Add next_file_id sequence
 CREATE SEQUENCE NEXT_FILE_ID START WITH 1 INCREMENT BY 1;
 
-set @restart_sql:=concat('alter sequence NEXT_FILE_ID restart with ',(select MAX(file_id) + 1 FROM T2_FILE));
+set @restart_sql:=concat('alter sequence NEXT_FILE_ID restart with ',(SELECT IFNULL(MAX(FILE_ID)+1, 1) FROM T2_FILE));
 prepare restart_sequence from @restart_sql;
 execute restart_sequence;
 deallocate prepare restart_sequence;
