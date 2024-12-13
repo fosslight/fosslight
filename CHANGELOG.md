@@ -1,11 +1,5 @@
 # Changelog
 
-## v2.1.1 (01/01/1970)
-## Changes
-- Release version 2.1.1 @hyeinlee00 (#1090)
-
----
-
 ## v2.1.1 (13/12/2024)
 ## What's Changed
 * Release version 2.1.1 by @FOSSLight-dev  @Min-Kyungsun @hyeinlee00 in https://github.com/fosslight/fosslight/pull/1090
@@ -868,3 +862,14 @@
 
 - Update the comments and messages @soimkim (#484)
 - Update newLogo in login, signup, menu bar @MoonDD99 (#478)
+
+---
+
+## v1.3.3 (15/04/2022)
+## 🚀 Features
+
+- Add statistics to menu @FOSSLight-dev (#475)
+
+## 🐛 Hotfixes
+
+- Fix the bug where the request button disappears when packaging rejects. @FOSSLight-dev (#476)
