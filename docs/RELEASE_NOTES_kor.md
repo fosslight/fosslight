@@ -6,14 +6,14 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
-## [2.1.1](https://github.com/fosslight/fosslight/releases/tag/v2.1.1) (2024-12-12)
+## [2.1.1](https://github.com/fosslight/fosslight/releases/tag/v2.1.1) (2024-12-13)
 
 ### New
 * Open source
   - Important Notes 항목 추가
 * Project 
   - Pre-review > cargo type 추가
-  - Packaging - Notice에서 append 를 file형태로도 가능하도록 기능 추가
+  - Packaging - Notice에서 append 할 때 file 형태도 가능하도록 기능 추가
 * UI
   - Restriction > level에 따른 icon 색상 추가
 * API
@@ -28,12 +28,12 @@ SPDX-License-Identifier: AGPL-3.0-only
   - Identification > BIN탭에서 warning message 레벨 변경
     - OSS Name 다르고, License 같은 경우, Warning -> Info로 레벨 낮춤
   - Packaging > path 입력시 /가 입력될 수 없도록 변경
-  - fosslight_binary.txt 영역 삭제. fosslight binary report에 tlsh, checksum값이 포함되도록 바뀜
+  - fosslight_binary.txt 영역 삭제. fosslight_binary.txt 대신 fosslight binary report에 tlsh, checksum값이 포함되도록 대체됨
   - 권한이 없는 프로젝트에 대해서는 BOM Compare 불가능하도록 수정
   - Request상태에서는 수정 불가능 하도록 권한 체크 로직 변경
   - Distribution시 따옴표, 큰따옴표 입력 불가하도록 처리
 * Open Source
-  - Sync기능에서 OSS_COMMON에 해당하는 항모 삭제
+  - Sync기능에서 OSS_COMMON에 해당하는 항목 삭제
   - Sync에 restriction 추가
   - Sync동작 시 current version으로 comment 추가 되도록 변경
   - List 검색 기준에 cpe관련 항목 추가
@@ -46,7 +46,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 * Review Report
   - License review가 보여지는 조건 변경
 * UI
-  - License / Opensource 등에서 저장버튼 클릭 시, input box에 입력된 값이 있는 경우 Add를 자동으로 해줌
+  - License / Opensource 상세 화면에서 저장 버튼 클릭 시, input box에 입력된 값이 있는 경우 Add를 자동으로 해줌
 * API
   - Watcher -> Editor용어 변경에 따라 API명 변경됨
   - API 호출 시, User permission check 관련 기능이 UI와 동일하도록 수정
@@ -54,8 +54,8 @@ SPDX-License-Identifier: AGPL-3.0-only
     - paging을 위한 parameter 추가
     - return 값에서 key 변경
   - Project create 개수 제한 해제
-  - 토큰 생성 방식 변경
-* **버그 수정** *
+  - 토큰 생성시, 랜덤 토큰을 사용하도록 변경
+* **버그 수정**
   - Project > Identification
     - Status bar 버그 수정
     - Pre-review 에러 수정
@@ -63,7 +63,7 @@ SPDX-License-Identifier: AGPL-3.0-only
   - Project > Packaging
     - Verify 과정 버그 수정
     - 여러 프로젝트에서 패키징 파일이 참조되는 경우, 한 프로젝트에서 삭제시, 물리적으로 패키징 파일 삭제되지 않도록 수정
-    - 4번째 패키징 파일이 보이지 않거나, copy되지 않던 이슈 수정
+    - 패키징 파일 로드 시 4번째 패키징 파일이 보이지 않거나, copy 안 되던 이슈 수정
   - Project > Security
     - Security 버튼에 상태 표기 이슈 수정
     - 버전없는 open source의 vulnerability 목록 보이지 않는 이슈 수정
@@ -72,7 +72,6 @@ SPDX-License-Identifier: AGPL-3.0-only
     - 3rd party 생성화면 버그 수정
   - License
     - License에서 Comment만 남기는 경우, mail 발송 시 버그 수정
-    -
   - Open source    
     - 상세페이지에서 open source와 연결된 license의 restriction이 보이도록 수정
     - Purl 생성 관련 버그 수정
