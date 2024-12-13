@@ -67,7 +67,7 @@ UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = 'notice/supplement_notice.txt' WHERE CD_NO
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = 'notice/selfcheck_notice.html' WHERE CD_NO=219 AND CD_DTL_NO=10;
 UPDATE `T2_CODE_DTL` SET CD_DTL_EXP = 'notice/selfcheck_notice.txt' WHERE CD_NO=219 AND CD_DTL_NO=11;
 
-ALTER TABLE `T2_USERS` ADD `TOKEN` varchar(500) NULL DEFAULT NULL;
+ALTER TABLE `T2_USERS` MODIFY `TOKEN` varchar(500);
 
 -- Added primary key of nvd_data_v3 table
 TRUNCATE TABLE `NVD_DATA_V3`;
