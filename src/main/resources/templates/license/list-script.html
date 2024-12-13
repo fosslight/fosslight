@@ -46,7 +46,12 @@
                     placeholder: "Restriction",
                     allowClear: true,
                 });
-
+                
+                $('#disclosingSrcSelect').select2({
+                    placeholder: "Source Code Disclosure Scope",
+                    allowClear: true,
+                });
+                
                 $('#licenseTypeSelect').select2({
                     placeholder: "License Type",
                     allowClear: true,
@@ -102,7 +107,7 @@
                     });
 
                 var input = ["licenseName", "webpage", "cStartDate", "cEndDate", "mStartDate", "mEndDate", "licenseNameAllSearchFlag"];
-                var singleSelect = ["licenseType", "obligationType", "creator", "modifier"];
+                var singleSelect = ["licenseType", "obligationType", "creator", "modifier", "disclosingSrc"];
                 var multiSelect = ["restrictions"];
                 var textarea = ["licenseText", "description"];
 
@@ -356,7 +361,10 @@
                 } else {
                     paramData.restrictions = "";
                 }
-
+                if (typeof paramData.disclosingSrc === "undefined") {
+                	paramData.disclosingSrc = "";
+                }
+                
                 return paramData;
             },
         	onUpdateSuccess : function(json, status){

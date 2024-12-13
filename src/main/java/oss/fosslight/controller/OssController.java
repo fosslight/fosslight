@@ -6,16 +6,15 @@
 package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -38,7 +37,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.*;
 import oss.fosslight.common.Url.OSS;
-import oss.fosslight.common.Url.PROJECT;
 import oss.fosslight.domain.*;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
@@ -845,6 +843,7 @@ public class OssController extends CoTopComponent{
 		
 		CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_OSS_ADDED_COMMENT);
 		mailBean.setParamOssId(commentsHistory.getReferenceId());
+		mailBean.setParamReferenceDiv(commentsHistory.getReferenceDiv());
 		mailBean.setComment(commentsHistory.getContents());
 		
 		CoMailManager.getInstance().sendMail(mailBean);
@@ -2223,14 +2222,17 @@ public class OssController extends CoTopComponent{
 			
 			boolean declaredLicenseCheckFlag;
 			boolean detectedLicenseCheckFlag;
-			boolean downloadLocationCheckFlag;
-			boolean ossMasterCheclFlag;
+			boolean restrictionCheckFlag;
+			boolean ossMasterCheckFlag;
 			boolean onlyCommentRegistFlag;
 		
 			for (int i=0; i<ossIdsArr.length; i++) {
 				param.setOssId(ossIdsArr[i]);
 				
 				OssMaster beforeBean = ossService.getOssMasterOne(param);
+				if (!CollectionUtils.isEmpty(beforeBean.getRestrictionCdNoList())) {
+					beforeBean.setRestriction(String.join(",", beforeBean.getRestrictionCdNoList()));
+				}
 				OssMaster syncBean = (OssMaster) BeanUtils.cloneBean(beforeBean);
 				syncBean.setCopyright(CommonFunction.brReplaceToLine(syncBean.getCopyright()));
 				syncBean.setSummaryDescription(CommonFunction.brReplaceToLine(syncBean.getSummaryDescription()));
@@ -2245,8 +2247,8 @@ public class OssController extends CoTopComponent{
 				
 				declaredLicenseCheckFlag = false;
 				detectedLicenseCheckFlag = false;
-				downloadLocationCheckFlag = false;
-				ossMasterCheclFlag = false;
+				restrictionCheckFlag = false;
+				ossMasterCheckFlag = false;
 				onlyCommentRegistFlag = false;
 
 					for (int j=0; j<syncItemArr.length; j++) {
@@ -2265,18 +2267,26 @@ public class OssController extends CoTopComponent{
 								break;
 
 							case "Detected License" :
-								if (syncBean.getDetectedLicenses() == null) {
-									if (standardOss.getDetectedLicenses() != null) {
-										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
-										detectedLicenseCheckFlag = true;
+								if (CollectionUtils.isEmpty(syncBean.getDetectedLicenses())) {
+									if (!CollectionUtils.isEmpty(standardOss.getDetectedLicenses())) {
+										int emptyCnt = 0;
+										for (String detectedLicense : standardOss.getDetectedLicenses()) {
+											if (isEmpty(detectedLicense)) {
+												emptyCnt++;
+											}
+										}
+										if (emptyCnt != standardOss.getDetectedLicenses().size()) {
+											syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
+											detectedLicenseCheckFlag = true;
+										}
 									}
-								}else {
-									if (standardOss.getDetectedLicenses() != null) {
+								} else {
+									if (!CollectionUtils.isEmpty(standardOss.getDetectedLicenses())) {
 										if (!Arrays.equals(standardOss.getDetectedLicenses().toArray(), syncBean.getDetectedLicenses().toArray())) {
 											syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
 											detectedLicenseCheckFlag = true;
 										}
-									}else {
+									} else {
 										syncBean.setDetectedLicenses(standardOss.getDetectedLicenses());
 										detectedLicenseCheckFlag = true;
 									}
@@ -2286,62 +2296,43 @@ public class OssController extends CoTopComponent{
 							case "Copyright" :
 								if (!standardOss.getCopyright().equals(syncBean.getCopyright())) {
 									syncBean.setCopyright(standardOss.getCopyright());
-									ossMasterCheclFlag = true;
+									ossMasterCheckFlag = true;
 								}
 								break;
 
-							case "Download Location" :
-								if (standardOss.getDownloadLocations() != null) {
-									if (syncBean.getDownloadLocations() == null) {
-										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
-										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-										downloadLocationCheckFlag = true;
-									}else {
-										if (!Arrays.equals(Arrays.asList(standardOss.getDownloadLocations()).toArray(), Arrays.asList(syncBean.getDownloadLocations()).toArray())){
-											syncBean.setDownloadLocations(standardOss.getDownloadLocations());
-											syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-											downloadLocationCheckFlag = true;
+							case "Restriction" :
+								if (!isEmpty(standardOss.getRestriction())) {
+									if (!isEmpty(syncBean.getRestriction())) {
+										List<String> standardRestrictionCdNoList = standardOss.getRestrictionCdNoList();
+										List<String> syncRestrictionCdNoList = syncBean.getRestrictionCdNoList();
+										syncRestrictionCdNoList.removeAll(standardRestrictionCdNoList);
+										if (!CollectionUtils.isEmpty(syncRestrictionCdNoList)) {
+											syncBean.setRestriction(String.join(",", standardRestrictionCdNoList));
+											restrictionCheckFlag = true;
 										}
+									} else {
+										syncBean.setRestriction(String.join(",", standardOss.getRestrictionCdNoList()));
+										restrictionCheckFlag = true;
 									}
-								}else {
-									if (syncBean.getDownloadLocations() != null) {
-										syncBean.setDownloadLocations(standardOss.getDownloadLocations());
-										syncBean.setDownloadLocation(standardOss.getDownloadLocation());
-										downloadLocationCheckFlag = true;
-									}
-								}
-								break;
-
-							case "Home Page" :
-								if (!standardOss.getHomepage().equals(syncBean.getHomepage())) {
-									syncBean.setHomepage(standardOss.getHomepage());
-									ossMasterCheclFlag = true;
-								}
-								break;
-
-							case "Summary Description" :
-								if (!standardOss.getSummaryDescription().equals(syncBean.getSummaryDescription())) {
-									syncBean.setSummaryDescription(standardOss.getSummaryDescription());
-									ossMasterCheclFlag = true;
 								}
 								break;
 
 							case "Attribution" :
 								if (!standardOss.getAttribution().equals(syncBean.getAttribution())) {
 									syncBean.setAttribution(standardOss.getAttribution());
-									ossMasterCheclFlag = true;
+									ossMasterCheckFlag = true;
 								}
 								break;
 						}
 				}
-				if (!ossMasterCheclFlag && !declaredLicenseCheckFlag && !detectedLicenseCheckFlag && !downloadLocationCheckFlag){
+				if (!ossMasterCheckFlag && !declaredLicenseCheckFlag && !detectedLicenseCheckFlag && !restrictionCheckFlag){
 					if (!isEmpty(comment)) {
 						onlyCommentRegistFlag = true;
 					}
 				}
 								
-				if ((ossMasterCheclFlag || declaredLicenseCheckFlag || detectedLicenseCheckFlag || downloadLocationCheckFlag) || onlyCommentRegistFlag) {
-					ossService.syncOssMaster(syncBean, declaredLicenseCheckFlag, detectedLicenseCheckFlag, downloadLocationCheckFlag);
+				if ((ossMasterCheckFlag || declaredLicenseCheckFlag || detectedLicenseCheckFlag || restrictionCheckFlag) || onlyCommentRegistFlag) {
+					ossService.syncOssMaster(syncBean, declaredLicenseCheckFlag, detectedLicenseCheckFlag, restrictionCheckFlag);
 					
 					if (!onlyCommentRegistFlag) {
 						History h = new History();
@@ -2350,9 +2341,10 @@ public class OssController extends CoTopComponent{
 						historyService.storeData(h);
 					}
 					
-					beforeBean.setDownloadLocation(String.join(",", beforeBean.getDownloadLocations()));
 					OssMaster afterBean = ossService.getOssMasterOne(param);
-					afterBean.setDownloadLocation(String.join(",", afterBean.getDownloadLocations()));
+					if (!CollectionUtils.isEmpty(afterBean.getRestrictionCdNoList())) {
+						afterBean.setRestriction(String.join(",", afterBean.getRestrictionCdNoList()));
+					}
 					
 					try {
 						String mailType = CoConstDef.CD_MAIL_TYPE_OSS_UPDATE;

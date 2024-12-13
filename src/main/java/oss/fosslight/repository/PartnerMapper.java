@@ -160,4 +160,6 @@ public interface PartnerMapper {
 	int existsWatcherByUserDivistion(PartnerMaster project);
 	
 	void updateWatcherDivision(PartnerMaster project);
+
+	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
 }

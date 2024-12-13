@@ -6,7 +6,89 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/RELEASE_NOTES.md">[Eng]</a>
 </p>
 
-## [2.1.0](https://github.com/fosslight/fosslight/releases/tag/v2.1.0) (2024-10-31)
+## [2.1.1](https://github.com/fosslight/fosslight/releases/tag/v2.1.1) (2024-12-13)
+
+### New
+* Open source
+  - Important Notes 항목 추가
+* Project 
+  - Pre-review > cargo type 추가
+  - Packaging - Notice에서 append 할 때 file 형태도 가능하도록 기능 추가
+* UI
+  - Restriction > level에 따른 icon 색상 추가
+* API
+  - Project reset API 추가
+  - Project delete API 추가
+  
+
+### Changed
+* Project 
+  - Information에서 용어 변경: Watcher -> Editor
+  - BOM Save시 불필요한 확인 팝업 제거
+  - Identification > BIN탭에서 warning message 레벨 변경
+    - OSS Name 다르고, License 같은 경우, Warning -> Info로 레벨 낮춤
+  - Packaging > path 입력시 /가 입력될 수 없도록 변경
+  - fosslight_binary.txt 영역 삭제. fosslight_binary.txt 대신 fosslight binary report에 tlsh, checksum값이 포함되도록 대체됨
+  - 권한이 없는 프로젝트에 대해서는 BOM Compare 불가능하도록 수정
+  - Request상태에서는 수정 불가능 하도록 권한 체크 로직 변경
+  - Distribution시 따옴표, 큰따옴표 입력 불가하도록 처리
+* Open Source
+  - Sync기능에서 OSS_COMMON에 해당하는 항목 삭제
+  - Sync에 restriction 추가
+  - Sync동작 시 current version으로 comment 추가 되도록 변경
+  - List 검색 기준에 cpe관련 항목 추가
+* Mail
+  - Opensource 공통정보에 대한 변경 사항도 표시
+  - Opensource all version comment에 대한 포맷 변경 
+  - Opensource purl 정보 추가
+  - Vulnerability Discovered 메일에서 info 테이블을 가져오는 쿼리 수정. 
+    Dependency탭에서도 OSS Name 사용 되도록 변경 되면서 쿼리 수정이 필요해짐
+* Review Report
+  - License review가 보여지는 조건 변경
+* UI
+  - License / Opensource 상세 화면에서 저장 버튼 클릭 시, input box에 입력된 값이 있는 경우 Add를 자동으로 해줌
+* API
+  - Watcher -> Editor용어 변경에 따라 API명 변경됨
+  - API 호출 시, User permission check 관련 기능이 UI와 동일하도록 수정
+  - Project search API
+    - paging을 위한 parameter 추가
+    - return 값에서 key 변경
+  - Project create 개수 제한 해제
+  - 토큰 생성시, 랜덤 토큰을 사용하도록 변경
+* **버그 수정**
+  - Project > Identification
+    - Status bar 버그 수정
+    - Pre-review 에러 수정
+    - copyright 정보 업데이트 안되는 이슈 수정
+  - Project > Packaging
+    - Verify 과정 버그 수정
+    - 여러 프로젝트에서 패키징 파일이 참조되는 경우, 한 프로젝트에서 삭제시, 물리적으로 패키징 파일 삭제되지 않도록 수정
+    - 패키징 파일 로드 시 4번째 패키징 파일이 보이지 않거나, copy 안 되던 이슈 수정
+  - Project > Security
+    - Security 버튼에 상태 표기 이슈 수정
+    - 버전없는 open source의 vulnerability 목록 보이지 않는 이슈 수정
+  - 3rd Party
+    - related document 삭제 안되는 버그 수정
+    - 3rd party 생성화면 버그 수정
+  - License
+    - License에서 Comment만 남기는 경우, mail 발송 시 버그 수정
+  - Open source    
+    - 상세페이지에서 open source와 연결된 license의 restriction이 보이도록 수정
+    - Purl 생성 관련 버그 수정
+  - Vulnerability
+    - recalculated 관련 로직 수정
+  - DB
+    - OSS COMMON ID가 중복으로 생기는 버그 수정
+    - fosslight_create.sql에 누락되었던 table 추가
+    - 누락된 코드 데이터 추가
+      - Source code disclosure scope
+      - Restriction
+* 기타
+  - Legacy code 삭제: jsp 및 사용하지 않는 라이브러리 파일 삭제
+  - verify script path를 root.dir을 포함한 절대 경로로 변경
+
+
+## [2.1.0](https://github.com/fosslight/fosslight/releases/tag/v2.1.0) (2024-11-05)
 
 ### New
 

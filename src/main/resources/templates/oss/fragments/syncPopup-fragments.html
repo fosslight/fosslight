@@ -194,12 +194,12 @@
             syncSave: function () {
                 var checkedOssList = $("#_ossList").jqGrid("getGridParam", "selarrrow");
 
-                var ossName = $("#_ossList").jqGrid("getRowData", checkedOssList[0]).ossNameVerStr;
-                ossName = ossName.substring(0, ossName.indexOf(" ("));
-
-                var checkedSyncList = $(".dCase tbody tr").find("input[type=checkbox]:checked");
-
                 if (checkedOssList.length > 0) {
+                	var ossName = $("#_ossList").jqGrid("getRowData", checkedOssList[0]).ossNameVerStr;
+                    ossName = ossName.substring(0, ossName.indexOf(" ("));
+
+                    var checkedSyncList = $(".dCase tbody tr").find("input[type=checkbox]:checked");
+                	
                     var dataLength = $("#syncOssEditor").summernote('code').length;
 
                     if ((checkedSyncList.length > 0) || dataLength > 0) {
@@ -207,6 +207,9 @@
 
                         $("input[name=ossIds]").val(checkedOssList);
                         let editorVal = $("#syncOssEditor").summernote('code');
+                        if ("" == $(editorVal).text()) {
+                        	editorVal = "";
+                        }
                         let ossIds = $("input[name=ossIds]").val();
                         let items = [];
                         checkedSyncList.each(function () {
@@ -237,12 +240,12 @@
                             }
                         }, function () {
                             alertify.alert([[ #{msg.common.valid2} ]], function () {});
-                        })
+                        });
                     } else {
                         alertify.alert([[ #{msg.oss.select.synchronize} ]], function () {});
                     }
                 } else {
-                    alertify.alert([[ #{msg.oss.select.project} ]], function () {});
+                    alertify.alert([[ #{msg.oss.required.select.grid} ]], function () {});
                 }
             },
             syncClose : function(){
@@ -281,25 +284,10 @@
                 <td class="dCase">[[${ossInfo.copyright}]]</td>
             </tr>
             <tr>
-                <th class="dCase"><input type="checkbox" id="Download Location"></th>
-                <th class="dCase" th:text="#{msg.common.field.downloadLocation}"></th>
-                <td class="dCase">
-                    <th:block th:each="downloadLocation, g : ${ossInfo.downloadLocations}">
-                        <span th:text="${downloadLocation}"></span><br/>
-                    </th:block>
-                </td>
+                <th class="dCase" style="height:50px;"><input type="checkbox" id="Restriction"></th>
+                <th class="dCase" th:text="#{msg.common.field.restriction}"></th>
+                <td class="dCase">[[${ossInfo.restriction}]]</td>
             </tr>
-            <tr>
-                <th class="dCase"><input type="checkbox" id="Home Page"></th>
-                <th class="dCase" th:text="#{msg.common.field.homepage}"></th>
-                <td class="dCase">[[${ossInfo.homepage}]]</td>
-            </tr>
-            <tr>
-                <th class="dCase" style="height:50px;"><input type="checkbox" id="Summary Description"></th>
-                <th class="dCase" th:text="#{msg.common.field.summaryDescription}"></th>
-                <td class="dCase">[[${ossInfo.summaryDescription}]]</td>
-            </tr>
-
             <tr>
                 <th class="dCase" style="height:50px;"><input type="checkbox" id="Attribution"></th>
                 <th class="dCase" th:text="#{msg.common.field.attribution}"></th>

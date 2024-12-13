@@ -557,29 +557,28 @@
 												</div>
 											</div>
 										</div>
-										<div class="row">
+										<div class="row binBinaryFileDiv" th:if="${project.binBinaryFile != null}">
 											<div class="col-lg-2">
 												<p style="text-align: center;" th:text="'fosslight_binary.txt'"></p>
 											</div>
-											<div class="col-lg-4 fileUploader">
+<!-- 										<div class="col-lg-4 fileUploader">
 												<div class="row">
 													<div class="col-lg-1"></div>
 													<div class="col-lg-11">
 														<div class="fileuploader" id="binBinaryFile" th:text="Upload"></div>
 													</div>
 												</div>
-											</div>
-											<div class="col-lg-5">
+											</div> -->
+											<div class="col-lg-8">
 												<div class="ajax-file-upload-container" style="margin-top: 0px; width: 100%;">
 													<ul class="binBinaryFileArea">
-														<th:block th:if="${project.binBinaryFile != null}">
-															<th:block th:each="csvFile : ${project.binBinaryFile}">
-																<li th:if="${csvFile.delYn eq 'N'}">
-																	<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
-																	<input type="hidden" class="binBinaryFileSeq" th:value="${csvFile.fileSeq}" />
-																	<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '2')|" th:text="X"></span>
-																	<br>[[${csvFile.createdDate}]]</li>
-															</th:block>
+														<th:block th:each="csvFile : ${project.binBinaryFile}">
+															<li th:if="${csvFile.delYn eq 'N'}">
+																<a class="ajax-file-upload-filename" th:text="${csvFile.origNm}" th:href="@{'/download/' + ${csvFile.fileSeq} + '/' + ${csvFile.logiNm}}"></a>
+																<input type="hidden" class="binBinaryFileSeq" th:value="${csvFile.fileSeq}" />
+																<span class="badge bg-danger" style="cursor: pointer;" th:onclick="|com_fn.deleteFiles(this, '2')|" th:text="X"></span>
+																<br>[[${csvFile.createdDate}]]
+															</li>
 														</th:block>
 													</ul>
 												</div>

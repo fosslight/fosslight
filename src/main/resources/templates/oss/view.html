@@ -59,7 +59,9 @@
 														<thead>
                                                     		<tr>
                                                         		<th class="text-center" th:text="''"></th>
+                                                        		<th class="text-center" th:text="LicenseId"></th>
                                                         		<th class="text-center" th:text="License"></th>
+                                                        		<th class="text-center" th:text="Restriction"></th>
                                                        		 	<th class="text-center" th:text="Copyright"></th>
                                                     		</tr>
                                                 		</thead>
@@ -68,12 +70,7 @@
 											</tr>
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.detectedLicense}"></th>
-												<td>
-													<th:block th:if="${detail?.detectedLicenses != null}" th:each="license, status : ${detail?.detectedLicenses}">
-														<span th:text="${license}"></span>
-														<span th:if="${status.count != status.size}" th:text="|, |"></span>
-													</th:block>
-												</td>
+												<td name="detectedLicenses"></td>
 											</tr>
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.licenseType}"></th>
@@ -91,7 +88,7 @@
 												<th th:text="#{msg.common.field.downloadLocation}"></th>
 												<td>
 													<th:block th:if="${detail?.downloadLocations != null}" th:each="downloadLocation : ${detail?.downloadLocations}">
-														<span class="input-group-append">
+														<span th:if="${downloadLocation != ''}" class="input-group-append">
 															<a th:href="${#strings.setSplit(downloadLocation, '|')[0]}" class="urlLink" target="_blank" th:text="${#strings.setSplit(downloadLocation, '|')[0]}"></a><span class="ml-1" th:text="|(${#strings.setSplit(downloadLocation, '|')[1]})|"></span>
 														</span>
 													</th:block>
@@ -110,6 +107,10 @@
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.summaryDescription}"></th>
 												<td style="white-space: pre;"><span th:utext="${detail?.summaryDescription}"></span></td>
+											</tr>
+											<tr class="text-smaller">
+												<th style="width: 30%" th:text="#{msg.common.field.importantNotes}"></th>
+												<td style="white-space: pre;"><span th:utext="${detail?.importantNotes}"></span></td>
 											</tr>
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.attribution}"></th>

@@ -144,9 +144,9 @@ var Ctrl_fn = {
 					var rowId = idArry[i];
 					
 					cleanErrMsg("ossList", rowId);
-					
+
 					var rowdata = target.getRowData(rowId);
- 					rowdata["checkName"] = rowdata["checkName"].split("redirect")[0];
+ 					rowdata["checkName"] = rowdata["checkName"].split("redirect url")[0];
  					if (rowdata["checkName"].indexOf("<div") > -1) {
 						var checkName = rowdata["checkName"];
 						var divHtml = checkName.substr(checkName.indexOf("<div"), checkName.indexOf("</div>"));
@@ -274,14 +274,17 @@ var Ctrl_fn = {
 						async: false,
 						contentType : 'application/json',
 						success: function(resultData){
-							if(resultData.isValid == "true"){
+							if (resultData.isValid == "true") {
 								$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'addFlag', 'Y');
 								$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'Y');
-							}
-							else {
+							} else {
 								$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'addFlag', 'N');
 								$("#ossList").jqGrid('setCell', idArryOnlyInOssList[i], 'result', 'N');
-								alertify.error([[#{already.added.nickname}]], 0);
+								if (typeof resultData.validMsg !== "undefined") {
+									alertify.error(resultData.validMsg, 0);
+								} else {
+									alertify.error([[#{already.added.nickname}]], 0);
+								}
 								failFlag = true;
 							}
 							

@@ -71,6 +71,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.HtmlUtils;
 import org.thymeleaf.TemplateEngine;
@@ -942,6 +943,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 
 	
 	public static String getStringFromFile(String path) {
+		return getStringFromFile(path, true);
+	}
+	
+	public static String getStringFromFile(String path, boolean lineSeparator) {
 		StringBuffer sb = new StringBuffer();
 		File file = new File(path);
 		
@@ -959,7 +964,11 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	            br = new BufferedReader(isr);
 	            // 버퍼를 한줄한줄 읽어들여 내용 추출
 	            while ( (temp = br.readLine()) != null) {
-	            	sb.append(temp).append(System.lineSeparator());
+	            	if (lineSeparator) {
+		            	sb.append(temp).append(System.lineSeparator());
+	            	} else {
+		            	sb.append(temp).append("<br>");
+	            	}
 	            }
 	        } catch (FileNotFoundException e) {
 	        	log.error(e.getMessage(), e);
@@ -1703,13 +1712,25 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 							warningVerMap.put(_key, _list);
 						}
 					} else {// warning message 가 포함되어 있는 경우 정렬 (우선순위 3)
+						String addValue = "";
+						if (errKey.startsWith("binaryNotice")) {
+							if (msg.equalsIgnoreCase("Found binary in notice.html")) {
+								addValue = "FIND";
+							} else if (msg.equalsIgnoreCase("Can't find binary in notice.htm")) {
+								addValue = "NOTFIND";
+							} else if (msg.equalsIgnoreCase("NOTICE Should be \"ok\" in case OSS is used")) {
+								addValue = "PERMISSIVE";
+							}
+						}
 						if (warningMap.containsKey(_key)) {
 							List<String> _list = warningMap.get(_key);
-							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							String warningValue = errKey.substring(0, errKey.indexOf(".")).toUpperCase();
+							_list.add(!isEmpty(addValue) ? warningValue + "_" + addValue : warningValue);
 							warningMap.replace(_key, _list);
 						} else {
 							List<String> _list = new ArrayList<>();
-							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							String warningValue = errKey.substring(0, errKey.indexOf(".")).toUpperCase();
+							_list.add(!isEmpty(addValue) ? warningValue + "_" + addValue : warningValue);
 							warningMap.put(_key, _list);
 						}
 					}
@@ -1981,7 +2002,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		String rtn = "";
 		// compareArray 순서대로 정렬된다.
 		// 정의되지 않은 경우는 정렬대상에서 제외
-		String[] compareArray = new String[]{"NOTICE", "BINARYNOTICE", "BINARYNAME", "OSSNAME", "OSSVERSION", "LICENSENAME", "LICENSETEXT", "FILEPATH", "DOWNLOADLOCATION", "HOMEPAGE"};
+		String[] compareArray = new String[]{"NOTICE", "BINARYNOTICE", "BINARYNOTICE_FIND", "BINARYNOTICE_NOTFIND", "BINARYNOTICE_PERMISSIVE", "BINARYNAME", "OSSNAME", "OSSVERSION", "LICENSENAME", "LICENSETEXT", "FILEPATH", "DOWNLOADLOCATION", "HOMEPAGE"};
 		Map<String, String> compareSortMap = new LinkedHashMap<>(); // [Identification] Auto ID message있는 Row 정렬 필요.
 		int sortIdx = 0;
 		
@@ -3459,13 +3480,17 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			
 			// String 배열 -> String 리스트
 			for (int i = 0 ; i < restrictionArr.length ; i++){
-				restrictionList.add(restrictionArr[i]);
+				if (!isEmpty(restrictionArr[i])) {
+					restrictionList.add(restrictionArr[i]);
+				}
 			}
 			
 			if (!isEmpty(ossRestriction)) {
 				List<String> ossRestrictionList = Arrays.asList(ossRestriction.split(","));
 				for (String or : ossRestrictionList) {
-					restrictionList.add(or);
+					if (!isEmpty(or)) {
+						restrictionList.add(or);
+					}
 				}
 			}
 		} else {
@@ -3475,12 +3500,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				
 				List<String> ossRestrictionList = Arrays.asList(ossRestriction.split(","));
 				for (String or : ossRestrictionList) {
-					restrictionList.add(or);
+					if (!isEmpty(or)) {
+						restrictionList.add(or);
+					}
 				}
 			}
 		}
 		
-		if (restrictionList != null) {
+		if (!CollectionUtils.isEmpty(restrictionList)) {
 			// 중복 제거
 	        for (String str : restrictionList){
 	            if (!distinctList.contains(str)) {
@@ -3488,8 +3515,38 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	            }
 	        }
 	        
+	        Map<String, Integer> restrictionMap = new HashMap<>();
 	        for (String str : distinctList){
-	        	returnStr += (isEmpty(returnStr)?"":"\n") + CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, str.trim().toUpperCase());
+	        	if (!isEmpty(str)) {
+	        		String level = CoCodeManager.getSubCodeNoForCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION, str.trim().toUpperCase());
+		        	if (isEmpty(level)) {
+		        		restrictionMap.put(str.trim().toUpperCase(), 99);
+		        	} else {
+		        		restrictionMap.put(str.trim().toUpperCase(), Integer.parseInt(level));
+		        	}
+	        	}
+	        }
+	        
+	        if (!restrictionMap.isEmpty()) {
+	        	List<String> restrictionMapKeys = new ArrayList<>(restrictionMap.keySet());
+	        	restrictionMapKeys.sort((o1, o2) -> restrictionMap.get(o2).compareTo(restrictionMap.get(o1)));
+		        
+		        String level = "";
+		        for (String restrictionKey : restrictionMapKeys) {
+		        	returnStr += (isEmpty(returnStr)?"":"\n") + CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, restrictionKey);
+		        	String maxLevel = CoCodeManager.getSubCodeNoForCodeDtls(CoConstDef.CD_LICENSE_RESTRICTION, restrictionKey);
+		        	if (isEmpty(level)) {
+		        		if (isEmpty(maxLevel) && restrictionMap.get(restrictionKey) == 99) {
+		        			level = String.valueOf(99);
+		        		} else {
+		        			level = maxLevel;
+		        		}
+		        	}
+		        }
+		        
+		        if (!isEmpty(level)) {
+		        	returnStr += "|" + level;
+		        }
 	        }
 		}
 		
@@ -3928,6 +3985,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				}
 			}
 			
+			int latestCnt = 0;
+			OssAnalysis latestOssAnalysis = null;
+			String analyzedDownloadLocation = "";
+			
 			userData.setTitle("사용자 작성 정보");
 			
 			String ossName = userData.getOssName();
@@ -3938,6 +3999,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			if (!isEmpty(comment)) userData.setComment(comment);
 			
 			if (bean.getResult().toUpperCase().equals("TRUE")) {
+				List<OssAnalysis> latestRegistrationInfoList = new ArrayList<OssAnalysis>();
+				
 				int ossNameCnt = errorMsg.entrySet()
 						.stream()
 						.filter(e -> e.getKey().indexOf(bean.getGridId()) > -1 && e.getKey().indexOf("ossName") > -1)
@@ -4022,6 +4085,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				} else {
 					downloadLocation = bean.getDownloadLocation();
 				}
+				
+				analyzedDownloadLocation = downloadLocation;
 				
 				OssAnalysis totalAnalysis = new OssAnalysis(userData.getGridId(), customOssName, bean.getOssVersion(), duplicateNickname
 						, avoidNull(bean.getConcludedLicense(), null), copyright, downloadLocation
@@ -4149,32 +4214,45 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						log.error(newestException.getMessage());
 					}
 					
-					changeAnalysisResultList.add(totalAnalysis); // seq 1 : 취합 정보
-					
 					if (ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
 						for (OssAnalysis oa : ossAnalysisByNickList) {
 							if (totalNewestOssInfo != null) {
 								if (!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName())) {
-									changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+									mergeDownloadLocation(oa, null, analyzedDownloadLocation, true);
+									latestRegistrationInfoList.add(oa); // seq 2 : oss 최신등록 정보
+									latestOssAnalysis = oa;
+									latestCnt++;
 								}
 							} else {
 								if (newestOssInfo != null) {
 									if (!newestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName())) {
-										changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+										mergeDownloadLocation(oa, null, analyzedDownloadLocation, true);
+										latestRegistrationInfoList.add(oa); // seq 2 : oss 최신등록 정보
+										latestOssAnalysis = oa;
+										latestCnt++;
 									}
 								} else {
-									changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+									mergeDownloadLocation(oa, null, analyzedDownloadLocation, true);
+									latestRegistrationInfoList.add(oa); // seq 2 : oss 최신등록 정보
+									latestOssAnalysis = oa;
+									latestCnt++;
 								}
 							}
 						}
 					}
 					
 					if (totalNewestOssInfo != null && !deactivateOssList.contains(totalNewestOssInfo.getOssName().toUpperCase())) {
-						changeAnalysisResultList.add(totalNewestOssInfo); // seq 3 : 취합정보 최신등록 정보
+						mergeDownloadLocation(totalNewestOssInfo, null, analyzedDownloadLocation, true);
+						latestRegistrationInfoList.add(totalNewestOssInfo); // seq 3 : 취합정보 최신등록 정보
+						latestOssAnalysis = totalNewestOssInfo;
+						latestCnt++;
 					}
 					
 					if (newestOssInfo != null && !deactivateOssList.contains(newestOssInfo.getOssName().toUpperCase())) {
-						changeAnalysisResultList.add(newestOssInfo); // seq 4 : 최신등록 정보
+						mergeDownloadLocation(newestOssInfo, null, analyzedDownloadLocation, true);
+						latestRegistrationInfoList.add(newestOssInfo); // seq 4 : 최신등록 정보
+						latestOssAnalysis = newestOssInfo;
+						latestCnt++;
 						
 						if (newestOssInfo.getOssName().toUpperCase().equals(userData.getOssName().toUpperCase())) {
 							if (newestOssInfo.getOssNickname() != null) {
@@ -4190,6 +4268,16 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 						userData.setOssName(ossName);
 					}
 					
+					if (latestCnt == 1) {
+						mergeDownloadLocation(latestOssAnalysis, totalAnalysis, analyzedDownloadLocation, false);
+						mergeDownloadLocation(latestOssAnalysis, askalono, analyzedDownloadLocation, false);
+						mergeDownloadLocation(latestOssAnalysis, scancode, analyzedDownloadLocation, false);
+					}
+					
+					changeAnalysisResultList.add(totalAnalysis); // seq 1 : 취합 정보
+					if (!CollectionUtils.isEmpty(latestRegistrationInfoList)) { // seq 2 : oss 최신등록 정보, seq 3 : 취합정보 최신등록 정보, seq 4 : 최신등록 정보
+						changeAnalysisResultList.addAll(latestRegistrationInfoList);
+					}
 					changeAnalysisResultList.add(askalono);		 // seq 5 : askalono 정보
 					changeAnalysisResultList.add(scancode);		 // seq 6 : scancode 정보
 					changeAnalysisResultList.add(userData);		 // seq 7 : 사용자 입력 정보
@@ -4216,24 +4304,41 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					askalono.setGridId(""+gridSeq++);
 					scancode.setGridId(""+gridSeq++);
 					
-					changeAnalysisResultList.add(totalAnalysis); // seq 1 : 취합 정보
-					
 					if (ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
 						for (OssAnalysis oa : ossAnalysisByNickList) {
 							if (totalNewestOssInfo != null) {
 								if (!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName())) {
-									changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+									mergeDownloadLocation(oa, null, analyzedDownloadLocation, true);
+									latestRegistrationInfoList.add(oa); // seq 2 : oss 최신등록 정보
+									latestOssAnalysis = oa;
+									latestCnt++;
 								}
 							} else {
-								changeAnalysisResultList.add(oa); // seq 2 : oss 최신등록 정보
+								mergeDownloadLocation(oa, null, analyzedDownloadLocation, true);
+								latestRegistrationInfoList.add(oa); // seq 2 : oss 최신등록 정보
+								latestOssAnalysis = oa;
+								latestCnt++;
 							}
 						}
 					}
 					
 					if (totalNewestOssInfo != null && !deactivateOssList.contains(totalNewestOssInfo.getOssName().toUpperCase())) {
-						changeAnalysisResultList.add(totalNewestOssInfo); // seq 3 : 취합정보 최신등록 정보
+						mergeDownloadLocation(totalNewestOssInfo, null, analyzedDownloadLocation, true);
+						latestRegistrationInfoList.add(totalNewestOssInfo); // seq 3 : 취합정보 최신등록 정보
+						latestOssAnalysis = totalNewestOssInfo;
+						latestCnt++;
 					}
 					
+					if (latestCnt == 1) {
+						mergeDownloadLocation(latestOssAnalysis, totalAnalysis, analyzedDownloadLocation, false);
+						mergeDownloadLocation(latestOssAnalysis, askalono, analyzedDownloadLocation, false);
+						mergeDownloadLocation(latestOssAnalysis, scancode, analyzedDownloadLocation, false);
+					}
+					
+					changeAnalysisResultList.add(totalAnalysis); // seq 1 : 취합 정보
+					if (!CollectionUtils.isEmpty(latestRegistrationInfoList)) { // seq 2 : oss 최신등록 정보, seq 3 : 취합정보 최신등록 정보
+						changeAnalysisResultList.addAll(latestRegistrationInfoList);
+					}
 					changeAnalysisResultList.add(userData);		 // seq 4 : 사용자 입력 정보
 					changeAnalysisResultList.add(askalono);		 // seq 5 : askalono 정보
 					changeAnalysisResultList.add(scancode);		 // seq 6 : scancode 정보
@@ -4294,6 +4399,41 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		map.remove("analysisList"); // 분석결과 Data에서는 필요없는 data이므로 제거.
 	}
 	
+	private static void mergeDownloadLocation(OssAnalysis latestOssAnalysis, OssAnalysis analysisResults, String analyzedDownloadLocation, boolean latestFlag) {
+		if (latestOssAnalysis != null && !StringUtil.isEmpty(analyzedDownloadLocation)) {
+			String latestDownloadLocation = latestOssAnalysis.getDownloadLocation();
+			List<String> latestDownloadLocationList = new ArrayList<>();
+			for (String dl : latestDownloadLocation.split(",")) {
+				latestDownloadLocationList.add(dl);
+			}
+			
+			List<String> analyzedDownloadLocationList = new ArrayList<>();
+			for (String dl : analyzedDownloadLocation.split(",")) {
+				analyzedDownloadLocationList.add(dl);
+			}
+			
+			if (latestFlag) {
+				analyzedDownloadLocationList.removeAll(latestDownloadLocationList);
+				if (!CollectionUtils.isEmpty(analyzedDownloadLocationList)) {
+					latestDownloadLocationList.addAll(analyzedDownloadLocationList);
+					latestDownloadLocationList.sort(Comparator.naturalOrder());
+				}
+			} else {
+				latestDownloadLocationList.removeAll(analyzedDownloadLocationList);
+				if (!CollectionUtils.isEmpty(latestDownloadLocationList)) {
+					analyzedDownloadLocationList.addAll(latestDownloadLocationList);
+					analyzedDownloadLocationList.sort(Comparator.naturalOrder());
+				}
+			}
+			
+			if (analysisResults != null) {
+				analysisResults.setDownloadLocation(String.join(",", analyzedDownloadLocationList));
+			} else {
+				latestOssAnalysis.setDownloadLocation(String.join(",", latestDownloadLocationList));
+			}
+		}
+	}
+
 	public static ArrayList<Object> checkXlsxFileLimit(List<UploadFile> list){
 		ArrayList<Object> result = new ArrayList<Object>();
 		
@@ -4380,9 +4520,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		
 		UUID randomUUID = UUID.randomUUID();
 		File outFile = new File(outPath + "/" + randomUUID + ".html");
-		LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, outFile);
 		
-		return outFile;
+		boolean convertFlag = LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, outFile);
+		if (convertFlag) {
+			return outFile;
+		} else {
+			return null;
+		}
 	}
 	
 	public static String mergeNickname(OssAnalysis bean, String newestNickName) {
@@ -4606,61 +4750,64 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			if (!avoidNull(beforeBean.getPrjName()).equals(avoidNull(afterBean.getPrjName()))) {
 				comment += "<p><strong>Project Name</strong><br />";
 				comment += "Before : " + beforeBean.getPrjName() + "<br />";
-				comment += "After : " + afterBean.getPrjName() + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + afterBean.getPrjName() + "</span></p>";
 			}
 
 			// Project Version
 			if (!avoidNull(beforeBean.getPrjVersion()).equals(avoidNull(afterBean.getPrjVersion()))) {
+				String beforePrjVersion = isEmpty(beforeBean.getPrjVersion()) ? "N/A" : beforeBean.getPrjVersion();
+				String afterPrjVersion = isEmpty(afterBean.getPrjVersion()) ? "N/A" : afterBean.getPrjVersion();
+				
 				comment += "<p><strong>Project Version</strong><br />";
-				comment += "Before : " + beforeBean.getPrjVersion() + "<br />";
-				comment += "After : " + afterBean.getPrjVersion() + "<br /></p>";
+				comment += "Before : " + beforePrjVersion + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + afterPrjVersion + "</span></p>";
 			}
 			
 			// Operating System
 			if (!avoidNull(beforeBean.getOsType()).equals(avoidNull(afterBean.getOsType()))) {
 				comment += "<p><strong>Operating System</strong><br />";
-				comment += "Before : " + beforeBean.getOsType() + "<br />";
-				comment += "After : " + afterBean.getOsType() + "<br /></p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, beforeBean.getOsType()) + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, afterBean.getOsType()) + "</span></p>";
 			}
 			
 			// Distribution Type
 			if (!avoidNull(beforeBean.getDistributionType()).equals(avoidNull(afterBean.getDistributionType()))) {
 				comment += "<p><strong>Distribution Type</strong><br />";
 				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, beforeBean.getDistributionType()) + "<br />";
-				comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType()) + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType()) + "</span></p>";
 			}
 			
 			
 			if (!avoidNull(beforeBean.getNetworkServerType()).equals(avoidNull(afterBean.getNetworkServerType()))) {
 				comment += "<p><strong>Network Service only?</strong><br />";
 				comment += "Before : " + beforeBean.getNetworkServerType() + "<br />";
-				comment += "After : " + afterBean.getNetworkServerType() + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + afterBean.getNetworkServerType() + "</span></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getDistributeTarget()).equals(avoidNull(afterBean.getDistributeTarget()))) {
 				comment += "<p><strong>Distribution Site</strong><br />";
 				comment += "Before : " + beforeBean.getDistributeTarget() + "<br />";
-				comment += "After : " + afterBean.getDistributeTarget() + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + afterBean.getDistributeTarget() + "</span></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getNoticeType()).equals(avoidNull(afterBean.getNoticeType()))) {
 				comment += "<p><strong>OSS Notice</strong><br />";
 				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, beforeBean.getNoticeType()) + "<br />";
-				comment += "After : " + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, afterBean.getNoticeType()) + "<br /></p>";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, afterBean.getNoticeType()) + "</span></p>";
 			}
 			
 			if (!avoidNull(beforeBean.getPriority()).equals(avoidNull(afterBean.getPriority()))) {
 				comment += "<p><strong>Priority</strong><br />";
-				comment += "Before : " + beforeBean.getPriority() + "<br />";
-				comment += "After : " + afterBean.getPriority() + "</p>";
+				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, beforeBean.getPriority()) + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, afterBean.getPriority()) + "</span></p>";
 			}
 			
-			String before = beforeBean.getComment().replaceAll("(\r\n|\r|\n|\n\r)", "");
-			String after = afterBean.getComment().replaceAll("(\r\n|\r|\n|\n\r)", "");
+			String before = beforeBean.getComment().replaceAll("<p>", "").replaceAll("</p>", "<br/>");
+			String after = afterBean.getComment().replaceAll("<p>", "").replaceAll("</p>", "<br/>");
 			if (!before.equals(after)) {
 				comment += "<p><strong>Additional Information</strong><br />";
-				comment += "Before : " + beforeBean.getComment() + "<br />";
-				comment += "After : " + afterBean.getComment() + "</p>";
+				comment += "Before : <br/>" + before + "<br/>";
+				comment += "After : <span style='background-color:yellow'><br/>" + after + "</span></p>";
 			}
 
 			before = avoidNull(beforeBean.getSecMailDesc()).replaceAll("(\r\n|\r|\n|\n\r)", "");
@@ -5580,6 +5727,11 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		} else {
 			return getMessage(msgCode, new String[]{contents});
 		}
+	}
+
+	public static void addSystemLogRecords(String prjId, String loginUserName) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		log.info("reset {} / {} / {}", prjId, loginUserName, sdf.format(System.currentTimeMillis()));
 	}
 }
 

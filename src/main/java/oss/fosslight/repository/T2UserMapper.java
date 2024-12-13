@@ -44,7 +44,7 @@ public interface T2UserMapper {
 	
 	public String checkDuplicateId(T2Users vo);
 	
-	public List<T2Users> selectReviwer(@Param("adminYn") String adminYn, @Param("ldapFlag") String ldapFlag);
+	public List<T2Users> selectReviwer(@Param("ldapFlag") String ldapFlag);
 	
 	public List<T2Users> selectAdminUser();
 	

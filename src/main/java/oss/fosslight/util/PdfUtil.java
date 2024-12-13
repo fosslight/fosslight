@@ -105,7 +105,7 @@ public final class PdfUtil extends CoTopComponent {
 
         Project project = projectMapper.selectProjectMaster2(prjId);
         if(project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
-            type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
+            type = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM;
         } else {
             type = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
         }
@@ -133,11 +133,7 @@ public final class PdfUtil extends CoTopComponent {
 
         Map<String, Object> map = projectService.getIdentificationGridList(_param, true);
         List<ProjectIdentification> list = new ArrayList<ProjectIdentification>();
-        if(type.equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID))      {
-            list = (List<ProjectIdentification>) map.get("mainData");
-        } else{
-            list = (List<ProjectIdentification>) map.get("rows");
-        }
+        list = (List<ProjectIdentification>) map.get("rows");
         for (ProjectIdentification projectIdentification : list) {
             if (projectIdentification.getExcludeYn().equals("N")) {
                 //OssMasterReview
@@ -179,7 +175,8 @@ public final class PdfUtil extends CoTopComponent {
                 for(String license : licenseList) {
                     LicenseMaster lm = CoCodeManager.LICENSE_INFO_UPPER.get(license.toUpperCase());
                     if(lm != null) {
-                        if (!isEmpty(avoidNull(lm.getRestrictionStr())) || (!isEmpty(avoidNull(lm.getDescription())) && !lm.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS))) {
+                        String disclosingSrc = CoCodeManager.getCodeString(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE, lm.getDisclosingSrc());
+                        if (!isEmpty(avoidNull(lm.getRestrictionStr())) || (!isEmpty(avoidNull(lm.getDescription())) && !disclosingSrc.equals("NONE") && project.getNetworkServerType().equals("N"))) {
                             if(!isEmpty(avoidNull(lm.getShortIdentifier()))) {
                                 lm.setLicenseName(lm.getShortIdentifier());
                             }

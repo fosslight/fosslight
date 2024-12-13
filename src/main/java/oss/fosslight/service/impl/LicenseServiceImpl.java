@@ -75,6 +75,16 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 
 	@Override
 	public int selectLicenseMasterTotalCount(LicenseMaster licenseMaster) {
+		if (licenseMaster.getRestrictions() != null) {
+			String restrictions = licenseMaster.getRestrictions();
+						
+			if (!isEmpty(restrictions)){
+				String[] arrRestrictions = restrictions.split(",");
+				
+				licenseMaster.setArrRestriction(arrRestrictions);
+			}
+		}
+		
 		return licenseMapper.selectLicenseMasterTotalCount(licenseMaster);
 	}
 	
@@ -440,6 +450,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 				} else if (CoConstDef.FLAG_YES.equals(avoidNull(bean.getObligationNotificationYn()))) {
 					bean.setObligationCode(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 				}
+				bean.setRestriction(CommonFunction.setLicenseRestrictionList(bean.getRestriction()));
 			}
 		}
 		

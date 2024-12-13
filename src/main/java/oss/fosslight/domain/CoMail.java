@@ -103,6 +103,9 @@ public class CoMail extends ComBean {
 	/** The param prj info. */
 	private Project paramPrjInfo;
 	
+	/** The param license info. */
+	private LicenseMaster paramLicenseInfo;
+	
 	/** The param oss list. */
 	private List<OssMaster> paramOssList;
 	
@@ -141,6 +144,8 @@ public class CoMail extends ComBean {
 	private String paramStandardScore;
 	
 	private boolean toIdsCheckDivision = false;
+	
+	private String paramReferenceDiv;
 	
 	/**
 	 * Gets the snd seq.
@@ -948,5 +953,21 @@ public class CoMail extends ComBean {
 
 	public void setParamStandardScore(String paramStandardScore) {
 		this.paramStandardScore = paramStandardScore;
+	}
+
+	public String getParamReferenceDiv() {
+		return paramReferenceDiv;
+	}
+
+	public void setParamReferenceDiv(String paramReferenceDiv) {
+		this.paramReferenceDiv = paramReferenceDiv;
+	}
+
+	public LicenseMaster getParamLicenseInfo() {
+		return paramLicenseInfo;
+	}
+
+	public void setParamLicenseInfo(LicenseMaster paramLicenseInfo) {
+		this.paramLicenseInfo = paramLicenseInfo;
 	}
  } 

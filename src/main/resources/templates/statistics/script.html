@@ -261,7 +261,8 @@ var chart_fn = {
 			params["startDate"] = $("#startDate").val();
 			params["endDate"] = $("#endDate").val();
 			params["divisionNo"] = $("#mostUsedOssChartDivision").val();
-			params["pieSize"] = $("#mostUsedOssChartPieSize").val();
+			let pieSize = $("#mostUsedOssChartPieSize").val();
+			params["pieSize"] = pieSize;
 			params["chartType"] = "OSS";
 			params["isRawData"] = "N";
 			
@@ -293,6 +294,16 @@ var chart_fn = {
        				} else {
        					mostUsedOssChartObject = getPieChart($('#mostUsedOssChart').get(0).getContext('2d'), obj);
        				}
+       				
+       				// pie chart canvas resize
+       				switch (pieSize) {
+    					case "30" : $("#mostUsedOssChart").css("min-height", "450px").css("height", "450px").css("max-height", "450px");
+    						break;
+    					case "50" : $("#mostUsedOssChart").css("min-height", "550px").css("height", "550px").css("max-height", "550px");
+    						break;
+    					default : $("#mostUsedOssChart").css("min-height", "350px").css("height", "350px").css("max-height", "350px");
+    						break;
+    				}
 				},
 				error: function(data){
 					alertify.error([[#{msg.common.valid2}]], 0);
@@ -304,7 +315,8 @@ var chart_fn = {
 			params["startDate"] = $("#startDate").val();
 			params["endDate"] = $("#endDate").val();
 			params["divisionNo"] = $("#mostUsedLicenseChartDivision").val();
-			params["pieSize"] = $("#mostUsedLicenseChartPieSize").val();
+			let pieSize = $("#mostUsedLicenseChartPieSize").val();
+			params["pieSize"] = pieSize;
 			params["chartType"] = "LICENSE";
 			params["isRawData"] = "N";
 			
@@ -323,7 +335,6 @@ var chart_fn = {
        				$.each(data.chartData, function(index, value) {
        					labels.push(value.columnName);
        					dataArr.push(value.columnCnt);
-       					
        				});
        				datasets.push({label:'Count', data:dataArr, backgroundColor:Object.values(CHART_COLORS)});
        				obj["labels"] = labels;
@@ -336,6 +347,16 @@ var chart_fn = {
        				} else {
        					mostUsedLicenseChartObject = getPieChart($('#mostUsedLicenseChart').get(0).getContext('2d'), obj);
        				}
+       				
+       				// pie chart canvas resize
+       				switch (pieSize) {
+						case "30" : $("#mostUsedLicenseChart").css("min-height", "450px").css("height", "450px").css("max-height", "450px");
+							break;
+						case "50" : $("#mostUsedLicenseChart").css("min-height", "550px").css("height", "550px").css("max-height", "550px");
+							break;
+						default : $("#mostUsedLicenseChart").css("min-height", "350px").css("height", "350px").css("max-height", "350px");
+							break;
+					}
 				},
 				error: function(data){
 					alertify.error([[#{msg.common.valid2}]], 0);

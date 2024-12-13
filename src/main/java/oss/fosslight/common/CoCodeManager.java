@@ -216,6 +216,7 @@ public class CoCodeManager extends CoTopComponent {
 						bean.setMultiLicenseFlag(sourceBean.getMultiLicenseFlag());
 						bean.setDualLicenseFlag(sourceBean.getDualLicenseFlag());
 						bean.setVersionDiffFlag(sourceBean.getVersionDiffFlag());
+						bean.setImportantNotes(sourceBean.getImportantNotes());
 						if (sourceBean.getDetectedLicenses() != null) {
 							bean.setDetectedLicenses(sourceBean.getDetectedLicenses());
 						}
@@ -841,4 +842,22 @@ public class CoCodeManager extends CoTopComponent {
     	}
     }
 
+    public static String getSubCodeNoForCodeDtls(String s, String s1) {
+    	CoCode code = getCodeInstance(s);
+        
+    	if (code != null) {
+    		String level = "";
+    		for (CoCodeDtl dtl : code.getCodeDtls()) {
+    			if (!dtl.getUseYn().equals(CoConstDef.FLAG_NO)) {
+    				if (dtl.getCdDtlNo().equals(s1)) {
+    					level = dtl.getCdSubNo();
+    					break;
+    				}
+    			}
+    		}
+    		return level;
+    	} else {
+    		return "";
+    	}
+    }
 }

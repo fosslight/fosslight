@@ -206,6 +206,8 @@ public class PartnerMaster extends ComBean implements Serializable{
 	
 	private int statusPermission;
 	
+	private String resetFlag;
+	
 	/*
 	 * Gets the partner id.
 	 *
@@ -1231,6 +1233,14 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setStatusPermission(int statusPermission) {
 		this.statusPermission = statusPermission;
+	}
+
+	public String getResetFlag() {
+		return resetFlag;
+	}
+
+	public void setResetFlag(String resetFlag) {
+		this.resetFlag = resetFlag;
 	}
 	
 }

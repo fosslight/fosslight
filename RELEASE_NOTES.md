@@ -6,7 +6,87 @@ SPDX-License-Identifier: AGPL-3.0-only
   <a href="https://github.com/fosslight/fosslight_system/blob/main/docs/RELEASE_NOTES_kor.md">[Kor]</a>
 </p>
 
-## [2.1.0](https://github.com/fosslight/fosslight/releases/tag/v2.1.0) (2024-10-31)
+## [2.1.1](https://github.com/fosslight/fosslight/releases/tag/v2.1.1) (2024-12-13)
+
+### New
+* Open Source
+  - Added Important Notes section
+* Project
+  - Added cargo type to Pre-review
+  - Added functionality to allow appending in file format in the Packaging - Notice section
+* UI
+  - Added icon color based on level in Restrictions
+* API
+  - Added Project reset API
+  - Added Project delete API
+
+### Changed
+* Project
+  - Changed terminology in Information: Watcher -> Editor
+  - Removed unnecessary confirmation popup when saving BOM
+  - Changed warning message level in Identification > BIN tab
+    - OSS Name different and License cases, lowered level from Warning -> Info
+  - Modified Packaging to prevent '/' from being entered in the path
+  - Deleted fosslight_binary.txt area. Replaced with fosslight binary report to include tlsh and checksum values.
+  - Modified to prevent BOM Compare for projects without permissions
+  - Changed permission check logic to make modifications impossible in Request status
+  - Handled to disallow input of single and double quotes during Distribution
+* Open Source
+  - Deleted items corresponding to OSS_COMMON in Sync functionality
+  - Added restriction in Sync
+  - Modified Sync operation to add comment with current version
+  - Added CPE-related items to the List search criteria
+* Mail
+  - Displayed changes related to Open Source common information
+  - Changed format for Open Source all version comments
+  - Added Open Source purl information
+  - Modified query to retrieve info table from Vulnerability Discovered email. 
+    Adjusted query to ensure OSS Name is also used in the Dependency tab
+* Review Report
+  - Changed conditions for displaying License review
+* UI
+  - Automatically adds input box values when the save button is clicked in License / Open Source details.
+* API
+  - Changed API name according to the terminology change from Watcher to Editor
+  - Modified User permission check functionality in API calls to align with UI
+  - Project search API
+    - Added parameter for paging
+    - Changed key in return values
+  - Removed limit on the number of Project creations
+  - Changed to use random tokens during token generation
+* **Bug fix**
+  - Project > Identification
+    - Fixed status bar bug
+    - Corrected pre-review error
+    - Resolved issue with copyright information not updating
+  - Project > Packaging
+    - Fixed bug in the verify process
+    - Modified to prevent physical deletion of packaging files when referenced by multiple projects
+    - Fixed issue where the 4th packaging file was not visible when loading previous project or could not be copied
+  - Project > Security
+    - Fixed issue with status indication on the Security button
+    - Resolved issue where vulnerability list for open source without versions was not visible
+  - 3rd Party
+    - Fixed bug preventing deletion of related documents
+    - Corrected bug in the 3rd party creation screen
+  - License
+    - Fixed bug when sending mail with only comments added in License
+  - Open source
+    - Modified to display restrictions of licenses linked to open source on the detail page
+    - Fixed bug related to Purl creation
+  - Vulnerability
+    - Modified logic related to recalculation
+  - DB
+    - Fixed bug causing duplicate OSS COMMON IDs
+    - Added missing tables to fosslight_create.sql
+    - Added missing code data
+      - Source code disclosure scope
+      - Restriction
+* Other Changes
+  - Legacy code deletion: Removed unused JSP and library files
+  - Changed verify script path to an absolute path including root.dir
+
+## [2.1.0](https://github.com/fosslight/fosslight/releases/tag/v2.1.0) (2024-11-05)
 
 ### New
 

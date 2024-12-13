@@ -5,7 +5,7 @@
 
 package oss.fosslight.api.controller.v2;
 
-import com.google.common.collect.Lists;
+import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ArrayUtils;
@@ -16,11 +16,12 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
-import oss.fosslight.api.entity.CommonResult;
+import oss.fosslight.api.advice.CProjectNotAvailableException;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -41,7 +42,9 @@ import oss.fosslight.validation.custom.T2CoProjectValidator;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.websocket.server.PathParam;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.Min;
+import java.lang.reflect.Type;
 import java.util.*;
 
 @Api(tags = {"3. Project"})
@@ -86,6 +89,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     protected static final Logger log = LoggerFactory.getLogger("DEFAULT_LOG");
 
+
     @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_SEARCH})
     public ResponseEntity<Map<String, Object>> selectProjectList(
@@ -98,7 +102,11 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
             @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, COMP:Complete, DROP:Drop)", required = false, allowableValues = "PROG,REQ,REV,COMP,DROP") @RequestParam(required = false) String status,
             @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
-            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator) {
+            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
+            @ApiParam(value = "Count Per Page (max: 1000)", required = false)
+            @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="1000") int countPerPage,
+            @ApiParam(value = "Page", required = false)
+            @Min(value=1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -119,6 +127,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             paramMap.put("prjIdList", prjIdList);
             paramMap.put("prjName", prjName);
             paramMap.put("prjNameExactYn", prjNameExactYn);
+            paramMap.put("countPerPage", countPerPage);
+            paramMap.put("offset", (page - 1) * countPerPage);
 
             try {
                 resultMap = apiProjectService.selectProjectList(paramMap);
@@ -132,7 +142,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "Search Project List", notes = "Project 정보 조회")
+    @ApiOperation(value = "Retrieve the model list of the project", notes = "Project의 모델 정보 조회")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_MODEL_SEARCH})
     public ResponseEntity<Map<String, Object>> selectModelList(
             @ApiParam(hidden=true) @RequestHeader String authorization,
@@ -175,40 +185,31 @@ public class ApiProjectV2Controller extends CoTopComponent {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         Map<String, List<Project>> modelList = null;
 
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)){
+            throw new CProjectNotAvailableException(prjId);
+        }
+
         try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> prjIdList = new ArrayList<String>();
-            prjIdList.add(prjId);
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjIdList);
-            paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
-
-            boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
-            if (searchFlag) {
-                Project project = projectService.getProjectBasicInfo(prjId);
-                if (modelListToUpdate != null) {
-                    List<String[]> models = new ArrayList<>();
-                    for (String strModel : modelListToUpdate) {
-                        String[] model = strModel.replaceAll("\"", "").split("\\|");
-                        if (model.length > 2) {
-                            models.add(model);
-                        }
-                    }
-                    if (models.size() > 0) {
-                        modelList = ExcelUtil.readModelFromList(models, prjId, CoConstDef.FLAG_YES, "0", project.getDistributeTarget());
+            Project project = projectService.getProjectBasicInfo(prjId);
+            if (modelListToUpdate != null) {
+                List<String[]> models = new ArrayList<>();
+                for (String strModel : modelListToUpdate) {
+                    String[] model = strModel.replaceAll("\"", "").split("\\|");
+                    if (model.length > 2) {
+                        models.add(model);
                     }
                 }
-
-                if (modelList != null) {
-                    project.setModelList(modelList.get("currentModelList"));
-                    projectService.insertProjectModel(project);
-                    return new ResponseEntity<>(resultMap, HttpStatus.OK);
+                if (models.size() > 0) {
+                    modelList = ExcelUtil.readModelFromList(models, prjId, CoConstDef.FLAG_YES, "0", project.getDistributeTarget());
                 }
-            } else {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
+
+            if (modelList != null) {
+                project.setModelList(modelList.get("currentModelList"));
+                projectService.insertProjectModel(project);
+                return new ResponseEntity<>(resultMap, HttpStatus.OK);
+            }
+
         } catch (Exception e) {
             log.error(e.getMessage());
 //			errorCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
@@ -232,20 +233,10 @@ public class ApiProjectV2Controller extends CoTopComponent {
         if (modelReport == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
+            if (!apiProjectService.checkUserHasProject(userInfo, prjId)){
+                throw new CProjectNotAvailableException(prjId);
+            }
             try {
-                Map<String, Object> paramMap = new HashMap<>();
-                List<String> prjIdList = new ArrayList<String>();
-                prjIdList.add(prjId);
-                paramMap.put("userId", userInfo.getUserId());
-                paramMap.put("userRole", userRole(userInfo));
-                paramMap.put("prjId", prjIdList);
-                paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
-                paramMap.put("readOnly", CoConstDef.FLAG_NO);
-
-                boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
-                if (!searchFlag) {
-                    return responseService.errorResponse(HttpStatus.FORBIDDEN);
-                }
                 Project project = projectService.getProjectBasicInfo(prjId);
                 if (modelReport != null) {
                     if (modelReport.getOriginalFilename().contains("xls") // Allowed file extension: xls, xlsx, xlsm
@@ -294,14 +285,9 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
-        int createCnt = apiProjectService.getCreateProjectCnt(userInfo.getUserId());
         Map<String, Object> result = new HashMap<String, Object>();
 
         try {
-            if (CoConstDef.CD_OPEN_API_CREATE_PROJECT_LIMIT <= createCnt) {
-                return responseService.errorResponse(HttpStatus.TOO_MANY_REQUESTS,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_CREATE_OVERFLOW_MESSAGE));
-            }
             Map<String, Object> paramMap = new HashMap<String, Object>();
 
             String osTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_OS_TYPE, osType);
@@ -460,37 +446,28 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Save Flag (YES : Y, NO : N)", allowableValues = "Y,N")
-            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false) String saveFlag,
+            @ValuesAllowed(propName = "saveFlag", values={"Y","N"}) @RequestParam(required = false, defaultValue = "Y") String saveFlag,
             @ApiParam(value = "Format", allowableValues = "Spreadsheet")
             @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format){
 
         log.info("Project Bom Download as File :: " + prjId + " :: " + saveFlag + " :: " + format);
 
         // 사용자 인증
-        String downloadId = "";
-        T2File fileInfo = new T2File();
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        if (!apiProjectService.checkUserHasProject(userInfo,prjId)) {
+            throw new CProjectNotAvailableException(prjId);
+        }
 
         try {
-            T2Users userInfo = userService.checkApiUserAuth(authorization);
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> prjIdList = new ArrayList<String>();
-            prjIdList.add(prjId);
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjIdList);
-            paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
-            paramMap.put("distributionType", "normal");
+            String downloadId = "";
+            T2File fileInfo = new T2File();
 
-            boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
-
-            if (searchFlag) {
-                if ("Y".equals(saveFlag)) {
+            if ("Y".equals(saveFlag)) {
 //                    apiProjectService.registBom(prjId, mergeSaveFlag);
-                    projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
-                }
-                downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
-                fileInfo = fileService.selectFileInfo(downloadId);
+                projectService.registBom(prjId, saveFlag, new ArrayList<>(), new ArrayList<>());
             }
+            downloadId = ExcelDownLoadUtil.getExcelDownloadId("bom", prjId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+            fileInfo = fileService.selectFileInfo(downloadId);
 
             return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
         } catch (Exception e) {
@@ -602,43 +579,97 @@ public class ApiProjectV2Controller extends CoTopComponent {
         }
     }
 
+    @ApiOperation(value = "Reset specific identification tab", notes = "Identification > reset")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_IDENTIFICATION_RESET})
+    public ResponseEntity<Map<String, Object>> identificationReset(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Project id", required = true) @PathVariable(name="id") String prjId,
+            @ApiParam( value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
+            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name="tab_name") String tabName
+    ){
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info(String.format("/api/v2/projects/%s/%s/reset called by %s",prjId,tabName, userInfo.getUserId()));
+        Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
+
+        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
+        }
+
+        tabName = tabName.toUpperCase();
+
+        Type collectionType2 = new TypeToken<List<ProjectIdentification>>() {
+        }.getType();
+        List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
+        ossComponents = (List<ProjectIdentification>) fromJson("[]", collectionType2);
+        List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
+
+        Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
+        ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+        ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+
+        Project project = new Project();
+        project.setPrjId(prjId);
+        Project projectMaster = projectService.getProjectDetail(project);
+        project.setCsvFileSeq(new ArrayList<T2File>());
+
+        switch(tabName) {
+            case "DEP":
+                project.setIdentificationSubStatusDep("Y");
+                project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+                project.setCsvFile(projectMaster.getDepCsvFile());
+                project.setDepCsvFileId("");
+                projectService.registDepOss(ossComponents, ossComponentsLicense, project);
+
+                break;
+            case "SRC":
+                project.setIdentificationSubStatusSrc("Y");
+                project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
+                project.setCsvFile(projectMaster.getCsvFile());
+                project.setSrcCsvFileId("");
+                projectService.registSrcOss(ossComponents, ossComponentsLicense, project);
+                break;
+            case "BIN":
+                project.setIdentificationSubStatusBin("Y");
+                project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+                project.setCsvFile(projectMaster.getBinCsvFile());
+                project.setBinCsvFileId("");
+                projectService.registBinOss(ossComponents, ossComponentsLicense, project);
+                break;
+        }
+
+//        projectService.deleteUploadFile(project);
+
+        // reset load list
+        projectService.existsAddList(project);
+        projectService.insertAddList(new ArrayList<Project>());
+
+        return new ResponseEntity<>(resultMap, HttpStatus.OK);
+    }
+
     @ApiOperation(value = "Identification OSS Report", notes = "Identification > upload oss report")
     @PostMapping(value = {APIV2.FOSSLIGHT_API_OSS_REPORT})
     public ResponseEntity<Map<String, Object>> ossReportAll(
             @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin") @PathVariable(name = "tab_name") String tabName,
+            @ApiParam(value = "Project id") @PathVariable(name="id") String prjId,
+            @ApiParam(value = "Upload Target Tab Name (Valid Input: dep, src, bin)", required = true, allowableValues = "dep, src, bin")
+            @ValuesAllowed(propName = "tabName", values = {"dep", "src", "bin"}) @PathVariable(name="tab_name") String tabName,
             @ApiParam(value = "OSS Report", required = true) @RequestPart(required = true) MultipartFile ossReport,
-            @ApiParam(value = "Comment", required = false) @RequestParam(required = false) String comment,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
-            @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
+            @ApiParam(value = "Comment") @RequestParam(name="comment", required = false) String comment,
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N")
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"}) @RequestParam(required = false, defaultValue = "Y") String resetFlag,
+            @ApiParam(value = "Sheet Names") @RequestParam(name="sheet_names", required = false) String sheetNames) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
+        log.info(String.format("/api/v2/projects/%s/%s/reports called by %s",prjId,tabName, userInfo.getUserId()));
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
-        tabName = tabName == null? null : tabName.toUpperCase();
-        if (tabName == null || (!tabName.equals("DEP") && !tabName.equals("SRC") && !tabName.equals("BIN"))) {
-            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Invalid tab name : " + tabName);
+        tabName = tabName.toUpperCase();
+
+        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
         }
 
         try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> prjIdList = new ArrayList<String>();
-            prjIdList.add(prjId);
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("loginUserName", userInfo.getUserName());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjIdList);
-            paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
-            paramMap.put("distributionType", "normal");
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
-
-            boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
-
-            if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.NOT_FOUND);
-            }
-
             String oldFileId = "";
             if (CoConstDef.FLAG_NO.equals(avoidNull(resetFlag))) {
                 Map<String, Object> prjInfo = apiProjectService.selectProjectMaster(prjId);
@@ -665,12 +696,23 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
             }
-            boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) src -> bin Android
-            if (!checkDistributionTypeFlag) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE,
-                                CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE)
-                                + " Check Project Distribution Type");
+
+            Map<String, Object> paramMap = new HashMap<>();
+            List<String> prjIdList = new ArrayList<String>();
+            prjIdList.add(prjId);
+            paramMap.put("prjId", prjIdList);
+            paramMap.put("distributionType", "normal");
+
+            try {
+                boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) src -> bin Android
+                if (!checkDistributionTypeFlag) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                            CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE,
+                                    CoConstDef.CD_OPEN_API_UPLOAD_TARGET_ERROR_MESSAGE)
+                                    + " Check Project Distribution Type");
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(),e);
             }
 
             UploadFile bean = null;
@@ -783,24 +825,13 @@ public class ApiProjectV2Controller extends CoTopComponent {
         T2Users userInfo = userService.checkApiUserAuth(authorization); // token이 정상적인 값인지 확인
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
-        try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> prjIdList = new ArrayList<String>();
-            prjIdList.add(prjId);
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjIdList);
-            paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
-            paramMap.put("distributionType", "android");
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
+        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
+        }
 
-            boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
+        try {
             UploadFile ossReportBean = null;
 
-            if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.FORBIDDEN,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
-            }
             if (!ossReport.getOriginalFilename().contains("xls")) { // 확장자 xls, xlsx, xlsm 허용
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST,
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_EXT_UNSUPPORT_MESSAGE));
@@ -808,6 +839,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 return responseService.errorResponse(HttpStatus.PAYLOAD_TOO_LARGE,
                         CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_FILE_SIZEOVER_MESSAGE));
             } else {
+
+                Map<String, Object> paramMap = new HashMap<>();
+                List<String> prjIdList = new ArrayList<String>();
+                prjIdList.add(prjId);
+                paramMap.put("prjId", prjIdList);
+                paramMap.put("distributionType", "android");
                 boolean checkDistributionTypeFlag = apiProjectService.checkDistributionType(paramMap); // 잘못된  project에 oss report를 upload하려고 할 경우 ex) bin Android -> bin
                 if (!checkDistributionTypeFlag) {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST,
@@ -995,62 +1032,54 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id") String prjId,
             @ApiParam(value = "Package FIle", required = true) @RequestPart(required = true) MultipartFile packageFile,
-            @ApiParam(value = "Verify when file is uploaded (YES : Y, NO : N)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String verifyFlag) {
+            @ApiParam(value = "Verify when file is uploaded (YES : Y, NO : N)", allowableValues = "Y,N") @RequestParam(required = false, defaultValue = "N") String verifyFlag) {
 
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
 
         T2Users userInfo = userService.checkApiUserAuth(authorization); // token이 정상적인 값인지 확인
-        Map<String, Object> paramMap = new HashMap<>();
-        List<String> prjIdList = new ArrayList<String>();
-        prjIdList.add(prjId);
-        paramMap.put("userId", userInfo.getUserId());
-        paramMap.put("userRole", userRole(userInfo));
-        paramMap.put("prjId", prjIdList);
-        paramMap.put("readOnly", CoConstDef.FLAG_NO);
+        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", prjId));
+        }
 
-        boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
         String errorMsg = "";
         String afterFileSeq = "";
         boolean uploadFlag = false;
 
-        if (searchFlag) {
-            Map<String, Object> result = apiProjectService.selectVerificationCheck(prjId);
-            String useYn = (String) result.get("useYn");
-            String packageFileSeq = (String) result.get("packageFileSeq").toString();
+        Map<String, Object> check_result = apiProjectService.selectVerificationCheck(prjId);
+        String useYn = (String) check_result.get("useYn");
+        String packageFileSeq = (String) check_result.get("packageFileSeq").toString();
 
-            if (CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT < Integer.parseInt(packageFileSeq)) {
-                return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Up to 3 packaging files can be uploaded.");
-            }
+        if (CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT < Integer.parseInt(packageFileSeq)) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Up to 3 packaging files can be uploaded.");
+        }
 
-            String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
-            UploadFile packageFileBean = apiFileService.uploadFile(packageFile, filePath); // packagingFile 등록
-            afterFileSeq = packageFileBean.getRegistSeq();
+        String filePath = CommonFunction.emptyCheckProperty("packaging.path", "/upload/packaging") + "/" + prjId;
+        UploadFile packageFileBean = apiFileService.uploadFile(packageFile, filePath); // packagingFile 등록
+        afterFileSeq = packageFileBean.getRegistSeq();
 
-            if (CoConstDef.FLAG_YES.equals(useYn) && CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT >= Integer.parseInt(packageFileSeq)) {
-                // packaging File comment
-                String uploadComment = "Packaging file, " + packageFileBean.getOriginalFilename() + ", was uploaded by " + userInfo.getUserId() + ". <br>";
+        if (CoConstDef.FLAG_YES.equals(useYn) && CoConstDef.CD_OPEN_API_PACKAGE_FILE_LIMIT >= Integer.parseInt(packageFileSeq)) {
+            // packaging File comment
+            String uploadComment = "Packaging file, " + packageFileBean.getOriginalFilename() + ", was uploaded by " + userInfo.getUserId() + ". <br>";
 
-                paramMap = new HashMap<String, Object>();
-                paramMap.put("prjId", prjId);
-                paramMap.put("packageFileId", packageFileBean.getRegistSeq());
-                paramMap.put("packageFileSeq", packageFileSeq);
+            Map<String, Object> paramMap = new HashMap<String, Object>();
+            paramMap = new HashMap<String, Object>();
+            paramMap.put("prjId", prjId);
+            paramMap.put("packageFileId", packageFileBean.getRegistSeq());
+            paramMap.put("packageFileSeq", packageFileSeq);
 
-                apiProjectService.updatePackageFile(paramMap);
-                CommentsHistory commHisBean = new CommentsHistory();
-                commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-                commHisBean.setReferenceId(prjId);
-                commHisBean.setContents(uploadComment);
-                commentService.registComment(commHisBean);
+            apiProjectService.updatePackageFile(paramMap);
+            CommentsHistory commHisBean = new CommentsHistory();
+            commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+            commHisBean.setReferenceId(prjId);
+            commHisBean.setContents(uploadComment);
+            commentService.registComment(commHisBean);
 
-                errorMsg = null; // 정상적으로 처리됨.
-                uploadFlag = true;
-            } else {
-                if (!CoConstDef.FLAG_YES.equals(useYn)) {
-                    errorMsg = "delete project"; // 삭제된 project
-                }
-            }
+            errorMsg = null; // 정상적으로 처리됨.
+            uploadFlag = true;
         } else {
-            errorMsg = "Authrization Issue"; // 해당 사용자 권한으로는 등록할 project가 없음
+            if (!CoConstDef.FLAG_YES.equals(useYn)) {
+                errorMsg = "delete project"; // 삭제된 project
+            }
         }
 
         try {
@@ -1067,6 +1096,7 @@ public class ApiProjectV2Controller extends CoTopComponent {
             CoMailManager.getInstance().sendMail(mailBean);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         // after upload complete, verify
@@ -1127,37 +1157,28 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 apiProjectService.updateVerifyFileCount((HashMap<String, Object>) resMap.get("fileCounts"));
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
+                return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
 
         return new ResponseEntity<>(resultMap, HttpStatus.OK);
     }
 
-    @ApiOperation(value = "Project Add Watcher", notes = "Project Add Watcher")
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_WATCHER})
-    public ResponseEntity<Map<String, Object>> addPrjWatcher(
+    @ApiOperation(value = "Project Add Editor", notes = "Project Add Editor (A person with edit permissions)")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_ADD_EDITOR})
+    public ResponseEntity<Map<String, Object>> addPrjEditor(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id") String prjId,
-            @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+            @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
 
-        try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> prjIdList = new ArrayList<String>();
-            prjIdList.add(prjId);
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjIdList);
-            paramMap.put("ossReportFlag", CoConstDef.FLAG_NO);
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(prjId);
+        }
 
-            boolean searchFlag = apiProjectService.existProjectCnt(paramMap);
-            if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.FORBIDDEN,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
-            }
+        try {
             if (emailList == null) {
                 return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Email list is required.");
             }
@@ -1192,17 +1213,24 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
     @ApiOperation(value = "Project get Notice", notes = "Project Get")
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PROJECT_GET_NOTICE})
-    public ResponseEntity getSelfcheckReport(
+    public ResponseEntity getProjectNotice(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "project ID", required = false) @PathVariable(required = true, name = "id") String prjId,
             HttpServletRequest req
     ) {
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)) {
+            throw new CProjectNotAvailableException(prjId);
+        }
+
         try {
             var ossNotice = verificationService.selectOssNoticeOne(prjId);
 
             if (ossNotice == null) {
                 return responseService.errorResponse(HttpStatus.NOT_FOUND, "Notice has not been published for given project.");
             }
+
             var downloadId = verificationService.getNoticeHtmlFileForPreview(ossNotice);
 
             T2File fileInfo = fileService.selectFileInfo(downloadId);
@@ -1233,8 +1261,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
             @ApiParam(value = "Project ID to Load") @RequestParam(required = false) String prjIdToLoad,
             @ApiParam(value = "Project Name to Load") @RequestParam(required = false) String prjNameToLoad,
             @ApiParam(value = "Project Version to Load") @RequestParam(required = false) String prjVersionToLoad,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", defaultValue = "Y", allowableValues = "Y, N")
-            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false) String resetFlag) {
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y, N")
+            @ValuesAllowed(propName = "resetFlag", values = {"Y", "N"})@RequestParam(required = false, defaultValue = "Y") String resetFlag) {
 
         log.error("/api/v2/oss_load called:" + targetPrjId);
 
@@ -1243,26 +1271,12 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         String errorMsgCode = CoConstDef.CD_OPEN_API_PARAMETER_ERROR_MESSAGE;
 
+        if (!apiProjectService.checkUserAvailableToEditProject(userInfo, targetPrjId)) {
+            throw new CProjectNotAvailableException(String.format("%s. Check Permission or Project Status", targetPrjId));
+        }
+
         try {
             Map<String, Object> paramMap = new HashMap<>();
-            List<String> prjIdList = new ArrayList<String>();
-            prjIdList.add(targetPrjId);
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("loginUserName", userInfo.getUserName());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("prjId", prjIdList);
-            paramMap.put("ossReportFlag", CoConstDef.FLAG_YES);
-            paramMap.put("distributionType", "normal");
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
-
-            boolean searchFlag = apiProjectService.existProjectCnt(paramMap); // 조회가 안된다면 권한이 없는 project id를 입력함.
-
-            if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.NOT_FOUND,
-                        String.format("Project %s not exist or User doesn't have permission for the project", targetPrjId));
-            }
-
-            paramMap.clear();
 
             // Parameter validation check:
             if (!StringUtils.isEmpty(targetPrjId) && !targetPrjId.chars().allMatch(Character::isDigit)) {
@@ -1325,6 +1339,71 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @ApiOperation(value = "Delete Target Project", notes = "Delete Project'")
+    @DeleteMapping(value = { Url.APIV2.FOSSLIGHT_API_PROJECT_BY_ID })
+    public ResponseEntity<Map<String, Object>> deleteProject(
+            @ApiParam(hidden=true) @RequestHeader String authorization,
+            @ApiParam(value = "Target Project ID", required = true) @PathVariable(name = "id") String prjId
+    ) {
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+
+        T2Users userInfo = userService.checkApiUserAuth(authorization);
+        if (!apiProjectService.checkUserHasProject(userInfo, prjId)){
+            throw new CProjectNotAvailableException(prjId);
+        }
+
+        Project project = new Project();
+        project.setPrjId(prjId);
+        Project projectInfo = projectService.getProjectDetail(project);
+
+        if (Objects.equals(projectInfo.getDestributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_DEPLOIDED) ||
+                Objects.equals(projectInfo.getDestributionStatus(), CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS)) {
+            return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Cannot delete distributed project.");
+        }
+
+        try {
+            History h = new History();
+            h = projectService.work(project);
+            h.sethAction(CoConstDef.ACTION_CODE_DELETE);
+            h.setModifier(userInfo.getUserId());
+            historyService.storeData(h);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        try {
+            CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED);
+            mailBean.setParamPrjId(project.getPrjId());
+
+            if (!isEmpty(project.getUserComment())) {
+                mailBean.setComment(project.getUserComment());
+            }
+
+            CoMailManager.getInstance().sendMail(mailBean);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        try {
+            projectService.deleteProject(project);
+
+            try {
+                // Delete project ref files
+                projectService.deleteProjectRefFiles(projectInfo);
+                resultMap.put("msg", prjId + " is deleted");
+                return new ResponseEntity<>(resultMap, HttpStatus.OK);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                resultMap.put("msg", "Error occurs during remove ref files. Please report this issue");
+                return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            resultMap.put("msg", "Error occurs during remove ref files. Please report this issue");
             return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

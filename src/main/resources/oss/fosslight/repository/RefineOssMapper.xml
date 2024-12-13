@@ -17,10 +17,14 @@
 		</if>
 		<choose>
 			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(refineType,'reorderGithubUrl')">
-				AND EXISTS(SELECT 1 FROM OSS_DOWNLOADLOCATION T2 WHERE T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.DOWNLOAD_LOCATION LIKE '%github.com%' AND T2.OSS_DL_IDX > 1)
+				AND EXISTS(SELECT 1 FROM OSS_DOWNLOADLOCATION T2 WHERE T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.DOWNLOAD_LOCATION LIKE '%github.com%')
+				AND NOT EXISTS (SELECT 1 FROM OSS_DOWNLOADLOCATION T2 WHERE T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND T2.DOWNLOAD_LOCATION LIKE '%github.com%' AND T2.OSS_DL_IDX = 1)
 			</when>
 			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(refineType,'unsetPurl')">
 				AND EXISTS(SELECT 1 FROM OSS_DOWNLOADLOCATION T2 WHERE T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND IFNULL(T2.PURL, '') = '')
+			</when>
+			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(refineType,'updateDownloadLocation')">
+				AND IFNULL(T1.DOWNLOAD_LOCATION, '') != ''
 			</when>
 			<otherwise></otherwise>
 		</choose>
@@ -40,6 +44,9 @@
 			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(refineType,'unsetPurl')">
 				AND EXISTS(SELECT 1 FROM OSS_DOWNLOADLOCATION T2 WHERE T1.OSS_COMMON_ID = T2.OSS_COMMON_ID AND IFNULL(T2.PURL, '') = '')
 			</when>
+			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(refineType,'updateDownloadLocation')">
+				AND IFNULL(T1.DOWNLOAD_LOCATION, '') != ''
+			</when>
 			<otherwise></otherwise>
 		</choose>
 		ORDER BY OSS_COMMON_ID
@@ -51,8 +58,7 @@
 	</select>
 	
 	<update id="updateOssCommonDownloadLocation">
-		UPDATE OSS_COMMON SET DOWNLOAD_LOCATION = #{downloadLocation}, MODIFIED_DATE = MODIFIED_DATE
-		WHERE OSS_COMMON_ID = #{ossCommonId}
+		UPDATE OSS_COMMON SET DOWNLOAD_LOCATION = #{downloadLocation} WHERE OSS_COMMON_ID = #{ossCommonId}
 	</update>
 	
 	<delete id="deleteOssDownloadLocation">DELETE FROM OSS_DOWNLOADLOCATION WHERE OSS_COMMON_ID = #{ossCommonId}</delete>

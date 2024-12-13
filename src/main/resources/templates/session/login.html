@@ -395,4 +395,7 @@
     }
     //]]>
 </script>
+
+<script async th:if="${not #strings.isEmpty(@environment.getProperty('gtag.id'))}" th:src="'https://www.googletagmanager.com/gtag/js?id='+${@environment.getProperty('gtag.id')}"></script>
+<script th:if="${not #strings.isEmpty(@environment.getProperty('gtag.id'))}">window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', '[[${@environment.getProperty("gtag.id")}]]');</script>
 </html>

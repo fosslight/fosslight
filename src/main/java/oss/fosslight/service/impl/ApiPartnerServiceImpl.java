@@ -19,10 +19,12 @@ import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.repository.ApiPartnerMapper;
 import oss.fosslight.service.ApiPartnerService;
 import oss.fosslight.service.ApiVulnerabilityService;
@@ -31,7 +33,7 @@ import oss.fosslight.util.YamlUtil;
 
 @Service
 @Slf4j
-public class ApiPartnerServiceImpl implements ApiPartnerService {
+public class ApiPartnerServiceImpl extends CoTopComponent implements ApiPartnerService {
 	@Autowired ApiPartnerMapper apiPartnerMapper;
 	@Autowired ProjectService projectService;
 	@Autowired ApiVulnerabilityService apiVulnerabilityService;
@@ -51,6 +53,21 @@ public class ApiPartnerServiceImpl implements ApiPartnerService {
 		result.put("totalCount", partnerCnt);
 		
 		return result;
+	}
+
+	@Override
+	public boolean checkUserHasPartnerProject(T2Users userInfo, String partnerId){
+		Map<String, Object> paramMap = new HashMap<>();
+		List<String> partnerIdList = new ArrayList<String>();
+		partnerIdList.add(partnerId);
+		String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
+
+		paramMap.put("userId", userInfo.getUserId());
+		paramMap.put("userRole", userRole(userInfo));
+		paramMap.put("partnerIdList", partnerIds);
+		paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+		return existPartnertCnt(paramMap);
 	}
 
 	@Override

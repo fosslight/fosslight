@@ -61,6 +61,8 @@ public class OssMaster extends ComBean implements Serializable{
 
 	/** The download location. */
 	private String[] downloadLocations;
+	
+	private String[] existDownloadLocations;
 
 	private List<String> detectedLicenses;
 
@@ -70,11 +72,20 @@ public class OssMaster extends ComBean implements Serializable{
 	/** The homepage. */
 	private String homepage;
 	
+	private String existHomepage;
+	
 	/** The homepage link format. */
 	private String homepageLinkFormat;
 	
 	/** The summary description. */
 	private String summaryDescription;
+	
+	private String existSummaryDescription;
+	
+	/** The important notes. */
+	private String importantNotes;
+	
+	private String existImportantNotes;
 	
 	/** The oss type. */
 	private String ossType;
@@ -320,6 +331,10 @@ public class OssMaster extends ComBean implements Serializable{
 	
 	private String purl;
 	
+	private String[] purls;
+	
+	private String[] existPurls;
+	
 	private String includeCpe;
 	
 	private String[] includeCpes;
@@ -331,6 +346,10 @@ public class OssMaster extends ComBean implements Serializable{
 	private String[] existIncludeCpes;
 	
 	private String[] existExcludeCpes;
+	
+	private String includeCpeAllSearchFlag;
+	
+	private String excludeCpeAllSearchFlag;
 	
 	private String purlJson;
 	
@@ -2316,5 +2335,77 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setOssVersionAliasWithColon(String[] ossVersionAliasWithColon) {
 		this.ossVersionAliasWithColon = ossVersionAliasWithColon;
+	}
+
+	public String getIncludeCpeAllSearchFlag() {
+		return includeCpeAllSearchFlag;
+	}
+
+	public void setIncludeCpeAllSearchFlag(String includeCpeAllSearchFlag) {
+		this.includeCpeAllSearchFlag = includeCpeAllSearchFlag;
+	}
+
+	public String getExcludeCpeAllSearchFlag() {
+		return excludeCpeAllSearchFlag;
+	}
+
+	public void setExcludeCpeAllSearchFlag(String excludeCpeAllSearchFlag) {
+		this.excludeCpeAllSearchFlag = excludeCpeAllSearchFlag;
+	}
+	
+	public String getImportantNotes() {
+		return importantNotes;
+	}
+
+	public void setImportantNotes(String importantNotes) {
+		this.importantNotes = importantNotes;
+	}
+
+	public String[] getPurls() {
+		return purls;
+	}
+
+	public void setPurls(String[] purls) {
+		this.purls = purls;
+	}
+
+	public String[] getExistDownloadLocations() {
+		return existDownloadLocations;
+	}
+
+	public void setExistDownloadLocations(String[] existDownloadLocations) {
+		this.existDownloadLocations = existDownloadLocations;
+	}
+
+	public String getExistHomepage() {
+		return existHomepage;
+	}
+
+	public void setExistHomepage(String existHomepage) {
+		this.existHomepage = existHomepage;
+	}
+
+	public String getExistSummaryDescription() {
+		return existSummaryDescription;
+	}
+
+	public void setExistSummaryDescription(String existSummaryDescription) {
+		this.existSummaryDescription = existSummaryDescription;
+	}
+
+	public String getExistImportantNotes() {
+		return existImportantNotes;
+	}
+
+	public void setExistImportantNotes(String existImportantNotes) {
+		this.existImportantNotes = existImportantNotes;
+	}
+
+	public String[] getExistPurls() {
+		return existPurls;
+	}
+
+	public void setExistPurls(String[] existPurls) {
+		this.existPurls = existPurls;
 	}
 }

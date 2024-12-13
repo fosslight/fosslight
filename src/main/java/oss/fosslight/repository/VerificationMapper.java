@@ -75,4 +75,14 @@ public interface VerificationMapper {
 	OssComponents checkOssNickName2(OssComponents bean);
 
 	void updatePackageVulDocFile(Project project);
+
+	void deletePackagingFileInfo(T2File file);
+
+	void deleteReuseFileInfo(T2File file);
+
+	int countSameLogiFile(T2File file);
+	
+	void updateNoticeAppendFile(Project project);
+	
+	List<T2File> selectNoticeAppendFile(@Param("noticeAppendFileId") String noticeAppendFileId);
 }

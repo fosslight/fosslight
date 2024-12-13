@@ -565,7 +565,7 @@ var com_fn = {
 					break;
 				case "REQ":
 					btn_confirm.hide();btn_reject.hide();btn_review.hide();btn_restart.show();
-					btn_Reset.show();btn_Merge.show();btn_Save.show();btn_check.show();btn_bulkRegist.show();fileUploader.show();
+					btn_Reset.hide();btn_Merge.hide();btn_Save.hide();btn_check.hide();btn_bulkRegist.hide();fileUploader.hide();btn_Analysis.hide();
 					
 					break;
 				case "REV":
@@ -1414,38 +1414,18 @@ var com_fn = {
 							deleteTabInFrame('/project/identification/'+prjId);
 							createTabInFrame(prjId+'_Packaging', "/project/verification/"+prjId);
 						});
-					} else if(status == "PROG") { //reject한 경우는 새로고침 (save 버튼등이 문제)
-						alertify.alert([[#{msg.common.success}]], function() {
- 							if(isAndroidModel) {
- 								deleteTabInFrame('/project/identification/'+prjId+'/4');
- 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/4');
- 							} else {
- 								deleteTabInFrame('/project/identification/'+prjId+'/5');
- 								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
- 							}
-						});
-					} else if(userRole != "ROLE_ADMIN" && status == "REQ") { // 일반인이 request review한 경우
-						alertify.alert([[#{msg.common.success}]], function() {
-							deleteTabInFrame("/project/identification/"+prjId);
-						});	
-					} else if(userRole == "ROLE_ADMIN" && status == "REQ") { // admin이 request review한 경우
-						alertify.alert([[#{msg.common.success}]], function() {
- 							if (isAndroidModel) {
- 								deleteTabInFrame('/project/identification/'+prjId+'/4');
- 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/4");
-							} else {
-								deleteTabInFrame('/project/identification/'+prjId+'/5');
- 								createTabInFrame(prjId+'_Identify', "/project/identification/"+prjId+"/5");
- 							}
-						});
-					} else if (status == "CONF") { // Admin이 confirm한 경우
+					} else if (status == "PROG" //reject한 경우는 새로고침 (save 버튼등이 문제)
+						|| (userRole != "ROLE_ADMIN" && status == "REQ") // 일반인이 request review한 경우
+						|| (userRole == "ROLE_ADMIN" && status == "REQ") // admin이 request review한 경우
+						|| status == "REV" // request 시 버튼 hide 처리되어 다시 활성화 하기 위함
+						|| status == "CONF") { // Admin이 confirm한 경우
 						alertify.alert([[#{msg.common.success}]], function() {
 							if (isAndroidModel) {
 								deleteTabInFrame('/project/identification/'+prjId+'/4');
-								createTabInFrame(prjId+'_Identify', "/project/identification/" + prjId + "/4");
+								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/4');
 							} else {
 								deleteTabInFrame('/project/identification/'+prjId+'/5');
-								createTabInFrame(prjId+'_Identify', "/project/identification/" + prjId + "/5");
+								createTabInFrame(prjId+'_Identify', '/project/identification/'+prjId+'/5');
 							}
 						});
 					} else {
@@ -1715,6 +1695,9 @@ var com_fn = {
     		return false;
     	} else if ("CONF" == status) {
     		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+    		return false
+    	} else if ("REQ" == status) {
+    		alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
     		return false
     	}
 		
@@ -2025,7 +2008,8 @@ var com_fn = {
 					$(obj).closest('li').remove();
 					if ("15" == referenceDiv) {
 						if ("2" == type) {
-							bin_fn.binaryUploadFile();
+//							bin_fn.binaryUploadFile();
+							$(".binBinaryFileDiv").hide();
 						}
 					}
 				} else {
@@ -2187,6 +2171,8 @@ var com_fn = {
 			alertify.alert([[#{msg.common.not.permission}]], function(){});
 		} else if ("CONF" == status) {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+		} else if ("REQ" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
 		} else {
 			var grid = $("#" + targetId);
 			com_fn.saveFlagObject[tab] = false;
@@ -2202,6 +2188,8 @@ var com_fn = {
 			alertify.alert([[#{msg.common.not.permission}]], function(){});
 		} else if ("CONF" == status) {
 			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'CONFIRM')}]], function(){});
+		} else if ("REQ" == status) {
+			alertify.alert([[${@CommonFunction.getCustomMessage('msg.common.not.edit.status', 'REQUEST')}]], function(){});
 		} else {
 			var grid = $("#" + targetId);
 			var selarrrow = grid.jqGrid("getGridParam", "selarrrow");
@@ -2340,7 +2328,7 @@ var com_fn = {
 						case "bin" : 
 							if (!resetFlag) {
 								bin_fn.csvUploadFile();
-								bin_fn.binaryUploadFile();
+//								bin_fn.binaryUploadFile();
 								$('#_binAddList').jqGrid(bin_fn.setParamProject3());
 							}
 							

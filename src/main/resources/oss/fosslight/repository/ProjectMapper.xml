@@ -97,6 +97,9 @@
     			<when test="@oss.fosslight.util.StringUtil@equals('COMMENT', sidx)">
     				ORDER BY COMMENT
     			</when>
+    			<when test="@oss.fosslight.util.StringUtil@equals('PRIORITY', sidx)">
+    				ORDER BY PRIORITY
+    			</when>
     		</choose>
     		<if test="!@oss.fosslight.util.StringUtil@isEmpty(sord)">
     			<choose>
@@ -195,9 +198,9 @@
 <!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)"> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
-						T1.CREATOR = #{loginUserName}	
+						T1.CREATOR = #{loginUserName}
 						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
-							OR T1.REVIEWER = #{loginUserName}	
+							OR T1.REVIEWER = #{loginUserName}
 						</if>
 						OR EXISTS (
 						SELECT 1
@@ -251,34 +254,38 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName) 
 					  or !@oss.fosslight.util.StringUtil@isEmpty(licenseName)
 			          or !@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
-				AND EXISTS(SELECT 1 
+				AND EXISTS (SELECT 1
+								FROM
+								(
+									SELECT DISTINCT REFERENCE_ID
 		                            FROM OSS_COMPONENTS X 
-		                   LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
+		                       	<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+		                   			LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
 		                                ON X.COMPONENT_ID = Y.COMPONENT_ID 
-		                   LEFT OUTER JOIN LICENSE_MASTER Z ON Y.LICENSE_ID = Z.LICENSE_ID
-		                  WHERE  T1.PRJ_ID = X.REFERENCE_ID
-		                  		AND X.EXCLUDE_YN <![CDATA[<>]]> 'Y' AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y' AND X.REFERENCE_DIV != '20'
+		                   			LEFT OUTER JOIN LICENSE_MASTER Z ON Y.LICENSE_ID = Z.LICENSE_ID
+		                   		</if>
+		                  			WHERE X.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+		                  		<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+		                  			AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+		                  		</if>
+		                  			AND X.REFERENCE_DIV != '20'
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-		                         AND ( X.OSS_NAME = #{ossName}
-		                         	<if test="ossNickNames != null">
-										<foreach item="item" index="index" collection="ossNickNames">
-											OR X.OSS_NAME = #{item}
-										</foreach>
-		                         	</if>
-		                         )
+		                     		AND X.OSS_NAME = #{ossName}
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
-								AND X.OSS_VERSION = #{ossVersion}
+									AND X.OSS_VERSION = #{ossVersion}
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
-		                         AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
+		                       		AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
-		                         AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
+		                         	AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
 		                                                    FROM PARTNER_MASTER P
 		                                                   WHERE P.USE_YN = 'Y' AND P.STATUS = 'CONF'
 		                                                     AND P.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{refPartnerName}, '_', '\\\\_'),'%'))
 								</if>
+								) TBL
+								WHERE TBL.REFERENCE_ID = T1.PRJ_ID
 							)
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(binaryName)">
@@ -467,9 +474,9 @@
 <!-- 			<if test="@oss.fosslight.util.StringUtil@notEquals('ROLE_ADMIN', loginUserRole)"> -->
 				<if test="!@oss.fosslight.util.StringUtil@isEmpty(publicYn) and @oss.fosslight.util.StringUtil@equals('N', publicYn)">
 					AND (
-						T1.CREATOR = #{loginUserName}	
+						T1.CREATOR = #{loginUserName}
 						<if test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', loginUserRole)">
-							OR T1.REVIEWER = #{loginUserName}	
+							OR T1.REVIEWER = #{loginUserName}
 						</if>
 						OR EXISTS (
 						SELECT 1
@@ -523,34 +530,38 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName) 
 					  or !@oss.fosslight.util.StringUtil@isEmpty(licenseName)
 			          or !@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
-				AND EXISTS(SELECT 1 
+				AND EXISTS (SELECT 1
+								FROM
+								(
+									SELECT DISTINCT X.REFERENCE_ID 
 		                            FROM OSS_COMPONENTS X 
-		                   LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
+		               			<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+		                   			LEFT OUTER JOIN OSS_COMPONENTS_LICENSE Y 
 		                                ON X.COMPONENT_ID = Y.COMPONENT_ID 
-		                   LEFT OUTER JOIN LICENSE_MASTER Z ON Y.LICENSE_ID = Z.LICENSE_ID
-		                  WHERE  T1.PRJ_ID = X.REFERENCE_ID
-		                  		AND X.EXCLUDE_YN <![CDATA[<>]]> 'Y' AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y' AND X.REFERENCE_DIV != '20'
-								<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
-		                         AND ( X.OSS_NAME = #{ossName}
-		                         	<if test="ossNickNames != null">
-										<foreach item="item" index="index" collection="ossNickNames">
-											OR X.OSS_NAME = #{item}
-										</foreach>
-		                         	</if>
-		                         )
+		                   			LEFT OUTER JOIN LICENSE_MASTER Z ON Y.LICENSE_ID = Z.LICENSE_ID
+		            			</if>
+		                  			WHERE X.EXCLUDE_YN <![CDATA[<>]]> 'Y' 
+		               			<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
+		                  			AND Y.EXCLUDE_YN <![CDATA[<>]]> 'Y' 
+		              			</if>
+		              				AND X.REFERENCE_DIV != '20'
+		               			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
+		                        	AND X.OSS_NAME = #{ossName}
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersion)">
-								AND X.OSS_VERSION = #{ossVersion}
+									AND X.OSS_VERSION = #{ossVersion}
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(licenseName)">
-		                         AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
+		                      		AND (Y.LICENSE_NAME = #{licenseName} OR Z.LICENSE_NAME = #{licenseName} OR Z.SHORT_IDENTIFIER = #{licenseName})
 								</if>
 								<if test="!@oss.fosslight.util.StringUtil@isEmpty(refPartnerName)">
-		                         AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
+		                      		AND X.REF_PARTNER_ID IN (SELECT P.PARTNER_ID 
 		                                                    FROM PARTNER_MASTER P
 		                                                   WHERE P.USE_YN = 'Y' AND P.STATUS = 'CONF'
 		                                                     AND P.PARTNER_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{refPartnerName}, '_', '\\\\_'),'%'))
 								</if>
+								) TBL
+								WHERE TBL.REFERENCE_ID = T1.PRJ_ID
 							)
 			</if>
 			<!-- 어디서 사용하는 것인지 확인할 필요가 있음 -->
@@ -717,6 +728,7 @@
 			, A.PACKAGE_FILE_TYPE3
 			, A.PACKAGE_FILE_TYPE4
 			, A.PACKAGE_VUL_DOC_FILE_ID
+	   		, A.NOTICE_APPEND_FILE_ID
 			, A.NOTICE_FILE_ID
 			, A.REVIEW_REPORT_FILE_ID
 			, A.ZIP_FILE_ID
@@ -1214,8 +1226,7 @@
 		(
 			SELECT OSS_COMMON_ID, DOWNLOAD_LOCATION
 			FROM OSS_DOWNLOADLOCATION
-			WHERE MATCH(DOWNLOAD_LOCATION) AGAINST (#{downloadLocation})
-			HAVING DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
+			WHERE DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
 		) DOWN
 		INNER JOIN OSS_COMMON OC
 		ON DOWN.OSS_COMMON_ID = OC.OSS_COMMON_ID
@@ -1244,8 +1255,7 @@
 		(
 			SELECT OSS_COMMON_ID, DOWNLOAD_LOCATION
 			FROM OSS_DOWNLOADLOCATION
-			WHERE MATCH(DOWNLOAD_LOCATION) AGAINST (#{downloadLocation})
-			HAVING DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
+			WHERE DOWNLOAD_LOCATION LIKE CONCAT('%', #{downloadLocation})
 		) DOWN
 		INNER JOIN OSS_COMMON OC
 		ON DOWN.OSS_COMMON_ID = OC.OSS_COMMON_ID
@@ -1700,11 +1710,16 @@
 		AND
 			T1.DEL_YN = 'N'
 	</select>
-	
+
 	<delete id="deleteFileBySeq" parameterType="oss.fosslight.domain.T2File">
-		UPDATE T2_FILE 
-			SET DEL_YN = 'Y'
-		 WHERE FILE_SEQ = #{fileSeq} 	
+		DELETE FROM T2_FILE
+			WHERE FILE_SEQ = #{fileSeq}
+	</delete>
+
+	<delete id="updateDeleteYNByFileSeq" parameterType="oss.fosslight.domain.T2File">
+		UPDATE T2_FILE
+		SET DEL_YN = 'Y'
+		WHERE FILE_SEQ = #{fileSeq}
 	</delete>
 	
 	<update id="updateFileBySeq" parameterType="oss.fosslight.domain.T2File">
@@ -1866,6 +1881,264 @@
 				, (CASE WHEN GROUP_CONCAT(A3.LICENSE_TYPE) REGEXP 'PMS|WCP|CP' THEN 1 WHEN A3.LICENSE_TYPE IS NULL THEN 1 ELSE CONCAT(GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ','), '-', 2) END) AS LICENSE_TYPE_IDX
 				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME, A1.PACKAGE_URL
 				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
+				, CASE WHEN ((SELECT IFNULL(EXCLUDE_YN, 'N') FROM OSS_COMPONENTS WHERE COMPONENT_ID = A1.REF_COMPONENT_ID) != 'Y' AND IFNULL(A1.OSS_NAME, IFNULL(A4.OSS_NAME, '')) != '') THEN 
+				</if>
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
+				, CASE WHEN IFNULL(A1.EXCLUDE_YN, 'N') != 'Y' AND IFNULL(A1.OSS_NAME, IFNULL(A4.OSS_NAME, '')) != '' THEN 
+				</if>
+				(
+				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+					FROM NVD_DATA_V3 NVD
+					INNER JOIN NVD_CVE_V3 CVE
+					ON NVD.CVE_ID = CVE.CVE_ID
+					WHERE NVD.PRODUCT != '-'
+					AND NVD.PRODUCT = REPLACE(IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)), ' ', '_')
+					AND NVD.VERSION = A1.OSS_VERSION
+					AND NOT EXISTS (
+						SELECT 1
+						FROM
+						(
+							SELECT OSS_COMMON_ID,
+								CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+								WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+							FROM OSS_INCLUDE_CPE
+						) TBL
+						WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+						AND TBL.OSS_COMMON_ID != A4.OSS_COMMON_ID
+					)
+					AND NOT EXISTS (
+						SELECT 1
+						FROM
+						(
+							SELECT OSS_COMMON_ID,
+								CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+								WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+							FROM OSS_EXCLUDE_CPE
+						) TBL
+						WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+						AND TBL.OSS_COMMON_ID = A4.OSS_COMMON_ID
+					)
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+					FROM NVD_DATA_SCORE_V3 NVD
+					INNER JOIN NVD_CVE_V3 CVE
+					ON NVD.CVE_ID = CVE.CVE_ID
+					WHERE NVD.PRODUCT != '-'
+					AND NVD.PRODUCT = REPLACE(IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)), ' ', '_')
+					AND NOT EXISTS (
+						SELECT 1
+						FROM
+						(
+							SELECT OSS_COMMON_ID,
+								CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+								WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+							FROM OSS_INCLUDE_CPE
+						) TBL
+						WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+						AND TBL.OSS_COMMON_ID != A4.OSS_COMMON_ID
+					)
+					AND NOT EXISTS (
+						SELECT 1
+						FROM
+						(
+							SELECT OSS_COMMON_ID,
+								CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+								WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+							FROM OSS_EXCLUDE_CPE
+						) TBL
+						WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+						AND TBL.OSS_COMMON_ID = A4.OSS_COMMON_ID
+					)
+				</if>
+				) ELSE NULL END CVSS_SCORE_MAX
+				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
+				, CASE WHEN ((SELECT IFNULL(EXCLUDE_YN, 'N') FROM OSS_COMPONENTS WHERE COMPONENT_ID = A1.REF_COMPONENT_ID) != 'Y' AND IFNULL(A1.OSS_NAME, IFNULL(A4.OSS_NAME, '')) != '') THEN 
+				</if>
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
+				, CASE WHEN IFNULL(A1.EXCLUDE_YN, 'N') != 'Y' AND IFNULL(A1.OSS_NAME, IFNULL(A4.OSS_NAME, '')) != '' THEN 
+				</if>
+				(
+				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+					FROM NVD_DATA_V3 NVD
+					INNER JOIN NVD_CVE_V3 CVE
+					ON NVD.CVE_ID = CVE.CVE_ID
+					WHERE NVD.PRODUCT != '-'
+					AND NVD.VERSION = A1.OSS_VERSION
+				</if>
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+					SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
+					FROM NVD_DATA_SCORE_V3 NVD
+					INNER JOIN NVD_CVE_V3 CVE
+					ON NVD.CVE_ID = CVE.CVE_ID
+					WHERE NVD.PRODUCT != '-'
+				</if>
+					AND NVD.PRODUCT IN (
+						SELECT REPLACE(NICK.OSS_NICKNAME, ' ', '_') 
+						FROM (
+							SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+							FROM OSS_NICKNAME NICK
+							INNER JOIN OSS_COMMON OC
+							ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+						) NICK
+						WHERE NICK.OSS_NAME = IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)))
+					AND NOT EXISTS (
+						SELECT 1
+						FROM
+						(
+							SELECT OSS_COMMON_ID,
+								CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+								WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+							FROM OSS_INCLUDE_CPE
+						) TBL
+						WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+						AND TBL.OSS_COMMON_ID != A4.OSS_COMMON_ID
+					)
+					AND NOT EXISTS (
+						SELECT 1
+						FROM
+						(
+							SELECT OSS_COMMON_ID,
+								CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+								WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+							FROM OSS_EXCLUDE_CPE
+						) TBL
+						WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+						AND TBL.OSS_COMMON_ID = A4.OSS_COMMON_ID
+					)
+				) ELSE NULL END CVSS_SCORE_MAX1
+			FROM OSS_COMPONENTS A1 
+				INNER JOIN PROJECT_MASTER PRJ ON A1.REFERENCE_ID = PRJ.PRJ_ID
+				INNER JOIN OSS_COMPONENTS_LICENSE A2 
+					ON A1.COMPONENT_ID = A2.COMPONENT_ID 
+						AND  A2.EXCLUDE_YN <![CDATA[<>]]> 'Y'
+				LEFT OUTER JOIN LICENSE_MASTER A3 ON A2.LICENSE_ID = A3.LICENSE_ID AND A3.USE_YN = 'Y'
+				LEFT OUTER JOIN (
+					SELECT
+				    	OV.OSS_ID,
+				    	OC.OSS_COMMON_ID,
+				    	OC.OSS_NAME,
+				    	OV.OSS_VERSION,
+				    	OC.HOMEPAGE,
+						OC.DOWNLOAD_LOCATION,
+				    	OC.SUMMARY_DESCRIPTION,
+				    	OV.LICENSE_DIV,
+				    	OV.USE_YN,
+				    	OV.VULN_CPE_NM,
+				    	OV.CVSS_SCORE,
+				    	OV.CVE_ID,
+				    	OV.VULN_YN,
+				    	OV.VULN_RECHECK,
+				    	OV.VULN_DATE,
+				    	OV.LICENSE_TYPE,
+				    	OV.OBLIGATION_TYPE,
+				    	OV.COPYRIGHT,
+				    	OV.ATTRIBUTION,
+						OC.DEACTIVATE_FLAG,
+						OV.CREATOR,
+						OV.CREATED_DATE,
+						OV.MODIFIER,
+						OV.MODIFIED_DATE
+					FROM OSS_COMMON OC
+					LEFT OUTER JOIN OSS_VERSION OV
+					ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+			 ) A4 ON A1.OSS_NAME = A4.OSS_NAME AND A1.OSS_VERSION = A4.OSS_VERSION AND A4.USE_YN = 'Y' 
+				WHERE A1.REFERENCE_ID = #{referenceId}
+				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+	    			AND IFNULL(A1.OSS_VERSION, '') = ''
+	    		</if>
+	    		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+	    			AND IFNULL(A1.OSS_VERSION, '') != ''
+	    		</if>
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">
+					AND A1.OBLIGATION_TYPE IN ('10', '11')
+			    </if>
+				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
+					<choose>
+						<when test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">
+							AND A1.REFERENCE_DIV IN ('13', '17')
+							AND IFNULL(A1.EXCLUDE_YN, 'N') = 'N'
+						</when>
+						<otherwise>AND A1.REFERENCE_DIV IN ('13')</otherwise>
+					</choose>
+			   	</if>
+			    <if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
+					AND IFNULL(A1.EXCLUDE_YN, 'N') = 'N' 
+					AND A1.REFERENCE_DIV IN ('10','11','15','16') 
+					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_PARTNER = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '10' ELSE TRUE END) 
+					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_DEP = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '16' ELSE TRUE END)
+					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_SRC = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '11' ELSE TRUE END) 
+					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_BIN = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '15' ELSE TRUE END)
+				</if>
+			GROUP BY A1.COMPONENT_ID
+		) RTN
+		
+		WHERE 1=1
+		GROUP BY GROUPBY
+		
+	</select>
+	
+	<select id="selectAndroidBomList" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.ProjectIdentification">
+		/* ProjectMapper selectAndroidBomList */
+		SELECT 
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </when>
+				<when test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </when>
+				<when test="@oss.fosslight.util.StringUtil@equals('N', merge)">CONCAT(RTN.REFERENCE_DIV, '-', RTN.REF_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </when>
+				<otherwise>CONCAT(RTN.REFERENCE_DIV, '-', RTN.OSS_NAME, '-', RTN.OSS_VERSION, '-', RTN.LICENSE_NAME) AS GROUPBY, </otherwise>
+			</choose>
+			
+			CASE WHEN RTN.OSS_NAME = '-' THEN RTN.COMPONENT_ID ELSE CONCAT(RTN.OSS_NAME,RTN.OSS_VERSION,RTN.LICENSE_NAME) END AS GROUPING_COLUMN,
+			RTN.COMPONENT_ID,
+			 RTN.REF_COMPONENT_ID,
+			 RTN.REFERENCE_ID,
+			 RTN.REFERENCE_DIV,
+			 RTN.COMPONENT_IDX,
+			 (SELECT COMPONENT_IDX FROM OSS_COMPONENTS OC1 WHERE OC1.COMPONENT_ID = RTN.REF_COMPONENT_ID) AS REF_COMPONENT_IDX,
+			RTN.REF_DIV,
+			RTN.OSS_ID, 
+			RTN.OSS_NAME, 
+			RTN.OSS_VERSION, 
+			RTN.DOWNLOAD_LOCATION, 
+			RTN.HOMEPAGE,
+			RTN.BINARY_NAME, 
+			RTN.BINARY_SIZE , 
+			RTN.BINARY_NOTICE, 
+			RTN.CUSTOM_BINARY_YN, 
+			RTN.EXCLUDE_YN, 
+			RTN.MERGE_PRE_DIV, 
+			RTN.BAT_STRING_MATCH_PERCENTAGE, 
+			RTN.BAT_PERCENTAGE, 
+			RTN.BAT_SCORE,
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('Y', saveBomFlag)">RTN.FILE_PATH,</when>
+				<otherwise>GROUP_CONCAT(IF(IFNULL(RTN.FILE_PATH, '') = '', NULL, RTN.FILE_PATH) SEPARATOR '\r\n') AS FILE_PATH,</otherwise>
+			</choose>
+			<choose>
+				<when test="@oss.fosslight.util.StringUtil@equals('N', merge)">RTN.OBLIGATION_TYPE,</when>
+				<otherwise>
+					CASE 
+						WHEN IFNULL(RTN.OBLIGATION_TYPE, '') = '' AND IFNULL(RTN.OSS_ID, '') <![CDATA[<>]]> '' THEN ( SELECT B1.OBLIGATION_TYPE FROM OSS_VERSION B1 WHERE RTN.OSS_ID = B1.OSS_ID) 
+						ELSE  RTN.OBLIGATION_TYPE END AS OBLIGATION_TYPE, 
+				</otherwise>
+			</choose>
+			RTN.PRE_OBLIGATION_TYPE,
+			RTN.ADMIN_CHECK_YN,
+			RTN.LICENSE_ID, RTN.LICENSE_NAME, GROUP_CONCAT(DISTINCT RTN.COPYRIGHT SEPARATOR '|') AS COPYRIGHT_TEXT, RTN.LICENSE_TYPE_IDX,
+			RTN.CVSS_SCORE_MAX, RTN.CVSS_SCORE_MAX1, RTN.LICENSE_TYPE, RTN.DEPENDENCIES, RTN.REF_OSS_NAME, RTN.PACKAGE_URL
+		FROM  (
+			SELECT 
+				A1.REFERENCE_ID, A1.COMPONENT_ID, A1.REF_COMPONENT_ID, A1.REFERENCE_DIV, A1.COMPONENT_IDX,A1.OSS_ID, A1.OSS_NAME, A1.OSS_VERSION
+				, A1.DOWNLOAD_LOCATION, A1.HOMEPAGE, A1.FILE_PATH, A1.BINARY_NOTICE, A1.BINARY_NAME, A1.BINARY_SIZE, A1.CUSTOM_BINARY_YN, A1.EXCLUDE_YN, A1.MERGE_PRE_DIV
+				, A1.BAT_STRING_MATCH_PERCENTAGE, A1.BAT_PERCENTAGE, A1.BAT_SCORE, A1.PRE_OBLIGATION_TYPE, A1.OBLIGATION_TYPE, A1.ADMIN_CHECK_YN, A1.COPYRIGHT
+				, GROUP_CONCAT(A2.LICENSE_ID ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_ID
+				, GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ',') AS LICENSE_NAME
+				, IFNULL(A1.REF_DIV, (SELECT S.REFERENCE_DIV FROM OSS_COMPONENTS S WHERE S.COMPONENT_ID = A1.REF_COMPONENT_ID)) AS REF_DIV
+				, (CASE WHEN GROUP_CONCAT(A3.LICENSE_TYPE) REGEXP 'PMS|WCP|CP' THEN 1 WHEN A3.LICENSE_TYPE IS NULL THEN 1 ELSE CONCAT(GROUP_CONCAT(A2.LICENSE_NAME ORDER BY A2.LICENSE_ID DESC SEPARATOR ','), '-', 2) END) AS LICENSE_TYPE_IDX
+				, A3.LICENSE_TYPE, A1.DEPENDENCIES, A1.REF_OSS_NAME, A1.PACKAGE_URL
+				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
 				, CASE WHEN ((SELECT IFNULL(EXCLUDE_YN, 'N') FROM OSS_COMPONENTS WHERE COMPONENT_ID = A1.REF_COMPONENT_ID) != 'Y') THEN 
 				</if>
 				<if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
@@ -1920,42 +2193,6 @@
 						) NICK
 						WHERE NICK.OSS_NAME = IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)))
 				) ELSE NULL END CVSS_SCORE_MAX1
-<!--			CASE WHEN IFNULL(A1.EXCLUDE_YN, 'N') != 'Y' AND A1.OSS_NAME != '' AND A1.OSS_NAME != '-' THEN 
-				(
-					SELECT CONCAT(TBL.PRODUCT,'@',TBL.VERSION,'@',TBL.VENDOR,'@',MAX(TBL.CVSS_SCORE),'@',TBL.CVE_ID)
-	    			FROM
-	    			(
-	    				SELECT NVD.PRODUCT, NVD.VERSION, NVD.VENDOR, CVE.CVE_ID, CVE.CVSS_SCORE, NVD.CRITERIA
-						FROM NVD_DATA_CONFIGURATIONS NVD
-						INNER JOIN NVD_CVE_V3 CVE
-						ON NVD.CVE_ID = CVE.CVE_ID
-					) TBL
-					WHERE TBL.PRODUCT = REPLACE(IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME)), ' ', '_')
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = A1.OSS_VERSION
-				</if>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					AND SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = '-'
-				</if>
-				) ELSE NULL END CVSS_SCORE_MAX2,
-				CASE WHEN IFNULL(A1.EXCLUDE_YN, 'N') != 'Y' AND A1.OSS_NAME != '' AND A1.OSS_NAME != '-' THEN 
-				(
-					SELECT CONCAT(TBL.PRODUCT,'@',TBL.VERSION,'@',TBL.VENDOR,'@',MAX(TBL.CVSS_SCORE),'@',TBL.CVE_ID)
-	    			FROM
-	    			(
-	    				SELECT NVD.PRODUCT, NVD.VERSION, NVD.VENDOR, CVE.CVE_ID, CVE.CVSS_SCORE, NVD.CRITERIA
-						FROM NVD_DATA_CONFIGURATIONS NVD
-						INNER JOIN NVD_CVE_V3 CVE
-						ON NVD.CVE_ID = CVE.CVE_ID
-					) TBL
-				<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = A1.OSS_VERSION
-				</if>
-				<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-					WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = '-'
-				</if>
-					AND TBL.PRODUCT IN (SELECT REPLACE(OSS_NICKNAME, ' ', '_') FROM OSS_NICKNAME WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = IFNULL(A1.REF_OSS_NAME, IFNULL(A1.OSS_NAME, A4.OSS_NAME))))
-				) ELSE NULL END CVSS_SCORE_MAX3 -->
 			FROM OSS_COMPONENTS A1 
 				INNER JOIN PROJECT_MASTER PRJ ON A1.REFERENCE_ID = PRJ.PRJ_ID
 				INNER JOIN OSS_COMPONENTS_LICENSE A2 
@@ -1999,33 +2236,24 @@
 	    		<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
 	    			AND IFNULL(A1.OSS_VERSION, '') != ''
 	    		</if>
-					<if test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">
-						AND A1.OBLIGATION_TYPE IN ('10', '11')
-			        </if>
-					<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
-						<choose>
-							<when test="@oss.fosslight.util.StringUtil@equals('Y', bomWithAndroidFlag)">
-								AND A1.REFERENCE_DIV IN ('13', '14')
-								AND IFNULL(A1.EXCLUDE_YN, 'N') = 'N'
-							</when>
-							<otherwise>AND A1.REFERENCE_DIV IN ('13')</otherwise>
-						</choose>
-			        </if>
-			        <if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', noticeFlag)">
+					AND A1.OBLIGATION_TYPE IN ('10', '11')
+			    </if>
+				<if test="@oss.fosslight.util.StringUtil@equals('N', merge)">
+					AND A1.REFERENCE_DIV  = '17'
+					AND IFNULL(A1.EXCLUDE_YN, 'N') = 'N'
+			   	</if>
+			    <if test="@oss.fosslight.util.StringUtil@equals('Y', merge)">
 					AND IFNULL(A1.EXCLUDE_YN, 'N') = 'N' 
-					AND A1.REFERENCE_DIV IN ('10','11','15','16') 
-					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_PARTNER = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '10' ELSE TRUE END) 
-					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_DEP = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '16' ELSE TRUE END)
-					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_SRC = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '11' ELSE TRUE END) 
-					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_BIN = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '15' ELSE TRUE END)
-					</if>
+					AND A1.REFERENCE_DIV = '14'
+					AND (CASE WHEN PRJ.IDENTIFICATION_SUB_STATUS_ANDROID = 'N' THEN A1.REFERENCE_DIV <![CDATA[<>]]> '14' ELSE TRUE END) 
+				</if>
 			GROUP BY A1.COMPONENT_ID
 		) RTN
 		
 		WHERE 1=1
 		GROUP BY GROUPBY
-		
-	</select>	
+	</select>
 	
 	<select id="selectBomLicense" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="oss.fosslight.domain.OssComponentsLicense">
 		SELECT
@@ -2043,7 +2271,12 @@
 			OSS_COMPONENTS_LICENSE OCL
 		WHERE EXISTS (SELECT 1 FROM OSS_COMPONENTS 
 									WHERE REFERENCE_ID = #{referenceId}
+								<if test="@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
 									AND REFERENCE_DIV IN ('10', '11', '13', '15', '16')
+								</if>
+								<if test="!@oss.fosslight.util.StringUtil@equals('13', referenceDiv)">
+									AND REFERENCE_DIV IN ('14', '17')
+								</if>
 									AND COMPONENT_ID = OCL.COMPONENT_ID)
 		AND IFNULL(OCL.EXCLUDE_YN, 'N') != 'Y'
 	</select>
@@ -2695,7 +2928,7 @@
 							WHERE OC.REFERENCE_DIV = '10' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
 							) THEN 'N' 
 						WHEN (
-						IFNULL(PM.IDENTIFICATION_SUB_STATUS_SRC, 'Y') <![CDATA[<>]]> 'N' 
+						IFNULL(PM.IDENTIFICATION_SUB_STATUS_PARTNER, 'Y') <![CDATA[<>]]> 'N' 
 						AND IFNULL(
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
@@ -2708,6 +2941,7 @@
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '16' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
+						AND IFNULL(PM.DEP_CSV_FILE_ID, '') = ''
 							) THEN 'N' 
 						WHEN (
 						IFNULL(PM.IDENTIFICATION_SUB_STATUS_DEP, 'Y') <![CDATA[<>]]> 'N' 
@@ -2715,6 +2949,7 @@
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '16' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) > 0
+							OR IFNULL(PM.DEP_CSV_FILE_ID, '') != ''
 							) THEN 'Y' 
 						ELSE PM.IDENTIFICATION_SUB_STATUS_DEP END AS IDENTIFICATION_SUB_STATUS_DEP,
 				CASE WHEN (
@@ -2723,6 +2958,7 @@
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '11' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
+						AND IFNULL(PM.SRC_CSV_FILE_ID, '') = ''
 							) THEN 'N' 
 						WHEN (
 						IFNULL(PM.IDENTIFICATION_SUB_STATUS_SRC, 'Y') <![CDATA[<>]]> 'N' 
@@ -2730,6 +2966,7 @@
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '11' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) > 0
+						OR IFNULL(PM.SRC_CSV_FILE_ID, '') != ''
 							) THEN 'Y' 
 						ELSE PM.IDENTIFICATION_SUB_STATUS_SRC END AS IDENTIFICATION_SUB_STATUS_SRC,
 				CASE WHEN (
@@ -2740,7 +2977,7 @@
 							WHERE OC.REFERENCE_DIV = '12' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
 							) THEN 'N' 
 						WHEN (
-						IFNULL(PM.IDENTIFICATION_SUB_STATUS_SRC, 'Y') <![CDATA[<>]]> 'N' 
+						IFNULL(PM.IDENTIFICATION_SUB_STATUS_BAT, 'Y') <![CDATA[<>]]> 'N' 
 						AND IFNULL(
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
@@ -2753,13 +2990,15 @@
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '15' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
+						AND IFNULL(PM.BIN_CSV_FILE_ID, '') = ''
 							) THEN 'N' 
 						WHEN (
-						IFNULL(PM.IDENTIFICATION_SUB_STATUS_SRC, 'Y') <![CDATA[<>]]> 'N' 
+						IFNULL(PM.IDENTIFICATION_SUB_STATUS_BIN, 'Y') <![CDATA[<>]]> 'N' 
 						AND IFNULL(
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '15' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) > 0
+						OR IFNULL(PM.BIN_CSV_FILE_ID, '') != ''
 							) THEN 'Y' 
 						ELSE PM.IDENTIFICATION_SUB_STATUS_BIN END AS IDENTIFICATION_SUB_STATUS_BIN,
 				CASE WHEN (
@@ -2768,13 +3007,17 @@
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '14' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) = 0
+						AND IFNULL(PM.SRC_ANDROID_CSV_FILE_ID, '') = ''
+						AND IFNULL(PM.SRC_ANDROID_NOTICE_FILE_ID, '') = ''
 							) THEN 'N' 
 						WHEN (
-						IFNULL(PM.IDENTIFICATION_SUB_STATUS_SRC, 'Y') <![CDATA[<>]]> 'N' 
-						AND IFNULL(
+						IFNULL(PM.IDENTIFICATION_SUB_STATUS_ANDROID, 'Y') <![CDATA[<>]]> 'N' 
+						AND (IFNULL(
 							(SELECT COUNT(1)
 							FROM OSS_COMPONENTS OC
 							WHERE OC.REFERENCE_DIV = '14' AND OC.REFERENCE_ID = PM.PRJ_ID), 0) > 0
+						OR IFNULL(PM.SRC_ANDROID_CSV_FILE_ID, '') != ''
+						OR IFNULL(PM.SRC_ANDROID_NOTICE_FILE_ID, '') != '')
 							) THEN 'Y' 
 						ELSE PM.IDENTIFICATION_SUB_STATUS_ANDROID END AS IDENTIFICATION_SUB_STATUS_ANDROID
 			FROM PROJECT_MASTER PM
@@ -2941,9 +3184,16 @@
 			M.REF_PARTNER_ID,
 			M.OBLIGATION_TYPE,
 			M.DEPENDENCIES,
-			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' AND M.OSS_NAME != '' AND M.OSS_NAME != '-' THEN 
-			(
+			M.REF_OSS_NAME
+			<if test="@oss.fosslight.util.StringUtil@equals('30', referenceDiv)">
+				, BAR.GUIREPORT_FLAG
+			</if>
+			<if test="@oss.fosslight.util.StringUtil@equals('14', referenceDiv) or @oss.fosslight.util.StringUtil@equals('15', referenceDiv) or @oss.fosslight.util.StringUtil@equals('20', referenceDiv)">
+				, M.TLSH, M.CHECK_SUM
+			</if>
 			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
+			, CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' AND M.OSS_NAME != '' AND M.OSS_NAME != '-' THEN 
+			(
 				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
 				FROM NVD_DATA_V3 NVD
 				INNER JOIN NVD_CVE_V3 CVE
@@ -2951,31 +3201,39 @@
 				WHERE NVD.PRODUCT != '-'
 				AND NVD.PRODUCT = REPLACE(IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)), ' ', '_')
 				AND NVD.VERSION = M.OSS_VERSION
-			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
-				FROM NVD_DATA_SCORE_V3 NVD
-				WHERE NVD.PRODUCT != '-'
-				AND NVD.VERSION = '-'
-				AND NVD.PRODUCT = REPLACE(IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)), ' ', '_')
-			</if>
+				AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != L1.OSS_COMMON_ID
+				)
+				AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+						CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = L1.OSS_COMMON_ID
+				)
 			) ELSE NULL END CVSS_SCORE_MAX,
 			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' AND M.OSS_NAME != '' AND M.OSS_NAME != '-' THEN 
 			(
-			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
 				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(CVE.CVSS_SCORE),'@',CVE.CVE_ID)
 				FROM NVD_DATA_V3 NVD
 				INNER JOIN NVD_CVE_V3 CVE
 				ON NVD.CVE_ID = CVE.CVE_ID
 				WHERE NVD.PRODUCT != '-'
 				AND NVD.VERSION = M.OSS_VERSION
-			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-				SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',MAX(NVD.CVSS_SCORE),'@',NVD.CVE_ID)
-				FROM NVD_DATA_SCORE_V3 NVD
-				WHERE NVD.PRODUCT != '-'
-				AND NVD.VERSION = '-'
-			</if>
 				AND NVD.PRODUCT IN (
 					SELECT REPLACE(NICK.OSS_NICKNAME, ' ', '_') 
 					FROM (
@@ -2985,50 +3243,32 @@
 						ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
 					) NICK
 					WHERE NICK.OSS_NAME = IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)))
+				AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != L1.OSS_COMMON_ID
+				)
+				AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = L1.OSS_COMMON_ID
+				)
 			) ELSE NULL END CVSS_SCORE_MAX1
-<!-- 		CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' AND M.OSS_NAME != '' AND M.OSS_NAME != '-' THEN 
-			(
-				SELECT CONCAT(TBL.PRODUCT,'@',TBL.VERSION,'@',TBL.VENDOR,'@',MAX(TBL.CVSS_SCORE),'@',TBL.CVE_ID)
-	    		FROM
-	    		(
-	    			SELECT NVD.PRODUCT, NVD.VERSION, NVD.VENDOR, CVE.CVE_ID, CVE.CVSS_SCORE, NVD.CRITERIA
-					FROM NVD_DATA_CONFIGURATIONS NVD
-					INNER JOIN NVD_CVE_V3 CVE
-					ON NVD.CVE_ID = CVE.CVE_ID
-				) TBL
-				WHERE TBL.PRODUCT = REPLACE(IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME)), ' ', '_')
-			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-				AND SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = M.OSS_VERSION
 			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-				AND SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = '-'
-			</if>
-			) ELSE NULL END CVSS_SCORE_MAX2,
-			CASE WHEN IFNULL(M.EXCLUDE_YN, 'N') != 'Y' AND M.OSS_NAME != '' AND M.OSS_NAME != '-' THEN 
-			(
-				SELECT CONCAT(TBL.PRODUCT,'@',TBL.VERSION,'@',TBL.VENDOR,'@',MAX(TBL.CVSS_SCORE),'@',TBL.CVE_ID)
-	    		FROM
-	    		(
-	    			SELECT NVD.PRODUCT, NVD.VERSION, NVD.VENDOR, CVE.CVE_ID, CVE.CVSS_SCORE, NVD.CRITERIA
-					FROM NVD_DATA_CONFIGURATIONS NVD
-					INNER JOIN NVD_CVE_V3 CVE
-					ON NVD.CVE_ID = CVE.CVE_ID
-				) TBL
-			<if test="@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-				WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = M.OSS_VERSION
-			</if>
-			<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossVersionEmptyFlag)">
-				WHERE SUBSTRING_INDEX(SUBSTRING_INDEX(TBL.CRITERIA, ':', 6), ':', -1) = '-'
-			</if>
-				AND TBL.PRODUCT IN (SELECT REPLACE(OSS_NICKNAME, ' ', '_') FROM OSS_NICKNAME WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = IFNULL(M.REF_OSS_NAME, IFNULL(L1.OSS_NAME, M.OSS_NAME))))
-			) ELSE NULL END CVSS_SCORE_MAX3 -->
-		<if test="@oss.fosslight.util.StringUtil@equals('30', referenceDiv)">
-			, BAR.GUIREPORT_FLAG
-		</if>
-			, M.REF_OSS_NAME
-		<if test="@oss.fosslight.util.StringUtil@equals('14', referenceDiv) or @oss.fosslight.util.StringUtil@equals('15', referenceDiv) or @oss.fosslight.util.StringUtil@equals('20', referenceDiv)">
-			, M.TLSH, M.CHECK_SUM
-		</if>
 	   FROM OSS_COMPONENTS M
 	   LEFT OUTER JOIN (
 				SELECT
@@ -3086,6 +3326,44 @@
 	    </if>
 	    <if test="@oss.fosslight.util.StringUtil@equals('Y', sortAndroidFlag)">ORDER BY CONCAT(IFNULL(BINARY_NAME,''), IFNULL(FILE_PATH,'')), (0 + REPLACE(CASE WHEN IFNULL(BAT_PERCENTAGE, '0') = '' THEN '0' ELSE IFNULL(BAT_PERCENTAGE, '0') END , '%', '') ) DESC, COMPONENT_ID</if>
 	  
+	</select>
+	
+	<select id="selectNvdInfoWithOutVer" parameterType="oss.fosslight.domain.OssMaster" resultType="string">
+		SELECT CONCAT(NVD.PRODUCT,'@',NVD.VERSION,'@',NVD.VENDOR,'@',CVE.CVSS_SCORE,'@',CVE.CVE_ID)
+	   	FROM NVD_DATA_V3 NVD
+	    INNER JOIN NVD_CVE_V3 CVE
+	    ON NVD.CVE_ID = CVE.CVE_ID
+	    WHERE (NVD.PRODUCT = #{ossName} OR NVD.PRODUCT = REPLACE(#{ossName}, ' ', '_')
+		<if test="ossNicknames != null">
+			<foreach item="item" collection="ossNicknames">
+				OR NVD.PRODUCT = REPLACE(#{item}, ' ', '_')
+			</foreach>
+		</if>
+		)
+		AND NOT EXISTS (
+			SELECT 1
+			FROM
+			(	
+				SELECT CASE 
+						WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+						WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+				FROM OSS_INCLUDE_CPE
+			) CPE
+			WHERE CPE.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+		)
+		AND NOT EXISTS (
+			SELECT 1
+			FROM
+			(
+				SELECT OSS_COMMON_ID,
+					CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+					WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+				FROM OSS_EXCLUDE_CPE
+			) TBL
+			WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+			AND TBL.OSS_COMMON_ID = #{ossCommonId}
+		)
+		ORDER BY CVE.CVSS_SCORE DESC LIMIT 1
 	</select>
 	
 	<select id="getPartnerOssList" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.OssComponents">
@@ -5083,7 +5361,8 @@
 		 INNER JOIN T2_FILE T2 
 		    ON (T1.PACKAGE_FILE_ID = T2.FILE_SEQ
 		        OR T1.PACKAGE_FILE_ID2 = T2.FILE_SEQ
-		        OR T1.PACKAGE_FILE_ID3 = T2.FILE_SEQ)
+		        OR T1.PACKAGE_FILE_ID3 = T2.FILE_SEQ
+		        OR T1.PACKAGE_FILE_ID4 = T2.FILE_SEQ)
 		 WHERE T1.PRJ_ID = #{prjId}
 	 </select>
 	 
@@ -5762,7 +6041,7 @@
 			, IF(IFNULL(T3.LICENSE_ID, '') = '', '', T5.LICENSE_TYPE) AS LICENSE_TYPE
 			, T2.PACKAGE_URL
 		FROM PROJECT_MASTER T1 
-			INNER JOIN OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = '13' AND T2.OSS_NAME != '-'
+			INNER JOIN OSS_COMPONENTS T2 ON T1.PRJ_ID = T2.REFERENCE_ID AND T2.REFERENCE_DIV = #{referenceDiv} AND T2.OSS_NAME != '-'
 			INNER JOIN OSS_COMPONENTS_LICENSE T3 ON T2.COMPONENT_ID = T3.COMPONENT_ID
 			 LEFT JOIN (
 				SELECT
@@ -5830,7 +6109,7 @@
 			FROM NVD_DATA_V3 NVD
 			INNER JOIN
 			(
-				SELECT OSS_NAME, IF(IFNULL(OSS_VERSION, '') = '', '-', OSS_VERSION) AS VERSION
+				SELECT OSS_ID, OSS_NAME, IF(IFNULL(OSS_VERSION, '') = '', '-', OSS_VERSION) AS VERSION
 				FROM OSS_COMPONENTS
 				WHERE REFERENCE_ID = #{prjId}
 				AND REFERENCE_DIV = #{referenceDiv}
@@ -5840,8 +6119,87 @@
 				AND EXCLUDE_YN != 'Y'
 				GROUP BY OSS_NAME, OSS_VERSION
 			) OC
-			ON NVD.PRODUCT = OC.OSS_NAME
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
 			AND NVD.VERSION = OC.VERSION
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
+			
+			UNION
+			
+			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION AS VERSION
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN
+			(
+				SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM
+				(
+					SELECT OSS_ID, OSS_NAME, OSS_VERSION
+					FROM OSS_COMPONENTS
+					WHERE REFERENCE_ID = #{prjId}
+					AND REFERENCE_DIV = #{referenceDiv}
+					AND IFNULL(OSS_NAME, '') != '' 
+					AND IFNULL(OSS_VERSION, '') != ''
+					AND OSS_NAME != '-'
+					AND EXCLUDE_YN != 'Y'
+					GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
+				) OC
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
+				WHERE ALIAS.OSS_VERSION_ALIAS IS NOT NULL
+			) OC
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+			AND NVD.VERSION = OC.VERSION
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 			
 			UNION
@@ -5860,8 +6218,87 @@
 				AND EXCLUDE_YN != 'Y'
 				GROUP BY OSS_NAME, OSS_VERSION
 			) OC
-			ON NVD.PRODUCT = OC.OSS_NAME
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
 			AND NVD.VERSION = '-'
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY NVD.CVE_ID, OC.OSS_NAME
+			
+			UNION
+			
+			SELECT NVD.CVE_ID, OC.OSS_NAME, '-' AS VERSION
+			FROM NVD_DATA_SCORE_V3 NVD
+			INNER JOIN
+			(
+				SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM
+				(
+					SELECT OSS_ID, OSS_NAME, OSS_VERSION
+					FROM OSS_COMPONENTS
+					WHERE REFERENCE_ID = #{prjId}
+					AND REFERENCE_DIV = #{referenceDiv}
+					AND IFNULL(OSS_NAME, '') != '' 
+					AND IFNULL(OSS_VERSION, '') = ''
+					AND OSS_NAME != '-'
+					AND EXCLUDE_YN != 'Y'
+					GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
+				) OC
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
+				WHERE ALIAS.OSS_VERSION_ALIAS IS NOT NULL
+			) OC
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+			AND NVD.VERSION = '-'
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY NVD.CVE_ID, OC.OSS_NAME
 			
 			UNION
@@ -5888,9 +6325,92 @@
 				AND OC.EXCLUDE_YN != 'Y'
 				GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
 			) OC
-			ON NVD.PRODUCT = OC.OSS_NICKNAME
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
 			AND NVD.VERSION = OC.VERSION
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
+			
+			UNION
+			
+			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION AS VERSION
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN
+			(
+				SELECT NICK.OSS_NICKNAME, NICK.OSS_NAME
+						, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS OSS_VERSION
+						, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM OSS_COMPONENTS OC
+				INNER JOIN (
+					SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+					FROM OSS_NICKNAME NICK
+					INNER JOIN OSS_COMMON OC
+					ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				) NICK
+				ON OC.OSS_NAME = NICK.OSS_NAME
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
+				WHERE OC.REFERENCE_ID = #{prjId}
+				AND OC.REFERENCE_DIV = #{referenceDiv}
+				AND IFNULL(OC.OSS_NAME, '') != '' 
+				AND IFNULL(OC.OSS_VERSION, '') != ''
+				AND OC.OSS_NAME != '-'
+				AND OC.EXCLUDE_YN != 'Y'
+				GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS
+			) OC
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
+			AND NVD.VERSION = OC.VERSION
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION
 			
 			UNION
 			
@@ -5915,104 +6435,232 @@
 				AND OC.EXCLUDE_YN != 'Y'
 				GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
 			) OC
-			ON NVD.PRODUCT = OC.OSS_NICKNAME
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
 			AND NVD.VERSION = '-'
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY NVD.CVE_ID, OC.OSS_NAME
 			
 			UNION
-			
-			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
-			FROM NVD_DATA_V3 NVD
-			INNER JOIN
-			(
-				SELECT NICK.OSS_NICKNAME, NICK.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS VERSION
-				FROM OSS_COMPONENTS OC
-				INNER JOIN (
-					SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
-					FROM OSS_NICKNAME NICK
-					INNER JOIN OSS_COMMON OC
-					ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
-				) NICK
-				ON OC.OSS_NAME = NICK.OSS_NAME
-				WHERE OC.REFERENCE_ID = #{prjId}
-				AND OC.REFERENCE_DIV = #{referenceDiv}
-				AND IFNULL(OC.OSS_NAME, '') != '' 
-				AND IFNULL(OC.OSS_VERSION, '') != '' 
-				AND OC.OSS_NAME != '-' 
-				AND OC.EXCLUDE_YN != 'Y'
-				AND NICK.OSS_NICKNAME REGEXP '[-]'
-				GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
-			) OC
-			ON NVD.VENDORPRODUCT = OC.OSS_NICKNAME
-			AND NVD.VERSION = OC.VERSION
-			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
-			
-			UNION
-			
-			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
-			FROM NVD_DATA_SCORE_V3 NVD
-			INNER JOIN
-			(
-				SELECT NICK.OSS_NICKNAME, NICK.OSS_NAME, '-' AS VERSION
-				FROM OSS_COMPONENTS OC
-				INNER JOIN (
-					SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
-					FROM OSS_NICKNAME NICK
-					INNER JOIN OSS_COMMON OC
-					ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
-				) NICK
-				ON OC.OSS_NAME = NICK.OSS_NAME
-				WHERE OC.REFERENCE_ID = #{prjId}
-				AND OC.REFERENCE_DIV = #{referenceDiv}
-				AND IFNULL(OC.OSS_NAME, '') != '' 
-				AND IFNULL(OC.OSS_VERSION, '') = ''
-				AND OC.OSS_NAME != '-' 
-				AND OC.EXCLUDE_YN != 'Y'
-				AND NICK.OSS_NICKNAME REGEXP '[-]'
-				GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
-			) OC
-			ON NVD.VENDORPRODUCT = OC.OSS_NICKNAME
-			AND NVD.VERSION = '-'
-			GROUP BY NVD.CVE_ID, OC.OSS_NAME
-			
-			UNION
-			
-			SELECT OM.CVE_ID, OC.OSS_NAME, IFNULL(OC.OSS_VERSION, '-') AS VERSION
-			FROM OSS_COMPONENTS OC
-			INNER JOIN (
-				SELECT OC.OSS_NAME, OV.OSS_VERSION, OV.CVE_ID
-				FROM OSS_COMMON OC
-				INNER JOIN OSS_VERSION OV
-				ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
-				WHERE OV.IN_CPE_MATCH_FLAG = 'Y'
-			) OM
-			ON OC.OSS_NAME = OM.OSS_NAME
-			AND OC.OSS_VERSION = OM.OSS_VERSION
-			WHERE OC.REFERENCE_ID = #{prjId}
-			AND OC.REFERENCE_DIV = #{referenceDiv}
-			AND IFNULL(OC.OSS_NAME, '') != '' 
-			AND OC.OSS_NAME != '-' 
-			AND OC.EXCLUDE_YN != 'Y'
-			GROUP BY OM.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION
-			
-<!-- 		UNION
 			
 			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 			FROM (
-				SELECT CONF.CVE_ID, CONF.PRODUCT, SUBSTRING_INDEX(SUBSTRING_INDEX(CONF.CRITERIA , ':', 6), ':', -1) AS VERSION
+				SELECT TBL.*
+				FROM
+				(	
+					SELECT NVD.PRODUCT, CVE.CVE_ID, SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, NVD.CHK_CRITERIA) , ':', 6), ':', -1) AS VERSION, NVD.CRITERIA
+					FROM (
+						SELECT CONF.*
+						FROM
+						(				
+							SELECT CONF.MATCH_CRITERIA_ID, CONF.PRODUCT, CONF.VENDOR, CONF.CVE_ID,
+									CASE 
+											WHEN (LENGTH(CONF.CRITERIA) - LENGTH(REPLACE(CONF.CRITERIA, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CONF.CRITERIA, ':', 5), ':', -2)
+											WHEN (LENGTH(CONF.CRITERIA) - LENGTH(REPLACE(CONF.CRITERIA, ':', ''))) <![CDATA[<]]> 12 THEN CONF.CRITERIA ELSE CONF.CRITERIA END CRITERIA
+									, CONF.CRITERIA AS CHK_CRITERIA
+							FROM NVD_DATA_CONFIGURATIONS CONF
+							WHERE 1=1
+							AND MATCH(CONF.CRITERIA) AGAINST (
+								(SELECT GROUP_CONCAT(TBL.CRITERIA SEPARATOR ' ') AS URI
+								FROM (SELECT CASE 
+											WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+											WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+										FROM OSS_INCLUDE_CPE
+										WHERE OSS_COMMON_ID IN (	
+												SELECT (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = OC.OSS_NAME) AS OSS_COMMON_ID
+												FROM OSS_COMPONENTS OC
+												WHERE OC.REFERENCE_ID = #{prjId}
+												AND OC.REFERENCE_DIV = #{referenceDiv}
+												AND IFNULL(OC.OSS_NAME, '') != '' 
+												AND OC.OSS_NAME != '-' 
+												AND OC.EXCLUDE_YN != 'Y'
+												GROUP BY OC.OSS_NAME)
+								GROUP BY CPE23URI
+								) TBL)
+							)
+						) CONF
+						WHERE EXISTS (
+							SELECT 1
+							FROM (SELECT CASE 
+										WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+										WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+							FROM OSS_INCLUDE_CPE
+							WHERE OSS_COMMON_ID IN (	
+								SELECT (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = OC.OSS_NAME) AS OSS_COMMON_ID
+								FROM OSS_COMPONENTS OC
+								WHERE OC.REFERENCE_ID = #{prjId}
+								AND OC.REFERENCE_DIV = #{referenceDiv}
+								AND IFNULL(OC.OSS_NAME, '') != '' 
+								AND OC.OSS_NAME != '-' 
+								AND OC.EXCLUDE_YN != 'Y'
+								GROUP BY OC.OSS_NAME)
+							GROUP BY CPE23URI
+							) TBL
+							WHERE CONF.CRITERIA = TBL.CRITERIA
+						)
+					) NVD
+					INNER JOIN NVD_CVE_V3 CVE
+					ON NVD.CVE_ID = CVE.CVE_ID
+					LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+					ON NVD.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+				) TBL
+				GROUP BY TBL.PRODUCT, TBL.CVE_ID, TBL.VERSION, TBL.CRITERIA
+			) NVD
+			INNER JOIN
+			(
+				SELECT OC.OSS_NAME, IFNULL(OC.OSS_VERSION, '-') AS VERSION, OM.CRITERIA
 				FROM OSS_COMPONENTS OC
-				INNER JOIN NVD_DATA_CONFIGURATIONS CONF
-				ON CONF.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+				INNER JOIN (
+					SELECT OC.OSS_NAME,
+							CASE 
+								WHEN (LENGTH(CPE.CPE23URI) - LENGTH(REPLACE(CPE.CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE.CPE23URI, ':', 5), ':', -2)
+								WHEN (LENGTH(CPE.CPE23URI) - LENGTH(REPLACE(CPE.CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE.CPE23URI ELSE CPE.CPE23URI END CRITERIA
+					FROM OSS_COMMON OC
+					LEFT JOIN OSS_INCLUDE_CPE CPE
+					ON OC.OSS_COMMON_ID = CPE.OSS_COMMON_ID
+					WHERE CPE.CPE23URI IS NOT NULL
+				) OM
+				ON OC.OSS_NAME = OM.OSS_NAME
 				WHERE OC.REFERENCE_ID = #{prjId}
 				AND OC.REFERENCE_DIV = #{referenceDiv}
 				AND IFNULL(OC.OSS_NAME, '') != '' 
 				AND OC.OSS_NAME != '-' 
 				AND OC.EXCLUDE_YN != 'Y'
-				GROUP BY CONF.MATCH_CRITERIA_ID, OC.OSS_NAME
-			) NVD
-			INNER JOIN
-			(
-				SELECT OC.OSS_NAME, IFNULL(OC.OSS_VERSION, '-') AS VERSION
+				GROUP BY OC.OSS_NAME, OC.OSS_VERSION, OM.CRITERIA
+			) OC
+			ON NVD.CRITERIA = OC.CRITERIA
+			AND NVD.VERSION = OC.VERSION 
+			GROUP BY NVD.CVE_ID, OC.OSS_NAME
+			
+			UNION
+			
+			SELECT CONF.CVE_ID, OC.OSS_NAME, IF(OC.VERSION = '-', '', OC.VERSION) AS VERSION
+			FROM (
+				SELECT OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS VERSION
+				FROM OSS_COMPONENTS OC
+				WHERE OC.REFERENCE_ID = #{prjId}
+				AND OC.REFERENCE_DIV = #{referenceDiv}
+				AND IFNULL(OC.OSS_NAME, '') != '' 
+				AND OC.OSS_NAME != '-' 
+				AND OC.EXCLUDE_YN != 'Y'
+				GROUP BY OC.OSS_NAME
+			) OC
+			INNER JOIN NVD_DATA_CONFIGURATIONS CONF
+			ON REPLACE(OC.OSS_NAME, ' ', '_') = CONF.PRODUCT
+			LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+			ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE REPLACE(OC.OSS_NAME, ' ', '_') = CONF.PRODUCT
+			AND OC.VERSION = SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY CONF.CVE_ID, OC.OSS_NAME, OC.VERSION
+			
+			UNION
+			
+			SELECT CONF.CVE_ID, OC.OSS_NAME, OSS_VERSION AS VERSION
+			FROM (
+				SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM
+				(
+					SELECT OC.OSS_ID, OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS OSS_VERSION
+					FROM OSS_COMPONENTS OC
+					WHERE OC.REFERENCE_ID = #{prjId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND IFNULL(OC.OSS_NAME, '') != '' 
+					AND OC.OSS_NAME != '-' 
+					AND OC.EXCLUDE_YN != 'Y'
+					GROUP BY OC.OSS_NAME
+				) OC
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
+			) OC
+			INNER JOIN NVD_DATA_CONFIGURATIONS CONF
+			ON CONF.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+			LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+			ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE REPLACE(OC.OSS_NAME, ' ', '_') = CONF.PRODUCT
+			AND IFNULL(OC.VERSION, '') = SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY CONF.CVE_ID, OC.OSS_NAME, OC.VERSION
+			
+			UNION
+			
+			SELECT CONF.CVE_ID, OC.OSS_NAME, IF(OC.VERSION = '-', '', OC.VERSION) AS VERSION
+			FROM (
+				SELECT OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS VERSION
 				FROM OSS_COMPONENTS OC
 				WHERE OC.REFERENCE_ID = #{prjId}
 				AND OC.REFERENCE_DIV = #{referenceDiv}
@@ -6021,56 +6669,109 @@
 				AND OC.EXCLUDE_YN != 'Y'
 				GROUP BY OC.OSS_NAME, OC.OSS_VERSION
 			) OC
-			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
-			AND NVD.VERSION = OC.VERSION
-			GROUP BY NVD.CVE_ID, OC.OSS_NAME
+			INNER JOIN (
+				SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+				FROM OSS_NICKNAME NICK
+				INNER JOIN OSS_COMMON OC
+				ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+			) NICK
+			ON OC.OSS_NAME = NICK.OSS_NAME
+			INNER JOIN NVD_DATA_CONFIGURATIONS CONF
+			ON REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+			LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+			ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+			AND SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1) = OC.VERSION
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY NICK.OSS_NAME, OC.VERSION
 			
 			UNION
 			
-			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
+			SELECT CONF.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION AS VERSION
 			FROM (
-				SELECT CONF.CVE_ID, CONF.PRODUCT, SUBSTRING_INDEX(SUBSTRING_INDEX(CONF.CRITERIA , ':', 6), ':', -1) AS VERSION
-				FROM OSS_COMPONENTS OC
-				INNER JOIN (
-					SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
-					FROM OSS_NICKNAME NICK
-					INNER JOIN OSS_COMMON OC
-					ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
-				) NICK
-				ON OC.OSS_NAME = NICK.OSS_NAME
-				INNER JOIN NVD_DATA_CONFIGURATIONS CONF
-				ON CONF.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
-				WHERE OC.REFERENCE_ID = #{prjId}
-				AND OC.REFERENCE_DIV = #{referenceDiv}
-				AND IFNULL(OC.OSS_NAME, '') != '' 
-				AND OC.OSS_NAME != '-' 
-				AND OC.EXCLUDE_YN != 'Y'
-				GROUP BY CONF.MATCH_CRITERIA_ID, NICK.OSS_NICKNAME
-			) NVD
-			INNER JOIN
-			(
-				SELECT NICK.OSS_NICKNAME, NICK.OSS_NAME, IFNULL(OC.OSS_VERSION, '-') AS VERSION
-				FROM OSS_COMPONENTS OC
-				INNER JOIN (
-					SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
-					FROM OSS_NICKNAME NICK
-					INNER JOIN OSS_COMMON OC
-					ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
-				) NICK
-				ON OC.OSS_NAME = NICK.OSS_NAME
-				WHERE OC.REFERENCE_ID = #{prjId}
-				AND OC.REFERENCE_DIV = #{referenceDiv}
-				AND IFNULL(OC.OSS_NAME, '') != '' 
-				AND OC.OSS_NAME != '-' 
-				AND OC.EXCLUDE_YN != 'Y'
-				GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
+				SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM
+				(
+					SELECT OC.OSS_ID, OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS OSS_VERSION
+					FROM OSS_COMPONENTS OC
+					WHERE OC.REFERENCE_ID = #{prjId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND IFNULL(OC.OSS_NAME, '') != '' 
+					AND OC.OSS_NAME != '-' 
+					AND OC.EXCLUDE_YN != 'Y'
+					GROUP BY OC.OSS_ID, OC.OSS_NAME, OC.OSS_VERSION
+				) OC
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
 			) OC
-			ON NVD.PRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
-			AND NVD.VERSION = OC.VERSION
-			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION -->
+			INNER JOIN (
+				SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+				FROM OSS_NICKNAME NICK
+				INNER JOIN OSS_COMMON OC
+				ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+			) NICK
+			ON OC.OSS_NAME = NICK.OSS_NAME
+			INNER JOIN NVD_DATA_CONFIGURATIONS CONF
+			ON REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+			LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+			ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+			AND SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1) = OC.VERSION
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY NICK.OSS_NAME, OC.OSS_VERSION
 		) TBL
 		ON CVE.CVE_ID = TBL.CVE_ID
-		AND CVE.CVSS_SCORE >= 6.0
+		AND CVE.CVSS_SCORE >= 1.0
 		LEFT JOIN (
 			SELECT *
 			FROM NVD_DATA_SECURITY
@@ -6218,7 +6919,7 @@
 			FROM NVD_DATA_V3 NVD
 			INNER JOIN
 			(
-				SELECT OSS_NAME, IF(IFNULL(OSS_VERSION, '') = '', '-', OSS_VERSION) AS VERSION
+				SELECT OSS_ID, OSS_NAME, IF(IFNULL(OSS_VERSION, '') = '', '-', OSS_VERSION) AS VERSION
 				FROM OSS_COMPONENTS
 				WHERE REFERENCE_ID = #{referenceId}
 				AND REFERENCE_DIV = #{referenceDiv}
@@ -6230,6 +6931,85 @@
 			) OC
 			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
 			AND NVD.VERSION = OC.VERSION
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
+			
+			UNION
+			
+			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION AS VERSION
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN
+			(
+				SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM
+				(
+					SELECT OSS_ID, OSS_NAME, OSS_VERSION
+					FROM OSS_COMPONENTS
+					WHERE REFERENCE_ID = #{referenceId}
+					AND REFERENCE_DIV = #{referenceDiv}
+					AND IFNULL(OSS_NAME, '') != '' 
+					AND IFNULL(OSS_VERSION, '') != ''
+					AND OSS_NAME != '-'
+					AND EXCLUDE_YN != 'Y'
+					GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
+				) OC
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
+				WHERE ALIAS.OSS_VERSION_ALIAS IS NOT NULL
+			) OC
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+			AND NVD.VERSION = OC.VERSION
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 			
 			UNION
@@ -6250,6 +7030,85 @@
 			) OC
 			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
 			AND NVD.VERSION = '-'
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY NVD.CVE_ID, OC.OSS_NAME
+			
+			UNION
+			
+			SELECT NVD.CVE_ID, OC.OSS_NAME, '-' AS VERSION
+			FROM NVD_DATA_SCORE_V3 NVD
+			INNER JOIN
+			(
+				SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM
+				(
+					SELECT OSS_ID, OSS_NAME, OSS_VERSION
+					FROM OSS_COMPONENTS
+					WHERE REFERENCE_ID = #{referenceId}
+					AND REFERENCE_DIV = #{referenceDiv}
+					AND IFNULL(OSS_NAME, '') != '' 
+					AND IFNULL(OSS_VERSION, '') = ''
+					AND OSS_NAME != '-'
+					AND EXCLUDE_YN != 'Y'
+					GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
+				) OC
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
+				WHERE ALIAS.OSS_VERSION_ALIAS IS NOT NULL
+			) OC
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+			AND NVD.VERSION = '-'
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY NVD.CVE_ID, OC.OSS_NAME
 			
 			UNION
@@ -6278,7 +7137,90 @@
 			) OC
 			ON NVD.PRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
 			AND NVD.VERSION = OC.VERSION
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
+			
+			UNION
+			
+			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION AS VERSION
+			FROM NVD_DATA_V3 NVD
+			INNER JOIN
+			(
+				SELECT NICK.OSS_NICKNAME, NICK.OSS_NAME
+						, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS OSS_VERSION
+						, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM OSS_COMPONENTS OC
+				INNER JOIN (
+					SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+					FROM OSS_NICKNAME NICK
+					INNER JOIN OSS_COMMON OC
+					ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+				) NICK
+				ON OC.OSS_NAME = NICK.OSS_NAME
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
+				WHERE OC.REFERENCE_ID = #{referenceId}
+				AND OC.REFERENCE_DIV = #{referenceDiv}
+				AND IFNULL(OC.OSS_NAME, '') != '' 
+				AND IFNULL(OC.OSS_VERSION, '') != ''
+				AND OC.OSS_NAME != '-'
+				AND OC.EXCLUDE_YN != 'Y'
+				GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS
+			) OC
+			ON NVD.PRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
+			AND NVD.VERSION = OC.VERSION
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION
 			
 			UNION
 			
@@ -6305,62 +7247,32 @@
 			) OC
 			ON NVD.PRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
 			AND NVD.VERSION = '-'
-			GROUP BY NVD.CVE_ID, OC.OSS_NAME
-			
-			UNION
-			
-			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
-			FROM NVD_DATA_V3 NVD
-			INNER JOIN
-			(
-				SELECT NICK.OSS_NICKNAME, NICK.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS VERSION
-				FROM OSS_COMPONENTS OC
-				INNER JOIN (
-					SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
-					FROM OSS_NICKNAME NICK
-					INNER JOIN OSS_COMMON OC
-					ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
-				) NICK
-				ON OC.OSS_NAME = NICK.OSS_NAME
-				WHERE OC.REFERENCE_ID = #{referenceId}
-				AND OC.REFERENCE_DIV = #{referenceDiv}
-				AND IFNULL(OC.OSS_NAME, '') != '' 
-				AND IFNULL(OC.OSS_VERSION, '') != '' 
-				AND OC.OSS_NAME != '-' 
-				AND OC.EXCLUDE_YN != 'Y'
-				AND NICK.OSS_NICKNAME REGEXP '[-]'
-				GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
-			) OC
-			ON NVD.VENDORPRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
-			AND NVD.VERSION = OC.VERSION
-			GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
-			
-			UNION
-			
-			SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
-			FROM NVD_DATA_SCORE_V3 NVD
-			INNER JOIN
-			(
-				SELECT NICK.OSS_NICKNAME, NICK.OSS_NAME, '-' AS VERSION
-				FROM OSS_COMPONENTS OC
-				INNER JOIN (
-					SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
-					FROM OSS_NICKNAME NICK
-					INNER JOIN OSS_COMMON OC
-					ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
-				) NICK
-				ON OC.OSS_NAME = NICK.OSS_NAME
-				WHERE OC.REFERENCE_ID = #{referenceId}
-				AND OC.REFERENCE_DIV = #{referenceDiv}
-				AND IFNULL(OC.OSS_NAME, '') != '' 
-				AND IFNULL(OC.OSS_VERSION, '') = ''
-				AND OC.OSS_NAME != '-' 
-				AND OC.EXCLUDE_YN != 'Y'
-				AND NICK.OSS_NICKNAME REGEXP '[-]'
-				GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION
-			) OC
-			ON NVD.VENDORPRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
-			AND NVD.VERSION = '-'
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(NVD.VENDOR, ':', NVD.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY NVD.CVE_ID, OC.OSS_NAME
 			
 			UNION
@@ -6468,8 +7380,90 @@
 				GROUP BY OC.OSS_NAME
 			) OC
 			INNER JOIN NVD_DATA_CONFIGURATIONS CONF
+			ON REPLACE(OC.OSS_NAME, ' ', '_') = CONF.PRODUCT
+			LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+			ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE REPLACE(OC.OSS_NAME, ' ', '_') = CONF.PRODUCT
+			AND OC.VERSION = SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY CONF.CVE_ID, OC.OSS_NAME, OC.VERSION
+			
+			UNION
+			
+			SELECT CONF.CVE_ID, OC.OSS_NAME, OSS_VERSION AS VERSION
+			FROM (
+				SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM
+				(
+					SELECT OC.OSS_ID, OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS OSS_VERSION
+					FROM OSS_COMPONENTS OC
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND IFNULL(OC.OSS_NAME, '') != '' 
+					AND OC.OSS_NAME != '-' 
+					AND OC.EXCLUDE_YN != 'Y'
+					GROUP BY OC.OSS_NAME
+				) OC
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
+			) OC
+			INNER JOIN NVD_DATA_CONFIGURATIONS CONF
 			ON CONF.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
-			AND OC.VERSION = SUBSTRING_INDEX(SUBSTRING_INDEX(CONF.CRITERIA, ':', 6), ':', -1)
+			LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+			ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE REPLACE(OC.OSS_NAME, ' ', '_') = CONF.PRODUCT
+			AND IFNULL(OC.VERSION, '') = SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY CONF.CVE_ID, OC.OSS_NAME, OC.VERSION
 			
 			UNION
@@ -6493,9 +7487,98 @@
 			) NICK
 			ON OC.OSS_NAME = NICK.OSS_NAME
 			INNER JOIN NVD_DATA_CONFIGURATIONS CONF
-			ON CONF.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
-			AND SUBSTRING_INDEX(SUBSTRING_INDEX(CONF.CRITERIA, ':', 6), ':', -1) = OC.VERSION
+			ON REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+			LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+			ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+			AND SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1) = OC.VERSION
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
 			GROUP BY NICK.OSS_NAME, OC.VERSION
+			
+			UNION
+			
+			SELECT CONF.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION AS VERSION
+			FROM (
+				SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+				FROM
+				(
+					SELECT OC.OSS_ID, OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS OSS_VERSION
+					FROM OSS_COMPONENTS OC
+					WHERE OC.REFERENCE_ID = #{referenceId}
+					AND OC.REFERENCE_DIV = #{referenceDiv}
+					AND IFNULL(OC.OSS_NAME, '') != '' 
+					AND OC.OSS_NAME != '-' 
+					AND OC.EXCLUDE_YN != 'Y'
+					GROUP BY OC.OSS_ID, OC.OSS_NAME, OC.OSS_VERSION
+				) OC
+				LEFT JOIN OSS_VERSION_ALIAS ALIAS
+				ON OC.OSS_ID = ALIAS.OSS_ID
+			) OC
+			INNER JOIN (
+				SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+				FROM OSS_NICKNAME NICK
+				INNER JOIN OSS_COMMON OC
+				ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+			) NICK
+			ON OC.OSS_NAME = NICK.OSS_NAME
+			INNER JOIN NVD_DATA_CONFIGURATIONS CONF
+			ON REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+			LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+			ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+			LEFT JOIN OSS_COMMON COMMON
+			ON OC.OSS_NAME = COMMON.OSS_NAME
+			WHERE REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+			AND SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1) = OC.VERSION
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_INCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID != COMMON.OSS_COMMON_ID
+				)
+			AND NOT EXISTS (
+					SELECT 1
+					FROM
+					(
+						SELECT OSS_COMMON_ID,
+							CASE WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) = 12 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(CPE23URI, ':', 5), ':', -2)
+							WHEN (LENGTH(CPE23URI) - LENGTH(REPLACE(CPE23URI, ':', ''))) <![CDATA[<]]> 12 THEN CPE23URI ELSE CPE23URI END CRITERIA
+						FROM OSS_EXCLUDE_CPE
+					) TBL
+					WHERE TBL.CRITERIA = CONCAT(CONF.VENDOR, ':', CONF.PRODUCT)
+					AND TBL.OSS_COMMON_ID = COMMON.OSS_COMMON_ID
+				)
+			GROUP BY NICK.OSS_NAME, OC.OSS_VERSION
 		) TBL
 		ON CVE.CVE_ID = TBL.CVE_ID
 		AND CVE.CVSS_SCORE >= #{standardScore}
@@ -6513,11 +7596,11 @@
 				FROM NVD_CVE_V3 CVE
 				INNER JOIN
 				(
-					SELECT NVD.CVE_ID, OC.OSS_NAME
+					SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					FROM NVD_DATA_V3 NVD
 					INNER JOIN
 					(
-						SELECT OSS_NAME, IF(IFNULL(OSS_VERSION, '') = '', '-', OSS_VERSION) AS VERSION
+						SELECT OSS_ID, OSS_NAME, IF(IFNULL(OSS_VERSION, '') = '', '-', OSS_VERSION) AS VERSION
 						FROM OSS_COMPONENTS
 						WHERE REFERENCE_ID = #{referenceId}
 						AND REFERENCE_DIV = #{referenceDiv}
@@ -6529,11 +7612,38 @@
 					) OC
 					ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
 					AND NVD.VERSION = OC.VERSION
-					GROUP BY NVD.CVE_ID, OC.OSS_NAME
+					GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					
 					UNION
 					
-					SELECT NVD.CVE_ID, OC.OSS_NAME
+					SELECT NVD.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION AS VERSION
+					FROM NVD_DATA_V3 NVD
+					INNER JOIN
+					(
+						SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+						FROM
+						(
+							SELECT OSS_ID, OSS_NAME, OSS_VERSION
+							FROM OSS_COMPONENTS
+							WHERE REFERENCE_ID = #{referenceId}
+							AND REFERENCE_DIV = #{referenceDiv}
+							AND IFNULL(OSS_NAME, '') != '' 
+							AND IFNULL(OSS_VERSION, '') != ''
+							AND OSS_NAME != '-'
+							AND EXCLUDE_YN != 'Y'
+							GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
+						) OC
+						LEFT JOIN OSS_VERSION_ALIAS ALIAS
+						ON OC.OSS_ID = ALIAS.OSS_ID
+						WHERE ALIAS.OSS_VERSION_ALIAS IS NOT NULL
+					) OC
+					ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+					AND NVD.VERSION = OC.VERSION
+					GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
+					
+					UNION
+					
+					SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					FROM NVD_DATA_SCORE_V3 NVD
 					INNER JOIN
 					(
@@ -6553,7 +7663,34 @@
 					
 					UNION
 					
-					SELECT NVD.CVE_ID, OC.OSS_NAME
+					SELECT NVD.CVE_ID, OC.OSS_NAME, '-' AS VERSION
+					FROM NVD_DATA_SCORE_V3 NVD
+					INNER JOIN
+					(
+						SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+						FROM
+						(
+							SELECT OSS_ID, OSS_NAME, OSS_VERSION
+							FROM OSS_COMPONENTS
+							WHERE REFERENCE_ID = #{referenceId}
+							AND REFERENCE_DIV = #{referenceDiv}
+							AND IFNULL(OSS_NAME, '') != '' 
+							AND IFNULL(OSS_VERSION, '') = ''
+							AND OSS_NAME != '-'
+							AND EXCLUDE_YN != 'Y'
+							GROUP BY OSS_ID, OSS_NAME, OSS_VERSION
+						) OC
+						LEFT JOIN OSS_VERSION_ALIAS ALIAS
+						ON OC.OSS_ID = ALIAS.OSS_ID
+						WHERE ALIAS.OSS_VERSION_ALIAS IS NOT NULL
+					) OC
+					ON NVD.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+					AND NVD.VERSION = '-'
+					GROUP BY NVD.CVE_ID, OC.OSS_NAME
+					
+					UNION
+					
+					SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					FROM NVD_DATA_V3 NVD
 					INNER JOIN
 					(
@@ -6577,11 +7714,42 @@
 					) OC
 					ON NVD.PRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
 					AND NVD.VERSION = OC.VERSION
-					GROUP BY NVD.CVE_ID, OC.OSS_NAME
+					GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					
 					UNION
 					
-					SELECT NVD.CVE_ID, OC.OSS_NAME
+					SELECT NVD.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION AS VERSION
+					FROM NVD_DATA_V3 NVD
+					INNER JOIN
+					(
+						SELECT NICK.OSS_NICKNAME, NICK.OSS_NAME
+								, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS OSS_VERSION
+								, ALIAS.OSS_VERSION_ALIAS AS VERSION
+						FROM OSS_COMPONENTS OC
+						INNER JOIN (
+							SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+							FROM OSS_NICKNAME NICK
+							INNER JOIN OSS_COMMON OC
+							ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+						) NICK
+						ON OC.OSS_NAME = NICK.OSS_NAME
+						LEFT JOIN OSS_VERSION_ALIAS ALIAS
+						ON OC.OSS_ID = ALIAS.OSS_ID
+						WHERE OC.REFERENCE_ID = #{referenceId}
+						AND OC.REFERENCE_DIV = #{referenceDiv}
+						AND IFNULL(OC.OSS_NAME, '') != '' 
+						AND IFNULL(OC.OSS_VERSION, '') != ''
+						AND OC.OSS_NAME != '-'
+						AND OC.EXCLUDE_YN != 'Y'
+						GROUP BY NICK.OSS_NICKNAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS
+					) OC
+					ON NVD.PRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
+					AND NVD.VERSION = OC.VERSION
+					GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION
+					
+					UNION
+					
+					SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					FROM NVD_DATA_SCORE_V3 NVD
 					INNER JOIN
 					(
@@ -6608,7 +7776,7 @@
 					
 					UNION
 					
-					SELECT NVD.CVE_ID, OC.OSS_NAME
+					SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					FROM NVD_DATA_V3 NVD
 					INNER JOIN
 					(
@@ -6632,11 +7800,11 @@
 					) OC
 					ON NVD.VENDORPRODUCT = REPLACE(OC.OSS_NICKNAME, ' ', '_')
 					AND NVD.VERSION = OC.VERSION
-					GROUP BY NVD.CVE_ID, OC.OSS_NAME
+					GROUP BY NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					
 					UNION
 					
-					SELECT NVD.CVE_ID, OC.OSS_NAME
+					SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					FROM NVD_DATA_SCORE_V3 NVD
 					INNER JOIN
 					(
@@ -6664,7 +7832,7 @@
 					
 					UNION
 					
-					SELECT NVD.CVE_ID, OC.OSS_NAME
+					SELECT NVD.CVE_ID, OC.OSS_NAME, OC.VERSION
 					FROM (
 						SELECT TBL.*
 						FROM
@@ -6755,7 +7923,7 @@
 					
 					UNION
 					
-					SELECT CONF.CVE_ID, OC.OSS_NAME
+					SELECT CONF.CVE_ID, OC.OSS_NAME, IF(OC.VERSION = '-', '', OC.VERSION) AS VERSION
 					FROM (
 						SELECT OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS VERSION
 						FROM OSS_COMPONENTS OC
@@ -6768,12 +7936,42 @@
 					) OC
 					INNER JOIN NVD_DATA_CONFIGURATIONS CONF
 					ON CONF.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
-					AND OC.VERSION = SUBSTRING_INDEX(SUBSTRING_INDEX(CONF.CRITERIA, ':', 6), ':', -1)
-					GROUP BY CONF.CVE_ID, OC.OSS_NAME
+					LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+					ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+					WHERE REPLACE(OC.OSS_NAME, ' ', '_') = CONF.PRODUCT
+					AND OC.VERSION = SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1)
+					GROUP BY CONF.CVE_ID, OC.OSS_NAME, OC.VERSION
 					
 					UNION
 					
-					SELECT CONF.CVE_ID, OC.OSS_NAME
+					SELECT CONF.CVE_ID, OC.OSS_NAME, OSS_VERSION AS VERSION
+					FROM (
+						SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+						FROM
+						(
+							SELECT OC.OSS_ID, OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS OSS_VERSION
+							FROM OSS_COMPONENTS OC
+							WHERE OC.REFERENCE_ID = #{referenceId}
+							AND OC.REFERENCE_DIV = #{referenceDiv}
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-' 
+							AND OC.EXCLUDE_YN != 'Y'
+							GROUP BY OC.OSS_NAME
+						) OC
+						LEFT JOIN OSS_VERSION_ALIAS ALIAS
+						ON OC.OSS_ID = ALIAS.OSS_ID
+					) OC
+					INNER JOIN NVD_DATA_CONFIGURATIONS CONF
+					ON CONF.PRODUCT = REPLACE(OC.OSS_NAME, ' ', '_')
+					LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+					ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+					WHERE REPLACE(OC.OSS_NAME, ' ', '_') = CONF.PRODUCT
+					AND IFNULL(OC.VERSION, '') = SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1)
+					GROUP BY CONF.CVE_ID, OC.OSS_NAME, OC.VERSION
+					
+					UNION
+					
+					SELECT CONF.CVE_ID, OC.OSS_NAME, IF(OC.VERSION = '-', '', OC.VERSION) AS VERSION
 					FROM (
 						SELECT OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS VERSION
 						FROM OSS_COMPONENTS OC
@@ -6793,8 +7991,45 @@
 					ON OC.OSS_NAME = NICK.OSS_NAME
 					INNER JOIN NVD_DATA_CONFIGURATIONS CONF
 					ON CONF.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
-					AND SUBSTRING_INDEX(SUBSTRING_INDEX(CONF.CRITERIA, ':', 6), ':', -1) = OC.VERSION
-					GROUP BY CONF.CVE_ID, NICK.OSS_NAME
+					LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+					ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+					WHERE REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+					AND SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1) = OC.VERSION
+					GROUP BY NICK.OSS_NAME, OC.VERSION
+					
+					UNION
+					
+					SELECT CONF.CVE_ID, OC.OSS_NAME, OC.OSS_VERSION AS VERSION
+					FROM (
+						SELECT OC.OSS_NAME, OC.OSS_VERSION, ALIAS.OSS_VERSION_ALIAS AS VERSION
+						FROM
+						(
+							SELECT OC.OSS_ID, OC.OSS_NAME, IF(IFNULL(OC.OSS_VERSION, '') = '', '-', OC.OSS_VERSION) AS OSS_VERSION
+							FROM OSS_COMPONENTS OC
+							WHERE OC.REFERENCE_ID = #{referenceId}
+							AND OC.REFERENCE_DIV = #{referenceDiv}
+							AND IFNULL(OC.OSS_NAME, '') != '' 
+							AND OC.OSS_NAME != '-' 
+							AND OC.EXCLUDE_YN != 'Y'
+							GROUP BY OC.OSS_ID, OC.OSS_NAME, OC.OSS_VERSION
+						) OC
+						LEFT JOIN OSS_VERSION_ALIAS ALIAS
+						ON OC.OSS_ID = ALIAS.OSS_ID
+					) OC
+					INNER JOIN (
+						SELECT OC.OSS_NAME, NICK.OSS_NICKNAME
+						FROM OSS_NICKNAME NICK
+						INNER JOIN OSS_COMMON OC
+						ON NICK.OSS_COMMON_ID = OC.OSS_COMMON_ID
+					) NICK
+					ON OC.OSS_NAME = NICK.OSS_NAME
+					INNER JOIN NVD_DATA_CONFIGURATIONS CONF
+					ON CONF.PRODUCT = REPLACE(NICK.OSS_NICKNAME, ' ', '_')
+					LEFT JOIN NVD_CPE_MATCH_NAMES MAT
+					ON CONF.MATCH_CRITERIA_ID = MAT.MATCH_CRITERIA_ID
+					WHERE REPLACE(NICK.OSS_NICKNAME, ' ', '_') = CONF.PRODUCT
+					AND SUBSTRING_INDEX(SUBSTRING_INDEX(IFNULL(MAT.CPE23URI, CONF.CRITERIA), ':', 6), ':', -1) = IFNULL(OC.VERSION, '')
+					GROUP BY NICK.OSS_NAME, OC.OSS_VERSION
 				) TBL
 				ON CVE.CVE_ID = TBL.CVE_ID
 				AND CVE.CVSS_SCORE >= #{standardScore}

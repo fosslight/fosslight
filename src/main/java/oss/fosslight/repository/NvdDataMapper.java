@@ -11,36 +11,20 @@ import org.springframework.context.annotation.Configuration;
 @Mapper
 public interface NvdDataMapper {
 	
-	String getCodeString(@Param(value = "cdNo") String cdNo, @Param(value = "cdDtlNo") String cdDtlNo);
-	String getCodeExp(@Param(value = "cdNo") String cdNo, @Param(value = "cdDtlNo") String cdDtlNo);
-
-	List<HashMap<String, Object>> selectUseMetaData(HashMap<String, Object> params);
-
-	int insertNewMetaData(HashMap<String, Object> params);
-	
-	int insertErrorMetaData(HashMap<String, Object> params);
-
-	int updateUseYN(HashMap<String, Object> params);
-
-	int updateJobStatus(HashMap<String, Object> params);
-	List<HashMap<String, Object>> selectWaitJobData(HashMap<String, Object> params);
 	void truncateCpeMatchNames();
 	void truncateCpeMatch();
-	void insertBulkCpeMatchData(List<Map<String, Object>> params);
 	void insertBulkCpeMatchNameData(List<Map<String, Object>> params);
 	Map<String, Object> selectOneCveInfoV3(Map<String, Object> params);
-	List<String> selectNvdMatchList(Map<String, String> params);
 	void insertCveInfoV3(Map<String, Object> params);
 	void insertNvdDataV3(Map<String, String> params);
-	void insertBulkNvdDataV3(List<Map<String, String>> params);
-	void insertNvdDataV3Temp(Map<String, Object> params);
+	void insertBulkNvdDataV3Temp(List<Map<String, String>> params);
+	void insertNvdDataScoreV3Temp(Map<String, Object> params);
 	void deleteCveDataV3(Map<String, Object> params);
 	void deleteNvdDataV3(Map<String, Object> params);
-	void deleteNvdDataTempV3();
+	void deleteNvdDataScoreV3Temp();
 	int getProducVerCnt();
 	List<Map<String, Object>> getProducVerList(@Param(value = "pageIdx")int pageIdx, @Param(value = "pageCnt")int pageCnt);
-	public Map<String, Object> getMaxScoreProductVer(@Param(value = "ossName")String ossName, @Param(value = "ossVersion")String ossVersion, @Param(value = "vendor") String vendor);
-	void insertNvdDataListTempV3(List<Map<String, Object>> params);
+	Map<String, Object> getMaxScoreProductVer(@Param(value = "ossName")String ossName, @Param(value = "ossVersion")String ossVersion, @Param(value = "vendor") String vendor);
 	void deleteNvdDataScoreV3();
 	void insertNvdDataScoreV3();
 	int selectNickNameMgrtNvdDataScoreV3();
@@ -68,6 +52,7 @@ public interface NvdDataMapper {
 	void insertNewMetaDataUrlConnection(HashMap<String, Object> param);
 	List<Map<String, Object>> selectUseMetaDataUrlConnection(HashMap<String, Object> param);
 	void insertNvdDataPatchLink(Map<String, Object> param);
+	void insertNvdDataPatchLinkTemp(Map<String, Object> param);
 	void deleteNvdDataPatchLink(@Param(value = "cveId") String cveId);
 	int selectNvdCpeMatch(Map<String, Object> param);
 	int selectNvdCpeMatchTemp(Map<String, Object> param);
@@ -79,4 +64,25 @@ public interface NvdDataMapper {
 	void copyNvdDataConfigurationsFromTemp();
 	void truncateNvdDataConfigurationsTemp();
 	void deleteNvdDataConfigurations(Map<String, String> param);
+	void deleteNvdDataMatchExistingInTemp();
+	void createTableConfigurationsTemp();
+	void createTablePatchLinkTemp();
+	void truncateNvdDataPatchLinkTemp();
+	void truncateNvdDataPatchLink();
+	void copyNvdDataPatchLinkFromTemp();
+	void deleteNvdDataConfigurationsExistingInTemp();
+	void deleteNvdDataPatchLinkExistingInTemp();
+	void insertCveInfoV3Temp(Map<String, Object> cveInfo);
+	void createTableNvdCveV3Temp();
+	void truncateNvdCveV3Temp();
+	void copyNvdCveV3FromTemp();
+	
+	void createTableNvdDavaScoreV3Temp();
+	int insertNvdDataV3Temp(String cveId);
+	void deleteNvdCveV3ExistingInTemp();
+	void deleteNvdDataV3ExistingInTemp();
+	void copyNvdDataV3FromTemp();
+	void createTableNvdDataV3Temp();
+	void truncateNvdDataV3Temp();
+	
 }

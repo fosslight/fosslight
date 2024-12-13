@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jsonldjava.shaded.com.google.common.reflect.TypeToken;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -39,15 +37,7 @@ import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.common.ShellCommander;
-import oss.fosslight.domain.CommentsHistory;
-import oss.fosslight.domain.History;
-import oss.fosslight.domain.LicenseMaster;
-import oss.fosslight.domain.OssComponents;
-import oss.fosslight.domain.OssComponentsLicense;
-import oss.fosslight.domain.OssNotice;
-import oss.fosslight.domain.Project;
-import oss.fosslight.domain.ProjectIdentification;
-import oss.fosslight.domain.UploadFile;
+import oss.fosslight.domain.*;
 import oss.fosslight.repository.ApiFileMapper;
 import oss.fosslight.repository.ApiOssMapper;
 import oss.fosslight.repository.ApiProjectMapper;
@@ -119,12 +109,74 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			}
 		}
 		
-		result.put("content", list);
-		result.put("record", projectCnt);
+		result.put("list", list);
+		result.put("totalCount", projectCnt);
 		
 		return result;
 	}
-	
+
+	// NOTE: This method needs to be removed when V1 API is fade out
+	@Override
+	public Map<String, Object> selectProjectList_V1(Map<String, Object> paramMap){
+		Map<String, Object> result = new HashMap<String, Object>();
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+		int projectCnt = apiProjectMapper.selectProjectTotalCount(paramMap);
+
+		if (projectCnt > 0) {
+			list = apiProjectMapper.selectProject_V1(paramMap);
+
+			for (Map<String, Object> map : list) {
+				String prjId = (String) map.get("prjId").toString();
+				String status = (String) map.get("status");
+				String distributionStatus = (String) map.get("distributionStatus");
+				distributionStatus = CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS.equals(distributionStatus)
+						? CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROGRESS : distributionStatus;
+				String nvdMaxScore = apiProjectMapper.findIdentificationMaxNvdInfo(prjId);
+
+				map.put("DISTRIBUTION_TYPE", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, (String) map.get("distributionType")));
+				map.put("NETWORK_SERVICE", (String) map.get("networkService"));
+				map.put("NOTICE", CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, (String) map.get("notice")));
+				map.put("NOTICE_PLATFORM", CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, (String) map.get("noticePlatform")));
+				map.put("PRIORITY", CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_PRIORITY, (String) map.get("priority")));
+				map.put("STATUS",CoCodeManager.getCodeString(CoConstDef.CD_PROJECT_STATUS, status));
+				map.put("IDENTIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("identificationStatus")));
+				map.put("VERIFICATION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, (String) map.get("verificationStatus")));
+				map.put("DISTRIBUTION_STATUS", CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));
+				map.put("VULNERABILITY_SCORE", nvdMaxScore);
+//				map.put("MODEL_LIST", apiProjectMapper.selectModelList(prjId));
+			}
+		}
+
+		result.put("content", list);
+		result.put("record", projectCnt);
+
+		return result;
+	}
+
+	@Override
+	public boolean checkProjectAvailability(T2Users userInfo, String prjId, String needToUploadReport){
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("userId", userInfo.getUserId());
+		paramMap.put("loginUserName", userInfo.getUserName());
+		paramMap.put("userRole", userRole(userInfo));
+		paramMap.put("prjId", prjId);
+//		paramMap.put("distributionType", projectType);
+		paramMap.put("needToUploadReport", needToUploadReport);
+//		paramMap.put("readOnly", CoConstDef.FLAG_NO);
+
+		return apiProjectMapper.checkProjectExist(paramMap);
+	}
+
+	public boolean checkUserAvailableToEditProject(T2Users userInfo, String prjId){
+		return checkProjectAvailability(userInfo, prjId, CoConstDef.FLAG_YES);
+	}
+
+	@Override
+	public boolean checkUserHasProject(T2Users userInfo, String prjId){
+		return checkProjectAvailability(userInfo, prjId, CoConstDef.FLAG_NO);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean existProjectCnt(Map<String, Object> paramMap) {
@@ -1907,22 +1959,24 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 		
 		// delete component
 		Map<String, Object> paramMap = new HashMap<>();
-		paramMap.put("referenceId", (String) prjId);
-		paramMap.put("referenceDiv", (String) CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-		paramMap.put("merge", (String) merge);
-		paramMap.put("roleOutLicense", (String) CoCodeManager.CD_ROLE_OUT_LICENSE);
-		paramMap.put("saveBomFlag", (String) CoConstDef.FLAG_YES);
+		paramMap.put("referenceId", prjId);
+		paramMap.put("referenceDiv", CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		paramMap.put("merge", merge);
+		paramMap.put("roleOutLicense", CoCodeManager.CD_ROLE_OUT_LICENSE);
+		paramMap.put("saveBomFlag", CoConstDef.FLAG_YES);
 		
-		List<String> componentId = apiProjectMapper.selectComponentId(paramMap);
 		
-		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
-		if (componentId.size() > 0){
-			for (int i = 0; i < componentId.size(); i++) {
-				apiProjectMapper.deleteOssComponentsLicense(componentId.get(i));
-			}
-			
-			apiProjectMapper.deleteOssComponents(paramMap);
-		}
+		apiProjectMapper.resetOssComponentsAndLicense(prjId, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+//		List<String> componentId = apiProjectMapper.selectComponentId(paramMap);
+//		
+//		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
+//		if (componentId.size() > 0){
+//			for (int i = 0; i < componentId.size(); i++) {
+//				apiProjectMapper.deleteOssComponentsLicense(componentId.get(i));
+//			}
+//			
+//			apiProjectMapper.deleteOssComponents(paramMap);
+//		}
 		
 		HashMap<String, Object> mergeListMap = getIdentificationGridList(paramMap);
 		
@@ -3147,13 +3201,15 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 	public void updateSubStatus(Map<String, Object> param) {
 		apiProjectMapper.updateProjectSubStatus(param);
 
-		List<String> componentIds = apiProjectMapper.selectComponentId(param);
+		apiProjectMapper.resetOssComponentsAndLicense((String)param.get("referenceId"), (String)param.get("referenceDiv"));
 		
-		for (String componentId : componentIds) {
-			apiProjectMapper.deleteOssComponentsLicense(componentId);
-		}
-		
-		apiProjectMapper.deleteOssComponents(param);
+//		List<String> componentIds = apiProjectMapper.selectComponentId(param);
+//		
+//		for (String componentId : componentIds) {
+//			apiProjectMapper.deleteOssComponentsLicense(componentId);
+//		}
+//		
+//		apiProjectMapper.deleteOssComponents(param);
 	}
 
 	@SuppressWarnings("unchecked")

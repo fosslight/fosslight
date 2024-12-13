@@ -337,7 +337,7 @@ var fn = {
                     if("Y" == rowObject.androidFlag) {
                         display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
                     } else {
-                        display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                        display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                     }
                 }
 				break;
@@ -355,7 +355,7 @@ var fn = {
 					if ("Y" == rowObject.androidFlag) {
 						display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",4,"+rowObject.permission+")\">Identification</span>";
 					} else {
-						display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+						display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
 					}
 				} else {
 					if ("Y" == rowObject.androidFlag) {
@@ -370,14 +370,14 @@ var fn = {
 						}
 					} else {
                         if ("Confirm" == identificationStatus) {
-                            display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                            display += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                         } else {
                             if (projectStatus == progress) {
-                                display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                                display += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                             } else if (projectStatus == request) {
-                                display += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                                display += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                             } else if (review == projectStatus) {
-                                display += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",0,"+rowObject.permission+")\">Identification</span>";
+                                display += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem d-flex-align fs-77p' onclick=\"fn.mvIdentification("+options.rowId+",5,"+rowObject.permission+")\">Identification</span>";
                             }
                         }
 					}
@@ -1193,6 +1193,24 @@ var fn = {
 		if(chk < 3){
 			var bomCompareArr = $("#list").jqGrid("getGridParam", "selarrrow");
 			
+			var notPermissionIds = "";
+			for (var i in bomCompareArr) {
+				var permission = $("#list").jqGrid("getRowData", bomCompareArr[i]).permission;
+				if ("1" != permission) {
+					if ("" != notPermissionIds) {
+						notPermissionIds += ", ";
+					}
+					notPermissionIds += bomCompareArr[i];
+				}
+			}
+			
+			if ("" != notPermissionIds) {
+				var message = [[#{msg.project.bom.compare.permission}]];
+				message = message.replace("prjId", notPermissionIds);
+				alertify.alert(message, function(){});
+				return false;
+			}
+			
 			var beforePrjId = "";
 			var afterPrjId = "";
 
@@ -1611,7 +1629,7 @@ var fn = {
 		dataObj["prjDivision"] = uDiv;
 		dataObj["prjUserId"] = uId;
 		dataObj["prjEmail"] = uEmail;
-		changeWatcherArr.push(dataObj);console.log(changeWatcherArr);
+		changeWatcherArr.push(dataObj);
 	},
 	removeWatcher : function (uDiv, uId, obj) {
 		var uEmail = "";
@@ -2157,7 +2175,7 @@ var list = {
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'statusRequestYn', index: 'statusRequestYn', width: 50, hidden:true, title:false};
 		colModelArr.push(colModelObj);
-		colModelObj = {name: 'priority', index: 'priority', width: 50, hidden:true, title:false};
+		colModelObj = {name: 'priority', index: 'priority', width: 30, sortable : true, title:false};
 		colModelArr.push(colModelObj);
 		colModelObj = {name: 'permission', index: 'permission', width: 50, hidden:true, title:false};
 		colModelArr.push(colModelObj);
@@ -2177,6 +2195,7 @@ var list = {
             {'Distribution Type': 'distributionType'},
             {'Security': 'cvssScore'},
             {'Division': 'division'},
+            {'Priority': 'priority'},
             {'Creator': 'creator'},
             {'Created Date': 'createdDate'},
             {'Modified Date': 'modifiedDate'},

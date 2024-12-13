@@ -99,6 +99,8 @@ public interface ProjectMapper {
 	
 	void deleteFileBySeq(T2File file);
 
+	void updateDeleteYNByFileSeq(T2File file);
+
 	List<T2File> selectAndroidCsvFile(Project project);
 
 	List<T2File> selectAndroidNoticeFile(Project project);
@@ -110,6 +112,8 @@ public interface ProjectMapper {
 	void deleteComment(CommentsHistory commentsHistory);
 
 	List<ProjectIdentification> selectBomList(ProjectIdentification projectIdentification);
+	
+	List<ProjectIdentification> selectAndroidBomList(ProjectIdentification projectIdentification);
 	
 	List<OssComponents> selectOssRefPrjList1(OssMaster ossMaster);
 	
@@ -413,4 +417,6 @@ public interface ProjectMapper {
 	void insertOssComponentLicenseList(@Param("list")List<OssComponentsLicense> ossComponentLicenseList);
 
 	List<Map<String, Object>> getCpeInfoAndRangeForProject(ProjectIdentification identification);
+
+	String selectNvdInfoWithOutVer(OssMaster ossMaster);
 }

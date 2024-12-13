@@ -354,6 +354,7 @@ public class CoConstDef {
 	public static final String CD_DTL_COMPONENT_ID_BAT = "12";
 	public static final String CD_DTL_COMPONENT_ID_BOM = "13";
 	public static final String CD_DTL_COMPONENT_ID_ANDROID = "14";
+	public static final String CD_DTL_COMPONENT_ID_ANDROID_BOM = "17";
 	public static final String CD_DTL_COMPONENT_ID_BIN = "15";
 	public static final String CD_DTL_COMPONENT_PARTNER = "20";
 	public static final String CD_DTL_COMPONENT_PARTNER_BAT = "22";

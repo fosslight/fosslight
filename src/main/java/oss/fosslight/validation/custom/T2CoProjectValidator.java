@@ -2502,8 +2502,10 @@ public class T2CoProjectValidator extends T2CoValidator {
 						&& !bean.getOssName().equals("-") 
 						&& isEmpty(bean.getOssVersion())) {
 					if (!errMap.containsKey("OSS_VERSION." + bean.getGridId())) {
-						if (ossService.checkOssVersionDiff(bean.getOssName()) > 0) {
-							diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.REQUIRED");
+						if (CoCodeManager.OSS_INFO_UPPER.containsKey((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase())) {
+							if (CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase()).getOssType().endsWith("1")) {
+								diffMap.put("OSS_VERSION." + bean.getGridId(), "OSS_VERSION.REQUIRED");
+							}
 						}
 					}
 				}
@@ -2599,7 +2601,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							// 6) OSS NAME은 다르나, LICENSE 는 동일
 							else if(!isSameOssName && isSameLicense) {
 								// Same binary : <OSS Name> <OSS Version> /
-								diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " /"));
+								infoMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " /"));
 							} 
 							// 7) OSS NAME LICENSE 모두 다른 경우
 							else {

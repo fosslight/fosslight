@@ -127,8 +127,9 @@
 	</select>
 	
 	<select id="getFileId" resultType="java.lang.String">
-	    SELECT IFNULL(MAX(FILE_ID), 0)+1 AS FILE_ID
-	    FROM T2_FILE
+		SELECT NEXTVAL(NEXT_FILE_ID)
+<!--    SELECT IFNULL(MAX(FILE_ID), 0)+1 AS FILE_ID
+	    FROM T2_FILE -->
 	</select>
 	
 	<update id="updateFileDelYn" >

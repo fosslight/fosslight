@@ -297,6 +297,7 @@ public final class Url {
 		public static final String SAVE_BINANDROID = PATH + "/saveBinAndroid";
 		public static final String DELETE_FILEANDROID = PATH + "/deleteFileAndroid";
 		public static final String SAVE_BOM = PATH + "/saveBom";
+		public static final String SAVE_ANDROID_BOM = PATH + "/saveAndroidBom";
 		public static final String SAVE_BAT = PATH + "/saveBat";
 		
 		public static final String IDENTIFICATION_GRID_ID_CD = PATH + "/identificationGrid/{prjId}/{code}";
@@ -960,13 +961,12 @@ public final class Url {
 			/** API 3rd Party 조회 */
 			public static final String FOSSLIGHT_API_PARTNER_SEARCH			= "/partners";
 
-			/** API 3rd Party Add Watcher */
-			public static final String FOSSLIGHT_API_PARTNER_ADD_WATCHER			= "/partners/{id}/watchers";
-			public static final String FOSSLIGHT_API_PARTNER_EXPORT_DEPRECATED = "/partners/{id}/export";
-			public static final String FOSSLIGHT_API_PARTNER_JSON_DEPRECATED = "/partners/{id}/json";
+			/** API 3rd Party Add Editor */
+			public static final String FOSSLIGHT_API_PARTNER_ADD_EDITOR			= "/partners/{id}/editors";
 
-			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD		= "/partners/{id}/file";
-			public static final String FOSSLIGHT_API_PARTNER_JSON			= "/partners/{id}/json-data";
+			public static final String FOSSLIGHT_API_PARTNER_DOWNLOAD		= "/partners/{id}/bom/file";
+
+		public static final String FOSSLIGHT_API_PARTNER_JSON			= "/partners/{id}/bom/json-data";
 
 
 		/** OSS */
@@ -987,6 +987,9 @@ public final class Url {
 		/** PROJECT */
 			/** API create Project  */
 			public static final String FOSSLIGHT_API_PROJECT_CREATE			= "/projects";
+
+			/** API Project by ID */
+			public static final String FOSSLIGHT_API_PROJECT_BY_ID			= "/projects/{id}";
 
 			/** API Project List 조회 */
 			public static final String FOSSLIGHT_API_PROJECT_SEARCH			= "/projects";
@@ -1009,11 +1012,16 @@ public final class Url {
 			/** API BOM COMPARE */
 			public static final String FOSSLIGHT_API_PROJECT_BOM_COMPARE		= "/projects/{id}/bom/compare-with/{compareId}";
 
-			/** API Project Add Watcher */
-			public static final String FOSSLIGHT_API_PROJECT_ADD_WATCHER		= "/projects/{id}/watchers";
+			/** API Project Add Editor */
+			public static final String FOSSLIGHT_API_PROJECT_ADD_EDITOR		= "/projects/{id}/editors";
+
+
+			/** API OSS Report upload */
+			public static final String FOSSLIGHT_API_IDENTIFICATION_RESET = "/projects/{id}/{tab_name}/reset";
 
 			/** API OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT = "/projects/{id}/{tab_name}/reports";
+
 			public static final String FOSSLIGHT_API_OSS_REPORT_SRC			= "/projects/{id}/src";
 			public static final String FOSSLIGHT_API_OSS_REPORT_BIN			= "/projects/{id}/bin";
 			public static final String FOSSLIGHT_API_OSS_REPORT_ANDROID		= "/projects/{id}/report-android";
@@ -1026,7 +1034,7 @@ public final class Url {
 
 			public static final String FOSSLIGHT_API_PROJECT_SECURITY_EXPORT_JSON	    = "/projects/{id}/security/json-data";
 
-      public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
+      		public static final String FOSSLIGHT_API_OSS_LOAD 				= "/projects/{id}/{tab_name}/oss-load";
 
     
 		/** VULNABILITY */
@@ -1044,11 +1052,11 @@ public final class Url {
 			/** OSS Report upload */
 			public static final String FOSSLIGHT_API_OSS_REPORT_SELFCHECK		= "/selfchecks/{id}/report";
 
-			/** OSS Report upload */
-			public static final String FOSSLIGHT_API_EXPORT_SELFCHECK		= "/selfchecks/{id}/export";
+			/** OSS Report download */
+			public static final String FOSSLIGHT_API_SELFCHECK_DOWNLOAD		= "/selfchecks/{id}/bom/file";
 
-			/** API SelfCheck Add Watcher */
-			public static final String FOSSLIGHT_API_SELFCHECK_ADD_WATCHER		= "/selfchecks/{id}/watchers";
+			/** API SelfCheck Add Editor */
+			public static final String FOSSLIGHT_API_SELFCHECK_ADD_EDITOR		= "/selfchecks/{id}/editors";
 
 			public static final String FOSSLIGHT_API_SELFCHECK_GET		= "/selfchecks/{id}";
 

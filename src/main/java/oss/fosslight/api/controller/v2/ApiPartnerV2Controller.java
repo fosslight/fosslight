@@ -12,8 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.advice.CProjectNotAvailableException;
 import oss.fosslight.api.service.RestResponseService;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
@@ -27,15 +29,15 @@ import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.ExcelDownLoadUtil;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
+import javax.validation.constraints.Min;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Api(tags = {"2. 3rd Party"})
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
+@Validated
 public class ApiPartnerV2Controller extends CoTopComponent {
 
     private String RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX;
@@ -58,14 +60,16 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_SEARCH})
     public ResponseEntity<Map<String, Object>> getPartners(
             @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID List", required = false) @RequestParam(required = false) String[] partnerIdList,
-            @ApiParam(value = "Division", required = false) @RequestParam(required = false) String division,
-            @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String createDate,
-            @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", required = false, allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
-            @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)", required = false) @RequestParam(required = false) String updateDate,
-            @ApiParam(value = "Creator", required = false) @RequestParam(required = false) String creator,
-            @ApiParam(value = "Count Per Page (max: 1000, default: 1000)", required = false) @RequestParam(required = false, defaultValue="1000") String countPerPage,
-            @ApiParam(value = "Page (default 1)", required = false) @RequestParam(required = false, defaultValue="1") String page) {
+            @ApiParam(value = "3rd Party ID List") @RequestParam(required = false) String[] partnerIdList,
+            @ApiParam(value = "Division") @RequestParam(required = false) String division,
+            @ApiParam(value = "Create Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)") @RequestParam(required = false) String createDate,
+            @ApiParam(value = "Status (PROG:progress, REQ:Request, REV:Review, CONF:Confirm)", allowableValues = "PROG,REQ,REV,CONF") @RequestParam(required = false) String status,
+            @ApiParam(value = "Update Date (Format: fromDate-toDate > yyyymmdd-yyyymmdd)") @RequestParam(required = false) String updateDate,
+            @ApiParam(value = "Creator") @RequestParam(required = false) String creator,
+            @ApiParam(value = "Count Per Page (max: 1000)")
+            @Min(value = 1, message="Input value=${validatedValue}. countPerPage must be larger than {value}") @RequestParam(required = false, defaultValue="1000") int countPerPage,
+            @ApiParam(value = "Page", required = false)
+            @Min(value = 1, message="Input value=${validatedValue}. page must be larger than {value}") @RequestParam(required = false, defaultValue="1") int page) {
 
         // 사용자 인증
         T2Users userInfo = userService.checkApiUserAuth(authorization);
@@ -73,13 +77,6 @@ public class ApiPartnerV2Controller extends CoTopComponent {
         Map<String, Object> paramMap = new HashMap<String, Object>();
 
         try {
-            var _page = Integer.parseInt(page);
-            var _countPerPage = Integer.parseInt(countPerPage);
-            if (_page < 0 || _countPerPage < 0 ) {
-                throw new NumberFormatException();
-            }
-            var _offset = (_page - 1) * _countPerPage;
-
             CommonFunction.splitDate(createDate, paramMap, "-", "createDate");
             CommonFunction.splitDate(updateDate, paramMap, "-", "updateDate");
 
@@ -90,8 +87,8 @@ public class ApiPartnerV2Controller extends CoTopComponent {
             paramMap.put("division", division);
             paramMap.put("status", status);
             paramMap.put("partnerIdList", partnerIdList);
-            paramMap.put("countPerPage", _countPerPage);
-            paramMap.put("offset", _offset);
+            paramMap.put("countPerPage", countPerPage);
+            paramMap.put("offset", (page - 1) * countPerPage);
 
             resultMap = apiPartnerService.getPartnerMasterList(paramMap);
 
@@ -105,31 +102,21 @@ public class ApiPartnerV2Controller extends CoTopComponent {
 
     }
 
-    @ApiOperation(value = "3rd Party Add Watcher", notes = "3rd Party Add Watcher")
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_WATCHER})
-    public ResponseEntity<Map<String, Object>> addPrjWatcher(
+    @ApiOperation(value = "3rd Party Add Editor", notes = "3rd Party Add Editor")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_ADD_EDITOR})
+    public ResponseEntity<Map<String, Object>> addPrjEditor(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
-            @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+            @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<>();
 
+        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
+            throw new CProjectNotAvailableException(partnerId);
+        }
+
         try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> partnerIdList = new ArrayList<String>();
-            partnerIdList.add(partnerId);
-            String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
-
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("partnerIdList", partnerIds);
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
-
-            boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
-            if (!searchFlag) {
-                return responseService.errorResponse(HttpStatus.FORBIDDEN);
-            }
             for (String email : emailList) {
                 boolean ldapCheck = true;
                 if (CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag")))) {
@@ -160,70 +147,47 @@ public class ApiPartnerV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "3rd Party Export report", notes = "3rd Party > Export report")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_DOWNLOAD})
     public ResponseEntity<FileSystemResource> get3rdDownload(
-            @RequestHeader String authorization,
-            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId,
-            @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) {
+            @ApiParam(hidden = true) @RequestHeader String authorization,
+            @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id") String partnerId,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet") @RequestParam String format) throws Exception {
 
         String downloadId = "";
         T2File fileInfo = new T2File();
         T2Users userInfo = userService.checkApiUserAuth(authorization);
 
+        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
+            throw new CProjectNotAvailableException(partnerId);
+        }
+
         try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> partnerIdList = new ArrayList<String>();
-            partnerIdList.add(partnerId);
-            String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
-
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("partnerIdList", partnerIds);
-            paramMap.put("readOnly", CoConstDef.FLAG_NO);
-
-            boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
-            if (searchFlag) {
-                downloadId = ExcelDownLoadUtil.getExcelDownloadId("partnerCheckList", partnerId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
-                fileInfo = fileService.selectFileInfo(downloadId);
-            }
+            downloadId = ExcelDownLoadUtil.getExcelDownloadId("partnerCheckList", partnerId, RESOURCE_PUBLIC_DOWNLOAD_EXCEL_PATH_PREFIX);
+            fileInfo = fileService.selectFileInfo(downloadId);
 
             return excelToResponseEntity(fileInfo.getLogiPath() + fileInfo.getLogiNm(), fileInfo.getOrigNm());
-        } catch (Exception e) {
+        } catch (java.lang.Exception e) {
             log.error(e.getMessage(), e);
-            return null;
+            throw e;
         }
     }
 
     @ApiOperation(value = "3rd Party Export Json", notes = "3rd Party > Export Json")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "token", required = true, dataType = "String", paramType = "header")
-    })
     @GetMapping(value = {APIV2.FOSSLIGHT_API_PARTNER_JSON})
     public ResponseEntity<Map<String, Object>> get3rdAsJson(
-            @RequestHeader String authorization,
+            @ApiParam(hidden = true) @RequestHeader String authorization,
             @ApiParam(value = "3rd Party ID", required = true) @PathVariable(name = "id", required = true) String partnerId) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>();
 
+        if (!apiPartnerService.checkUserHasPartnerProject(userInfo, partnerId)) {
+            throw new CProjectNotAvailableException(partnerId);
+        }
+
         try {
-            Map<String, Object> paramMap = new HashMap<>();
-            List<String> partnerIdList = new ArrayList<String>();
-            partnerIdList.add(partnerId);
-            String[] partnerIds = partnerIdList.toArray(new String[partnerIdList.size()]);
+            resultMap = apiPartnerService.getExportJson(partnerId);
 
-            paramMap.put("userId", userInfo.getUserId());
-            paramMap.put("userRole", userRole(userInfo));
-            paramMap.put("partnerIdList", partnerIds);
-            paramMap.put("readOnly", CoConstDef.FLAG_YES);
-
-            boolean searchFlag = apiPartnerService.existPartnertCnt(paramMap);
-            if (searchFlag) {
-                resultMap = apiPartnerService.getExportJson(partnerId);
-            }
             return new ResponseEntity<>(resultMap, HttpStatus.OK);
         } catch (Exception e) {
             return responseService.errorResponse(HttpStatus.BAD_REQUEST);

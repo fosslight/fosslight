@@ -15,12 +15,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.api.entity.CommonResult;
 import oss.fosslight.api.service.ResponseService;
 import oss.fosslight.api.service.RestResponseService;
+import oss.fosslight.api.validator.ValuesAllowed;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -45,6 +47,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/api/v2")
+@Validated
 public class ApiSelfCheckV2Controller extends CoTopComponent {
     @Resource
     private Environment env;
@@ -119,9 +122,9 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     public ResponseEntity<Map<String, Object>> ossReportSelfCheck(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
-            @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '", required = false) @RequestPart(required = false) MultipartFile ossReport,
-            @ApiParam(value = "Reset Flag (YES : Y, NO : N, Default : Y)", required = false, allowableValues = "Y,N") @RequestParam(required = false) String resetFlag,
-            @ApiParam(value = "Sheet Names", required = false) @RequestParam(required = false) String sheetNames) {
+            @ApiParam(value = "OSS Report > sheetName : 'Start with Self-Check, SRC or BIN '") @RequestPart(required = false) MultipartFile ossReport,
+            @ApiParam(value = "Reset Flag (YES : Y, NO : N)", allowableValues = "Y,N") @RequestParam(required = false, defaultValue="Y") String resetFlag,
+            @ApiParam(value = "Sheet Names") @RequestParam(required = false) String sheetNames) {
 
         T2Users userInfo = userService.checkApiUserAuth(authorization);
         Map<String, Object> resultMap = new HashMap<String, Object>(); // 성공, 실패에 대한 정보를 return하기 위한 map;
@@ -301,10 +304,12 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
     }
 
     @ApiOperation(value = "SelfCheck Export", notes = "SelfCheck > Export")
-    @GetMapping(value = {APIV2.FOSSLIGHT_API_EXPORT_SELFCHECK})
-    public ResponseEntity selfCheckExport(
+    @GetMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_DOWNLOAD})
+    public ResponseEntity selfCheckBomDownload(
             @ApiParam(hidden=true) @RequestHeader String authorization,
-            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId
+            @ApiParam(value = "Project id", required = true) @PathVariable(name = "id", required = true) String prjId,
+            @ApiParam(value = "Format", allowableValues = "Spreadsheet")
+            @ValuesAllowed(propName = "format", values = { "Spreadsheet"}) @RequestParam String format
     ) {
         String downloadId = "";
         T2File fileInfo = new T2File();
@@ -330,12 +335,12 @@ public class ApiSelfCheckV2Controller extends CoTopComponent {
         }
     }
 
-    @ApiOperation(value = "SelfCheck Add Watcher", notes = "SelfCheck Add Watcher")
-    @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_ADD_WATCHER})
-    public ResponseEntity<Map<String, Object>> addPrjWatcher(
+    @ApiOperation(value = "SelfCheck Add Editor", notes = "SelfCheck Add Editor")
+    @PostMapping(value = {APIV2.FOSSLIGHT_API_SELFCHECK_ADD_EDITOR})
+    public ResponseEntity<Map<String, Object>> addPrjEditor(
             @ApiParam(hidden=true) @RequestHeader String authorization,
             @ApiParam(value = "Project Id", required = true) @PathVariable(name = "id", required = true) String prjId,
-            @ApiParam(value = "Watcher Email", required = true) @RequestParam(required = true) String[] emailList) {
+            @ApiParam(value = "Editor Email", required = true) @RequestParam(required = true) String[] emailList) {
 
         Map<String, Object> resultMap = new HashMap<>();
         String errorCode = CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE; // Default error message

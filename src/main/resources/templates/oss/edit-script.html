@@ -427,6 +427,7 @@
 				detectedLicenseHtml 		+= 	'</div>';
 				
 				$(".detectedLicensesDiv").append(detectedLicenseHtml);
+				$("#input_detectedLicense").val('');
 				setCustomAutoComplete("single");
 			});
 			
@@ -874,6 +875,8 @@
 					$('#'+lastsel+' > td:eq(10)').text(ui.item.licenseType); // licenseType
 					$('#'+lastsel+' > td:eq(11)').text(ui.item.obligationChecks); // obligationChecks
 					$('#'+lastsel+' > td:eq(8)').text(ui.item.licenseId); // licenseId
+					$('#'+lastsel+' > td:eq(5)').text(ui.item.restriction); // restriction
+					$('#'+lastsel+' > td:eq(5)').css("white-space", "break-spaces");
 					showLicenseText(licenseName);
 					gLicenseData[lastsel] = "Y";
 					return false;
@@ -893,6 +896,7 @@
 					$("div.retxt._licenseChoice_"+lastsel).remove();
 					if(_item == null) {
 						$("#"+lastsel+"_licenseNameEx").after('<div class=\"'+gridStr+"_"+lastsel+' retxt\">'+ [[#{msg.oss.unknown.license}]] +'</div>');
+						$("#"+lastsel+"_licenseNameEx").parent().next().html("");
 						$("div.retxt._licenseChoice_"+lastsel).show();
 					} else {
 						var licenseName = _item.shortIdentifier.length > 0 ? _item.shortIdentifier : _item.licenseName; 
@@ -908,6 +912,7 @@
 						rowData['licenseType'] = _item.licenseType;
 						rowData['obligation'] = _item.obligation;
 						rowData['obligationChecks'] = _item.obligationChecks;
+						rowData['restriction'] = _item.restriction;
 						rowData['ossLicenseIdx'] = lastsel;
 						rowData['no'] = lastsel;
 						
@@ -1172,7 +1177,7 @@
 		});
 
         if(isReadOnly == null) {
-            _licenseChoice.jqGrid('navGrid',"#_licenseChoice_toppager",{edit:false,add:true,del:false,search:false,refresh:false
+            _licenseChoice.jqGrid('navGrid',"#_licenseChoice_toppager",{edit:false,add:true,del:true,search:false,refresh:false
                 , addfunc: function (rowid) {
                     var ids = $("#_licenseChoice").jqGrid("getDataIDs");
                     var newId = ids.length ? Number(ids[ids.length-1])+1 : 1;
@@ -1899,6 +1904,8 @@
 	//OSS등록로직
 	function registSubmit(){
 		if(validationDataSet()){
+			fn.checkAddData();
+			
 			$("#ossForm").ajaxForm({
 				url :'/oss/validation',
 	            type : 'POST',
@@ -2912,6 +2919,60 @@
 			}
 			return true;
 		},
+		checkAddData : function () {
+			let matchFlag = false;
+    		let inputValue = $("#input_ossNicknames").val();
+    		
+    		if ("" != inputValue) {
+    			$("input[name='ossNicknames']").each(function (i) {
+    				let ossNickname = $("input[name='ossNicknames']").eq(i).attr("value");
+    				if (inputValue == ossNickname) {
+    					matchFlag = true;
+    				}
+    			});
+    			if (!matchFlag) {
+    				$("#nickAdd").trigger("click");
+    			} else {
+    				$("#input_ossNicknames").val("");
+    			}
+    		}
+    		
+    		matchFlag = false;
+    		inputValue = "";
+    		inputValue = $("#input_detectedLicense").val();
+    		
+    		if ("" != inputValue) {
+    			$("input[name='webpages']").each(function (i) {
+    				let detectedLicense = $("input[name='detectedLicenses']").eq(i).attr("value");
+    				if (inputValue == detectedLicense) {
+    					matchFlag = true;
+    				}
+    			});
+    			if (!matchFlag) {
+    				$("#detectedLicenseAdd").trigger("click");
+    			} else {
+    				$("#input_detectedLicense").val("");
+    			}
+    		}
+    		
+    		matchFlag = false;
+    		inputValue = "";
+    		inputValue = $("#input_downloadLocations").val();
+    		
+    		if ("" != inputValue) {
+    			$("input[name='downloadLocations']").each(function (i) {
+    				let downloadLocation = $("input[name='downloadLocations']").eq(i).attr("value");
+    				if (inputValue == downloadLocation) {
+    					matchFlag = true;
+    				}
+    			});
+    			if (!matchFlag) {
+    				$("#downloadLocationAdd").trigger("click");
+    			} else {
+    				$("#input_downloadLocations").val("");
+    			}
+    		}
+		},
 		checkNickName : function(target){
 			var targetVal = $(target).val();
 
@@ -2948,7 +3009,7 @@
 				$("div.retxt").remove();
 				// remove input error class
 				$("input").removeClass("is-invalid");
-			
+				
 				// 멀티 일경우 라이센스는 1건 이상이어야 한다.
 				var licenseDiv = "";
 				var licenseChoiceLength = $("#_licenseChoice").jqGrid("getDataIDs").length;
@@ -3024,7 +3085,9 @@
 				
 				var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
            		innerHtml 		+= '<br><textarea id="ossSaveEditor"></textarea>';
-				
+           		innerHtml 		+= '<span class="ml-4"><input class="form-check-input" type="radio" name="checkComment" value="42"><label class="form-check-label">All version</label></span>';
+           		innerHtml 		+= '<span class="ml-5"><input class="form-check-input" type="radio" name="checkComment" value="40" checked><label class="form-check-label">Current version</label></span>';
+           		
            		alertify.ossSaveDialog()
            		.set('onok', function(e) {
            			// prevent clicking the OK button on Enter
@@ -3053,6 +3116,12 @@
 								return false;
 							}
 						}
+           				
+           				var referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}]];
+    			        if ("42" == $('input[name=checkComment]:checked').val()) {
+    			        	referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS_COMMON')}]];
+    			        }
+    			        $("input[name='referenceDiv']").val(referenceDiv);
            				
            				// 세이브 전 그리드 처리
     					$('#_licenseChoice').jqGrid('saveRow',lastsel);

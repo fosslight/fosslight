@@ -18,12 +18,16 @@ import oss.fosslight.domain.ProjectIdentification;
 @Mapper
 public interface ApiProjectMapper {
 	int selectProjectCount(Map<String, Object> paramMap);
+
+	boolean checkProjectExist(Map<String, Object> paramMap);
 	
 	Map<String, Object> selectVerificationCheck(@Param("prjId") String prjId);
 	
 	int updatePackageFile(Map<String, Object> paramMap);
 	
 	List<Map<String, Object>> selectProject(Map<String, Object> paramMap);
+
+	List<Map<String, Object>> selectProject_V1(Map<String, Object> paramMap);
 
 	int selectProjectTotalCount(Map<String, Object> paramMap);
 	
@@ -98,5 +102,7 @@ public interface ApiProjectMapper {
 	void insertWatcher(Map<String, Object> paramMap);
 
 	void updateProjectSubStatus(Map<String, Object> param);
+	
+	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
 
 }

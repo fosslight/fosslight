@@ -57,7 +57,7 @@ public interface ProjectService extends HistoryConfig{
 
 	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList);
 	
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm);
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid);
 	
 	public void checkProjectReviewer(Project project);
 	

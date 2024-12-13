@@ -395,7 +395,7 @@ public class T2UserServiceImpl implements T2UserService {
 	@Override
 	public List<T2Users> getReviwer() {
 		String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
-		return userMapper.selectReviwer(CoConstDef.FLAG_YES, ldapFlag);
+		return userMapper.selectReviwer(ldapFlag);
 	}
 
 	@Override
@@ -579,11 +579,14 @@ public class T2UserServiceImpl implements T2UserService {
 		if (StringUtil.isEmpty(vo.getExpireDate())) {
 			vo.setExpireDate(CoConstDef.CD_TOKEN_END_DATE);
 		}
-		String expireDate = CommonFunction.removeSpecialChar(vo.getExpireDate(), 8);
-		JwtUtil jwt = new JwtUtil(env.getProperty("token.secret.key") + expireDate);
-		String tokenKey = jwt.createToken(vo.getUserId(), StringUtils.isEmpty(vo.getEmail()) ? "" : vo.getEmail());
-		
-		return _token.equals(tokenKey);
+//		String expireDate = CommonFunction.removeSpecialChar(vo.getExpireDate(), 8);
+//		JwtUtil jwt = new JwtUtil(env.getProperty("token.secret.key") + expireDate);
+//		String tokenKey = jwt.createToken(vo.getUserId(), StringUtils.isEmpty(vo.getEmail()) ? "" : vo.getEmail());
+		if (StringUtil.isEmpty(vo.getToken())) {
+			return false;
+		} else {
+			return _token.equals(vo.getToken());
+		}
 	}
 	
 	public boolean checkPassword(String rawPassword, T2Users bean) {

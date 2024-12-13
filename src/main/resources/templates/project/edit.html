@@ -126,7 +126,7 @@
                                                             <input type="radio" name="publicYn" id="permissionRadio1" value="Y" th:checked="${project != null && !#strings.equals(project.publicYn, 'N')}" autocomplete="off" checked="" th:text="Everyone" th:disabled="${isReadOnly}">
                                                         </label>
                                                         <label class="btn btn-sm btn-onOff active px-3">
-                                                            <input type="radio" name="publicYn" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Watcher'" th:disabled="${isReadOnly}">
+                                                            <input type="radio" name="publicYn" id="permissionRadio2" value="N" th:checked="${project != null && #strings.equals(project.publicYn, 'N')}" autocomplete="off" th:text="'Creator & Editor'" th:disabled="${isReadOnly}">
                                                         </label>
                                                     </div>
                                                 </div>
@@ -208,7 +208,7 @@
                                         <li class="nav-item">
                                             <a class="nav-link my-1 ml-0 pl-0 width-12rem" href="#" onclick="fn.tableRefresh()">
                                                 <label for="inputName" th:text="'Model Information'"></label>
-                                                <i class="right fas fa-angle-left ml-1"></i>
+                                                <i class="right fas fa-angle-right ml-1"></i>
                                             </a>
                                             <ul class="nav nav-treeview">
                                                 <li class="nav-item">

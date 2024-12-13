@@ -80,6 +80,12 @@
 														</td>
 													</tr>
 													<tr>
+														<th align="left" style="padding:5px;background:#f0f0f0;">Internal URL</th>
+														<td style="padding:5px;">
+															<span th:if="${license_basic_info?.internalUrl != null}" th:utext="${license_basic_info.internalUrl}"></span>
+														</td>
+													</tr>
+													<tr>
 														<th align="left" style="padding:5px;background:#f0f0f0;">User Guide</th>
 														<td style="padding:5px;" th:utext="${license_basic_info?.description}"></td>
 													</tr>

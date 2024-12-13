@@ -21,6 +21,7 @@
         var deleteFileList = new Array();
         var isAndroid = [[${project.androidFlag}]];
         var appendReadOnlyFlag = false;
+        var activeTab = null;
         var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
 
      	// prevent clicking the OK button on Enter
@@ -176,6 +177,7 @@
         		if ("Packaging" == tabId && datas.ossList.length < 1) {
     				alertify.alert([[#{msg.project.verification.confirm.package}]], function(){
     					$("#tabMenuNotice").click();
+    					activeTab = "1";
     					if ('CONF' == curIdenStatus) $("#save").hide();
     				});
     			} else if("Notice" == tabId && isAndroid == "Y") {
@@ -184,11 +186,13 @@
     			}
         		
         		if ("Packaging" == tabId) {
+        			activeTab = null;
         			$("#save").hide();
         			$("#btnSavePath").show();
         			$("#verify").show();
         			$("#girdAreaPackaging").show();
         		} else {
+        			activeTab = "1";
         			$("#verify").hide();
         			$("#btnSavePath").hide();
         			$("#save").show();
@@ -655,9 +659,14 @@
 
                                         var checkedFlag = $("[name='btnEditOssNotice']:checked").val() == "Y";
                                         fn.defaultNotice(checkedFlag);
-
+                                        
+                                        var _iframeUrl = "/project/verification/";
+                                    	if (activeTab != null) _iframeUrl += "1/";
+                                    	_iframeUrl += [[${project.prjId}]];
+                                        
                                         alertify.alert([[#{msg.common.success}]], function () {
-                                            deleteTabInFrame('/project/verification/' + [[${project.prjId}]]);
+                                        	activeDeleteTabInFrame();
+                                            createTabInFrame([[${project.prjId}]] + '_Packaging', _iframeUrl);
                                             activeTabInFrameList("PROJECT");
                                         });
                                     }
@@ -1498,13 +1507,19 @@
 
                         var filePaths = [];
                         var componentIds = [];
+                        var pathValidMsg = {};
 
                         // empty check
                         for (var i in arr) {
                             var _path = target.jqGrid('getCell', arr[i], 'filePath');
-                            if ("undefined/" == _path) _path = "";
                             var _componentId = target.jqGrid('getCell', arr[i], 'componentId');
-
+                            
+                            if ("undefined/" == _path) {
+                            	_path = "";
+                            } else if ("/" == _path) {
+                        		pathValidMsg["filePath." + _componentId] = [[#{msg.package.check.source.code.path}]];
+                        	}
+                            
                             filePaths.push(_path);
                             componentIds.push(_componentId);
                         }
@@ -1516,6 +1531,11 @@
                         	if ("undefined/" == _path) $("#" + arr[i] + "_filePath").val("");
                         }
 
+                        if (Object.keys(pathValidMsg).length !== 0) {
+                        	gridValidMsgNew(pathValidMsg, "list");
+                        	return false;
+                        }
+                        
                         var fileSeqs = [];
                         var fileTypeSeqs = [];
 
@@ -1577,7 +1597,7 @@
                                     alertify.error([[#{msg.common.valid2}]], 0);
                                 } else {
                                     alertify.alert([[#{msg.common.success}]], function () {
-                                    	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
+                                    	activeDeleteTabInFrame();
                                         createTabInFrame([[${project.prjId}]] + '_Packaging', '/project/verification/' + [[${project.prjId}]]);
                                     });
                                 }
@@ -1866,9 +1886,13 @@
                         fn.procRequest(tempHandler);
                         tempHandler = ""; // temp clear
                     } else {
+                    	var _iframeUrl = "/project/verification/";
+                    	if (activeTab != null) _iframeUrl += "1/";
+                    	_iframeUrl += [[${project.prjId}]];
+                    	
                         alertify.alert([[#{msg.common.success}]], function () {
-                        	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
-							createTabInFrame([[${project.prjId}]] + '_Packaging', "/project/verification/1/" + [[${project.prjId}]]);
+                        	activeDeleteTabInFrame();
+							createTabInFrame([[${project.prjId}]] + '_Packaging', _iframeUrl);
                         });
                     }
                 }
@@ -1946,7 +1970,7 @@
                             if ("notice" != targetId) {
                             	btn_savePath.show();
                             }
-                            verFileUploder.prop("disabled", false);
+                            verFileUploder.prop("disabled", true);
                             
                             break;
 
@@ -2085,10 +2109,14 @@
                     success: function (data) {
                         fn.btnCtl(userRole, status);
                         reloadTabInframe('/project/list');
-
+                        
+                        var _iframeUrl = "/project/verification/";
+                    	if (activeTab != null) _iframeUrl += "1/";
+                    	_iframeUrl += [[${project.prjId}]];
+                        
                         alertify.alert([[#{msg.common.success}]], function () {
-                        	deleteTabInFrame("/project/verification/" + [[${project.prjId}]]);
-							createTabInFrame([[${project.prjId}]] + '_Packaging', "/project/verification/" + [[${project.prjId}]]);
+                        	activeDeleteTabInFrame();
+							createTabInFrame([[${project.prjId}]] + '_Packaging', _iframeUrl);
                         });
                     },
                     error: function (data) {
@@ -2509,6 +2537,8 @@
                             $('#wgetUrl_' + key).hide();
                             $('#projectSearch_' + key).hide();
                             $("input[name='packageFileType"+key+"']").val(value);
+                            $(".verifyFile_"+key).parent().show();
+                            $(".verifyFile_"+key).show();
                             
                             break;
                         case "2":
@@ -3237,6 +3267,10 @@
                             var isReq = true;
                             var validArray = json.verifyValid;
                             var validMsg = json.verifyValidMsg;
+                            var validCheckSourcePathArray = json.verifyCheckSourcePath;
+                            var validCheckSourcePathMsg = json.verifyCheckSourcePathMsg;
+                            var validEmptySourcePathArray = json.verifyEmptySourcePath;
+                            var validEmptySourcePathMsg = json.verifyEmptySourcePathMsg;
                             var fileCountsMap = json.fileCounts;
                             var readmeFileName = json.verifyReadme;
                             var proprietary = json.verifyProprietary;
@@ -3254,6 +3288,30 @@
                                 isReq = false;
                             });
 
+                            validCheckSourcePathArray.forEach(function (id) {
+                                var errRow = $("#" + id + " > td[aria-describedby='list_filePath']");
+
+                                if (errRow) {
+                                    errRow.append('<div class=\"list_filePath_' + id + ' retxt"\">' + validCheckSourcePathMsg + '</div>');
+                                }
+
+                                $("#list").jqGrid("setCell", id, "verifyFileCount", " ");
+
+                                isReq = false;
+                            });
+                            
+                            validEmptySourcePathArray.forEach(function (id) {
+                                var errRow = $("#" + id + " > td[aria-describedby='list_filePath']");
+
+                                if (errRow) {
+                                    errRow.append('<div class=\"list_filePath_' + id + ' retxt"\">' + validEmptySourcePathMsg + '</div>');
+                                }
+
+                                $("#list").jqGrid("setCell", id, "verifyFileCount", " ");
+
+                                isReq = false;
+                            });
+                            
                             $.each(fileCountsMap, function (key, value) {
                                 $("#list").jqGrid("setCell", key, "verifyFileCount", value);
                             });

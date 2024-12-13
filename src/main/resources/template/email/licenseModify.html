@@ -92,6 +92,15 @@
 								</td>
 							</tr>
 							<tr>
+								<th align="left" style="padding:5px;background:#f0f0f0;">Internal Url</th>
+								<td style="padding:5px;">
+									<span th:if="${before?.internalUrl != null}" th:utext="${before?.internalUrl}"></span>
+								</td>
+								<td style="padding:5px;">
+									<span th:if="${after?.internalUrl != null}" th:utext="${after?.internalUrl}"></span>
+								</td>
+							</tr>
+							<tr>
 								<th align="left" style="padding:5px;background:#f0f0f0;">User Guide</th>
 								<td style="padding:5px;" th:utext="${before?.description}"></td>
 								<td style="padding:5px;" th:utext="${after?.description}"></td>

@@ -798,6 +798,15 @@
 			COMPONENT_ID = #{componentId}
 	</delete>
 	
+	<delete id="resetOssComponentsAndLicense">
+		/* PartnerMapper.resetOssComponentsAndLicense */
+		DELETE COMPONENT, LICENSE 
+		FROM OSS_COMPONENTS COMPONENT 
+			LEFT JOIN OSS_COMPONENTS_LICENSE LICENSE ON COMPONENT.COMPONENT_ID = LICENSE.COMPONENT_ID
+		WHERE
+		 COMPONENT.REFERENCE_ID = #{referenceId} AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
+	</delete>
+	
 	<insert id="insertOssComponents" parameterType="oss.fosslight.domain.OssComponents">
 	INSERT INTO
 		OSS_COMPONENTS
