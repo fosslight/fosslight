@@ -1,5 +1,99 @@
 # Changelog
 
+## v2.1.1 (01/01/1970)
+## Changes
+- Release version 2.1.1 @hyeinlee00 (#1090)
+
+---
+
+## v2.1.1 (13/12/2024)
+## What's Changed
+* Release version 2.1.1 by @FOSSLight-dev  @Min-Kyungsun @hyeinlee00 in https://github.com/fosslight/fosslight/pull/1090
+
+## 🚀 New Features
+* Open Source
+  - Added Important Notes section
+* Project
+  - Added cargo type to Pre-review
+  - Added functionality to allow appending in file format in the Packaging - Notice section
+* UI
+  - Added icon color based on level in Restrictions
+* API
+  - Added Project reset API
+  - Added Project delete API
+
+ 
+## Changes
+* Project
+  - Changed terminology in Information: Watcher -> Editor
+  - Removed unnecessary confirmation popup when saving BOM
+  - Changed warning message level in Identification > BIN tab
+    - OSS Name different and License cases, lowered level from Warning -> Info
+  - Modified Packaging to prevent '/' from being entered in the path
+  - Deleted fosslight_binary.txt area. Replaced with fosslight binary report to include tlsh and checksum values.
+  - Modified to prevent BOM Compare for projects without permissions
+  - Changed permission check logic to make modifications impossible in Request status
+  - Handled to disallow input of single and double quotes during Distribution
+* Open Source
+  - Deleted items corresponding to OSS_COMMON in Sync functionality
+  - Added restriction in Sync
+  - Modified Sync operation to add comment with current version
+  - Added CPE-related items to the List search criteria
+* Mail
+  - Displayed changes related to Open Source common information
+  - Changed format for Open Source all version comments
+  - Added Open Source purl information
+  - Modified query to retrieve info table from Vulnerability Discovered email. 
+    Adjusted query to ensure OSS Name is also used in the Dependency tab
+* Review Report
+  - Changed conditions for displaying License review
+* UI
+  - Automatically adds input box values when the save button is clicked in License / Open Source details.
+* API
+  - Changed API name according to the terminology change from Watcher to Editor
+  - Modified User permission check functionality in API calls to align with UI
+  - Project search API
+    - Added parameter for paging
+    - Changed key in return values
+  - Removed limit on the number of Project creations
+  - Changed to use random tokens during token generation
+
+## 🐛 Hotfixes
+  - Project > Identification
+    - Fixed status bar bug
+    - Corrected pre-review error
+    - Resolved issue with copyright information not updating
+  - Project > Packaging
+    - Fixed bug in the verify process
+    - Modified to prevent physical deletion of packaging files when referenced by multiple projects
+    - Fixed issue where the 4th packaging file was not visible when loading previous project or could not be copied
+  - Project > Security
+    - Fixed issue with status indication on the Security button
+    - Resolved issue where vulnerability list for open source without versions was not visible
+  - 3rd Party
+    - Fixed bug preventing deletion of related documents
+    - Corrected bug in the 3rd party creation screen
+  - License
+    - Fixed bug when sending mail with only comments added in License
+  - Open source
+    - Modified to display restrictions of licenses linked to open source on the detail page
+    - Fixed bug related to Purl creation
+  - Vulnerability
+    - Modified logic related to recalculation
+  - DB
+    - Fixed bug causing duplicate OSS COMMON IDs
+    - Added missing tables to fosslight_create.sql
+    - Added missing code data
+      - Source code disclosure scope
+      - Restriction
+* Other Changes
+  - Legacy code deletion: Removed unused JSP and library files
+  - Changed verify script path to an absolute path including root.dir
+
+
+**Full Changelog**: https://github.com/fosslight/fosslight/compare/v2.1.0...v2.1.1
+---
+
 ## v2.1.0 (05/11/2024)
 ## Changes
 ## 🚀 Features
@@ -774,27 +868,3 @@
 
 - Update the comments and messages @soimkim (#484)
 - Update newLogo in login, signup, menu bar @MoonDD99 (#478)
-
----
-
-## v1.3.3 (15/04/2022)
-## 🚀 Features
-
-- Add statistics to menu @FOSSLight-dev (#475)
-
-## 🐛 Hotfixes
-
-- Fix the bug where the request button disappears when packaging rejects. @FOSSLight-dev (#476)
-
----
-
-## v1.3.2 (09/04/2022)
-## 🐛 Hotfixes
-
-- Fix the bug of loading all licenses even though it is a dual license in Check License. @FOSSLight-dev  (#473)
-- Fix the bug that an error occurs when downloading the SPDX file @FOSSLight-dev  (#467)
-- Change the indication of unclear obligation to OSS Name : - @FOSSLight-dev  (#466)
-
-## 🔧 Maintenance
-
-- Add a commit message checker @soimkim (#471)
