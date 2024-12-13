@@ -24,7 +24,7 @@ public interface FileService {
 
 	public List<UploadFile> uploadFile(HttpServletRequest req, T2File registFile, String inputFileName, String fileId);
 	
-	public List<UploadFile> uploadNoticeXMLFile(HttpServletRequest req, T2File registFile, String oldFileId, String prjId);
+	public Map<String, Object> uploadNoticeXMLFile(HttpServletRequest req, T2File registFile, String oldFileId, String prjId);
 	
 	public List<UploadFile> uploadFile(HttpServletRequest req, T2File registFile, String inputFileName, boolean randomNm, String filePath);
 	

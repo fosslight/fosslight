@@ -20,6 +20,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -927,7 +928,8 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 	}
 
 	@Override
-	public List<UploadFile> uploadNoticeXMLFile(HttpServletRequest req, T2File registFile, String oldFileId, String prjId) {
+	public Map<String, Object> uploadNoticeXMLFile(HttpServletRequest req, T2File registFile, String oldFileId, String prjId) {
+		Map<String, Object> resultMap = new HashMap<>();
 		List<UploadFile> result = new ArrayList<UploadFile>();
 		MultipartHttpServletRequest multipartRequest = null;
 
@@ -937,7 +939,7 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 		} catch(Exception e) {
 			log.debug("error : " + e.getMessage());
 			
-			return result;
+			return resultMap;
 		}
 		
 		java.util.Iterator<String> fileNames = multipartRequest.getFileNames();
@@ -1069,12 +1071,14 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			}
 			result.add(upFile);
 			
+			boolean zipFile = false;
 			try {
 				File convertHTMLFile = null;
 				
 				if ("XML".equals(fileExt.toUpperCase())) {
 					convertHTMLFile = CommonFunction.convertXMLToHTML(file, false);
 				} else if ("ZIP".equals(fileExt.toUpperCase())) {
+					zipFile = true;
 					FileUtil.decompress(uploadFilePath + "/" + file.getName(), uploadFilePath + "/" + randomUUID);
 					convertHTMLFile = CommonFunction.convertXMLToHTML(new File(uploadFilePath + "/" + randomUUID), true);
 				} else if ("TAR.GZ".equals(fileExt.toUpperCase())) {
@@ -1116,9 +1120,16 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 						
 						result.add(convertNoticeFile);
 					}
+				} else {
+					if (zipFile) {
+						resultMap.put("msg", getMessage("msg.common.convert.html.file.fail"));
+					}
 				}
 			} catch (Throwable e) {
 				log.debug(e.getMessage());
+				if (zipFile) {
+					resultMap.put("msg", getMessage("msg.common.convert.html.file.fail"));
+				}
 			}
 		}
 		
@@ -1126,7 +1137,9 @@ public class FileServiceImpl extends CoTopComponent implements FileService {
 			result = null;
 		}
 		
-		return result;
+		resultMap.put("file", result);
+		
+		return resultMap;
 	}
 
 	@Override

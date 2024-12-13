@@ -19,6 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -1398,33 +1399,43 @@ public class ProjectController extends CoTopComponent {
 			log.error(e.getMessage(), e);
 		}
 		
-		if (copy.equals("true") && !confirmStatusCopy.equals("false")) {
-			Map<String, Object> copyConfirmStatusResultMap = updateCopyConfirmStatus(req, project, confirmStatusCopy, userComment);
-			if (copyConfirmStatusResultMap.get("result").equals("true")) {
-				lastResult.put("confirmCopyStatusSuccess", "true");
-			} else {
-				String falseStep = "";
-				
-				if (copyConfirmStatusResultMap.get("step").equals("verificationProgress")) {
-					falseStep = "verification";
-					project.setIdentificationStatus(null);
-					project.setVerificationStatus(CoConstDef.CD_DTL_PROJECT_STATUS_PROGRESS);
+		if (copy.equals("true")) {
+			if (!isEmpty(project.getCopyPrjId())) {
+				if (!project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+					projectService.registBom(project.getPrjId(), CoConstDef.FLAG_YES, new ArrayList<>(), new ArrayList<>(), project.getCopyPrjId(), true, false);
 				} else {
-					falseStep = "identification";
-					project.setIdentificationStatus(CoConstDef.CD_DTL_PROJECT_STATUS_PROGRESS);
-					project.setVerificationStatus(null);
-				} 
-				
-				Project prj = projectService.getProjectBasicInfo(project.getPrjId());
-				if (falseStep.equals("verification") && !isEmpty(prj.getVerificationStatus())) {
-					project.setVerificationStatus(prj.getVerificationStatus());
+					projectService.registBom(project.getPrjId(), CoConstDef.FLAG_YES, new ArrayList<>(), new ArrayList<>(), project.getCopyPrjId(), true, true);
 				}
-				
-				projectService.updateCopyConfirmStatusProjectStatus(project);
-				
-				lastResult.put("confirmCopyStatusSuccess", "false");
-				if (!confirmStatusCopy.equals("IdentificationProg")) {
-					lastResult.put("confirmCopyStatusFail", falseStep);
+			}
+			
+			if (!confirmStatusCopy.equals("false")) {
+				Map<String, Object> copyConfirmStatusResultMap = updateCopyConfirmStatus(req, project, confirmStatusCopy, userComment);
+				if (copyConfirmStatusResultMap.get("result").equals("true")) {
+					lastResult.put("confirmCopyStatusSuccess", "true");
+				} else {
+					String falseStep = "";
+					
+					if (copyConfirmStatusResultMap.get("step").equals("verificationProgress")) {
+						falseStep = "verification";
+						project.setIdentificationStatus(null);
+						project.setVerificationStatus(CoConstDef.CD_DTL_PROJECT_STATUS_PROGRESS);
+					} else {
+						falseStep = "identification";
+						project.setIdentificationStatus(CoConstDef.CD_DTL_PROJECT_STATUS_PROGRESS);
+						project.setVerificationStatus(null);
+					} 
+					
+					Project prj = projectService.getProjectBasicInfo(project.getPrjId());
+					if (falseStep.equals("verification") && !isEmpty(prj.getVerificationStatus())) {
+						project.setVerificationStatus(prj.getVerificationStatus());
+					}
+					
+					projectService.updateCopyConfirmStatusProjectStatus(project);
+					
+					lastResult.put("confirmCopyStatusSuccess", "false");
+					if (!confirmStatusCopy.equals("IdentificationProg")) {
+						lastResult.put("confirmCopyStatusFail", falseStep);
+					}
 				}
 			}
 		}
@@ -4213,6 +4224,7 @@ public class ProjectController extends CoTopComponent {
 	 * @return the string
 	 * @throws Exception the exception
 	 */
+	@SuppressWarnings("unchecked")
 	@ResponseBody
 	@PostMapping(value = PROJECT.ANDROID_FILE)
 	public String androidFile(T2File file, MultipartHttpServletRequest req, HttpServletRequest request,
@@ -4271,10 +4283,18 @@ public class ProjectController extends CoTopComponent {
 				if (req.getContentType() != null
 						&& req.getContentType().toLowerCase().indexOf("multipart/form-data") > -1) {
 					file.setCreator(loginUserName());
-					list = fileService.uploadNoticeXMLFile(req, file, fileId, prjId);
+					Map<String, Object> rtnMap = fileService.uploadNoticeXMLFile(req, file, fileId, prjId);
+					if (rtnMap.containsKey("msg")) {
+						return toJson((String) rtnMap.get("msg"));
+					} else {
+						list = (List<UploadFile>) rtnMap.get("file");
+					}
 				}
-				prj.setSrcAndroidNoticeXmlId(list.get(0).getRegistFileId());
-				prj.setSrcAndroidNoticeFileId(list.get(1).getRegistFileId());
+				
+				if (!CollectionUtils.isEmpty(list)) {
+					prj.setSrcAndroidNoticeXmlId(list.get(0).getRegistFileId());
+					prj.setSrcAndroidNoticeFileId(list.get(1).getRegistFileId());
+				}
 
 				resultList.add(list);
 				resultList.add(fileType);

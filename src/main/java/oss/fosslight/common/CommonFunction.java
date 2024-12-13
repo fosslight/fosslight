@@ -4520,9 +4520,13 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		
 		UUID randomUUID = UUID.randomUUID();
 		File outFile = new File(outPath + "/" + randomUUID + ".html");
-		LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, outFile);
 		
-		return outFile;
+		boolean convertFlag = LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, outFile);
+		if (convertFlag) {
+			return outFile;
+		} else {
+			return null;
+		}
 	}
 	
 	public static String mergeNickname(OssAnalysis bean, String newestNickName) {
