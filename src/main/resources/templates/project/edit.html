@@ -13,12 +13,6 @@
                         <div class="row">
                         	<div class="d-flex align-items-center mt-2 ml-2" id="displayProjectInfo"></div>
                             <div class="float-right align-items-center mt-2" style="margin-left: auto;">
-                          <!-- 	<div class="float-right btn-group px-1">
-                                    <a class="help-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" th:text="|Help|"></a>
-                                    <div class="dropdown-menu mt-0" role="menu">
-                                        <a class="dropdown-item text-dark" href="#" th:onclick="|openHelpGuideLink('Project_List_BasicInfo_Main')|">How to use FossLight Hub</a>
-                                    </div>
-                                </div> -->
                                 <div class="float-right">
                                 	<th:block th:if="${!@CommonFunction.isAdmin() and project.dropYn == 'Y' and project.statusRequestYn == 'N'}">
                                 		<button type="button" th:onclick="|fn.exeProjectComplete('N')|" class="btn btn-dark-04 btn-sm width-6rem px-1" th:text="Reopen"></button>
@@ -108,7 +102,6 @@
                                                 <div class="btn-group ml-2">
                                                     <button type="button" id="identificationStatus" class="btn text-sm btn-default width-14rem"></button>
                                                     <button type="button" id="verificationStatus" class="btn text-sm btn-default width-14rem"></button>
-<!--                                                    <button type="button" id="destributionStatus" class="btn text-sm btn-default width-14rem"></button>-->
                                                     <span id="downloadBtn"></span>
                                                 </div>
                                             </div>
@@ -337,10 +330,6 @@
                                 	</div>
                                 </div>
                                 </th:block>
-<!--                            <div class="form-group" th:unless="${isReadOnly}">
-                                    <label for="comment" th:text="Comment"></label>
-                                    <textarea id="comment" rows="3"></textarea>
-                                </div> -->
                             </div>
                             </form>
                         </div>
