@@ -4705,7 +4705,7 @@
 		    ON A.REFERENCE_ID = P.PRJ_ID
 		 WHERE A.PRJ_ID = #{prjId}
 		   AND A.REFERENCE_DIV = #{referenceDiv}
-	  ORDER BY A.PRJ_REF_IDX DESC
+	  ORDER BY A.PRJ_REF_IDX
 	</select>
 	
 	<insert id="insertAddList" parameterType="oss.fosslight.domain.Project">

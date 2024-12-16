@@ -230,7 +230,7 @@ var party_evt = {
 		var cnt = $('#_list2').jqGrid('getGridParam', "records" );
 		var ids = $('#_3rdAddList').jqGrid('getDataIDs');
 		listData.componentCount = cnt;
-		$('#_3rdAddList').jqGrid('addRowData',ids.length+1,listData);
+		$('#_3rdAddList').jqGrid('addRowData',ids.length+1,listData,"first");
 		var reference = "";
 
 		if(data.length > 0){

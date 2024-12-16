@@ -663,7 +663,7 @@ var src_fn = {
 				var cnt = $('#_srcProjectList2').jqGrid('getGridParam', "records" );
 				var ids = $('#_srcAddList').jqGrid('getDataIDs');
 				listData.componentCount = cnt;
-				$('#_srcAddList').jqGrid('addRowData',ids.length+1,listData);
+				$('#_srcAddList').jqGrid('addRowData',ids.length+1,listData,"first");
 				
 				param["mainData"] = JSON.stringify(mainData);				
 				param = JSON.stringify(param);
