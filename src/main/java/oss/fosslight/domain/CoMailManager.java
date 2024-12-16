@@ -372,7 +372,7 @@ public class CoMailManager extends CoTopComponent {
     				convertModifiedData(convertDataMap, bean.getMsgType());
 				}
     			
-    			if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(bean.getMsgType())) {
+    			if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(bean.getMsgType()) || CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(bean.getMsgType())) {
     				convertDataMap.put("paramLicenseInfo", bean.getParamLicenseInfo());
     				convertModifiedData(convertDataMap, bean.getMsgType());
     			}
@@ -2528,7 +2528,7 @@ public class CoMailManager extends CoTopComponent {
 			
 			convertDataMap.replace("before", before);
 			convertDataMap.replace("after", after);
-		} else if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(msgType)) {
+		} else if (CoConstDef.CD_MAIL_TYPE_LICENSE_REGIST.equals(msgType) || CoConstDef.CD_MAIL_TYPE_LICENSE_ADDED_COMMENT.equals(msgType)) {
 			LicenseMaster lm = (LicenseMaster) convertDataMap.get("paramLicenseInfo");
 			if (lm != null && !isEmpty(lm.getInternalUrl())) {
 				LicenseMaster licenseBasicInfo = (LicenseMaster) convertDataMap.get("license_basic_info");

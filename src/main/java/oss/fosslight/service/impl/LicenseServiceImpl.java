@@ -632,7 +632,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		result = registLicenseMaster(licenseMaster);
 
 		if(!isNew) {
-			afterBean =  getLicenseMasterOne(licenseMaster);
+			afterBean = getLicenseMasterOne(licenseMaster);
 
 			// licnese type이 변경된 경우, 해당 라이선스를 사용하는 oss의 license type을 재확인 한다.
 			if(!avoidNull(beforeBean.getLicenseType()).equals(avoidNull(afterBean.getLicenseType()))) {
