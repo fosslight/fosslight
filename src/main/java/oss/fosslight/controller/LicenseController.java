@@ -120,7 +120,7 @@ public class LicenseController extends CoTopComponent {
 
 	@GetMapping(value = LICENSE.EDIT)
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
-		return "license/edit";
+		return CommonFunction.isAdmin() ? "license/edit" : "license/view";
 	}
 
 	@GetMapping(value = LICENSE.EDIT_ID)

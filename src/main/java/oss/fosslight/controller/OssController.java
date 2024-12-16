@@ -276,7 +276,7 @@ public class OssController extends CoTopComponent{
 			model.addAttribute("downloadLocationList", downloadLocationList.toArray(new String[downloadLocationList.size()]));
 		}
 		
-		return "oss/edit";
+		return CommonFunction.isAdmin() ? "oss/edit" : "oss/view";
 	}
 
 	@GetMapping(value={OSS.EDIT_ID}, produces = "text/html; charset=utf-8")
