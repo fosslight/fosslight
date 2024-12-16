@@ -750,6 +750,8 @@ public class Project extends ComBean implements Serializable {
 	
 	private String[] noticeFileFormat;
 	
+	private int prjAddIdx;
+	
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -831,6 +833,8 @@ public class Project extends ComBean implements Serializable {
 	private String vulnerabilityResolution;
 	
 	private String cvssScoreMax;
+	
+	private int prjRefIdx;
 	
 	/**
 	 * Gets the prj id.
@@ -4693,5 +4697,21 @@ public class Project extends ComBean implements Serializable {
 
 	public void setNoticeAppendFileInfo(T2File noticeAppendFileInfo) {
 		this.noticeAppendFileInfo = noticeAppendFileInfo;
+	}
+
+	public int getPrjAddIdx() {
+		return prjAddIdx;
+	}
+
+	public void setPrjAddIdx(int prjAddIdx) {
+		this.prjAddIdx = prjAddIdx;
+	}
+
+	public int getPrjRefIdx() {
+		return prjRefIdx;
+	}
+
+	public void setPrjRefIdx(int prjRefIdx) {
+		this.prjRefIdx = prjRefIdx;
 	}
 }

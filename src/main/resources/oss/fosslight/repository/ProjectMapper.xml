@@ -4705,6 +4705,7 @@
 		    ON A.REFERENCE_ID = P.PRJ_ID
 		 WHERE A.PRJ_ID = #{prjId}
 		   AND A.REFERENCE_DIV = #{referenceDiv}
+	  ORDER BY A.PRJ_REF_IDX DESC
 	</select>
 	
 	<insert id="insertAddList" parameterType="oss.fosslight.domain.Project">
@@ -4713,12 +4714,14 @@
 			PRJ_ID,
 			REFERENCE_ID,
 			REFERENCE_DIV,
-			COMPONENT_COUNT
+			COMPONENT_COUNT,
+			PRJ_REF_IDX
 		)VALUES(
 			#{prjId},
 			#{referenceId},
 			#{referenceDiv},
-			#{componentCount}
+			#{componentCount},
+			#{prjRefIdx}
 		)
 	</insert>
 	

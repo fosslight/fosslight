@@ -5400,7 +5400,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	public void insertAddList(List<Project> project) {
+		int idx = 1;
 		for (Project p : project){
+			p.setPrjRefIdx(idx++);
 			projectMapper.insertAddList(p);
 		}
 	}
