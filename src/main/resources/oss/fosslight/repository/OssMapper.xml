@@ -4244,7 +4244,7 @@
 	</select>
 
 	<select id="getRecentlyModifiedOss" parameterType="oss.fosslight.domain.OssMaster" resultType="HashMap">
-		SELECT COUNT(*) AS CNT, OSS_ID
+		SELECT COUNT(*) AS CNT, OSS_COMMON_ID
 		FROM OSS_DOWNLOADLOCATION
 		WHERE OSS_COMMON_ID = (SELECT OSS_COMMON_ID FROM OSS_COMMON WHERE OSS_NAME = #{ossName} ORDER BY MODIFIED_DATE DESC LIMIT 1)
 	</select>

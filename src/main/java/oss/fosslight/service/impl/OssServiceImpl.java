@@ -2600,7 +2600,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						if (!isEmpty(checkName)) {
 							bean.setCheckOssList("Y");
 							bean.setRecommendedNickname(bean.getOssNickName());
-
 						} else {
 							if (urlSearchSeq == 7) {
 								generateCheckOSSName(bean, p, androidPlatformList, downloadlocationUrl);
@@ -4685,55 +4684,60 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 	@Override
 	public Map<String, Object> saveOssURLNickname(ProjectIdentification paramBean) {
 		Map<String, Object> map = new HashMap<String, Object>();
-		OssMaster ossMaster = new OssMaster();
-		ossMaster.setOssName(paramBean.getCheckName());
-		List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
-		int urlSearchSeq = -1;
-		int seq = 0;
-		for (String url : checkOssNameUrl) {
-			if (urlSearchSeq == -1 && paramBean.getDownloadLocation().contains(url)) {
-				urlSearchSeq = seq;
-				break;
+		OssMaster ossMaster = getOssInfo(null, paramBean.getCheckName(), true);
+		if (ossMaster != null) {
+			List<String> checkOssNameUrl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_NAME_URL);
+			int urlSearchSeq = -1;
+			int seq = 0;
+			for (String url : checkOssNameUrl) {
+				if (urlSearchSeq == -1 && paramBean.getDownloadLocation().contains(url)) {
+					urlSearchSeq = seq;
+					break;
+				}
+				seq++;
 			}
-			seq++;
-		}
-		ProjectIdentification bean;
+			ProjectIdentification bean;
 
-		try {
-			for (String recommendedNickname : paramBean.getRecommendedNickname().split("\\|")) {
-				ossMaster.setOssNickname(recommendedNickname);
-				ossMapper.mergeOssNickname2(ossMaster);
-			}
-
-			if (urlSearchSeq > -1) {
-				bean = downloadlocationFormatter(paramBean, urlSearchSeq);
-				String downloadLocation = bean.getDownloadLocation();
-				String redirectLocation = bean.getRedirectLocation();
-				bean.setOssName(paramBean.getCheckName());
-
-				for (int i = 0; i < 2; i++) {
-					if (i == 0) {
-						bean.setDownloadLocation(downloadLocation);
-					} else {
-						bean.setDownloadLocation(redirectLocation);
-					}
-
-					if (ossMapper.checkOssNameUrl2Cnt(bean) == 0) {
-						Map<String, Object> data = ossMapper.getRecentlyModifiedOss(ossMaster);
-						ossMaster.setOssId(String.valueOf(data.get("OSS_ID")));
-						int cnt = Integer.parseInt(String.valueOf(data.get("CNT"))) + 1;
-						ossMaster.setSOrder(Integer.toString(cnt));
-						ossMaster.setDownloadLocation("https://" + bean.getDownloadLocation());
-						ossMapper.insertOssDownloadLocation(ossMaster);
+			try {
+				for (String recommendedNickname : paramBean.getRecommendedNickname().split("\\|")) {
+					if (!isEmpty(recommendedNickname)) {
+						ossMaster.setOssNickname(recommendedNickname);
+						ossMapper.mergeOssNickname2(ossMaster);
 					}
 				}
+
+				if (urlSearchSeq > -1) {
+					bean = downloadlocationFormatter(paramBean, urlSearchSeq);
+					String downloadLocation = bean.getDownloadLocation();
+					String redirectLocation = bean.getRedirectLocation();
+					bean.setOssName(paramBean.getCheckName());
+
+					for (int i = 0; i < 2; i++) {
+						if (i == 0) {
+							bean.setDownloadLocation(downloadLocation);
+						} else {
+							bean.setDownloadLocation(redirectLocation);
+						}
+
+						if (ossMapper.checkOssNameUrl2Cnt(bean) == 0) {
+							Map<String, Object> data = ossMapper.getRecentlyModifiedOss(ossMaster);
+							ossMaster.setOssCommonId(String.valueOf(data.get("OSS_COMMON_ID")));
+							int cnt = Integer.parseInt(String.valueOf(data.get("CNT"))) + 1;
+							ossMaster.setOssDlIdx(cnt);
+							ossMaster.setDownloadLocation("https://" + bean.getDownloadLocation());
+							ossMapper.insertOssDownloadLocation(ossMaster);
+						}
+					}
+				}
+				map.put("isValid", true);
+				map.put("returnType", "Success");
+			} catch (Exception e) {
+				log.error(e.getMessage());
+				map.put("isValid", false);
+				map.put("returnType", e.getMessage());
 			}
-			map.put("isValid", true);
-			map.put("returnType", "Success");
-		} catch (Exception e) {
-			log.error(e.getMessage());
+		} else {
 			map.put("isValid", false);
-			map.put("returnType", e.getMessage());
 		}
 		return map;
 	}
