@@ -333,48 +333,49 @@ public class RefineOssService {
 		int itemTotalCnt = refineOssMapper.getRefineOssTotalCnt(schOssName, "reorderGithubUrl");
 		List<String> refinedItemList;
 		List<Map<String, String>> ossDownloadLocationList;
+		List<Map<String, String>> githubItemList = new ArrayList<>();
+		List<Map<String, String>> notGithubItemList = new ArrayList<>();
 		int reFineTotalCnt = 0;
 		if (itemTotalCnt > 0) {
-			if(itemTotalCnt < PROC_CHUNK_SIZE) {
+			if (itemTotalCnt < PROC_CHUNK_SIZE) {
 				itemTotalCnt = PROC_CHUNK_SIZE;
 			}
 			
-			for(int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
+			for (int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
 				final List<Map<String, Object>> ossCommonList = refineOssMapper.selectRefineOssCommonList(schOssName, "reorderGithubUrl", limitIndex*PROC_CHUNK_SIZE, PROC_CHUNK_SIZE);
 				String ossCommonId;
 				String ossName;
-				for(Map<String, Object> ossCommonInfo : ossCommonList) {
+				for (Map<String, Object> ossCommonInfo : ossCommonList) {
 					refinedItemList = new ArrayList<>();
 					ossCommonId = Integer.toString((int)ossCommonInfo.get(FIELD_OSS_COMMON_ID));
 					ossName = (String) ossCommonInfo.get(FIELD_OSS_NAME);
 					ossDownloadLocationList = refineOssMapper.selectOssDownloadLocationList(ossCommonId);
 
-					// find github.com url item
-					int githubUrlItemIndex = 0;
-					Map<String, String> githubUrlItem = null;
-					if(!CollectionUtils.isEmpty(ossDownloadLocationList)) {
-						for(Map<String, String> n : ossDownloadLocationList) {
-							if(n.get(FIELD_DOWNLOAD_LOCATION).contains("github.com")) {
-								githubUrlItem = n;
-								break;
+					if (!CollectionUtils.isEmpty(ossDownloadLocationList)) {
+						githubItemList.clear();
+						notGithubItemList.clear();
+						for (Map<String, String> n : ossDownloadLocationList) {
+							if (n.get(FIELD_DOWNLOAD_LOCATION).contains("github.com")) {
+								githubItemList.add(n);
+							} else {
+								notGithubItemList.add(n);
 							}
-							githubUrlItemIndex++;
 						}
-						
-						// remove and insert first github.com url item
-						if(githubUrlItem != null) {
-							ossDownloadLocationList.remove(githubUrlItemIndex);
-							ossDownloadLocationList.add(0, githubUrlItem);
-							refinedItemList.add(githubUrlItem.get(FIELD_DOWNLOAD_LOCATION));
+						if (!CollectionUtils.isEmpty(githubItemList) && !CollectionUtils.isEmpty(notGithubItemList)) {
+							githubItemList.addAll(notGithubItemList);
+							if (!ossDownloadLocationList.equals(githubItemList)) {
+								for (Map<String, String> githubUrlItem : githubItemList) {
+									refinedItemList.add(githubUrlItem.get(FIELD_DOWNLOAD_LOCATION));
+								}
+								if (doUpdateFlag) {
+									refineOssMapper.deleteOssDownloadLocation(ossCommonId);
+									refineOssMapper.insertOssDownloadLocation(ossCommonId, githubItemList);
+								}
+								reFineTotalCnt++;
+								reFineItems.put(ossName, refinedItemList);
+							}
 							
-							if(doUpdateFlag) {
-								refineOssMapper.deleteOssDownloadLocation(ossCommonId);
-								refineOssMapper.insertOssDownloadLocation(ossCommonId, ossDownloadLocationList);
-							}
-							reFineTotalCnt++;
-							reFineItems.put(ossName, refinedItemList);
 						}
-						
 					}
 				}
 
