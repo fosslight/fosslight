@@ -646,7 +646,7 @@ public class RefineOssService {
 	 * @return
 	 * @throws MalformedPackageURLException
 	 */
-	private String generatePurlByDownloadLocation(String downloadLocation) throws MalformedPackageURLException {
+	private String generatePurlByDownloadLocation(String downloadLocation) {
 		final List<String> checkPurl = CoCodeManager.getCodeNames(CoConstDef.CD_CHECK_OSS_DOWNLOADLOCAION_PURL);
 		String purlString = "";
 		int urlSearchSeq = -1;
@@ -735,62 +735,71 @@ public class RefineOssService {
 				String[] splitDownloadLocation = downloadLocation.split("/");
 				boolean addFlag = false;
 				String namespace = "/";
+				boolean errorFlag = false;
 				
-				switch(urlSearchSeq) {
-					case 0: // github
-						purl = new PackageURL(StandardTypes.GITHUB, splitDownloadLocation[1], splitDownloadLocation[2], null, null, null);
-						break;
-					case 1: // npm
-						if (downloadLocation.contains("/package/@")) addFlag = true;
-						purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[2], null, null, null);
-						break;
-					case 2: // npm
-						if (downloadLocation.contains("/@")) addFlag = true;
-						purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[1], null, null, null);
-						break;
-					case 3: // pypi
-					case 4: // pypi
-						purl = new PackageURL(StandardTypes.PYPI, null, splitDownloadLocation[2].replaceAll("_", "-"), null, null, null);
-						break;
-					case 5: // maven
-					case 6: // maven
-						purl = new PackageURL(StandardTypes.MAVEN, splitDownloadLocation[2], splitDownloadLocation[3], null, null, null);
-						break;
-					case 7: // cocoapod
-						purl = new PackageURL("cocoapods", null, splitDownloadLocation[2], null, null, null);
-						break;
-					case 8: // gem
-						purl = new PackageURL(StandardTypes.GEM, null, splitDownloadLocation[2], null, null, null);
-						break;
-					case 9: // go
-						int idx = 0;
-						for (String data : splitDownloadLocation) {
-							if (idx > 1) {
-								namespace += data + "/";
+				try {
+					switch(urlSearchSeq) {
+						case 0: // github
+							purl = new PackageURL(StandardTypes.GITHUB, splitDownloadLocation[1], splitDownloadLocation[2], null, null, null);
+							break;
+						case 1: // npm
+							if (downloadLocation.contains("/package/@")) addFlag = true;
+							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[2], null, null, null);
+							break;
+						case 2: // npm
+							if (downloadLocation.contains("/@")) addFlag = true;
+							purl = new PackageURL(StandardTypes.NPM, null, splitDownloadLocation[1], null, null, null);
+							break;
+						case 3: // pypi
+						case 4: // pypi
+							purl = new PackageURL(StandardTypes.PYPI, null, splitDownloadLocation[2].replaceAll("_", "-"), null, null, null);
+							break;
+						case 5: // maven
+						case 6: // maven
+							purl = new PackageURL(StandardTypes.MAVEN, splitDownloadLocation[2], splitDownloadLocation[3], null, null, null);
+							break;
+						case 7: // cocoapod
+							purl = new PackageURL("cocoapods", null, splitDownloadLocation[2], null, null, null);
+							break;
+						case 8: // gem
+							purl = new PackageURL(StandardTypes.GEM, null, splitDownloadLocation[2], null, null, null);
+							break;
+						case 9: // go
+							int idx = 0;
+							for (String data : splitDownloadLocation) {
+								if (idx > 1) {
+									namespace += data + "/";
+								}
+								idx++;
 							}
-							idx++;
-						}
-						namespace = namespace.substring(0, namespace.length()-1);
-						purl = new PackageURL(StandardTypes.GOLANG, splitDownloadLocation[1]);
-						
-						break;
-					case 11:
-						purl = new PackageURL("pub", null, splitDownloadLocation[2], null, null, null);
-						break;
-					default:
-						break;
+							namespace = namespace.substring(0, namespace.length()-1);
+							purl = new PackageURL(StandardTypes.GOLANG, splitDownloadLocation[1]);
+							
+							break;
+						case 11:
+							purl = new PackageURL("pub", null, splitDownloadLocation[2], null, null, null);
+							break;
+						default:
+							break;
+					}
+				} catch (Exception e) {
+					errorFlag = true;
 				}
 				
-				if (purl != null) {
-					purlString = purl.toString();
-					if (urlSearchSeq == 9) {
-						purlString += namespace + subPath;
-					} else {
-						if (addFlag) {
-							if (urlSearchSeq == 1) {
-								if (splitDownloadLocation.length > 3) purlString += "/" + splitDownloadLocation[3];
-							} else {
-								if (splitDownloadLocation.length > 2) purlString += "/" + splitDownloadLocation[2];
+				if (errorFlag) {
+					purlString = "link:" + downloadLocation;
+				} else {
+					if (purl != null) {
+						purlString = purl.toString();
+						if (urlSearchSeq == 9) {
+							purlString += namespace + subPath;
+						} else {
+							if (addFlag) {
+								if (urlSearchSeq == 1) {
+									if (splitDownloadLocation.length > 3) purlString += "/" + splitDownloadLocation[3];
+								} else {
+									if (splitDownloadLocation.length > 2) purlString += "/" + splitDownloadLocation[2];
+								}
 							}
 						}
 					}

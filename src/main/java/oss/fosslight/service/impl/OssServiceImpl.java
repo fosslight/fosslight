@@ -4886,13 +4886,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 	@Override
 	public String getPurlByDownloadLocation(OssMaster ossMaster) {
-		String purl = "";
-		try {
-			purl = generatePurlByDownloadLocation(ossMaster);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return purl;
+		return generatePurlByDownloadLocation(ossMaster);
 	}
 
 	private String generatePurlByDownloadLocation(OssMaster ossMaster) {
@@ -4901,93 +4895,94 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		int urlSearchSeq = -1;
 		int seq = 0;
 		
-		try {
-			String downloadLocation = ossMaster.getDownloadLocation();
-			if (!isEmpty(downloadLocation)) {
-				String subPath = "";
-				
-				for (String url : checkPurl) {
-					if (urlSearchSeq == -1 && downloadLocation.contains(url)) {
-						urlSearchSeq = seq;
-						break;
-					}
-					seq++;
+		String downloadLocation = ossMaster.getDownloadLocation();
+		if (!isEmpty(downloadLocation)) {
+			String subPath = "";
+			
+			for (String url : checkPurl) {
+				if (urlSearchSeq == -1 && downloadLocation.contains(url)) {
+					urlSearchSeq = seq;
+					break;
 				}
-				
-				if (downloadLocation.contains("://")) {
-					downloadLocation = downloadLocation.split("://")[1];
+				seq++;
+			}
+			
+			if (downloadLocation.contains("://")) {
+				downloadLocation = downloadLocation.split("://")[1];
+			}
+			if (downloadLocation.startsWith("www.")) {
+				downloadLocation = downloadLocation.substring(4, downloadLocation.length());
+			}
+			if (downloadLocation.contains(";")) {
+				downloadLocation = downloadLocation.split("[;]")[0];
+			}
+			// delete port number
+			if (downloadLocation.contains(":")) {
+				int colonIdx = downloadLocation.indexOf(":");
+				int slashIdx = downloadLocation.indexOf("/", colonIdx);
+				if (slashIdx > -1 && slashIdx > colonIdx && downloadLocation.substring(colonIdx+1, slashIdx).chars().allMatch(Character::isDigit)) {
+					downloadLocation = downloadLocation.substring(0, colonIdx) + downloadLocation.substring(slashIdx, downloadLocation.length());
 				}
-				if (downloadLocation.startsWith("www.")) {
-					downloadLocation = downloadLocation.substring(4, downloadLocation.length());
-				}
-				if (downloadLocation.contains(";")) {
-					downloadLocation = downloadLocation.split("[;]")[0];
-				}
-				// delete port number
-				if (downloadLocation.contains(":")) {
-					int colonIdx = downloadLocation.indexOf(":");
-					int slashIdx = downloadLocation.indexOf("/", colonIdx);
-					if (slashIdx > -1 && slashIdx > colonIdx && downloadLocation.substring(colonIdx+1, slashIdx).chars().allMatch(Character::isDigit)) {
-						downloadLocation = downloadLocation.substring(0, colonIdx) + downloadLocation.substring(slashIdx, downloadLocation.length());
-					}
-				}
-				
-				if (downloadLocation.contains(".git")) {
-					if (downloadLocation.endsWith(".git")) {
-						downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
-					} else {
-						if (downloadLocation.contains("#")) {
-							downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
-							if (downloadLocation.endsWith(".git")) {
-								downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
-							}
+			}
+			
+			if (downloadLocation.contains(".git")) {
+				if (downloadLocation.endsWith(".git")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
+				} else {
+					if (downloadLocation.contains("#")) {
+						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
+						if (downloadLocation.endsWith(".git")) {
+							downloadLocation = downloadLocation.substring(0, downloadLocation.length()-4);
 						}
 					}
 				}
-				
-				if (downloadLocation.contains("#")) {
-					if (urlSearchSeq == 9) {
-						String[] splitDownloadLocation = downloadLocation.split("[#]");
-						subPath = splitDownloadLocation[1];
-					}
-					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
+			}
+			
+			if (downloadLocation.contains("#")) {
+				if (urlSearchSeq == 9) {
+					String[] splitDownloadLocation = downloadLocation.split("[#]");
+					subPath = splitDownloadLocation[1];
 				}
-				
-				if (downloadLocation.contains("@")) {
-					if (urlSearchSeq == 9) {
-						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
-					}
+				downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("#"));
+			}
+			
+			if (downloadLocation.contains("@")) {
+				if (urlSearchSeq == 9) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
 				}
+			}
+			
+			if (downloadLocation.endsWith("/")) {
+				downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
+			}
+			
+			if (urlSearchSeq > -1) {
+				Pattern p = generatePatternPurl(urlSearchSeq, downloadLocation);
+				Matcher m = p.matcher(downloadLocation);
 				
-				if (downloadLocation.endsWith("/")) {
-					downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
+				while (m.find()) {
+					downloadLocation = m.group(0);
 				}
-				
-				if (urlSearchSeq > -1) {
-					Pattern p = generatePatternPurl(urlSearchSeq, downloadLocation);
-					Matcher m = p.matcher(downloadLocation);
-					
-					while (m.find()) {
-						downloadLocation = m.group(0);
-					}
+			}
+			
+			PackageURL purl = null;
+			if (urlSearchSeq == -1) {
+				if (downloadLocation.contains("+")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
 				}
+				purlString = "link:" + downloadLocation;
+			} else if (urlSearchSeq == 10) {
+				if (downloadLocation.contains("+")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
+				}
+				purlString = "link:" + downloadLocation;
+			} else {
+				String[] splitDownloadLocation = downloadLocation.split("/");
+				boolean addFlag = false;
+				String namespace = "/";
 				
-				PackageURL purl = null;
-				if (urlSearchSeq == -1) {
-					if (downloadLocation.contains("+")) {
-						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
-					}
-					purlString = "link:" + downloadLocation;
-				} else if (urlSearchSeq == 10) {
-					if (downloadLocation.contains("+")) {
-						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
-					}
-					purlString = "link:" + downloadLocation;
-				} else {
-					String[] splitDownloadLocation = downloadLocation.split("/");
-					boolean addFlag = false;
-					String namespace = "/";
-					
+				boolean errorFlag = false;
+				try {
 					switch(urlSearchSeq) {
 						case 0: // github
 							purl = new PackageURL(StandardTypes.GITHUB, splitDownloadLocation[1], splitDownloadLocation[2], null, null, null);
@@ -5032,7 +5027,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						default:
 							break;
 					}
-					
+				} catch (Exception e) {
+					errorFlag = true;
+					log.error("failed to generate purl download location : {}, link generate purl {}", downloadLocation, "link:" + downloadLocation);
+				}
+				
+				if (errorFlag) {
+					purlString = "link:" + downloadLocation;
+				} else {
 					if (purl != null) {
 						purlString = purl.toString();
 						if (urlSearchSeq == 9) {
@@ -5049,8 +5051,6 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					}
 				}
 			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 		}
 		
 		return purlString;
