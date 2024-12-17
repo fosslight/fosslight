@@ -6,6 +6,7 @@
 package oss.fosslight.controller;
 
 import java.lang.reflect.Type;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -240,7 +241,9 @@ public class UserController extends CoTopComponent {
 			return makeJsonResponseHeader(resMap);
 		}
 
-		String generatedPassword = RandomStringUtils.randomAlphanumeric(10);
+		String generatedPassword = generatedPassword(10);
+//		String generatedPassword = RandomStringUtils.randomAlphanumeric(10);
+		
 		foundUser.setPassword(encodePassword(generatedPassword));
 		foundUser.setModifier(userId);
 
@@ -278,6 +281,22 @@ public class UserController extends CoTopComponent {
 		return makeJsonResponseHeader(resMap);
 	}
 	
+	private String generatedPassword(int length) {
+		String ENGLISH_LOWER = "abcdefghijklmnopqrstuvwxyz";
+        String ENGLISH_UPPER = ENGLISH_LOWER.toUpperCase();
+        String NUMBER = "0123456789";
+		
+        String DATA_FOR_RANDOM_STRING = ENGLISH_LOWER + ENGLISH_UPPER + NUMBER;
+
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            sb.append(DATA_FOR_RANDOM_STRING.charAt(random.nextInt(DATA_FOR_RANDOM_STRING.length())));
+        }
+        return sb.toString();
+	}
+
 	@PostMapping(value=USER.UPDATE_USERNAME_DIVISION)
 	public  @ResponseBody ResponseEntity<Object> updateUserNameDivision(
 			@RequestBody Map<String, String> params
