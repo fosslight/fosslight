@@ -215,7 +215,7 @@ public class RefineOssService {
 					ossName = (String) ossCommonInfo.get(FIELD_OSS_NAME);
 					ossDownloadLocationList = refineOssMapper.selectOssDownloadLocationList(ossCommonId);
 
-					if(!CollectionUtils.isEmpty(ossDownloadLocationList)) {
+					if (!CollectionUtils.isEmpty(ossDownloadLocationList)) {
 						for(Map<String, String> n : ossDownloadLocationList) {
 							if(StringUtil.isEmpty(n.get(FIELD_PURL))) {
 								downloadLocation = n.get(FIELD_DOWNLOAD_LOCATION);
@@ -229,7 +229,7 @@ public class RefineOssService {
 							}
 						}
 
-						if(!CollectionUtils.isEmpty(refinedItemList)) {
+						if (!CollectionUtils.isEmpty(refinedItemList)) {
 							reFineTotalCnt++;
 							reFineItems.put(ossName, refinedItemList);							
 						}						
@@ -269,23 +269,23 @@ public class RefineOssService {
 				itemTotalCnt = PROC_CHUNK_SIZE;
 			}
 			
-			for(int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
+			for (int limitIndex = 0; limitIndex < itemTotalCnt/PROC_CHUNK_SIZE; limitIndex++) {
 				final List<Map<String, Object>> ossCommonList = refineOssMapper.selectRefineOssCommonList(schOssName, "unsetPurl", limitIndex*PROC_CHUNK_SIZE, PROC_CHUNK_SIZE);
 				String ossCommonId;
 				String ossName;
-				for(Map<String, Object> ossCommonInfo : ossCommonList) {
+				for (Map<String, Object> ossCommonInfo : ossCommonList) {
 					refinedItemList = new ArrayList<>();
 					ossCommonId = Integer.toString((int)ossCommonInfo.get(FIELD_OSS_COMMON_ID));
 					ossName = (String) ossCommonInfo.get(FIELD_OSS_NAME);
 					ossDownloadLocationList = refineOssMapper.selectOssDownloadLocationList(ossCommonId);
 
-					if(!CollectionUtils.isEmpty(ossDownloadLocationList)) {
-						for(Map<String, String> n : ossDownloadLocationList) {
-							if(StringUtil.isEmpty(n.get(FIELD_PURL))) {
+					if (!CollectionUtils.isEmpty(ossDownloadLocationList)) {
+						for (Map<String, String> n : ossDownloadLocationList) {
+							if (StringUtil.isEmpty(n.get(FIELD_PURL))) {
 								String downloadLocation = n.get(FIELD_DOWNLOAD_LOCATION);
 								try {
 									String purl = generatePurlByDownloadLocation(downloadLocation);
-									if(!StringUtil.isEmpty(purl)) {
+									if (!StringUtil.isEmpty(purl)) {
 										n.put(FIELD_PURL, purl);
 										refinedItemList.add(MessageFormat.format("{0}:{1}", downloadLocation, purl));
 									}
@@ -295,8 +295,8 @@ public class RefineOssService {
 							}
 						}
 
-						if(!CollectionUtils.isEmpty(refinedItemList)) {
-							if(doUpdateFlag) {
+						if (!CollectionUtils.isEmpty(refinedItemList)) {
+							if (doUpdateFlag) {
 								refineOssMapper.deleteOssDownloadLocation(ossCommonId);
 								refineOssMapper.insertOssDownloadLocation(ossCommonId, ossDownloadLocationList);
 							}
@@ -662,8 +662,9 @@ public class RefineOssService {
 				}
 				seq++;
 			}
-			
-			downloadLocation = downloadLocation.split("://")[1];
+			if (downloadLocation.contains("://")) {
+				downloadLocation = downloadLocation.split("://")[1];
+			}
 			if (downloadLocation.startsWith("www.")) {
 				downloadLocation = downloadLocation.substring(4, downloadLocation.length());
 			}
@@ -701,10 +702,14 @@ public class RefineOssService {
 			}
 			
 			if (downloadLocation.contains("@")) {
-				if (urlSearchSeq == 9) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
+				if (urlSearchSeq == 9) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
+				}
 			}
 			
-			if (downloadLocation.endsWith("/")) downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
+			if (downloadLocation.endsWith("/")) {
+				downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
+			}
 			
 			if (urlSearchSeq > -1) {
 				Pattern p = generatePatternPurl(urlSearchSeq, downloadLocation);
@@ -717,10 +722,14 @@ public class RefineOssService {
 			
 			PackageURL purl = null;
 			if (urlSearchSeq == -1) {
-				if (downloadLocation.contains("+")) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
+				if (downloadLocation.contains("+")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
+				}
 				purlString = "link:" + downloadLocation;
 			} else if (urlSearchSeq == 10) {
-				if (downloadLocation.contains("+")) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
+				if (downloadLocation.contains("+")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
+				}
 				purlString = "link:" + downloadLocation;
 			} else {
 				String[] splitDownloadLocation = downloadLocation.split("/");

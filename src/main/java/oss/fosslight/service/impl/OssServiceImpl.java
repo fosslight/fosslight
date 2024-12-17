@@ -4914,7 +4914,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					seq++;
 				}
 				
-				downloadLocation = downloadLocation.split("://")[1];
+				if (downloadLocation.contains("://")) {
+					downloadLocation = downloadLocation.split("://")[1];
+				}
 				if (downloadLocation.startsWith("www.")) {
 					downloadLocation = downloadLocation.substring(4, downloadLocation.length());
 				}
@@ -4952,10 +4954,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				}
 				
 				if (downloadLocation.contains("@")) {
-					if (urlSearchSeq == 9) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
+					if (urlSearchSeq == 9) {
+						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("@"));
+					}
 				}
 				
-				if (downloadLocation.endsWith("/")) downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
+				if (downloadLocation.endsWith("/")) {
+					downloadLocation = downloadLocation.substring(0, downloadLocation.length()-1);
+				}
 				
 				if (urlSearchSeq > -1) {
 					Pattern p = generatePatternPurl(urlSearchSeq, downloadLocation);
@@ -4968,10 +4974,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				
 				PackageURL purl = null;
 				if (urlSearchSeq == -1) {
-					if (downloadLocation.contains("+")) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
+					if (downloadLocation.contains("+")) {
+						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+"));
+					}
 					purlString = "link:" + downloadLocation;
 				} else if (urlSearchSeq == 10) {
-					if (downloadLocation.contains("+")) downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
+					if (downloadLocation.contains("+")) {
+						downloadLocation = downloadLocation.substring(0, downloadLocation.indexOf("+")-1);
+					}
 					purlString = "link:" + downloadLocation;
 				} else {
 					String[] splitDownloadLocation = downloadLocation.split("/");
