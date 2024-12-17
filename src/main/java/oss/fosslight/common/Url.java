@@ -975,6 +975,9 @@ public final class Url {
 
 			/** API OSS List 조회 */
 			public static final String FOSSLIGHT_API_OSS_REGISTER				= "/oss";
+			
+			/** API Refine OSS Download Location */
+			public static final String FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION	= "/refine-download-location";
 
 
 		/** LICENSE */
