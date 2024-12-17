@@ -878,6 +878,13 @@ public class RefineOssService {
 				customDownloadLocation = checkOssNameUrl.get(2) + name[name.length-2];
 			}
 			
+			if (urlSearchSeq == 7) {
+				if (customDownloadLocation.contains("+")) {
+					customDownloadLocation = customDownloadLocation.split("[+]")[0];
+					customDownloadLocation = customDownloadLocation.substring(0, customDownloadLocation.lastIndexOf("/"));
+				}
+			}
+			
 			if (urlSearchSeq == 0) {
 				if (customDownloadLocation.startsWith("git://")) {
 					customDownloadLocation = customDownloadLocation.replace("git://", "https://");
@@ -946,7 +953,7 @@ public class RefineOssService {
 				p = Pattern.compile("((http|https)://cocoapods.org/pods/([^/]+))");
 				break;
 			case 7:
-				p = Pattern.compile("((http|https)://android.googlesource.com/platform/(.*))");
+				p = Pattern.compile("((http|https)://android.googlesource.com/(.*))");
 				break;
 			case 8:
 				p = Pattern.compile("((http|https)://nuget.org/packages/([^/]+))");
