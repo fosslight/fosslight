@@ -209,19 +209,16 @@ public class ApiOssV2Controller extends CoTopComponent {
     }
     
     @ApiOperation(value = "Refine OSS Download Location", notes = "Refine ALL의 경우 다음 순서대로 처리합니다. <ol><li>UPDATE DOWNLOAD LOCATION FORMAT</li><li>REMOVE DUPLICATED DOWNLOAD LOCATION</li><li>PUT PURL</li><li>REMOVE DUPLICATED PURL</li><li>REORDER GITHUB PRIORITY</li></ol><br>* doUpdateFlag가 N인 경우 Database를 Update하지 않습니다.")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "_token", value = "token", required = true, dataType = "String", paramType = "header")
-    })
 	@GetMapping(value = {APIV2.FOSSLIGHT_API_OSS_REFINE_DOWNLOAD_LOCATION})
     public ResponseEntity<Map<String, Object>> refineOssDownloadLocation(
-    		@RequestHeader String _token,
+            @ApiParam(hidden=true) @RequestHeader String authorization,
     		@ApiParam(value = "OSS Name", required = false) @RequestParam(required = false) String ossName,
     		@ApiParam(value = "Do Update Database", required = true, defaultValue = "N", allowableValues = "N,Y") @RequestParam(required = true) String doUpdateFlag,
     		@ApiParam(value = "Refine Type", required = true, allowableValues = "0.UPDATE DOWNLOAD LOCATION FORMAT,1.REMOVE DUPLICATED DOWNLOAD LOCATION,2.PUT PURL,3.REMOVE DUPLICATED PURL,4.REORDER GITHUB PRIORITY,5.REFINE ALL") @RequestParam(required = true) String refineType){
 		
 		// 사용자 인증
 		try {
-			if (!userService.isAdmin(_token)) {
+			if (!userService.isAdmin(authorization)) {
 				return responseService.errorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
 						CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_PERMISSION_ERROR_MESSAGE));
 			}
