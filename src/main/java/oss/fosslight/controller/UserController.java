@@ -268,7 +268,7 @@ public class UserController extends CoTopComponent {
 
 		mailBean.setParamList(paramList);
 		mailBean.setParamUserId(userId);
-		mailBean.setToIds(new String[] { foundUser.getUserId() });
+		mailBean.setToIds(new String[] { foundUser.getEmail() });
 
 		boolean isMailSendingSuccessful = CoMailManager.getInstance().sendMail(mailBean);
 		if (!isMailSendingSuccessful) {
