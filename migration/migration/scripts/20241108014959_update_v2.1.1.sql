@@ -106,3 +106,8 @@ SET PA.PRJ_REF_IDX = TBL.SEQ;
 -- Modify code management
 UPDATE `T2_CODE_DTL` SET CD_DTL_NM = 'android.googlesource.com' WHERE CD_NO=903 AND CD_DTL_NO=008;
 UPDATE `T2_CODE_DTL` SET CD_DTL_NM = 'android.googlesource.com' WHERE CD_NO=913 AND CD_DTL_NO=011;
+
+DELETE `T2_CODE_DTL` WHERE CD_NO = '102' AND CD_DTL_NO = '817';
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('102', '817', '[FOSSLight] Your password has been reset : ${User}', '', '${User}''s password has been reset.', 817, 'Y');
+DELETE `T2_CODE_DTL` WHERE CD_NO = '110' AND CD_DTL_NO = '71';
+INSERT INTO `T2_CODE_DTL` (`CD_NO`, `CD_DTL_NO`, `CD_DTL_NM`, `CD_SUB_NO`, `CD_DTL_EXP`, `CD_ORDER`, `USE_YN`) VALUES ('110', '71', 'resetUserPassword.html', '', '817', 18, 'Y');
