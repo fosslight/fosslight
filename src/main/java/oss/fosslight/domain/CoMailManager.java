@@ -2506,11 +2506,7 @@ public class CoMailManager extends CoTopComponent {
 				}
 				
 				convertDataMap.replace("oss_basic_info", ossBasicInfo);
-				if (isModified){
-					convertDataMap.replace("isModify", false);
-				} else {
-					convertDataMap.replace("isModify", true);
-				}
+				convertDataMap.replace("isModify", false);
 			}
 		} else if (CoConstDef.CD_MAIL_TYPE_PARTNER_CHANGED.equals(msgType)) {
 			PartnerMaster before = (PartnerMaster) convertDataMap.get("before");
