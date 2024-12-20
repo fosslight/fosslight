@@ -186,12 +186,13 @@ public final class PdfUtil extends CoTopComponent {
                 }
             }
         }
-
         for(OssMaster ossMaster : ossMasterMap.values()) {
+            ossMaster.setOssName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") +"/oss/list/" + ossMaster.getOssName() + "' target='_blank'>" + ossMaster.getOssName() + "</a>");
             ossReview.add(ossMaster);
         }
 
         for (LicenseMaster licenseMaster : licenseMasterMap.values()) {
+            licenseMaster.setLicenseName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/license/edit/" + licenseMaster.getLicenseId() + "' target='_blank'>" + licenseMaster.getLicenseName() + "</a>");
             licenseReview.add(licenseMaster);
         }
 
