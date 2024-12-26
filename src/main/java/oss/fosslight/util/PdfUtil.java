@@ -139,17 +139,17 @@ public final class PdfUtil extends CoTopComponent {
                 //OssMasterReview
                 OssMaster ossMaster = new OssMaster();
                 ossMaster.setOssId(projectIdentification.getOssId());
-                OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(projectIdentification.getOssId());
-                if (oss != null) {
-                    if (!avoidNull(oss.getSummaryDescription()).equals("")) {
-                        if(!ossMasterMap.containsKey(oss.getOssName().toUpperCase())) {
-                            ossMasterMap.put(oss.getOssName().toUpperCase(), oss);
+                ossMaster = CoCodeManager.OSS_INFO_BY_ID.get(ossMaster.getOssId());
+                if (ossMaster != null && !isEmpty(ossMaster.getOssName())) {
+                    if (!avoidNull(ossMaster.getSummaryDescription()).equals("")) {
+                        if(!ossMasterMap.containsKey(ossMaster.getOssName().toUpperCase())) {
+                            ossMasterMap.put(ossMaster.getOssName().toUpperCase(), ossMaster);
                         }
                     }
 
                     //VulnerabilityReview
-                    projectIdentification.setOssName(oss.getOssName());
-                    projectIdentification.setOssVersion(oss.getOssVersion());
+                    projectIdentification.setOssName(ossMaster.getOssName());
+                    projectIdentification.setOssVersion(ossMaster.getOssVersion());
                     ProjectIdentification prjOssMaster = projectMapper.getOssId(projectIdentification);
                     if (prjOssMaster != null && prjOssMaster.getCvssScore() != null) {
                         BigDecimal bdScore = new BigDecimal(Float.parseFloat(prjOssMaster.getCvssScore()));
@@ -157,15 +157,15 @@ public final class PdfUtil extends CoTopComponent {
 
                         if (bdScore.compareTo(mailingScore) >= 0) {
                             Vulnerability vulnerability = new Vulnerability();
-                            vulnerability.setOssName(oss.getOssName());
-                            vulnerability.setVersion(oss.getOssVersion());
+                            vulnerability.setOssName(ossMaster.getOssName());
+                            vulnerability.setVersion(ossMaster.getOssVersion());
                             vulnerability.setCvssScore(prjOssMaster.getCvssScore());
-                            String version = oss.getOssVersion();
-                            if(oss.getOssVersion().equals("") || oss.getOssVersion() == null) {
+                            String version = ossMaster.getOssVersion();
+                            if (isEmpty(ossMaster.getOssVersion())) {
                                 version = "-";
                             }
-                            vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + oss.getOssName() + "&ossVersion=" + version);
-                            vulnerabilityMap.put(oss.getOssName().toUpperCase() + "_" + oss.getOssVersion().toUpperCase(), vulnerability);
+                            vulnerability.setVulnerabilityLink(CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/vulnerability/vulnpopup?ossName=" + ossMaster.getOssName() + "&ossVersion=" + version);
+                            vulnerabilityMap.put(ossMaster.getOssName().toUpperCase() + "_" + ossMaster.getOssVersion().toUpperCase(), vulnerability);
                         }
                     }
                 }
