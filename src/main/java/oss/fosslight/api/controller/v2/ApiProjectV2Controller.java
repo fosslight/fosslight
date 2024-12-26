@@ -411,16 +411,22 @@ public class ApiProjectV2Controller extends CoTopComponent {
                 log.error(e.getMessage(), e);
             }
 
-            if (userComment != null) {
-                CommentsHistory commentHisBean = new CommentsHistory();
-                commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
-                commentHisBean.setReferenceId(resultPrjId);
-                commentHisBean.setExpansion1("SRC");
-                commentHisBean.setContents(userComment);
-                commentService.registComment(commentHisBean, false);
-            }
-
             try {
+                if (!isEmpty(userComment)) {
+                    String initMessage = "<p>Project Created</p>";
+
+                    initMessage += userComment;
+
+                    CommentsHistory commentHisBean = new CommentsHistory();
+                    commentHisBean.setLoginUserName(userInfo.getUserId());
+
+                    commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_HIS);
+                    commentHisBean.setReferenceId(resultPrjId);
+                    commentHisBean.setContents(initMessage);
+                    commentService.registComment(commentHisBean);
+                }
+
+
                 CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED);
                 mailBean.setParamPrjId(resultPrjId);
                 String _tempComment = avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_MAIL_DEFAULT_CONTENTS, CoConstDef.CD_MAIL_TYPE_PROJECT_CREATED));
