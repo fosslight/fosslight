@@ -2764,7 +2764,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 
 			if (!isEmpty(bean.getAttribution())) {
-				bean.setAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getAttribution()))));
+				bean.setAttribution(CommonFunction.lineReplaceToBR(avoidNull(bean.getAttribution())));
 				attributionList.add(bean);
 			}
 		}
