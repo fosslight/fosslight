@@ -186,18 +186,19 @@ public final class PdfUtil extends CoTopComponent {
         }
         
         for(OssMaster ossMaster : ossMasterMap.values()) {
-            ossMaster.setOssName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") +"/oss/list/" + ossMaster.getOssName() + "' target='_blank'>" + ossMaster.getOssName() + "</a>");
-            ossReview.add(ossMaster);
+            OssMaster oss = new OssMaster();
+            oss.setOssName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") +"/oss/list/" + ossMaster.getOssName() + "' target='_blank'>" + ossMaster.getOssName() + "</a>");
+            oss.setSummaryDescription(ossMaster.getSummaryDescription());
+            ossReview.add(oss);
         }
-        
-        CoCodeManager.getInstance().refreshOssInfo();
 
         for (LicenseMaster licenseMaster : licenseMasterMap.values()) {
-            licenseMaster.setLicenseName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/license/edit/" + licenseMaster.getLicenseId() + "' target='_blank'>" + licenseMaster.getLicenseName() + "</a>");
-            licenseReview.add(licenseMaster);
+            LicenseMaster license = new LicenseMaster();
+            license.setLicenseName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") + "/license/edit/" + licenseMaster.getLicenseId() + "' target='_blank'>" + licenseMaster.getLicenseName() + "</a>");
+            license.setDescriptionHtml(licenseMaster.getDescriptionHtml());
+            license.setRestrictionStr(licenseMaster.getRestrictionStr());
+            licenseReview.add(license);
         }
-
-        CoCodeManager.getInstance().refreshLicenseInfo();
         
         for(Vulnerability vulnerability : vulnerabilityMap.values()){
             vulnerability.setVulnerabilityLink("<a href='" + vulnerability.getVulnerabilityLink() + "' target='_blank'>" + vulnerability.getVulnerabilityLink() + "</a>");
