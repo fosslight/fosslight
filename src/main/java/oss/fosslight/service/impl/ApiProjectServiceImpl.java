@@ -428,7 +428,8 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 			
 			OssNotice noticeParam = new OssNotice();
 			noticeParam.setPrjId((String) paramMap.get("prjId").toString());
-			noticeParam.setNoticeType(CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL);
+			noticeParam.setNoticeType((String) paramMap.getOrDefault("noticeType", CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL));
+			noticeParam.setNoticeTypeEtc((String) paramMap.getOrDefault("noticeTypeEtc", ""));
 			
 			projectMapper.makeOssNotice(noticeParam);
 		}

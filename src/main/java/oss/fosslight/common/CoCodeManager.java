@@ -5,12 +5,10 @@
 
 package oss.fosslight.common;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.lang.reflect.Type;
+import java.util.*;
 
+import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -397,7 +395,31 @@ public class CoCodeManager extends CoTopComponent {
             return code != null ? code.getCdDtlNoCdDtlNmPairVector(false) : emptyVector;
         }
     }
-    
+
+
+    public static boolean checkValidCodeDtl(String s, String s1){
+        List<Map<String, Object>> availableDtlValues = CoCodeManager.getCodeDtlValuesArray(s);
+
+        for (Map<String, Object> codeDtlObject: availableDtlValues) {
+            String cdDtlNo = (String)codeDtlObject.get("cdDtlNo");
+            if (Objects.equals(cdDtlNo, s1)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static List<Map<String, Object>> getCodeDtlValuesArray(String s) {
+        String jsonStr = getValuesJson(s, null);
+
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<Map<String, Object>>>(){}.getType();
+        List<Map<String, Object>> jsonArray = gson.fromJson(jsonStr, listType);
+
+        return jsonArray;
+    }
+
     //새로 추가 : hj-kim - 2016-05-31
     public static String getValuesJson(String s) {
     	return getValuesJson(s, null);

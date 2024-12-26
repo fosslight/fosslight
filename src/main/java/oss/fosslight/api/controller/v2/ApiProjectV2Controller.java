@@ -340,25 +340,20 @@ public class ApiProjectV2Controller extends CoTopComponent {
                     noticeType = CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL;
                 }
             } else if (!isEmpty(noticeType)) {
-                String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, noticeType);
-
-                if (isEmpty(noticeTypeStr)) {
+                if(!CoCodeManager.checkValidCodeDtl(CoConstDef.CD_NOTICE_TYPE, noticeType)) {
                     return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Notice type code is invalid.");
                 }
             }
 
-            if (!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType)) {
-                noticeTypeEtc = "";
-            } else if (CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType) && isEmpty(noticeTypeEtc)) {
-                noticeTypeEtc = CoConstDef.CD_DTL_DEFAULT_PLATFORM;
-            } else if (!isEmpty(noticeTypeEtc)) {
-                String noticeTypeEtcStr = CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, noticeTypeEtc);
-
-                if (!isEmpty(noticeTypeEtcStr)) {
-                    noticeTypeEtc = noticeTypeEtcStr;
-                } else if (isEmpty(noticeTypeEtcStr)) {
-                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Notice type etc code is invalid.");
+            if(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equals(noticeType)){
+                if(isEmpty(noticeTypeEtc)) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "Must select 'noticeTypeEtc' code for Platform-generated type");
                 }
+                if(!CoCodeManager.checkValidCodeDtl(CoConstDef.CD_PLATFORM_GENERATED, noticeTypeEtc)) {
+                    return responseService.errorResponse(HttpStatus.BAD_REQUEST, "noticeTypeEtc code is invalid.");
+                }
+            } else {
+                noticeTypeEtc = "";
             }
 
             if (!isEmpty(priority)) {
@@ -382,22 +377,19 @@ public class ApiProjectV2Controller extends CoTopComponent {
             paramMap.put("loginUserName", userInfo.getUserId());
             paramMap.put("publicYn", publicYn);
             paramMap.put("comment", avoidNull(additionalInformation, ""));
+            paramMap.put("noticeType", avoidNull(noticeType, CoConstDef.CD_DTL_NOTICE_TYPE_GENERAL));
+            paramMap.put("noticeTypeEtc", noticeTypeEtc);
+
 
             result = apiProjectService.createProject(paramMap);
 
+            if (result == null || result.isEmpty()) {
+                return responseService.errorResponse(HttpStatus.BAD_REQUEST,
+                        String.format("Project '%s%s' already exists", prjName, avoidNull(" ("+prjVersion+")", "")));
+            }
+
             String resultPrjId = (String) result.get("prjId");
 
-            Map<String, Object> noticeParamMap = new HashMap<String, Object>();
-            noticeParamMap.put("prjId", resultPrjId);
-            noticeParamMap.put("noticeType", noticeType);
-            noticeParamMap.put("noticeTypeEtc", noticeTypeEtc);
-
-            int resultCnt = apiProjectService.makeOssNotice(noticeParamMap);
-
-            if (isEmpty(resultPrjId) || resultCnt <= 0) {
-                return responseService.errorResponse(HttpStatus.CONFLICT,
-                        CoCodeManager.getCodeString(CoConstDef.CD_OPEN_API_MESSAGE, CoConstDef.CD_OPEN_API_CREATE_PROJECT_DUPLICATE_MESSAGE));
-            }
             try {
                 History h = new History();
                 Project project = new Project();
