@@ -4049,10 +4049,14 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 								customNick = customNick.substring(0, customNick.length()-4);
 							}
 							
-							if (!userData.getOssName().equalsIgnoreCase(customNick)) nicknameList.add(customNick);
+							if (!userData.getOssName().equalsIgnoreCase(customNick)) {
+								nicknameList.add(customNick);
+							}
 						}
 						
-						if (nicknameList != null && !nicknameList.isEmpty()) duplicateNickname = String.join(",", nicknameList);
+						if (nicknameList != null && !nicknameList.isEmpty()) {
+							duplicateNickname = String.join(",", nicknameList);
+						}
 					}
 				}
 				
@@ -4216,6 +4220,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					
 					if (ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
 						for (OssAnalysis oa : ossAnalysisByNickList) {
+							String mergeNickname = CommonFunction.mergeNickname(totalAnalysis, oa.getOssNickname());
+							oa.setOssNickname(mergeNickname);
+							
 							if (totalNewestOssInfo != null) {
 								if (!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName())) {
 									mergeDownloadLocation(oa, null, analyzedDownloadLocation, true);
@@ -4306,6 +4313,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					
 					if (ossAnalysisByNickList != null && !ossAnalysisByNickList.isEmpty()) {
 						for (OssAnalysis oa : ossAnalysisByNickList) {
+							String oaMergeNickName = CommonFunction.mergeNickname(totalAnalysis, oa.getOssNickname());
+							oa.setOssNickname(oaMergeNickName);
+							
 							if (totalNewestOssInfo != null) {
 								if (!totalNewestOssInfo.getOssName().equalsIgnoreCase(oa.getOssName())) {
 									mergeDownloadLocation(oa, null, analyzedDownloadLocation, true);
