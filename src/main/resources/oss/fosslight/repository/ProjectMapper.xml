@@ -767,6 +767,7 @@
 		   , A.PUBLIC_YN
 	   	   , A.VULNERABILITY_RESOLUTION
 		   , A.CVSS_SCORE_MAX
+		   , A.VULDOC_SKIP_YN
 		   , (SELECT COUNT(1) 
 				FROM OSS_COMPONENTS OC 
 		  INNER JOIN OSS_COMPONENTS_LICENSE OCL 
@@ -3094,6 +3095,16 @@
 			EXCEPT_FILE_CONTENT = #{exceptFileContent},
 			VERIFY_FILE_CONTENT = #{verifyFileContent},
 			BINARY_FILE_YN = #{binaryFileYn}
+
+		WHERE
+			PRJ_ID	= #{prjId}
+	</update>
+
+	<update id="updateVulDocSkipYn" parameterType="oss.fosslight.domain.Project">
+		UPDATE
+			PROJECT_MASTER
+		SET
+			VULDOC_SKIP_YN = #{vulDocSkipYn}
 
 		WHERE
 			PRJ_ID	= #{prjId}

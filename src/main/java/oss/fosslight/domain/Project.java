@@ -365,6 +365,8 @@ public class Project extends ComBean implements Serializable {
 	private String vulDocInst;
 	private String vulDocInfo;
 
+	private String vulDocSkipYn;
+
 	private Float standardScore;
 	
 	private String copyWatcherLocation;
@@ -4473,6 +4475,14 @@ public class Project extends ComBean implements Serializable {
 
 	public void setVulDocInfo(String vulDocInfo) {
 		this.vulDocInfo = vulDocInfo;
+	}
+
+	public String getVulDocSkipYn() {
+		return vulDocSkipYn;
+	}
+
+	public void setVulDocSkipYn(String vulDocSkipYn) {
+		this.vulDocSkipYn = vulDocSkipYn;
 	}
 
 	public T2File getPackageVulDocFileInfo() {

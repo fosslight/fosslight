@@ -144,6 +144,8 @@ public interface ProjectMapper {
 	void updateReadmeContent(Project project);
 
 	void updateVerifyContents(Project project);
+
+	void updateVulDocSkipYn(Project project);
 	
 	List<ProjectIdentification> identificationSubGrid(ProjectIdentification identification);
 

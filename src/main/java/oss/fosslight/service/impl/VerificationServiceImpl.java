@@ -152,6 +152,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			String deleteFlag = (String) map.get("deleteFlag");
 			String verifyFlag = (String) map.get("statusVerifyYn");
 			String deleteFiles = (String) map.get("deleteFiles");
+			String vulDocSkipYn = (String) map.get("vulDocSkipYn");
 			String deleteComment = "";
 			String uploadComment = "";
 			
@@ -273,6 +274,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
 					projectMapper.updateReadmeContent(prjParam); // README Clear
 					projectMapper.updateVerifyContents(prjParam); // File List, Banned List Clear
+				}
+
+				if(vulDocSkipYn != null) {
+					prjParam.setVulDocSkipYn(vulDocSkipYn);
+					projectMapper.updateVulDocSkipYn(prjParam);
 				}
 			}
 		} catch (Exception e) {
