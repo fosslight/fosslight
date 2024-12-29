@@ -232,7 +232,9 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 		
 		if (watcherList != null && !watcherList.isEmpty()) {
 			for (Project watcher : watcherList) {
-				if (!isEmpty(watcher.getCreator()) && !userIdList.contains(watcher.getCreator())) userIdList.add(watcher.getCreator());
+				if (!isEmpty(watcher.getPrjUserId()) && !userIdList.contains(watcher.getPrjUserId())) {
+					userIdList.add(watcher.getPrjUserId());
+				}
 			}
 		}
 		
