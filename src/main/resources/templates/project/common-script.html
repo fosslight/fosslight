@@ -2132,6 +2132,12 @@ var com_fn = {
        		alertify.bomRequestDialog()
        		.set('onok', function(e) {
        			if(e) {
+       				// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
+       				
 					if (userRole != "ROLE_ADMIN"){
 						if (!isAndroidModel && !com_fn.validBomChangeStatus(isAndroidModel)) {
 							return false;
