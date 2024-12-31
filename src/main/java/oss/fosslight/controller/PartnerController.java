@@ -732,7 +732,9 @@ public class PartnerController extends CoTopComponent{
 				}
 			}
 			
-			partnerService.registPartnerMaster(partnerMaster, ossComponents, ossComponentsLicense);
+			partnerService.registPartnerMaster(partnerMaster);
+			partnerService.registOss(partnerMaster, ossComponents, ossComponentsLicense);
+			
 			History h = partnerService.work(partnerMaster);
 			h.sethAction(!isNew ? CoConstDef.ACTION_CODE_UPDATE : CoConstDef.ACTION_CODE_INSERT);
 			
