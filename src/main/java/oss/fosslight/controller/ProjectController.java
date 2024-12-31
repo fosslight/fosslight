@@ -156,13 +156,13 @@ public class ProjectController extends CoTopComponent {
 				}
 			}
 		} else if (_param2 != null) {
-			String defaultSearchRefPartnerId = (String) _param2;
+			String defaultSearchRefPartnerName = (String) _param2;
 			searchBean = new Project();
 			
-			if (!isEmpty(defaultSearchRefPartnerId)) {
+			if (!isEmpty(defaultSearchRefPartnerName)) {
 				deleteSession(SESSION_KEY_SEARCH);
 				
-				searchBean.setRefPartnerId(defaultSearchRefPartnerId);
+				searchBean.setRefPartnerName(defaultSearchRefPartnerName);
 			}
 		} else {
 			if (!CoConstDef.FLAG_YES.equals(req.getParameter("gnbF")) || getSessionObject(SESSION_KEY_SEARCH) == null) {
@@ -4808,29 +4808,31 @@ public class ProjectController extends CoTopComponent {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@PostMapping(value=PROJECT.PROJECT_CHANGE_VIEW)
-	public String getProjectChangeView(@RequestBody Project project, @PathVariable String code, HttpServletRequest req, HttpServletResponse res, Model model) {
+	public String getProjectChangeView(@RequestBody Map<String, Object> map, @PathVariable String code, HttpServletRequest req, HttpServletResponse res, Model model) {
 		if (code.equals("status")) {
-			Map<String, String> map = new HashMap<String, String>();
-			Project prjBean = projectService.getProjectDetail(project);
-			String distributionStatus = avoidNull(prjBean.getDestributionStatus()).toUpperCase();
-			
-			map.put("projectStatus", avoidNull(prjBean.getStatus()).toUpperCase());
-			map.put("identificationStatus", avoidNull(prjBean.getIdentificationStatus()).toUpperCase());
-			map.put("verificationStatus", avoidNull(prjBean.getVerificationStatus()).toUpperCase());
-			map.put("distributionStatus", distributionStatus);
-			map.put("distributeDeployYn", prjBean.getDistributeDeployYn());
-			map.put("distributeDeployTime", prjBean.getDistributeDeployTime());
-			map.put("completeFlag", avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO));
-			map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
-			map.put("commId", avoidNull(prjBean.getCommId(), ""));
-			map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
-			
-			if (distributionStatus.equals("PROC")) {
-				code = "false";
-			}
-			
-			model.addAttribute("status", map);
+//			Map<String, String> map = new HashMap<String, String>();
+//			Project prjBean = projectService.getProjectDetail(project);
+//			String distributionStatus = avoidNull(prjBean.getDestributionStatus()).toUpperCase();
+//			
+//			map.put("projectStatus", avoidNull(prjBean.getStatus()).toUpperCase());
+//			map.put("identificationStatus", avoidNull(prjBean.getIdentificationStatus()).toUpperCase());
+//			map.put("verificationStatus", avoidNull(prjBean.getVerificationStatus()).toUpperCase());
+//			map.put("distributionStatus", distributionStatus);
+//			map.put("distributeDeployYn", prjBean.getDistributeDeployYn());
+//			map.put("distributeDeployTime", prjBean.getDistributeDeployTime());
+//			map.put("completeFlag", avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO));
+//			map.put("dropFlag", avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO));
+//			map.put("commId", avoidNull(prjBean.getCommId(), ""));
+//			map.put("viewOnlyFlag", avoidNull(prjBean.getViewOnlyFlag(), CoConstDef.FLAG_NO));
+//			
+//			if (distributionStatus.equals("PROC")) {
+//				code = "false";
+//			}
+//			
+			model.addAttribute("permissionPrjIds", String.join(",", (List<String>) map.get("permissionPrjIds")));
+			model.addAttribute("notPermissionPrjIds", String.join(",", (List<String>) map.get("notPermissionPrjIds")));
 		}
 		model.addAttribute("code", code);
 		return "project/view/projectChangeView";
