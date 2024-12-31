@@ -5686,7 +5686,7 @@
 				)
 			)
 		 </if>
-		ORDER BY PM.MODIFIED_DATE DESC LIMIT 100
+		ORDER BY PM.MODIFIED_DATE DESC LIMIT 5
 	</select>
 	
 	<update id="updateCopyConfirmStatusProjectStatus" parameterType="oss.fosslight.domain.Project">
