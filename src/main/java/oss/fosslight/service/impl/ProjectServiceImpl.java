@@ -460,7 +460,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 
 		// bom 일시
-		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(identification.getReferenceDiv())) {
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(identification.getReferenceDiv())) {
 			Map<String, String> obligationTypeMergeMap = new HashMap<>();
 			final String reqMergeFlag = identification.getMerge();
 			
@@ -848,9 +848,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					map.put("adminCheckList", adminCheckList);
 				}
 			} else {
-				list = projectMapper.selectAndroidBomList(identification);
+				list = projectMapper.selectOtherBomList(identification);
 				identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-				final List<ProjectIdentification> notVersionList = projectMapper.selectAndroidBomList(identification);
+				final List<ProjectIdentification> notVersionList = projectMapper.selectOtherBomList(identification);
 				if (!CollectionUtils.isEmpty(notVersionList)) {
 					list.addAll(notVersionList);
 				}
@@ -3465,10 +3465,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		registBom(prjId, merge, projectIdentification, checkGridBomList, null, false, false);
 	}
 	
+	@Override
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid) {
+		registBom(prjId, merge, projectIdentification, checkGridBomList, copyPrjId, isCopyConfirm, isAndroid, false);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid) {
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid, boolean isPartner) {
 		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 		List<ProjectIdentification> includeVulnInfoNewBomList = new ArrayList<>();
 		List<ProjectIdentification> includeVulnInfoOldBomList = new ArrayList<>();
@@ -3478,7 +3483,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(prjId);
 		if (!isAndroid) {
-			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			if (!isPartner) {
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			} else {
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+			}
 		} else {
 			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 		}
@@ -3486,19 +3495,19 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		// 기존 bom data get
 		List<ProjectIdentification> bomList = null;
-		if (!isAndroid) {
+		if (!isAndroid && !isPartner) {
 			bomList = projectMapper.selectBomList(identification);
 		} else {
-			bomList = projectMapper.selectAndroidBomList(identification);
+			bomList = projectMapper.selectOtherBomList(identification);
 		}
 		
 		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
 		
 		List<ProjectIdentification> notVersionList = null;
-		if (!isAndroid) {
+		if (!isAndroid && !isPartner) {
 			notVersionList = projectMapper.selectBomList(identification);
 		} else {
-			notVersionList = projectMapper.selectAndroidBomList(identification);
+			notVersionList = projectMapper.selectOtherBomList(identification);
 		}
 		if (notVersionList != null && !notVersionList.isEmpty()) {
 			bomList.addAll(notVersionList);
@@ -3564,11 +3573,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
 		if (componentId.size() > 0){
 			projectMapper.resetOssComponentsAndLicense(identification.getReferenceId(), identification.getReferenceDiv());
-//			for (int i = 0; i < componentId.size(); i++) {
-//				projectMapper.deleteOssComponentsLicense(componentId.get(i));
-//			}
-//			
-//			projectMapper.deleteOssComponents(identification);
 		}
 		
 		identification.setMerge(merge);
@@ -3592,7 +3596,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			for (ProjectIdentification bean : (List<ProjectIdentification>)mergeListMap.get("rows")) {
 				bean.setRefDiv(bean.getReferenceDiv());
 				if (!isAndroid) {
-					bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+					if (!isPartner) {
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+					} else {
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+					}
 				} else {
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
 				}
@@ -3706,13 +3714,15 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		// identification 대상이 없이 처음 저장하는 경우
-		final Project _tempPrjInfo = projectMapper.selectProjectMaster2(prjId);
-		
-		if (isEmpty(_tempPrjInfo.getIdentificationStatus())) {
-			_tempPrjInfo.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
+		if (!isPartner) {
+			// identification 대상이 없이 처음 저장하는 경우
+			final Project _tempPrjInfo = projectMapper.selectProjectMaster2(prjId);
 			
-			projectMapper.updateIdentifcationProgress(_tempPrjInfo);
+			if (isEmpty(_tempPrjInfo.getIdentificationStatus())) {
+				_tempPrjInfo.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
+				
+				projectMapper.updateIdentifcationProgress(_tempPrjInfo);
+			}
 		}
 		
 		// add or delete data containing vulnerability information among oss information

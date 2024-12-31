@@ -208,6 +208,11 @@ public class PartnerMaster extends ComBean implements Serializable{
 	
 	private String resetFlag;
 	
+	/** The reference div. */
+	private String referenceDiv;
+	
+	private String ossFileSheetNo;
+	
 	/*
 	 * Gets the partner id.
 	 *
@@ -1241,6 +1246,22 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setResetFlag(String resetFlag) {
 		this.resetFlag = resetFlag;
+	}
+
+	public String getReferenceDiv() {
+		return referenceDiv;
+	}
+
+	public void setReferenceDiv(String referenceDiv) {
+		this.referenceDiv = referenceDiv;
+	}
+
+	public String getOssFileSheetNo() {
+		return ossFileSheetNo;
+	}
+
+	public void setOssFileSheetNo(String ossFileSheetNo) {
+		this.ossFileSheetNo = ossFileSheetNo;
 	}
 	
 }

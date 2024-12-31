@@ -3236,7 +3236,7 @@ public class ProjectController extends CoTopComponent {
 	@RequestMapping(value = PROJECT.TRD_OSS)
 	public @ResponseBody ResponseEntity<Object> listAjax(OssComponents ossComponents, HttpServletRequest req,
 			HttpServletResponse res, Model model) {
-		ossComponents.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+		ossComponents.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 		Map<String, Object> map = projectService.getPartnerOssList(ossComponents);
 		projectService.setLoadToList(map, ossComponents.getReferenceId());
 		return makeJsonResponseHeader(map);

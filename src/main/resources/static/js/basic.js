@@ -2911,7 +2911,7 @@ var createTabNew = function (tabNm, tabLk) {
     var tabName = tabNm.replace(pattern, '-');
 	
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).length > 0) {
-    	if ("BOM_Compare" == tabName || "History" == tabName) {
+    	if ("BOM_Compare" == tabName || "History" == tabName || "3rdParty_BOM_Compare" == tabName) {
 			deleteTabNew(tabName);
 			createTabFnc(tabNm, tabName, tabLk);
 		} else {

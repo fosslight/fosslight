@@ -358,6 +358,7 @@ public class CoConstDef {
 	public static final String CD_DTL_COMPONENT_ID_BIN = "15";
 	public static final String CD_DTL_COMPONENT_PARTNER = "20";
 	public static final String CD_DTL_COMPONENT_PARTNER_BAT = "22";
+	public static final String CD_DTL_COMPONENT_PARTNER_BOM = "23";
 	public static final String CD_DTL_COMPONENT_BAT = "30";
 	public static final String CD_DTL_COMPONENT_PACKAGING = "50";
 	

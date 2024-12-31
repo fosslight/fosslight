@@ -61,7 +61,11 @@ public class YamlUtil extends CoTopComponent {
 				
 				break;
 			case CoConstDef.CD_DTL_COMPONENT_PARTNER:		// OSS Name, OSS version, License, Download location, Homepage, Copyright,Exclude 가 동일한 경우 Merge. > Source Name or Path, Binary Name, Binary Name or Source Path, Comment 
-				downloadFileId = makeYamlPartner(dataStr, type);
+				downloadFileId = makeYamlPartner(dataStr, type, false);
+				
+				break;
+			case CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM:
+				downloadFileId = makeYamlPartner(dataStr, type, true);
 				
 				break;
 			default:
@@ -103,13 +107,18 @@ public class YamlUtil extends CoTopComponent {
 		return makeYamlFileId(fileName, convertJSON2YAML(jsonStr));
 	}
 	
-	private static String makeYamlPartner(String dataStr, String typeCode)  throws Exception {
+	private static String makeYamlPartner(String dataStr, String typeCode, boolean isBom) throws Exception {
 		Type partnerType = new TypeToken<PartnerMaster>(){}.getType();
 		PartnerMaster partnerBean = (PartnerMaster) fromJson(dataStr, partnerType);
 		
 		// partner > OSS List
 		ProjectIdentification _param = new ProjectIdentification();
-		_param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+		if (isBom) {
+			_param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+			_param.setMerge(CoConstDef.FLAG_NO);
+		} else {
+			_param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+		}
 		_param.setReferenceId(partnerBean.getPartnerId());
 		
 		Map<String, Object> map = projectService.getIdentificationGridList(_param, true);

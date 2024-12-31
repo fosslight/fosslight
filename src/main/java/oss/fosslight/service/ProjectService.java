@@ -59,6 +59,8 @@ public interface ProjectService extends HistoryConfig{
 	
 	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid);
 	
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid, boolean isPartner);
+	
 	public void checkProjectReviewer(Project project);
 	
 	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm) throws Exception;
@@ -228,9 +230,5 @@ public interface ProjectService extends HistoryConfig{
 
 	public void setLoadToList(Map<String, Object> map, String prjId);
 
-	void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent,
-			List<List<ProjectIdentification>> ossComponentLicense);
+	void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
 }
-
-
-

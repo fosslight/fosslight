@@ -162,4 +162,6 @@ public interface PartnerMapper {
 	void updateWatcherDivision(PartnerMaster project);
 
 	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+	
+	int updateOssFileId(PartnerMaster partnerMaster);
 }

@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -156,8 +158,6 @@ public class PartnerController extends CoTopComponent{
 	@GetMapping(value=PARTNER.EDIT, produces = "text/html; charset=utf-8")
 	public String edit(HttpServletRequest req, HttpServletResponse res, Model model) throws Exception{
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		PartnerMaster partnerMaster = new PartnerMaster();
 		model.addAttribute("detail", partnerMaster);
 		model.addAttribute("editMode", CoConstDef.FLAG_YES);
@@ -177,18 +177,11 @@ public class PartnerController extends CoTopComponent{
 		
 		partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
 		
-		T2File ossFile = new T2File();
-		ossFile.setFileSeq(partnerMaster.getOssFileId());
-		ossFile = fileMapper.getFileInfo(ossFile);
-		
-		String binaryFileId = partnerMaster.getBinaryFileId();
-		T2File binaryFile = new T2File();
-		
-		if (!isEmpty(binaryFileId)){
-			binaryFile.setFileSeq(binaryFileId);
-			binaryFile = fileMapper.getFileInfo(binaryFile);
-			
-			model.addAttribute("binaryFile", binaryFile);
+		if (!isEmpty(partnerMaster.getOssFileId())) {
+			T2File ossFile = fileService.selectFileInfo(partnerMaster.getOssFileId());
+			if (ossFile != null) {
+				model.addAttribute("ossFile", ossFile);
+			}
 		}
 		
 		CommentsHistory comHisBean = new CommentsHistory();
@@ -197,6 +190,53 @@ public class PartnerController extends CoTopComponent{
 		partnerMaster.setUserComment(commentService.getUserComment(comHisBean));
 		partnerMaster.setDocumentsFile(partnerMapper.selectDocumentsFile(partnerMaster.getDocumentsFileId()));
 		partnerMaster.setDocumentsFileCnt(partnerMapper.selectDocumentsFileCnt(partnerMaster.getDocumentsFileId()));
+		
+		boolean notPermission = false;
+		CommonFunction.setPartnerService(partnerService);
+		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
+		if (permissionCheckList != null) {
+			if (avoidNull(partnerMaster.getPublicYn()).equals(CoConstDef.FLAG_NO)
+					&& !CommonFunction.isAdmin() 
+					&& !permissionCheckList.contains(loginUserName())) {
+				partnerMaster.setPermission(0);
+				partnerMaster.setStatusPermission(0);
+				notPermission = true;
+			} else {
+				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+					partnerMaster.setStatusPermission(0);
+					notPermission = true;
+				} else {
+					partnerMaster.setStatusPermission(1);
+				}
+				partnerMaster.setPermission(1);
+			}
+		}
+		
+		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
+		if (!CollectionUtils.isEmpty(prjList)) {
+			model.addAttribute("prjList", prjList);
+			if (prjList.size() == 5) {
+				model.addAttribute("prjLiseMore", CoConstDef.FLAG_YES);
+			}
+		}
+		
+		model.addAttribute("editMode", CoConstDef.FLAG_NO);
+		model.addAttribute("detail", partnerMaster);
+		model.addAttribute("detailJson", partnerMaster);
+		model.addAttribute("confirmationFile", confirmationFile);
+		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
+		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
+		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
+		
+		return !notPermission ? "partner/edit" : "partner/view";
+	}
+	
+	@GetMapping(value = PARTNER.IDENTIFICATION_ID, produces = "text/html; charset=utf-8")
+	public String identification(HttpServletRequest req, HttpServletResponse res, Model model, @PathVariable String partnerId) throws Exception {
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
 		
 		CommonFunction.setPartnerService(partnerService);
 		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {partnerMaster.getPartnerId()}, "partner");
@@ -216,23 +256,16 @@ public class PartnerController extends CoTopComponent{
 			}
 		}
 		
-		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
+		T2File ossFile = new T2File();
+		ossFile.setFileSeq(partnerMaster.getOssFileId());
+		ossFile = fileMapper.getFileInfo(ossFile);
 		
-		if (prjList.size() > 0) {
-			model.addAttribute("prjList", prjList);
-		}
-		
+		model.addAttribute("ossFile", ossFile);
 		model.addAttribute("editMode", CoConstDef.FLAG_NO);
 		model.addAttribute("detail", partnerMaster);
-		model.addAttribute("detailJson", partnerMaster);
-		model.addAttribute("confirmationFile", confirmationFile);
-		model.addAttribute("ossFile", ossFile);
-		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
-		model.addAttribute("checkFlag", CommonFunction.propertyFlagCheck("checkFlag", CoConstDef.FLAG_YES));
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
-		return "partner/edit";
+		return "partner/identification";
 	}
 	
 	@PostMapping(value=PARTNER.MODE_CONVERSION, produces = "text/html; charset=utf-8")
@@ -240,26 +273,11 @@ public class PartnerController extends CoTopComponent{
 		PartnerMaster partnerMaster = new PartnerMaster();
 		partnerMaster.setPartnerId(partnerId);
 		partnerMaster = partnerService.getPartnerMasterOne(partnerMaster);
-		
-		T2File confirmationFile = new T2File();
-		confirmationFile.setFileSeq(partnerMaster.getConfirmationFileId());
-		confirmationFile = fileMapper.getFileInfo(confirmationFile);
-		
 		partnerMaster.setViewOnlyFlag(partnerService.checkViewOnly(partnerId));
 		
 		T2File ossFile = new T2File();
 		ossFile.setFileSeq(partnerMaster.getOssFileId());
 		ossFile = fileMapper.getFileInfo(ossFile);
-		
-		String binaryFileId = partnerMaster.getBinaryFileId();
-		T2File binaryFile = new T2File();
-		
-		if (!isEmpty(binaryFileId)){
-			binaryFile.setFileSeq(binaryFileId);
-			binaryFile = fileMapper.getFileInfo(binaryFile);
-			
-			model.addAttribute("binaryFile", binaryFile);
-		}
 		
 		CommentsHistory comHisBean = new CommentsHistory();
 		comHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
@@ -286,16 +304,8 @@ public class PartnerController extends CoTopComponent{
 			}
 		}
 		
-		List<Project> prjList = projectMapper.selectPartnerRefPrjList(partnerMaster);
-		
-		if (prjList.size() > 0) {
-			model.addAttribute("prjList", prjList);
-		}
-		
 		model.addAttribute("editMode", CoConstDef.FLAG_NO);
 		model.addAttribute("detail", partnerMaster);
-		model.addAttribute("detailJson", partnerMaster);
-		model.addAttribute("confirmationFile", confirmationFile);
 		model.addAttribute("ossFile", ossFile);
 		model.addAttribute("projectFlag", CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES));
 		model.addAttribute("batFlag", CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_YES));
@@ -303,9 +313,9 @@ public class PartnerController extends CoTopComponent{
 		model.addAttribute("autoAnalysisFlag", CommonFunction.propertyFlagCheck("autoanalysis.use.flag", CoConstDef.FLAG_YES));
 		
 		if (mode.equals("edit")) {
-			return "partner/fragments/edit :: editFragments";
+			return "partner/fragments/edit :: partyEditFragments";
 		} else {
-			return "partner/fragments/edit :: viewFragments";
+			return "partner/fragments/edit :: partyViewFragments";
 		}
 	}
 	
@@ -1396,10 +1406,12 @@ public class PartnerController extends CoTopComponent{
 					}
 				}
 				
-				for (Object sheet : sheetNameList) {
-					String sheetName = sheet.toString();
-					if (sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {
-						isSpdxSpreadsheet = true;
+				if (sheetNameList != null) {
+					for (Object sheet : sheetNameList) {
+						String sheetName = sheet.toString();
+						if (sheetName.contains("Package Info") || sheetName.contains("Per File Info")) {
+							isSpdxSpreadsheet = true;
+						}
 					}
 				}
 			} catch(Exception e) {
@@ -1628,7 +1640,7 @@ public class PartnerController extends CoTopComponent{
 		
 		try {
 			// partnerId / partnerName 필수 값.
-			yamlFileId = YamlUtil.makeYaml(CoConstDef.CD_DTL_COMPONENT_PARTNER, toJson(partnerMaster));
+			yamlFileId = YamlUtil.makeYaml(isEmpty(partnerMaster.getReferenceDiv()) ? CoConstDef.CD_DTL_COMPONENT_PARTNER : partnerMaster.getReferenceDiv(), toJson(partnerMaster));
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}		
@@ -1837,5 +1849,70 @@ public class PartnerController extends CoTopComponent{
 			log.error(e.getMessage(), e);
 		}
 		return makeJsonResponseHeader(resMap);
+	}
+	
+	@GetMapping(value=PARTNER.BOM_COMPARE, produces = "text/html; charset=utf-8")
+	public String bomCompare(@PathVariable String beforePartnerId, @PathVariable String afterPartnerId, HttpServletRequest req, HttpServletResponse res, Model model) throws Exception {
+		if (beforePartnerId.equals("0000")) {
+			model.addAttribute("beforePartnerId", "");
+		} else {
+			model.addAttribute("beforePartnerId", beforePartnerId);
+		}
+		
+		if (afterPartnerId.equals("0000")) {
+			model.addAttribute("afterPartnerId", "");
+		}else {
+			model.addAttribute("afterPartnerId", afterPartnerId);
+		}
+		
+		return "partner/bomCompare";
+	}
+	
+	@SuppressWarnings("unchecked")
+	@GetMapping(value=PARTNER.BOM_COMPARE_LIST_AJAX)
+	public @ResponseBody ResponseEntity<Object> bomCompareList(
+			@RequestParam("beforePartnerId") String beforePartnerId, @RequestParam("afterPartnerId") String afterPartnerId) throws Exception{
+		Map<String, Object> resultMap = new HashMap<>();
+		
+		try {
+			ProjectIdentification param = new ProjectIdentification();
+			param.setReferenceId(beforePartnerId);
+			param.setMerge(CoConstDef.FLAG_NO);
+			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+			
+			Map<String, Object> beforeBom = new HashMap<String, Object>();
+			Map<String, Object> afterBom = new HashMap<String, Object>();
+			List<ProjectIdentification> beforeBomList = null;
+			List<ProjectIdentification> afterBomList = null;
+			boolean beforeDataFlag = false;
+			boolean afterDataFlag = false;
+			
+			beforeBom = projectService.getIdentificationGridList(param, true);
+			if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
+				beforeDataFlag = true;
+			} else {
+				beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
+			}
+			if (beforeDataFlag || beforeBomList == null) {
+				return makeJsonResponseHeader(false, "1");
+			}
+			
+			param.setReferenceId(afterPartnerId);
+			afterBom = projectService.getIdentificationGridList(param, true);
+			if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
+				afterDataFlag = true;
+			} else {
+				afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
+			}
+			if (afterDataFlag || afterBomList == null) {
+				return makeJsonResponseHeader(false, "1");
+			}
+			
+			resultMap.put("contents", projectService.getBomCompare(beforeBomList, afterBomList, "list"));
+			return makeJsonResponseHeader(true, "0" , resultMap);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return makeJsonResponseHeader(false, "1");
+		}
 	}
 }
