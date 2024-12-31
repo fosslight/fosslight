@@ -534,8 +534,27 @@
         const oss_lst_grid = {
             oldRowNum: 20,
             load: function () {
-            	var colNameArr = ['', 'ID', 'CID', 'OSS Type', 'OSS Name', 'OSS Version', 'License Name', 'License Type', 'Restriction', 'Notice', 'Source', 'Download<br>Location', 'Homepage', 'Description', 'CVE ID', 'Vulnera<br/>bility'];
-
+            	var colNameArr = new Array();
+            	if (isAdmin) {
+                	colNameArr.push('<input type="checkbox" onclick="fn.onCboxClickAll(this,\'list\');">');
+            	} else {
+                	colNameArr.push("");
+            	}
+            	colNameArr.push("ID");
+            	colNameArr.push("CID");
+            	colNameArr.push("OSS Type");
+            	colNameArr.push("OSS Name");
+            	colNameArr.push("OSS Version");
+            	colNameArr.push("License Name");
+            	colNameArr.push("License Type");
+            	colNameArr.push("Restriction");
+            	colNameArr.push("Notice");
+            	colNameArr.push("Source");
+            	colNameArr.push("Download<br>Location");
+            	colNameArr.push("Homepage");
+            	colNameArr.push("Description");
+            	colNameArr.push("CVE ID");
+            	colNameArr.push("Vulnera<br/>bility");
                 colNameArr.push("Creator");
                 colNameArr.push("Created<br>Date");
                 colNameArr.push("Modifier");
@@ -1031,6 +1050,23 @@
                 }
 				
                 return display;
+        	},
+        	onCboxClickAll : function (allChk, target) {
+        		if (event.stopPropagation) {
+        	    	event.stopPropagation(); //MOZILLA
+            	} else {
+        	    	event.cancelBubble = true; //IE
+            	}
+        		
+        		if ($(allChk).is(":checked")) {
+        			$("#"+target+" input[type='checkbox']").each(function (idx){
+        				$(this).prop('checked', true);
+        			});
+        		} else {
+        			$("#"+target+" input[type='checkbox']").each(function (idx){
+        				$(this).prop('checked', false);
+        			});
+        		}
         	}
         }
         
