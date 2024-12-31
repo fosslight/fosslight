@@ -2491,8 +2491,8 @@ public class CoMailManager extends CoTopComponent {
 				}
 				isModified = checkEquals(om.getHomepage(), om.getExistHomepage(), isModified);
 				ossBasicInfo.setHomepage(appendChangeStyleLinkFormat(om.getExistHomepage(), om.getHomepage()));
-				isModified = checkEquals(om.getSummaryDescription(), om.getExistSummaryDescription(), isModified);
-				ossBasicInfo.setSummaryDescription(appendChangeStyle(om.getExistSummaryDescription(), om.getSummaryDescription()));
+				isModified = checkEquals(CommonFunction.lineReplaceToBR(om.getSummaryDescription()), om.getExistSummaryDescription(), isModified);
+				ossBasicInfo.setSummaryDescription(appendChangeStyle(om.getExistSummaryDescription(), CommonFunction.lineReplaceToBR(om.getSummaryDescription())));
 				isModified = checkEquals(om.getImportantNotes(), om.getExistImportantNotes(), isModified);
 				ossBasicInfo.setImportantNotes(appendChangeStyle(om.getExistImportantNotes(), om.getImportantNotes()));
 				
