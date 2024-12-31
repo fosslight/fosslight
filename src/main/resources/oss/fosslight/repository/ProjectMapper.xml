@@ -3405,7 +3405,7 @@
 		, T3.CVE_ID
 	FROM 
 		OSS_COMPONENTS T1 
-		LEFT JOIN OSS_COMPONENTS_LICENSE T2 ON T1.COMPONENT_ID = T2.COMPONENT_ID AND T2.EXCLUDE_YN = 'N'
+		LEFT JOIN OSS_COMPONENTS_LICENSE T2 ON T1.COMPONENT_ID = T2.COMPONENT_ID AND IFNULL(T2.EXCLUDE_YN, 'N') = 'N'
 		LEFT JOIN (
 				SELECT
 			    	OV.OSS_ID,
@@ -3472,7 +3472,7 @@
 		, T3.CVE_ID
 	FROM 
 		OSS_COMPONENTS T1 
-		LEFT JOIN OSS_COMPONENTS_LICENSE T2 ON T1.COMPONENT_ID = T2.COMPONENT_ID AND T2.EXCLUDE_YN = 'N'
+		LEFT JOIN OSS_COMPONENTS_LICENSE T2 ON T1.COMPONENT_ID = T2.COMPONENT_ID AND IFNULL(T2.EXCLUDE_YN, 'N') = 'N'
 		LEFT JOIN (
 				SELECT
 			    	OV.OSS_ID,
@@ -3754,7 +3754,54 @@
 		   AND REFERENCE_DIV = #{referenceDiv}
 		   <foreach collection="ossComponentsIdList" item="item" open="AND COMPONENT_ID NOT IN (" separator="," close=")">#{item}</foreach>
 	</select>
-
+	
+	<select id="selectOssComponentsThirdCopy" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.ProjectIdentification">
+		SELECT
+			COMPONENT_ID
+			, OSS_ID
+			, OSS_VERSION	
+			, DOWNLOAD_LOCATION	
+			, HOMEPAGE	
+			, CONCAT(OSS_NAME, IF(IFNULL(OSS_VERSION, '') != '', CONCAT('-', OSS_VERSION), ''), '/') AS FILE_PATH
+			, COPYRIGHT
+			, OBLIGATION_TYPE
+			, REFERENCE_DIV
+			, PRE_OBLIGATION_TYPE
+			, ADMIN_CHECK_YN
+			, REF_OSS_NAME
+			, PACKAGE_URL
+		FROM OSS_COMPONENTS
+		WHERE 1=1
+		<foreach collection="ossComponentsIdList" item="item" open="AND COMPONENT_ID IN (" separator="," close=")">#{item}</foreach>
+	</select>
+	
+	<select id="selectOssComponentsLicenseThirdCopy" parameterType="oss.fosslight.domain.OssComponents" resultType="oss.fosslight.domain.OssComponentsLicense">
+		SELECT
+				COMPONENT_ID
+				, LICENSE_ID
+				, IFNULL(NULLIF((SELECT SHORT_IDENTIFIER FROM LICENSE_MASTER WHERE LICENSE_NAME = T1.LICENSE_NAME AND USE_YN = 'Y'), ''), T1.LICENSE_NAME) AS LICENSE_NAME
+				, LICENSE_TEXT
+				, COPYRIGHT_TEXT
+				, EXCLUDE_YN
+		FROM 
+		(
+			SELECT 
+				COMPONENT_ID
+				, COMPONENT_LICENSE_ID
+				, LICENSE_ID
+				, IFNULL(NULLIF((SELECT DISTINCT LM.LICENSE_NAME FROM LICENSE_NICKNAME NICK INNER JOIN LICENSE_MASTER LM ON NICK.LICENSE_ID = LM.LICENSE_ID WHERE NICK.LICENSE_ID = OCL.LICENSE_ID), ''), OCL.LICENSE_NAME) AS LICENSE_NAME
+				, LICENSE_TEXT
+				, COPYRIGHT_TEXT
+				, EXCLUDE_YN
+			FROM 
+				OSS_COMPONENTS_LICENSE OCL
+			WHERE 1=1
+			<foreach collection="ossComponentsIdList" item="item" open="AND COMPONENT_ID IN (" separator="," close=")">#{item}</foreach>
+		) T1
+		
+		ORDER BY T1.COMPONENT_ID, T1.COMPONENT_LICENSE_ID
+	</select>
+	
 	<insert id="insertOssComponentsCopy" parameterType="oss.fosslight.domain.OssComponents" useGeneratedKeys="true" keyProperty="componentId">
 	/* ProjectMapper.insertOssComponentsCopy */
 		INSERT INTO 
@@ -8064,14 +8111,6 @@
 		</if>
 		 WHERE PRJ_ID = #{prjId}
 	</update>
-	
-	<select id="selectProjectForSecurity" resultType="string">
-		SELECT PRJ_ID
-		FROM PROJECT_MASTER
-		WHERE USE_YN = 'Y'
-		AND CVSS_SCORE_MAX IS NULL
-		ORDER BY PRJ_ID DESC
-	</select>
 	
 	<delete id="resetOssComponentsAndLicense">
 		/* ProjectMapper.resetOssComponentsAndLicense */

@@ -403,22 +403,21 @@ public interface ProjectMapper {
 	
 	void updateProjectForSecurity(Project project);
 
-	List<String> selectProjectForSecurity();
-	
-	/**
-	 * Delete Component and license row from OSS_COMPONENTS and OSS_COMPONENTS_LICENSE Table
-	 * @param referenceId
-	 * @param referenceDiv
-	 * @return
-	 */
 	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+	
 	int resetSecurityData(@Param("prjId")String prjId);
 	
 	void insertOssComponentListWithComponentId(@Param("list")List<ProjectIdentification> OssComponentList);
+
 	void insertOssComponentList(@Param("list") List<ProjectIdentification> OssComponentList);
+
 	void insertOssComponentLicenseList(@Param("list")List<OssComponentsLicense> ossComponentLicenseList);
 
 	List<Map<String, Object>> getCpeInfoAndRangeForProject(ProjectIdentification identification);
 
 	String selectNvdInfoWithOutVer(OssMaster ossMaster);
+	
+	List<ProjectIdentification> selectOssComponentsThirdCopy(OssComponents ossComponents);
+	
+	List<OssComponentsLicense> selectOssComponentsLicenseThirdCopy(OssComponents ossComponents);
 }

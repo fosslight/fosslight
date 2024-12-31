@@ -2118,7 +2118,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponentsList, List<PartnerMaster> thirdPartyList) {		
+	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponentsList, List<PartnerMaster> thirdPartyList) {
 		// 프로젝트 정보를 취득
 		Project prjBasicInfo = projectMapper.selectProjectMaster(prjId);
 		
@@ -2158,7 +2158,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		List<OssComponents> updateList = new ArrayList<>();
 		List<OssComponents> insertFromPrjList = new ArrayList<>();
-		List<OssComponents> insertFromPartnerList = new ArrayList<>();
+		List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
+		
+		List<String> refComponentIdList = new ArrayList<>();
+		Map<String, ProjectIdentification> refOssComponentsMap = new HashMap<>();
+		Map<String, List<OssComponentsLicense>> refComponentIdLicenseMap = new HashMap<>();
+		final List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
 		List<String> deleteList = new ArrayList<>();
 		
 		// 순서대로 등록 1) update, 2) delete, 3)insert from project , 4) insert from 3rd 
@@ -2169,56 +2174,50 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				updateList.add(bean);
 				deleteList.add(bean.getComponentId());
 			} else {
-				if (!isEmpty(bean.getRefPrjId())) {
-					// 신규 추가이면서, ref 프로젝트 id가 있으면 
-					// componentsid + prjid + exclude 여부만 사용
-					insertFromPrjList.add(bean);
-				} else {
-					// 신규 추가이면서, ref partner id가 있으면 (개별등록은 없기 때문에 else로처리)
-					//componentsid + partnerid + exclude 여부만 사용
-					insertFromPartnerList.add(bean);
-				}
+				refComponentIdList.add(bean.getRefComponentId());
+				insertFromPrjList.add(bean);
 			}
 		}
 		
-		// 1) update
-		for (OssComponents bean : updateList) {
-			projectMapper.updatePartnerOssList(bean);
+		if (!refComponentIdList.isEmpty()) {
+			OssComponents param = new OssComponents();
+			param.setOssComponentsIdList(refComponentIdList);
+			List<ProjectIdentification> refOssComponentList = projectMapper.selectOssComponentsThirdCopy(param);
+			refOssComponentList.forEach(oc -> {
+				refOssComponentsMap.put(oc.getComponentId(), oc);
+			});
+			
+			List<OssComponentsLicense> refComponentIdLicenseList = projectMapper.selectOssComponentsLicenseThirdCopy(param);
+			refComponentIdLicenseList.forEach(ocl -> {
+				String key = ocl.getComponentId();
+				List<OssComponentsLicense> refComponentIdLicenses = null;
+				if (refComponentIdLicenseMap.containsKey(key)) {
+					refComponentIdLicenses = refComponentIdLicenseMap.get(ocl.getComponentId());
+				} else {
+					refComponentIdLicenses = new ArrayList<>();
+				}
+				refComponentIdLicenses.add(ocl);
+				refComponentIdLicenseMap.put(key, refComponentIdLicenses);
+			});
 		}
 		
-		// 2) delete
-		OssComponents param = new OssComponents();
-		param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-		param.setReferenceId(prjId);
-		param.setOssComponentsIdList(deleteList);
-		List<String> deleteComponentIds = projectMapper.getDeleteOssComponentsLicenseIds(param);
-		param.setOssComponentsIdList(deleteComponentIds);
-		
-		if (deleteComponentIds.size() > 0){
-			projectMapper.deleteOssComponentsLicenseWithIds(param);
-			// deleteOssComponentsWithIds는 not in 값을 delete, deleteOssComponentsWithIds2는 in 값을 delete함.
-			projectMapper.deleteOssComponentsWithIds2(param); 
-		}
-		
-		// 3) insert from project
-		for (OssComponents bean : insertFromPrjList) {
-			bean.setComponentId(bean.getRefComponentId());
-			bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-			bean.setReferenceId(prjId);
-			
-			projectMapper.insertOssComponentsCopy(bean);
-			projectMapper.insertOssComponentsLicenseCopy(bean);
-			
-		}
-		
-		// 4) insert from 3rd part
-		for (OssComponents bean : insertFromPartnerList) {
-			bean.setComponentId(bean.getRefComponentId());
-			bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-			bean.setReferenceId(prjId);
-			
-			projectMapper.insertOssComponentsCopy(bean);
-			projectMapper.insertOssComponentsLicenseCopy(bean);
+		if (!CollectionUtils.isEmpty(insertFromPrjList)) {
+			for (OssComponents bean : insertFromPrjList) {
+				if (refOssComponentsMap.containsKey(bean.getRefComponentId())) {
+					ProjectIdentification pi = refOssComponentsMap.get(bean.getRefComponentId());
+					pi.setOssName(bean.getOssName());
+					pi.setReferenceId(prjId);
+					pi.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+					pi.setExcludeYn(bean.getExcludeYn());
+					pi.setRefPartnerId(bean.getRefPartnerId());
+					pi.setRefPrjId(bean.getRefPrjId());
+					insertOssComponentList.add(pi);
+					
+					if (refComponentIdLicenseMap.containsKey(bean.getRefComponentId())) {
+						pi.setOssComponentsLicenseList(refComponentIdLicenseMap.get(bean.getRefComponentId()));
+					}
+				}
+			}
 		}
 		
 		Map<String, PartnerMaster> thirdPartyMap = new HashMap<>();
@@ -2237,6 +2236,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<PartnerMaster> thirdPartyUpdateList = new ArrayList<>();
 		List<PartnerMaster> thirdPartyInsertList = new ArrayList<>();
 		List<String> thirdPartyDeleteList = new ArrayList<>();
+		Map<String, PartnerMaster> deleteCheckMap = new HashMap<>();
 		
 		for (PartnerMaster bean : thirdPartyList) {
 			// 기존에 등록되어 있는 경우는 update
@@ -2244,22 +2244,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				thirdPartyUpdateList.add(bean);
 			} else {
 				thirdPartyInsertList.add(bean);
+				deleteCheckMap.put(bean.getPartnerId(), bean);
 			}
 		}
 		
-		Map<String, PartnerMaster> deleteCheckMap = new HashMap<>();
-		
-		// 1) update
 		for (PartnerMaster bean : thirdPartyUpdateList) {
 			deleteCheckMap.put(bean.getPartnerId(), bean);
-		}
-				
-		// 3) insert
-		for (PartnerMaster bean : thirdPartyInsertList) {
-			deleteCheckMap.put(bean.getPartnerId(), bean);
-			bean.setPrjId(prjId);
-			
-			partnerMapper.insertPartnerMapList(bean);
 		}
 		
 		for (String s : thirdPartyMap.keySet()) {
@@ -2268,14 +2258,107 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		// 2) delete
-		if (!thirdPartyDeleteList.isEmpty()) {
-			PartnerMaster thirdPartyDeleteParam = new PartnerMaster();
-			thirdPartyDeleteParam.setPrjId(prjId);
-			thirdPartyDeleteParam.setThirdPartyPartnerIdList(thirdPartyDeleteList);
+		registOssComponentsThird(prjId, prjBasicInfo, updateList, deleteList, insertOssComponentList, insertOssComponentLicenseList, thirdPartyInsertList, thirdPartyDeleteList);
+	}
+
+	private void registOssComponentsThird(String prjId, Project prjBasicInfo, List<OssComponents> updateList, List<String> deleteList, List<ProjectIdentification> insertOssComponentList,
+			List<OssComponentsLicense> insertOssComponentLicenseList, List<PartnerMaster> thirdPartyInsertList, List<String> thirdPartyDeleteList) {
+		
+		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+			ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+			PartnerMapper pMapper = sqlSession.getMapper(PartnerMapper.class);
 			
-			partnerMapper.deletePartnerMapList(thirdPartyDeleteParam);
+			int cnt = 0;
+			// 1) update
+			for (OssComponents bean : updateList) {
+				mapper.updatePartnerOssList(bean);
+				if (cnt++ == 1000) {
+					sqlSession.flushStatements();
+					cnt = 0;
+				}
+			}
+			if (cnt > 0) {
+                sqlSession.flushStatements();
+            }
+			
+			cnt = 0;
+			// 2) delete
+			OssComponents param = new OssComponents();
+			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+			param.setReferenceId(prjId);
+			param.setOssComponentsIdList(deleteList);
+			List<String> deleteComponentIds = mapper.getDeleteOssComponentsLicenseIds(param);
+			param.setOssComponentsIdList(deleteComponentIds);
+			
+			if (deleteComponentIds.size() > 0){
+				mapper.deleteOssComponentsLicenseWithIds(param);
+				mapper.deleteOssComponentsWithIds2(param);
+				sqlSession.flushStatements();
+			}
+			
+			if (!CollectionUtils.isEmpty(insertOssComponentList)) {
+				prjBasicInfo.setReferenceId(prjId);
+				prjBasicInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+				int ossComponentIdx = mapper.selectOssComponentMaxIdx(prjBasicInfo);
+				
+				for (ProjectIdentification bean : insertOssComponentList) {
+					bean.setComponentIdx(String.valueOf(ossComponentIdx++));
+					mapper.insertSrcOssList(bean);
+					if (cnt++ == 1000) {
+						sqlSession.flushStatements();
+						cnt = 0;
+					}
+				}
+				if (cnt > 0) {
+	                sqlSession.flushStatements();
+	            }
+				insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
+			}
+			
+			cnt = 0;
+            for (OssComponentsLicense bean : insertOssComponentLicenseList) {
+                mapper.registComponentLicense(bean);
+                if (cnt++ == 1000) {
+                    sqlSession.flushStatements();
+                    cnt = 0;
+                }
+            }
+            if (cnt > 0) {
+                sqlSession.flushStatements();
+            }
+            
+			cnt = 0;
+			for (PartnerMaster bean : thirdPartyInsertList) {
+				bean.setPrjId(prjId);
+				
+				pMapper.insertPartnerMapList(bean);
+				if (cnt++ == 1000) {
+					sqlSession.flushStatements();
+					cnt = 0;
+				}
+			}
+			if (cnt > 0) {
+                sqlSession.flushStatements();
+            }
+			
+			cnt = 0;
+			if (!thirdPartyDeleteList.isEmpty()) {
+				PartnerMaster thirdPartyDeleteParam = new PartnerMaster();
+				thirdPartyDeleteParam.setPrjId(prjId);
+				thirdPartyDeleteParam.setThirdPartyPartnerIdList(thirdPartyDeleteList);
+				
+				pMapper.deletePartnerMapList(thirdPartyDeleteParam);
+				sqlSession.flushStatements();
+			}
+			
+			sqlSession.commit();
 		}
+		
+		updateList.clear();
+		insertOssComponentList.clear();
+		insertOssComponentLicenseList.clear();
+		thirdPartyInsertList.clear();
+		thirdPartyDeleteList.clear();
 	}
 
 	private List<OssComponents> convertOssNickName3rd(List<OssComponents> ossComponents) {
@@ -2586,7 +2669,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			ossBean.setReferenceId(refId);
 			ossBean.setReferenceDiv(refDiv);
-			if(StringUtil.isEmpty(ossBean.getComponentIdx())) {
+			if (StringUtil.isEmpty(ossBean.getComponentIdx())) {
 				ossBean.setComponentIdx(Integer.toString(++ossComponentIdx));
 			}
 			
