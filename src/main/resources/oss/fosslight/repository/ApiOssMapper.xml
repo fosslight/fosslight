@@ -1066,4 +1066,8 @@
         ORDER BY T1.MODIFIED_DATE DESC
         LIMIT #{limit}
     </select>
+
+    <select id="getOssNameByCommonId" parameterType="string" resultType="string">
+        SELECT OSS_NAME FROM OSS_COMMON WHERE OSS_COMMON_ID = #{ossCommonId}
+    </select>
 </mapper>

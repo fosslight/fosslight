@@ -44,4 +44,6 @@ public interface ApiOssMapper {
 	List<String> getDownloadLocationListByOssName(String ossName);
 
 	List<String> getHomepageListByOssName(String ossName);
+
+	String getOssNameByCommonId(String ossCommonId);
 }
