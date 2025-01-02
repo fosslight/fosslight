@@ -104,6 +104,11 @@ public class OssController extends CoTopComponent{
 			}
 			
 			searchBean.setOssName(req.getParameter("ossName"));
+			
+			if (req.getParameter("linkFlag") != null) {
+				searchBean.setOssNameAllSearchFlag(CoConstDef.FLAG_YES);
+				searchBean.setLinkFlag(CoConstDef.FLAG_YES);
+			}
 		}
 		
 		if (getSessionObject("defaultLoadYn") != null) {

@@ -503,8 +503,7 @@
                         display += "<a onclick=\"oss_lst_fn.mvEdit('"+url+"', '"+rowObject['ossId']+"')\" class=\"urlLink d-inline-block\" style=\"cursor: pointer;\">" + cellvalue + "</a>";
                     }
                 } else {
-                	var url = '/oss/edit/'+rowObject['ossId'];
-    				display = "<a href='" + url + "' class='urlLink' target='_blank'>" + cellvalue + "</a>";
+                	display = "<a onclick=\"openDetailPage('" + rowObject['ossId'] + "')\" class='urlLink d-inline-block' style=\"cursor: pointer;\" target='_blank'>" + cellvalue + "</a>";
                 }
             	 
                 return display;
@@ -955,16 +954,12 @@
         }
 
         function openDetailPage(ossId) {
-            if ("Y" != linkFlag) {
-                callCreateTabInFrame(ossId + '_Opensource', '/oss/edit/' + ossId, 'oss-edit_' + ossId, true);
-            } else {
-                const openNewWindow = window.open("about:blank");
+        	const openNewWindow = window.open("about:blank");
 
-                if (isAdmin) {
-                    openNewWindow.location.href = "/oss/edit/" + ossId;
-                } else {
-                    openNewWindow.location.href = "/oss/view/" + ossId;
-                }
+            if (isAdmin) {
+                openNewWindow.location.href = "/oss/edit/" + ossId;
+            } else {
+                openNewWindow.location.href = "/oss/view/" + ossId;
             }
         }
 
