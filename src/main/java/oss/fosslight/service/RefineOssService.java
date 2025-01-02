@@ -41,6 +41,8 @@ public class RefineOssService {
 	
 	private static final String RESULT_KEY_TOTALCNT = "reFineTotalCnt";
 	private static final String RESULT_KEY_ITEMS = "reFineItems";
+	private static final String RESULT_NEED_CHECK_TOTALCNT = "needCheckTotalCnt";
+	private static final String RESULT_NEED_CHECK_ITEMS = "needCheckItems";
 	
 	private static final String LOG_FORMAT_INPROGRESS = "IN PROGRESS {}/{}";
 	private static final String LOG_FORMAT_METHOD_START = "Start refine OSS : {}";
@@ -258,12 +260,15 @@ public class RefineOssService {
 		log.info(LOG_FORMAT_METHOD_START, "trySetPurl");
 		final Map<String, Object> resultMap = new HashMap<>();
 		final Map<String, List<String>> reFineItems = new HashMap<>();
+		final Map<String, List<String>> needCheckItems = new HashMap<>();
 		
 		final RefineOssMapper refineOssMapper = sqlSession.getMapper(RefineOssMapper.class);
 		int itemTotalCnt = refineOssMapper.getRefineOssTotalCnt(schOssName, "unsetPurl");
 		List<String> refinedItemList;
 		List<Map<String, String>> ossDownloadLocationList;
+		List<String> needCheckItemList;
 		int reFineTotalCnt = 0;
+		int needCheckTotalCnt = 0;
 		if (itemTotalCnt > 0) {
 			if(itemTotalCnt < PROC_CHUNK_SIZE) {
 				itemTotalCnt = PROC_CHUNK_SIZE;
@@ -280,21 +285,25 @@ public class RefineOssService {
 					ossDownloadLocationList = refineOssMapper.selectOssDownloadLocationList(ossCommonId);
 
 					if (!CollectionUtils.isEmpty(ossDownloadLocationList)) {
+						needCheckItemList = new ArrayList<>();
 						for (Map<String, String> n : ossDownloadLocationList) {
 							if (StringUtil.isEmpty(n.get(FIELD_PURL))) {
 								String downloadLocation = n.get(FIELD_DOWNLOAD_LOCATION);
 								try {
 									String purl = generatePurlByDownloadLocation(downloadLocation);
 									if (!StringUtil.isEmpty(purl)) {
-										n.put(FIELD_PURL, purl);
-										refinedItemList.add(MessageFormat.format("{0}:{1}", downloadLocation, purl));
+										if (purl.contains("|")) {
+											needCheckItemList.add(MessageFormat.format("{0}:{1}", downloadLocation, purl.split("[|]")[1]));
+										} else {
+											n.put(FIELD_PURL, purl);
+											refinedItemList.add(MessageFormat.format("{0}:{1}", downloadLocation, purl));
+										}
 									}
 								} catch (Exception e) {
 									log.error("failed to generate purl download location : {}, {}", downloadLocation, e.getMessage());
 								}
 							}
 						}
-
 						if (!CollectionUtils.isEmpty(refinedItemList)) {
 							if (doUpdateFlag) {
 								refineOssMapper.deleteOssDownloadLocation(ossCommonId);
@@ -302,7 +311,11 @@ public class RefineOssService {
 							}
 							reFineTotalCnt++;
 							reFineItems.put(ossName, refinedItemList);							
-						}						
+						}
+						if (!CollectionUtils.isEmpty(needCheckItemList)) {
+							needCheckTotalCnt++;
+							needCheckItems.put(ossName, needCheckItemList);
+						}
 					}
 				}
 
@@ -313,6 +326,8 @@ public class RefineOssService {
 
 		resultMap.put(RESULT_KEY_TOTALCNT, reFineTotalCnt);
 		resultMap.put(RESULT_KEY_ITEMS, reFineItems);
+		resultMap.put(RESULT_NEED_CHECK_TOTALCNT, needCheckTotalCnt);
+		resultMap.put(RESULT_NEED_CHECK_ITEMS, needCheckItems);
 		log.info(LOG_FORMAT_METHOD_END, "trySetPurl", reFineTotalCnt);
 		return resultMap;
 	}
@@ -438,7 +453,7 @@ public class RefineOssService {
 								if (StringUtil.isEmpty(map.get(FIELD_PURL))) {
 									try {
 										String purl = generatePurlByDownloadLocation(map.get(FIELD_DOWNLOAD_LOCATION));
-										if (!StringUtil.isEmpty(purl)) {
+										if (!StringUtil.isEmpty(purl) && purl.contains("|")) {
 											map.put(FIELD_PURL, purl);
 										}
 									} catch (Exception e) {
@@ -787,7 +802,7 @@ public class RefineOssService {
 				}
 				
 				if (errorFlag) {
-					purlString = "link:" + downloadLocation;
+					purlString = "error|link:" + downloadLocation;
 				} else {
 					if (purl != null) {
 						purlString = purl.toString();
