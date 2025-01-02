@@ -28,7 +28,7 @@
 											<tr class="text-smaller">
 												<th th:text="#{msg.common.field.nickname}"></th>
 												<td>
-													<th:block th:if="${!#lists.isEmpty(detail.licenseNicknames)}" th:each="licenseNickname, status : ${detail.licenseNicknames}">
+													<th:block th:if="${detail != null AND !#lists.isEmpty(detail?.licenseNicknames)}" th:each="licenseNickname, status : ${detail.licenseNicknames}">
 														[[${licenseNickname}]]<span th:if="${status.count != status.size}" th:text="', '"></span>
 													</th:block>
 												</td>
