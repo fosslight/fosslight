@@ -212,7 +212,11 @@
 					}
            		})
            		.set('onshow', function(e){
-           			$("#completeEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           			$("#completeEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+    		           	if (event.keyCode == "9") {
+    		           		event.preventDefault();
+    		           	}
+    		      	});
                     
                     const parameter = {
     		          	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_USER')}]],
@@ -312,7 +316,11 @@
 						}
                 	})
                 	.set('onshow', function(e){
-                		$("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                		$("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+        		           	if (event.keyCode == "9") {
+        		           		event.preventDefault();
+        		           	}
+        		      	});
                		})
                		.setContent(innerHtml)
 					.show();
@@ -341,10 +349,22 @@
 			
 			// 삭제
 			$("#delete").click(function(){
-				if (data.detail.completeYn == 'Y' || data.detail.identificationStatus == "CONF") {
+				fn.getProjectStatus();
+				
+				if (displayInfo.completeFlag == 'Y' || displayInfo.identificationStatus == "CONF") {
 					alertify.alert([[#{msg.project.warn.edit.delete}]], function(){});
 
 					return;
+				} else if ('REV' == displayInfo.projectStatus || 'PROC' == displayInfo.distributionStatus) { 
+					var msg = "";
+					if ("PROC" == displayInfo.distributionStatus){
+						msg = [[#{msg.project.distribution.loading}]];
+					} else {
+						msg = [[#{msg.project.warn.project.status}]];
+					}
+					alertify.alert(msg, function(){});
+
+					return false;
 				} else {
 					var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
 	               	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';
@@ -393,7 +413,11 @@
 						}
 					})
 					.set('onshow', function(event){
-						$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+						$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+				           	if (event.keyCode == "9") {
+				           		event.preventDefault();
+				           	}
+				      	});
 					})
 					.setContent(innerHtml).show();
 				}
@@ -858,7 +882,11 @@
        			}
        		})
        		.set('onshow', function(e){
-       			$("#prjSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+       			$("#prjSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+		           	if (event.keyCode == "9") {
+		           		event.preventDefault();
+		           	}
+		      	});
        		})
        		.set('title', 'Save').setContent(confirmMsg)
 			.show();
@@ -1837,14 +1865,22 @@
                 	}
 					
 					alertify.reqToOpen().set('title', 'Request To Open').set('onshow', function(e){
-						$("#reqToOpenTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+						$("#reqToOpenTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+				           	if (event.keyCode == "9") {
+				           		event.preventDefault();
+				           	}
+				      	});
 						if (info != null && info.contents != null) {
 							$("#reqToOpenTextarea").summernote('code', info.contents);
 						}
 						if ([[${@CommonFunction.isAdmin()}]]) {
 							$("#reqToOpenTextarea").summernote("disable");
 							$("#reqToOpenTextarea").next().find(".note-editable").addClass("note-editable");
-							$('#reqToOpenTextareaAdmin').summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+							$('#reqToOpenTextareaAdmin').summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+					           	if (event.keyCode == "9") {
+					           		event.preventDefault();
+					           	}
+					      	});
 						} 
 					}).setContent(reqToOpenHtml).show();
 				}
@@ -1952,7 +1988,11 @@
 						}
 					})
 					.set('onshow', function(e){
-           				$("#editor3").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           				$("#editor3").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+        		           	if (event.keyCode == "9") {
+        		           		event.preventDefault();
+        		           	}
+        		      	});
            			})
 					.setContent(innerHtml).show();
 				}
@@ -2471,8 +2511,16 @@
 		copy : [[${copy}]],
 		createThird : [[${createThird}]],
 		init : function(){
-			$("#comment").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
-			$("[name='additionalInformation']").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			$("#comment").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+	           	if (event.keyCode == "9") {
+	           		event.preventDefault();
+	           	}
+	      	});
+			$("[name='additionalInformation']").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+	           	if (event.keyCode == "9") {
+	           		event.preventDefault();
+	           	}
+	      	});
 			
 			if(data.detail){
 				$('input[name=prjId]').val(data.detail.prjId);

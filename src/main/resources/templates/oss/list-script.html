@@ -432,7 +432,11 @@
 	                            }
 							})
 							.set('onshow', function(event){
-								$("#promptPopupEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+								$("#promptPopupEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+						           	if (event.keyCode == "9") {
+						           		event.preventDefault();
+						           	}
+						      	});
 							})
 							.setContent(res).show();
                     }, null, function () {});

@@ -1033,7 +1033,11 @@ var fn = {
 				   	}
            		})
            		.set('onshow', function(e){
-           			$("#delParEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           			$("#delParEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+    		           	if (event.keyCode == "9") {
+    		           		event.preventDefault();
+    		           	}
+    		      	});
            		})
            		.setContent(innerHtml)
 				.show();

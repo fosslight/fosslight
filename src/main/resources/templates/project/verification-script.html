@@ -40,7 +40,11 @@
             
             // 버튼 컨트롤
             fn.btnCtl(userRole, curIdenStatus);
-            $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+            $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+	           	if (event.keyCode == "9") {
+	           		event.preventDefault();
+	           	}
+	      	});
             
             $("#list").jqGrid({
                 datatype: 'local',
@@ -753,7 +757,11 @@
     						}
                         })
                         .set('onshow', function(e){
-                        	$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        	$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+            		           	if (event.keyCode == "9") {
+            		           		event.preventDefault();
+            		           	}
+            		      	});
                         	
                         	const parameter = {
                                	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_USER')}]],
@@ -2197,7 +2205,11 @@
         						return false;
         					})
         					.set('onshow', function(event){
-        						$("#noticeEditPop").summernote({height: 700, minHeight: null, maxHeight: null, lang: "ko-KR"});
+        						$("#noticeEditPop").summernote({height: 700, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+        				           	if (event.keyCode == "9") {
+        				           		event.preventDefault();
+        				           	}
+        				      	});
         						$("#noticeEditPop").summernote('code', result.resultData);
         					})
         					.setContent(contents)

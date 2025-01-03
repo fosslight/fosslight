@@ -210,7 +210,11 @@ var com_evt = {
 					}
 	       		})
 	       		.set('onshow', function(e){
-	       			$("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	       			$("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+			           	if (event.keyCode == "9") {
+			           		event.preventDefault();
+			           	}
+			      	});
 	       			
 	       			const parameter = {
 	                  	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICATION_USER')}]],
@@ -286,7 +290,11 @@ var com_evt = {
 					}
            		})
            		.set('onshow', function(e){
-           			$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           			$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+    		           	if (event.keyCode == "9") {
+    		           		event.preventDefault();
+    		           	}
+    		      	});
            			
            			const parameter = {
                    		"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICATION_USER')}]],
@@ -2157,7 +2165,11 @@ var com_fn = {
 				}
        		})
        		.set('onshow', function(e){
-           		$("#bomRequestEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           		$("#bomRequestEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+		           	if (event.keyCode == "9") {
+		           		event.preventDefault();
+		           	}
+		      	});
            	})
            	.set('title', 'Request').setContent(innerHtml)
 			.show();

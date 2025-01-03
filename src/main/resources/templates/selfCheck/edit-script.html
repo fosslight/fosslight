@@ -35,8 +35,16 @@ $(document).ready(function() {
 		showHelpLink("Self-Check_Edit_Export", "helpLink_vulerabiityExport");
 	}
 	
-	$("#editor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
-	$("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	$("#editor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+       	if (event.keyCode == "9") {
+       		event.preventDefault();
+       	}
+  	});
+	$("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+       	if (event.keyCode == "9") {
+       		event.preventDefault();
+       	}
+  	});
 	
 	data.init();
 	evt.init();
@@ -107,7 +115,11 @@ var fn_self ={
 			$("#divEditMode").show();
 			$("#divEditSaveBtn").show();
 			
-			$("#commentTextArea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			$("#commentTextArea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+	           	if (event.keyCode == "9") {
+	           		event.preventDefault();
+	           	}
+	      	});
 			$("#commentTextArea").summernote('code', $("#commentTextArea").val());
 		}
 	}
@@ -652,7 +664,11 @@ var fn = {
 					.set('labels', {ok:'save'})
 					.set('onok', function(event){ fn.saveNoticeEditPop(); return false; })
 					.set('onshow', function(event){
-						$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+						$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+				           	if (event.keyCode == "9") {
+				           		event.preventDefault();
+				           	}
+				      	});
 					})
 					.setContent(contents)
 					.show();
@@ -1147,7 +1163,11 @@ var fn = {
 			
 			if (editAppendedYn == "Y"){
 				$("#append").trigger("click").attr("checked", true);
-				$("#editor2").summernote({height: 250, minHeight: null, maxHeight: null, lang: "ko-KR"});
+				$("#editor2").summernote({height: 250, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+		           	if (event.keyCode == "9") {
+		           		event.preventDefault();
+		           	}
+		      	});
 			}
 		}, 1);
 	},

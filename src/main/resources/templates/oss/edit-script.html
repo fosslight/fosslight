@@ -605,7 +605,11 @@
                         }
                     })
                     .set('onshow', function(event){
-                        $("#deleteOssEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+                        $("#deleteOssEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+        		           	if (event.keyCode == "9") {
+        		           		event.preventDefault();
+        		           	}
+        		      	});
                     })
                     .setContent(innerHtml).show();
 			});
@@ -3133,7 +3137,11 @@
            			}
            		})
            		.set('onshow', function(e){
-           			$("#ossSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
+           			$("#ossSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+    		           	if (event.keyCode == "9") {
+    		           		event.preventDefault();
+    		           	}
+    		      	});
            		})
            		.set('title', 'Save').setContent(innerHtml)
 				.show();
