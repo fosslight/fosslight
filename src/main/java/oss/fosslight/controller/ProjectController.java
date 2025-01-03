@@ -5368,4 +5368,125 @@ public class ProjectController extends CoTopComponent {
 			return makeJsonResponseHeader(false, e.getMessage());
 		}
 	}
+	
+	@PostMapping(value=PROJECT.CHANGE_PROJECT_STATUS)
+	public @ResponseBody ResponseEntity<Object> changeProjectStatus(@RequestBody Project project, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		String resCd = "";
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		Project prjBean = projectService.getProjectDetail(project);
+		
+		if (prjBean != null) {
+			boolean notChangeFlag = false;
+			String prjId = project.getPrjId();
+			String changeCode = project.getCode();
+			boolean completeFlag = CoConstDef.FLAG_YES.equalsIgnoreCase(avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO)) ? true : false;
+			boolean dropFlag = CoConstDef.FLAG_YES.equalsIgnoreCase(avoidNull(prjBean.getDropYn(), CoConstDef.FLAG_NO)) ? true : false;
+			
+			if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equalsIgnoreCase(avoidNull(prjBean.getStatus()))) {
+				notChangeFlag = true;
+				rtnMap.put("notChangePrjId", prjId);
+			} else {
+				if (changeCode.equals("1")) {
+					if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS.equalsIgnoreCase(avoidNull(prjBean.getStatus()))) {
+						if (isEmpty(avoidNull(prjBean.getIdentificationStatus())) || CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS.equalsIgnoreCase(avoidNull(prjBean.getIdentificationStatus()))) {
+							notChangeFlag = true;
+							rtnMap.put("notChangePrjId", prjId);
+						}
+					}
+				} else if (changeCode.equals("2")) {
+					if (!dropFlag && !completeFlag) {
+					} else {
+						notChangeFlag = true;
+						rtnMap.put("notChangePrjId", prjId);
+					}
+				} else if (changeCode.equals("4")) {
+					if (CommonFunction.isAdmin() && CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(avoidNull(prjBean.getIdentificationStatus()))
+							&& (isEmpty(avoidNull(prjBean.getVerificationStatus())) 
+									|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS.equalsIgnoreCase(avoidNull(prjBean.getVerificationStatus()))
+									|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equalsIgnoreCase(avoidNull(prjBean.getVerificationStatus()))
+									|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA.equalsIgnoreCase(avoidNull(prjBean.getVerificationStatus())))
+							&& !completeFlag) {
+					} else {
+						notChangeFlag = true;
+						rtnMap.put("notChangePrjId", prjId);
+					}
+				}
+			}
+			
+			if (!notChangeFlag) {
+				Project param = new Project();
+				param.setPrjId(prjId);
+				param.setUserComment(project.getUserComment());
+				
+				try {
+					switch (changeCode) {
+						case "1" :
+							param.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
+							if (CommonFunction.isAdmin()) {
+								if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(avoidNull(prjBean.getIdentificationStatus()))) {
+									if (completeFlag) {
+										param.setCompleteYn(CoConstDef.FLAG_NO);
+									}
+								}
+								
+								if (dropFlag) {
+									param.setCompleteYn(CoConstDef.FLAG_NO);
+								}
+								
+								rtnMap = projectService.changeProjectStatus(param);
+							} else {
+								if (completeFlag) {
+									CommentsHistory commentsHistory = new CommentsHistory();
+									commentsHistory.setReferenceId(prjId);
+									commentsHistory.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS);
+									commentsHistory.setCommId(prjBean.getCommId());
+									commentsHistory.setCommentsMode(!isEmpty(prjBean.getCommId()) ? CoConstDef.ACTION_CODE_UPDATE : CoConstDef.ACTION_CODE_INSERT);
+									commentsHistory.setContents(param.getUserComment());
+									commentsHistory.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_REQUESTTOOPEN_COMMENT);
+									commentsHistory.setStatus("Request to Open");
+									commentService.registComment(commentsHistory);
+									
+									param.setCommId(prjBean.getCommId());
+									param.setStatusRequestYn(CoConstDef.FLAG_YES);
+									projectService.updateProjectMaster(param);
+								} else {
+									if (dropFlag) {
+										param.setCompleteYn(CoConstDef.FLAG_NO);
+									}
+									
+									rtnMap = projectService.changeProjectStatus(param);
+								}
+							}
+							break;
+						case "2" :
+							param.setDropYn(CoConstDef.FLAG_YES);
+							rtnMap = projectService.changeProjectStatus(param);
+							
+							break;
+						default :
+							param.setCompleteYn(CoConstDef.FLAG_YES);
+							rtnMap = projectService.changeProjectStatus(param);
+							
+							break;
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+					resCd = "20";
+				}
+				
+				resCd = (String) rtnMap.get("resCd");
+				
+				if (isEmpty(resCd) || resCd.equals("10")) {
+					updateProjectNotification(project, rtnMap);
+					rtnMap.clear();
+				} else {
+					rtnMap.clear();
+					rtnMap.put("notChangePrjId", prjId);
+				}
+			}
+		}
+		
+		return makeJsonResponseHeader(rtnMap);
+	}
 }

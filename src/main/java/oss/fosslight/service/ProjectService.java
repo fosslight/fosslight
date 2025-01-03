@@ -231,4 +231,6 @@ public interface ProjectService extends HistoryConfig{
 	public void setLoadToList(Map<String, Object> map, String prjId);
 
 	void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense);
+	
+	public Map<String, Object> changeProjectStatus(Project project);
 }

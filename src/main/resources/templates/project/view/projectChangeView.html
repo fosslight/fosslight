@@ -5,14 +5,8 @@
 	<div class="row custom-layout">
 		<div class="col-sm-12">
 			<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
-				<input type="hidden" id="projectStatus" th:value="${status.projectStatus}"/>
-				<input type="hidden" id="identificationStatus" th:value="${status.identificationStatus}"/>
-				<input type="hidden" id="verificationStatus" th:value="${status.verificationStatus}"/>
-				<input type="hidden" id="distributionStatus" th:value="${status.distributionStatus}"/>
-				<input type="hidden" id="completeFlag" th:value="${status.completeFlag}"/>
-				<input type="hidden" id="dropFlag" th:value="${status.dropFlag}"/>
-				<input type="hidden" id="commId" th:value="${status.commId}"/>
-				<input type="hidden" id="viewOnlyFlag" th:value="${status.viewOnlyFlag}"/>
+				<input type="hidden" id="permissionPrjIds" th:value="${permissionPrjIds}"/>
+				<input type="hidden" id="notPermissionPrjIds" th:value="${notPermissionPrjIds}"/>
 				<div class="row">
 					<div class="col-12">
 						<div class="form-group">
@@ -33,16 +27,6 @@
 						</div>
 					</div>
 				</div>
-<!-- 			<div class="row">
-					<div class="col-12">
-						<div class="form-group">
-							<div class="custom-control custom-radio" id="CSDelete">
-								<input class="custom-control-input" type="radio" id="r3" name="radioName" th:value="3">
-								<label for="r3" class="custom-control-label" th:text="Delete"></label>
-							</div>
-						</div>
-					</div>
-				</div> -->
 				<div class="row" th:if="${@CommonFunction.isAdmin()}">
 					<div class="col-12">
 						<div class="form-group">
@@ -74,7 +58,7 @@
 		</div>
 		<div class="col-sm-12">
 			<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 ml-1 float-right" th:text="Cancel" th:onclick="|fn.closeAlertify()|"></button>
-			<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right" th:text="OK" th:onclick=|fn.changeStatusProc()|></button>
+			<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right" th:text="OK" th:onclick=|fn.changeStatus()|></button>
 		</div>
 	</div>
 	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>

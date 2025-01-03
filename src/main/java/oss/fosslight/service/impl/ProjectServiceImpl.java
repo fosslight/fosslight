@@ -7905,4 +7905,23 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		map.put("rows", rows);
 	}
+	
+	@Override
+	public Map<String, Object> changeProjectStatus(Project project) {
+		Map<String, Object> resultMap = new HashMap<>();
+		String resCd = "";
+		
+		try {
+			resultMap = updateProjectStatus(project, false);
+			if (resultMap.containsKey("androidMessage") || resultMap.containsKey("diffMap") || resultMap.containsKey("validMap")) {
+				resCd = "20";
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			resCd = "20";
+		}
+		
+		resultMap.put("resCd", resCd);
+		return resultMap;
+	}
 }
