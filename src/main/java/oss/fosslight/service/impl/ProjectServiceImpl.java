@@ -2651,7 +2651,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (!StringUtil.isEmpty(homepageUrl) && homepageUrl.endsWith("/")) {
 				ossBean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
 			}
-			
+			if (avoidNull(ossBean.getTlsh()).equalsIgnoreCase("TNULL")) {
+				ossBean.setTlsh("0");
+			}
 			componentId = StringUtil.avoidNull(ossBean.getComponentId(), ossBean.getGridId());
 			
 			// set component licnese
