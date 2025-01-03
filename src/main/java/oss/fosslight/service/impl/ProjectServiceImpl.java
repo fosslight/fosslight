@@ -4823,15 +4823,29 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		ossComponents.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 		List<ProjectIdentification> list = projectMapper.getPartnerOssListValidation(ossComponents);
+		List<String> componentIdList = new ArrayList<>();
+		Map<String, ProjectIdentification> componentIdLicenseMap = new HashMap<>();
 		
-		for (ProjectIdentification oc : list){
-			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())){
-				ProjectIdentification PI = new ProjectIdentification();
-				PI.setComponentId(oc.getComponentId());
-				List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
-				if (!subGridData.isEmpty()) {
-					PI = subGridData.get(0);
-					
+		for (ProjectIdentification oc : list) {
+			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())) {
+				componentIdList.add(oc.getComponentId());
+			}
+		}
+		
+		if (!componentIdList.isEmpty()) {
+			ProjectIdentification pi = new ProjectIdentification();
+			pi.setComponentIdList(componentIdList);
+			List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(pi);
+			subGridData.forEach(projectIdentification -> {
+				String key = projectIdentification.getComponentId();
+				if (!componentIdLicenseMap.containsKey(key)) {
+					componentIdLicenseMap.put(key, projectIdentification);
+				}
+			});
+			
+			for (ProjectIdentification oc : list) {
+				if (componentIdLicenseMap.containsKey(oc.getComponentId())) {
+					ProjectIdentification PI = componentIdLicenseMap.get(oc.getComponentId());
 					oc.setLicenseName(PI.getLicenseName());
 					oc.setLicenseText(PI.getLicenseText());
 					oc.setCopyrightText(PI.getCopyrightText());
