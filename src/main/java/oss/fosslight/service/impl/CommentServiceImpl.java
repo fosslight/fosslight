@@ -59,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
 			commentMapper.registComment(bean);
 		}
 		
-		boolean isPartner = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS.equals(bean.getReferenceDiv());
+		boolean isPartner = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS.equals(bean.getReferenceDiv()) || CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS.equals(bean.getReferenceDiv());
 		
 		if (deleteUserComment && isNew && (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS.equals(bean.getReferenceDiv())
@@ -127,7 +127,7 @@ public class CommentServiceImpl implements CommentService {
 			
 			mailBean.setComment(bean.getContents());
 			
-			if (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())) {
+			if (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv()) || CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS.equals(bean.getReferenceDiv())) {
 				mailBean.setStage("Identificaiton");
 			} else if (CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS.equals(bean.getReferenceDiv())) {
 				mailBean.setStage("Packaging");
@@ -137,7 +137,7 @@ public class CommentServiceImpl implements CommentService {
 			
 			mailBean.setReceiveFlag(bean.getMailSendType());
 			
-			if (!StringUtil.isEmpty(bean.getContents())){//comment 내용이 있을시만 메일 발송
+			if (!StringUtil.isEmpty(bean.getContents())) {//comment 내용이 있을시만 메일 발송
 				CoMailManager.getInstance().sendMail(mailBean);
 			}
 		}

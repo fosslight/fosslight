@@ -401,16 +401,18 @@ public class CoConstDef {
 	public static final String CD_DISTRIBUTE_SITE_SKS = "SKS";
 	
 	public static final String CD_COMMENT_DIVISION = "214";
-	public static final String CD_DTL_COMMENT_PROJECT_USER = "09"; // 코멘트 통함
-	public static final String CD_DTL_COMMENT_PROJECT_HIS = "19"; // 코멘트 통함
+	public static final String CD_DTL_COMMENT_PROJECT_USER = "09";
+	public static final String CD_DTL_COMMENT_PROJECT_HIS = "19";
 	public static final String CD_DTL_COMMENT_IDENTIFICAITON_HIS = "10";
 	public static final String CD_DTL_COMMENT_IDENTIFICATION_USER = "11";
 	public static final String CD_DTL_COMMENT_PACKAGING_HIS = "12";
 	public static final String CD_DTL_COMMENT_PACKAGING_USER = "13";
-	public static final String CD_DTL_COMMENT_DISTRIBUTION_HIS = "14"; // 코멘트 통함
-	public static final String CD_DTL_COMMENT_DISTRIBUTION_USER = "15"; // 코멘트 통함
+	public static final String CD_DTL_COMMENT_DISTRIBUTION_HIS = "14";
+	public static final String CD_DTL_COMMENT_DISTRIBUTION_USER = "15";
 	public static final String CD_DTL_COMMENT_PARTNER_HIS = "20";
 	public static final String CD_DTL_COMMENT_PARTNER_USER = "21";
+	public static final String CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS = "22";
+	public static final String CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER = "23";
 	public static final String CD_DTL_COMMENT_LICENSE = "30";
 	public static final String CD_DTL_COMMENT_LICENSE_USER = "31";
 	public static final String CD_DTL_COMMENT_OSS = "40";

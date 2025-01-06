@@ -168,7 +168,7 @@
 						AND REFERENCE_DIV IN ('30')
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
-						AND REFERENCE_DIV IN ('20')
+						AND REFERENCE_DIV IN ('20', '22')
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
 						AND REFERENCE_DIV = '60'
@@ -247,7 +247,7 @@
 							AND T1.REFERENCE_DIV IN ('30')
 						</when>
 						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
-							AND T1.REFERENCE_DIV IN ('20')
+							AND T1.REFERENCE_DIV IN ('20', '22')
 						</when>
 						<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
 							AND T1.REFERENCE_DIV = '60'
@@ -299,7 +299,7 @@
 						AND REFERENCE_DIV IN ('30')
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'3rd')">
-						AND REFERENCE_DIV IN ('20')
+						AND REFERENCE_DIV IN ('20', '22')
 					</when>
 					<when test="@oss.fosslight.util.StringUtil@equals(referenceDiv,'security')">
 						AND REFERENCE_DIV = '60'
