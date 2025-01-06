@@ -7024,7 +7024,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
 			if (securityDatalist != null) {
 				for (OssComponents oss : securityDatalist) {
-					String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId()).toUpperCase();
+					String ossVersion = oss.getOssVersion();
+					if (ossVersion.equals("-")) {
+						ossVersion = "";
+					}
+					String key = (oss.getOssName() + "_" + ossVersion + "_" + oss.getCveId()).toUpperCase();
 					securityGridMap.put(key, oss);
 				}
 			}
@@ -7032,7 +7036,11 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		for (OssComponents oc : ossComponents) {
 			oc.setReferenceId(prjId);
-			String key = (oc.getOssName() + "_" + oc.getOssVersion() + "_" + oc.getCveId()).toUpperCase();
+			String ossVersion = oc.getOssVersion();
+			if (ossVersion.equals("-")) {
+				ossVersion = "";
+			}
+			String key = (oc.getOssName() + "_" + ossVersion + "_" + oc.getCveId()).toUpperCase();
 			if (securityGridMap.containsKey(key)) {
 				deleteDataList.add(oc);
 			}
