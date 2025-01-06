@@ -20,13 +20,7 @@
     var userRole = [[${#authentication.authorities[0].authority}]];
     var isSaveButtonClicked = false;
     
- 	// prevent clicking the OK button on Enter
-    let keyCode;
-    $(document).on('keydown', function (event) {
-        keyCode = event.keyCode;
-    });
-    
-	//데이터 객체
+ 	//데이터 객체
 	var data = {
 		detail : [[${detail}]],
 		list : [[${list}]],
@@ -549,38 +543,11 @@
                	innerHtml 		+= '<textarea id="deleteOssEditor"></textarea>';
 
                 if (!alertify.delOssDialog){
-					alertify.dialog('delOssDialog', function() {
-						return {
-							setup: function() {
-								var settings = alertify.confirm().settings;
-								
-								for (var prop in settings) {
-									this.settings[prop] = settings[prop];
-								}
-								
-								var setup = alertify.confirm().setup();
-								setup.focus.element = 0;
-								
-								return setup;
-							},
-						    hooks: {
-						    	onshow: function() {
-						        	this.elements.dialog.style.maxWidth = 'none';
-						          	this.elements.dialog.style.width = '650px';
-						        }
-							}
-						};
-					}, false, 'confirm');
+                	commonAlertifyDialog('delOssDialog');
 	        	}
 
                 alertify.delOssDialog()
                     .set('onok', function(event){
-                        // prevent clicking the OK button on Enter
-                        if (typeof keyCode !== 'undefined' && keyCode == 13) {
-                            keyCode = undefined;
-                            return false;
-                        }
-
                         var editorVal = $("#deleteOssEditor").summernote('code');
                         if ("" == $(editorVal).text().trim()){
                             alertify.alert([[#{msg.oss.required.deletion}]], function(){});
@@ -605,11 +572,7 @@
                         }
                     })
                     .set('onshow', function(event){
-                        $("#deleteOssEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-        		           	if (event.keyCode == "9") {
-        		           		event.preventDefault();
-        		           	}
-        		      	});
+                        $("#deleteOssEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
                     })
                     .setContent(innerHtml).show();
 			});
@@ -3063,28 +3026,7 @@
 				}
 
 				if (typeof alertify.ossSaveDialog === 'undefined') {
-					alertify.dialog('ossSaveDialog', function() {
-						return {
-							setup: function() {
-								var settings = alertify.confirm().settings;
-								
-								for (var prop in settings) {
-									this.settings[prop] = settings[prop];
-								}
-								
-								var setup = alertify.confirm().setup();
-								setup.focus.element = 0;
-								
-								return setup;
-							},
-						    hooks: {
-						    	onshow: function() {
-						        	this.elements.dialog.style.maxWidth = 'none';
-						          	this.elements.dialog.style.width = '650px';
-						        }
-							}
-						};
-					}, false, 'confirm');
+					commonAlertifyDialog('ossSaveDialog');
             	}
 				
 				var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
@@ -3094,12 +3036,6 @@
            		
            		alertify.ossSaveDialog()
            		.set('onok', function(e) {
-           			// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-           			
            			if (e) {
            				var editorVal = $("#ossSaveEditor").summernote('code');
            				if ("" != $(editorVal).text().trim()) {
@@ -3137,11 +3073,7 @@
            			}
            		})
            		.set('onshow', function(e){
-           			$("#ossSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-    		           	if (event.keyCode == "9") {
-    		           		event.preventDefault();
-    		           	}
-    		      	});
+           			$("#ossSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
            		})
            		.set('title', 'Save').setContent(innerHtml)
 				.show();

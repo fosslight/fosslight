@@ -24,13 +24,7 @@
         var activeTab = null;
         var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
 
-     	// prevent clicking the OK button on Enter
-		let keyCode;
-		$(document).on('keydown', function (event) {
-			keyCode = event.keyCode;
-		});
-        
-        $(document).ready(function () {
+     	$(document).ready(function () {
             'use strict';
             $('.select2').select2();
             datas.init();
@@ -40,11 +34,7 @@
             
             // 버튼 컨트롤
             fn.btnCtl(userRole, curIdenStatus);
-            $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-	           	if (event.keyCode == "9") {
-	           		event.preventDefault();
-	           	}
-	      	});
+            $("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
             
             $("#list").jqGrid({
                 datatype: 'local',
@@ -596,46 +586,17 @@
                         var innerHtml 	= 'Are you sure you want to confirm?<br>';
                         innerHtml 		+= '<textarea id="verConfirmEditor"></textarea>';
                         
-                     	if(!alertify.verConfirmDialog){
-    						alertify.dialog('verConfirmDialog', function() {
-    							return {
-    								setup: function() {
-    									var settings = alertify.confirm().settings;
-    									
-    									for (var prop in settings) {
-    										this.settings[prop] = settings[prop];
-    									}
-    									
-    									var setup = alertify.confirm().setup();
-    									setup.focus.element = 1;
-    									
-    									return setup;
-    								},
-    							    hooks: {
-    							    	onshow: function() {
-    							        	this.elements.dialog.style.maxWidth = 'none';
-    							          	this.elements.dialog.style.width = '650px';
-    							        }
-    								}
-    							};
-    						}, false, 'confirm');
+                     	if (!alertify.verConfirmDialog) {
+                     		commonAlertifyDialog('verConfirmDialog');
                     	}
                         
                         alertify.verConfirmDialog()
                         .set('onok', function(e) {
-                        	// prevent clicking the OK button on Enter
-            				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-								keyCode = undefined;
-								return false;
-							}
-                        	
-            				var editorVal = $("#verConfirmEditor").summernote('code');
+                        	var editorVal = $("#verConfirmEditor").summernote('code');
             				if ("" == $(editorVal).text().trim()) {
                					editorVal = "";
                				}
             				$("input[name='userComment']").val(editorVal);
-            				
-            				
                         })
                         .set('onshow', function(e){
                         	if ($("#append").prop("checked")) {
@@ -704,40 +665,13 @@
                         var innerHtml 	= 'Are you sure you want to reject?<br>';
                         innerHtml 		+= '<textarea id="editor3"></textarea>';
                         
-                        if(!alertify.verRejectDialog){
-    						alertify.dialog('verRejectDialog', function() {
-    							return {
-    								setup: function() {
-    									var settings = alertify.confirm().settings;
-    									
-    									for (var prop in settings) {
-    										this.settings[prop] = settings[prop];
-    									}
-    									
-    									var setup = alertify.confirm().setup();
-    									setup.focus.element = 0;
-    									
-    									return setup;
-    								},
-    							    hooks: {
-    							    	onshow: function() {
-    							        	this.elements.dialog.style.maxWidth = 'none';
-    							          	this.elements.dialog.style.width = '650px';
-    							        }
-    								}
-    							};
-    						}, false, 'confirm');
+                        if (!alertify.verRejectDialog) {
+                        	commonAlertifyDialog('verRejectDialog');
                     	}
                         
                         alertify.verRejectDialog()
                         .set('onok', function(e) {
-                        	// prevent clicking the OK button on Enter
-            				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-								keyCode = undefined;
-								return false;
-							}
-                        	
-							var editorVal = $("#editor3").summernote('code');
+                        	var editorVal = $("#editor3").summernote('code');
                         	
      						if ("" == $(editorVal).text().trim()){
      							alertify.alert([[#{msg.project.required.comments}]], function(){});
@@ -757,12 +691,7 @@
     						}
                         })
                         .set('onshow', function(e){
-                        	$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-            		           	if (event.keyCode == "9") {
-            		           		event.preventDefault();
-            		           	}
-            		      	});
-                        	
+                        	$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
                         	const parameter = {
                                	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PACKAGING_USER')}]],
                                	"referenceId" : [[${project.prjId}]]
@@ -2190,30 +2119,23 @@
                 if (result.isValid == 'false') {
                     alertify.error([[#{msg.common.valid2}]], 0);
                 } else {
+                	if (typeof alertify.openNoticeEditDialog === 'undefined') {
+        				commonAlertifyDialog('openNoticeEditDialog');
+                	}
                 	var contents = '<textarea cols="80" id="noticeEditPop" name="noticeEditPop" rows="10"></textarea>';
-        			alertify.confirm()
-        					.set({'resizable': true, 'startMaximized':true}).resizeTo('650', '480')
-        					.set('labels', {ok:'save'})
-        					.set('onok', function(event){
-        						// prevent clicking the OK button on Enter
-        						if (typeof keyCode !== 'undefined' && keyCode == 13) {
-        							keyCode = undefined;
-        							return false;
-        						}
-        						
-        						fn.saveNoticeEditPop();
-        						return false;
-        					})
-        					.set('onshow', function(event){
-        						$("#noticeEditPop").summernote({height: 700, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-        				           	if (event.keyCode == "9") {
-        				           		event.preventDefault();
-        				           	}
-        				      	});
-        						$("#noticeEditPop").summernote('code', result.resultData);
-        					})
-        					.setContent(contents)
-        					.show();
+        			alertify.openNoticeEditDialog()
+        				.set({'resizable': true, 'startMaximized':true}).resizeTo('650', '480')
+        				.set('labels', {ok:'save'})
+        				.set('onok', function(event){
+        					fn.saveNoticeEditPop();
+        					return false;
+        				})
+        				.set('onshow', function(event){
+        					$("#noticeEditPop").summernote({height: 700, minHeight: null, maxHeight: null, lang: "ko-KR"});
+        					$("#noticeEditPop").summernote('code', result.resultData);
+        				})
+        				.setContent(contents)
+        				.show();
 					
 					fn.defaultNotice(false);
                 }

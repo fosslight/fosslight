@@ -35,16 +35,8 @@ $(document).ready(function() {
 		showHelpLink("Self-Check_Edit_Export", "helpLink_vulerabiityExport");
 	}
 	
-	$("#editor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-       	if (event.keyCode == "9") {
-       		event.preventDefault();
-       	}
-  	});
-	$("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-       	if (event.keyCode == "9") {
-       		event.preventDefault();
-       	}
-  	});
+	$("#editor").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+	$("#editor2").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 	
 	data.init();
 	evt.init();
@@ -115,11 +107,7 @@ var fn_self ={
 			$("#divEditMode").show();
 			$("#divEditSaveBtn").show();
 			
-			$("#commentTextArea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-	           	if (event.keyCode == "9") {
-	           		event.preventDefault();
-	           	}
-	      	});
+			$("#commentTextArea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			$("#commentTextArea").summernote('code', $("#commentTextArea").val());
 		}
 	}
@@ -657,18 +645,16 @@ var fn = {
 		if (result.isValid == 'false') {
            	alertify.error([[#{msg.common.valid2}]], 0);
 		} else {
+			if (typeof alertify.selfOpenNoticeEditDialog === 'undefined') {
+				commonAlertifyDialog('selfOpenNoticeEditDialog');
+        	}
 			var contents = '<textarea id="editor3" name="editor3"></textarea>';
-			
-			alertify.confirm()
+			alertify.selfOpenNoticeEditDialog()
 					.set({'resizable': true, 'startMaximized':true})
 					.set('labels', {ok:'save'})
 					.set('onok', function(event){ fn.saveNoticeEditPop(); return false; })
 					.set('onshow', function(event){
-						$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-				           	if (event.keyCode == "9") {
-				           		event.preventDefault();
-				           	}
-				      	});
+						$("#editor3").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 					})
 					.setContent(contents)
 					.show();
@@ -1163,11 +1149,7 @@ var fn = {
 			
 			if (editAppendedYn == "Y"){
 				$("#append").trigger("click").attr("checked", true);
-				$("#editor2").summernote({height: 250, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-		           	if (event.keyCode == "9") {
-		           		event.preventDefault();
-		           	}
-		      	});
+				$("#editor2").summernote({height: 250, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			}
 		}, 1);
 	},

@@ -11,13 +11,7 @@
         let G_ROW_CNT = [[ ${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_EXCEL_DOWNLOAD'), @CommonFunction.getCoConstDefVal('CD_MAX_ROW_COUNT')) }]];
         let linkFlag = [[ ${searchBean.linkFlag}]];
         
-     	// prevent clicking the OK button on Enter
-		let keyCode;
-		$(document).on('keydown', function (event) {
-			keyCode = event.keyCode;
-		});
-        
-        $(document).ready(function () {
+     	$(document).ready(function () {
             oss_lst_evt.init();
         });
 
@@ -385,38 +379,11 @@
                     };
                     postAjaxJsonData(JSON.stringify(param), "/render/component", "html", function (res) {
                        	if (!alertify.deleteOssListDialog){
-							alertify.dialog('deleteOssListDialog', function() {
-								return {
-									setup: function() {
-										var settings = alertify.confirm().settings;
-										
-										for (var prop in settings) {
-											this.settings[prop] = settings[prop];
-										}
-										
-										var setup = alertify.confirm().setup();
-										setup.focus.element = 0;
-										
-										return setup;
-									},
-								    hooks: {
-								    	onshow: function() {
-								        	this.elements.dialog.style.maxWidth = 'none';
-								          	this.elements.dialog.style.width = '650px';
-								        }
-									}
-								};
-							}, false, 'confirm');
+                       		commonAlertifyDialog('deleteOssListDialog');
 	                	}
 						
 						alertify.deleteOssListDialog()
 							.set('onok', function(e){
-								// prevent clicking the OK button on Enter
-								if (typeof keyCode !== 'undefined' && keyCode == 13) {
-									keyCode = undefined;
-									return false;
-								}
-							
 								var comment = $("#promptPopupEditor").summernote('code');
 	                            if (e) {
 	                            	if ("" == $(comment).text().trim()){
@@ -432,11 +399,7 @@
 	                            }
 							})
 							.set('onshow', function(event){
-								$("#promptPopupEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-						           	if (event.keyCode == "9") {
-						           		event.preventDefault();
-						           	}
-						      	});
+								$("#promptPopupEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 							})
 							.setContent(res).show();
                     }, null, function () {});

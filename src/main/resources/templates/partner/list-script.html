@@ -15,12 +15,6 @@ var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMP
 var changeWatcherArr = [];
 var role = [[${#authentication.authorities[0].authority}]];
 
-//prevent clicking the OK button on Enter
-let keyCode;
-$(document).on('keydown', function (event) {
-	keyCode = event.keyCode;
-});
-
 $(document).ready(function () {
 	'use strict';
 	setMaxRowCnt(G_ROW_CNT); // maxRowCnt 값 setting
@@ -929,8 +923,8 @@ var fn = {
 			});
 		}
 	},
-	checkChar : function(){
-		if(event.keyCode == 64){//@ 특수문자 체크
+	checkChar : function(event){
+		if (event.keyCode == 64){//@ 특수문자 체크
 			alertify.alert([[#{msg.login.check.char}]], function(){});
     		
 			event.returnValue = false;
@@ -987,38 +981,11 @@ var fn = {
 	           	innerHtml 		+= '<textarea id="delParEditor"></textarea>';
 	           	
 	           	if (!alertify.delParDialog){
-	    			alertify.dialog('delParDialog', function() {
-	    				return {
-	    					setup: function() {
-	    						var settings = alertify.confirm().settings;
-	    						
-	    						for (var prop in settings) {
-	    							this.settings[prop] = settings[prop];
-	    						}
-	    						
-	    						var setup = alertify.confirm().setup();
-	    						setup.focus.element = 0;
-	    						
-	    						return setup;
-	    					},
-	    				    hooks: {
-	    				    	onshow: function() {
-	    				        	this.elements.dialog.style.maxWidth = 'none';
-	    				          	this.elements.dialog.style.width = '650px';
-	    				        }
-	    					}
-	    				};
-	    			}, false, 'confirm');
+	           		commonAlertifyDialog('delParDialog');
 	        	}
 	           	
 	           	alertify.delParDialog()
            		.set('onok', function(e) {
-           			// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-					
 				   	if (e) {
 				   		var editorVal = $("#delParEditor").summernote('code');
 				   		if ("" == $(editorVal).text().trim()) {
@@ -1033,11 +1000,7 @@ var fn = {
 				   	}
            		})
            		.set('onshow', function(e){
-           			$("#delParEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-    		           	if (event.keyCode == "9") {
-    		           		event.preventDefault();
-    		           	}
-    		      	});
+           			$("#delParEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
            		})
            		.setContent(innerHtml)
 				.show();

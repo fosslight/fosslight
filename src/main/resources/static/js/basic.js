@@ -4151,3 +4151,29 @@ function draftUserComments(param) {
 	});
 	return comments;
 }
+
+function commonAlertifyDialog(target) {
+	alertify.dialog(target, function() {
+		return {
+			setup: function() {
+				var settings = alertify.confirm().settings;
+				
+				for (var prop in settings) {
+					this.settings[prop] = settings[prop];
+				}
+				
+				var setup = alertify.confirm().setup();
+				setup.focus.element = 0;
+				setup.buttons[0].key = 0;
+
+				return setup;
+			},
+			hooks: {
+				onshow: function() {
+					this.elements.dialog.style.maxWidth = 'none';
+					this.elements.dialog.style.width = '650px';
+				}
+			}
+		};
+	}, false, 'confirm');
+}

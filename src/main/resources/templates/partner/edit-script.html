@@ -27,12 +27,6 @@ var ossFileObj;
 var partnerStatus = [[${detail.status}]];
 var partnerId = [[${detail.partnerId}]];
 
-//prevent clicking the OK button on Enter
-let keyCode;
-$(document).on('keydown', function (event) {
-	keyCode = event.keyCode;
-});
-
 $(document).ready(function () {
 	'use strict';
 	evt.init();
@@ -104,11 +98,7 @@ var modifyCommentId = [[${detail.comment}]];
 var commentIdx= [[${detail.comment}]];
 var evt = {
 	init : function(){
-		$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-           	if (event.keyCode == "9") {
-           		event.preventDefault();
-           	}
-      	});
+		$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 		
 		commentTemp = $('<div>').append($('dl[name=commentClone]').clone());
 		$('dl[name=commentClone]').remove();
@@ -833,28 +823,7 @@ var fn = {
 			com_fn.exitCell(_mainLastsel, "list");
 			
 			if (typeof alertify.parSaveDialog === 'undefined') {
-				alertify.dialog('parSaveDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
+				commonAlertifyDialog('parSaveDialog');
         	}
 			
 			var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
@@ -862,12 +831,6 @@ var fn = {
 			
        		alertify.parSaveDialog()
        		.set('onok', function(e) {
-       			// prevent clicking the OK button on Enter
-				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-					keyCode = undefined;
-					return false;
-				}
-       			
        			if (e) {
        				cleanErrMsg("list");
 					$("div.retxt").hide();
@@ -943,11 +906,7 @@ var fn = {
        		})
        		.set('title', 'Save').setContent(innerHtml)
        		.set('onshow', function(e){
-       			$("#parSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-		           	if (event.keyCode == "9") {
-		           		event.preventDefault();
-		           	}
-		      	});
+       			$("#parSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
        		})
 			.show();
 		}else{
@@ -1325,41 +1284,14 @@ var fn = {
 			var innerHtml 	= [[#{msg.partner.delete.warning}]] + '<br><br>';
            	innerHtml 		+= '<textarea id="parDelEditor"></textarea>';
            	
-       		if(!alertify.deleteParDialog){
-				alertify.dialog('deleteParDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
+       		if (!alertify.deleteParDialog){
+       			commonAlertifyDialog('deleteParDialog');
         	}
            	
            	alertify.deleteParDialog()
        		.set('onok', function(e) {
        			if (e) {
-       				// prevent clicking the OK button on Enter
-    				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-    					keyCode = undefined;
-    					return false;
-    				}
-    				
-    				var editorVal = $("#parDelEditor").summernote('code');
+       				var editorVal = $("#parDelEditor").summernote('code');
     				
     				if ("" == $(editorVal).text().trim()) {
     					alertify.alert([[#{msg.project.required.comments}]], function(){});
@@ -1393,11 +1325,7 @@ var fn = {
        		})
            	.set('title', 'Delete').setContent(innerHtml)
        		.set('onshow', function(e){
-       			$("#parDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-		           	if (event.keyCode == "9") {
-		           		event.preventDefault();
-		           	}
-		      	});
+       			$("#parDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
        		})
 			.show();
 		} else {
@@ -1497,40 +1425,13 @@ var fn = {
            	innerHtml 		+= '<textarea id="partnerRejectEditor"></textarea>';
 			
          	if (!alertify.partnerRejectDialog){
-				alertify.dialog('partnerRejectDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
+         		commonAlertifyDialog('partnerRejectDialog');
            	}
            	
            	alertify.partnerRejectDialog()
        		.set('onok', function(e) {
        			if (e) {
-       				// prevent clicking the OK button on Enter
-    				if (typeof keyCode !== 'undefined' && keyCode == 13) { 
-    					keyCode = undefined;
-    					return false;
-    				}
-       				
-					var editorVal = $("#partnerRejectEditor").summernote('code');
+       				var editorVal = $("#partnerRejectEditor").summernote('code');
     				
     				if ("" == $(editorVal).text().trim()){
                			alertify.alert([[#{msg.project.required.comments}]], function(){});
@@ -1566,11 +1467,7 @@ var fn = {
        		})
        		.set('title', 'Reject').setContent(innerHtml)
        		.set('onshow', function(e){
-       			$("#partnerRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-		           	if (event.keyCode == "9") {
-		           		event.preventDefault();
-		           	}
-		      	});
+       			$("#partnerRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
        		})
 			.show();
 		} else {
@@ -1628,40 +1525,13 @@ var fn = {
            	innerHtml 		+= '<textarea id="partnerConfirmEditor"></textarea>';
            	
          	if (!alertify.partnerConfirmDialog){
-				alertify.dialog('partnerConfirmDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
+         		commonAlertifyDialog('partnerConfirmDialog');
            	}
 			
         	alertify.partnerConfirmDialog()
         	.set('onok', function(e) {
         		if (e) {
-        			// prevent clicking the OK button on Enter
-    				if (typeof keyCode !== 'undefined' && keyCode == 13) { 
-    					keyCode = undefined;
-    					return false;
-    				}
-        			
-    				var ignoreBinaryDbFlag = $("#ignoreBinaryDbFlag").val();
+        			var ignoreBinaryDbFlag = $("#ignoreBinaryDbFlag").val();
                		if (typeof ignoreBinaryDbFlag === 'undefined') ignoreBinaryDbFlag = "";
                		
                		var editorVal = $("#partnerConfirmEditor").summernote('code');
@@ -1709,11 +1579,7 @@ var fn = {
         	})
            	.set('title', 'Confirm').setContent(innerHtml)
        		.set('onshow', function(e){
-       			$("#partnerConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-		           	if (event.keyCode == "9") {
-		           		event.preventDefault();
-		           	}
-		      	});
+       			$("#partnerConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
        		})
 			.show();
 		} else {
@@ -3481,11 +3347,7 @@ var com_fn = {
 				            $(".ajax-upload-dragdrop").hide();
 				        }
 						
-						$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-				           	if (event.keyCode == "9") {
-				           		event.preventDefault();
-				           	}
-				      	});
+						$("#descriptionTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 						var description = [[${detail.description}]];
 						if ("" != description) {
 							$("#descriptionTextarea").summernote('code', description);

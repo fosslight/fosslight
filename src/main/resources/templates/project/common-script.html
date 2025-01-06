@@ -17,12 +17,6 @@ var licenseNames = [];
 //COMMON
 //==========================================================================================
 
-// prevent clicking the OK button on Enter
-let keyCode;
-$(document).on('keydown', function (event) {
-	keyCode = event.keyCode;
-});
-	
 var com_evt = {
 	// init
 	init: function(){
@@ -84,28 +78,7 @@ var com_evt = {
 				}
 				
 				if (typeof alertify.bomConfirmDialog === 'undefined') {
-					alertify.dialog('bomConfirmDialog', function() {
-						return {
-							setup: function() {
-								var settings = alertify.confirm().settings;
-								
-								for (var prop in settings) {
-									this.settings[prop] = settings[prop];
-								}
-								
-								var setup = alertify.confirm().setup();
-								setup.focus.element = 0;
-								
-								return setup;
-							},
-						    hooks: {
-						    	onshow: function() {
-						        	this.elements.dialog.style.maxWidth = 'none';
-						          	this.elements.dialog.style.width = '650px';
-						        }
-							}
-						};
-					}, false, 'confirm');
+					commonAlertifyDialog('bomConfirmDialog');
 	        	}
 				
 				var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.confirm', true)}]];
@@ -113,12 +86,6 @@ var com_evt = {
 				
 	       		alertify.bomConfirmDialog()
 	       		.set('onok', function(e) {
-	       			// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-	       			
 	       			var editorVal = $("#bomConfirmEditor").summernote('code');
 	       			if ("" == $(editorVal).text().trim()) {
 	   					editorVal = "";
@@ -210,12 +177,7 @@ var com_evt = {
 					}
 	       		})
 	       		.set('onshow', function(e){
-	       			$("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-			           	if (event.keyCode == "9") {
-			           		event.preventDefault();
-			           	}
-			      	});
-	       			
+	       			$("#bomConfirmEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 	       			const parameter = {
 	                  	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICATION_USER')}]],
 	                   	"referenceId" : [[${project.prjId}]]
@@ -241,40 +203,12 @@ var com_evt = {
                	innerHtml 		+= '<textarea id="bomRejectEditor"></textarea>';
 				
              	if (typeof alertify.bomRejectDialog === 'undefined') {
-					alertify.dialog('bomRejectDialog', function() {
-						return {
-							setup: function() {
-								var settings = alertify.confirm().settings;
-								
-								for (var prop in settings) {
-									this.settings[prop] = settings[prop];
-								}
-								
-								var setup = alertify.confirm().setup();
-								
-								setup.focus.element = 0;
-								
-								return setup;
-							},
-						    hooks: {
-						    	onshow: function() {
-						        	this.elements.dialog.style.maxWidth = 'none';
-						          	this.elements.dialog.style.width = '650px';
-						        }
-							}
-						};
-					}, false, 'confirm');
+             		commonAlertifyDialog('bomRejectDialog');
             	}
                	
                	alertify.bomRejectDialog()
            		.set('onok', function(e) {
-           			// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-
-					if (e) {
+           			if (e) {
 						var editorVal = $("#bomRejectEditor").summernote('code');
 
 						if ("" == $(editorVal).text().trim()) {
@@ -290,12 +224,7 @@ var com_evt = {
 					}
            		})
            		.set('onshow', function(e){
-           			$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-    		           	if (event.keyCode == "9") {
-    		           		event.preventDefault();
-    		           	}
-    		      	});
-           			
+           			$("#bomRejectEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
            			const parameter = {
                    		"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_IDENTIFICATION_USER')}]],
                    		"referenceId" : [[${project.prjId}]]
@@ -2110,28 +2039,7 @@ var com_fn = {
 			}
 			
 			if (typeof alertify.bomRequestDialog === 'undefined') {
-				alertify.dialog('bomRequestDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
+				commonAlertifyDialog('bomRequestDialog');
         	}
 			
 			var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.request', true)}]];
@@ -2140,13 +2048,7 @@ var com_fn = {
        		alertify.bomRequestDialog()
        		.set('onok', function(e) {
        			if(e) {
-       				// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-       				
-					if (userRole != "ROLE_ADMIN"){
+       				if (userRole != "ROLE_ADMIN"){
 						if (!isAndroidModel && !com_fn.validBomChangeStatus(isAndroidModel)) {
 							return false;
 						}
@@ -2165,11 +2067,7 @@ var com_fn = {
 				}
        		})
        		.set('onshow', function(e){
-           		$("#bomRequestEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-		           	if (event.keyCode == "9") {
-		           		event.preventDefault();
-		           	}
-		      	});
+           		$("#bomRequestEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
            	})
            	.set('title', 'Request').setContent(innerHtml)
 			.show();

@@ -23,13 +23,7 @@
 	var commentsParam = {referenceId : [[${project.prjId}]], referenceDiv : 'prj'};
     var isReadOnly = [[${isReadOnly}]];
 	
- 	// prevent clicking the OK button on Enter
-	let keyCode;
-	$(document).on('keydown', function (event) {
-		keyCode = event.keyCode;
-	});
-    
-	$(document).ready(function() {
+ 	$(document).ready(function() {
 		'use strict';
 		data.init();
 		evt.init();
@@ -174,6 +168,7 @@
 								var customButtons = [];
 								for (var i in buttons) {
 									if ('OK' == buttons[i].text) {
+										buttons[i].key = 0;
 										customButtons.push(buttons[i]);
 									}
 								}
@@ -194,13 +189,7 @@
                 
                 alertify.completeDialog()
            		.set('onok', function(e) {
-           			// prevent clicking the OK button on Enter
-					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-						keyCode = undefined;
-						return false;
-					}
-           			
-					if (e) {
+           			if (e) {
 						var editorVal = $("#completeEditor").summernote('code');
 						if ("" == $(editorVal).text().trim()) {
 	       					editorVal = "";
@@ -212,12 +201,7 @@
 					}
            		})
            		.set('onshow', function(e){
-           			$("#completeEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-    		           	if (event.keyCode == "9") {
-    		           		event.preventDefault();
-    		           	}
-    		      	});
-                    
+           			$("#completeEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
                     const parameter = {
     		          	"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PROJECT_USER')}]],
     		            "referenceId" : [[${project.prjId}]]
@@ -250,6 +234,7 @@
 								var customButtons = [];
 								for (var i in buttons) {
 									if ('OK' == buttons[i].text) {
+										buttons[i].key = 0;
 										customButtons.push(buttons[i]);
 									}
 								}
@@ -270,13 +255,7 @@
 				
                 alertify.dropDialog()
                 	.set('onok', function(e) {
-                		// prevent clicking the OK button on Enter
-						if (typeof keyCode !== 'undefined' && keyCode == 13) {
-							keyCode = undefined;
-							return false;
-						}
-                		
-						if (e) {
+                		if (e) {
 							var editorVal = $("#dropEditor").summernote('code');
 							if ("" == $(editorVal).text().trim()){
 		    					alertify.alert([[#{msg.project.confirm.comment}]], function(){});
@@ -316,11 +295,7 @@
 						}
                 	})
                 	.set('onshow', function(e){
-                		$("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-        		           	if (event.keyCode == "9") {
-        		           		event.preventDefault();
-        		           	}
-        		      	});
+                		$("#dropEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
                		})
                		.setContent(innerHtml)
 					.show();
@@ -369,39 +344,12 @@
 					var innerHtml 	= 'Are you sure you want to remove this project?<br>This will permanently delete all datas.<br><br>';
 	               	innerHtml 		+= '<textarea id="prjDelEditor"></textarea>';
 					
-					if(!alertify.deletePrjDialog){
-						alertify.dialog('deletePrjDialog', function() {
-							return {
-								setup: function() {
-									var settings = alertify.confirm().settings;
-									
-									for (var prop in settings) {
-										this.settings[prop] = settings[prop];
-									}
-									
-									var setup = alertify.confirm().setup();
-									setup.focus.element = 0;
-									
-									return setup;
-								},
-							    hooks: {
-							    	onshow: function() {
-							        	this.elements.dialog.style.maxWidth = 'none';
-							          	this.elements.dialog.style.width = '650px';
-							        }
-								}
-							};
-						}, false, 'confirm');
+					if (!alertify.deletePrjDialog){
+						commonAlertifyDialog('deletePrjDialog');
                 	}
 	               	
 	               	alertify.deletePrjDialog()
 					.set('onok', function(event){
-						// prevent clicking the OK button on Enter
-						if (typeof keyCode !== 'undefined' && keyCode == 13) {
-							keyCode = undefined;
-							return false;
-						}
-
 						var editorVal = $("#prjDelEditor").summernote('code');
 
 						if ("" == $(editorVal).text().trim()) {
@@ -413,11 +361,7 @@
 						}
 					})
 					.set('onshow', function(event){
-						$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-				           	if (event.keyCode == "9") {
-				           		event.preventDefault();
-				           	}
-				      	});
+						$("#prjDelEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
 					})
 					.setContent(innerHtml).show();
 				}
@@ -834,38 +778,11 @@
 			}
 			
 			if (typeof alertify.prjSaveDialog === 'undefined') {
-				alertify.dialog('prjSaveDialog', function() {
-					return {
-						setup: function() {
-							var settings = alertify.confirm().settings;
-							
-							for (var prop in settings) {
-								this.settings[prop] = settings[prop];
-							}
-							
-							var setup = alertify.confirm().setup();
-							setup.focus.element = 0;
-							
-							return setup;
-						},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '650px';
-					        }
-						}
-					};
-				}, false, 'confirm');
+				commonAlertifyDialog('prjSaveDialog');
         	}
 			
 			alertify.prjSaveDialog()
        		.set('onok', function(e) {
-       			// prevent clicking the OK button on Enter
-				if (typeof keyCode !== 'undefined' && keyCode == 13) {
-					keyCode = undefined;
-					return false;
-				}
-       			
        			if (e) {
        				var editorVal = $("#prjSaveEditor").summernote('code');
        				if ("" != $(editorVal).text().trim()) {
@@ -882,11 +799,7 @@
        			}
        		})
        		.set('onshow', function(e){
-       			$("#prjSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-		           	if (event.keyCode == "9") {
-		           		event.preventDefault();
-		           	}
-		      	});
+       			$("#prjSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
        		})
        		.set('title', 'Save').setContent(confirmMsg)
 			.show();
@@ -1865,22 +1778,14 @@
                 	}
 					
 					alertify.reqToOpen().set('title', 'Request To Open').set('onshow', function(e){
-						$("#reqToOpenTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-				           	if (event.keyCode == "9") {
-				           		event.preventDefault();
-				           	}
-				      	});
+						$("#reqToOpenTextarea").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 						if (info != null && info.contents != null) {
 							$("#reqToOpenTextarea").summernote('code', info.contents);
 						}
 						if ([[${@CommonFunction.isAdmin()}]]) {
 							$("#reqToOpenTextarea").summernote("disable");
 							$("#reqToOpenTextarea").next().find(".note-editable").addClass("note-editable");
-							$('#reqToOpenTextareaAdmin').summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-					           	if (event.keyCode == "9") {
-					           		event.preventDefault();
-					           	}
-					      	});
+							$('#reqToOpenTextareaAdmin').summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 						} 
 					}).setContent(reqToOpenHtml).show();
 				}
@@ -1988,11 +1893,7 @@
 						}
 					})
 					.set('onshow', function(e){
-           				$("#editor3").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-        		           	if (event.keyCode == "9") {
-        		           		event.preventDefault();
-        		           	}
-        		      	});
+           				$("#editor3").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
            			})
 					.setContent(innerHtml).show();
 				}
@@ -2130,11 +2031,10 @@
 					$("[name='noticeType'][value|='"+noticeTypeGeneral+"']").trigger("click");
 				}
 			},
-			CheckChar : function(){
-				if(event.keyCode == 64){//@ 특수문자 체크
-            				alertify.alert([[#{msg.login.check.char}]], function(){});
-            		
-            				event.returnValue = false;
+			CheckChar : function(event){
+				if (event.keyCode == 64){//@ 특수문자 체크
+            		alertify.alert([[#{msg.login.check.char}]], function(){});
+            		event.returnValue = false;
             	}
 			},
 			shareUrl : function(){
@@ -2511,16 +2411,8 @@
 		copy : [[${copy}]],
 		createThird : [[${createThird}]],
 		init : function(){
-			$("#comment").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-	           	if (event.keyCode == "9") {
-	           		event.preventDefault();
-	           	}
-	      	});
-			$("[name='additionalInformation']").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-	           	if (event.keyCode == "9") {
-	           		event.preventDefault();
-	           	}
-	      	});
+			$("#comment").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
+			$("[name='additionalInformation']").summernote({height: 200, minHeight: null, maxHeight: null, lang: "ko-KR"});
 			
 			if(data.detail){
 				$('input[name=prjId]').val(data.detail.prjId);

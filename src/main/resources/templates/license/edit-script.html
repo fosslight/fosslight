@@ -6,13 +6,7 @@
         var commentsParam = {referenceDiv : 'license'};
         var isNew = false;
 
-     	// prevent clicking the OK button on Enter
-		let keyCode;
-		$(document).on('keydown', function (event) {
-			keyCode = event.keyCode;
-		});
-        
-        $(window).load(function () {
+     	$(window).load(function () {
             lic_edit_data.init();
 
             showHelpLink("License_Edit_Info", "heplLink_licenseEditInfo");
@@ -76,28 +70,7 @@
                 	fn.checkValidMsg();
                 	
                 	if (typeof alertify.licenseSaveDialog === 'undefined') {
-    					alertify.dialog('licenseSaveDialog', function() {
-    						return {
-    							setup: function() {
-    								var settings = alertify.confirm().settings;
-    								
-    								for (var prop in settings) {
-    									this.settings[prop] = settings[prop];
-    								}
-    								
-    								var setup = alertify.confirm().setup();
-    								setup.focus.element = 0;
-    								
-    								return setup;
-    							},
-    						    hooks: {
-    						    	onshow: function() {
-    						        	this.elements.dialog.style.maxWidth = 'none';
-    						          	this.elements.dialog.style.width = '650px';
-    						        }
-    							}
-    						};
-    					}, false, 'confirm');
+                		commonAlertifyDialog('licenseSaveDialog');
                 	}
                 	
                 	var innerHtml 	= [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
@@ -105,12 +78,6 @@
                 	
                		alertify.licenseSaveDialog()
                		.set('onok', function(e) {
-               			// prevent clicking the OK button on Enter
-    					if (typeof keyCode !== 'undefined' && keyCode == 13) {
-    						keyCode = undefined;
-    						return false;
-    					}
-               			
                			if (e) {
                				var editorVal = $("#licenseSaveEditor").summernote('code');
                				if ("" != $(editorVal).text().trim()) {
@@ -123,11 +90,7 @@
                			}
                		})
                		.set('onshow', function(e){
-               			$("#licenseSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-        		           	if (event.keyCode == "9") {
-        		           		event.preventDefault();
-        		           	}
-        		      	});
+               			$("#licenseSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
                		})
                		.set('title', 'Save').setContent(innerHtml)
     				.show();
@@ -139,38 +102,11 @@
                     innerHtml 		+= '<textarea id="delLicenseEditor"></textarea>';
 
                     if (!alertify.delLicenseDialog){
-                        alertify.dialog('delLicenseDialog', function() {
-                            return {
-                                setup: function() {
-                                    var settings = alertify.confirm().settings;
-
-                                    for (var prop in settings) {
-                                        this.settings[prop] = settings[prop];
-                                    }
-
-                                    var setup = alertify.confirm().setup();
-                                    setup.focus.element = 0;
-
-                                    return setup;
-                                },
-                                hooks: {
-                                    onshow: function() {
-                                        this.elements.dialog.style.maxWidth = 'none';
-                                        this.elements.dialog.style.width = '650px';
-                                    }
-                                }
-                            };
-                        }, false, 'confirm');
+                    	commonAlertifyDialog('delLicenseDialog');
                     }
 
                     alertify.delLicenseDialog()
                         .set('onok', function(e){
-                            // prevent clicking the OK button on Enter
-                            if (typeof keyCode !== 'undefined' && keyCode == 13) {
-                                keyCode = undefined;
-                                return false;
-                            }
-
                             var editorVal = $("#delLicenseEditor").summernote('code');
                             if ("" == $(editorVal).text().trim()){
                                 alertify.alert([[#{msg.oss.required.deletion}]], function(){});
@@ -185,11 +121,7 @@
                             }
                         })
                         .set('onshow', function(event){
-                            $("#delLicenseEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
-            		           	if (event.keyCode == "9") {
-            		           		event.preventDefault();
-            		           	}
-            		      	});
+                            $("#delLicenseEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
                         })
                         .setContent(innerHtml).show();
                 });
