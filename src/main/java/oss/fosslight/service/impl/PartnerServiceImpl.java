@@ -1395,7 +1395,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	}
 
 	@Override
-	public List<OssComponents> getSecurityGridList(PartnerMaster partnerMaster) {
+	public List<OssComponents> getSecurityGridList(boolean isDemo, PartnerMaster partnerMaster) {
 		List<OssComponents> needToResolveList = new ArrayList<>();
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(partnerMaster.getPartnerId());
@@ -1413,23 +1413,26 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		for (ProjectIdentification pi : list) {
 			Map<String, List<Map<String, Object>>> cpeInfoMap = new HashMap<>();
 			Map<String, String> patchLinkMap = new HashMap<>();
-			List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
-			for (Map<String, Object> cpeInfo : cpeInfoList) {
-				String key = ((String) cpeInfo.get("cveId") + "_" + (String) cpeInfo.get("product")).toUpperCase();
-				String key2 = (String) cpeInfo.get("cveId");
-				String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
-				
-				List<Map<String, Object>> cpeInfoMapList = null;
-				if (cpeInfoMap.containsKey(key)) {
-					cpeInfoMapList = cpeInfoMap.get(key);
-				} else {
-					cpeInfoMapList = new ArrayList<>();
-				}
-				cpeInfoMapList.add(cpeInfo);
-				cpeInfoMap.put(key, cpeInfoMapList);
-				
-				if (!patchLinkMap.containsKey(key2) && !isEmpty(patchLink)) {
-					patchLinkMap.put(key2, patchLink);
+			
+			if (!isDemo) {
+				List<Map<String, Object>> cpeInfoList = projectMapper.getCpeInfoAndRangeForProject(identification);
+				for (Map<String, Object> cpeInfo : cpeInfoList) {
+					String key = ((String) cpeInfo.get("cveId") + "_" + (String) cpeInfo.get("product")).toUpperCase();
+					String key2 = (String) cpeInfo.get("cveId");
+					String patchLink = (String) cpeInfo.getOrDefault("patchLink", "");
+					
+					List<Map<String, Object>> cpeInfoMapList = null;
+					if (cpeInfoMap.containsKey(key)) {
+						cpeInfoMapList = cpeInfoMap.get(key);
+					} else {
+						cpeInfoMapList = new ArrayList<>();
+					}
+					cpeInfoMapList.add(cpeInfo);
+					cpeInfoMap.put(key, cpeInfoMapList);
+					
+					if (!patchLinkMap.containsKey(key2) && !isEmpty(patchLink)) {
+						patchLinkMap.put(key2, patchLink);
+					}
 				}
 			}
 			
@@ -1466,7 +1469,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 				oc.setVulnerabilityResolution("");
 				
 				if (!activateFlag) {
-					if (cpeInfoMap.containsKey(key2)) {
+					if (!isDemo && cpeInfoMap.containsKey(key2)) {
 						List<Map<String, Object>> matchCpeInfoList = cpeInfoMap.get(key2);
 						String criteria = "";
 						String verStartEndRange = "";

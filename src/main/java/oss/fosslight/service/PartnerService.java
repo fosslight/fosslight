@@ -78,7 +78,7 @@ public interface PartnerService extends HistoryConfig{
 
 	public Map<String, Object> checkSelectDownloadFile(PartnerMaster partnerMaster);
 
-	public List<OssComponents> getSecurityGridList(PartnerMaster partnerMaster);
+	public List<OssComponents> getSecurityGridList(boolean isDemo, PartnerMaster partnerMaster);
 
 	public void registOssWhenRegistPartner(PartnerMaster partnerMaster);
 }

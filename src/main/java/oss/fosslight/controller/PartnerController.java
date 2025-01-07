@@ -610,7 +610,6 @@ public class PartnerController extends CoTopComponent{
 		return makeJsonResponseHeader(result);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@PostMapping(value=PARTNER.SAVE_AJAX)
 	public @ResponseBody ResponseEntity<Object> saveAjax(
 			@RequestBody PartnerMaster partnerMaster
@@ -646,100 +645,24 @@ public class PartnerController extends CoTopComponent{
 			return makeJsonResponseHeader(retMap);
 		}
 				
-		String mainGrid = partnerMaster.getOssComponentsStr();
-		
-		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
-		List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
-		// ossVersion N/A => "" 치환 / 3rd Party > e2fsprogs를 Row에 추가 시 Save 불가
-		// ossVersion N/A => "" replace / 3rd Party > cannot save when adding e2fsprogs to row
-		ossComponents = CommonFunction.replaceOssVersionNA((List<ProjectIdentification>) fromJson(mainGrid, collectionType));
-		ossComponents = CommonFunction.removeDuplicateLicense(ossComponents);
-		List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
-		
-		ossComponentsLicense = CommonFunction.mergeGridAndSession(
-				CommonFunction.makeSessionKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()), ossComponents, ossComponentsLicense,
-				CommonFunction.makeSessionReportKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()));
-		
-		T2CoProjectValidator pv = new T2CoProjectValidator(); // validation proceeded with t2coProject
-		pv.setIgnore("OSS_NAME");
-		pv.setIgnore("OSS_VERSION");
-		pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_PARTNER);
-		pv.setValidLevel(pv.VALID_LEVEL_BASIC);
-		// main grid
-		pv.setAppendix("mainList", ossComponents);
-		
-		T2CoValidationResult vr = pv.validateObject(partnerMaster); 
-		
-		// return validator result
-		if (!vr.isValid()) {
-			return makeJsonResponseHeader(false,  CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
-		}
-		
 		Boolean isNew = isEmpty(partnerMaster.getPartnerId());
-		
-		Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
-		ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
-		ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+		String userComment = partnerMaster.getUserComment();
 		
 		try{
-			// binary.txt 파일이 변경된 경우 최초 한번만 수행
-			PartnerMaster beforePartnerInfo = new PartnerMaster();
-			if(!isEmpty(partnerMaster.getPartnerId())) {
-				beforePartnerInfo.setPartnerId(partnerMaster.getPartnerId());
-				beforePartnerInfo = partnerService.getPartnerMasterOne(partnerMaster);
-			}
-			
-			String binaryFileId = partnerMaster.getBinaryFileId();
-			
-			if((!isEmpty(binaryFileId) && beforePartnerInfo == null)  // 최초생성시 binary.txt File을 upload하였거나
-					|| (!isEmpty(binaryFileId) && beforePartnerInfo != null && !binaryFileId.equals(beforePartnerInfo.getBinaryFileId()))) { // binary.txt를 변경하였을 경우에만 동작.
-				List<String> binaryTxtList = CommonFunction.getBinaryListBinBinaryTxt(fileService.selectFileInfo(binaryFileId));
-				
-				if(binaryTxtList != null && !binaryTxtList.isEmpty()) {
-					// 현재 osslist의 binary 목록을 격납
-					Map<String, ProjectIdentification> componentBinaryList = new HashMap<>();
-					
-					for(ProjectIdentification bean : ossComponents) {
-						if(!isEmpty(bean.getBinaryName())) {
-							componentBinaryList.put(bean.getBinaryName(), bean);
-						}
-					}
-					
-					List<ProjectIdentification> addComponentList = Lists.newArrayList();
-					
-					// 존재여부 확인
-					for(String binaryNameTxt : binaryTxtList) {
-						if(!componentBinaryList.containsKey(binaryNameTxt)) {
-							// add 해야할 list
-							ProjectIdentification bean = new ProjectIdentification();
-							// 화면에서 추가한 것 처럼 jqg로 시작하는 component id를 임시로 설정한다.
-							bean.setGridId("jqg_"+binaryFileId+"_"+addComponentList.size());
-							bean.setBinaryName(binaryNameTxt);
-							addComponentList.add(bean);
-							
-//							changeAdded += "<br> - " + binaryNameTxt;
-						} else { // exclude처리된 경우
-							ProjectIdentification bean = componentBinaryList.get(binaryNameTxt);
-							if(bean != null && CoConstDef.FLAG_YES.equals(bean.getExcludeYn())) {
-//								changeExclude += "<br>" + binaryNameTxt;
-							}
-						}
-					}
-					
-					if(addComponentList != null && !addComponentList.isEmpty()) {
-						ossComponents.addAll(addComponentList);
-					}
-				}
-			}
-			
 			partnerService.registPartnerMaster(partnerMaster);
-			partnerService.registOss(partnerMaster, ossComponents, ossComponentsLicense);
+			if (!isEmpty(partnerMaster.getOssFileId()) && !isEmpty(partnerMaster.getOssFileSheetNo())) {
+				partnerService.registOssWhenRegistPartner(partnerMaster);
+			}
 			
 			History h = partnerService.work(partnerMaster);
 			h.sethAction(!isNew ? CoConstDef.ACTION_CODE_UPDATE : CoConstDef.ACTION_CODE_INSERT);
 			
-			if(!isEmpty(binaryFileId)) {
-				binaryDataService.autoIdentificationWithBinryTextFilePartner(partnerMaster);
+			if (!isEmpty(userComment)) {
+				CommentsHistory commHisBean = new CommentsHistory();
+				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
+				commHisBean.setReferenceId(partnerMaster.getPartnerId());
+				commHisBean.setContents(userComment);
+				commentService.registComment(commHisBean);
 			}
 			
 			historyService.storeData(h);
@@ -837,6 +760,169 @@ public class PartnerController extends CoTopComponent{
 		
 		resMap.put("isValid", String.valueOf(isValid));
 		resMap.put("resCd", resCd);
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
+	@PostMapping(value = PARTNER.SAVE_PARTY)
+	public @ResponseBody ResponseEntity<Object> saveParty(@RequestBody Map<String, Object> map, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		boolean isValid = true;
+		Map<String, String> resMap = new HashMap<>();
+		String resCd = "00";
+		String partnerId = (String) map.get("partnerId");
+		String ossFileId = (String) map.get("ossFileId");
+		String mainDataString = (String) map.get("mainData");
+		String resetFlag = map.containsKey("resetFlag") ? (String) map.get("resetFlag") : CoConstDef.FLAG_NO;
+		
+		PartnerMaster partnerMaster = new PartnerMaster();
+		partnerMaster.setPartnerId(partnerId);
+		partnerMaster.setOssFileId(ossFileId);
+		
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> ossComponents = new ArrayList<ProjectIdentification>();
+		ossComponents = (List<ProjectIdentification>) fromJson(mainDataString, collectionType);
+		
+		List<List<ProjectIdentification>> ossComponentsLicense = CommonFunction.setOssComponentLicense(ossComponents);
+		ossComponentsLicense = CommonFunction.mergeGridAndSession(
+				CommonFunction.makeSessionKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()), ossComponents, ossComponentsLicense,
+				CommonFunction.makeSessionReportKey(loginUserName(),CoConstDef.CD_DTL_COMPONENT_PARTNER, partnerMaster.getPartnerId()));
+		
+		{
+			T2CoProjectValidator pv = new T2CoProjectValidator(); // validation proceeded with t2coProject
+			pv.setIgnore("OSS_NAME");
+			pv.setIgnore("OSS_VERSION");
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_PARTNER);
+			pv.setValidLevel(pv.VALID_LEVEL_BASIC);
+			// main grid
+			pv.setAppendix("mainList", ossComponents);
+			
+			T2CoValidationResult vr = pv.validateObject(partnerMaster); 
+			
+			// return validator result
+			if (!vr.isValid()) {
+				return makeJsonResponseHeader(false,  CommonFunction.makeValidMsgTohtml(vr.getValidMessageMap()), vr.getValidMessageMap());
+			}
+			
+			Map<String, Object> remakeComponentsMap = CommonFunction.remakeMutiLicenseComponents(ossComponents, ossComponentsLicense);
+			ossComponents = (List<ProjectIdentification>) remakeComponentsMap.get("mainList");
+			ossComponentsLicense = (List<List<ProjectIdentification>>) remakeComponentsMap.get("subList");
+			
+			try {
+				partnerService.registOss(partnerMaster, ossComponents, ossComponentsLicense);
+				resCd="10";
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
+			
+			if ("10".equals(resCd)) {
+				String prjId = partnerMaster.getPartnerId();
+				// 분석 결과어 업로시 nickname 변경된 사항
+				// In the case of nickname is changed when uploading to analysis result
+				try {
+					if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+							CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, partnerMaster.getOssFileId())) != null) {
+						String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(
+								loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE,
+								partnerMaster.getOssFileId()), true);
+						
+						if (!isEmpty(changedLicenseName)) {
+							CommentsHistory commentHisBean = new CommentsHistory();
+							commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+							commentHisBean.setReferenceId(prjId);
+							commentHisBean.setContents(changedLicenseName);
+							commentService.registComment(commentHisBean, false);
+						}
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+				
+				try {
+					if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+							CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_PARTNER)) != null) {
+						String changedLicenseName = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(),
+								CoConstDef.SESSION_KEY_NICKNAME_CHANGED, prjId, CoConstDef.CD_DTL_COMPONENT_PARTNER), true);
+						if (!isEmpty(changedLicenseName)) {
+							CommentsHistory commentHisBean = new CommentsHistory();
+							commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_HIS);
+							commentHisBean.setReferenceId(prjId);
+							commentHisBean.setContents(changedLicenseName);
+							commentService.registComment(commentHisBean, false);
+						}
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+				
+				try {
+					if (getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, partnerMaster.getOssFileId())) != null) {
+						String chagedOssVersion = (String) getSessionObject(CommonFunction.makeSessionKey(loginUserName(), CoConstDef.SESSION_KEY_UPLOAD_REPORT_CHANGEDLICENSE, partnerMaster.getOssFileId()), true);
+						
+						if (!isEmpty(chagedOssVersion)) {
+							CommentsHistory commentHisBean = new CommentsHistory();
+							commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+							commentHisBean.setReferenceId(prjId);
+							commentHisBean.setContents(chagedOssVersion);
+							commentService.registComment(commentHisBean, false);
+						}
+					}
+					
+					if (!isEmpty(resetFlag) && CoConstDef.FLAG_YES.equals(resetFlag)) {
+						CommentsHistory commentHisBean = new CommentsHistory();
+						commentHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+						commentHisBean.setReferenceId(prjId);
+						commentHisBean.setContents("reset all data");
+						commentService.registComment(commentHisBean, false);
+						
+						CommonFunction.addSystemLogRecords("3rd_" + prjId, loginUserName());
+					}
+				} catch (Exception e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+		
+		if (!isEmpty(partnerMaster.getPartnerId())) {
+			resMap.put("partnerId", partnerMaster.getPartnerId());
+		}
+		
+		resMap.put("isValid", String.valueOf(isValid));
+		resMap.put("resCd", resCd);
+		
+		return makeJsonResponseHeader(resMap);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@PostMapping(value = PARTNER.SAVE_BOM)
+	public @ResponseBody ResponseEntity<Object> saveBom(@RequestBody Map<String, Object> map, HttpServletRequest req,
+			HttpServletResponse res, Model model) {
+		String partnerId = (String) map.get("referenceId");
+		String merge = (String) map.get("merge");
+		String gridString = (String) map.get("gridData");
+		String checkGridString = (String) map.get("checkGridData");
+		
+		// bom에서 admin check선택한 data
+		Type collectionType = new TypeToken<List<ProjectIdentification>>() {}.getType();
+		List<ProjectIdentification> projectIdentification = new ArrayList<>();
+		projectIdentification = (List<ProjectIdentification>) fromJson(gridString, collectionType);
+		List<ProjectIdentification> checkGridBomList = new ArrayList<>();
+		checkGridBomList = (List<ProjectIdentification>) fromJson(checkGridString, collectionType);
+		projectService.registBom(partnerId, merge, projectIdentification, checkGridBomList, null, false, false, true);
+//		projectService.updateSecurityDataForProject(prjId);
+		Map<String, String> resMap = new HashMap<>();
+		
+		try {
+			PartnerMaster pDat = new PartnerMaster();
+			pDat.setPartnerId(partnerId);
+			pDat = partnerService.getPartnerMasterOne(pDat);
+			resMap.put("status", pDat.getStatus());
+			History h = partnerService.work(pDat);
+			h.sethAction(CoConstDef.ACTION_CODE_NEEDED);
+			historyService.storeData(h); // 메일로 보낼 데이터를 History에 저장합니다. -> h.gethData()로 확인 가능
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
 		
 		return makeJsonResponseHeader(resMap);
 	}
@@ -1192,30 +1278,28 @@ public class PartnerController extends CoTopComponent{
 			, Model model){
 		CoMail mailbean = null;
 		
-		String commentDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS;
+		String commentDiv = CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS;
 		String userComment = partnerMaster.getUserComment();
 		String statusCode = partnerMaster.getStatus();
 		String status = CoCodeManager.getCodeExpString(CoConstDef.CD_IDENTIFICATION_STATUS, statusCode);
 		
 		if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM.equals(partnerMaster.getStatus())) {
 			ProjectIdentification _param = new ProjectIdentification();
-			_param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+			_param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 			_param.setReferenceId(partnerMaster.getPartnerId());
 			Map<String, Object> map = projectService.getIdentificationGridList(_param);
 			
-			T2CoProjectValidator pv = new T2CoProjectValidator();
-			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_PARTNER);
+			if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
+				T2CoProjectValidator pv = new T2CoProjectValidator();
+				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
 
-			// main grid
-			pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
-			// sub grid
-			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
-			//pv.setCheckForAdmin(true);
-			
-			T2CoValidationResult vr = pv.validate(new HashMap<>());
-			// return validator result
-			if (!vr.isValid()) {
-				return makeJsonResponseHeader(vr.getValidMessageMap());
+				pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
+
+				T2CoValidationResult vr = pv.validate(new HashMap<>());
+				
+				if (!vr.isValid() && !vr.isAdminCheck((List<String>) map.get("adminCheckList"))) {
+					return makeJsonResponseHeader(vr.getValidMessageMap());
+				}
 			}
 			
 			partnerService.updatePartnerConfirm(partnerMaster);

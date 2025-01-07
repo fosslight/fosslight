@@ -1987,6 +1987,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				break;
 			case "partnerBomList" :
+			case "partnerBomList_demo" :
 				downloadId = getPartnerChecklistReportExcelPost(dataStr, null);
 				
 				break;
@@ -2262,7 +2263,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					rowDatas.add(rowParam);
 				}
 				
-				makeSecuritySheet(creationHelper, sheet, style, hyperLinkStyle, rowInfoData, rowDatas, true);
+				makeSecuritySheet(creationHelper, sheet, style, hyperLinkStyle, rowInfoData, rowDatas, true, false);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -2277,12 +2278,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return makeExcelFileId(wb, downloadFileName);
 	}
 	
-	private static void makeSecuritySheet(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows, boolean isProject) {
+	private static void makeSecuritySheet(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows, boolean isProject, boolean isDemo) {
 		int infoStartRow= 1;
 		int startRow= 8;
 		int startCol = 0;
 		int endCol = 0;
-		if (!isProject) {
+		if (!isProject || isDemo) {
 			startRow = 9;
 		}
 		if (!infoRows.isEmpty()) {
@@ -4283,6 +4284,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		String downloadFileName = "fosslight-report"; // Default
 
 		try {
+			boolean isDemo = false;
+			if (!isEmpty(prjId) && prjId.endsWith("_demo")) {
+				isDemo = true;
+				prjId = prjId.replace("_demo", "");
+			}
 			//cover
 			PartnerMaster partnerInfo = new PartnerMaster();
 			partnerInfo.setPartnerId(prjId);
@@ -4306,7 +4312,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 				ossListParam.setMerge(CoConstDef.FLAG_NO);
 				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb.getSheetAt(1), projectService.getIdentificationGridList(ossListParam), null, false);
-				reportSecuritySheet(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb, partnerInfo, partnerService.getSecurityGridList(partnerInfo));
+				reportSecuritySheet(isDemo, CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb, partnerInfo, partnerService.getSecurityGridList(isDemo, partnerInfo));
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -4321,7 +4327,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return makeExcelFileId(wb,downloadFileName);
 	}
 
-	private static void reportSecuritySheet(String cdDtlComponentPartnerBom, Workbook wb, PartnerMaster partnerMaster, List<OssComponents> securityGridList) {
+	private static void reportSecuritySheet(boolean isDemo, String cdDtlComponentPartnerBom, Workbook wb, PartnerMaster partnerMaster, List<OssComponents> securityGridList) {
 		try {
 			CreationHelper creationHelper = wb.getCreationHelper();
 			CellStyle style = wb.createCellStyle();
@@ -4351,24 +4357,40 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				int num = 1;
 				for (OssComponents bean : securityGridList) {
-					String[] rowParam = {
-						String.valueOf(num++)
-						, bean.getOssName()
-						, bean.getOssVersion()
-						, bean.getCveId()
-						, bean.getPublDate()
-						, bean.getCvssScore()
-						, bean.getVulnerabilityResolution()
-						, bean.getVulnerabilityLink()
-						, bean.getOfficialPatchLink()
-						, bean.getVerStartEndRange()
-						, bean.getSecurityComments()
-					};
-					
-					rowDatas.add(rowParam);
+					if (!isDemo) {
+						String[] rowParam = {
+								String.valueOf(num++)
+								, bean.getOssName()
+								, bean.getOssVersion()
+								, bean.getCveId()
+								, bean.getPublDate()
+								, bean.getCvssScore()
+								, bean.getVulnerabilityResolution()
+								, bean.getVulnerabilityLink()
+								, bean.getOfficialPatchLink()
+								, bean.getVerStartEndRange()
+								, bean.getSecurityComments()
+							};
+						
+						rowDatas.add(rowParam);
+					} else {
+						String[] rowParam = {
+								String.valueOf(num++)
+								, bean.getOssName()
+								, bean.getOssVersion()
+								, bean.getCveId()
+								, bean.getPublDate()
+								, bean.getCvssScore()
+								, bean.getVulnerabilityResolution()
+								, bean.getVulnerabilityLink()
+								, bean.getSecurityComments()
+							};
+						
+						rowDatas.add(rowParam);
+					}
 				}
 				
-				makeSecuritySheet(creationHelper, sheet, style, hyperLinkStyle, rowInfoData, rowDatas, false);
+				makeSecuritySheet(creationHelper, sheet, style, hyperLinkStyle, rowInfoData, rowDatas, false, isDemo);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
