@@ -181,10 +181,14 @@ var fn_comment = {
 		}
 	},
 	showCommentHistory : function () {
-		fn_comment.activateCommentArea();
-		
-		var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]];
-        openCommentHistory('/comment/popup/3rd/' + _rDiv + '/' + [[${detail.partnerId}]]);
+		if ([[${detail.permission}]] > 0) {
+			fn_comment.activateCommentArea();
+			
+			var _rDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_HIS')}]];
+	        openCommentHistory('/comment/popup/3rd/' + _rDiv + '/' + [[${detail.partnerId}]]);
+		} else {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+		}
 	}
 }
 </script>

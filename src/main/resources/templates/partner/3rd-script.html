@@ -1241,6 +1241,120 @@ var fn = {
 			$('.ossUpload').append(uploadFileTag);
 			$(".ossUploader").attr("style", "display: none !important");
 		}
+	},
+	handleUserCommentPopupOpen : function() {
+		if ([[${detail.permission}]] > 0) {
+			// 코멘트 팝업
+		    const param = {
+		   		"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER')}]],
+		    	"referenceId" : [[${detail.partnerId}]]
+		  	}
+
+			getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+		        if (!alertify.editDialog) {
+					alertify.dialog('editDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+							
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+							
+								var setup = alertify.confirm().setup();
+								setup.buttons = [];
+								setup.focus.element = 0;
+							
+								return setup;
+							},
+					    	hooks: {
+					    		onshow: function() {
+					        		this.elements.dialog.style.maxWidth = 'none';
+					          		this.elements.dialog.style.width = '700px';
+					        	}
+							}
+						};
+					}, false, 'confirm');
+		   		}
+			
+				alertify.editDialog(res);
+		   	},
+		  	null,
+		   	function () {
+		       	$("#modifiedCommentInPjtEditor").summernote({
+		           	height: 180,
+		           	callbacks: {
+		               	onInit: function () {
+		                   	$(this).summernote('code', $("#userContents").val());
+		               	}
+		           	}
+		       	});
+		  	});
+		} else {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+		}
+	},
+	sendEditor : function(type){
+		//코멘트 저장
+	    var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+	   	if (!editorVal || editorVal == "") {
+	    	alertify.alert([[#{msg.project.enter.comment}]], function(){});
+	        return false;
+	  	}
+
+	   	var param = {referenceId : [[${detail.partnerId}]], referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS')}]], contents : editorVal, mailSendType : type, expansion1 : $(".nav-link.active").text()};
+
+	   	$.ajax({
+			url : '/partner/sendComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if (json.isValid == 'false') {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+	           		alertify.success([[#{msg.project.sent.comments.success}]]);
+	                $("#modifiedCommentInPjtEditor").summernote('code', '<p></p>');
+	                $("#userContents").val('');
+	                $('.ajs-close').trigger("click");
+	                fn_comment.getCommentList(commentsParam);
+	                  
+	                if (_popupComment == null || _popupComment.closed) {
+	                } else {
+	                  	_popupComment.callbackFunction();
+	        		}
+				}	
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	saveEditor : function(){
+		//코멘트 임시저장
+		var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+		var param = {referenceId : [[${detail.partnerId}]], referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER')}]], contents : editorVal};
+		
+		$.ajax({
+			url : '/project/saveComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if (json.isValid == 'false') {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.success([[#{msg.common.success}]]);
+					$("#userContents").val(editorVal);
+					$('.ajs-close').trigger("click");
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
 	}
 }
 
