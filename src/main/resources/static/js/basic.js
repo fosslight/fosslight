@@ -4165,6 +4165,7 @@ function commonAlertifyDialog(target) {
 				var setup = alertify.confirm().setup();
 				setup.focus.element = 0;
 				setup.buttons[0].key = 0;
+				setup.buttons[1].key = 1;
 
 				return setup;
 			},
