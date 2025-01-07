@@ -1134,8 +1134,9 @@ a.g-menu-item, a.soptclass, a.clearsearchclass { cursor: pointer; }
   color: #e22563;
 }
 
-td .retxt, div .retxt {padding-top:2px; font-size:13px; color:red !important;}
+td.retxt, div.retxt {padding-top:2px; font-size:13px; color:red !important;}
 .urltxt {display:none; padding-top:2px; font-size:13px; color:blue !important;}
+span.retxt {display:none; padding-top:2px; font-size:13px; color:red !important;}
 div .retxtb {padding-top:2px; font-size:13px; color:blue !important;}
 div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .urlLink {display:block;color:#0070c0 !important;text-decoration:underline !important;}
