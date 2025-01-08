@@ -3803,33 +3803,13 @@
         				dataType : 'html',
         				cache : false,
         				success : function(res){
-        					if(!alertify.editComments){
-        						alertify.dialog('editComments', function() {
-        							return {
-        								setup: function() {
-        									var settings = alertify.confirm().settings;
-        								
-        									for (var prop in settings) {
-        										this.settings[prop] = settings[prop];
-        									}
-        								
-        									var setup = alertify.confirm().setup();
-        									setup.buttons = [];
-        									setup.focus.element = 1;
-        								
-        									return setup;
-        								},
-        						    	hooks: {
-        						    		onshow: function() {
-        						        		this.elements.dialog.style.maxWidth = 'none';
-        						          		this.elements.dialog.style.width = '700px';
-        						        	}
-        								}
-        							};
-        						}, false, 'confirm');
+        					if (!alertify.editComments){
+        						commonAlertifyDialog('editComments');
                     		}
-        				
-        					alertify.editComments(res).set('title', 'Edit Comments');
+        					alertify.editComments().set('title', 'Edit Comments').set('onshow', function(e) {
+        		        		$(".ajs-ok").hide();
+        		        		$(".ajs-cancel").hide();
+        		        	}).setContent(res).show();
         					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
         					$("#commentEdit").summernote({minHeight: 180, maxHeight: 800, lang: "ko-KR"});
         				}
