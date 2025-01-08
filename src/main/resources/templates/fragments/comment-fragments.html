@@ -23,7 +23,9 @@
                                         <div class="user-block mt-1" style="display: flex;">
                                             <span class="username" th:text="${comment.creator}"></span><span class="ml-2 text-sm" style="margin-top: .1rem;" th:text="${comment.modifiedDate}"></span>
                                         </div>
-                                        <div th:utext="${comment.contents}"></div>
+                                        <div class="note-editor note-frame" style="border: 0;">
+                                        	<span th:utext="${comment.contents}"></span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="text-right py-0 align-middle">
