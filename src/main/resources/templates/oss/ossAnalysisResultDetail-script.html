@@ -115,14 +115,14 @@ var Ctrl_fn = {
 				downloadLocationHtml 		+=					'<input class="form-control" name="downloadLocations" id="downloadLocations'+seq+'" type="text" value="'+download+'" onblur="Ctrl_fn.urlDuplication(this);">';
 				downloadLocationHtml 		+=					'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
 				downloadLocationHtml 		+=				'</div>';
-				downloadLocationHtml 		+=				'<span class="urltxt"></span>';
-				downloadLocationHtml 		+=				'<span class="retxt"></span>';
 		    	downloadLocationHtml 		+=			'</div>';
 		    	downloadLocationHtml 		+=			'<div class="col-lg-12 purlArea">';
 		    	downloadLocationHtml 		+=				'<div class="form-group mb-0">';
 		    	downloadLocationHtml 		+=					'<input class="form-control" style="background-color:#f5f4f3 !important; border-width:0;" name="purl" type="text" value="' + purl + '" readonly>';
 		    	downloadLocationHtml 		+=					'<input class="form-control" type="hidden" name="refDownloadLocation" value="'+downloadLocation+'">';
 		    	downloadLocationHtml 		+=				'</div>';
+		    	downloadLocationHtml 		+=				'<span class="urltxt"></span>';
+				downloadLocationHtml 		+=				'<span class="retxt"></span>';
 		    	downloadLocationHtml 		+=			'</div>';
 		    	downloadLocationHtml 		+=		'</div>';
 				downloadLocationHtml 		+= 	'</div>';
@@ -326,24 +326,15 @@ var Ctrl_fn = {
 		downloadLocationHtml 		+=					'<input class="form-control" name="downloadLocations" id="downloadLocations'+seq+'" type="text" value="'+$("#input_downloadLocations" + seq).val()+'"/ onblur="Ctrl_fn.urlDuplication(this);">';
 		downloadLocationHtml 		+=					'<button type="button" class="btn btn-tool xbox" onclick="Ctrl_fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
 		downloadLocationHtml 		+=				'</div>';
-		downloadLocationHtml 		+=				'<span class="urltxt"></span>';
-		downloadLocationHtml 		+=				'<span class="retxt"></span>';
 		downloadLocationHtml 		+=			'</div>';
 		downloadLocationHtml 		+= 			'<div class="col-lg-12 purlArea">';
 		downloadLocationHtml 		+= 				'<div class="row">';
 		downloadLocationHtml 		+= 					'<div class="col-lg-12">';
-//		downloadLocationHtml 		+=						'<div class="input-group">';
 		downloadLocationHtml 		+=							'<input class="form-control" name="purl" type="text" style="background-color:#f5f4f3 !important;" placeholder="Package URL" readonly/>';
 		downloadLocationHtml 		+=							'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
-// 		downloadLocationHtml 		+=							'<div class="input-group-append">';
-// 		downloadLocationHtml 		+=								'<button class="btn btn-default" type="button" onclick="fn.addPurl(this);">Add</button>';
-// 		downloadLocationHtml 		+=								'<input class="form-control" type="hidden" value="'+downloadLocation+'"/>';
-// 		downloadLocationHtml 		+=							'</div>';
-// 		downloadLocationHtml 		+=						'</div>';
 		downloadLocationHtml 		+=					'</div>';
-// 		downloadLocationHtml 		+= 					'<div class="col-lg-12">';
-// 		downloadLocationHtml 		+= 						'<div class="row multiPurlSet"></div>';
-// 		downloadLocationHtml 		+=					'</div>';
+		downloadLocationHtml 		+=					'<span class="urltxt"></span>';
+		downloadLocationHtml 		+=					'<span class="retxt"></span>';
 		downloadLocationHtml 		+=				'</div>';
 		downloadLocationHtml 		+=			'</div>';
 		downloadLocationHtml 		+=		'</div>';
@@ -681,13 +672,13 @@ var Ctrl_fn = {
 		
 		var pattern = /\s/g;
 		if (value.match(pattern)) {
-			$(target).parent().next("span.urltxt").empty();
-			$(target).parent().next("span.urltxt").css("display", "none");
-			$(target).parent().next().next("span.retxt").empty();
-			$(target).parent().next().next("span.retxt").html("Remove spaces").show();
+			$(target).parent().parent().next().find("span.urltxt").empty();
+			$(target).parent().parent().next().find("span.urltxt").css("display", "none");
+			$(target).parent().parent().next().find("span.retxt").empty();
+			$(target).parent().parent().next().find("span.retxt").html("Remove spaces").show();
 		} else {
-			$(target).parent().next().next("span.retxt").empty();
-			$(target).parent().next().next("span.retxt").css("display", "none");
+			$(target).parent().parent().next().find("span.retxt").empty();
+			$(target).parent().parent().next().find("span.retxt").css("display", "none");
 			
 			$("#ossForm" + seq + " input[name=validationType]").val('DOWNLOADLOCATION');
 			$("[name='downloadLocation']").val(value);
@@ -704,11 +695,11 @@ var Ctrl_fn = {
 			        			downloadLocationHtml = downloadLocationHtml.replaceAll("createTabInFrame", "Ctrl_fn.loadUrl");
 			        		}
 			        		
-			        		$(target).parent().next("span.urltxt").empty();
-							$(target).parent().next("span.urltxt").html(downloadLocationHtml).show();
+			        		$(target).parent().parent().next().find("span.urltxt").empty();
+							$(target).parent().parent().next().find("span.urltxt").html(downloadLocationHtml).show();
 		        		}
 		        	} else {
-			        	$(target).parent().next("span.urltxt").empty();
+		        		$(target).parent().parent().next().find("span.urltxt").empty();
 		        	}
 		        	
 		        	$(target).parent().parent().next().find("input").val(json.resultData);

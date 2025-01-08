@@ -211,20 +211,20 @@
 									downloadLocationHtml 		+= 			'<div class="col-lg-12" style="margin-top: 5px;">';
 									downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
 				               	if (isReadOnly == 'true' || isReadOnly) {
-	                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)" disabled>';
+	                                downloadLocationHtml 		+=					'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)" disabled>';
 				                } else {
-	                                downloadLocationHtml 		+=			'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)">';
-				                    downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
+	                                downloadLocationHtml 		+=					'<input class="form-control pr-4" name="downloadLocations" type="text" value="'+download+'" onblur="fn.urlDuplication(this)">';
+				                    downloadLocationHtml 		+=					'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
 				                }
 									downloadLocationHtml 		+=				'</div>';
-									downloadLocationHtml 		+=				'<span class="urltxt ml-3"></span>';
-									downloadLocationHtml 		+=				'<span class="retxt ml-3"></span>';
 									downloadLocationHtml 		+= 			'</div>';
 									downloadLocationHtml 		+= 			'<div class="col-lg-12 purlArea">';
 									downloadLocationHtml 		+= 				'<div class="form-group mb-0">';
 									downloadLocationHtml 		+=					'<input class="form-control" style="background-color:#fff !important; border-width:0;" name="purl" type="text" value="' + purl + '" readonly>';
 									downloadLocationHtml 		+=					'<input class="form-control" type="hidden" name="refDownloadLocation" value="'+download+'">';
 									downloadLocationHtml 		+=				'</div>';
+									downloadLocationHtml 		+=				'<span class="urltxt ml-3"></span>';
+									downloadLocationHtml 		+=				'<span class="retxt ml-3"></span>';
 									downloadLocationHtml 		+= 			'</div>';
 									downloadLocationHtml 		+= 		'</div>';
 									downloadLocationHtml 		+= 	'</div>';
@@ -443,24 +443,15 @@
                     downloadLocationHtml 		+=				'<button type="button" class="btn btn-tool xbox" onclick="fn.downloadRemoveTag(this);"><i class="fas fa-times"></i></button>';
                 }
 				downloadLocationHtml 		+=				'</div>';
-				downloadLocationHtml 		+=				'<span class="urltxt"></span>';
-				downloadLocationHtml 		+=				'<span class="retxt"></span>';
 				downloadLocationHtml 		+= 			'</div>';
 				downloadLocationHtml 		+= 			'<div class="col-lg-6 purlArea" style="margin-top: 5px;">';
 				downloadLocationHtml 		+= 				'<div class="row">';
 				downloadLocationHtml 		+= 					'<div class="col-lg-12">';
-//				downloadLocationHtml 		+=						'<div class="input-group">';
-				downloadLocationHtml 		+=							'<input class="form-control" name="purl" type="text" style="background-color:#fff !important; border-width:0;" placeholder="Package URL" readonly/>';
-				downloadLocationHtml 		+=							'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
-//				downloadLocationHtml 		+=							'<div class="input-group-append">';
-//				downloadLocationHtml 		+=								'<button class="btn btn-default" type="button" onclick="fn.addPurl(this);">Add</button>';
-//				downloadLocationHtml 		+=								'<input class="form-control" type="hidden" value="'+downloadLocation+'"/>';
-//				downloadLocationHtml 		+=							'</div>';
-//				downloadLocationHtml 		+=						'</div>';
+				downloadLocationHtml 		+=						'<input class="form-control" name="purl" type="text" style="background-color:#fff !important; border-width:0;" placeholder="Package URL" readonly/>';
+				downloadLocationHtml 		+=						'<input class="form-control" name="refDownloadLocation" type="hidden" value="'+downloadLocation+'"/>';
 				downloadLocationHtml 		+=					'</div>';
-//				downloadLocationHtml 		+= 					'<div class="col-lg-12">';
-//				downloadLocationHtml 		+= 						'<div class="row multiPurlSet"></div>';
-//				downloadLocationHtml 		+=					'</div>';
+				downloadLocationHtml 		+=					'<span class="urltxt ml-3"></span>';
+				downloadLocationHtml 		+=					'<span class="retxt ml-3"></span>';
 				downloadLocationHtml 		+=				'</div>';
 				downloadLocationHtml 		+= 			'</div>';
 				downloadLocationHtml 		+= 		'</div>';
@@ -2732,13 +2723,13 @@
 		
 			var pattern = /\s/g;
 			if (value.match(pattern)) {
-				$(target).parent().next("span.urltxt").empty();
-				$(target).parent().next("span.urltxt").css("display", "none");
-				$(target).parent().next().next("span.retxt").empty();
-				$(target).parent().next().next("span.retxt").html("Remove spaces").show();
+				$(target).parent().parent().next().find("span.urltxt").empty();
+				$(target).parent().parent().next().find("span.urltxt").css("display", "none");
+				$(target).parent().parent().next().find("span.retxt").empty();
+				$(target).parent().parent().next().find("span.retxt").html("Remove spaces").show();
 			} else {
-				$(target).parent().next().next("span.retxt").empty();
-				$(target).parent().next().next("span.retxt").css("display", "none");
+				$(target).parent().parent().next().find("span.retxt").empty();
+				$(target).parent().parent().next().find("span.retxt").css("display", "none");
 				
 				$("input[name=validationType]").val('DOWNLOADLOCATION');
 	    		$("[name='downloadLocation']").val(value);
@@ -2755,12 +2746,12 @@
 			        				downloadLocation = downloadLocation.replaceAll("createTabInFrame", "fn.loadUrl");
 			        			}
 			        		
-			        			$(target).parent().next("span.urltxt").empty();
-			        			$(target).parent().next("span.urltxt").html(downloadLocation).show();
+			        			$(target).parent().parent().next().find("span.urltxt").empty();
+			        			$(target).parent().parent().next().find("span.urltxt").html(downloadLocation).show();
 			        			$(target).addClass("is-warning");
 			        		}
 		        		} else {
-			        		$(target).parent().next("span.urltxt").empty();
+		        			$(target).parent().parent().next().find("span.urltxt").empty();
 		        		}
 		        		
 		        		$(target).parent().parent().next().find("input[name='purl']").val(json.resultData);
