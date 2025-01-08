@@ -1334,29 +1334,12 @@ var fn = {
 	   	}
 	    getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
 	  		if (!alertify.editDialog) {
-	           	alertify.dialog('editDialog', function () {
-	            	return {
-	           			main: function (content) {
-	                  		this.setContent(content);
-	              		},
-	             		setup: function () {
-	             			var setup = alertify.confirm().setup();
-							setup.buttons = [];
-							setup.focus.element = 1;
-						
-							return setup;
-	            		},
-					    hooks: {
-					    	onshow: function() {
-					        	this.elements.dialog.style.maxWidth = 'none';
-					          	this.elements.dialog.style.width = '700px';
-					        }
-						}
-	           		};
-	     		});
+	  			commonAlertifyDialog('editDialog');
 	  		}
-	  		
-	     	editDailog = alertify.editDialog(res);
+	  		alertify.editDialog().set('onshow', function(e) {
+        		$(".ajs-ok").hide();
+        		$(".ajs-cancel").hide();
+        	}).setContent(res).show();
 	   	},
 	   	null,
 	 	function () {
