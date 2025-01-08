@@ -4172,7 +4172,7 @@ function commonAlertifyDialog(target) {
 			hooks: {
 				onshow: function() {
 					this.elements.dialog.style.maxWidth = 'none';
-					this.elements.dialog.style.width = '650px';
+					this.elements.dialog.style.width = '700px';
 				}
 			}
 		};
