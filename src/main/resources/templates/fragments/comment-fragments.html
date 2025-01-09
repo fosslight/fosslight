@@ -23,7 +23,7 @@
                                         <div class="user-block mt-1" style="display: flex;">
                                             <span class="username" th:text="${comment.creator}"></span><span class="ml-2 text-sm" style="margin-top: .1rem;" th:text="${comment.modifiedDate}"></span>
                                         </div>
-                                        <div class="note-editor note-frame popCommentContents" style="border: 0;">
+                                        <div class="note-editor note-frame line-break-anywhere" style="border: 0;">
                                         	<p th:utext="${comment.contents}"></p>
                                         </div>
                                     </div>
