@@ -1375,6 +1375,8 @@ public class ApiProjectV2Controller extends CoTopComponent {
 
         try {
             CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED);
+            mailBean.setLoginUserName(userInfo.getUserId());
+            mailBean.setLoginUserRole(userInfo.getAuthority());
             mailBean.setParamPrjId(project.getPrjId());
 
             if (!isEmpty(project.getUserComment())) {
