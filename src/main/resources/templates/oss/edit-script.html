@@ -230,6 +230,7 @@
 									downloadLocationHtml 		+= 	'</div>';
 								
 								$(".multiDownloadLocationSet").append(downloadLocationHtml);
+								$(".multiDownloadLocationSet > div:last").find("input").trigger("blur");
 							}
 						});
 						
