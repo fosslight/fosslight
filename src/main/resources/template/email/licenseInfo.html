@@ -4,6 +4,9 @@
 	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 	<style>
 		.marker{background-color: Yellow;}
+		.commentDiv table {border: 1px solid #ddd;}
+		.commentDiv table th {border: 1px solid #ddd;}
+		.commentDiv table td {border: 1px solid #ddd;}
 	</style>
 	<title>FOSSLight Hub</title>
 </head>
@@ -32,11 +35,11 @@
 										<tr>
 											<td width="1" style="background:#ddd"></td>
 											<td style="padding:40px;">
-												<div th:if="${contentsTitle}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
-												<p th:if="${contentsSubTitle}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
-												<div th:if="${comment != null and comment != ''}">
+												<div th:if="${contentsTitle != null and contentsTitle != ''}" style="padding-bottom:10px;font-size:16px;font-weight:bold;" th:utext="${contentsTitle}"></div>
+												<p th:if="${contentsSubTitle != null and contentsSubTitle != ''}" style="font-size:12px;" th:utext="${contentsSubTitle}"></p>
+												<div th:if="${comment != null and comment != ''}" class="commentDiv">
 													<h2 style="margin:0;padding:25px 10px 0;font-size:14px;">Comment</h2>
-													<p style="padding:10px;font-size:12px;" th:utext="${comment}"></p>
+													<div style="padding:10px;font-size:12px;font-color:#000;" th:utext="${comment}"></div>
 												</div>
 												<table cellspacing="0" cellpadding="0" width="100%" border="1" style="font-size:12px;border-color:#ddd;">
 													<col style="width:40%">
