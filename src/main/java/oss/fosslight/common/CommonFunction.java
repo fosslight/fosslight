@@ -5265,7 +5265,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				List<Project> watcherList = projectService.getWatcherList(param);
 				if (watcherList != null) {
 					for (Project watcher : watcherList) {
-						if (!isEmpty(watcher.getPrjUserId()) && !userIdList.contains(watcher.getPrjUserId())) userIdList.add(watcher.getPrjUserId());
+						if (!isEmpty(watcher.getPrjUserId()) && !userIdList.contains(watcher.getPrjUserId())) {
+							userIdList.add(watcher.getPrjUserId());
+						}
 					}
 				}
 				
@@ -5289,7 +5291,9 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				userIdList.add(bean.getCreator());
 				if (bean.getPartnerWatcher() != null) {
 					for (String watcher : bean.getPartnerWatcher().stream().map(e -> e.getParUserId()).collect(Collectors.toList())) {
-						if (!isEmpty(watcher)) userIdList.add(watcher);
+						if (!isEmpty(watcher)) {
+							userIdList.add(watcher);
+						}
 					}
 				}
 				

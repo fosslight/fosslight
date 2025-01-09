@@ -1604,23 +1604,21 @@ var data = {
     				var deptUseYn = watcher.deptUseYn || "Y";
     				var userUseYn = watcher.userUseYn || "Y";
     				
-    				if (watcher != "") {
-    					if (watcher.prjEmail) { 
+    				if (watcher) {
+						if (watcher.prjEmail != null && "" != watcher.prjEmail) {
     						fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
     					} else {
     						var str = "";
     						
-    						if (watcher.prjUserName == undefined){
-    							str = watcher.prjDivisionName;
-    						} else {
-    							str = '<b';
-    							
-    							if (divisionEmptyCd != watcher.prjDivision) {
-    								str += '>'+watcher.prjDivisionName+'</b>/<b';
-    							}
-    							
-    							str += '>'+watcher.prjUserName+'</b>';
-    						}
+    						if (watcher.prjUserName == null || "" == watcher.prjUserName) {
+								str = watcher.prjDivisionName;
+							} else {
+								str = "";
+								if (watcher.prjDivisionName != null && "" != watcher.prjDivisionName) {
+									str += '<span class="text-bold">' + watcher.prjDivisionName + '</span>/';
+								}
+								str += '<span class="text-bold">' + watcher.prjUserName + '</span>';
+							}
     						
     						fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
     					}

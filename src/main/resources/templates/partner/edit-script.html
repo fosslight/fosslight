@@ -1438,23 +1438,19 @@ var datas = {
 			var deptUseYn = watcher.deptUseYn || "Y";
 			var userUseYn = watcher.userUseYn || "Y";
 			
-			if (watcher!=""){
-				if (watcher.parEmail) { 
+			if (watcher) {
+				if (watcher.parEmail != null && "" != watcher.parEmail) {
 					fn.addHtml($("#multiDiv"), watcher.parEmail, watcher.parEmail, "Email");
 				} else {
 					var str = "";
 					
-					if (watcher.parUserName == undefined){
+					if (watcher.parUserName == null || "" == watcher.parUserName) {
 						str = watcher.parDivisionName;
 					} else {
-						str = '<span class="text-bold"';
-						
-						if (divisionEmptyCd != watcher.prjDivision) {
-							str += '>'+watcher.parDivisionName+'</span>/';
+						if (watcher.parDivisionName != null && "" != watcher.parDivisionName) {
+							str += '<span class="text-bold">' + watcher.parDivisionName + '</span>/';
 						}
-						
-						str += '<span class="text-bold">';
-						str += watcher.parUserName+'</span>';
+						str += '<span class="text-bold">' + watcher.parUserName+ '</span>';
 					}
 					
 					fn.addHtml($("#multiDiv"), str, watcher.parDivision, watcher.parUserId);

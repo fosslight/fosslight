@@ -331,10 +331,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		bean.setSecCode(avoidNull(bean.getSecCode(), CoConstDef.FLAG_NO));
 	}
 
-	private boolean getSecurityDataCntByProject(Project project) {
-		return projectMapper.getSecurityDataCntByProject(project) > 0 ? true : false;
-	}
-	
 	@Override
 	public Project getProjectDetail(Project project) {
 		String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
@@ -352,7 +348,26 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		// watcher
 		List<Project> watcherList = projectMapper.selectWatchersList(project);
-		project.setWatcherList(watcherList);
+		if (!CollectionUtils.isEmpty(watcherList)) {
+			T2Users param = new T2Users();
+			for (Project wat : watcherList) {
+				if (!isEmpty(wat.getPrjUserId())) {
+					param.setUserId(wat.getPrjUserId());
+					T2Users userInfo = userMapper.getUser(param);
+					if (userInfo != null) {
+						wat.setPrjDivision(userInfo.getDivision());
+						wat.setPrjUserName(userInfo.getUserName());
+						String codeNm = CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, userInfo.getDivision());
+						if (!isEmpty(codeNm)) {
+							wat.setPrjDivisionName(codeNm);
+						} else {
+							wat.setPrjDivisionName(null);
+						}
+					}
+				}
+			}
+			project.setWatcherList(watcherList);
+		}
 
 		// file
 		if (!isEmpty(project.getSrcCsvFileId())) {

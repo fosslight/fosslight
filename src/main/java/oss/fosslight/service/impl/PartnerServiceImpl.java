@@ -99,8 +99,25 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		List<PartnerWatcher> watcher = partnerMapper.selectPartnerWatcher(partnerMaster);
 		
 		if (result != null) {
-			if (watcher != null){
-				result.setPartnerWatcher(watcher);	
+			if (!CollectionUtils.isEmpty(watcher)) {
+				T2Users param = new T2Users();
+				for (PartnerWatcher wat : watcher) {
+					if (!isEmpty(wat.getParUserId())) {
+						param.setUserId(wat.getParUserId());
+						T2Users userInfo = userMapper.getUser(param);
+						if (userInfo != null) {
+							wat.setParDivision(userInfo.getDivision());
+							wat.setParUserName(userInfo.getUserName());
+							String codeNm = CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, userInfo.getDivision());
+							if (!isEmpty(codeNm)) {
+								wat.setParDivisionName(codeNm);
+							} else {
+								wat.setParDivisionName(null);
+							}
+						}
+					}
+				}
+				result.setPartnerWatcher(watcher);
 			}
 			String partnerId = "3rd_" + result.getPartnerId();
 			int resultCnt = partnerMapper.getOssAnalysisDataCnt(partnerId);

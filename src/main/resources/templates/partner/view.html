@@ -110,17 +110,21 @@
 													<th th:text="#{msg.common.field.watcher}"></th>
 													<td>
 														<th:block th:if="${detail.partnerWatcher != null}" th:each="watcher, status : ${detail.partnerWatcher}">
-															<th:block th:if="${watcher.parEmail != ''}">
-																<span th:text="${watcher.parEmail + ' / Email'}"></span>
+															<th:block th:if="${watcher.parEmail != null and watcher.parEmail != ''}">
+																<span th:text="${watcher.parEmail}"></span>
 															</th:block>
-															<th:block th:unless="${watcher.parEmail != ''}">
-																<th:block th:if="${watcher.parDivisionName != ''}">
-																	<span th:text="${watcher.parDivisionName}"></span>
-																	<span th:if="${watcher.parUserName != ''}" th:text="${' / ' + watcher.parUserName}"></span>
+															<th:block th:unless="${watcher.parEmail != null and watcher.parEmail != ''}">
+																<th:block th:if="${watcher.parUserName != null and watcher.parUserName != ''}">
+																	<th:block th:if="${watcher.parDivisionName != null and watcher.parDivisionName != ''}">
+																		<span th:text="${watcher.parDivisionName}"></span>
+																		<span th:text="${'/' + watcher.parUserName}"></span>
+																	</th:block>
+																	<th:block th:unless="${watcher.parDivisionName != null and watcher.parDivisionName != ''}">
+																		<span th:text="${watcher.parUserName}"></span>
+																	</th:block>
 																</th:block>
-																<th:block th:unless="${watcher.parDivisionName != ''}">
-																	<span th:if="${watcher.parUserName != ''}" th:text="${watcher.parUserName}"></span>
-																	<span th:if="${watcher.parUserId != ''}" th:text="${' / ' + watcher.parUserId}"></span>
+																<th:block th:unless="${watcher.parUserName != null and watcher.parUserName != ''}">
+																	<span th:if="${watcher.parDivisionName != '' and watcher.parDivisionName != ''}" th:text="${watcher.parDivisionName}"></span>
 																</th:block>
 															</th:block>
 															<span th:if="${status.count != status.size}" th:text="|, |"></span>

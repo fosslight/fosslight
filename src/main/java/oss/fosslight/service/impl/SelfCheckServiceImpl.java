@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
@@ -56,6 +57,7 @@ import oss.fosslight.domain.OssNotice;
 import oss.fosslight.domain.Project;
 import oss.fosslight.domain.ProjectIdentification;
 import oss.fosslight.domain.T2File;
+import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.repository.FileMapper;
@@ -222,7 +224,26 @@ public class SelfCheckServiceImpl extends CoTopComponent implements SelfCheckSer
 
 		// watcher
 		List<Project> watcherList = selfCheckMapper.selectWatchersList(project);
-		project.setWatcherList(watcherList);
+		if (!CollectionUtils.isEmpty(watcherList)) {
+			T2Users param = new T2Users();
+			for (Project wat : watcherList) {
+				if (!isEmpty(wat.getPrjUserId())) {
+					param.setUserId(wat.getPrjUserId());
+					T2Users userInfo = userMapper.getUser(param);
+					if (userInfo != null) {
+						wat.setPrjDivision(userInfo.getDivision());
+						wat.setPrjUserName(userInfo.getUserName());
+						String codeNm = CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, userInfo.getDivision());
+						if (!isEmpty(codeNm)) {
+							wat.setPrjDivisionName(codeNm);
+						} else {
+							wat.setPrjDivisionName(null);
+						}
+					}
+				}
+			}
+			project.setWatcherList(watcherList);
+		}
 
 		// file
 		project.setCsvFile(selfCheckMapper.selectCsvFile(project));
