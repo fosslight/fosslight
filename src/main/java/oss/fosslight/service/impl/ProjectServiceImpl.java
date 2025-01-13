@@ -6851,6 +6851,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		List<OssComponents> fullDiscoveredList = new ArrayList<>();
 		Map<String, Object> securityGridMap = new HashMap<>();
 		List<String> deduplicatedkey = new ArrayList<>();
+		List<String> caseWithoutVersionKey = new ArrayList<>();
 		List<String> checkOssNameList = new ArrayList<>();
 		List<ProjectIdentification> list = null;
 		List<ProjectIdentification> fullList = null;
@@ -6889,6 +6890,12 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 				activateFlag = false;
 				if (isEmpty(pi.getOssVersion())) {
 					activateFlag = true;
+					String keyWithoutVersion = (pi.getOssName() + "_" + pi.getOssVersion()).toUpperCase();
+					if (!caseWithoutVersionKey.contains(keyWithoutVersion)) {
+						caseWithoutVersionKey.add(keyWithoutVersion);
+					} else {
+						continue;
+					}
 				} 
 					
 				String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
@@ -6936,15 +6943,22 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 			}
 			
 			if (list != null && !list.isEmpty()) {
-				vulnerabilityLink = "";
 				gridIdx = 1;
+				caseWithoutVersionKey.clear();
 				deduplicatedkey.clear();
 				
 				for (ProjectIdentification pi : list) {
 					activateFlag = false;
+					
 					if (isEmpty(pi.getOssVersion())) {
 						activateFlag = true;
-					} 
+						String keyWithoutVersion = (pi.getOssName() + "_" + pi.getOssVersion()).toUpperCase();
+						if (!caseWithoutVersionKey.contains(keyWithoutVersion)) {
+							caseWithoutVersionKey.add(keyWithoutVersion);
+						} else {
+							continue;
+						}
+					}
 					
 					String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
 					
