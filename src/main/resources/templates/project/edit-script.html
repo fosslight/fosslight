@@ -2400,30 +2400,32 @@
 				$("#priority").trigger("change");
 				$("#noticeTypeEtc").trigger("change");
 				
-				data.detail.watcherList.forEach(function(watcher, index, obj){
-					var deptUseYn = watcher.deptUseYn || "Y";
-					var userUseYn = watcher.userUseYn || "Y";
-					
-					if (watcher) {
-						if (watcher.prjEmail != null && "" != watcher.prjEmail) {
-							fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
-						} else {
-							var str = "";
-							
-							if (watcher.prjUserName == null || "" == watcher.prjUserName) {
-								str = watcher.prjDivisionName;
+				if (data.detail.watcherList != null) {
+					data.detail.watcherList.forEach(function(watcher, index, obj){
+						var deptUseYn = watcher.deptUseYn || "Y";
+						var userUseYn = watcher.userUseYn || "Y";
+						
+						if (watcher) {
+							if (watcher.prjEmail != null && "" != watcher.prjEmail) {
+								fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
 							} else {
-								str = "";
-								if (watcher.prjDivisionName != null && "" != watcher.prjDivisionName) {
-									str += '<span class="text-bold">' + watcher.prjDivisionName + '</span>/';
+								var str = "";
+								
+								if (watcher.prjUserName == null || "" == watcher.prjUserName) {
+									str = watcher.prjDivisionName;
+								} else {
+									str = "";
+									if (watcher.prjDivisionName != null && "" != watcher.prjDivisionName) {
+										str += '<span class="text-bold">' + watcher.prjDivisionName + '</span>/';
+									}
+									str += '<span class="text-bold">' + watcher.prjUserName + '</span>';
 								}
-								str += '<span class="text-bold">' + watcher.prjUserName + '</span>';
+								
+								fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
 							}
-							
-							fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
 						}
-					}
-				});
+					});
+				}
 
                 // Security Mail
                 var checked = $("[name='secMailYn']:checked").val();
