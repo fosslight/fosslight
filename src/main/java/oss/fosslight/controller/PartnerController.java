@@ -1287,6 +1287,7 @@ public class PartnerController extends CoTopComponent{
 			ProjectIdentification _param = new ProjectIdentification();
 			_param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 			_param.setReferenceId(partnerMaster.getPartnerId());
+			_param.setMerge(CoConstDef.FLAG_NO);
 			Map<String, Object> map = projectService.getIdentificationGridList(_param);
 			
 			if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
