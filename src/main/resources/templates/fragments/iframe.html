@@ -11,9 +11,9 @@
             <a class="dropdown-item" href="#" data-widget="iframe-close" data-type="all-other">Close All Other</a>
           </div>
         </div>
-        <a class="nav-link bg-grayish-blue text-white" href="#" data-widget="iframe-scrollleft"><i class="fas fa-angle-double-left"></i></a>
+        <a class="nav-link bg-grayish-blue text-white" href="#" id="iframe-scrollleft"><i class="fas fa-angle-double-left"></i></a>
         <ul class="navbar-nav overflow-hidden" id="navbarNav" role="tablist"></ul>
-        <a class="nav-link bg-grayish-blue text-white" href="#" data-widget="iframe-scrollright"><i class="fas fa-angle-double-right"></i></a>
+        <a class="nav-link bg-grayish-blue text-white" href="#" id="iframe-scrollright"><i class="fas fa-angle-double-right"></i></a>
         <a class="nav-link bg-grayish-blue text-white" href="#" data-widget="iframe-fullscreen"><i class="fas fa-expand"></i></a>
       </div>
       <div class="tab-content">
@@ -31,7 +31,7 @@
       </div>
     </div>
   <script>
-	
+  var scrollRight = 0;
   var observer = new MutationObserver(function (mutationsList) {
 		for (var mutation of mutationsList) {
 			if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
@@ -52,6 +52,7 @@
 				lastTab = selectTab;
 				selectTab = tabNumber;
 				moveNavbar();
+				scrollRight = 0;
 			}
 		});
 	}
@@ -100,14 +101,34 @@
 	});
 
 	function moveNavbar() {
-		var navbarNav = document.getElementById("navbarNav");
-		var activeElement = navbarNav.querySelector('.active');
-		if (activeElement) {
-			var navbarRect = navbarNav.getBoundingClientRect();
-			var activeRect = activeElement.getBoundingClientRect();
-			var scrollLeft = activeRect.left - navbarRect.left - (navbarRect.width - activeRect.width) / 2;
-			navbarNav.scrollLeft = scrollLeft;
-		}
+		var nav = $('#navbarNav');
+		var target = nav.find('.active');
+	    var navItem = nav.find('li');
+	    var navHarf = nav.width()/2;
+	    var pos;
+	    var listWidth = 0;
+	    var targetLeft = 0;
+	    
+	    navItem.each(function(){
+	    	listWidth += $(this).outerWidth();
+	    });
+	    
+	    for (var i=0; i<target.index(); i++) {
+	    	targetLeft += navItem.eq(i).outerWidth();
+	    }
+	    
+	    var selectTargetPos = (targetLeft + navItem.outerWidth()/2);
+	    if (selectTargetPos <= navHarf) { // left
+	        pos = 0;
+	    }else if (listWidth - selectTargetPos <= navHarf) { //right : target 절반 이후 영역이 boxHarf 보다 작을경우 right 정렬
+	        pos = listWidth-nav.width();
+	    }else {
+	        pos = selectTargetPos - navHarf; // center
+	    }
+	    
+	    setTimeout(function(){
+	    	nav.animate({scrollLeft:pos},300)
+	    }, 50);
 	}
 
     $("#navbarNav").on("click", ".btn-iframe-close", function() {
@@ -125,6 +146,26 @@
     	} else if ("BAT" == tabNm) {
 			sessionStorage.removeItem("batSearchConditions");
     	}
+    });
+    
+    $(document).on("click", "#iframe-scrollleft", function() {
+    	let navbarNav = document.getElementById("navbarNav");
+    	let scrollLeft = navbarNav.scrollLeft;
+		if (scrollLeft > 300) {
+			navbarNav.scrollLeft = scrollLeft - 300;
+		} else {
+			navbarNav.scrollLeft = 0;
+		}
+		scrollRight = navbarNav.scrollLeft;
+    });
+    
+    $(document).on("click", "#iframe-scrollright", function() {
+    	let navbarNav = document.getElementById("navbarNav");
+    	let scrollLeft = navbarNav.scrollLeft + 300;
+    	if (scrollRight == 0 || scrollRight < scrollLeft) {
+			navbarNav.scrollLeft = scrollLeft;
+			scrollRight = scrollLeft;
+		}
     });
   </script>
 </th:block>

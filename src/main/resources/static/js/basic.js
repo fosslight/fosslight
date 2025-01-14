@@ -2925,7 +2925,8 @@ var createTabNew = function (tabNm, tabLk) {
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").hasClass("ui-tabs") === true) {
         $(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").removeClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
     }
-
+    
+	moveNavbar();
 }
 
 var createTabFnc = function (tabNm, tabName, tabLk) {
