@@ -910,77 +910,76 @@
 				cache : false,
 				contentType : 'application/json',
 				success: function(resultData){
-					var copyWatcher = resultData.copyWatcher;
-					
-					if(copyWatcher.length){
-						for(var i = 0, len = copyWatcher.length ; i < len ; i++){
-							var isNew = true
-							  , division = copyWatcher[i].prjDivision || ""
-							  , divisionName = copyWatcher[i].prjDivisionName || ""
-							  , userId = copyWatcher[i].prjUserId || ""
-							  , userName = copyWatcher[i].prjUserName || ""
-							  , email = copyWatcher[i].prjEmail || ""
-							  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
-							  , userUseYn = copyWatcher[i].userUseYn || "Y";
-							
-							$(".watcherTags").each(function(idx, tag){
-								var tagDiv = $(tag).val().split("/")[0]
-								  , tagUid = $(tag).val().split("/")[1];
-								  
-								if(division == tagDiv) {
-									if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
-										isNew = false;
-										
-										return false;
-									} else if(tagUid == userId) {
-										isNew = false;	// 이미 등록된 watcher가 있을경우
-									}
-								}
+					if (typeof resultData.copyWatcher !== "undefined") {
+						var copyWatcher = resultData.copyWatcher;
+						if (copyWatcher.length > 0) {
+							for(var i = 0, len = copyWatcher.length ; i < len ; i++){
+								var isNew = true
+								  , division = copyWatcher[i].prjDivision || ""
+								  , divisionName = copyWatcher[i].prjDivisionName || ""
+								  , userId = copyWatcher[i].prjUserId || ""
+								  , userName = copyWatcher[i].prjUserName || ""
+								  , email = copyWatcher[i].prjEmail || ""
+								  , deptUseYn = copyWatcher[i].deptUseYn || "Y"
+								  , userUseYn = copyWatcher[i].userUseYn || "Y";
 								
-								if(tagUid == "Email") {
-									if(email == tagDiv) {
-										isNew = false;
+								$(".watcherTags").each(function(idx, tag){
+									var tagDiv = $(tag).val().split("/")[0]
+									  , tagUid = $(tag).val().split("/")[1];
+									  
+									if(division == tagDiv) {
+										if(tagUid == 'all') { // 선택된 태그 중에 all이 있을 경우 등록 안함
+											isNew = false;
+											
+											return false;
+										} else if(tagUid == userId) {
+											isNew = false;	// 이미 등록된 watcher가 있을경우
+										}
 									}
-								}
-							});
-							
-							if(isNew){
-								if(email != ""){
-									fn.addHtml($("#multiDiv"), email, email, "Email");
-								} else {
-									var str = "";
 									
-									if(userName == "") {
-										str = divisionName;
+									if(tagUid == "Email") {
+										if(email == tagDiv) {
+											isNew = false;
+										}
+									}
+								});
+								
+								if(isNew){
+									if(email != ""){
+										fn.addHtml($("#multiDiv"), email, email, "Email");
 									} else {
-										str = '<b';
+										var str = "";
+										
+										if(userName == "") {
+											str = divisionName;
+										} else {
+											str = '<b';
 
-										if(divisionEmptyCd != division) {
-											if(deptUseYn == "N"){
+											if(divisionEmptyCd != division) {
+												if(deptUseYn == "N"){
+													str += ' class="deleteUser"';
+												}
+												
+												str += '>'+divisionName+'</b>/<b';
+											}
+											
+											if(userUseYn == "N"){
 												str += ' class="deleteUser"';
 											}
 											
-											str += '>'+divisionName+'</b>/<b';
+											str += '>'+userName+'</b>';
 										}
 										
-										if(userUseYn == "N"){
-											str += ' class="deleteUser"';
-										}
-										
-										str += '>'+userName+'</b>';
+										fn.addHtml($("#multiDiv"), str, division, userId);
 									}
-									
-									fn.addHtml($("#multiDiv"), str, division, userId);
 								}
 							}
+							
+							if(prjId) {
+								alertify.success([[#{msg.common.success}]]);
+							}
 						}
-						
-						if(prjId) {
-							alertify.success([[#{msg.common.success}]]);
-						}
-					}
-					
-					if(!copyWatcher.length) {
+					} else {
 						alertify.warning([[#{msg.project.required.id}]]);
 					}
 				},
@@ -2524,6 +2523,33 @@
 						$(this).trigger('click');
 					}
 				});
+				
+				if (data.copy.watcherList != null) {
+					data.copy.watcherList.forEach(function(watcher, index, obj){
+						var deptUseYn = watcher.deptUseYn || "Y";
+						var userUseYn = watcher.userUseYn || "Y";
+						
+						if (watcher) {
+							if (watcher.prjEmail != null && "" != watcher.prjEmail) {
+								fn.addHtml($("#multiDiv"), watcher.prjEmail, watcher.prjEmail, "Email");
+							} else {
+								var str = "";
+								
+								if (watcher.prjUserName == null || "" == watcher.prjUserName) {
+									str = watcher.prjDivisionName;
+								} else {
+									str = "";
+									if (watcher.prjDivisionName != null && "" != watcher.prjDivisionName) {
+										str += '<span class="text-bold">' + watcher.prjDivisionName + '</span>/';
+									}
+									str += '<span class="text-bold">' + watcher.prjUserName + '</span>';
+								}
+								
+								fn.addHtml($("#multiDiv"), str, watcher.prjDivision, watcher.prjUserId);
+							}
+						}
+					});
+				}
 				
 				$("#complete").hide();
 				$("#drop").hide();
