@@ -592,7 +592,8 @@ var bom_fn = {
 			}
 
 			if (status.toUpperCase().indexOf("LOAD") > -1) { // status : success & load
-				_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId='+[[${detail.partnerId}]], 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
+				let partnerId = '3rd_' + [[${detail.partnerId}]];
+				_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId='+partnerId, 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
 
 				if (!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
 					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
@@ -624,7 +625,7 @@ var bom_fn = {
 				var data = {
 						'componentIdList' : componentIdList
 					  , 'prjId' : [[${detail.partnerId}]]
-					  , 'referenceDiv' : '17'
+					  , 'referenceDiv' : '23'
 				};
 				
 				$.ajax({
@@ -635,7 +636,7 @@ var bom_fn = {
 					data : JSON.stringify(data),
 					contentType : 'application/json',
 					success : function(data){
-						_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId='+[[${detail.partnerId}]], 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
+						_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId=3rd_'+[[${detail.partnerId}]], 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
 
 						if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
 							alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
@@ -653,7 +654,7 @@ var bom_fn = {
 	showAnalysisResult : function(){
 		if (com_fn.checkStatus()){
 			var rdm = Math.random().toString(36).substring(2, 12);
-			_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId='+[[${detail.partnerId}]]+'&ossAnalysisStatus=result', 'OSS Auto Analysis' + rdm, 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
+			_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId=3rd_'+[[${detail.partnerId}]]+'&ossAnalysisStatus=result', 'OSS Auto Analysis' + rdm, 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
 
 			if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
 				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
@@ -664,12 +665,12 @@ var bom_fn = {
 	},
 	binaryDBSave : function(prjId) {
 		var param = {
-			"prjId" : prjId,
-			"referenceDiv" : "17"
+			"partnerId" : prjId,
+			"referenceDiv" : "20"
 		};
 
 		$.ajax({
-			url : '/project/binaryDBSave',
+			url : '/partner/saveBinaryDB',
 			type : 'POST',
 			data : JSON.stringify(param),
 			dataType : 'json',

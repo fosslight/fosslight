@@ -3414,7 +3414,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			switch(key) {
 				case "VIEW":
 					String prjId = ossBean.getPrjId();
-					if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(ossBean.getReferenceDiv())) {
+					if (CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(ossBean.getReferenceDiv())) {
 						prjId = "3rd_" + prjId;
 					}
 					
