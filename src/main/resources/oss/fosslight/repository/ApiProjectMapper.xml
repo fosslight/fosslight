@@ -5,11 +5,20 @@
 
 <mapper namespace="oss.fosslight.repository.ApiProjectMapper">
 	<sql id="limitPage">
-		<if test="countPerPage != 0">
-			LIMIT
-			#{offset},
-			#{countPerPage}
-		</if>
+		<choose>
+			<when test="offset != null and countPerPage != null">
+				LIMIT #{offset}, #{countPerPage}
+			</when>
+			<when test="offset == null and countPerPage != null">
+				LIMIT 0, #{countPerPage}
+			</when>
+			<when test="offset != null and countPerPage == null">
+				LIMIT #{offset}, 10
+			</when>
+			<otherwise>
+				LIMIT 0, 10
+			</otherwise>
+		</choose>
 	</sql>
 	
 	<select id="selectProjectTotalCount" parameterType="oss.fosslight.domain.Project" resultType="int">
