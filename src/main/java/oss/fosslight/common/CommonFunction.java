@@ -1653,6 +1653,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		Map<String, List<String>> restrictionMap = new HashMap<>(); // restriction level
 		Map<String, List<String>> warningMap = new HashMap<>(); // warning level
 		Map<String, List<String>> warningVerMap = new HashMap<>(); // warning level (oss version)
+		Map<String, List<String>> infoSameMap = new HashMap<>(); // info level (same & similar binary > include license)
 		Map<String, List<String>> infoBiMap = new HashMap<>(); // info level (new bianry)
 		Map<String, List<String>> infoModifyMap = new HashMap<>(); // info level (modified = new + tlsh > 120)
 		Map<String, List<String>> infoOnlyMap = new HashMap<>(); // info level
@@ -1763,7 +1764,17 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					}
 					
 					// info level message 중에서 new binary message는 info level 상단으로 정렬하기 위해 우선순위 5로 구분하여 격납함
-					if (errKey.startsWith("binaryName.") && "NEW".equalsIgnoreCase(validInfoMap.get(errKey))) {
+					if (errKey.startsWith("binaryName.") && (validInfoMap.get(errKey).toUpperCase().startsWith("SAME") || validInfoMap.get(errKey).toUpperCase().startsWith("SIMILAR"))) {
+						if (infoSameMap.containsKey(_key)) {
+							List<String> _list = infoSameMap.get(_key);
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							infoSameMap.replace(_key, _list);
+						} else {
+							List<String> _list = new ArrayList<>();
+							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
+							infoSameMap.put(_key, _list);
+						}
+					} else if (errKey.startsWith("binaryName.") && "NEW".equalsIgnoreCase(validInfoMap.get(errKey))) {
 						if (infoBiMap.containsKey(_key)) {
 							List<String> _list = infoBiMap.get(_key);
 							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
@@ -1773,7 +1784,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
 							infoBiMap.put(_key, _list);
 						}
-						
 					} else if (errKey.startsWith("binaryName.") && validInfoMap.get(errKey).toUpperCase().startsWith("MODIFIED")) {
 						if (infoModifyMap.containsKey(_key)) {
 							List<String> _list = infoModifyMap.get(_key);
@@ -1795,7 +1805,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 							infoCopyrightMap.put(_key, _list);
 						}
 					} else {
-						
 						if (infoOnlyMap.containsKey(_key)) {
 							List<String> _list = infoOnlyMap.get(_key);
 							_list.add(errKey.substring(0, errKey.indexOf(".")).toUpperCase());
@@ -1864,28 +1873,36 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					String _id = checkMultiLicenseError(warningVerMap, bean.getComponentLicenseList());
 					sortMap.put(makeValidSortKey(warningVerMap.get(_id), _id, "4"), bean);
 				}
-				// 5 : info level (new binary)
+				// 5 : info level (same binary > include license)
+				else if (infoSameMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
+					//sortList.add(bean);
+					sortMap.put(makeValidSortKey(infoSameMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "5"), bean);
+				} else if (checkMultiLicenseError(infoSameMap, bean.getComponentLicenseList()) != null) {
+					String _id = checkMultiLicenseError(infoSameMap, bean.getComponentLicenseList());
+					sortMap.put(makeValidSortKey(infoSameMap.get(_id), _id, "5"), bean);
+				}
+				// 6 : info level (new binary)
 				else if (infoBiMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(infoBiMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "5"), bean);
+					sortMap.put(makeValidSortKey(infoBiMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "6"), bean);
 				} else if (checkMultiLicenseError(infoBiMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoBiMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoBiMap.get(_id), _id, "5"), bean);
+					sortMap.put(makeValidSortKey(infoBiMap.get(_id), _id, "6"), bean);
 				}
-				// 6 : info level (Modified = new + tlsh > 120)
+				// 7 : info level (Modified = new + tlsh > 120)
 				else if (infoModifyMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
-					sortMap.put(makeValidSortKey(infoModifyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "6"), bean);
+					sortMap.put(makeValidSortKey(infoModifyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "7"), bean);
 				} else if (checkMultiLicenseError(infoModifyMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoBiMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoModifyMap.get(_id), _id, "6"), bean);
+					sortMap.put(makeValidSortKey(infoModifyMap.get(_id), _id, "7"), bean);
 				}
-				// 7 : info level
+				// 8 : info level
 				else if (infoOnlyMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {
 					//sortList.add(bean);
-					sortMap.put(makeValidSortKey(infoOnlyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "7"), bean);
+					sortMap.put(makeValidSortKey(infoOnlyMap.get(avoidNull(bean.getGridId(), bean.getComponentId())), avoidNull(bean.getGridId(), bean.getComponentId()) , "8"), bean);
 				} else if (checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList()) != null) {
 					String _id = checkMultiLicenseError(infoOnlyMap, bean.getComponentLicenseList());
-					sortMap.put(makeValidSortKey(infoOnlyMap.get(_id), _id, "7"), bean);
+					sortMap.put(makeValidSortKey(infoOnlyMap.get(_id), _id, "8"), bean);
 				}
 				// 10 : info level (copyright)
 				else if (infoCopyrightMap.containsKey(avoidNull(bean.getGridId(), bean.getComponentId()))) {

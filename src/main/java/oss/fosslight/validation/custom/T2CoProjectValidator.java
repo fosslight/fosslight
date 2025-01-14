@@ -2555,7 +2555,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 							// 동일한 binary가 없는 경우 유사한 binary 체크
 							if (avoidNull(bean.getOssName(), "-").equalsIgnoreCase(_temp.getOssName())
 									&& avoidNull(bean.getOssVersion()).equalsIgnoreCase(_temp.getOssVersion())
-									&& compareLicenseWithLicenseNameSort(bean, _temp)) {
+									&& compareLicenseWithLicenseNameSort(bean, _temp, false)) {
 								doCheck = false;
 							}
 							
@@ -2578,7 +2578,8 @@ public class T2CoProjectValidator extends T2CoValidator {
 								_temp = _batList.get(0);
 							}
 							
-							boolean isSameLicense = compareLicenseWithLicenseNameSort(bean, _temp);
+							boolean isSameLicense = compareLicenseWithLicenseNameSort(bean, _temp, false);
+							boolean isIncludeLicense = compareLicenseWithLicenseNameSort(bean, _temp, true);
 							boolean isSameOssName = avoidNull(bean.getOssName(), "-").equalsIgnoreCase(_temp.getOssName());
 							boolean isSameOssVersion = avoidNull(bean.getOssVersion()).equalsIgnoreCase(_temp.getOssVersion());
 							//2) OSS NAME + VERSION 등일하나 LICENSE 만 다른 경우
@@ -2586,7 +2587,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 									&& isSameOssVersion
 									&& !isSameLicense) {
 								// Same binary : / <License>
-								diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + " /"+_temp.getLicense())); // message를
+								if (!isIncludeLicense) {
+									diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + " /"+_temp.getLicense())); // message를
+								} else {
+									infoMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + " /"+_temp.getLicense()));
+								}
 							} 
 							// 3) OSS NAME LICENSE는 동일하나  VERSION 이 다른경우
 							else if(isSameOssName && isSameLicense && !isSameOssVersion) {
@@ -2596,7 +2601,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 							// 4) OSS NAME 은 동일하나 VERSION 과 LICENSE 가 다른 경우 
 							else if(isSameOssName && !isSameOssVersion && !isSameLicense) {
 								// Same binary : <OSS Name> <OSS Version> / <License>
-								diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " / "+_temp.getLicense()));
+								if (!isIncludeLicense) {
+									diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " / "+_temp.getLicense()));
+								} else {
+									infoMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " / "+_temp.getLicense()));
+								}
 							}
 							// 6) OSS NAME은 다르나, LICENSE 는 동일
 							else if(!isSameOssName && isSameLicense) {
@@ -2606,7 +2615,11 @@ public class T2CoProjectValidator extends T2CoValidator {
 							// 7) OSS NAME LICENSE 모두 다른 경우
 							else {
 								// Same binary : <OSS Name> <OSS Version> / <License>
-								diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " / "+_temp.getLicense()));
+								if (!isIncludeLicense) {
+									diffMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " / "+_temp.getLicense()));
+								} else {
+									infoMap.put(errKey, MessageFormat.format(hasBatOssSameTlsh ? errMessageFormatSame : errMessageFormatSimilar, (hasBatOssSameTlsh ? ":" : " ("+_temp.getTlshDistance()+") :") + makeBinaryOssName(_temp.getOssName(), _temp.getOssVersion()) + " / "+_temp.getLicense()));
+								}
 							}
 						} else {
 							// oss name + version + license 까지 동일하면 match info Matched message 표시
@@ -2622,7 +2635,7 @@ public class T2CoProjectValidator extends T2CoValidator {
 		}
 	}
 
-	private boolean compareLicenseWithLicenseNameSort(ProjectIdentification bean, BinaryData _temp) {
+	private boolean compareLicenseWithLicenseNameSort(ProjectIdentification bean, BinaryData _temp, boolean isInclude) {
 
 		String selectedLicenses = "";
 		if (bean.getOssComponentsLicenseList() != null) {
@@ -2685,23 +2698,40 @@ public class T2CoProjectValidator extends T2CoValidator {
 		Collections.sort(compare1);
 		Collections.sort(compare2);
 
-		String diff1 = "";
-		String diff2 = "";
-		for (String s : compare1) {
-			if (!isEmpty(diff1)) {
-				diff1 += ",";
+		if (!isInclude) {
+			String diff1 = "";
+			String diff2 = "";
+			for (String s : compare1) {
+				if (!isEmpty(diff1)) {
+					diff1 += ",";
+				}
+				diff1 += s;
 			}
-			diff1 += s;
-		}
-		for (String s : compare2) {
-			if (!isEmpty(diff2)) {
-				diff2 += ",";
+			for (String s : compare2) {
+				if (!isEmpty(diff2)) {
+					diff2 += ",";
+				}
+				diff2 += s;
 			}
-			diff2 += s;
+
+			return diff1.equalsIgnoreCase(diff2);
+		} else {
+			if (!CollectionUtils.isEmpty(compare1)) {
+				if (CollectionUtils.isEmpty(compare2)) {
+					return false;
+				} else {
+					List<String> includeLicenseCheckList = new ArrayList<>(compare1);
+					includeLicenseCheckList.removeAll(compare2);
+					if (includeLicenseCheckList.size() != compare1.size()) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			} else {
+				return false;
+			}
 		}
-
-		return diff1.equalsIgnoreCase(diff2);
-
 	}
 	
 	private String makeBinaryOssName(String ossName, String ossVersion) {
