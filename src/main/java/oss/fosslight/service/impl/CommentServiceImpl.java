@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,9 @@ public class CommentServiceImpl implements CommentService {
 		List<CommentsHistory> commentsHistoryList = commentMapper.getCommentListHis(bean);
 		
 		for (CommentsHistory commentsHistory : commentsHistoryList) {
+			if (!StringUtils.isEmpty(bean.getRecentFlag())) {
+				commentsHistory.setRecentFlag(bean.getRecentFlag());
+			}
 			commentMapper.updateHistoryReadYn(commentsHistory);
 		}
 		

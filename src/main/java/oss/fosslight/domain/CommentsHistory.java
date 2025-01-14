@@ -78,6 +78,8 @@ public class CommentsHistory extends ComBean implements Serializable{
 	
 	private String moreFlag = CoConstDef.FLAG_NO;
 	
+	private String recentFlag;
+	
 	/**
 	 * Gets the comm id.
 	 *
@@ -399,6 +401,14 @@ public class CommentsHistory extends ComBean implements Serializable{
 
 	public void setMoreFlag(String moreFlag) {
 		this.moreFlag = moreFlag;
+	}
+
+	public String getRecentFlag() {
+		return recentFlag;
+	}
+
+	public void setRecentFlag(String recentFlag) {
+		this.recentFlag = recentFlag;
 	}
 	
 }

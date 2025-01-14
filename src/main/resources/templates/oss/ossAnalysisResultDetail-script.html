@@ -43,9 +43,6 @@ var Ctrl_fn = {
 		$("[id^=selectTitle]").html(options);
 	},
 	selectTitle : function(seq){
-		var width = $(".detailView1").width()-40;
-    	$("#commentList"+seq).css("width", width);
-		
 		var gridId = $("#selectTitle"+seq).val();
 		var selectData = common_data.detailData.filter(function(cur){
 		    return cur.gridId == gridId;
@@ -63,13 +60,11 @@ var Ctrl_fn = {
 		
 		if (typeof selectData.ossId !== 'undefined') {
 			if ('' == commentTemp){
-				$("input[name=latestOssId]").val(selectData.ossId);
-//				Ctrl_fn.getCommentList(seq);
+				$("#ossForm"+ seq).find("input[name=recentOssId]").val(selectData.ossId);
+				Ctrl_fn.getCommentList(seq);
 			} else {
-				if ($('#commentListArea'+seq).find('dl').length == 0) {
-					$('#commentListArea'+seq).append(commentTemp);
-				}
-				$("#commentList"+seq).show();
+				$("#ossForm"+ seq).find("input[name=recentOssId]").val("");
+				$("#detailViewComment"+seq).hide();
 			}
 		} else {
 			$("#commentList"+seq).hide();
@@ -1017,55 +1012,21 @@ var Ctrl_fn = {
 		});
     },
     getCommentList : function (seq) {
+    	let ossId = $("#ossForm" + seq).find("input[name='recentOssId']").val();
     	$.ajax({
-        	url : '/comment/getDivCommentList',
+        	url : '/comment/getCusCommentList',
             type : 'GET',
-            dataType : 'json',
+            dataType : 'html',
             cache : false,
             data : {
-                referenceId : $('input[name=latestOssId]').val(),
-                referenceDiv : '40'
+                referenceId : ossId,
+                referenceDiv : "oss",
+                recentFlag : "Y"
             },
             success : function(data){
-            	$('.tabContent'+seq).next().show();
-            	$('#commentList'+seq).show();
-            	$('#commentListArea'+seq).children().remove();
-				
-				if(data.length != 0) {
-					for(var i = 0; i < data.length; i++) {
-						var tempDl = document.createElement("dl");
-						var commId = data[i].commId;
-						var tempDt = document.createElement("dt");
-						var leftSpan = document.createElement("span");
-						leftSpan.setAttribute("class", "left");
-						var nameArea = document.createElement("strong");
-						var commentContentsArea = document.createElement("dd");
-						
-						if(data[i].status == "" || data[i].status == null || data[i].status == "undefined") {
-							nameArea.append(data[i].creator);
-						} else {
-							nameArea.append(data[i].status).append("</br>"+data[i].creator);
-						}
-						
-						if (typeof data[i].createdDate !== "undefined") {
-							var dateArea = document.createElement("span");
-							dateArea.append(data[i].createdDate);
-							nameArea.append(" | ");
-							nameArea.append(dateArea);
-						}
-						
-						leftSpan.appendChild(nameArea);
-						tempDt.appendChild(leftSpan);
-						commentContentsArea.innerHTML = replaceWithLink(data[i].contents);
-						tempDl.appendChild(tempDt).appendChild(commentContentsArea);
-						$('#commentListArea'+seq).append(tempDl);
-					}
-					
-					commentTemp = $('#commentListArea'+seq).html();
-					$('#commentListArea'+seq).html(commentTemp);
-				} else {
-					$('#commentListArea'+seq).append('<p class="noneTxt">No comments were registered.</p>');
-				}
+            	$("#detailViewComment" + seq).find("#commentList").empty();
+            	$("#detailViewComment" + seq).find("#commentList").html(data);
+            	$("#detailViewComment" + seq).show();
             },
             error : function(xhr, ajaxOptions, thrownError){
                 alertify.error([[#{msg.common.valid2}]], 0);
