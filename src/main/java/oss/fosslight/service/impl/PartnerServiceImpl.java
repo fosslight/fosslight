@@ -716,7 +716,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		ProjectIdentification prjBean = new ProjectIdentification();
 		
 		prjBean.setReferenceId(partnerMaster.getPartnerId());
-		prjBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+		prjBean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+		prjBean.setMerge(CoConstDef.FLAG_NO);
 		Map<String, Object> partnerList = projectService.getIdentificationGridList(prjBean, true);
 		
 		PartnerMaster partnerInfo = new PartnerMaster();
@@ -731,12 +732,9 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 		partnerInfo = getPartnerMasterOne(partnerInfo);
 
 		if (partnerInfo != null) {
-			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_PARTNER);
+			pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
 
-			// main grid
-			pv.setAppendix("mainList", (List<ProjectIdentification>) partnerList.get("mainData"));
-			// sub grid
-			pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) partnerList.get("subData"));
+			pv.setAppendix("bomList", (List<ProjectIdentification>) partnerList.get("rows"));
 			
 			if ((CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST.equals(partnerInfo.getStatus())
 					|| CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(partnerInfo.getStatus()))
@@ -747,8 +745,8 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 			T2CoValidationResult vr = pv.validate(new HashMap<>());
 			
 			if (!vr.isValid() || !vr.isDiff() || vr.hasInfo()) {
-				partnerList.replace("mainData", CommonFunction.identificationSortByValidInfo(
-						(List<ProjectIdentification>) partnerList.get("mainData"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
+				partnerList.replace("rows", CommonFunction.identificationSortByValidInfo(
+						(List<ProjectIdentification>) partnerList.get("rows"), vr.getValidMessageMap(), vr.getDiffMessageMap(), vr.getInfoMessageMap(), false, true));
 				if (!vr.isValid()) {
 					partnerList.put("validData", vr.getValidMessageMap());
 				}
@@ -768,7 +766,7 @@ public class PartnerServiceImpl extends CoTopComponent implements PartnerService
 	public Map<String, Object> getFilterdList(Map<String, Object> paramMap){
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-		List<ProjectIdentification> mainData = (List<ProjectIdentification>) paramMap.get("mainData");
+		List<ProjectIdentification> mainData = (List<ProjectIdentification>) paramMap.get("rows");
 		Map<String, String> errorMap = (Map<String, String>) paramMap.get("validData");
 		List<String> duplicateList = new ArrayList<>();
 		List<String> componentIdList = new ArrayList<>();
