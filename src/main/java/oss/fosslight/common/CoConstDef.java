@@ -511,6 +511,7 @@ public class CoConstDef {
 	
 	public static final String CD_MAIL_TYPE_OSS_MODIFIED_COMMENT = "130";
 	public static final String CD_MAIL_TYPE_OSS_ADDED_COMMENT = "131";
+	public static final String CD_MAIL_TYPE_OSS_DELETED_COMMENT = "132";
 	
 	/** Mail Type [FOSSLight] OSS bas been deactivated */
 	public static final String CD_MAIL_TYPE_OSS_DEACTIVATED = "813";
@@ -525,6 +526,7 @@ public class CoConstDef {
 	public static final String CD_MAIL_TYPE_LICENSE_MODIFIED_COMMENT = "230";
 	public static final String CD_MAIL_TYPE_LICENSE_ADDED_COMMENT = "231";
 	public static final String CD_MAIL_TYPE_LICENSE_NOTICE_INCORRECT = "232";
+	public static final String CD_MAIL_TYPE_LICENSE_DELETED_COMMENT = "233";
 	
 	/** Mail Type [FOSSLight] Open source license has been removed */
 	public static final String CD_MAIL_TYPE_LICENSE_DELETE = "29";
@@ -538,6 +540,7 @@ public class CoConstDef {
 	
 	public static final String CD_MAIL_TYPE_PROJECT_ADDED_COMMENT = "34"; // Project Comemnt 추가
 	public static final String CD_MAIL_TYPE_PROJECT_MODIFIED_COMMENT = "340"; // Project Comemnt 수정
+	public static final String CD_MAIL_TYPE_PROJECT_DELETED_COMMENT = "341";
 	public static final String CD_MAIL_TYPE_PROJECT_COMPLETED = "35"; // Project complete
 	public static final String CD_MAIL_TYPE_PROJECT_DROPPED = "812"; // Project drop
 	public static final String CD_MAIL_TYPE_PROJECT_REOPENED = "36"; // Project reopen
@@ -552,6 +555,7 @@ public class CoConstDef {
 	/** Project Identification reject (not review) */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_ADDED_COMMENT = "43";
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_MODIFIED_COMMENT = "430";
+	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_DELETED_COMMENT = "431";
 	/** Project Identification reject (by review) */
 	public static final String CD_MAIL_TYPE_PROJECT_IDENTIFICATION_REJECT = "44";
 	/** Project Identification self reject */
@@ -569,6 +573,7 @@ public class CoConstDef {
 	/** Project packaging commnets registered */
 	public static final String CD_MAIL_TYPE_PROJECT_PACKAGING_ADDED_COMMENT = "53";
 	public static final String CD_MAIL_TYPE_PROJECT_PACKAGING_MODIFIED_COMMENT = "530";
+	public static final String CD_MAIL_TYPE_PROJECT_PACKAGING_DELETED_COMMENT = "531";
 	/** Project packaging reject (review) */
 	public static final String CD_MAIL_TYPE_PROJECT_PACKAGING_REJECT = "54";
 	/** Project packaging self reject */
@@ -592,6 +597,7 @@ public class CoConstDef {
 	
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_ADDED_COMMENT = "65";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_MODIFIED_COMMENT = "650";
+	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED_COMMENT = "651";
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED = "66"; // OSDD에서 DESCRIPTION이 삭제된 경우
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DIFF_FILE = "67"; // OSDD에서 DESCRIPTION이 삭제된 경우
 	public static final String CD_MAIL_TYPE_PROJECT_DISTRIBUTE_EDIT_FILE = "670";
@@ -616,6 +622,9 @@ public class CoConstDef {
 	/** 3rd party reviewer changed */
 	public static final String CD_MAIL_TYPE_PARTER_ADDED_COMMENT = "74";
 	public static final String CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT = "740";
+	public static final String CD_MAIL_TYPE_PARTER_DELETED_COMMENT = "741";
+	public static final String CD_MAIL_TYPE_PARTER_IDENTIFICATION_MODIFIED_COMMENT = "742";
+	public static final String CD_MAIL_TYPE_PARTER_IDENTIFICATION_DELETED_COMMENT = "743";
 	/** 3rd party Review결과 Admin이 reject한 경우 */
 	public static final String CD_MAIL_TYPE_PARTER_REJECT = "75";
 	/** 3rd party Request review를 self reject한 경우 */

@@ -3839,7 +3839,10 @@
         			}
         		},
         		deleteComments : function (_commId) {
-        			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+        			if (typeof alertify.delCommentVeriDialog === "undefined") {
+        				basicAlertifyDialog('delCommentVeriDialog');
+        			}
+        			alertify.delCommentVeriDialog("Are you sure you want to delete this comment?", function (e) {
         				if (e) {
         					$.ajax({
         						url : '/comment/deleteComment',
