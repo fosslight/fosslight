@@ -2261,6 +2261,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				case 11:
 					checkName = "cargo:" + ossNameMatcher.group(3);
 					break;
+				case 12 :
+					ArrayList<String> name = new ArrayList<>();
+					name.add("codelinaro");
+					for(String nick : ossNameMatcher.group(5).split("/-/")[0].split("/")) {
+						name.add(nick);
+					}
+					checkName = String.join("-", name);
+					break;
 				default:
 					break;
 			}
@@ -2329,6 +2337,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				break;
 			case 11:
 				p = Pattern.compile("((http|https)://crates.io/crates/([^/]+))");
+				break;
+			case 12 :
+				p = Pattern.compile("((http|https)://git.codelinaro.org/([^/]+)/([^/]+)/(.*))");
 				break;
 			default:
 				p = Pattern.compile("(.*)");
