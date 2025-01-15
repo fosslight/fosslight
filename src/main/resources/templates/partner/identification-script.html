@@ -49,6 +49,10 @@ $(window).on('load', function() {
 	
 	commentsParam.height = $(window).height() - 120;
 	fn_comment.getCommentList(commentsParam);
+	
+	window.setTimeout(function(){
+    	$("#tabMenuParty").trigger("click");
+    }, 100);
 });
 
 var fn_comment = {
