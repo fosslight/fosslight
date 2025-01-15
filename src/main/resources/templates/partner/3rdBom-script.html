@@ -1457,11 +1457,7 @@ var bom_data = {
 					fn_grid_com.totalGridSaveMode('bomList');
 				}
 				, gridComplete: function(){
-					window.setTimeout(function(){
-						$("#tabMenuParty").trigger("click");
-					}, 100);
-					
-					updateGridRowCount('bomList', 'bomPager'); 
+					pdateGridRowCount('bomList', 'bomPager'); 
 				}
 			})
 			
