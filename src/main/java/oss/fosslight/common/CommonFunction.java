@@ -1018,7 +1018,8 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	            		continue;
 	            	}
 	            	if (checkExceptionWords(temp, ignorePathStr, checkList, ignoreList)) {
-	            		sb.append(temp).append(System.lineSeparator());
+	            		String tmp = splitExceptionWords(temp, checkList);
+	            		sb.append(tmp).append(System.lineSeparator());
 	            	}
 	            	duplicationCheckList.add(temp.trim());
 	            }
@@ -1048,6 +1049,33 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 		return sb.toString();
 	}
 	
+	private static String splitExceptionWords(String temp, List<String> checkList) {
+		String tmp = "";
+		int tempLength = temp.length();
+		boolean checkFlag = false;
+		for (String s : checkList) {
+			if (temp.toUpperCase().contains(s.toUpperCase())) {
+				int idx = temp.toUpperCase().indexOf(s.toUpperCase(), 0);
+				String front = "";
+				String end = "";
+				if (tempLength - idx < 30) {
+					front = temp.substring(idx-30, idx);
+					end = temp.substring(idx-1, tempLength);
+				} else {
+					front = temp.substring(idx-30, idx);
+					end = temp.substring(idx-1, idx+30);
+				}
+				tmp = front + end;
+				checkFlag = true;
+				break;
+			}
+		}
+		if (!checkFlag) {
+			tmp = temp;
+		}
+		return tmp;
+	}
+
 	private static boolean checkExceptionWords(String line, String ignorePathStr, List<String> checkList, List<String> ignoreList) {
 		line = line.replaceAll(ignorePathStr, "");
 		line = line.toUpperCase();
