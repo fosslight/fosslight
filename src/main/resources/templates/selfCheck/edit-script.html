@@ -1595,11 +1595,9 @@ var data = {
 			$('input[name=prjName]').val(data.detail.prjName);
 			$('input[name=prjVersion]').val(data.detail.prjVersion);
 
-            if (viewFlag == null && data.detail.watcherList.length > 0) {
-                $(".tbws1.w1025.mt10").removeClass("collapsed-card")
-            }
-
-            if (viewFlag == null) {
+            if (viewFlag == null && data.detail.watcherList != null) {
+            	$(".tbws1.w1025.mt10").removeClass("collapsed-card");
+            	
             	data.detail.watcherList.forEach(function(watcher, index, obj){
     				var deptUseYn = watcher.deptUseYn || "Y";
     				var userUseYn = watcher.userUseYn || "Y";
