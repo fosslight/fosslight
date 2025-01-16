@@ -2370,6 +2370,17 @@ var src_fn = {
     }
 };
 
+var gridTooltip = {
+		typeCodes : [],
+		tooltipCont : "<div class=\"tooltipData500\"><span style=\"color:red;\">Obligation is unclear. Obliagtion이 불명확한 경우입니다.</span>"
+	                   +"<dl><dt><span>non-included license : License is different from registered in FOSSLight Hub.</span></dt></dl><br>"
+	                   +"<dl><dt><span>unconfirmed oss : It is a new OSS not registered in FOSSLight Hub.</span></dt></dl><br>"
+	                   +"<dl><dt><span>unconfirmed version : It is the new OSS version that is not registered with FOSSLight Hub.</span></dt></dl><br>"
+	                   +"<dl><dt><span>unconfirmed license : It is a new license not registered in FOSSLight Hub.</span></dt></dl>"
+	                   +"</div>",
+		existTooltip : false
+};
+
 //SRC 그리드
 var src_grid = {
 	load: function() {
@@ -2929,29 +2940,18 @@ var src_grid = {
 		});
 		
 		if (viewFlag == null) {
-			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn", afterSearch : function () {
-				updateGridRowCount('srcList', 'srcListPager');
-			}});
-//			srcList.jqGrid('navGrid',"#srcPager",{add:true,edit:false,del:true,search:false,refresh:false
-// 													  , addfunc: function () { saveFlag = false; fn_grid_com.rowAddNew('srcList',srcList,"main", null, com_fn.getLicenseName);}
-// 													  , delfunc: function () { fn_grid_com.rowDelNew(srcList,"main");}
-// 													  , cloneToTop:true
-// 			});
+			srcList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+				beforeSearch: function () {
+					if (_mainLastsel != -1) {
+						fn_grid_com.setGridBeforeSearch(srcList, com_fn.getLicenseName);
+	            	}
+				},
+				afterSearch : function () {
+					updateGridRowCount('srcList', 'srcListPager');
+				}
+			});
 		}
-		
-		$('#srcList').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
 	}
-};
-
-var gridTooltip = {
-		typeCodes : [],
-		tooltipCont : "<div class=\"tooltipData500\"><span style=\"color:red;\">Obligation is unclear. Obliagtion이 불명확한 경우입니다.</span>"
-	                   +"<dl><dt><span>non-included license : License is different from registered in FOSSLight Hub.</span></dt></dl><br>"
-	                   +"<dl><dt><span>unconfirmed oss : It is a new OSS not registered in FOSSLight Hub.</span></dt></dl><br>"
-	                   +"<dl><dt><span>unconfirmed version : It is the new OSS version that is not registered with FOSSLight Hub.</span></dt></dl><br>"
-	                   +"<dl><dt><span>unconfirmed license : It is a new license not registered in FOSSLight Hub.</span></dt></dl>"
-	                   +"</div>",
-		existTooltip : false
 };
 
 var com_fn = {

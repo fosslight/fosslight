@@ -5,7 +5,7 @@
 <th:block th:replace="selfCheck/edit-script :: contentScript"></th:block>
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
-        <div class="custom-layout">
+        <div class="custom-layout multi-grid-page">
             <section class="content-header">
                 <div class="container-fluid">
                 	<div class="card card-outline card-dark p-2" style="background-color: #f5f4f3;">
@@ -129,7 +129,8 @@
             </section>
             <section class="content" th:if="${project.prjId != null}">
                 <div class="container-fluid">
-                    <div class="card card-secondary card-tabs">
+                	<div class="topper-content">
+                		<div class="card card-secondary card-tabs">
                         <div class="card-header d-flex p-0 pt-1">
                         	<div class="d-flex align-items-center">
                         		<ul class="nav nav-tabs" id="menu-tab" role="tablist">
@@ -330,9 +331,9 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                <div class="container-fluid">
-                    <div class="tabButtonArea" name="gridArea" id="gridAreaOssList">
+                	</div>
+                	
+                    <div class="tabButtonArea bottom-component" name="gridArea" id="gridAreaOssList">
                         <div th:class="${viewFlag == null ? 'row mt-3 ml-1' : 'row mt-3 ml-3'}">
                             <div th:if="${viewFlag == null}" class="col-md-12">
                                 <div th:if="${project.permission > 0}" class="row float-left">
@@ -345,7 +346,7 @@
                                		</div>
                                 </div>
                             </div>
-                            <div class="col-md-12 mt-2">
+                            <div class="col-md-12 mt-2 grid-area">
                                 <div class="jqGridSet">
                                     <table id="srcList"><tr><td></td></tr></table>
                                     <div id="srcPager"></div>
