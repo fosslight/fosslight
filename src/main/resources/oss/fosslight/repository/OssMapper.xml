@@ -3625,7 +3625,7 @@
 		)
 		SELECT OC.COMPONENT_ID
 		<choose>
-    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
+    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '23')">
     			, CONCAT('3rd_', #{prjId}) AS REFERENCE_ID
     		</when>
     		<otherwise>, #{prjId} AS REFERENCE_ID</otherwise>
@@ -4040,8 +4040,8 @@
            AND T1.OSS_NAME			= #{ossName}
            AND T1.OSS_VERSION		= #{ossVersion}
 		<choose>
-    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
-           AND T1.REFERENCE_DIV IN ('20')
+    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '23')">
+           AND T1.REFERENCE_DIV IN ('20', '23')
     		</when>
     		<otherwise>
            AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
