@@ -6005,16 +6005,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						}
 						
 						LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
-						license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
-						license.setAttribution(avoidNull(licenseBean.getAttribution()));
-						license.setObligationType(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn()) ? CoConstDef.CD_DTL_OBLIGATION_NOTICE : "");
-						
-						if (CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
-							if (!isEmpty(licenseName)) {
-								licenseName += ",";
-							}
+						if (licenseBean != null) {
+							license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
+							license.setAttribution(avoidNull(licenseBean.getAttribution()));
+							license.setObligationType(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn()) ? CoConstDef.CD_DTL_OBLIGATION_NOTICE : "");
 							
-							licenseName += license.getLicenseName();
+							if (CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
+								if (!isEmpty(licenseName)) {
+									licenseName += ",";
+								}
+								
+								licenseName += license.getLicenseName();
+							}
 						}
 					}
 					
@@ -6031,7 +6033,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() +"_"+ avoidNull(bean.getOssVersion())).toUpperCase());
 					bean.setAttribution(ossBean != null ? avoidNull(ossBean.getAttribution())  : "");
 					bean.setLicenseName(licenseName);
-					if (!licenseDuplicateFlag) bean.setDeduplicatedComponentLicenseList(deduplicateComponentLicenseList);
+					if (!licenseDuplicateFlag) {
+						bean.setDeduplicatedComponentLicenseList(deduplicateComponentLicenseList);
+					}
 					
 					_list.add(bean);
 					
@@ -6047,16 +6051,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 					
 					LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
-					license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
-					license.setAttribution(avoidNull(licenseBean.getAttribution()));
-					license.setObligationType(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn()) ? CoConstDef.CD_DTL_OBLIGATION_NOTICE : "");
+					if (licenseBean != null) {
+						license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
+						license.setAttribution(avoidNull(licenseBean.getAttribution()));
+						license.setObligationType(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn()) ? CoConstDef.CD_DTL_OBLIGATION_NOTICE : "");
 
-					if (CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
-						if (!isEmpty(licenseName)) {
-							licenseName += ",";
+						if (CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
+							if (!isEmpty(licenseName)) {
+								licenseName += ",";
+							}
+							
+							licenseName += license.getLicenseName();
 						}
-						
-						licenseName += license.getLicenseName();
 					}
 				}
 				
