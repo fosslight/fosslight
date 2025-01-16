@@ -3983,9 +3983,9 @@
     		, T1.OSS_VERSION = #{mergeOssVersion}
     	WHERE T1.ADMIN_CHECK_YN	!= 'Y'
     		<choose>
-    			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
+    			<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '23')">
     				AND T1.REFERENCE_ID IN (SELECT PARTNER_ID FROM PARTNER_MASTER WHERE USE_YN = 'Y' AND STATUS = 'CONF')
-    				AND T1.REFERENCE_DIV IN ('20')
+    				AND T1.REFERENCE_DIV IN ('20', '23')
     				<if test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(registMergeFlag,'Y')">
     				AND T1.OSS_ID = #{ossId}
     				</if>
@@ -4098,8 +4098,8 @@
 		 WHERE OC.ADMIN_CHECK_YN != 'Y'
 		   AND OC.REFERENCE_ID = #{prjId}
 		 <choose>
-    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '20')">
-		   		AND OC.REFERENCE_DIV IN ('20')
+    		<when test="@oss.fosslight.util.StringUtil@equalsIgnoreCase(referenceDiv, '23')">
+		   		AND OC.REFERENCE_DIV IN ('20', '23')
     		</when>
     		<otherwise>
     			AND OC.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')

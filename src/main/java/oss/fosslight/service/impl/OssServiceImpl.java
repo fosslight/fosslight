@@ -878,7 +878,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<PartnerMaster> confirmPartnerList = ossMapper.getOssNameMergePartnerList(ossMaster);
 
 		if (confirmPartnerList.size() > 0) {
-			ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+			ossMaster.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 			ossMapper.mergeOssName(ossMaster);
 
 			for (PartnerMaster pm : confirmPartnerList) {
@@ -3473,7 +3473,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<OssAnalysis> list = null;
 		String prjId = ossMaster.getPrjId();
 		
-		if (CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(ossMaster.getReferenceDiv())) {
+		if (CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(ossMaster.getReferenceDiv())) {
 			ossMaster.setPrjId("3rd_" + prjId);
 		}
 		
@@ -4193,7 +4193,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 
 			if (confirmPartnerList.size() > 0) {
 				param.setMergeOssName(afterOssName);
-				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
 				
 				for (PartnerMaster pm : confirmPartnerList) {
 					param.setPrjId(pm.getPartnerId());
