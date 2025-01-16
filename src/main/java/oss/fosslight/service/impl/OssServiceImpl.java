@@ -2224,7 +2224,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		String customDownloadlocationUrl = "";
 		if (downloadlocationUrl.contains("?")) {
 			customDownloadlocationUrl = downloadlocationUrl.split("[?]")[0];
-		} else {
+		} else if(downloadlocationUrl.contains("/-/")){
+			customDownloadlocationUrl = downloadlocationUrl.split("/-/")[0];
+		}else {
 			customDownloadlocationUrl = downloadlocationUrl;
 		}
 		Matcher ossNameMatcher = p.matcher("https://" + customDownloadlocationUrl);
@@ -2264,7 +2266,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				case 12 :
 					ArrayList<String> name = new ArrayList<>();
 					name.add("codelinaro");
-					for(String nick : ossNameMatcher.group(5).split("/-/")[0].split("/")) {
+					for(String nick : ossNameMatcher.group(5).split("/")) {
 						name.add(nick);
 					}
 					checkName = String.join("-", name);
