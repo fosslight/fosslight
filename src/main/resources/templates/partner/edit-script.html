@@ -1536,13 +1536,10 @@ var grid = {
 				dataType : 'html',
 				cache : false,
 				success : function(res){
-					if (!alertify.editComments){
-						commonAlertifyDialog('editComments');
-                	}
-					alertify.editComments().set('title', 'Edit Comments').set('onshow', function(e) {
-		        		$(".ajs-ok").hide();
-		        		$(".ajs-cancel").hide();
-		        	}).setContent(res).show();
+					if (typeof alertify.editComments === "undefined"){
+						alertifyWithoutButtons('editComments');
+	        		}
+					alertify.editComments().set('title', 'Edit Comments').setContent(res).show();
 					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
 					$("#commentEdit").summernote({minHeight: 200, maxHeight: 800, lang: "ko-KR"});
 				}

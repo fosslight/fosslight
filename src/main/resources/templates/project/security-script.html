@@ -1459,13 +1459,10 @@ var fn = {
 				dataType : 'html',
 				cache : false,
 				success : function(res){
-					if (!alertify.editComments){
-						commonAlertifyDialog('editComments');
+					if (typeof alertify.editComments === "undefined"){
+						alertifyWithoutButtons('editComments');
 	        		}
-					alertify.editComments().set('title', 'Edit Comments').set('onshow', function(e) {
-		        		$(".ajs-ok").hide();
-		        		$(".ajs-cancel").hide();
-		        	}).setContent(res).show();
+					alertify.editComments().set('title', 'Edit Comments').setContent(res).show();
 					$("#updateComments").attr("onclick", "fn_comment.updateComments("+_commId+", "+_referenceDiv+", "+_referenceId+")");
 					$("#commentEdit").summernote({minHeight: 180, maxHeight: 800, lang: "ko-KR"});
 				}
@@ -1495,7 +1492,10 @@ var fn = {
 			}
 		},
 		deleteComments : function (_commId) {
-			alertify.confirm("Are you sure you want to delete this comment?", function (e) {
+			if (typeof alertify.delCommentSecDialog === "undefined") {
+				basicAlertifyDialog('delCommentSecDialog');
+			}
+			alertify.delCommentSecDialog("Are you sure you want to delete this comment?", function (e) {
 				if (e) {
 					$.ajax({
 						url : '/comment/deleteComment',
