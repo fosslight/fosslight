@@ -1160,11 +1160,8 @@
 				}
 				
 				//public 값 넣어주기
-				if ($('#checkbox3').is(':checked')) {
-					$('#checkbox3').val('N');
-				} else {
-					$('#checkbox3').val('Y');
-				}
+				var publicYn = $("input[name='permissionRadio']:checked").val();
+				$("input[name='publicYn']").val(publicYn);
 				 
  				$("#projectForm").ajaxForm({
  					url : URL,

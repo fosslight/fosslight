@@ -2253,6 +2253,11 @@ public class CoMailManager extends CoTopComponent {
 			Project before = (Project) convertDataMap.get("before");
 			Project after = (Project) convertDataMap.get("after");
 
+			String beforePermission = CoConstDef.FLAG_YES.equals(before.getPublicYn()) ? "Everyone" : "Creator & Editor";
+			String afterPermission = CoConstDef.FLAG_YES.equals(after.getPublicYn()) ? "Everyone" : "Creator & Editor";
+			before.setPublicYn(beforePermission);
+			after.setPublicYn(afterPermission);
+			
 			isModified = checkEquals(before.getPrjName(), after.getPrjName(), isModified);
 			isModified = checkEquals(before.getPrjVersion(), after.getPrjVersion(), isModified);
 			isModified = checkEquals(before.getOsType(), after.getOsType(), isModified);
@@ -2266,6 +2271,7 @@ public class CoMailManager extends CoTopComponent {
 			isModified = checkEquals(before.getDivision(), after.getDivision(), isModified);
 			isModified = checkEquals(before.getSecMailYn(), after.getSecMailYn(), isModified);
 			isModified = checkEquals(before.getSecMailDesc(), after.getSecMailDesc(), isModified);
+			isModified = checkEquals(before.getPublicYn(), after.getPublicYn(), isModified);
 			
 			after.setPrjName(appendChangeStyle(before.getPrjName(), after.getPrjName()));
 			after.setPrjVersion(appendChangeStyle(before.getPrjVersion(), after.getPrjVersion()));
@@ -2280,8 +2286,8 @@ public class CoMailManager extends CoTopComponent {
 			after.setDivision(appendChangeStyle(before.getDivision(), after.getDivision()));
 			after.setSecMailYn(appendChangeStyle(before.getSecMailYn(), after.getSecMailYn()));
 			after.setSecMailDesc(appendChangeStyle(avoidNull(before.getSecMailDesc()), avoidNull(after.getSecMailDesc())));
+			after.setPublicYn(appendChangeStyle(avoidNull(before.getPublicYn()), avoidNull(after.getPublicYn())));
 			
-
 			if (before.getModelList().size() > 0 || after.getModelList().size() > 0) {
 				String distributeTargetString = "";
 				List<String> _beforeList = new ArrayList<>();

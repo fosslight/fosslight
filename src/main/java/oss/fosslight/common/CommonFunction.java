@@ -4818,6 +4818,16 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "After : <span style='background-color:yellow'>" + afterPrjVersion + "</span></p>";
 			}
 			
+			// Permission
+			if (!avoidNull(beforeBean.getPublicYn()).equals(avoidNull(afterBean.getPublicYn()))) {
+				String beforePermission = CoConstDef.FLAG_YES.equals(beforeBean.getPublicYn()) ? "Everyone" : "Creator & Editor";
+				String afterPermission = CoConstDef.FLAG_YES.equals(afterBean.getPublicYn()) ? "Everyone" : "Creator & Editor";
+				
+				comment += "<p><strong>View Permission</strong><br />";
+				comment += "Before : " + beforePermission + "<br />";
+				comment += "After : <span style='background-color:yellow'>" + afterPermission + "</span></p>";
+			}
+			
 			// Operating System
 			if (!avoidNull(beforeBean.getOsType()).equals(avoidNull(afterBean.getOsType()))) {
 				comment += "<p><strong>Operating System</strong><br />";
@@ -4831,7 +4841,6 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "Before : " + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, beforeBean.getDistributionType()) + "<br />";
 				comment += "After : <span style='background-color:yellow'>" + CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTION_TYPE, afterBean.getDistributionType()) + "</span></p>";
 			}
-			
 			
 			if (!avoidNull(beforeBean.getNetworkServerType()).equals(avoidNull(afterBean.getNetworkServerType()))) {
 				comment += "<p><strong>Network Service only?</strong><br />";
@@ -4872,6 +4881,85 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 				comment += "<p><strong>Security Mail</strong><br />";
 				comment += "Before : " + (beforeBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + before+ ")") + "<br />";
 				comment += "After : <span style='background-color:yellow'>" + (afterBean.getSecMailYn().equals("Y") ? "Enable" : "Disable (" + after + ")") + "</span><br /></p>";
+			}
+			
+			// Model Information
+			if (!CollectionUtils.isEmpty(beforeBean.getModelList()) || !CollectionUtils.isEmpty(afterBean.getModelList())) {
+				List<String> _beforeList = new ArrayList<>();
+				if (!CollectionUtils.isEmpty(beforeBean.getModelList())){
+					for (int i=0; i < beforeBean.getModelList().size(); i++){
+						String categoryName = CommonFunction.makeCategoryFormat(beforeBean.getDistributeTarget(), beforeBean.getModelList().get(i).getCategory());
+						String before_str = categoryName + "/" + beforeBean.getModelList().get(i).getModelName() + "/" + beforeBean.getModelList().get(i).getReleaseDate();
+						_beforeList.add(before_str);
+					}
+				}
+						 
+				List<String> _afterList = new ArrayList<>();
+				if (!CollectionUtils.isEmpty(afterBean.getModelList())){
+					for (int i=0; i < afterBean.getModelList().size(); i++){
+						String categoryName = CommonFunction.makeCategoryFormat(afterBean.getDistributeTarget(), afterBean.getModelList().get(i).getCategory());
+						String after_str = categoryName + "/" + afterBean.getModelList().get(i).getModelName() + "/" + afterBean.getModelList().get(i).getReleaseDate();
+						_afterList.add(after_str);
+					}
+				}
+				
+				List<String> _newBeforeList = new ArrayList<>(_beforeList);
+				List<String> _newAfterList = new ArrayList<>(_afterList);
+
+				Collections.sort(_newBeforeList);
+				Collections.sort(_newAfterList);
+				
+				String modelComment = "";
+				String beforeComment = "";
+				String afterComment = "";
+				if (!CollectionUtils.isEmpty(_newBeforeList) && !CollectionUtils.isEmpty(_newAfterList)) {
+					List<String> matchList = _newBeforeList.stream().filter(o -> _newAfterList.stream().anyMatch(Predicate.isEqual(o))).collect(Collectors.toList());
+					if (matchList.size() != _newBeforeList.size() || matchList.size() != _newAfterList.size()) {
+						List<String> beforeNoneMatchList = _newBeforeList.stream().filter(o -> _newAfterList.stream().noneMatch(Predicate.isEqual(o))).collect(Collectors.toList());
+						List<String> afterNoneMatchList = _newAfterList.stream().filter(o -> _newBeforeList.stream().noneMatch(Predicate.isEqual(o))).collect(Collectors.toList());
+						modelComment = "<p><strong>Model Information</strong><br />";
+						beforeComment = "Before : ";
+						for (int i=0; i<_newBeforeList.size(); i++) {
+							beforeComment += "<span>" + _newBeforeList.get(i) + "</span><br />";
+						}
+						afterComment = "After : ";
+						for (int i=0; i<matchList.size(); i++) {
+							afterComment += "<span>" + matchList.get(i) + "</span><br />";
+						}
+						for (int i=0; i<beforeNoneMatchList.size(); i++) {
+							afterComment += "<span style='background-color:red'>" + beforeNoneMatchList.get(i) + "</span><br />";
+						}
+						for (int i=0; i<afterNoneMatchList.size(); i++) {
+							afterComment += "<span style='background-color:yellow'>" + afterNoneMatchList.get(i) + "</span><br />";
+						}
+						modelComment += beforeComment + afterComment + "</p>";
+					}
+				} else if (CollectionUtils.isEmpty(_newBeforeList) && !CollectionUtils.isEmpty(_afterList)) {
+					modelComment = "<p><strong>Model Information</strong><br />";
+					beforeComment = "Before : <br/>";
+					afterComment = "After : ";
+					for (int i=0; i<_afterList.size(); i++) {
+						afterComment += "<span style='background-color:yellow'>" + _afterList.get(i) + "</span>";
+						if (i < _afterList.size()-1) {
+							afterComment += "<br />";
+						}
+					}
+					modelComment += beforeComment + afterComment + "</p>";
+				} else if (!CollectionUtils.isEmpty(_newBeforeList) && CollectionUtils.isEmpty(_afterList)) {
+					modelComment = "<p><strong>Model Information</strong><br />";
+					beforeComment = "Before : ";
+					for (int i=0; i<_beforeList.size(); i++) {
+						beforeComment += "<span>" + _beforeList.get(i) + "</span><br />";
+					}
+					afterComment = "After : ";
+					for (int i=0; i<_beforeList.size(); i++) {
+						afterComment += "<span style='background-color:red'>" + _beforeList.get(i) + "</span><br />";
+					}
+					modelComment += beforeComment + afterComment + "</p>";
+				}
+				if (!isEmpty(modelComment)) {
+					comment += modelComment;
+				}
 			}
 		} else {
 			// Project Division
