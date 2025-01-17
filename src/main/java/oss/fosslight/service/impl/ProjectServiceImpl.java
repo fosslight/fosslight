@@ -8,29 +8,39 @@ package oss.fosslight.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.base.Functions;
+import org.springframework.web.util.HtmlUtils;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -54,9 +64,11 @@ import oss.fosslight.domain.T2File;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.UploadFile;
 import oss.fosslight.domain.Vulnerability;
+import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.PartnerMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.T2UserMapper;
+import oss.fosslight.service.CacheService;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.OssService;
@@ -74,16 +86,36 @@ import oss.fosslight.validation.custom.T2CoProjectValidator;
 @Slf4j
 public class ProjectServiceImpl extends CoTopComponent implements ProjectService{
 	// Service
-	@Autowired OssService ossService;
-	@Autowired VerificationService verificationService;
-	@Autowired FileService fileService;
-	@Autowired VulnerabilityService vulnerabilityService;
-	@Autowired CommentService commentService;
+	@Autowired private OssService ossService;
+	@Autowired private VerificationService verificationService;
+	@Autowired private FileService fileService;
+	@Autowired private VulnerabilityService vulnerabilityService;
+	@Autowired private CommentService commentService;
 	
 	// Mapper
-	@Autowired ProjectMapper projectMapper;
-	@Autowired T2UserMapper userMapper;
-	@Autowired PartnerMapper partnerMapper;
+	@Autowired private ProjectMapper projectMapper;
+	@Autowired private T2UserMapper userMapper;
+	@Autowired private PartnerMapper partnerMapper;
+	@Autowired private CodeMapper codeMapper;
+	@Autowired private CacheService cacheService;
+
+	@Autowired Environment env;
+	
+	private String JDBC_DRIVER;
+	private String DB_URL;
+	private String USERNAME;
+	private String PASSWORD;
+	
+	@Autowired private SqlSessionFactory sqlSessionFactory;
+	
+	@PostConstruct
+	public void setResourcePathPrefix(){
+		JDBC_DRIVER = env.getRequiredProperty("spring.datasource.driver-class-name");
+		DB_URL = env.getRequiredProperty("spring.datasource.url");
+		if (!DB_URL.startsWith("jdbc:mariadb")) DB_URL = "jdbc:mariadb://" + DB_URL;
+		USERNAME = env.getRequiredProperty("spring.datasource.username");
+		PASSWORD = env.getRequiredProperty("spring.datasource.password");
+	}
 	
 	@Override
 	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName, #project?.creator, #project?.identificationStatus}")
@@ -106,7 +138,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	public String getReviewerList(String adminYn) {
 		String ldapFlag = CoCodeManager.getCodeExpString(CoConstDef.CD_SYSTEM_SETTING, CoConstDef.CD_LDAP_USED_FLAG);
-		List<T2Users> userList = userMapper.selectReviwer(adminYn, ldapFlag);
+		List<T2Users> userList = userMapper.selectReviwer(ldapFlag);
 		StringBuilder sb = new StringBuilder();
 		sb.append( " : " +  ";");
 		
@@ -135,9 +167,10 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	@Override
 	public Map<String, Object> getProjectList(Project project) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		List<Project> list = null;
-
+		String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
+		
 		try {
 			// OSS NAME으로 검색하는 경우 NICK NAME을 포함하도록 추가
 			if (!isEmpty(project.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(project.getOssName().toUpperCase())) {
@@ -155,8 +188,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			if (!StringUtil.isEmpty(ossId)) {
 				list = projectMapper.selectUnlimitedOssComponentBomList(project);
 			} else {
-				Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
-				
 				if (CommonFunction.propertyFlagCheck("menu.bat.use.flag", CoConstDef.FLAG_NO)) {
 					project.setIdentificationSubStatusBat(CoConstDef.FLAG_NO);
 				}
@@ -164,14 +195,27 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				list = projectMapper.selectProjectList(project);
 				
 				if (list != null) {
+					boolean isNumberic = false;
+					if (!isEmpty(project.getPrjIdName())) {
+						isNumberic = project.getPrjIdName().chars().allMatch(Character::isDigit);
+					}
+					if (isNumberic) {
+						List<Project> filteredList = list.stream().filter(e -> e.getPrjId().equalsIgnoreCase(project.getPrjName())).collect(Collectors.toList());
+						if (filteredList != null && !filteredList.isEmpty()) {
+							List<Project> sortedList = new ArrayList<>();
+							sortedList.addAll(filteredList);
+							sortedList.addAll(list.stream().filter(e -> !e.getPrjId().equalsIgnoreCase(project.getPrjName())).collect(Collectors.toList()));
+							list = sortedList;
+						}
+					}
+					
 					ProjectIdentification identification = new ProjectIdentification();
 					identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 					identification.setMerge(CoConstDef.FLAG_NO);
 					
-					List<String> customNvdMaxScoreInfoList = new ArrayList<>();
-					
 					// 코드변환처리
-					for (Project bean : list) {
+					list.forEach(bean -> {
+						bean.setStandardScore(Float.valueOf(standardScore));
 						// DISTRIBUTION Android Flag
 						String androidFlag = CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(avoidNull(bean.getNoticeType())) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO;
 						bean.setAndroidFlag(androidFlag);
@@ -197,47 +241,29 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						// DIVISION
 						bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
 						
+						List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {bean.getPrjId()}, "project");
+						if (permissionCheckList != null) {
+							if (bean.getPublicYn().equals(CoConstDef.FLAG_NO)
+									&& !CommonFunction.isAdmin() 
+									&& !permissionCheckList.contains(loginUserName())) {
+								bean.setPermission(0);
+								bean.setStatusPermission(0);
+							} else {
+								if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+									bean.setStatusPermission(0);
+								} else {
+									bean.setStatusPermission(1);
+								}
+								bean.setPermission(1);
+							}
+						}
+						
 						if (!CoConstDef.FLAG_YES.equals(androidFlag)) {
 							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
 						} else {
 							bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 						}
-						
-						if (getSecurityDataCntByProject(bean)) {
-							if (checkIfVulnerabilityResolutionIsFixed(bean)) {
-								bean.setSecCode("Fixed");
-							} else {
-								bean.setSecCode("NotFixed");
-							}
-						}
-						
-						List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(bean.getPrjId(), null);
-						List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(bean.getPrjId(), null);
-						
-						if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-							nvdMaxScoreInfoList = nvdMaxScoreInfoList.stream().distinct().collect(Collectors.toList());
-							String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
-							if (conversionCveInfo != null) {
-								customNvdMaxScoreInfoList.add(conversionCveInfo);
-							}
-						}
-						
-						if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
-							customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
-						}
-						
-						if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
-							String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
-							if (conversionCveInfo != null) {
-								String[] conversionCveData = conversionCveInfo.split("\\@");
-								bean.setCvssScore(conversionCveData[3]);
-								bean.setCveId(conversionCveData[4]);
-								bean.setVulnYn(CoConstDef.FLAG_YES);
-							}
-						}
-						
-						customNvdMaxScoreInfoList.clear();
-					}
+					});
 				}
 			}
 
@@ -252,28 +278,64 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return map;
 	}
 	
-	private boolean checkIfVulnerabilityResolutionIsFixed(Project bean) {
-		List<OssComponents> securityDataList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
-		if (securityDataList != null && !securityDataList.isEmpty()) {
-			int fixedVulnResolutionDataListCnt = securityDataList.stream().filter(e -> avoidNull(e.getVulnerabilityResolution()).equalsIgnoreCase("Fixed")).collect(Collectors.toList()).size();
-			if (securityDataList.size() == fixedVulnResolutionDataListCnt) {
-				return true;
-			} else {
-				return false;
+	private void checkIfVulnerabilityResolutionIsFixed(Project bean) {
+		String fixedCvssScore = "";
+		String notFixedCvssScore = "";
+		int fixedCheckCnt = 0;
+		List<OssComponents> securityList = projectMapper.selectVulnerabilityResolutionSecurityList(bean);
+		
+		if (securityList != null && !securityList.isEmpty()) {
+			int emptyVersionCnt = securityList.stream().filter(e -> isEmpty(e.getOssVersion())).collect(Collectors.toList()).size();
+			int securityListCnt = securityList.stream().filter(e -> !isEmpty(e.getOssVersion()) && Float.valueOf(e.getCvssScore()) >= bean.getStandardScore()).collect(Collectors.toList()).size();
+			
+			for (OssComponents oc : securityList) {
+				if (oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
+					fixedCheckCnt++;
+					continue;
+				} else {
+					if (!isEmpty(notFixedCvssScore)) {
+						if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(notFixedCvssScore)) > 0) {
+							notFixedCvssScore = oc.getCvssScore();
+						}
+					} else {
+						notFixedCvssScore = oc.getCvssScore();
+					}
+				}
+				
+				if (!oc.getVulnerabilityResolution().equalsIgnoreCase("Fixed")) {
+					if (isEmpty(fixedCvssScore)) {
+						fixedCvssScore = oc.getCvssScore();
+					} else {
+						if (new BigDecimal(oc.getCvssScore()).compareTo(new BigDecimal(fixedCvssScore)) > 0) {
+							fixedCvssScore = oc.getCvssScore();
+						}
+					}
+				}
 			}
-		} else {
-			return false;
+			
+			if (emptyVersionCnt == securityList.size()) {
+				bean.setSecCode("notFixed");
+				bean.setCvssScore(notFixedCvssScore);
+			} else {
+				if (fixedCheckCnt > 0 && fixedCheckCnt == securityListCnt) {
+					bean.setSecCode("Fixed");
+					bean.setCvssScore(fixedCvssScore);
+				} else {
+					bean.setSecCode("notFixed");
+					bean.setCvssScore(notFixedCvssScore);
+				}
+			}
 		}
+		
+		bean.setCvssScore(avoidNull(bean.getCvssScore(), CoConstDef.FLAG_NO));
+		bean.setSecCode(avoidNull(bean.getSecCode(), CoConstDef.FLAG_NO));
 	}
 
-	private boolean getSecurityDataCntByProject(Project project) {
-		return projectMapper.getSecurityDataCntByProject(project) > 0 ? true : false;
-	}
-	
 	@Override
 	public Project getProjectDetail(Project project) {
+		String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
 		// master
-		project = projectMapper.selectProjectMaster(project);
+		project = projectMapper.selectProjectMaster(project.getPrjId());
 		
 		// 이전에 생성된 프로젝트를 위해 Default를 설정한다.
 		Map<String, Object> NoticeInfo = projectMapper.getNoticeType(project.getPrjId());
@@ -286,22 +348,55 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		// watcher
 		List<Project> watcherList = projectMapper.selectWatchersList(project);
-		project.setWatcherList(watcherList);
+		if (!CollectionUtils.isEmpty(watcherList)) {
+			T2Users param = new T2Users();
+			for (Project wat : watcherList) {
+				if (!isEmpty(wat.getPrjUserId())) {
+					param.setUserId(wat.getPrjUserId());
+					T2Users userInfo = userMapper.getUser(param);
+					if (userInfo != null) {
+						wat.setPrjDivision(userInfo.getDivision());
+						wat.setPrjUserName(userInfo.getUserName());
+						String codeNm = CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, userInfo.getDivision());
+						if (!isEmpty(codeNm)) {
+							wat.setPrjDivisionName(codeNm);
+						} else {
+							wat.setPrjDivisionName(null);
+						}
+					}
+				}
+			}
+			project.setWatcherList(watcherList);
+		}
 
 		// file
-		project.setCsvFile(projectMapper.selectCsvFile(project));
-		project.setAndroidCsvFile(projectMapper.selectAndroidCsvFile(project));
-		project.setAndroidNoticeFile(projectMapper.selectAndroidNoticeFile(project));
-		project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
+		if (!isEmpty(project.getSrcCsvFileId())) {
+			project.setCsvFile(projectMapper.selectCsvFile(project.getSrcCsvFileId()));
+		}
+		
+		if (!isEmpty(project.getDepCsvFileId())) {
+			project.setDepCsvFile(projectMapper.selectCsvFile(project.getDepCsvFileId()));
+		}
 		
 		if (!isEmpty(project.getBinCsvFileId())) {
-			project.setBinCsvFile(projectMapper.selectBinCsvFile(project));
+			project.setBinCsvFile(projectMapper.selectCsvFile(project.getBinCsvFileId()));
 		}
 		
 		if (!isEmpty(project.getBinBinaryFileId())) {
 			project.setBinBinaryFile(projectMapper.selectFileInfoById(project.getBinBinaryFileId()));
 		}
-
+		
+		project.setAndroidCsvFile(projectMapper.selectAndroidCsvFile(project));
+		project.setAndroidNoticeFile(projectMapper.selectAndroidNoticeFile(project));
+		
+		if (!isEmpty(project.getSrcAndroidResultFileId())) {
+			project.setAndroidResultFile(projectMapper.selectAndroidResultFile(project));
+		}
+		
+		if (!isEmpty(project.getScrtCsvFileId())) {
+			project.setScrtCsvFile(projectMapper.selectCsvFile(project.getScrtCsvFileId()));
+		}
+		
 		//  button(삭제/복사/저장) view 여부
 		if (CommonFunction.isAdmin()) {
 			project.setViewOnlyFlag(CoConstDef.FLAG_NO);
@@ -318,19 +413,33 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		if (project.getAndroidFlag().equals(CoConstDef.FLAG_YES)) {
+			project.setStandardScore(Float.valueOf(standardScore));
 			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-			if (getSecurityDataCntByProject(project)) {
-				project.setSecCode(CoConstDef.FLAG_YES);
-			}
 		} else {
 			if (!project.getIdentificationSubStatusBom().equals("0")) {
+				project.setStandardScore(Float.valueOf(standardScore));
 				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-				if (getSecurityDataCntByProject(project)) {
-					project.setSecCode(CoConstDef.FLAG_YES);
-				}
 			}
 		}
 		
+		List<String> permissionCheckList = CommonFunction.checkUserPermissions("", new String[] {project.getPrjId()}, "project");
+		if (permissionCheckList != null) {
+			if (avoidNull(project.getPublicYn()).equals(CoConstDef.FLAG_NO)
+					&& !CommonFunction.isAdmin() 
+					&& !permissionCheckList.contains(loginUserName())) {
+				project.setPermission(0);
+				project.setStatusPermission(0);
+			} else {
+				if (!CommonFunction.isAdmin() && !permissionCheckList.contains(loginUserName())) {
+					project.setStatusPermission(0);
+				} else {
+					project.setStatusPermission(1);
+				}
+				project.setPermission(1);
+			}
+		}
+		
+		project.setStandardScore(null);
 		return project;
 	}
 	
@@ -339,12 +448,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return getIdentificationGridList(identification, false);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getIdentificationGridList(ProjectIdentification identification, boolean multiUIFlag) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		final HashMap<String, Object> map = new HashMap<>();
 		List<ProjectIdentification> list = null;
-		List<OssComponentsLicense> listLicense = null;
-		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
+		final Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
+		final List<String> inCpeMatchCheckList = ossInfoMap.values().stream().filter(e -> CoConstDef.FLAG_YES.equals(e.getInCpeMatchFlag())).map(OssMaster::getCveId).distinct().collect(Collectors.toList());
 		
 		identification.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
 		
@@ -352,356 +462,547 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			identification.setRoleOutLicenseIdList(CoCodeManager.CD_ROLE_OUT_LICENSE_ID_LIST);
 		}
 		
-		boolean isLoadFromProject = isEmpty(identification.getReferenceId()) && !isEmpty(identification.getRefPrjId());
+		final boolean isLoadFromProject = isEmpty(identification.getReferenceId()) && !isEmpty(identification.getRefPrjId());
 		
 		if (isLoadFromProject) {
 			identification.setReferenceId(identification.getRefPrjId());
 		}
 		
-		boolean isApplyFromBat = isEmpty(identification.getReferenceId()) && !isEmpty(identification.getRefBatId());
+		final boolean isApplyFromBat = isEmpty(identification.getReferenceId()) && !isEmpty(identification.getRefBatId());
 		
 		if (isApplyFromBat) {
 			identification.setReferenceId(identification.getRefBatId());
 		}
 
 		// bom 일시
-		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv())) {
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(identification.getReferenceDiv())) {
 			Map<String, String> obligationTypeMergeMap = new HashMap<>();
-			String reqMergeFlag = identification.getMerge();
-
-			list = projectMapper.selectBomList(identification);
-			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-			List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
-			if (notVersionList != null) {
-				list.addAll(notVersionList);
-			}
-			identification.setOssVersionEmptyFlag(null);
+			final String reqMergeFlag = identification.getMerge();
 			
-			Comparator<ProjectIdentification> compare = Comparator
-					.comparing(ProjectIdentification::getLicenseTypeIdx)
-					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getMergeOrder);
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(identification.getReferenceDiv())) {
+				list = projectMapper.selectBomList(identification);
+				identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+				final List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);
+				if (!CollectionUtils.isEmpty(notVersionList)) {
+					list.addAll(notVersionList);
+				}
+				identification.setOssVersionEmptyFlag(null);
+				
+				final Comparator<ProjectIdentification> compare = Comparator
+						.comparing(ProjectIdentification::getLicenseTypeIdx)
+						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getMergeOrder);
 
-			list.sort(compare);
-			
-			// For loading 3rd Party ID
-			ProjectIdentification thirdPartyOssListParam = new ProjectIdentification();
-			thirdPartyOssListParam.setReferenceId(identification.getReferenceId());
-			thirdPartyOssListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+				list.sort(compare);
+				
+				// For loading 3rd Party ID
+				ProjectIdentification thirdPartyOssListParam = new ProjectIdentification();
+				thirdPartyOssListParam.setReferenceId(identification.getReferenceId());
+				thirdPartyOssListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 
-			List<ProjectIdentification> thirdList = null;
-			Map<String, Object> thirdlistMap = getIdentificationGridList(thirdPartyOssListParam);
-			Map<String, String> thirdPartyNameListByOssMap = new HashMap<>();
-			String keySeparater = ":::";
-			if (thirdlistMap != null && (thirdlistMap.containsKey("mainData") || thirdlistMap.containsKey("rows"))) {
-				thirdList = (List<ProjectIdentification>) thirdlistMap.get(thirdlistMap.containsKey("mainData") ? "mainData" : "rows");
-				if (thirdList != null) {
-					for (ProjectIdentification bean : thirdList) {
-						if (CoConstDef.FLAG_NO.equals(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO))) {
+				List<ProjectIdentification> thirdList = null;
+				Map<String, Object> thirdlistMap = getIdentificationGridList(thirdPartyOssListParam);
+				Map<String, String> thirdPartyNameListByOssMap = new HashMap<>();
+				final String keySeparater = ":::";
+				if (thirdlistMap != null && (thirdlistMap.containsKey("mainData") || thirdlistMap.containsKey("rows"))) {
+					thirdList = (List<ProjectIdentification>) thirdlistMap.get(thirdlistMap.containsKey("mainData") ? "mainData" : "rows");
+					if (thirdList != null) {
+						thirdList.stream().filter(bean -> CoConstDef.FLAG_NO.equals(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO))).forEach(bean -> {
 							String value = bean.getRefPartnerId();
 							if (value != null) {
 								String rowOssName = avoidNull(bean.getOssName()).toUpperCase();
 								String rowOssVersion = avoidNull(bean.getOssVersion()).toUpperCase();
 								String strKey = rowOssName + keySeparater + rowOssVersion + keySeparater;
-								if (isEmpty(rowOssName) || rowOssName.equals("-")) {
+								if (isEmpty(rowOssName) || "-".equals(rowOssName)) {
 									String rowOssLicense = avoidNull(bean.getLicenseName()).toUpperCase();
 									strKey = rowOssName + keySeparater + rowOssVersion + keySeparater + rowOssLicense;
 								}
 								thirdPartyNameListByOssMap.put(strKey, thirdPartyNameListByOssMap.containsKey(strKey) ? thirdPartyNameListByOssMap.get(strKey) + "," + value : value);
 							}
-						}
-					}
-				}
-			}
-			
-			// bom merge 버튼을 클릭하고, 표시대상이 있을 경우, 기존에 저장되어 있는 내용을 취득한다.
-			// need check의 저장값을 유지하기 위함
-			if (CoConstDef.FLAG_YES.equals(reqMergeFlag) && list != null && !list.isEmpty()) {
-				identification.setMerge(CoConstDef.FLAG_NO);
-				List<ProjectIdentification> bomBeforeList = projectMapper.selectBomList(identification);
-				identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-				List<ProjectIdentification> bomBeforeNotVersionList = projectMapper.selectBomList(identification);;
-				if (bomBeforeNotVersionList != null) {
-					bomBeforeList.addAll(bomBeforeNotVersionList);
-				}
-				identification.setOssVersionEmptyFlag(null);
-				bomBeforeList.sort(compare);
-				
-				if (bomBeforeList != null) {
-					for (ProjectIdentification _orgIdentificationBean : bomBeforeList) {
-						obligationTypeMergeMap.put(_orgIdentificationBean.getRefComponentId(), _orgIdentificationBean.getObligationType());
-					}
-				}
-			}
-			
-			Map<String, ProjectIdentification> batMergeSrcMap = new HashMap<>();
-			Map<String, ProjectIdentification> batMergePartnerMap = new HashMap<>();
-			
-			// convert max score
-			List<String> cvssScoreMaxList = new ArrayList<>();
-			List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
-			
-			Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
-			List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
-			
-			for (OssComponentsLicense ocl : bomLicenseList) {
-				String key = ocl.getComponentId();
-				List<OssComponentsLicense> bomLicenses = null;
-				if (bomLicenseMap.containsKey(key)) {
-					bomLicenses = bomLicenseMap.get(ocl.getComponentId());
-				} else {
-					bomLicenses = new ArrayList<>();
-				}
-				bomLicenses.add(ocl);
-				bomLicenseMap.put(key, bomLicenses);
-			}
-			
-			for (ProjectIdentification ll : list) {
-				ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
-				ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
-  				ll.setCopyrightText(ll.getCopyrightText());
-				ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
-
-				if (bomLicenseMap.containsKey(ll.getComponentId())) {
-					ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
-					ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
-				}
-//				listLicense = projectMapper.selectBomLicense(ll);
-//				ll.setOssComponentsLicenseList(listLicense);
-//				ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
-				
-				if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
-					if (obligationTypeMergeMap.containsKey(ll.getComponentId())) {
-						ll.setObligationType(obligationTypeMergeMap.get(ll.getComponentId()));
-					} else {
-						ll.setObligationType(ll.getObligationLicense());
+						});
 					}
 				}
 				
-				// grouping 된 file path를 br tag로 변경
-				ll.setFilePath(CommonFunction.lineReplaceToBR(ll.getFilePath()));
-				
-				if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(ll.getReferenceDiv())) {
-					if (!batMergeSrcMap.containsKey(ll.getOssName().toUpperCase())) {
-						batMergeSrcMap.put(ll.getOssName().toUpperCase(), ll);
-					} else if (StringUtil.compareTo(ll.getOssVersion(), batMergeSrcMap.get(ll.getOssName().toUpperCase()).getOssVersion()) > 0) {
-						batMergeSrcMap.replace(ll.getOssName().toUpperCase(), ll);
+				// bom merge 버튼을 클릭하고, 표시대상이 있을 경우, 기존에 저장되어 있는 내용을 취득한다.
+				// need check의 저장값을 유지하기 위함
+				if (CoConstDef.FLAG_YES.equals(reqMergeFlag) && list != null && !list.isEmpty()) {
+					identification.setMerge(CoConstDef.FLAG_NO);
+					List<ProjectIdentification> bomBeforeList = projectMapper.selectBomList(identification);
+					identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+					List<ProjectIdentification> bomBeforeNotVersionList = projectMapper.selectBomList(identification);;
+					if (bomBeforeNotVersionList != null) {
+						bomBeforeList.addAll(bomBeforeNotVersionList);
 					}
-				} else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(ll.getReferenceDiv())) {
-					if (!batMergePartnerMap.containsKey(ll.getOssName().toUpperCase())) {
-						batMergePartnerMap.put(ll.getOssName().toUpperCase(), ll);
-					} else if (StringUtil.compareTo(ll.getOssVersion(), batMergePartnerMap.get(ll.getOssName().toUpperCase()).getOssVersion()) > 0) {
-						batMergePartnerMap.replace(ll.getOssName().toUpperCase(), ll);
+					identification.setOssVersionEmptyFlag(null);
+					bomBeforeList.sort(compare);
+					
+					if (bomBeforeList != null) {
+						bomBeforeList.forEach(_orgIdentificationBean -> {
+							obligationTypeMergeMap.put(_orgIdentificationBean.getRefComponentId(), _orgIdentificationBean.getObligationType());
+						});
 					}
 				}
 				
-				// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
-				if (isEmpty(ll.getCveId()) 
-						&& isEmpty(ll.getOssVersion()) 
-						&& !isEmpty(ll.getCvssScoreMax())
-						&& !("-".equals(ll.getOssName()))){ 
-					String[] cvssScoreMax = ll.getCvssScoreMax().split("\\@");
-					ll.setCvssScore(cvssScoreMax[3]);
-					ll.setCveId(cvssScoreMax[4]);
-				}
+				Map<String, ProjectIdentification> mergeDepMap = new HashMap<>();
+				Map<String, ProjectIdentification> batMergeSrcMap = new HashMap<>();
+				Map<String, ProjectIdentification> batMergePartnerMap = new HashMap<>();
 				
 				// convert max score
-				if (ll.getCvssScoreMax() != null) {
-					cvssScoreMaxList.add(ll.getCvssScoreMax());
-				}
-				if (ll.getCvssScoreMax1() != null) {
-					cvssScoreMaxVendorProductList.add(ll.getCvssScoreMax1());
-				}
-				if (ll.getCvssScoreMax2() != null) {
-					cvssScoreMaxList.add(ll.getCvssScoreMax2());
-				}
-				if (ll.getCvssScoreMax3() != null) {
-					cvssScoreMaxVendorProductList.add(ll.getCvssScoreMax3());
-				}
+				List<String> cvssScoreMaxList = new ArrayList<>();
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, ll.getOssName(), ll.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
-				if (conversionCveInfo != null) {
-					String[] conversionCveData = conversionCveInfo.split("\\@");
-					ll.setCvssScore(conversionCveData[3]);
-					ll.setCveId(conversionCveData[4]);
-					ll.setVulnYn(CoConstDef.FLAG_YES);
-				}
+				Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+				List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
 				
-				cvssScoreMaxVendorProductList.clear();
-				cvssScoreMaxList.clear();
-			}
-			
-			// bat merget
-			// bat 분석 결과 중에서 oss version이 명시되지 않고, src 또는 3rd party에 동일한 oss 가 존재하는 경우
-			// bat 분석 결과를 src 또는 3rd party에 merge 한다.
-			List<ProjectIdentification> _list = new ArrayList<>();
-			List<String> adminCheckList = new ArrayList<>();
-			List<ProjectIdentification> groupList = null;
-			Map<String, List<ProjectIdentification>> srcSameLicenseMap = new HashMap<>();
-			List<String> egnoreList = new ArrayList<>();
-			
-			for (ProjectIdentification ll : list) {
-
-				// 이미 추가된 oss의 경우
-				if (egnoreList.contains(ll.getComponentId())) {
-					continue;
-				}
-				
-				int addIdx = -1;
-				
-				if (!isEmpty(ll.getOssName())) {
-					String mergeKey = ll.getOssName().toUpperCase();
-					// main oss로 표시되는 bat oss의 version이 명시되어 있지 않은 경우
-					if (CoConstDef.CD_DTL_COMPONENT_ID_BAT.equals(ll.getReferenceDiv()) && isEmpty(ll.getMergePreDiv()) && isEmpty(ll.getOssVersion())) {
-						ProjectIdentification refBean = null;
-						
-						if ( batMergeSrcMap.containsKey(mergeKey)) {
-							// bat => src
-							refBean = batMergeSrcMap.get(mergeKey);
-							
-							// 설정된 license가 상이하고, bat와 동일한 license가 src에 존재한다면 (최상위 버전이 아닌경우)
-							// continue하고 다음 loop에서 merge
-							if (!CommonFunction.isSameLicense(refBean.getOssComponentsLicenseList(), ll.getOssComponentsLicenseList())) {
-								String ossNameAndVersion = findBatOssOtherVersionWithLicense(ll, refBean, list);
-								
-								if (!isEmpty(ossNameAndVersion)) {
-									List<ProjectIdentification> _batList = null;
-									
-									if (srcSameLicenseMap.containsKey(ossNameAndVersion)) {
-										_batList = srcSameLicenseMap.get(ossNameAndVersion);
-										_batList.add(ll);
-										srcSameLicenseMap.replace(ossNameAndVersion, _batList);
-									} else {
-										_batList = new ArrayList<>();
-										_batList.add(ll);
-										srcSameLicenseMap.put(ossNameAndVersion, _batList);
-									}
-									
-									continue;
-								}
-							}
-							
-							ll.setOssId(refBean.getOssId());
-							ll.setOssName(refBean.getOssName());
-							ll.setOssVersion(refBean.getOssVersion());
-							ll.setOssComponentsLicenseList(refBean.getOssComponentsLicenseList());
-							
-							// 순서 정렬
-							addIdx = findOssAppendIndex(CoConstDef.CD_DTL_COMPONENT_ID_SRC, refBean.getComponentId(), list);
-							
-							if (addIdx > -1) {
-								addIdx = addIdx +1;
-								ll.setGroupingColumn(refBean.getOssName() + refBean.getOssVersion());
-							}					
-						} else if ( batMergePartnerMap.containsKey(mergeKey)) {
-							// 3rd => bat
-							refBean = batMergePartnerMap.get(mergeKey);
-
-							// 3rd에 같은 그룹으로 묶여 있는 모든 oss list를 취득
-							ll.setGroupingColumn(refBean.getOssName() + refBean.getOssVersion());
-							ll.setOssName(refBean.getOssName());
-							ll.setOssVersion(refBean.getOssVersion());
-							ll.setOssId(refBean.getOssId());
-							
-							// bin 에 누락된 정보를 3rd의 첫번재 row에서 채워 넣는다.
-							// DOWNLOAD_LOCATION
-							if (isEmpty(ll.getDownloadLocation())) {
-								ll.setDownloadLocation(refBean.getDownloadLocation());
-							}
-							
-							// HOMEPAGE
-							if (isEmpty(ll.getHomepage())) {
-								ll.setHomepage(refBean.getHomepage());
-							}
-							
-							// license 정보
-							ll.setOssComponentsLicenseList(refBean.getOssComponentsLicenseList());
-							ll.setLicenseName(refBean.getLicenseName());
-							ll.setCopyrightText(refBean.getCopyrightText());
-							
-							ll.setObligationLicense(refBean.getObligationLicense());
-							ll.setObligationType(refBean.getObligationType());
-							
-							// 3rd party의 우선순위가 가장 낮기 때문에, 복수건을 취득하는 경우는 없지만, 기능 확장을 고려해서 list 형으로 반환
-							groupList = findOssGroupList(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, batMergePartnerMap.get(mergeKey).getOssName(), batMergePartnerMap.get(mergeKey).getOssVersion(), list);
-							
-							if (groupList != null && !groupList.isEmpty()) {
-								for (ProjectIdentification _groupBean : groupList) {
-									egnoreList.add(_groupBean.getComponentId());
-								}
-							}
-						}
-					} 
-					// 3rd party의 경우, bat에 동일한 oss가 없을 경우만 추가 (정렬)
-					else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(ll.getReferenceDiv()) && isEmpty(ll.getMergePreDiv()) ) {
-						if (existsBatOSS(ll.getOssName(), list)) {
-							continue;
-						}
-					}
-				}
-
-				// Set 3rd Party IDs
-				String rowOssName = avoidNull(ll.getOssName()).toUpperCase();
-				String rowOssVersion = avoidNull(ll.getOssVersion()).toUpperCase();
-				String strKey = rowOssName + keySeparater + rowOssVersion + keySeparater;
-				if (isEmpty(rowOssName) || rowOssName.equals("-")) {
-					String rowOssLicense = avoidNull(ll.getLicenseName()).toUpperCase();
-					strKey = rowOssName + keySeparater + rowOssVersion + keySeparater + rowOssLicense;
-				}
-				if (thirdPartyNameListByOssMap.containsKey(strKey)) {
-					ll.setRefPartnerId(thirdPartyNameListByOssMap.get(strKey));
-				}
-				// License Restriction 저장
-				ll.setRestriction(CommonFunction.setLicenseRestrictionListById(ll.getLicenseId()));
-
-				if (addIdx > -1) {
-					if (addIdx > _list.size() -1) {
-						_list.add(ll);
+				bomLicenseList.forEach(ocl -> {
+					String key = ocl.getComponentId();
+					List<OssComponentsLicense> bomLicenses = null;
+					if (bomLicenseMap.containsKey(key)) {
+						bomLicenses = bomLicenseMap.get(ocl.getComponentId());
 					} else {
-						_list.add(addIdx, ll);
+						bomLicenses = new ArrayList<>();
 					}
-				} else {
-					_list.add(ll);
-					
-					if (groupList != null && !groupList.isEmpty()) {
-						_list.addAll(groupList);
+					bomLicenses.add(ocl);
+					bomLicenseMap.put(key, bomLicenses);
+				});
+				
+				list.forEach(ll -> {
+					ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
+					ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
+	  				ll.setCopyrightText(ll.getCopyrightText());
+					ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+
+					if (bomLicenseMap.containsKey(ll.getComponentId())) {
+						ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
+						ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
 					}
-				}
-				
-				if (CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn())) {
-					adminCheckList.add(ll.getComponentId());
-				}
-			}
-			
-			// src oss중에서 bat와 merge할 수 있는 동일한 oss에 최신 version 외 라이선스까지 동일한 bat가 존재하는 경우
-			if (!srcSameLicenseMap.isEmpty()) {
-				List<ProjectIdentification> _tmp = new ArrayList<>();
-				
-				for (ProjectIdentification bean : _list) {
-					_tmp.add(bean);
-					String _key = bean.getOssName() + "-" + avoidNull(bean.getOssVersion());
+//					listLicense = projectMapper.selectBomLicense(ll);
+//					ll.setOssComponentsLicenseList(listLicense);
+//					ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
 					
-					if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(bean.getReferenceDiv()) && srcSameLicenseMap.containsKey(_key)) {
-						for (ProjectIdentification _mergeBean : srcSameLicenseMap.get(_key)) {
-							_mergeBean.setOssId(bean.getOssId());
-							_mergeBean.setOssName(bean.getOssName());
-							_mergeBean.setOssVersion(bean.getOssVersion());
-							_mergeBean.setOssComponentsLicenseList(bean.getOssComponentsLicenseList());
-							_mergeBean.setGroupingColumn(bean.getGroupingColumn()); // 순서 정렬
-							
-							_tmp.add(_mergeBean);
+					if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
+						if (obligationTypeMergeMap.containsKey(ll.getComponentId())) {
+							ll.setObligationType(obligationTypeMergeMap.get(ll.getComponentId()));
+						} else {
+							ll.setObligationType(ll.getObligationLicense());
 						}
 					}
+					
+					// grouping 된 file path를 br tag로 변경
+					ll.setFilePath(CommonFunction.lineReplaceToBR(ll.getFilePath()));
+					
+					if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(ll.getReferenceDiv())) {
+						if (!batMergeSrcMap.containsKey(ll.getOssName().toUpperCase())) {
+							batMergeSrcMap.put(ll.getOssName().toUpperCase(), ll);
+						} else if (StringUtil.compareTo(ll.getOssVersion(), batMergeSrcMap.get(ll.getOssName().toUpperCase()).getOssVersion()) > 0) {
+							batMergeSrcMap.replace(ll.getOssName().toUpperCase(), ll);
+						}
+					} else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(ll.getReferenceDiv())) {
+						if (!batMergePartnerMap.containsKey(ll.getOssName().toUpperCase())) {
+							batMergePartnerMap.put(ll.getOssName().toUpperCase(), ll);
+						} else if (StringUtil.compareTo(ll.getOssVersion(), batMergePartnerMap.get(ll.getOssName().toUpperCase()).getOssVersion()) > 0) {
+							batMergePartnerMap.replace(ll.getOssName().toUpperCase(), ll);
+						}
+					}
+					
+					String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
+					boolean setCveInfoFlag = false;
+					
+					if (ll.getCvssScoreMax() != null) {
+						String cveId = ll.getCvssScoreMax().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
+					}
+					if (ll.getCvssScoreMax1() != null) {
+						String cveId = ll.getCvssScoreMax1().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
+					}
+					if (ll.getCvssScoreMax2() != null) {
+						String cveId = ll.getCvssScoreMax2().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
+					}
+					if (ll.getCvssScoreMax3() != null) {
+						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
+					}
+					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+						if (cvssScoreMaxList.size() > 1) {
+							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+								@Override
+								public int compare(String o1, String o2) {
+									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+										return -1;
+									}else {
+										return 1;
+									}
+								}
+							});
+						}
+						
+						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+						ll.setCvssScore(cveData[3]);
+						ll.setCveId(cveData[4]);
+						ll.setVulnYn(CoConstDef.FLAG_YES);
+					} else {
+						String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
+						if (conversionCveInfo != null) {
+							String[] conversionCveData = conversionCveInfo.split("\\@");
+							ll.setCvssScore(conversionCveData[3]);
+							ll.setCveId(conversionCveData[4]);
+							ll.setVulnYn(CoConstDef.FLAG_YES);
+						} else {
+							setCveInfoFlag = true;
+						}
+					}
+					
+					cvssScoreMaxList.clear();
+					
+					if (!isEmpty(ll.getOssName()) && ossInfoMap.containsKey(key)) {
+						OssMaster om = ossInfoMap.get(key);
+						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
+							String cveId = om.getCveId();
+							String cvssScore = om.getCvssScore();
+							String _cvssScore = ll.getCvssScore();
+							
+							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+								if (!isEmpty(_cvssScore)) {
+									if (new BigDecimal(cvssScore).compareTo(new BigDecimal(_cvssScore)) > 0) {
+										ll.setCvssScore(cvssScore);
+										ll.setCveId(cveId);
+										ll.setVulnYn(CoConstDef.FLAG_YES);
+									}
+								} else {
+									ll.setCvssScore(cvssScore);
+									ll.setCveId(cveId);
+									ll.setVulnYn(CoConstDef.FLAG_YES);
+								}
+							}
+						}
+					}
+					
+					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(ll.getRefDiv())) {
+						String _key = ll.getOssName() + "-" + avoidNull(ll.getOssVersion());
+						mergeDepMap.put(_key, ll);
+					}
+				});
+				
+				// bat merget
+				// bat 분석 결과 중에서 oss version이 명시되지 않고, src 또는 3rd party에 동일한 oss 가 존재하는 경우
+				// bat 분석 결과를 src 또는 3rd party에 merge 한다.
+				List<ProjectIdentification> _list = new ArrayList<>();
+				List<String> adminCheckList = new ArrayList<>();
+				List<ProjectIdentification> groupList = null;
+				Map<String, List<ProjectIdentification>> srcSameLicenseMap = new HashMap<>();
+				List<String> egnoreList = new ArrayList<>();
+				
+				for (ProjectIdentification ll : list) {
+					
+					// 이미 추가된 oss의 경우
+					if (egnoreList.contains(ll.getComponentId())) {
+						continue;
+					}
+					
+					int addIdx = -1;
+					String ossRestriction = "";
+					
+					if (!isEmpty(ll.getOssName())) {
+						String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
+						if (ossInfoMap.containsKey(key)) {
+							ossRestriction = ossInfoMap.get(key).getRestriction();
+						}
+						
+						String mergeKey = ll.getOssName().toUpperCase();
+						// main oss로 표시되는 bat oss의 version이 명시되어 있지 않은 경우
+						if (CoConstDef.CD_DTL_COMPONENT_ID_BAT.equals(ll.getReferenceDiv()) && isEmpty(ll.getMergePreDiv()) && isEmpty(ll.getOssVersion())) {
+							ProjectIdentification refBean = null;
+							
+							if ( batMergeSrcMap.containsKey(mergeKey)) {
+								// bat => src
+								refBean = batMergeSrcMap.get(mergeKey);
+								
+								// 설정된 license가 상이하고, bat와 동일한 license가 src에 존재한다면 (최상위 버전이 아닌경우)
+								// continue하고 다음 loop에서 merge
+								if (!CommonFunction.isSameLicense(refBean.getOssComponentsLicenseList(), ll.getOssComponentsLicenseList())) {
+									String ossNameAndVersion = findBatOssOtherVersionWithLicense(ll, refBean, list);
+									
+									if (!isEmpty(ossNameAndVersion)) {
+										List<ProjectIdentification> _batList = null;
+										
+										if (srcSameLicenseMap.containsKey(ossNameAndVersion)) {
+											_batList = srcSameLicenseMap.get(ossNameAndVersion);
+											_batList.add(ll);
+											srcSameLicenseMap.replace(ossNameAndVersion, _batList);
+										} else {
+											_batList = new ArrayList<>();
+											_batList.add(ll);
+											srcSameLicenseMap.put(ossNameAndVersion, _batList);
+										}
+										
+										continue;
+									}
+								}
+								
+								ll.setOssId(refBean.getOssId());
+								ll.setOssName(refBean.getOssName());
+								ll.setOssVersion(refBean.getOssVersion());
+								ll.setOssComponentsLicenseList(refBean.getOssComponentsLicenseList());
+								
+								// 순서 정렬
+								addIdx = findOssAppendIndex(CoConstDef.CD_DTL_COMPONENT_ID_SRC, refBean.getComponentId(), list);
+								
+								if (addIdx > -1) {
+									addIdx = addIdx +1;
+									ll.setGroupingColumn(refBean.getOssName() + refBean.getOssVersion());
+								}					
+							} else if ( batMergePartnerMap.containsKey(mergeKey)) {
+								// 3rd => bat
+								refBean = batMergePartnerMap.get(mergeKey);
+
+								// 3rd에 같은 그룹으로 묶여 있는 모든 oss list를 취득
+								ll.setGroupingColumn(refBean.getOssName() + refBean.getOssVersion());
+								ll.setOssName(refBean.getOssName());
+								ll.setOssVersion(refBean.getOssVersion());
+								ll.setOssId(refBean.getOssId());
+								
+								// bin 에 누락된 정보를 3rd의 첫번재 row에서 채워 넣는다.
+								// DOWNLOAD_LOCATION
+								if (isEmpty(ll.getDownloadLocation())) {
+									ll.setDownloadLocation(refBean.getDownloadLocation());
+								}
+								
+								// HOMEPAGE
+								if (isEmpty(ll.getHomepage())) {
+									ll.setHomepage(refBean.getHomepage());
+								}
+								
+								// license 정보
+								ll.setOssComponentsLicenseList(refBean.getOssComponentsLicenseList());
+								ll.setLicenseName(refBean.getLicenseName());
+								ll.setCopyrightText(refBean.getCopyrightText());
+								
+								ll.setObligationLicense(refBean.getObligationLicense());
+								ll.setObligationType(refBean.getObligationType());
+								
+								// 3rd party의 우선순위가 가장 낮기 때문에, 복수건을 취득하는 경우는 없지만, 기능 확장을 고려해서 list 형으로 반환
+								groupList = findOssGroupList(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, batMergePartnerMap.get(mergeKey).getOssName(), batMergePartnerMap.get(mergeKey).getOssVersion(), list);
+								
+								if (groupList != null && !groupList.isEmpty()) {
+									for (ProjectIdentification _groupBean : groupList) {
+										egnoreList.add(_groupBean.getComponentId());
+									}
+								}
+							}
+						} 
+						// 3rd party의 경우, bat에 동일한 oss가 없을 경우만 추가 (정렬)
+						else if (CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(ll.getReferenceDiv()) && isEmpty(ll.getMergePreDiv()) ) {
+							if (existsBatOSS(ll.getOssName(), list)) {
+								continue;
+							}
+						}
+					}
+
+					// Set 3rd Party IDs
+					String rowOssName = avoidNull(ll.getOssName()).toUpperCase();
+					String rowOssVersion = avoidNull(ll.getOssVersion()).toUpperCase();
+					String strKey = rowOssName + keySeparater + rowOssVersion + keySeparater;
+					if (isEmpty(rowOssName) || rowOssName.equals("-")) {
+						String rowOssLicense = avoidNull(ll.getLicenseName()).toUpperCase();
+						strKey = rowOssName + keySeparater + rowOssVersion + keySeparater + rowOssLicense;
+					}
+					if (thirdPartyNameListByOssMap.containsKey(strKey)) {
+						ll.setRefPartnerId(thirdPartyNameListByOssMap.get(strKey));
+					}
+					// License Restriction 저장
+					ll.setRestriction(CommonFunction.setLicenseRestrictionListById(ll.getLicenseId(), ossRestriction));
+					
+					if (addIdx > -1) {
+						if (addIdx > _list.size() -1) {
+							_list.add(ll);
+						} else {
+							_list.add(addIdx, ll);
+						}
+					} else {
+						_list.add(ll);
+						
+						if (groupList != null && !groupList.isEmpty()) {
+							_list.addAll(groupList);
+						}
+					}
+					
+					if (CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn())) {
+						adminCheckList.add(ll.getComponentId());
+					}
 				}
 				
-				_list = _tmp;
-			}
-			map.put("rows", _list);
+				// src oss중에서 bat와 merge할 수 있는 동일한 oss에 최신 version 외 라이선스까지 동일한 bat가 존재하는 경우
+				if (!srcSameLicenseMap.isEmpty()) {
+					List<ProjectIdentification> _tmp = new ArrayList<>();
+					
+					for (ProjectIdentification bean : _list) {
+						_tmp.add(bean);
+						String _key = bean.getOssName() + "-" + avoidNull(bean.getOssVersion());
+						
+						if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(bean.getReferenceDiv()) && srcSameLicenseMap.containsKey(_key)) {
+							for (ProjectIdentification _mergeBean : srcSameLicenseMap.get(_key)) {
+								_mergeBean.setOssId(bean.getOssId());
+								_mergeBean.setOssName(bean.getOssName());
+								_mergeBean.setOssVersion(bean.getOssVersion());
+								_mergeBean.setOssComponentsLicenseList(bean.getOssComponentsLicenseList());
+								_mergeBean.setGroupingColumn(bean.getGroupingColumn()); // 순서 정렬
+								
+								_tmp.add(_mergeBean);
+							}
+						}
+					}
+					
+					_list = _tmp;
+				}
+				map.put("rows", _list);
 
-			if (adminCheckList.size() > 0) {
-				map.put("adminCheckList", adminCheckList);
+				if (adminCheckList.size() > 0) {
+					map.put("adminCheckList", adminCheckList);
+				}
+			} else {
+				list = projectMapper.selectOtherBomList(identification);
+				identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
+				final List<ProjectIdentification> notVersionList = projectMapper.selectOtherBomList(identification);
+				if (!CollectionUtils.isEmpty(notVersionList)) {
+					list.addAll(notVersionList);
+				}
+				identification.setOssVersionEmptyFlag(null);
+				
+				final Comparator<ProjectIdentification> compare = Comparator
+						.comparing(ProjectIdentification::getLicenseTypeIdx)
+						.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
+						.thenComparing(ProjectIdentification::getOssVersion, Comparator.reverseOrder())
+						.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()));
+
+				list.sort(compare);
+				
+				// convert max score
+				List<String> cvssScoreMaxList = new ArrayList<>();
+				List<String> adminCheckList = new ArrayList<>();
+				
+				Map<String, List<OssComponentsLicense>> bomLicenseMap = new HashMap<>();
+				List<OssComponentsLicense> bomLicenseList = projectMapper.selectBomLicenseList(identification);
+				
+				bomLicenseList.forEach(ocl -> {
+					String key = ocl.getComponentId();
+					List<OssComponentsLicense> bomLicenses = null;
+					if (bomLicenseMap.containsKey(key)) {
+						bomLicenses = bomLicenseMap.get(ocl.getComponentId());
+					} else {
+						bomLicenses = new ArrayList<>();
+					}
+					bomLicenses.add(ocl);
+					bomLicenseMap.put(key, bomLicenses);
+				});
+				
+				list.forEach(ll -> {
+					String ossRestriction = "";
+					String key = (ll.getOssName() + "_" + avoidNull(ll.getOssVersion())).toUpperCase();
+					
+					if (ossInfoMap.containsKey(key)) {
+						ossRestriction = ossInfoMap.get(key).getRestriction();
+					}
+					
+					ll.setLicenseId(CommonFunction.removeDuplicateStringToken(ll.getLicenseId(), ","));
+					ll.setLicenseName(CommonFunction.removeDuplicateStringToken(ll.getLicenseName(), ","));
+	  				ll.setCopyrightText(ll.getCopyrightText());
+					ll.setRoleOutLicense(CoCodeManager.CD_ROLE_OUT_LICENSE);
+
+					if (bomLicenseMap.containsKey(ll.getComponentId())) {
+						ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
+						ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
+					}
+					
+					if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
+						if (obligationTypeMergeMap.containsKey(ll.getComponentId())) {
+							ll.setObligationType(obligationTypeMergeMap.get(ll.getComponentId()));
+						} else {
+							ll.setObligationType(ll.getObligationLicense());
+						}
+					}
+					
+					// grouping 된 file path를 br tag로 변경
+					ll.setFilePath(CommonFunction.lineReplaceToBR(ll.getFilePath()));
+					
+					// License Restriction 저장
+					ll.setRestriction(CommonFunction.setLicenseRestrictionListById(ll.getLicenseId(), ossRestriction));
+					
+					boolean setCveInfoFlag = false;
+					
+					if (ll.getCvssScoreMax() != null) {
+						String cveId = ll.getCvssScoreMax().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax());
+					}
+					if (ll.getCvssScoreMax1() != null) {
+						String cveId = ll.getCvssScoreMax1().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax1());
+					}
+					if (ll.getCvssScoreMax2() != null) {
+						String cveId = ll.getCvssScoreMax2().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax2());
+					}
+					if (ll.getCvssScoreMax3() != null) {
+						String cveId = ll.getCvssScoreMax3().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(ll.getCvssScoreMax3());
+					}
+					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+						if (cvssScoreMaxList.size() > 1) {
+							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+								@Override
+								public int compare(String o1, String o2) {
+									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+										return -1;
+									}else {
+										return 1;
+									}
+								}
+							});
+						}
+						
+						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+						ll.setCvssScore(cveData[3]);
+						ll.setCveId(cveData[4]);
+						ll.setVulnYn(CoConstDef.FLAG_YES);
+					} else {
+						String conversionCveInfo = CommonFunction.getConversionCveInfo(ll.getReferenceId(), ossInfoMap, ll, null, cvssScoreMaxList, true);
+						if (conversionCveInfo != null) {
+							String[] conversionCveData = conversionCveInfo.split("\\@");
+							ll.setCvssScore(conversionCveData[3]);
+							ll.setCveId(conversionCveData[4]);
+							ll.setVulnYn(CoConstDef.FLAG_YES);
+						} else {
+							setCveInfoFlag = true;
+						}
+					}
+					
+					cvssScoreMaxList.clear();
+					
+					if (ossInfoMap.containsKey(key)) {
+						OssMaster om = ossInfoMap.get(key);
+						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
+							String cveId = om.getCveId();
+							String cvssScore = om.getCvssScore();
+							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+								ll.setCvssScore(cvssScore);
+								ll.setCveId(cveId);
+								ll.setVulnYn(CoConstDef.FLAG_YES);
+							}
+						}
+					}
+					
+					if (CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn())) {
+						adminCheckList.add(ll.getComponentId());
+					}
+				});
+				
+				map.put("rows", list);
+
+				if (adminCheckList.size() > 0) {
+					map.put("adminCheckList", adminCheckList);
+				}
 			}
 		} else { // bom 외 서브 그리드
 			// bat oss list를 대상
@@ -714,7 +1015,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			String loadToListComment = "";
 			if (!isEmpty(identification.getRefPrjId()) &&
-					(CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(identification.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv()))) {
+					(CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv()) 
+							|| CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(identification.getReferenceDiv()) 
+							|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv()))) {
 				loadToListComment = "(From Prj " + identification.getRefPrjId() + ")";
 			}
 			
@@ -723,23 +1026,43 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			// src, bin, bin(android) 의 경우만 comment를 포함한다.
 			if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(identification.getReferenceDiv()) 
 					|| CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(identification.getReferenceDiv())
-					|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv())) {
+					|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(identification.getReferenceDiv())
+					|| CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) {
 				identification.setIncCommentsFlag(CoConstDef.FLAG_YES);
 			}
 			
 			list = projectMapper.selectIdentificationGridList(identification);
 			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
 			List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
-			if (notVersionOssComponentList != null) {
+			if (!CollectionUtils.isEmpty(notVersionOssComponentList)) {
+				Map<String, String> nvdInfoWithOutVerMap = new HashMap<>();
+				List<ProjectIdentification> outVerOssComponentList = notVersionOssComponentList.stream().filter(CommonFunction.distinctByKey(e -> e.getOssName() + "_" + avoidNull(e.getOssVersion()))).collect(Collectors.toList());
+				for (ProjectIdentification pi : outVerOssComponentList) {
+					String ossInfoKey = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase();
+					if (CoCodeManager.OSS_INFO_UPPER.containsKey(ossInfoKey)) {
+						OssMaster ossInfo = CoCodeManager.OSS_INFO_UPPER.get(ossInfoKey);
+						String cvssScoreMaxString = projectMapper.selectNvdInfoWithOutVer(ossInfo);
+						if (!isEmpty(cvssScoreMaxString)) {
+							nvdInfoWithOutVerMap.put(ossInfoKey, cvssScoreMaxString);
+						}
+					}
+				}
+				for (ProjectIdentification pi : notVersionOssComponentList) {
+					String ossInfoKey = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase();
+					if (nvdInfoWithOutVerMap.containsKey(ossInfoKey)) {
+						pi.setCvssScoreMax(nvdInfoWithOutVerMap.get(ossInfoKey));
+					}
+				}
 				list.addAll(notVersionOssComponentList);
+				nvdInfoWithOutVerMap.clear();
 			}
 			identification.setOssVersionEmptyFlag(null);
 			
 			list.sort(Comparator.comparing(ProjectIdentification::getComponentId));
 			
 			if (list != null && !list.isEmpty()) {
+				String standardScore = CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD);
 				List<String> cvssScoreMaxList = new ArrayList<>();
-				List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
 				
 				for (ProjectIdentification project : list){
 					String _test = project.getOssName().trim() + "_" + project.getOssVersion().trim();
@@ -754,45 +1077,23 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					project.setLicenseDiv(licenseDiv);
 					
-					// oss Name은 작성하고, oss Version은 작성하지 않은 case경우 해당 분기문에서 처리
-					if (isEmpty(project.getCveId()) 
-							&& isEmpty(project.getOssVersion()) 
-							&& !isEmpty(project.getCvssScoreMax())
-							&& !("-".equals(project.getOssName()))){ 
-						String[] cvssScoreMax = project.getCvssScoreMax().split("\\@");
-						project.setCvssScore(cvssScoreMax[3]);
-						project.setCveId(cvssScoreMax[4]);
-					}
-					
-					// convert max score
-					if (project.getCvssScoreMax() != null) {
-						cvssScoreMaxList.add(project.getCvssScoreMax());
-					}
-					if (project.getCvssScoreMax1() != null) {
-						cvssScoreMaxVendorProductList.add(project.getCvssScoreMax1());
-					}
-					if (project.getCvssScoreMax2() != null) {
-						cvssScoreMaxList.add(project.getCvssScoreMax2());
-					}
-					if (project.getCvssScoreMax3() != null) {
-						cvssScoreMaxVendorProductList.add(project.getCvssScoreMax3());
-					}
-					
-					String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, project.getOssName(), project.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, true);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
-						project.setCvssScore(conversionCveData[3]);
-						project.setCveId(conversionCveData[4]);
-						project.setVulnYn(CoConstDef.FLAG_YES);
-					}
-					
-					cvssScoreMaxVendorProductList.clear();
-					cvssScoreMaxList.clear();
-					
 					String comments = "";
-					if (!isEmpty(loadToListComment)) comments = loadToListComment;
-					if (!isEmpty(project.getComments())) comments += " " + project.getComments();
-					if (!isEmpty(comments)) project.setComments(comments);
+					if (!isEmpty(loadToListComment)) {
+						comments = loadToListComment;
+						if (!isEmpty(project.getComments())) {
+							comments += " " + project.getComments();
+						}
+					} else {
+						if (!isEmpty(project.getComments())) comments += " " + project.getComments();
+					}
+					
+					if (!isEmpty(comments)) {
+						project.setComments(comments);
+					}
+					
+					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(identification.getReferenceDiv())) {
+						project.setDependencies(avoidNull(project.getDependencies()));
+					}
 				}
 				
 				ProjectIdentification param = new ProjectIdentification();
@@ -805,6 +1106,62 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					if (!isEmpty(bean.getOssId())) {
 						ossParam.addOssIdList(bean.getOssId());
 					}
+					
+					String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+					boolean setCveInfoFlag = false;
+					
+					if (bean.getCvssScoreMax() != null) {
+						String cveId = bean.getCvssScoreMax().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax());
+					}
+					if (bean.getCvssScoreMax1() != null) {
+						String cveId = bean.getCvssScoreMax1().split("\\@")[4];
+						if (!inCpeMatchCheckList.contains(cveId)) cvssScoreMaxList.add(bean.getCvssScoreMax1());
+					}
+					if (cvssScoreMaxList != null && !cvssScoreMaxList.isEmpty()) {
+						if (cvssScoreMaxList.size() > 1) {
+							Collections.sort(cvssScoreMaxList, new Comparator<String>() {
+								@Override
+								public int compare(String o1, String o2) {
+									if (new BigDecimal(o1.split("\\@")[3]).compareTo(new BigDecimal(o2.split("\\@")[3])) > 0) {
+										return -1;
+									}else {
+										return 1;
+									}
+								}
+							});
+						}
+						
+						String[] cveData = cvssScoreMaxList.get(0).split("\\@");
+						bean.setCvssScore(cveData[3]);
+						bean.setCveId(cveData[4]);
+						bean.setVulnYn(CoConstDef.FLAG_YES);
+					}
+					
+					cvssScoreMaxList.clear();
+					
+					if (ossInfoMap.containsKey(key)) {
+						OssMaster om = ossInfoMap.get(key);
+						if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag())) || setCveInfoFlag) {
+							String cveId = om.getCveId();
+							String cvssScore = om.getCvssScore();
+							String _cvssScore = bean.getCvssScore();
+							
+							if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+								if (!isEmpty(_cvssScore)) {
+									if (new BigDecimal(cvssScore).compareTo(new BigDecimal(_cvssScore)) > 0) {
+										bean.setCvssScore(cvssScore);
+										bean.setCveId(cveId);
+										bean.setVulnYn(CoConstDef.FLAG_YES);
+									}
+								} else {
+									bean.setCvssScore(cvssScore);
+									bean.setCveId(cveId);
+									bean.setVulnYn(CoConstDef.FLAG_YES);
+								}
+							}
+						}
+					}
 				}
 				
 				// oss id로 oss master에 등록되어 있는 라이선스 정보를 취득
@@ -814,25 +1171,53 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					componentOssInfoMap = ossService.getBasicOssInfoListById(ossParam);
 				}
 				
+				Map<String, List<ProjectIdentification>> licenseMap = new HashMap<>();
 				List<ProjectIdentification> licenseList = projectMapper.identificationSubGrid(param);
 				
-				for (ProjectIdentification licenseBean : licenseList) {
-					for (ProjectIdentification bean : list) {
-						if (licenseBean.getComponentId().equals(bean.getComponentId())) {
-							// 수정가능 여부 초기설정
-							licenseBean.setEditable(CoConstDef.FLAG_YES);
-							bean.addComponentLicenseList(licenseBean);
-							
-							break;
-						}
+				for (ProjectIdentification ocl : licenseList) {
+					String key = ocl.getComponentId();
+					List<ProjectIdentification> bomLicenses = null;
+					if (licenseMap.containsKey(key)) {
+						bomLicenses = licenseMap.get(ocl.getComponentId());
+					} else {
+						bomLicenses = new ArrayList<>();
+					}
+					ocl.setEditable(CoConstDef.FLAG_YES);
+					bomLicenses.add(ocl);
+					licenseMap.put(key, bomLicenses);
+				}
+				
+				for (ProjectIdentification bean : list) {
+					if (licenseMap.containsKey(bean.getComponentId())) {
+						bean.setComponentLicenseList(licenseMap.get(bean.getComponentId()));
 					}
 				}
+				
+				licenseMap = null;
+				
+//				for (ProjectIdentification licenseBean : licenseList) {
+//					for (ProjectIdentification bean : list) {
+//						if (licenseBean.getComponentId().equals(bean.getComponentId())) {
+//							// 수정가능 여부 초기설정
+//							licenseBean.setEditable(CoConstDef.FLAG_YES);
+//							bean.addComponentLicenseList(licenseBean);
+//							
+//							break;
+//						}
+//					}
+//				}
 				
 				// license 정보 등록
 				for (ProjectIdentification bean : list) {
 					if (bean.getComponentLicenseList() != null) {
 						//String licenseText = "";
 						String licenseCopy = "";
+						
+						String ossRestriction = "";
+						String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+						if (ossInfoMap.containsKey(key)) {
+							ossRestriction = ossInfoMap.get(key).getRestriction();
+						}
 						
 						// multi dual 라이선스의 경우, main row에 표시되는 license 정보는 OSS List에 등록되어진 라이선스를 기준으로 표시한다.
 						// ossId가 없는 경우는 기본적으로 subGrid로 등록될 수 없다
@@ -899,8 +1284,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						
 
 						// Restriction 설정
-						if (!isEmpty(strLicenseIds)) {
-							bean.setRestriction(CommonFunction.setLicenseRestrictionListById(strLicenseIds));
+						if (!isEmpty(strLicenseIds) || !isEmpty(ossRestriction)) {
+							bean.setRestriction(CommonFunction.setLicenseRestrictionListById(strLicenseIds, ossRestriction));
 						}
 						
 						// customBinary 설정
@@ -1230,6 +1615,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (isEmpty(notice.getAppended())){
 					notice.setAppended(CoCodeManager.getCodeExpString(distributeCode, CoConstDef.CD_DTL_NOTICE_DEFAULT_APPENDED));
 				}
+				
+				notice.setNoticeFileFormat(new String[]{"chkAllowDownloadNoticeHTML"});
 			} else if (CoConstDef.FLAG_YES.equals(notice.getEditNoticeYn())
 					&& CoConstDef.CD_NOTICE_TYPE_GENERAL.equals(notice.getNoticeType())) {
 				
@@ -1259,7 +1646,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					notice.setEditNoticeYn(CoConstDef.FLAG_YES);
 				}
 			}
-		} catch (Exception e) {
+		} catch (Exception e) {e.printStackTrace();
 			log.error(e.getMessage(), e);
 		}
 		
@@ -1268,10 +1655,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	@Override
 	public Project getProjectBasicInfo(String prjId) {
-		Project param = new Project();
-		param.setPrjId(prjId);
-		
-		return projectMapper.selectProjectMaster2(param);
+		return projectMapper.selectProjectMaster2(prjId);
 	}
 	
 	@Transactional
@@ -1466,7 +1850,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			// Identification 관련 정보만 Copy한다.
 			// upload한 파일이 있는 경우는 파일 순번을 새롭게 취득하여 재등록한다. 물리파일은 복사하지 않고 공유한다.
 			project.setPrjId(oldId);
-			Project orgBean = projectMapper.selectProjectMaster2(project);
+			Project orgBean = projectMapper.selectProjectMaster2(oldId);
 			project.setPrjId(prjId);
 			
 			{
@@ -1479,6 +1863,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				
 				newBean.setIdentificationSubStatusPartner(orgBean.getIdentificationSubStatusPartner());
+				newBean.setIdentificationSubStatusDep(orgBean.getIdentificationSubStatusDep());
 				newBean.setIdentificationSubStatusSrc(orgBean.getIdentificationSubStatusSrc());
 				newBean.setIdentificationSubStatusBin(orgBean.getIdentificationSubStatusBin());
 				newBean.setIdentificationSubStatusAndroid(orgBean.getIdentificationSubStatusAndroid());
@@ -1556,10 +1941,16 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			project.setPublicYn(avoidNull(project.getPublicYn(), CoConstDef.FLAG_YES));
+			project.setSecMailYn(avoidNull(project.getSecMailYn(), CoConstDef.FLAG_YES));
+			if(project.getSecMailYn().equals("Y")) {
+				project.setSecMailDesc("");
+			} else {
+				project.setSecMailDesc(avoidNull(project.getSecMailDesc()));
+			}
 			
 			// if complete value equals 'Y', set
 			if (!isNew) {
-				Project prjBean = projectMapper.selectProjectMaster(project);
+				final Project prjBean = projectMapper.selectProjectMaster(project.getPrjId());
 				
 				if (prjBean != null) {
 					if (CoConstDef.FLAG_YES.equals(prjBean.getCompleteYn())) {
@@ -1600,7 +1991,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			} else if ("CONF".equals(result.getVerificationStatus()) 
 					&& CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(result.getDestributionStatus())
 					&& !CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(project.getDistributeTarget())) {
-				projectMapper.updateProjectDistributionStatus(project.getPrjId(), null);
+				String distributionType = codeMapper.getCodeDetail(CoConstDef.CD_DISTRIBUTION_TYPE, result.getDistributionType()).getCdDtlExp();
+				if ("T".equalsIgnoreCase(avoidNull(distributionType))
+						|| (CoConstDef.FLAG_NO.equalsIgnoreCase(avoidNull(distributionType)) && verificationService.checkNetworkServer(result.getPrjId()))) {
+					projectMapper.updateProjectDistributionStatus(project.getPrjId(), CoConstDef.CD_DTL_DISTRIBUTE_NA);
+				} else {
+					projectMapper.updateProjectDistributionStatus(project.getPrjId(), null);
+				}
 			}
 			
 			if (isNew) {
@@ -1658,7 +2055,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
 	public void deleteProject(Project project) {
-		if (project.getDeleteOsddFlag().equals(CoConstDef.FLAG_YES)) {
+		if (projectMapper.checkProjectDistributeHis(project) > 0) {
 			projectMapper.deleteProjectDistributeHis(project);
 		}
 		projectMapper.deleteProjectModel(project);
@@ -1684,6 +2081,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	private void deleteFiles(List<T2File> list) {
 		if(list != null) {
 			for(T2File fileInfo : list) {
+				projectMapper.updateDeleteYNByFileSeq(fileInfo);
 				projectMapper.deleteFileBySeq(fileInfo);
 				fileService.deletePhysicalFile(fileInfo, null);
 			}
@@ -1718,27 +2116,26 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public void updateSubStatus(Project project) {
 		projectMapper.updateProjectSubStatus(project);
 
-		ProjectIdentification components = new ProjectIdentification();
-		components.setReferenceId(project.getPrjId());
-		components.setReferenceDiv(project.getReferenceDiv());
-		
-		List<OssComponents> componentsLicense = projectMapper.selectComponentId(components);
-		
-		for (OssComponents oc : componentsLicense) {
-			projectMapper.deleteOssComponentsLicense(oc);
-		}
-		
-		projectMapper.deleteOssComponents(components);
+//		ProjectIdentification components = new ProjectIdentification();
+//		components.setReferenceId(project.getPrjId());
+//		components.setReferenceDiv(project.getReferenceDiv());
+//		
+//		List<OssComponents> componentsLicense = projectMapper.selectComponentId(components);
+//		
+//		for (OssComponents oc : componentsLicense) {
+//			projectMapper.deleteOssComponentsLicense(oc);
+//		}
+//		
+//		projectMapper.deleteOssComponents(components);
+		projectMapper.resetOssComponentsAndLicense(project.getPrjId(), project.getReferenceDiv());
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponentsList, List<PartnerMaster> thirdPartyList) {		
+	public void registComponentsThird(String prjId, String identificationSubStatusPartner, List<OssComponents> ossComponentsList, List<PartnerMaster> thirdPartyList) {
 		// 프로젝트 정보를 취득
-		Project prjBasicInfo = new Project();
-		prjBasicInfo.setPrjId(prjId);
-		prjBasicInfo = projectMapper.selectProjectMaster(prjBasicInfo);
+		Project prjBasicInfo = projectMapper.selectProjectMaster(prjId);
 		
 		// 프로젝트 상태 정보 변경
 		{
@@ -1776,7 +2173,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		List<OssComponents> updateList = new ArrayList<>();
 		List<OssComponents> insertFromPrjList = new ArrayList<>();
-		List<OssComponents> insertFromPartnerList = new ArrayList<>();
+		List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
+		
+		List<String> refComponentIdList = new ArrayList<>();
+		Map<String, ProjectIdentification> refOssComponentsMap = new HashMap<>();
+		Map<String, List<OssComponentsLicense>> refComponentIdLicenseMap = new HashMap<>();
+		final List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
 		List<String> deleteList = new ArrayList<>();
 		
 		// 순서대로 등록 1) update, 2) delete, 3)insert from project , 4) insert from 3rd 
@@ -1787,56 +2189,50 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				updateList.add(bean);
 				deleteList.add(bean.getComponentId());
 			} else {
-				if (!isEmpty(bean.getRefPrjId())) {
-					// 신규 추가이면서, ref 프로젝트 id가 있으면 
-					// componentsid + prjid + exclude 여부만 사용
-					insertFromPrjList.add(bean);
-				} else {
-					// 신규 추가이면서, ref partner id가 있으면 (개별등록은 없기 때문에 else로처리)
-					//componentsid + partnerid + exclude 여부만 사용
-					insertFromPartnerList.add(bean);
-				}
+				refComponentIdList.add(bean.getRefComponentId());
+				insertFromPrjList.add(bean);
 			}
 		}
 		
-		// 1) update
-		for (OssComponents bean : updateList) {
-			projectMapper.updatePartnerOssList(bean);
+		if (!refComponentIdList.isEmpty()) {
+			OssComponents param = new OssComponents();
+			param.setOssComponentsIdList(refComponentIdList);
+			List<ProjectIdentification> refOssComponentList = projectMapper.selectOssComponentsThirdCopy(param);
+			refOssComponentList.forEach(oc -> {
+				refOssComponentsMap.put(oc.getComponentId(), oc);
+			});
+			
+			List<OssComponentsLicense> refComponentIdLicenseList = projectMapper.selectOssComponentsLicenseThirdCopy(param);
+			refComponentIdLicenseList.forEach(ocl -> {
+				String key = ocl.getComponentId();
+				List<OssComponentsLicense> refComponentIdLicenses = null;
+				if (refComponentIdLicenseMap.containsKey(key)) {
+					refComponentIdLicenses = refComponentIdLicenseMap.get(ocl.getComponentId());
+				} else {
+					refComponentIdLicenses = new ArrayList<>();
+				}
+				refComponentIdLicenses.add(ocl);
+				refComponentIdLicenseMap.put(key, refComponentIdLicenses);
+			});
 		}
 		
-		// 2) delete
-		OssComponents param = new OssComponents();
-		param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-		param.setReferenceId(prjId);
-		param.setOssComponentsIdList(deleteList);
-		List<String> deleteComponentIds = projectMapper.getDeleteOssComponentsLicenseIds(param);
-		param.setOssComponentsIdList(deleteComponentIds);
-		
-		if (deleteComponentIds.size() > 0){
-			projectMapper.deleteOssComponentsLicenseWithIds(param);
-			// deleteOssComponentsWithIds는 not in 값을 delete, deleteOssComponentsWithIds2는 in 값을 delete함.
-			projectMapper.deleteOssComponentsWithIds2(param); 
-		}
-		
-		// 3) insert from project
-		for (OssComponents bean : insertFromPrjList) {
-			bean.setComponentId(bean.getRefComponentId());
-			bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-			bean.setReferenceId(prjId);
-			
-			projectMapper.insertOssComponentsCopy(bean);
-			projectMapper.insertOssComponentsLicenseCopy(bean);
-			
-		}
-		
-		// 4) insert from 3rd part
-		for (OssComponents bean : insertFromPartnerList) {
-			bean.setComponentId(bean.getRefComponentId());
-			bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
-			bean.setReferenceId(prjId);
-			
-			projectMapper.insertOssComponentsCopy(bean);
-			projectMapper.insertOssComponentsLicenseCopy(bean);
+		if (!CollectionUtils.isEmpty(insertFromPrjList)) {
+			for (OssComponents bean : insertFromPrjList) {
+				if (refOssComponentsMap.containsKey(bean.getRefComponentId())) {
+					ProjectIdentification pi = refOssComponentsMap.get(bean.getRefComponentId());
+					pi.setOssName(bean.getOssName());
+					pi.setReferenceId(prjId);
+					pi.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+					pi.setExcludeYn(bean.getExcludeYn());
+					pi.setRefPartnerId(bean.getRefPartnerId());
+					pi.setRefPrjId(bean.getRefPrjId());
+					insertOssComponentList.add(pi);
+					
+					if (refComponentIdLicenseMap.containsKey(bean.getRefComponentId())) {
+						pi.setOssComponentsLicenseList(refComponentIdLicenseMap.get(bean.getRefComponentId()));
+					}
+				}
+			}
 		}
 		
 		Map<String, PartnerMaster> thirdPartyMap = new HashMap<>();
@@ -1855,6 +2251,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<PartnerMaster> thirdPartyUpdateList = new ArrayList<>();
 		List<PartnerMaster> thirdPartyInsertList = new ArrayList<>();
 		List<String> thirdPartyDeleteList = new ArrayList<>();
+		Map<String, PartnerMaster> deleteCheckMap = new HashMap<>();
 		
 		for (PartnerMaster bean : thirdPartyList) {
 			// 기존에 등록되어 있는 경우는 update
@@ -1862,22 +2259,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				thirdPartyUpdateList.add(bean);
 			} else {
 				thirdPartyInsertList.add(bean);
+				deleteCheckMap.put(bean.getPartnerId(), bean);
 			}
 		}
 		
-		Map<String, PartnerMaster> deleteCheckMap = new HashMap<>();
-		
-		// 1) update
 		for (PartnerMaster bean : thirdPartyUpdateList) {
 			deleteCheckMap.put(bean.getPartnerId(), bean);
-		}
-				
-		// 3) insert
-		for (PartnerMaster bean : thirdPartyInsertList) {
-			deleteCheckMap.put(bean.getPartnerId(), bean);
-			bean.setPrjId(prjId);
-			
-			partnerMapper.insertPartnerMapList(bean);
 		}
 		
 		for (String s : thirdPartyMap.keySet()) {
@@ -1886,14 +2273,107 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 		}
 		
-		// 2) delete
-		if (!thirdPartyDeleteList.isEmpty()) {
-			PartnerMaster thirdPartyDeleteParam = new PartnerMaster();
-			thirdPartyDeleteParam.setPrjId(prjId);
-			thirdPartyDeleteParam.setThirdPartyPartnerIdList(thirdPartyDeleteList);
+		registOssComponentsThird(prjId, prjBasicInfo, updateList, deleteList, insertOssComponentList, insertOssComponentLicenseList, thirdPartyInsertList, thirdPartyDeleteList);
+	}
+
+	private void registOssComponentsThird(String prjId, Project prjBasicInfo, List<OssComponents> updateList, List<String> deleteList, List<ProjectIdentification> insertOssComponentList,
+			List<OssComponentsLicense> insertOssComponentLicenseList, List<PartnerMaster> thirdPartyInsertList, List<String> thirdPartyDeleteList) {
+		
+		try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+			ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+			PartnerMapper pMapper = sqlSession.getMapper(PartnerMapper.class);
 			
-			partnerMapper.deletePartnerMapList(thirdPartyDeleteParam);
+			int cnt = 0;
+			// 1) update
+			for (OssComponents bean : updateList) {
+				mapper.updatePartnerOssList(bean);
+				if (cnt++ == 1000) {
+					sqlSession.flushStatements();
+					cnt = 0;
+				}
+			}
+			if (cnt > 0) {
+                sqlSession.flushStatements();
+            }
+			
+			cnt = 0;
+			// 2) delete
+			OssComponents param = new OssComponents();
+			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+			param.setReferenceId(prjId);
+			param.setOssComponentsIdList(deleteList);
+			List<String> deleteComponentIds = mapper.getDeleteOssComponentsLicenseIds(param);
+			param.setOssComponentsIdList(deleteComponentIds);
+			
+			if (deleteComponentIds.size() > 0){
+				mapper.deleteOssComponentsLicenseWithIds(param);
+				mapper.deleteOssComponentsWithIds2(param);
+				sqlSession.flushStatements();
+			}
+			
+			if (!CollectionUtils.isEmpty(insertOssComponentList)) {
+				prjBasicInfo.setReferenceId(prjId);
+				prjBasicInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+				int ossComponentIdx = mapper.selectOssComponentMaxIdx(prjBasicInfo);
+				
+				for (ProjectIdentification bean : insertOssComponentList) {
+					bean.setComponentIdx(String.valueOf(ossComponentIdx++));
+					mapper.insertSrcOssList(bean);
+					if (cnt++ == 1000) {
+						sqlSession.flushStatements();
+						cnt = 0;
+					}
+				}
+				if (cnt > 0) {
+	                sqlSession.flushStatements();
+	            }
+				insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
+			}
+			
+			cnt = 0;
+            for (OssComponentsLicense bean : insertOssComponentLicenseList) {
+                mapper.registComponentLicense(bean);
+                if (cnt++ == 1000) {
+                    sqlSession.flushStatements();
+                    cnt = 0;
+                }
+            }
+            if (cnt > 0) {
+                sqlSession.flushStatements();
+            }
+            
+			cnt = 0;
+			for (PartnerMaster bean : thirdPartyInsertList) {
+				bean.setPrjId(prjId);
+				
+				pMapper.insertPartnerMapList(bean);
+				if (cnt++ == 1000) {
+					sqlSession.flushStatements();
+					cnt = 0;
+				}
+			}
+			if (cnt > 0) {
+                sqlSession.flushStatements();
+            }
+			
+			cnt = 0;
+			if (!thirdPartyDeleteList.isEmpty()) {
+				PartnerMaster thirdPartyDeleteParam = new PartnerMaster();
+				thirdPartyDeleteParam.setPrjId(prjId);
+				thirdPartyDeleteParam.setThirdPartyPartnerIdList(thirdPartyDeleteList);
+				
+				pMapper.deletePartnerMapList(thirdPartyDeleteParam);
+				sqlSession.flushStatements();
+			}
+			
+			sqlSession.commit();
 		}
+		
+		updateList.clear();
+		insertOssComponentList.clear();
+		insertOssComponentLicenseList.clear();
+		thirdPartyInsertList.clear();
+		thirdPartyDeleteList.clear();
 	}
 
 	private List<OssComponents> convertOssNickName3rd(List<OssComponents> ossComponents) {
@@ -1964,6 +2444,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	@Override
+	public void registDepOss(List<ProjectIdentification> ossComponent,	List<List<ProjectIdentification>> ossComponentLicense, Project project) {
+		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+	}
+
+	@Override
+	public void registBinOss(List<ProjectIdentification> ossComponent, List<List<ProjectIdentification>> ossComponentLicense, Project project) {
+		registSrcOss(ossComponent, ossComponentLicense, project, CoConstDef.CD_DTL_COMPONENT_ID_BIN);
+	}
+
+
+	@Override
 	@Transactional
 	public void registSrcOss(List<ProjectIdentification> ossComponent,
 			List<List<ProjectIdentification>> ossComponentLicense, Project project, String refDiv) {
@@ -1998,7 +2489,6 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.updateProjectMaster(projectSubStatus);
 		}
 		
-		
 		ossComponent = convertOssNickName(ossComponent);
 		ossComponentLicense = convertLicenseNickName(ossComponentLicense);
 		String refId = project.getReferenceId();
@@ -2011,7 +2501,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		// 파일 등록
-		if (!isEmpty(project.getSrcCsvFileId()) || !isEmpty(project.getSrcAndroidCsvFileId()) || !isEmpty(project.getSrcAndroidNoticeFileId()) || !isEmpty(project.getBinCsvFileId()) || !isEmpty(project.getBinBinaryFileId())){
+		if (!isEmpty(project.getDepCsvFileId()) || !isEmpty(project.getSrcCsvFileId()) || !isEmpty(project.getSrcAndroidCsvFileId()) || !isEmpty(project.getSrcAndroidNoticeFileId()) || !isEmpty(project.getBinCsvFileId()) || !isEmpty(project.getBinBinaryFileId())){
 			projectMapper.updateFileId(project);
 			
 			if (project.getCsvFileSeq() != null) {
@@ -2039,7 +2529,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Project prjFileCheck = projectMapper.getProjectBasicInfo(project);
 		boolean fileDeleteCheckFlag = false;
 		
-		if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+		if(CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+			if(isEmpty(project.getDepCsvFileId()) && !isEmpty(prjFileCheck.getDepCsvFileId())) {
+				project.setDepCsvFileFlag(CoConstDef.FLAG_YES);
+				fileDeleteCheckFlag = true;
+			}
+		} else if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
 			if (project.getCsvFileSeq().size() == 0 && !isEmpty(prjFileCheck.getSrcCsvFileId())) {
 				project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
 				fileDeleteCheckFlag = true;
@@ -2070,8 +2565,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (project.getCsvFile() != null && project.getCsvFile().size() > 0) {
 			for (int i = 0; i < project.getCsvFile().size(); i++) {
-				projectMapper.deleteFileBySeq(project.getCsvFile().get(i));
+				projectMapper.updateDeleteYNByFileSeq(project.getCsvFile().get(i));
 				fileService.deletePhysicalFile(project.getCsvFile().get(i), "Identification");
+				projectMapper.deleteFileBySeq(project.getCsvFile().get(i));
 			}
 		}
 		
@@ -2086,255 +2582,481 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			List<List<ProjectIdentification>> ossComponentLicense, String refId, String refDiv) {
 		updateOssComponentList(new Project(), refDiv, refId, ossComponent, ossComponentLicense);
 	}
-	
+
+	@Override
 	@Transactional
-	private void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent,
+	public void updateOssComponentList(Project project, String refDiv, String refId, List<ProjectIdentification> ossComponent,
 			List<List<ProjectIdentification>> ossComponentLicense) {
-		// 컴포넌트 마스터 라이센스 지우기
-		ProjectIdentification prj = new ProjectIdentification();
 		
-		if (isEmpty(refId)) {
+		if(StringUtil.isEmpty(refId)) {
 			refId = project.getPrjId();
 		}
 		
-		prj.setReferenceId(refId);
-		prj.setReferenceDiv(refDiv);
-		List<OssComponents> componentId = projectMapper.selectComponentId(prj);
-		
-		for (int i = 0; i < componentId.size(); i++) {
-			projectMapper.deleteOssComponentsLicense(componentId.get(i));
-		}
-		
-		if (!CoConstDef.CD_DTL_COMPONENT_BAT.equals(refDiv)) {
-			if (!ossComponent.isEmpty()) {
-				Project projectStatus = new Project();
-				projectStatus.setPrjId(refId);
-				projectStatus = projectMapper.selectProjectMaster(projectStatus);
-				
-				// 최초 상태이면 PROG 
-				if (StringUtil.isEmpty(projectStatus.getIdentificationStatus())) {
-					projectStatus.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
-				}
-				
-				if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
-					// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
-					if (!StringUtil.isEmpty(project.getIdentificationSubStatusSrc())){
-						projectStatus.setIdentificationSubStatusSrc(project.getIdentificationSubStatusSrc());
-					} else {
-						projectStatus.setIdentificationSubStatusSrc(CoConstDef.FLAG_YES);
-					}
-				} else if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(refDiv)) {
-					// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
-					if (!StringUtil.isEmpty(project.getIdentificationSubStatusBin())){
-						projectStatus.setIdentificationSubStatusBin(project.getIdentificationSubStatusBin());
-					} else {
-						projectStatus.setIdentificationSubStatusBin(CoConstDef.FLAG_YES);
-					}
-				} else {
-					// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
-					if (!StringUtil.isEmpty(project.getIdentificationSubStatusAndroid())){
-						projectStatus.setIdentificationSubStatusAndroid(project.getIdentificationSubStatusAndroid());
-					} else {
-						projectStatus.setIdentificationSubStatusAndroid(CoConstDef.FLAG_YES);
-					}
-				}
-	
-				projectStatus.setModifier(projectStatus.getLoginUserName());
-				projectMapper.updateProjectMaster(projectStatus);
+		if (!CoConstDef.CD_DTL_COMPONENT_BAT.equals(refDiv) && !CollectionUtils.isEmpty(ossComponent)) {
+			Project projectStatus = projectMapper.selectProjectMaster(refId);
+			
+			// 최초 상태이면 PROG 
+			if (StringUtil.isEmpty(projectStatus.getIdentificationStatus())) {
+				projectStatus.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
 			}
+			
+			if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+				if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
+					projectStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
+				} else {
+					projectStatus.setIdentificationSubStatusDep(CoConstDef.FLAG_YES);
+				}
+			} else if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+				// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
+				if(!StringUtil.isEmpty(project.getIdentificationSubStatusSrc())){
+					projectStatus.setIdentificationSubStatusSrc(project.getIdentificationSubStatusSrc());
+				} else {
+					projectStatus.setIdentificationSubStatusSrc(CoConstDef.FLAG_YES);
+				}
+			} else if(CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(refDiv)) {
+				// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
+				if(!StringUtil.isEmpty(project.getIdentificationSubStatusBin())){
+					projectStatus.setIdentificationSubStatusBin(project.getIdentificationSubStatusBin());
+				} else {
+					projectStatus.setIdentificationSubStatusBin(CoConstDef.FLAG_YES);
+				}
+			} else {
+				// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
+				if(!StringUtil.isEmpty(project.getIdentificationSubStatusAndroid())){
+					projectStatus.setIdentificationSubStatusAndroid(project.getIdentificationSubStatusAndroid());
+				} else {
+					projectStatus.setIdentificationSubStatusAndroid(CoConstDef.FLAG_YES);
+				}
+			}
+
+			projectStatus.setModifier(projectStatus.getLoginUserName());
+			projectMapper.updateProjectMaster(projectStatus);
 		}
 
 		project.setReferenceDiv(refDiv);
 		project.setReferenceId(refId);
 		
 		int ossComponentIdx = projectMapper.selectOssComponentMaxIdx(project);
+		// Delete project all components and license
+		projectMapper.resetOssComponentsAndLicense(refId, refDiv);
 		
-		//deleteRows
-		List<String> deleteRows = new ArrayList<String>();
+		// 컴포넌트 등록
+		if (CollectionUtils.isEmpty(ossComponent)) {
+			return;
+		}
 		
-		// 컴포넌트 등록	
-		for (int i = 0; i < ossComponent.size(); i++) {
-			// SRC STATUS 등록
-			
-			ProjectIdentification ossBean = ossComponent.get(i);
-			
+		final Map<String, List<OssComponentsLicense>> componentMultiLicenseMap = makeComponentMultiLicenseMap(ossComponentLicense);
+		String componentId;
+		String downloadLocationUrl;
+		String homepageUrl;
+		final List<ProjectIdentification> insertOssComponentListWithComponentId = new ArrayList<>();
+		final List<ProjectIdentification> insertOssComponentList = new ArrayList<>();
+		final List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
+		for(ProjectIdentification ossBean : ossComponent) {
 			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
 			ossBean = CommonFunction.findOssIdAndName(ossBean);
 			if (isEmpty(ossBean.getOssId())) {
 				ossBean.setOssId(null);
 			}
+			downloadLocationUrl = ossBean.getDownloadLocation();
+			if (!StringUtil.isEmpty(downloadLocationUrl) && downloadLocationUrl.endsWith("/")) {
+				ossBean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
+			}
+			homepageUrl = ossBean.getHomepage();
+			if (!StringUtil.isEmpty(homepageUrl) && homepageUrl.endsWith("/")) {
+				ossBean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
+			}
+			if (avoidNull(ossBean.getTlsh()).equalsIgnoreCase("TNULL")) {
+				ossBean.setTlsh("0");
+			}
+			componentId = StringUtil.avoidNull(ossBean.getComponentId(), ossBean.getGridId());
 			
-			String downloadLocationUrl = ossBean.getDownloadLocation();
-			String homepageUrl = ossBean.getHomepage();
-			
-			if (!isEmpty(downloadLocationUrl)) {
-				if (downloadLocationUrl.endsWith("/")) {
-					ossBean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
-				}
+			// set component licnese
+			if(componentMultiLicenseMap.containsKey(componentId)) {
+				ossBean.setOssComponentsLicenseList(componentMultiLicenseMap.get(componentId));
+			} else {
+				ossBean.addOssComponentsLicense(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
 			}
 			
-			if (!isEmpty(homepageUrl)) {
-				if (homepageUrl.endsWith("/")) {
-					ossBean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
-				}
+			// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
+			if(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
+				ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(ossBean.getOssComponentsLicenseList()));
+				ossBean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
 			}
 			
-			//update
-			if (!ossBean.getGridId().contains(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
-				//ossComponents 등록
-				// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
-				if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
-					List<OssComponentsLicense> _list = new ArrayList<>();
-					
-					if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())) {
-						for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
-							for (ProjectIdentification comLicense : comLicenseList) {
-								if (ossBean.getComponentId().equals(comLicense.getComponentId())){
-									// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
-									if (isEmpty(comLicense.getLicenseName()) && isEmpty(comLicense.getLicenseText()) && isEmpty(comLicense.getOssCopyright())) {
-										continue;
-									}
-									
-									_list.add(CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI));
-								}
-							}
-						}
-					} else {
-						_list.add(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
-					}
-					
-					ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(_list));
-					ossBean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
-				}
-				
-				projectMapper.updateSrcOssList(ossBean);
-				deleteRows.add(ossBean.getComponentId());
-				
-				//멀티라이센스일 경우
-				if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())){
-					List<String> duplicateLicense = new ArrayList<String>();
-					for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
-						for (ProjectIdentification comLicense : comLicenseList) {
-							if (ossBean.getComponentId().equals(comLicense.getComponentId())){
-								if (!isEmpty(comLicense.getLicenseId()) && duplicateLicense.contains(comLicense.getLicenseId())) {
-									continue;
-								}
-								
-								// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
-								if ((isEmpty(comLicense.getLicenseName()) 
-										&& isEmpty(comLicense.getLicenseText()) 
-										&& isEmpty(comLicense.getOssCopyright()))) {
-									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
-									projectMapper.registComponentLicense(license);
-									break;
-								}
-								
-								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
-								duplicateLicense.add(comLicense.getLicenseId());
-								
-								// 라이센스 등록
-								projectMapper.registComponentLicense(license);
-							}
-						}
-					}
-				} else { //싱글라이센스일경우
-					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
-					// 라이센스 등록
-					projectMapper.registComponentLicense(license);
-				}
-			} else { //insert
-				//ossComponents 등록
-				String exComponentId = ossBean.getGridId();
-				ossBean.setReferenceId(refId);
-				ossBean.setReferenceDiv(refDiv);
-				
-				// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
-				if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
-					List<OssComponentsLicense> _list = new ArrayList<>();
-					
-					if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())) {
-
-						for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
-							for (ProjectIdentification comLicense : comLicenseList) {
-								String gridId = comLicense.getGridId();
-								
-								if (isEmpty(gridId)) {
-									continue;
-								}
-								
-								gridId = gridId.split("-")[0];
-								
-								if (exComponentId.equals(comLicense.getComponentId())
-										|| exComponentId.equals(gridId)){
-									_list.add(CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI));
-								}
-							}
-						}
-					} else {
-						_list.add(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
-					}
-					
-					ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(_list));
-					ossBean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
-				}
-				
-				// insert시 매번 max idx를 select 하면 
-				ossBean.setComponentIdx(Integer.toString(ossComponentIdx++));
-				projectMapper.insertSrcOssList(ossBean);
-				deleteRows.add(ossBean.getComponentId());
-				
-				//멀티라이센스일 경우
-				if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())){
-					List<String> duplicateLicense = new ArrayList<String>();
-					for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
-						for (ProjectIdentification comLicense : comLicenseList) {
-							String gridId = comLicense.getGridId();
-							
-							if (isEmpty(gridId)) {
-								continue;
-							}
-							
-							gridId = gridId.split("-")[0];
-							
-							if (exComponentId.equals(comLicense.getComponentId()) || exComponentId.equals(gridId)){
-								if (!isEmpty(comLicense.getLicenseId()) && duplicateLicense.contains(comLicense.getLicenseId())) {
-									continue;
-								}
-								
-								// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
-								if ((isEmpty(comLicense.getLicenseName()) 
-									&& isEmpty(comLicense.getLicenseText()) 
-									&& isEmpty(comLicense.getOssCopyright()))) {
-									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
-									projectMapper.registComponentLicense(license);
-									break;
-								}
-								
-								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
-								// 컴포넌트 ID 설정
-								license.setComponentId(ossBean.getComponentId());
-								duplicateLicense.add(comLicense.getLicenseName()); 
-								
-								// 라이센스 등록
-								projectMapper.registComponentLicense(license);
-							}
-						}
-					}
-				} else { // 싱글라이센스일경우
-					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
-					// 라이센스 등록
-					projectMapper.registComponentLicense(license);
-				}
+			ossBean.setReferenceId(refId);
+			ossBean.setReferenceDiv(refDiv);
+			if (StringUtil.isEmpty(ossBean.getComponentIdx())) {
+				ossBean.setComponentIdx(Integer.toString(++ossComponentIdx));
+			}
+			
+			// 신규인 경우만 compoentId를 생성
+			// 업데이트되는 경우 기존 componentId를 그대로 사용한다.(화면에 표시되는 ID로 커뮤니케이션 이력 유지) 
+			if(!componentId.contains(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
+				insertOssComponentListWithComponentId.add(ossBean);
+			} else {
+				insertOssComponentList.add(ossBean);
 			}
 		}
 		
-		// delete
-		OssComponents param = new OssComponents();
-		param.setReferenceDiv(refDiv);
-		param.setReferenceId(refId);
-		param.setOssComponentsIdList(deleteRows);
+		if (!insertOssComponentList.isEmpty() || !insertOssComponentListWithComponentId.isEmpty()) {
+            try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+                ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+                int saveCnt = 0;
+                for (ProjectIdentification bean : insertOssComponentListWithComponentId) {
+                    mapper.insertSrcOssList(bean);
+                    if(saveCnt++ == 1000) {
+                        sqlSession.flushStatements();
+                        saveCnt = 0;
+                    }
+                }
+                for (ProjectIdentification bean : insertOssComponentList) {
+                    mapper.insertSrcOssList(bean);
+                    if(saveCnt++ == 1000) {
+                        sqlSession.flushStatements();
+                        saveCnt = 0;
+                    }
+                }
+                
+                if (saveCnt > 0) {
+                    sqlSession.flushStatements();
+                }
+                insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentListWithComponentId));
+                insertOssComponentLicenseList.addAll(getInsertOssComponentLicenseList(insertOssComponentList));
+                
+                saveCnt = 0;
+                for (OssComponentsLicense bean : insertOssComponentLicenseList) {
+                    mapper.registComponentLicense(bean);
+                    if (saveCnt++ == 1000) {
+                        sqlSession.flushStatements();
+                        saveCnt = 0;
+                    }
+                }
+                if (saveCnt > 0) {
+                    sqlSession.flushStatements();
+                }
+                sqlSession.commit();
+            }
+            
+            insertOssComponentListWithComponentId.clear();
+            insertOssComponentList.clear();
+            insertOssComponentLicenseList.clear();
+        }
 		
-		projectMapper.deleteOssComponentsWithIds(param);
+//	
+//		
+//		
+//		// 컴포넌트 마스터 라이센스 지우기
+//		ProjectIdentification prj = new ProjectIdentification();
+//		
+//		if (isEmpty(refId)) {
+//			refId = project.getPrjId();
+//		}
+//		
+//		prj.setReferenceId(refId);
+//		prj.setReferenceDiv(refDiv);
+//		List<OssComponents> componentId = projectMapper.selectComponentId(prj);
+//		
+//		for (int i = 0; i < componentId.size(); i++) {
+//			projectMapper.deleteOssComponentsLicense(componentId.get(i));
+//		}
+//		
+//		if (!CoConstDef.CD_DTL_COMPONENT_BAT.equals(refDiv)) {
+//			if (!ossComponent.isEmpty()) {
+//				Project projectStatus = projectMapper.selectProjectMaster(refId);
+//				
+//				// 최초 상태이면 PROG 
+//				if (StringUtil.isEmpty(projectStatus.getIdentificationStatus())) {
+//					projectStatus.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
+//				}
+//				
+//				if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(refDiv)) {
+//					if(!StringUtil.isEmpty(project.getIdentificationSubStatusDep())){
+//						projectStatus.setIdentificationSubStatusDep(project.getIdentificationSubStatusDep());
+//					} else {
+//						projectStatus.setIdentificationSubStatusDep(CoConstDef.FLAG_YES);
+//					}
+//				} else if (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(refDiv)) {
+//					// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
+//					if (!StringUtil.isEmpty(project.getIdentificationSubStatusSrc())){
+//						projectStatus.setIdentificationSubStatusSrc(project.getIdentificationSubStatusSrc());
+//					} else {
+//						projectStatus.setIdentificationSubStatusSrc(CoConstDef.FLAG_YES);
+//					}
+//				} else if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(refDiv)) {
+//					// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
+//					if (!StringUtil.isEmpty(project.getIdentificationSubStatusBin())){
+//						projectStatus.setIdentificationSubStatusBin(project.getIdentificationSubStatusBin());
+//					} else {
+//						projectStatus.setIdentificationSubStatusBin(CoConstDef.FLAG_YES);
+//					}
+//				} else {
+//					// 프로젝트 마스터 SRC 사용가능여부가 N 이면 N 그외 Y
+//					if (!StringUtil.isEmpty(project.getIdentificationSubStatusAndroid())){
+//						projectStatus.setIdentificationSubStatusAndroid(project.getIdentificationSubStatusAndroid());
+//					} else {
+//						projectStatus.setIdentificationSubStatusAndroid(CoConstDef.FLAG_YES);
+//					}
+//				}
+//	
+//				projectStatus.setModifier(projectStatus.getLoginUserName());
+//				projectMapper.updateProjectMaster(projectStatus);
+//			}
+//		}
+//
+//		project.setReferenceDiv(refDiv);
+//		project.setReferenceId(refId);
+//		
+//		int ossComponentIdx = projectMapper.selectOssComponentMaxIdx(project);
+//		
+//		//deleteRows
+//		List<String> deleteRows = new ArrayList<String>();
+//		
+//		// 컴포넌트 등록	
+//		for (int i = 0; i < ossComponent.size(); i++) {
+//			// SRC STATUS 등록
+//			
+//			ProjectIdentification ossBean = ossComponent.get(i);
+//			
+//			// oss_id를 다시 찾는다. (oss name과 oss id가 일치하지 않는 경우가 있을 수 있음)
+//			ossBean = CommonFunction.findOssIdAndName(ossBean);
+//			if (isEmpty(ossBean.getOssId())) {
+//				ossBean.setOssId(null);
+//			}
+//			
+//			String downloadLocationUrl = ossBean.getDownloadLocation();
+//			String homepageUrl = ossBean.getHomepage();
+//			
+//			if (!isEmpty(downloadLocationUrl)) {
+//				if (downloadLocationUrl.endsWith("/")) {
+//					ossBean.setDownloadLocation(downloadLocationUrl.substring(0, downloadLocationUrl.length()-1));
+//				}
+//			}
+//			
+//			if (!isEmpty(homepageUrl)) {
+//				if (homepageUrl.endsWith("/")) {
+//					ossBean.setHomepage(homepageUrl.substring(0, homepageUrl.length()-1));
+//				}
+//			}
+//			
+//			//update
+//			if (!ossBean.getGridId().contains(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX)){
+//				//ossComponents 등록
+//				// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
+//				if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
+//					List<OssComponentsLicense> _list = new ArrayList<>();
+//					
+//					if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())) {
+//						for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+//							for (ProjectIdentification comLicense : comLicenseList) {
+//								if (ossBean.getComponentId().equals(comLicense.getComponentId())){
+//									// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
+//									if (isEmpty(comLicense.getLicenseName()) && isEmpty(comLicense.getLicenseText()) && isEmpty(comLicense.getOssCopyright())) {
+//										continue;
+//									}
+//									
+//									_list.add(CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI));
+//								}
+//							}
+//						}
+//					} else {
+//						_list.add(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
+//					}
+//					
+//					ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(_list));
+//					ossBean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
+//				}
+//				
+//				projectMapper.updateSrcOssList(ossBean);
+//				deleteRows.add(ossBean.getComponentId());
+//				
+//				//멀티라이센스일 경우
+//				if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())){
+//					List<String> duplicateLicense = new ArrayList<String>();
+//					for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+//						for (ProjectIdentification comLicense : comLicenseList) {
+//							if (ossBean.getComponentId().equals(comLicense.getComponentId())){
+//								if (!isEmpty(comLicense.getLicenseId()) && duplicateLicense.contains(comLicense.getLicenseId())) {
+//									continue;
+//								}
+//								
+//								// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
+//								if ((isEmpty(comLicense.getLicenseName()) 
+//										&& isEmpty(comLicense.getLicenseText()) 
+//										&& isEmpty(comLicense.getOssCopyright()))) {
+//									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+//									projectMapper.registComponentLicense(license);
+//									break;
+//								}
+//								
+//								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
+//								duplicateLicense.add(comLicense.getLicenseId());
+//								
+//								// 라이센스 등록
+//								projectMapper.registComponentLicense(license);
+//							}
+//						}
+//					}
+//				} else { //싱글라이센스일경우
+//					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+//					// 라이센스 등록
+//					projectMapper.registComponentLicense(license);
+//				}
+//			} else { //insert
+//				//ossComponents 등록
+//				String exComponentId = ossBean.getGridId();
+//				ossBean.setReferenceId(refId);
+//				ossBean.setReferenceDiv(refDiv);
+//				
+//				// android project의 경우, bom 처리를 하지 않기 때문에, bom save에서 처리하는 obligation type을 여기서 설정해야한다.
+//				if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(refDiv)) {
+//					List<OssComponentsLicense> _list = new ArrayList<>();
+//					
+//					if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())) {
+//
+//						for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+//							for (ProjectIdentification comLicense : comLicenseList) {
+//								String gridId = comLicense.getGridId();
+//								
+//								if (isEmpty(gridId)) {
+//									continue;
+//								}
+//								
+//								gridId = gridId.split("-")[0];
+//								
+//								if (exComponentId.equals(comLicense.getComponentId())
+//										|| exComponentId.equals(gridId)){
+//									_list.add(CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI));
+//								}
+//							}
+//						}
+//					} else {
+//						_list.add(CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE));
+//					}
+//					
+//					ossBean.setObligationType(CommonFunction.checkObligationSelectedLicense(_list));
+//					ossBean.setBomWithAndroidFlag(CoConstDef.FLAG_YES);
+//				}
+//				
+//				// insert시 매번 max idx를 select 하면 
+//				ossBean.setComponentIdx(Integer.toString(ossComponentIdx++));
+//				projectMapper.insertSrcOssList(ossBean);
+//				deleteRows.add(ossBean.getComponentId());
+//				
+//				//멀티라이센스일 경우
+//				if (CoConstDef.LICENSE_DIV_MULTI.equals(ossBean.getLicenseDiv())){
+//					List<String> duplicateLicense = new ArrayList<String>();
+//					for (List<ProjectIdentification> comLicenseList : ossComponentLicense) {
+//						for (ProjectIdentification comLicense : comLicenseList) {
+//							String gridId = comLicense.getGridId();
+//							
+//							if (isEmpty(gridId)) {
+//								continue;
+//							}
+//							
+//							gridId = gridId.split("-")[0];
+//							
+//							if (exComponentId.equals(comLicense.getComponentId()) || exComponentId.equals(gridId)){
+//								if (!isEmpty(comLicense.getLicenseId()) && duplicateLicense.contains(comLicense.getLicenseId())) {
+//									continue;
+//								}
+//								
+//								// multi license oss에 license를 추가한 경우, license 명을 입력하지 않은 경우는 무시
+//								if ((isEmpty(comLicense.getLicenseName()) 
+//									&& isEmpty(comLicense.getLicenseText()) 
+//									&& isEmpty(comLicense.getOssCopyright()))) {
+//									OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+//									projectMapper.registComponentLicense(license);
+//									break;
+//								}
+//								
+//								OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, CoConstDef.LICENSE_DIV_MULTI);
+//								// 컴포넌트 ID 설정
+//								license.setComponentId(ossBean.getComponentId());
+//								duplicateLicense.add(comLicense.getLicenseName()); 
+//								
+//								// 라이센스 등록
+//								projectMapper.registComponentLicense(license);
+//							}
+//						}
+//					}
+//				} else { // 싱글라이센스일경우
+//					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(ossBean, CoConstDef.LICENSE_DIV_SINGLE);
+//					// 라이센스 등록
+//					projectMapper.registComponentLicense(license);
+//				}
+//			}
+//		}
+//		
+//		// delete
+//		OssComponents param = new OssComponents();
+//		param.setReferenceDiv(refDiv);
+//		param.setReferenceId(refId);
+//		param.setOssComponentsIdList(deleteRows);
+//		
+//		projectMapper.deleteOssComponentsWithIds(param);
+	}
+	
+	/**
+	 * make component license list
+	 * @param ossComponentList
+	 * @return
+	 */
+	private List<OssComponentsLicense> getInsertOssComponentLicenseList(List<ProjectIdentification> ossComponentList) {
+		final List<OssComponentsLicense> insertOssComponentLicenseList = new ArrayList<>();
+		ossComponentList.stream()
+		.filter(regComponet -> !CollectionUtils.isEmpty(regComponet.getOssComponentsLicenseList()))
+		.forEach(regComponet -> regComponet.getOssComponentsLicenseList().forEach(_license -> {
+			_license.setComponentId(regComponet.getComponentId());
+			insertOssComponentLicenseList.add(_license);
+		}));
+		return insertOssComponentLicenseList;
+	}
+
+	/**
+	 * make component Multi license Map List
+	 * @param ossComponentLicense
+	 * @return
+	 */
+	private Map<String, List<OssComponentsLicense>> makeComponentMultiLicenseMap(List<List<ProjectIdentification>> ossComponentLicense) {
+		final Map<String, List<OssComponentsLicense>> componentMultiLicenseMap = new HashMap<>();
+		List<OssComponentsLicense> licenseList;
+		String _componentId;
+		String _licenseId;
+		for (List<ProjectIdentification> compLicenseList : ossComponentLicense) {
+			for (ProjectIdentification compLicense : compLicenseList) {
+				_componentId = isEmpty(compLicense.getComponentId()) ? compLicense.getGridId() : compLicense.getComponentId();
+				_licenseId = compLicense.getLicenseId();
+				if(componentMultiLicenseMap.containsKey(_componentId)) {
+					licenseList = componentMultiLicenseMap.get(_componentId);
+				} else {
+					licenseList = new ArrayList<>();
+				}
+				
+				// multi license oss에 license 명을 입력하지 않은 경우는 Single license
+				if((StringUtil.isEmpty(compLicense.getLicenseName()) 
+						&& StringUtil.isEmpty(compLicense.getLicenseText()) 
+						&& StringUtil.isEmpty(compLicense.getOssCopyright()))) {
+					break;
+				}
+				
+				// check duplicate license id
+				boolean isDuplicatedLicenseId = false;
+				for(OssComponentsLicense _license : licenseList) {
+					if(!StringUtil.isEmpty(_licenseId) && StringUtil.avoidNull(_license.getLicenseId(), "").equals(_licenseId)) {
+						isDuplicatedLicenseId = true;
+						break;
+					}
+				}
+				if(isDuplicatedLicenseId) {
+					continue;
+				}
+
+				licenseList.add(CommonFunction.reMakeLicenseBean(compLicense, CoConstDef.LICENSE_DIV_MULTI));
+				componentMultiLicenseMap.put(_componentId, licenseList);
+			}
+		}
+		return componentMultiLicenseMap;
 	}
 	
 	@Transactional
@@ -2655,7 +3377,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 
 	@Override
-	public Map<String, List<String>> nickNameValid(List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentLicenseList) {
+	public Map<String, List<String>> nickNameValid(String prjId, List<ProjectIdentification> ossComponentList, List<List<ProjectIdentification>> ossComponentLicenseList) {
 		List<String> ossNickNameCheckResult = new ArrayList<>();
 		List<String> licenseNickNameCheckResult = new ArrayList<>();
 		Map<String, List<String>> result = new HashMap<String, List<String>>();
@@ -2663,12 +3385,29 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> ossCheckParam = new ArrayList<>();
 		List<String> licenseCheckParam = new ArrayList<>();
 		
+		List<ProjectIdentification> adminCheckList = projectMapper.selectAdminCheckList(prjId);
+		List<String> refComponentIdList = new ArrayList<>();
+		List<String> ossNameVersionList = new ArrayList<>();
+		
+		for (ProjectIdentification pi : adminCheckList) {
+			refComponentIdList.add(pi.getRefComponentId());
+			if (!pi.getOssName().isEmpty() && !pi.getOssName().equals("")) {
+				String ossName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(pi.getOssName().toUpperCase());
+				ossNameVersionList.add((ossName + "_" + avoidNull(pi.getOssVersion())).toUpperCase());
+			}
+		}
+		
 		for (ProjectIdentification bean : ossComponentList) {
 			String _ossName = avoidNull(bean.getOssName()).trim();
-			int isAdminCheck = projectMapper.selectAdminCheckCnt(bean);
 			
-			if (!isEmpty(_ossName) && !"-".equals(_ossName) && !ossCheckParam.contains(_ossName) && isAdminCheck < 1) {
-				ossCheckParam.add(_ossName);
+			if (!isEmpty(_ossName) && !"-".equals(_ossName)) {
+				boolean adminCheckFlag = false;
+				if (refComponentIdList.contains(bean.getComponentId()) || ossNameVersionList.contains((_ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase())) {
+					adminCheckFlag = true;
+				}
+				if (!ossCheckParam.contains(_ossName) && !adminCheckFlag) {
+					ossCheckParam.add(_ossName);
+				}
 			}
 			
 			if (CoConstDef.LICENSE_DIV_MULTI.equals(bean.getLicenseDiv())) {
@@ -2738,69 +3477,119 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return result;
 	}
 
+	@Override
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList) {
+		registBom(prjId, merge, projectIdentification, checkGridBomList, null, false, false);
+	}
+	
+	@Override
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid) {
+		registBom(prjId, merge, projectIdentification, checkGridBomList, copyPrjId, isCopyConfirm, isAndroid, false);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification) {
+	public void registBom(String prjId, String merge, List<ProjectIdentification> projectIdentification, List<ProjectIdentification> checkGridBomList, String copyPrjId, boolean isCopyConfirm, boolean isAndroid, boolean isPartner) {
 		Map<String, OssMaster> ossInfoMap = CoCodeManager.OSS_INFO_UPPER;
 		List<ProjectIdentification> includeVulnInfoNewBomList = new ArrayList<>();
 		List<ProjectIdentification> includeVulnInfoOldBomList = new ArrayList<>();
 		List<String> cvssScoreMaxList = new ArrayList<>();
-		List<String> cvssScoreMaxVendorProductList = new ArrayList<>();
 				
 		// 컴포넌트 삭제
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(prjId);
-		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		if (!isAndroid) {
+			if (!isPartner) {
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			} else {
+				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+			}
+		} else {
+			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+		}
 		identification.setMerge(CoConstDef.FLAG_NO);
 		
 		// 기존 bom data get
-		List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
+		List<ProjectIdentification> bomList = null;
+		if (!isAndroid && !isPartner) {
+			bomList = projectMapper.selectBomList(identification);
+		} else {
+			bomList = projectMapper.selectOtherBomList(identification);
+		}
+		
 		identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-		List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
+		
+		List<ProjectIdentification> notVersionList = null;
+		if (!isAndroid && !isPartner) {
+			notVersionList = projectMapper.selectBomList(identification);
+		} else {
+			notVersionList = projectMapper.selectOtherBomList(identification);
+		}
 		if (notVersionList != null && !notVersionList.isEmpty()) {
 			bomList.addAll(notVersionList);
 		}
 		identification.setOssVersionEmptyFlag(null);
 		
-		if (bomList != null && !bomList.isEmpty()) {
-			for (ProjectIdentification pi : bomList) {
-				// convert max score
-				if (pi.getCvssScoreMax() != null) {
-					cvssScoreMaxList.add(pi.getCvssScoreMax());
-				}
-				if (pi.getCvssScoreMax1() != null) {
-					cvssScoreMaxVendorProductList.add(pi.getCvssScoreMax1());
-				}
-				if (pi.getCvssScoreMax2() != null) {
-					cvssScoreMaxList.add(pi.getCvssScoreMax2());
-				}
-				if (pi.getCvssScoreMax3() != null) {
-					cvssScoreMaxVendorProductList.add(pi.getCvssScoreMax3());
-				}
-				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, pi.getOssName(), pi.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
-				if (conversionCveInfo != null) {
-					String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
-					if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
-						includeVulnInfoOldBomList.add(pi);
-					}
-				}
-				
-				cvssScoreMaxVendorProductList.clear();
-				cvssScoreMaxList.clear();
+		List<String> adminCheckComponentIds = new ArrayList<>();
+		List<String> removeAdminCheckComponentIds = new ArrayList<>();
+		for (ProjectIdentification bomGridData : checkGridBomList) {
+			for (String refComponentId : bomGridData.getRefComponentId().split(",")) {
+				removeAdminCheckComponentIds.add(refComponentId.trim());
 			}
 		}
 		
+		if (bomList != null && !bomList.isEmpty()) {
+			for (ProjectIdentification pi : bomList) {
+				if (pi.getAdminCheckYn().equals(CoConstDef.FLAG_YES)) adminCheckComponentIds.add(pi.getRefComponentId());
+				
+				String key = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase();
+				boolean setCveInfoFlag = false;
+				if (ossInfoMap.containsKey(key)) {
+					OssMaster om = ossInfoMap.get(key);
+					if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag()))) {
+						String cveId = om.getCveId();
+						String cvssScore = om.getCvssScore();
+						if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+							if (new BigDecimal(cvssScore).compareTo(new BigDecimal("8.0")) > -1) {
+								includeVulnInfoOldBomList.add(pi);
+							}
+						} else {
+							setCveInfoFlag = true;
+						}
+					} else {
+						setCveInfoFlag = true;
+					}
+				}
+				
+				if (setCveInfoFlag) {
+					// convert max score
+					if (pi.getCvssScoreMax() != null) {
+						cvssScoreMaxList.add(pi.getCvssScoreMax());
+					}
+					if (pi.getCvssScoreMax1() != null) {
+						cvssScoreMaxList.add(pi.getCvssScoreMax1());
+					}
+					
+					String conversionCveInfo = CommonFunction.getConversionCveInfo(pi.getReferenceId(), ossInfoMap, pi, null, cvssScoreMaxList, false);
+					if (conversionCveInfo != null) {
+						String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
+						if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
+							includeVulnInfoOldBomList.add(pi);
+						}
+					}
+					
+					cvssScoreMaxList.clear();
+				}
+			}
+		}
+		
+		if (!removeAdminCheckComponentIds.isEmpty()) adminCheckComponentIds.removeAll(removeAdminCheckComponentIds);
 		List<OssComponents> componentId = projectMapper.selectComponentId(identification);
 		
 		// 기존 bom 정보를 모두 물리삭제하고 다시 등록한다.
 		if (componentId.size() > 0){
-			for (int i = 0; i < componentId.size(); i++) {
-				projectMapper.deleteOssComponentsLicense(componentId.get(i));
-			}
-			
-			projectMapper.deleteOssComponents(identification);
+			projectMapper.resetOssComponentsAndLicense(identification.getReferenceId(), identification.getReferenceDiv());
 		}
 		
 		identification.setMerge(merge);
@@ -2809,18 +3598,51 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> mergeListMap = getIdentificationGridList(identification);
 		
 		if (mergeListMap != null && mergeListMap.get("rows") != null) {
-			for (ProjectIdentification bean : (List<ProjectIdentification>)mergeListMap.get("rows")) {
+			if (isCopyConfirm) {
+				ProjectIdentification param = new ProjectIdentification();
+				param.setReferenceId(copyPrjId);
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				param.setMerge(CoConstDef.FLAG_NO);
+				Map<String, Object> copyTargetbomList = getIdentificationGridList(param);
 				
+				if (copyTargetbomList != null && copyTargetbomList.get("rows") != null && projectIdentification.isEmpty()) {
+					projectIdentification = (List<ProjectIdentification>) copyTargetbomList.get("rows");
+				}
+			}
+			
+			for (ProjectIdentification bean : (List<ProjectIdentification>)mergeListMap.get("rows")) {
 				bean.setRefDiv(bean.getReferenceDiv());
-				bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				if (!isAndroid) {
+					if (!isPartner) {
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+					} else {
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+					}
+				} else {
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+				}
 				bean.setRefComponentId(bean.getComponentId());
-				bean.setAdminCheckYn(CoConstDef.FLAG_NO);
+				if (adminCheckComponentIds.contains(bean.getRefComponentId())) {
+					bean.setAdminCheckYn(CoConstDef.FLAG_YES);
+				} else {
+					bean.setAdminCheckYn(CoConstDef.FLAG_NO);
+				}
 				bean.setPreObligationType(bean.getObligationType());
+				
+				String copyCheckKey = bean.getRefComponentId();
+				if (isCopyConfirm) {
+					copyCheckKey = (bean.getRefDiv() + "_" + bean.getOssName() + "_" + bean.getOssVersion() + "_" + bean.getLicenseName()).toUpperCase();
+				}
 				
 				// 그리드 데이터 넣기
 				for (ProjectIdentification gridData : projectIdentification) {
+					String copyCheckKey2 = gridData.getRefComponentId();
+					if (isCopyConfirm) {
+						copyCheckKey2 = (gridData.getRefDiv() + "_" + gridData.getOssName() + "_" + gridData.getOssVersion() + "_" + gridData.getLicenseName()).toUpperCase();
+					}
+					
 					// merge 결과 (src/bat/3rd) 일시
-					if (gridData.getRefComponentId().contains(bean.getRefComponentId())){
+					if (copyCheckKey2.contains(copyCheckKey)){
 						bean.setMergePreDiv(gridData.getMergePreDiv());
 						
 						// BOM에 초기표시된 obligation을 초기 값으로 설정
@@ -2828,13 +3650,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (CoConstDef.FLAG_YES.equals(gridData.getAdminCheckYn())) {
 							bean.setAdminCheckYn(gridData.getAdminCheckYn());
 							
-							if (CoConstDef.FLAG_YES.equals(gridData.getSource())) {
-								bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
-							} else if (CoConstDef.FLAG_YES.equals(gridData.getNotify())) {
-								bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
-							} else if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_NO.equals(gridData.getSource())) {
-								bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED);
+							if (isCopyConfirm) {
+								bean.setPreObligationType(gridData.getPreObligationType());
+								bean.setObligationType(gridData.getObligationType());
+							} else {
+								if (CoConstDef.FLAG_YES.equals(gridData.getSource())) {
+									bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE);
+								} else if (CoConstDef.FLAG_YES.equals(gridData.getNotify())) {
+									bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
+								} else if (CoConstDef.FLAG_NO.equals(gridData.getNotify()) && CoConstDef.FLAG_NO.equals(gridData.getSource())) {
+									bean.setObligationType(CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK_SELECTED);
+								}
 							}
+							
+							bean.setDownloadLocation(gridData.getDownloadLocation());
+							bean.setHomepage(gridData.getHomepage());
+							bean.setCopyrightText(gridData.getCopyrightText());
 						}
 						
 						break;
@@ -2843,25 +3674,49 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				bean = CommonFunction.findOssIdAndName(bean);
 				
-				if (bean.getCvssScoreMax() != null) {
-					cvssScoreMaxList.add(bean.getCvssScoreMax());
-				}
-				if (bean.getCvssScoreMax1() != null) {
-					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax1());
-				}
-				if (bean.getCvssScoreMax2() != null) {
-					cvssScoreMaxList.add(bean.getCvssScoreMax2());
-				}
-				if (bean.getCvssScoreMax3() != null) {
-					cvssScoreMaxVendorProductList.add(bean.getCvssScoreMax3());
+				String key = (bean.getOssName() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
+				boolean setCveInfoFlag = false;
+				if (ossInfoMap.containsKey(key)) {
+					OssMaster om = ossInfoMap.get(key);
+					if (CoConstDef.FLAG_YES.equals(avoidNull(om.getInCpeMatchFlag()))) {
+						String cveId = om.getCveId();
+						String cvssScore = om.getCvssScore();
+						if (!isEmpty(cvssScore) && !isEmpty(cveId)) {
+							if (new BigDecimal(cvssScore).compareTo(new BigDecimal("8.0")) > -1) {
+								includeVulnInfoOldBomList.add(bean);
+							}
+						} else {
+							setCveInfoFlag = true;
+						}
+					} else {
+						setCveInfoFlag = true;
+					}
 				}
 				
-				String conversionCveInfo = CommonFunction.getConversionCveInfo(ossInfoMap, bean.getOssName(), bean.getOssVersion(), cvssScoreMaxVendorProductList, cvssScoreMaxList, false);
-				if (conversionCveInfo != null) {
-					String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
-					if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
-						includeVulnInfoNewBomList.add(bean);
+				if (setCveInfoFlag) {
+					// convert max score
+					if (bean.getCvssScoreMax() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax());
 					}
+					if (bean.getCvssScoreMax1() != null) {
+						cvssScoreMaxList.add(bean.getCvssScoreMax1());
+					}
+					
+					String conversionCveInfo = CommonFunction.getConversionCveInfo(bean.getReferenceId(), ossInfoMap, bean, null, cvssScoreMaxList, false);
+					if (conversionCveInfo != null) {
+						String[] conversionCveInfoSplit = conversionCveInfo.split("\\@");
+						if (new BigDecimal(conversionCveInfoSplit[3]).compareTo(new BigDecimal("8.0")) > -1) {
+							includeVulnInfoNewBomList.add(bean);
+						}
+					}
+					
+					cvssScoreMaxList.clear();
+				}
+				
+				if(!isEmpty(bean.getCopyrightText())) {
+					String[] copyrights = bean.getCopyrightText().split("\\|");
+					String copyrightText  = Arrays.stream(copyrights).distinct().collect(Collectors.joining("\n"));
+					bean.setCopyrightText(copyrightText);
 				}
 				
 				// 컴포넌트 마스터 인서트
@@ -2873,21 +3728,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					
 					projectMapper.registComponentLicense(licenseBean);
 				}
-				
-				cvssScoreMaxVendorProductList.clear();
-				cvssScoreMaxList.clear();
 			}
 		}
 		
-		// identification 대상이 없이 처음 저장하는 경우
-		Project _tempPrjInfo = new Project();
-		_tempPrjInfo.setPrjId(prjId);
-		_tempPrjInfo = projectMapper.selectProjectMaster2(_tempPrjInfo);
-		
-		if (isEmpty(_tempPrjInfo.getIdentificationStatus())) {
-			_tempPrjInfo.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
+		if (!isPartner) {
+			// identification 대상이 없이 처음 저장하는 경우
+			final Project _tempPrjInfo = projectMapper.selectProjectMaster2(prjId);
 			
-			projectMapper.updateIdentifcationProgress(_tempPrjInfo);
+			if (isEmpty(_tempPrjInfo.getIdentificationStatus())) {
+				_tempPrjInfo.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS);
+				
+				projectMapper.updateIdentifcationProgress(_tempPrjInfo);
+			}
 		}
 		
 		// add or delete data containing vulnerability information among oss information
@@ -2962,9 +3814,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	
 	@Override
 	public void checkProjectReviewer(Project project) {
-		Project param = new Project();
-		param.setPrjId(project.getPrjId());
-		param = projectMapper.selectProjectMaster2(param);
+		Project param = projectMapper.selectProjectMaster2(project.getPrjId());
 		
 		//review 상태로 변경시 reviewer가 설정되어 있지 않은 경우, reviewer도 업데이트 한다.
 		if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getIdentificationStatus())) {
@@ -2987,10 +3837,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
-	public Map<String, Object> updateProjectStatus(Project project) throws Exception {
+	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm, boolean isVerificationConfirm) throws Exception {
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		String commentDiv = isEmpty(project.getReferenceDiv()) ? CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS
@@ -3019,86 +3870,82 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			Map<String, Object> map = null;
 			
+			Project prjParam = new Project();
+			prjParam.setPrjId(project.getPrjId());
+			Project prjInfo = getProjectDetail(prjParam);
+			
 			// confirm 시 다시 DB Data를 가져와서 체크한다.
 			ProjectIdentification param = new ProjectIdentification();
 			param.setReferenceId(project.getPrjId());
-			param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			param.setMerge(CoConstDef.FLAG_NO);
-			map = getIdentificationGridList(param);
 			
-			if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
-				T2CoProjectValidator pv = new T2CoProjectValidator();
-				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
+			if (CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())
+					&& !CoConstDef.FLAG_NO.equals(prjInfo.getIdentificationSubStatusAndroid())
+					&& !CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA.equals(prjInfo.getIdentificationSubStatusAndroid())) {
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				map = getIdentificationGridList(param);
 
-				pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
+				if (map != null && map.containsKey("mainData")
+						&& !((List<ProjectIdentification>) map.get("mainData")).isEmpty()) {
+					isAndroidModel = true;
+					T2CoProjectValidator pv = new T2CoProjectValidator();
+					pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
 
-				T2CoValidationResult vr = pv.validate(new HashMap<>());
-				
-				// return validator result
-				if (!vr.isValid() && !vr.isAdminCheck((List<String>) map.get("adminCheckList"))) {
-//					return makeJsonResponseHeader(vr.getValidMessageMap());
-					resultMap.put("validMap", vr.getValidMessageMap());
-					return resultMap;
-				}
-				
-				String networkRedistribution = CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, CoConstDef.CD_LICENSE_NETWORK_RESTRICTION);
-				
-				for (ProjectIdentification _projectBean : (List<ProjectIdentification>) map.get("rows")) {
-					if (hasSourceOss && hasNotificationOss && isNetworkRestriction) {
-						break;
-					}
+					pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
+					pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
+					T2CoValidationResult vr = pv.validate(new HashMap<>());
 					
-					if (!hasNotificationOss) {
-						if (!CoConstDef.FLAG_YES.equals(_projectBean.getExcludeYn()) && ("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType()) )) {
-							hasNotificationOss = true;
-						}
-					}
-					
-					if (!hasSourceOss) {
-						if ("11".equals(_projectBean.getObligationType())){
-							hasSourceOss = true;
-						}
-					}
-					
-					if (!isNetworkRestriction) {
-						if (_projectBean.getRestriction().toUpperCase().contains(networkRedistribution.toUpperCase())) {
-							isNetworkRestriction = true;
-						}
+					// return validator result
+					if (!vr.isValid()) {
+//						return makeJsonResponseHeader(false, getMessage("msg.project.android.valid"));
+						resultMap.put("androidMessage", getMessage("msg.project.android.valid"));
+						return resultMap;
 					}
 				}
-			}
-
-			Project prjInfo = null;
-			
-			{
-				// ANDROID PROJECT인 경우
-				Project prjParam = new Project();
-				prjParam.setPrjId(project.getPrjId());
-				prjInfo = getProjectDetail(prjParam);
+			} else {
+				project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+				param.setMerge(CoConstDef.FLAG_NO);
+				map = getIdentificationGridList(param);
 				
-				if (CoConstDef.FLAG_YES.equals(prjInfo.getAndroidFlag())
-						&& !CoConstDef.FLAG_NO.equals(prjInfo.getIdentificationSubStatusAndroid())
-						&& !CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA.equals(prjInfo.getIdentificationSubStatusAndroid())) {
-					param = new ProjectIdentification();
-					param.setReferenceId(project.getPrjId());
-					param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-					map = getIdentificationGridList(param);
+				if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
+					T2CoProjectValidator pv = new T2CoProjectValidator();
+					pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_BOM_MERGE);
 
-					if (map != null && map.containsKey("mainData")
-							&& !((List<ProjectIdentification>) map.get("mainData")).isEmpty()) {
-						isAndroidModel = true;
-						T2CoProjectValidator pv = new T2CoProjectValidator();
-						pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_ANDROID);
+					pv.setAppendix("bomList", (List<ProjectIdentification>) map.get("rows"));
 
-						pv.setAppendix("mainList", (List<ProjectIdentification>) map.get("mainData"));
-						pv.setAppendix("subListMap", (Map<String, List<ProjectIdentification>>) map.get("subData"));
-						T2CoValidationResult vr = pv.validate(new HashMap<>());
+					T2CoValidationResult vr = pv.validate(new HashMap<>());
+					
+					// return validator result
+					if (!vr.isValid() && !vr.isAdminCheck((List<String>) map.get("adminCheckList"))) {
+//						return makeJsonResponseHeader(vr.getValidMessageMap());
+						resultMap.put("validMap", vr.getValidMessageMap());
+						return resultMap;
+					}
+					
+					String networkRedistribution = CoCodeManager.getCodeString(CoConstDef.CD_LICENSE_RESTRICTION, CoConstDef.CD_LICENSE_NETWORK_RESTRICTION);
+					
+					for (ProjectIdentification _projectBean : (List<ProjectIdentification>) map.get("rows")) {
+						if (hasSourceOss && hasNotificationOss && isNetworkRestriction) {
+							break;
+						}
 						
-						// return validator result
-						if (!vr.isValid()) {
-//							return makeJsonResponseHeader(false, getMessage("msg.project.android.valid"));
-							resultMap.put("androidMessage", getMessage("msg.project.android.valid"));
-							return resultMap;
+						if (!hasNotificationOss) {
+							if (!CoConstDef.FLAG_YES.equals(_projectBean.getExcludeYn()) && ("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType()) )) {
+								hasNotificationOss = true;
+							}
+						}
+						
+						if (!hasSourceOss) {
+							if ("11".equals(_projectBean.getObligationType())){
+								hasSourceOss = true;
+							}
+						}
+						
+						if (!isNetworkRestriction) {
+							if (("10".equals(_projectBean.getObligationType()) || "11".equals(_projectBean.getObligationType())) && _projectBean.getRestriction().toUpperCase().contains(networkRedistribution.toUpperCase())) {
+								isNetworkRestriction = true;
+							}
 						}
 					}
 				}
@@ -3131,7 +3978,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			project.setModifier(project.getLoginUserName());
-			updateProjectIdentificationConfirm(project);
+			updateProjectIdentificationConfirm(project, isCopyConfirm, isVerificationConfirm);
 			
 			// network server 이면서 notice 생성 대상이 없을 경우
 			if ( hasNotificationOss
@@ -3169,6 +4016,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 				userComment = avoidNull(userComment) + "<br />" + _tempComment;
 			}
+			verificationService.getReviewReportPdfFile(prjInfo.getPrjId());
 		} else if (!isEmpty(project.getCompleteYn())) {
 			// project complete 시
 			updateProjectMaster(project);
@@ -3338,17 +4186,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		return resultMap;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void updateProjectIdentificationConfirm(Project project) {
+	public void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm) {
 		Map<String, Object> map = null;
 		ProjectIdentification param = new ProjectIdentification();
 		param.setReferenceId(project.getPrjId());
-		param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		param.setReferenceDiv(project.getReferenceDiv());
 		param.setMerge(CoConstDef.FLAG_NO);
 		map = getIdentificationGridList(param);
 		if (map != null && map.containsKey("rows") && !((List<ProjectIdentification>) map.get("rows")).isEmpty()) {
-			for (ProjectIdentification bean : (List<ProjectIdentification>) map.get("rows")) {
+			((List<ProjectIdentification>) map.get("rows")).forEach(bean -> {
 				String ossCopyright = findAddedOssCopyright(bean.getOssId(), bean.getLicenseId(), bean.getOssCopyright());
 				OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(bean.getOssId());
 				if(oss != null) {
@@ -3363,7 +4212,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					bean.setCopyrightText(addCopyright);
 				}
 				projectMapper.updateComponentsCopyrightInfo(bean);
-			}
+			});
 		}
 
 		// oss id 등록
@@ -3400,16 +4249,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			// 1) packaging components delete 처리
-			ProjectIdentification delParam = new ProjectIdentification();
-			delParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
-			delParam.setReferenceId(project.getPrjId());
-			List<OssComponents> componentId = projectMapper.selectComponentId(delParam);
-			
-			for (int i = 0; i < componentId.size(); i++) {
-				projectMapper.deleteOssComponentsLicense(componentId.get(i));
-			}
-			
-			projectMapper.deleteOssComponents(delParam);
+//			ProjectIdentification delParam = new ProjectIdentification();
+//			delParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
+//			delParam.setReferenceId(project.getPrjId());
+//			List<OssComponents> componentId = projectMapper.selectComponentId(delParam);
+//			
+//			for (int i = 0; i < componentId.size(); i++) {
+//				projectMapper.deleteOssComponentsLicense(componentId.get(i));
+//			}
+//			
+//			projectMapper.deleteOssComponents(delParam);
+			projectMapper.resetOssComponentsAndLicense(project.getPrjId(), CoConstDef.CD_DTL_COMPONENT_PACKAGING);
 			
 			// 2) get bom list
 			ProjectIdentification bomParam = new ProjectIdentification();
@@ -3488,6 +4338,42 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						if (oldPackageInfoMap.containsKey(key)) {
 							newBean.setFilePath(oldPackageInfoMap.get(key).getFilePath());
 							projectMapper.updateFilePath(newBean);
+						}
+					}
+				}
+			}
+			
+			if (isCopyConfirm) {
+				Project paramBean = new Project();
+				paramBean.setPrjId(project.getCopyPrjId());
+				
+				Map<String, OssComponents> copiedPackageInfoMap = new HashMap<>();
+				List<OssComponents> copiedPackagingList = verificationService.getVerifyOssList(paramBean);
+				
+				if (copiedPackagingList != null && !copiedPackagingList.isEmpty()) {
+					for (OssComponents copyBean : copiedPackagingList) {
+						if (!isEmpty(copyBean.getFilePath())) {
+							String key = copyBean.getReferenceDiv() + "|" + copyBean.getOssId() + "|" + copyBean.getLicenseName();
+							
+							copiedPackageInfoMap.put(key, copyBean);
+						}
+					}
+				}
+				
+				List<OssComponents> afterPackagingList = verificationService.getVerifyOssList(project);
+				
+				if (afterPackagingList != null && !afterPackagingList.isEmpty()) {
+					for (OssComponents newBean : afterPackagingList) {
+						String key = newBean.getReferenceDiv() + "|" + newBean.getOssId() + "|" + newBean.getLicenseName();
+						
+						if (copiedPackageInfoMap.containsKey(key)) {
+							newBean.setFilePath(copiedPackageInfoMap.get(key).getFilePath());
+							if (isVerificationConfirm) {
+								newBean.setVerifyFileCount(copiedPackageInfoMap.get(key).getVerifyFileCount());
+								projectMapper.updateFilePathWithFileCount(newBean);
+							} else {
+								projectMapper.updateFilePath(newBean);
+							}
 						}
 					}
 				}
@@ -3640,9 +4526,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			// BAT STATUS 등록
 			if (i==0 && prjYn){
-				Project projectStatus = new Project();
-				projectStatus.setPrjId(prjId);
-				projectStatus = projectMapper.selectProjectMaster(projectStatus);
+				Project projectStatus = projectMapper.selectProjectMaster(prjId);
 				
 				// 최초 상태이면 PROG
 				if (StringUtil.isEmpty(projectStatus.getIdentificationStatus())) {
@@ -3791,18 +4675,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		ossComponents.setReferenceDiv(avoidNull(ossComponents.getReferenceDiv(), CoConstDef.CD_DTL_COMPONENT_PARTNER));
 		List<OssComponents> list = projectMapper.getPartnerOssList(ossComponents);
+		ProjectIdentification param = new ProjectIdentification();
 		
 		for (OssComponents oc : list){
 			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())){
-				ProjectIdentification PI = new ProjectIdentification();
-				PI.setComponentId(oc.getComponentId());
-				List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
-				if (!subGridData.isEmpty()) {
-					PI = subGridData.get(0);
-					
-					oc.setLicenseName(PI.getLicenseName());
-					oc.setLicenseText(PI.getLicenseText());
-					oc.setCopyrightText(PI.getCopyrightText());
+				param.addComponentIdList(oc.getComponentId());
+			}
+		}
+		
+		Map<String, List<ProjectIdentification>> licenseMap = new HashMap<>();
+		if (param.getComponentIdList() != null && !param.getComponentIdList().isEmpty()) {
+			List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(param);
+			for (ProjectIdentification ocl : subGridData) {
+				String key = ocl.getComponentId();
+				List<ProjectIdentification> thridLicenses = null;
+				if (licenseMap.containsKey(key)) {
+					thridLicenses = licenseMap.get(ocl.getComponentId());
+				} else {
+					thridLicenses = new ArrayList<>();
+				}
+				ocl.setEditable(CoConstDef.FLAG_YES);
+				thridLicenses.add(ocl);
+				licenseMap.put(key, thridLicenses);
+			}
+			
+			for (OssComponents oc : list){
+				if (licenseMap.containsKey(oc.getComponentId())) {
+					List<ProjectIdentification> licenseList = licenseMap.get(oc.getComponentId());
+					oc.setLicenseName(licenseList.get(0).getLicenseName());
+					oc.setLicenseText(licenseList.get(0).getLicenseText());
+					oc.setCopyrightText(licenseList.get(0).getCopyrightText());
 				}
 			}
 		}
@@ -3943,15 +4845,29 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		ossComponents.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 		List<ProjectIdentification> list = projectMapper.getPartnerOssListValidation(ossComponents);
+		List<String> componentIdList = new ArrayList<>();
+		Map<String, ProjectIdentification> componentIdLicenseMap = new HashMap<>();
 		
-		for (ProjectIdentification oc : list){
-			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())){
-				ProjectIdentification PI = new ProjectIdentification();
-				PI.setComponentId(oc.getComponentId());
-				List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(PI);
-				if (!subGridData.isEmpty()) {
-					PI = subGridData.get(0);
-					
+		for (ProjectIdentification oc : list) {
+			if (CoConstDef.FLAG_YES.equals(oc.getExcludeYn())) {
+				componentIdList.add(oc.getComponentId());
+			}
+		}
+		
+		if (!componentIdList.isEmpty()) {
+			ProjectIdentification pi = new ProjectIdentification();
+			pi.setComponentIdList(componentIdList);
+			List<ProjectIdentification> subGridData = projectMapper.identificationSubGrid(pi);
+			subGridData.forEach(projectIdentification -> {
+				String key = projectIdentification.getComponentId();
+				if (!componentIdLicenseMap.containsKey(key)) {
+					componentIdLicenseMap.put(key, projectIdentification);
+				}
+			});
+			
+			for (ProjectIdentification oc : list) {
+				if (componentIdLicenseMap.containsKey(oc.getComponentId())) {
+					ProjectIdentification PI = componentIdLicenseMap.get(oc.getComponentId());
 					oc.setLicenseName(PI.getLicenseName());
 					oc.setLicenseText(PI.getLicenseText());
 					oc.setCopyrightText(PI.getCopyrightText());
@@ -3992,6 +4908,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Cacheable(value="autocompleteProjectCache", key="{#root.methodName, #project?.creator}")
 	public List<Project> getProjectVersionList(Project project) {
 		return projectMapper.getProjectVersionList(project);
+	}
+	
+	@Override
+	public List<Project> getProjectDivisionList(Project project) {
+		return projectMapper.getProjectDivisionList(project);
 	}
 	
 	@Override
@@ -4085,9 +5006,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		// TRIM, 대소문자를 무시하고, 주요 칼럼만 비교한다.
 		List<String> dbInfoList = projectMapper.checkChangedIdentification(prjId);
 		
-		Project projectInfo = new Project();
-		projectInfo.setPrjId(prjId);
-		projectInfo = projectMapper.selectProjectMaster2(projectInfo);
+		Project projectInfo = projectMapper.selectProjectMaster2(prjId);
 		
 		List<String> dbPartnerList = new ArrayList<>();
 		List<String> dbSrcList = new ArrayList<>();
@@ -4110,11 +5029,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		boolean dbBinUseFlag = CoConstDef.FLAG_NO.equals(projectInfo.getIdentificationSubStatusBin());
 		
 		if (partnerUseFlag != dbPartnerUseFlag) {
-			return getMessage("msg.project.checke.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)});
+			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)});
 		} else if (srcUseFlag != dbSrcUseFlag) {
-			return getMessage("msg.project.checke.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC)});
+			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC)});
 		} else if (binUseFlag != dbBinUseFlag) {
-			return getMessage("msg.project.checke.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN)});
+			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN)});
 		}
 		
  		if (dbInfoList != null && !dbInfoList.isEmpty()) {
@@ -4168,11 +5087,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
  		// 1) 건수 비교 
  		// 2) 건수가 동일하기 때문에 sort후 text 비교
  		if (partnerList.size() != dbPartnerList.size() || !compareList(partnerList, partnerList2, dbPartnerList)) {
- 			return getMessage("msg.project.checke.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)});
+ 			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER)});
  		} else if (srcList.size() != dbSrcList.size() || !compareList(srcList, srcList2, dbSrcList)) {
- 			return getMessage("msg.project.checke.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC)});
+ 			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_SRC)});
  		} else if (binList.size() != dbBinList.size() || !compareList(binList, binList2, dbBinList)) {
- 			return getMessage("msg.project.checke.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN)});
+ 			return getMessage("msg.project.check.changed", new String[]{CoCodeManager.getCodeString(CoConstDef.CD_COMPONENT_DIVISION, CoConstDef.CD_DTL_COMPONENT_ID_BIN)});
  		}
  		
  		return null;
@@ -4610,7 +5529,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 	@Override
 	public void insertAddList(List<Project> project) {
+		int idx = 1;
 		for (Project p : project){
+			p.setPrjRefIdx(idx++);
 			projectMapper.insertAddList(p);
 		}
 	}
@@ -4641,15 +5562,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				groupColumn = info.getOssName() + "-" + info.getOssVersion();
 			}
 			
-			if ("-".equals(groupColumn)) {
+			if ("-".equals(info.getOssName())) {
 				if ("NA".equals(info.getLicenseType())) {
 					ossNameEmptyFlag = true;
 				}
 			}
 			if (groupColumn.equals(info.getOssName() + "-" + info.getOssVersion()) // 같은 groupColumn이면 데이터를 쌓음
-					&& !("-".equals(info.getOssName()) 
-					&& !"NA".equals(info.getLicenseType()))
-					&& !ossNameEmptyFlag) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
+					&& (!("-".equals(info.getOssName()) && !"NA".equals(info.getLicenseType())) || ossNameEmptyFlag)) { // 단, OSS Name: - 이면서, License Type: Proprietary이 아닌 경우 Row를 합치지 않음.
 				tempData.add(info);
 			} else { // 다른 grouping
 				setMergeData(tempData, resultGridData);
@@ -4684,6 +5603,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			for (ProjectIdentification temp : tempData) {
 				if (rtnBean == null) {
 					rtnBean = temp;
+					if (!isEmpty(rtnBean.getCopyrightText())) {
+						List<String> rtnBeanCopyrights = Arrays.asList(rtnBean.getCopyrightText().split("\\n"));
+						String mergedCopyrightText = rtnBeanCopyrights.stream().distinct().collect(Collectors.joining("\n"));
+						rtnBean.setCopyrightText(mergedCopyrightText);
+					}
 					continue;
 				}
 				
@@ -4713,21 +5637,37 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					}
 				}
 				
-				List<OssComponentsLicense> rtnComponentLicenseList = new ArrayList<OssComponentsLicense>();
-				
-				for (OssComponentsLicense list : temp.getOssComponentsLicenseList()) {
-					int equalsItemList = (int) rtnBean.getOssComponentsLicenseList()
-														.stream()
-														.filter(e -> list.getLicenseName().equals(e.getLicenseName())) // 동일한 licenseName을 filter
-														.collect(Collectors.toList()) // return을 list로변환
-														.size(); // 해당 list의 size
-					
-					if (equalsItemList == 0) {
-						rtnComponentLicenseList.add(list);
+				if (!isEmpty(temp.getCopyrightText())) {
+					List<String> mergedCopyrights = new ArrayList<>();
+					if (!isEmpty(rtnBean.getCopyrightText())) {
+						mergedCopyrights.addAll(Arrays.asList(rtnBean.getCopyrightText().split("\\n")));
+					}
+					if (!isEmpty(rtnBean.getCopyrightText())) {
+						mergedCopyrights.addAll(Arrays.asList(temp.getCopyrightText().split("\\n")));
+					}
+					if (mergedCopyrights != null && !mergedCopyrights.isEmpty()) {
+						String mergedCopyrightText = mergedCopyrights.stream().distinct().collect(Collectors.joining("\n"));
+						rtnBean.setCopyrightText(mergedCopyrightText);
 					}
 				}
 				
-				rtnBean.getOssComponentsLicenseList().addAll(rtnComponentLicenseList);
+				List<OssComponentsLicense> rtnComponentLicenseList = new ArrayList<OssComponentsLicense>();
+				
+				if (!CollectionUtils.isEmpty(temp.getOssComponentsLicenseList())) {
+					for (OssComponentsLicense list : temp.getOssComponentsLicenseList()) {
+						int equalsItemList = (int) rtnBean.getOssComponentsLicenseList()
+															.stream()
+															.filter(e -> list.getLicenseName().equals(e.getLicenseName())) // 동일한 licenseName을 filter
+															.collect(Collectors.toList()) // return을 list로변환
+															.size(); // 해당 list의 size
+						
+						if (equalsItemList == 0) {
+							rtnComponentLicenseList.add(list);
+						}
+					}
+					
+					rtnBean.getOssComponentsLicenseList().addAll(rtnComponentLicenseList);
+				}
 				
 				if (!rtnBean.getRefComponentId().contains(temp.getRefComponentId())) {
 					rtnBean.setRefComponentId(rtnBean.getRefComponentId() + "," + temp.getRefComponentId());
@@ -4778,12 +5718,56 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					rtnBean.setObligationLicense(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 					rtnBean.setPreObligationType(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 				}
+				
+				if (isEmpty(rtnBean.getDependencies())) {
+					if (!isEmpty(temp.getDependencies())) {
+						rtnBean.setDependencies(temp.getDependencies());
+					}
+				}
 			}
 			
 			resultGridData.add(rtnBean);
 		}
 	}
 	
+	@Override
+	public List<ProjectIdentification> setMergeGridDataByAndroid(List<ProjectIdentification> gridData) {
+		List<ProjectIdentification> resultGridData = null;
+		Map<String, ProjectIdentification> resultGridDataMap = new HashMap<>();
+		String groupKey = "";
+		
+		for (ProjectIdentification grid : gridData) {
+			groupKey = (grid.getOssName() + "_" + avoidNull(grid.getOssVersion())).toUpperCase();
+			
+			if (!resultGridDataMap.containsKey(groupKey)) {
+				resultGridDataMap.put(groupKey, grid);
+			} else {
+				ProjectIdentification bean = resultGridDataMap.get(groupKey);
+				for (String licenseName : grid.getLicenseName().split(",")) {
+					boolean equalFlag = false;
+					
+					for (String rtnLicenseName : bean.getLicenseName().split(",")) {
+						if (rtnLicenseName.trim().equals(licenseName.trim())) {
+							equalFlag = true;
+							break;
+						}
+					}
+					
+					if (!equalFlag) {
+						bean.setLicenseName((bean.getLicenseName() + "," + licenseName).trim());
+					}
+				}
+				resultGridDataMap.put(groupKey, bean);
+			}
+		}
+		
+		if (!resultGridDataMap.isEmpty()) {
+			resultGridData = new ArrayList<>(resultGridDataMap.values());
+		}
+		
+		return resultGridData;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public String checkValidData(Map<String, Object> map) {
@@ -4837,7 +5821,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		// OSS Name, OSS Version, License에 Warning message(빨간색, 파란색)가 있는 Row 또는 Binary Name이 공란인 Row
-		if (emptyBinaryPathCnt > 0 || errCnt > 0 || diffCnt > 0) {
+		if (emptyBinaryPathCnt > 0 || errCnt > 0 ) {
 			validMsg = "You can download NOTICE only if there is no warning message in OSS Name, OSS Version, License or Binary Name is not null.";
 		}
 		
@@ -4912,7 +5896,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			model.put("noticeData", mergedBinaryData.get(binaryPath));
 			
 			String contents = CommonFunction.VelocityTemplateToString(model);
-			
+			contents = HtmlUtils.htmlUnescape(contents);
 			for (String path : binaryPath.split(",")) {
 				String fileName = "";
 				String binaryFilePath = binaryDirPath;
@@ -4994,12 +5978,25 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		Map<String, List<ProjectIdentification>> binaryMergeData = new HashMap<String, List<ProjectIdentification>>();
 		Map<String, String> binaryOssKeyMap = new HashMap<String, String>();
+		List<String> mergeOssCheckList = new ArrayList<>();
+		Map<String, List<String>> mergeLicenseCheckList = new HashMap<>();
 		
 		for (ProjectIdentification bean : mainData) {
+			boolean licenseDuplicateFlag = false;
 			List<ProjectIdentification> _list = new ArrayList<>();
 			String _oldKey = null;
 			String key = bean.getOssName() + "|" + bean.getOssVersion() + "|" + bean.getLicenseName();
 			String licenseName = "";
+			
+			String _key = (bean.getOssName() + "|" + licenseName).toUpperCase();
+			if (!mergeOssCheckList.contains(_key)) {
+				mergeOssCheckList.add(_key);
+			} else {
+				continue;
+			}
+			
+			List<String> duplicateCheckList = new ArrayList<>();
+			List<ProjectIdentification> deduplicateComponentLicenseList = new ArrayList<>();
 			
 			if (binaryMergeData.containsKey(bean.getBinaryName())) { // binaryPath 기준으로 merge
 				_list = binaryMergeData.get(bean.getBinaryName());
@@ -5007,23 +6004,43 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				
 				if (_list != null) {
 					for (ProjectIdentification license : bean.getComponentLicenseList()) {
-						LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
-						license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
-						license.setAttribution(avoidNull(licenseBean.getAttribution()));
-						license.setObligationType(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn()) ? CoConstDef.CD_DTL_OBLIGATION_NOTICE : "");
+						if (!duplicateCheckList.contains(license.getLicenseName())) {
+							duplicateCheckList.add(license.getLicenseName());
+							deduplicateComponentLicenseList.add(license);
+						}
 						
-						if (CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
-							if (!isEmpty(licenseName)) {
-								licenseName += ",";
-							}
+						LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
+						if (licenseBean != null) {
+							license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
+							license.setAttribution(avoidNull(licenseBean.getAttribution()));
+							license.setObligationType(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn()) ? CoConstDef.CD_DTL_OBLIGATION_NOTICE : "");
 							
-							licenseName += license.getLicenseName();
+							if (CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
+								if (!isEmpty(licenseName)) {
+									licenseName += ",";
+								}
+								
+								licenseName += license.getLicenseName();
+							}
+						}
+					}
+					
+					if (mergeLicenseCheckList.containsKey(bean.getBinaryName())) {
+						List<String> licenseList = mergeLicenseCheckList.get(bean.getBinaryName());
+						if (licenseList.contains(licenseName)) {
+							licenseDuplicateFlag = true;
+						} else {
+							licenseList.add(licenseName);
+							mergeLicenseCheckList.put(bean.getBinaryName(), licenseList);
 						}
 					}
 					
 					OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() +"_"+ avoidNull(bean.getOssVersion())).toUpperCase());
-					bean.setAttribution(avoidNull(ossBean.getAttribution()));
+					bean.setAttribution(ossBean != null ? avoidNull(ossBean.getAttribution())  : "");
 					bean.setLicenseName(licenseName);
+					if (!licenseDuplicateFlag) {
+						bean.setDeduplicatedComponentLicenseList(deduplicateComponentLicenseList);
+					}
 					
 					_list.add(bean);
 					
@@ -5033,25 +6050,36 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				}
 			} else {
 				for (ProjectIdentification license : bean.getComponentLicenseList()) {
+					if (!duplicateCheckList.contains(license.getLicenseName())) {
+						duplicateCheckList.add(license.getLicenseName());
+						deduplicateComponentLicenseList.add(license);
+					}
+					
 					LicenseMaster licenseBean = CoCodeManager.LICENSE_INFO_UPPER.get(license.getLicenseName().toUpperCase());
-					license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
-					license.setAttribution(avoidNull(licenseBean.getAttribution()));
-					license.setObligationType(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn()) ? CoConstDef.CD_DTL_OBLIGATION_NOTICE : "");
+					if (licenseBean != null) {
+						license.setLicenseText(avoidNull(licenseBean.getLicenseText()));
+						license.setAttribution(avoidNull(licenseBean.getAttribution()));
+						license.setObligationType(CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn()) ? CoConstDef.CD_DTL_OBLIGATION_NOTICE : "");
 
-					if (CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
-						if (!isEmpty(licenseName)) {
-							licenseName += ",";
+						if (CoConstDef.FLAG_YES.equals(licenseBean.getObligationNotificationYn())) {
+							if (!isEmpty(licenseName)) {
+								licenseName += ",";
+							}
+							
+							licenseName += license.getLicenseName();
 						}
-						
-						licenseName += license.getLicenseName();
 					}
 				}
+				
+				List<String> licenseList = new ArrayList<>();
+				licenseList.add(licenseName);
+				mergeLicenseCheckList.put(bean.getBinaryName(), licenseList);
 				
 				OssMaster ossBean = CoCodeManager.OSS_INFO_UPPER.get((bean.getOssName() +"_"+ avoidNull(bean.getOssVersion())).toUpperCase());
 				
 				bean.setAttribution(ossBean != null ? avoidNull(ossBean.getAttribution())  : "");
-				
 				bean.setLicenseName(licenseName);
+				bean.setDeduplicatedComponentLicenseList(deduplicateComponentLicenseList);
 				
 				_list.add(bean);
 				
@@ -5065,7 +6093,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		List<String> valuesList = binaryOssKeyMap.values().stream().distinct().collect(Collectors.toList());
 		
 		Map<String, String> collect = valuesList.stream()
-										.collect(Collectors.toMap(Functions.identity(), v -> binaryOssKeyMap.entrySet().stream()
+										.collect(Collectors.toMap(Function.identity(), v -> binaryOssKeyMap.entrySet().stream()
 												.filter(entry -> Objects.equals(v, entry.getValue()))
 												.map(Map.Entry<String, String>::getKey)
 												.reduce("", (s1, s2) -> isEmpty(s1) ? s2 : s1 + "," + s2)));
@@ -5109,6 +6137,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 										.equalsIgnoreCase(afList.getOssName() + "||" + afList.getOssVersion() + "||" + getLicenseNameSort(afList.getLicenseName().trim()))
 										).collect(Collectors.toList()).size() == 0
 						).collect(Collectors.toList());
+		filteredBeforeBomList = filteredBeforeBomList.stream().filter(e -> !isEmpty(e.getOssName()) && !e.getOssName().equals("-")).collect(Collectors.toList());
 		
 		List<ProjectIdentification> filteredAfterBomList = afterBomList
 				.stream()
@@ -5120,6 +6149,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 										.equalsIgnoreCase(bfList.getOssName() + "||" + bfList.getOssVersion() + "||" + getLicenseNameSort(bfList.getLicenseName().trim()))
 										).collect(Collectors.toList()).size() == 0
 						).collect(Collectors.toList());
+		filteredAfterBomList = filteredAfterBomList.stream().filter(e -> !isEmpty(e.getOssName()) && !e.getOssName().equals("-")).collect(Collectors.toList());
 		
 		// status > add
 		int addchk = 0;
@@ -5310,7 +6340,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 
 
 	private String getCompareKey(ProjectIdentification param) {
-		return param.getOssName().toLowerCase() + "|" + avoidNull(param.getOssVersion(), "") + "|" + param.getLicenseName();
+		return (param.getOssName() + "|" + avoidNull(param.getOssVersion(), "") + "|" + param.getLicenseName()).toLowerCase();
 	}
 	
 	private static String changeStyle(String flag, String text) {
@@ -5342,7 +6372,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	}
 	
 	private String ossCheck(String flag, String ossNameVersion, String ossLicenseName, String ossNameVersion2, String ossLicenseName2) {
-		String splitOssNameVersion[] = ossNameVersion.split("/");
+String splitOssNameVersion[] = ossNameVersion.split("/");
 		
 		int count = splitOssNameVersion.length;
 		
@@ -5357,38 +6387,59 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			
 			if (cnt > 0) {
 				return ossNameVersion;
-			}else {
+			} else {
 				return ossNameVersion + " / " + ossNameVersion2;
 			}
-		}else {
-			String licenseNmArr1[] = ossLicenseName.split("/");
-			
+		} else {
+			String licenseNmArr1[] = ossLicenseName.split(" / ");
 			int chk = 0;
-			for (int i=0; i<count; i++) {
-				if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
-					List<String> licenseNmChk1 = Arrays.asList(licenseNmArr1[i].split(","));
-					List<String> licenseNmChk2 = Arrays.asList(ossLicenseName2.split(","));
-					
-					Set<String> set = new LinkedHashSet<>(licenseNmChk1);
-					set.addAll(licenseNmChk2);
-					
-					List<String> mergeList = new ArrayList<>(set);
-					
-					if (mergeList.size() > 0) {
-						String str = "";
-						for (int j=0; j<mergeList.size(); j++) {
-							str += mergeList.get(j);
-							if (j < mergeList.size()-1) {
-								str += ", ";
+			boolean chkFlag = false;
+			
+			if (count == licenseNmArr1.length) {
+				chkFlag = true;
+				
+				for (int i=0; i<count; i++) {
+					if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
+						List<String> mergeList = new ArrayList<>();
+						List<String> licenseNmChk1 = Arrays.asList(licenseNmArr1[i].split(","));
+						List<String> licenseNmChk2 = Arrays.asList(ossLicenseName2.split(","));
+						
+						for (String chk1 : licenseNmChk1) {
+							boolean equalsFlag = false;
+							
+							for (String chk2 : licenseNmChk2) {
+								if (chk1.trim().equalsIgnoreCase(chk2.trim())) {
+									equalsFlag = true;
+									break;
+								}
+							}
+							
+							if (!equalsFlag) {
+								for (String chk2 : licenseNmChk2) {
+									mergeList.add(chk2.trim());
+								}
+								mergeList.add(chk1.trim());
 							}
 						}
-						licenseNmArr1[i] = str;
-						chk++;
+						
+						if (mergeList.size() > 0) {
+							mergeList = mergeList.stream().distinct().collect(Collectors.toList());
+							
+							String str = "";
+							for (int j=0; j<mergeList.size(); j++) {
+								str += mergeList.get(j);
+								if (j < mergeList.size()-1) {
+									str += ", ";
+								}
+							}
+							licenseNmArr1[i] = str;
+							chk++;
+						}
 					}
 				}
 			}
 			
-			if (chk > 0) {
+			if (chk > 0 || chkFlag) {
 				String strMerge = "";
 				for (int i=0; i<licenseNmArr1.length; i++) {
 					strMerge += licenseNmArr1[i];
@@ -5396,8 +6447,20 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						strMerge += " / ";
 					}
 				}
-				return strMerge;
-			}else {
+				
+				int cnt = 0;
+				for (int i=0; i<count; i++) {
+					if (splitOssNameVersion[i].trim().equals(ossNameVersion2)) {
+						cnt++;
+					}
+				}
+				
+				if (cnt == 0) {
+					return strMerge + " / " + ossLicenseName2;
+				} else {
+					return strMerge;
+				}
+			} else {
 				return ossLicenseName + " / " + ossLicenseName2;
 			}
 		}
@@ -5549,6 +6612,17 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					fileSeqs.add(file3.get(0).getRegistSeq());
 				}
 			}
+			
+			if (!isEmpty(prj.getPackageFileId4())) {
+				List<UploadFile> file4 = fileService.setReusePackagingFile(prj.getPackageFileId4());
+				fileMap.put("refFileSeq", prj.getPackageFileId4());
+				fileMap.put("fileSeq", file4.get(0).getRegistSeq());
+				reuseCheck = verificationService.setReusePackagingFile(fileMap);
+				
+				if (reuseCheck) {
+					fileSeqs.add(file4.get(0).getRegistSeq());
+				}
+			}
 		}
 		
 		return fileSeqs;
@@ -5579,7 +6653,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Project prj = getProjectBasicInfo(project.getCopyPrjId());
 		
 		if (!isEmpty(prj.getSrcAndroidNoticeFileId())) {
-			String fileId = fileService.copyPhysicalFile(prj.getSrcAndroidNoticeFileId());
+			String fileId = fileService.copyPhysicalFile(prj.getSrcAndroidNoticeFileId(), null, true);
 			if (!isEmpty(fileId)) {
 				project.setSrcAndroidNoticeFileId(fileId);
 				projectMapper.updateFileId(project);
@@ -5666,8 +6740,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 																.filter(obj -> {
 																	String ossName = (avoidNull(obj.getOssName())).toUpperCase();
 																	String compareOssName = (avoidNull(CoCodeManager.OSS_INFO_UPPER_NAMES.get(obj.getOssName().toUpperCase()))).toUpperCase();
-						
-																	return CoConstDef.FLAG_NO.equals(obj.getAdminCheckYn()) && !isEmpty(compareOssName) && !ossName.equals(compareOssName);
+																	String referenceDiv = obj.getReferenceDiv();
+																	return CoConstDef.FLAG_NO.equals(obj.getAdminCheckYn()) && !isEmpty(compareOssName) && !ossName.equals(compareOssName) && !CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(referenceDiv);
 																}).collect(Collectors.toList());
 			
 			if (checkList.size() > 0) {
@@ -5713,8 +6787,8 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		String physicalFilePath = "";
 		T2File fileInfo = null;
 		
-		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_SRC) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BIN)
-				|| project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) {
+		if (project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_DEP) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_SRC) 
+				|| project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_BIN) || project.getReferenceDiv().equals(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID)) {
 			physicalFilePath = "Identification";
 		}
 		
@@ -5723,6 +6797,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (i == 0) {
 					fileInfo = fileService.selectFileInfo(project.getCsvFile().get(i).getFileSeq());
 				}
+				projectMapper.updateDeleteYNByFileSeq(project.getCsvFile().get(i));
 				projectMapper.deleteFileBySeq(project.getCsvFile().get(i));
 				fileService.deletePhysicalFile(project.getCsvFile().get(i), physicalFilePath);
 			}
@@ -5731,22 +6806,43 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		if (fileInfo != null) {
 			T2File fileInfo2 = fileService.selectFileInfoById(fileInfo.getFileId());
 			switch (project.getReferenceDiv()) {
+			case CoConstDef.CD_DTL_COMPONENT_ID_DEP: 
+				if (fileInfo2 == null && prjInfo.getDepCsvFileId() != null) {
+					if (prjInfo.getDepCsvFileId().equals(fileInfo.getFileId())) {
+						project.setDepCsvFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
+				}
+				break;
 			case CoConstDef.CD_DTL_COMPONENT_ID_SRC: 
-				if (fileInfo2 == null && prjInfo.getSrcCsvFileId().equals(fileInfo.getFileId())) {
-					project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
-					fileDeleteCheckFlag = true;
+				if (fileInfo2 == null && prjInfo.getSrcCsvFileId() != null) {
+					if (prjInfo.getSrcCsvFileId().equals(fileInfo.getFileId())) {
+						project.setSrcCsvFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
 				}
 				break;
 			case CoConstDef.CD_DTL_COMPONENT_ID_BIN: 
-				if (fileInfo2 == null && prjInfo.getBinCsvFileId().equals(fileInfo.getFileId())) {
-					project.setBinCsvFileFlag(CoConstDef.FLAG_YES);
-					fileDeleteCheckFlag = true;
+				if (fileInfo2 == null && prjInfo.getBinCsvFileId() != null) {
+					if (prjInfo.getBinCsvFileId().equals(fileInfo.getFileId())) {
+						project.setBinCsvFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
+				}
+				
+				if (fileInfo2 == null && prjInfo.getBinBinaryFileId() != null) {
+					if (prjInfo.getBinBinaryFileId().equals(fileInfo.getFileId())) {
+						project.setBinBinaryFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
 				}
 				break;
 			case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID: 
-				if (fileInfo2 == null && prjInfo.getSrcAndroidCsvFileId().equals(fileInfo.getFileId())) {
-					project.setSrcAndroidCsvFileFlag(CoConstDef.FLAG_YES);
-					fileDeleteCheckFlag = true;
+				if (fileInfo2 == null && prjInfo.getSrcAndroidCsvFileId() != null) {
+					if (prjInfo.getSrcAndroidCsvFileId().equals(fileInfo.getFileId())) {
+						project.setSrcAndroidCsvFileFlag(CoConstDef.FLAG_YES);
+						fileDeleteCheckFlag = true;
+					}
 				}
 				break;
 			default :
@@ -5763,85 +6859,120 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	public Map<String, Object> getSecurityGridList(Project project) {
 		Map<String, Object> rtnMap = new HashMap<>();
 		List<OssComponents> totalList = new ArrayList<>();
-		List<OssComponents> fixedList = new ArrayList<>();
-		List<OssComponents> notFixedList = new ArrayList<>();
+		List<OssComponents> fullDiscoveredList = new ArrayList<>();
 		Map<String, Object> securityGridMap = new HashMap<>();
 		List<String> deduplicatedkey = new ArrayList<>();
+		List<String> caseWithoutVersionKey = new ArrayList<>();
 		List<String> checkOssNameList = new ArrayList<>();
 		List<ProjectIdentification> list = null;
+		List<ProjectIdentification> fullList = null;
 		
-		OssMaster param = new OssMaster();
 		OssComponents oc = null;
 		OssComponents bean = null;
 		boolean activateFlag;
+		String ossVersion = "";
+		String vulnerabilityLink = "";
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(project.getPrjId());
+		identification.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_SECURITY_VULNERABILITY_SCORE, CoConstDef.CD_SECURITY_VULNERABILITY_DETAIL_SCORE)));
 		
-		Project prjInfo = projectMapper.selectProjectMaster2(project);
+		Project prjInfo = projectMapper.selectProjectMaster2(project.getPrjId());
 		if (!prjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
 			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			identification.setMerge(CoConstDef.FLAG_NO);
-			
-			List<ProjectIdentification> bomList = projectMapper.selectBomList(identification);
-			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-			List<ProjectIdentification> notVersionList = projectMapper.selectBomList(identification);;
-			if (notVersionList != null) {
-				bomList.addAll(notVersionList);
-			}
-			identification.setOssVersionEmptyFlag(null);
-			
-			Comparator<ProjectIdentification> compare = Comparator
-					.comparing(ProjectIdentification::getLicenseTypeIdx)
-					.thenComparing(ProjectIdentification::getOssName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getOssVersion, (str1, str2) -> str2.compareTo(str1))
-					.thenComparing(ProjectIdentification::getLicenseName, Comparator.nullsFirst(Comparator.naturalOrder()))
-					.thenComparing(ProjectIdentification::getMergeOrder);
-
-			bomList.sort(compare);
-			list = bomList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
 		} else {
 			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
-			List<ProjectIdentification> componentList = projectMapper.selectIdentificationGridList(identification);
-			identification.setOssVersionEmptyFlag(CoConstDef.FLAG_YES);
-			List<ProjectIdentification> notVersionOssComponentList = projectMapper.selectIdentificationGridList(identification);;
-			if (notVersionOssComponentList != null) {
-				componentList.addAll(notVersionOssComponentList);
-			}
-			identification.setOssVersionEmptyFlag(null);
-			
-			componentList.sort(Comparator.comparing(ProjectIdentification::getComponentId));
-			list = componentList.stream().filter(CommonFunction.distinctByKey(p -> p.getOssName()+p.getOssVersion())).collect(Collectors.toList());
 		}
 		
-		int gridIdx = 1;
-		for (ProjectIdentification pi : list) {
-			activateFlag = false;
-			if (pi.getOssName().equals("-") || pi.getOssName().isEmpty()) continue;
-			
-			param.setOssName(pi.getOssName());
-			param.setOssVersion(pi.getOssVersion());
-			
-			List<Vulnerability> vulnList = vulnerabilityService.getSecurityVulnListByOssName(param);
-			if (vulnList != null && !vulnList.isEmpty()) {
-				List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
-				if (securityDatalist != null && !securityDatalist.isEmpty()) {
-					for (OssComponents oss : securityDatalist) {
-						String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
-						securityGridMap.put(key, oss);
-					}
+		list = projectMapper.selectSecurityListForProject(identification);
+		identification.setStandardScore(Float.valueOf("0.1"));
+		fullList = projectMapper.selectSecurityListForProject(identification);
+		
+		if (fullList != null && !fullList.isEmpty()) {
+			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(identification);
+			if (securityDatalist != null && !securityDatalist.isEmpty()) {
+				for (OssComponents oss : securityDatalist) {
+					String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId() + "_" + oss.getCvssScore()).toUpperCase();
+					securityGridMap.put(key, oss);
 				}
-				
-				if (vulnList != null && !vulnList.isEmpty() && isEmpty(pi.getOssVersion())) {
+			}
+			
+			int gridIdx = 1;
+			for (ProjectIdentification pi : fullList) {
+				activateFlag = false;
+				if (isEmpty(pi.getOssVersion())) {
 					activateFlag = true;
-					
-					vulnList = vulnList.stream().sorted(Comparator.comparing(Vulnerability::getCvssScore).reversed()).collect(Collectors.toList());
-					List<Vulnerability> convertVulnList = new ArrayList<>();
-					convertVulnList.add(vulnList.get(0));
-					vulnList = convertVulnList;
+					String keyWithoutVersion = (pi.getOssName() + "_" + pi.getOssVersion()).toUpperCase();
+					if (!caseWithoutVersionKey.contains(keyWithoutVersion)) {
+						caseWithoutVersionKey.add(keyWithoutVersion);
+					} else {
+						continue;
+					}
 				} 
+					
+				String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
 				
-				for (Vulnerability vuln : vulnList) {
-					String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + vuln.getCveId() + "_" + vuln.getCvssScore()).toUpperCase();
+				if (!deduplicatedkey.contains(key)) {
+					deduplicatedkey.add(key);
+					
+					if (securityGridMap.containsKey(key)) {
+						bean = (OssComponents) securityGridMap.get(key);
+					}
+					
+					if (activateFlag) {
+						checkOssNameList.add(pi.getOssName());
+						vulnerabilityLink = CommonFunction.getProperty("server.domain");
+						vulnerabilityLink += "/vulnerability/vulnpopup?ossName=" + pi.getOssName() + "&ossVersion=" + ossVersion;
+					} else {
+						vulnerabilityLink = "https://nvd.nist.gov/vuln/detail/" + pi.getCveId();
+					}
+					
+					oc = new OssComponents();
+					oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
+					oc.setOssName(pi.getOssName());
+					oc.setOssVersion(pi.getOssVersion());
+					
+					if (!activateFlag) {
+						oc.setCveId(pi.getCveId());
+						oc.setCvssScore(pi.getCvssScore());
+						oc.setPublDate(pi.getPublDate());
+					}
+					
+					oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+					oc.setVulnerabilityLink(vulnerabilityLink);
+					oc.setVulnerabilityResolution("Unresolved");
+					
+					if (bean != null) {
+						oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
+						oc.setSecurityComments(bean.getSecurityComments());
+					}
+							
+					fullDiscoveredList.add(oc);
+					
+					bean = null;
+					gridIdx++;
+				}
+			}
+			
+			if (list != null && !list.isEmpty()) {
+				gridIdx = 1;
+				caseWithoutVersionKey.clear();
+				deduplicatedkey.clear();
+				
+				for (ProjectIdentification pi : list) {
+					activateFlag = false;
+					
+					if (isEmpty(pi.getOssVersion())) {
+						activateFlag = true;
+						String keyWithoutVersion = (pi.getOssName() + "_" + pi.getOssVersion()).toUpperCase();
+						if (!caseWithoutVersionKey.contains(keyWithoutVersion)) {
+							caseWithoutVersionKey.add(keyWithoutVersion);
+						} else {
+							continue;
+						}
+					}
+					
+					String key = (pi.getOssName() + "_" + pi.getOssVersion() + "_" + pi.getCveId() + "_" + pi.getCvssScore()).toUpperCase();
+					
 					if (!deduplicatedkey.contains(key)) {
 						deduplicatedkey.add(key);
 						
@@ -5849,7 +6980,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 							bean = (OssComponents) securityGridMap.get(key);
 						}
 						
-						if (activateFlag) checkOssNameList.add(pi.getOssName());
+						if (activateFlag) {
+							checkOssNameList.add(pi.getOssName());
+							vulnerabilityLink = CommonFunction.getProperty("server.domain");
+							vulnerabilityLink += "/vulnerability/vulnpopup?ossName=" + pi.getOssName() + "&ossVersion=" + ossVersion;
+						} else {
+							vulnerabilityLink = "https://nvd.nist.gov/vuln/detail/" + pi.getCveId();
+						}
 						
 						oc = new OssComponents();
 						oc.setGridId("jqg_sec_" + project.getPrjId() + "_" + String.valueOf(gridIdx));
@@ -5858,21 +6995,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						oc.setOssVersion(pi.getOssVersion());
 						
 						if (!activateFlag) {
-							oc.setCveId(vuln.getCveId());
-							oc.setCvssScore(vuln.getCvssScore());
-							oc.setPublDate(vuln.getPublDate());
+							oc.setCveId(pi.getCveId());
+							oc.setCvssScore(pi.getCvssScore());
+							oc.setPublDate(pi.getPublDate());
 						}
 						
+						oc.setActivateFlag(activateFlag ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
+						oc.setVulnerabilityLink(vulnerabilityLink);
 						oc.setVulnerabilityResolution("Unresolved");
 						
 						if (bean != null) {
 							oc.setVulnerabilityResolution(bean.getVulnerabilityResolution());
-						}
-						
-						if (oc.getVulnerabilityResolution().equals("Fixed")) {
-							fixedList.add(oc);
-						} else {
-							notFixedList.add(oc);
+							oc.setSecurityComments(bean.getSecurityComments());
 						}
 						
 						totalList.add(oc);
@@ -5904,8 +7038,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		rtnMap.put("totalList", totalList);
-		rtnMap.put("fixedList", fixedList);
-		rtnMap.put("notFixedList", notFixedList);
+		rtnMap.put("fullDiscoveredList", fullDiscoveredList);
 		
 		return rtnMap;
 	}
@@ -5913,79 +7046,86 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void registSecurity(String prjId, String tabName, List<OssComponents> ossComponents) {
-		try {
-			List<OssComponents> updateNvdDataList = new ArrayList<>();
-			Map<String, OssComponents> securityGridMap = new HashMap<>();
-			List<OssComponents> deleteDataList = new ArrayList<>();
-			
-			ProjectIdentification identification = new ProjectIdentification();
-			identification.setReferenceId(prjId);
-			identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			identification.setMerge(CoConstDef.FLAG_NO);
-			
-			Map<String, Object> bomObj = getIdentificationGridList(identification);
-			List<ProjectIdentification> bomList = (List<ProjectIdentification>) bomObj.get("rows");
-			
-			for (ProjectIdentification pi : bomList) {
-				if (pi.getOssName().equals("-")) continue;
-				List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
-				if (securityDatalist != null) {
-					for (OssComponents oss : securityDatalist) {
-						String key = (oss.getOssName() + "_" + oss.getOssVersion() + "_" + oss.getCveId()).toUpperCase();
-						securityGridMap.put(key, oss);
+	public void registSecurity(Project project, String tabName, List<OssComponents> ossComponents) {
+		Map<String, OssComponents> securityGridMap = new HashMap<>();
+		List<OssComponents> deleteDataList = new ArrayList<>();
+		
+		String prjId = project.getPrjId();
+		ProjectIdentification identification = new ProjectIdentification();
+		identification.setReferenceId(prjId);
+		identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		identification.setMerge(CoConstDef.FLAG_NO);
+		
+		Map<String, Object> bomObj = getIdentificationGridList(identification);
+		List<ProjectIdentification> bomList = (List<ProjectIdentification>) bomObj.get("rows");
+		
+		for (ProjectIdentification pi : bomList) {
+			if (pi.getOssName().equals("-")) continue;
+			List<OssComponents> securityDatalist = projectMapper.getSecurityDataList(pi);
+			if (securityDatalist != null) {
+				for (OssComponents oss : securityDatalist) {
+					String ossVersion = oss.getOssVersion();
+					if (ossVersion.equals("-")) {
+						ossVersion = "";
 					}
+					String key = (oss.getOssName() + "_" + ossVersion + "_" + oss.getCveId()).toUpperCase();
+					securityGridMap.put(key, oss);
 				}
 			}
-			
-			for (OssComponents oc : ossComponents) {
-				String key = (oc.getOssName() + "_" + oc.getOssVersion() + "_" + oc.getCveId()).toUpperCase();
-				if (securityGridMap.containsKey(key)) {
-					if (avoidNull(securityGridMap.get(key).getVulnerabilityResolution(), "").equals("Fixed") && !avoidNull(oc.getVulnerabilityResolution(), "").equals("Fixed")) {
-						updateNvdDataList.add(oc);
-					} else if (!avoidNull(securityGridMap.get(key).getVulnerabilityResolution(), "").equals("Fixed") && avoidNull(oc.getVulnerabilityResolution(), "").equals("Fixed")) {
-						updateNvdDataList.add(oc);
-					}
-					deleteDataList.add(oc);
-				} else {
-					if (avoidNull(oc.getVulnerabilityResolution(), "").equals("Fixed")) {
-						updateNvdDataList.add(oc);
-					}
-				}
+		}
+		
+		for (OssComponents oc : ossComponents) {
+			oc.setReferenceId(prjId);
+			String ossVersion = oc.getOssVersion();
+			if (ossVersion.equals("-")) {
+				ossVersion = "";
 			}
-			
-			if (!deleteDataList.isEmpty()) {
-				for (OssComponents oc : deleteDataList) {
-					oc.setReferenceId(prjId);
-					projectMapper.deleteSecurityData(oc);
-				}
+			String key = (oc.getOssName() + "_" + ossVersion + "_" + oc.getCveId()).toUpperCase();
+			if (securityGridMap.containsKey(key)) {
+				deleteDataList.add(oc);
 			}
-			
-			for (OssComponents oc : ossComponents) {
-				oc.setReferenceId(prjId);
-				projectMapper.insertSecurityData(oc);
+		}
+		
+		if (!deleteDataList.isEmpty() || (ossComponents != null && !ossComponents.isEmpty())) {
+			try (SqlSession sqlSession = sqlSessionFactory.openSession(ExecutorType.BATCH)) {
+				 ProjectMapper mapper = sqlSession.getMapper(ProjectMapper.class);
+				 
+				 int cnt = 0;
+				 for (OssComponents bean : deleteDataList) {
+					 mapper.deleteSecurityData(bean);
+					 if (cnt++ == 1000) {
+						 sqlSession.flushStatements();
+						 cnt = 0;
+					 }
+				 }
+				 
+				 if (cnt > 0) sqlSession.flushStatements();
+				 
+				 cnt = 0;
+				 for (OssComponents bean : ossComponents) {
+					 mapper.insertSecurityData(bean);
+					 if (cnt++ == 1000) {
+						 sqlSession.flushStatements();
+						 cnt = 0;
+					 }
+				 }
+				 
+				 if (cnt > 0) {
+					 sqlSession.flushStatements();
+				 }
+				 
+				 sqlSession.commit();
 			}
+		}
+		
+		if (!isEmpty(project.getScrtCsvFileId())) {
+			projectMapper.updateFileId(project);
 			
-			if (updateNvdDataList != null && !updateNvdDataList.isEmpty()) {
-				for (OssComponents oc : updateNvdDataList) {
-					OssMaster om = new OssMaster();
-					om.setOssName(oc.getOssName());
-					om.setOssVersion(avoidNull(oc.getOssVersion()).isEmpty() ? "-" : oc.getOssVersion());
-					
-					Vulnerability vuln = vulnerabilityService.selectNotFixedCveInfo(om);
-					if (vuln != null) {
-						om.setCveId(vuln.getCveId());
-						om.setCvssScore(vuln.getCvssScore());
-						om.setVulnSummary(vuln.getVulnSummary());
-					} else {
-						om.setCveId(null);
-					}
-					
-					projectMapper.updateCveInfoForNotFixedOssInfo(om);
-				}
+			if (project.getCsvFileSeq() != null) {
+				for (int i = 0; i < project.getCsvFileSeq().size(); i++) {
+					projectMapper.updateFileBySeq(project.getCsvFileSeq().get(i));
+				}				
 			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
 		}
 	}
 	
@@ -6024,6 +7164,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		ProjectIdentification identification = new ProjectIdentification();
 		identification.setReferenceId(ossNotice.getPrjId());
+		identification.setReferenceDiv(!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(ossNotice.getRefDiv()) ? CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM : ossNotice.getRefDiv());
 		
 		List<OssComponents> ossComponentList = projectMapper.selectOssComponentsSbomList(identification);
 		
@@ -6042,16 +7183,18 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			List<OssMaster> ossList = projectMapper.checkOssNickName(om);
 			if (ossList != null && !ossList.isEmpty()) {
 				om = ossList.get(0);
-				
-				String copyright = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId()).getCopyright();
-				String homepage = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId()).getHomepage();
-				
-				if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
-					bean.setCopyrightText(copyright);
-				}
-				
-				if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
-					bean.setHomepage(homepage);
+				OssMaster ossInfo = CoCodeManager.OSS_INFO_BY_ID.get(om.getOssId());
+				if (ossInfo != null) {
+					String copyright = ossInfo.getCopyright();
+					String homepage = ossInfo.getHomepage();
+					
+					if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
+						bean.setCopyrightText(copyright);
+					}
+					
+					if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
+						bean.setHomepage(homepage);
+					}
 				}
 			}
 			
@@ -6182,13 +7325,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		for (OssComponents bean : noticeInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
@@ -6213,13 +7356,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		for (OssComponents bean : srcInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 			
 
@@ -6245,13 +7388,13 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		for (OssComponents bean : notObligationInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 			
 
@@ -6313,7 +7456,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				List<OssComponents> fixedList = (List<OssComponents>) result.get("fixedList");
 				fixedList = fixedList.stream().filter(e -> e.getOssVersion().isEmpty()
 															|| (e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityPatchLink())))
-															|| (!e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityComments())))
+															|| (!e.getVulnerabilityResolution().equals("Fixed") && !e.getVulnerabilityResolution().equals("Unresolved") && isEmpty(avoidNull(e.getSecurityComments())))
 															|| e.getVulnerabilityResolution().equals("Unresolved")).collect(Collectors.toList());
 				if (!fixedList.isEmpty()) {
 					reqEntryFlag = true;
@@ -6325,7 +7468,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				List<OssComponents> notFixedList = (List<OssComponents>) result.get("notFixedList");
 				notFixedList = notFixedList.stream().filter(e -> isEmpty(avoidNull(e.getOssVersion()))
 															|| (e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityPatchLink())))
-															|| (!e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityComments())))
+															|| (!e.getVulnerabilityResolution().equals("Fixed") && !e.getVulnerabilityResolution().equals("Unresolved") && isEmpty(avoidNull(e.getSecurityComments())))
 															|| e.getVulnerabilityResolution().equals("Unresolved")).collect(Collectors.toList());
 				if (!notFixedList.isEmpty()) {
 					reqEntryFlag = true;
@@ -6335,11 +7478,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		default : 
 			if (result.containsKey("totalList")) {
 				List<OssComponents> totalList = (List<OssComponents>) result.get("totalList");
-				totalList = totalList.stream().filter(e -> e.getOssVersion().isEmpty()
+				List<OssComponents> filteredTotalList = totalList.stream().filter(e -> e.getOssVersion().isEmpty()
 															|| (e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityPatchLink())))
-															|| (!e.getVulnerabilityResolution().equals("Fixed") && isEmpty(avoidNull(e.getSecurityComments())))
+															|| (!e.getVulnerabilityResolution().equals("Fixed") && !e.getVulnerabilityResolution().equals("Unresolved") && isEmpty(avoidNull(e.getSecurityComments())))
 															|| e.getVulnerabilityResolution().equals("Unresolved")).collect(Collectors.toList());
-				if (!totalList.isEmpty()) {
+				if (!filteredTotalList.isEmpty()) {
 					reqEntryFlag = true;
 				}
 			}
@@ -6360,11 +7503,26 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		Map<String, Object> resMap = new HashMap<>();
 		boolean emptyCheckFlag = false;
 		
-		List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
-		for (OssComponents oss : list) {
-			if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
-				emptyCheckFlag = true;
-				break;
+		if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(project.getReferenceDiv()) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(project.getReferenceDiv())) {
+			List<ProjectIdentification> list = projectMapper.checkSelectDownloadFileForBOM(project);
+			if (list != null) {
+				for (ProjectIdentification bean : list) {
+					if (!bean.getLicenseTypeIdx().equals("1")) continue;
+					if (isEmpty(bean.getOssName()) || isEmpty(bean.getLicenseName())) {
+						emptyCheckFlag = true;
+						break;
+					}
+				}
+			}
+		} else {
+			List<OssComponents> list = projectMapper.checkSelectDownloadFile(project);
+			if (list != null) {
+				for (OssComponents oss : list) {
+					if (isEmpty(oss.getOssName()) || isEmpty(oss.getLicenseName())) {
+						emptyCheckFlag = true;
+						break;
+					}
+				}
 			}
 		}
 		
@@ -6375,5 +7533,445 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		}
 		
 		return resMap;
+	}
+
+	@Override
+	public List<OssComponents> getDependenciesDataList(Project project) {
+		return projectMapper.getDependenciesDataList(project);
+	}
+
+	@Override
+	public void setNoticeFileFormat(Project project, List<String> noticeFileFormatList) {
+		if (noticeFileFormatList.contains("chkAllowDownloadNoticeHTML")) {
+			project.setAllowDownloadNoticeHTMLYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadNoticeHTMLYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadNoticeText")) {
+			project.setAllowDownloadNoticeTextYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadNoticeTextYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSimpleHTML")) {
+			project.setAllowDownloadSimpleHTMLYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSimpleHTMLYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSimpleText")) {
+			project.setAllowDownloadSimpleTextYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSimpleTextYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXSheet")) {
+			project.setAllowDownloadSPDXSheetYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXSheetYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXRdf")) {
+			project.setAllowDownloadSPDXRdfYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXRdfYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXTag")) {
+			project.setAllowDownloadSPDXTagYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXTagYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXJson")) {
+			project.setAllowDownloadSPDXJsonYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXJsonYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadSPDXYaml")) {
+			project.setAllowDownloadSPDXYamlYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadSPDXYamlYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadCDXJson")) {
+			project.setAllowDownloadCDXJsonYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadCDXJsonYn(CoConstDef.FLAG_NO);
+		}
+		if (noticeFileFormatList.contains("chkAllowDownloadCDXXml")) {
+			project.setAllowDownloadCDXXmlYn(CoConstDef.FLAG_YES);
+		} else {
+			project.setAllowDownloadCDXXmlYn(CoConstDef.FLAG_NO);
+		}
+	}
+
+	@Override
+	public void updateSecurityDataForProject(String prjId) {
+		// check project notice
+		Project project = new Project();
+		project.setPrjId(prjId);
+		project = getProjectDetail(project);
+		project.setStandardScore(Float.valueOf(CoCodeManager.getCodeExpString(CoConstDef.CD_VULNERABILITY_MAILING_SCORE, CoConstDef.CD_VULNERABILITY_MAILING_SCORE_STANDARD)));
+		
+		if (CoConstDef.FLAG_NO.equals(project.getAndroidFlag())) {
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+		} else {
+			project.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+		}
+		
+		// set vulnerability resolution
+		checkIfVulnerabilityResolutionIsFixed(project);
+		
+		if (!CoConstDef.FLAG_NO.equals(project.getSecCode())) {
+			if (project.getSecCode().equals("Fixed")) {
+				project.setVulnerabilityResolution("Resolved");
+				if (CoConstDef.FLAG_NO.equals(project.getCvssScore())) {
+					project.setCvssScoreMax("N/A");
+				} else {
+					project.setCvssScoreMax(project.getCvssScore());
+				}
+			} else {
+				if (!project.getCvssScore().equals("0") && !project.getCvssScore().equals("N")) {
+					if (new BigDecimal(project.getCvssScore()).compareTo(new BigDecimal(project.getStandardScore())) > 0) {
+						project.setVulnerabilityResolution("Need to resolve");
+					} else {
+						project.setVulnerabilityResolution("Discovered");
+					}
+					project.setCvssScoreMax(project.getCvssScore());
+				} else {
+					project.setVulnerabilityResolution("Discovered");
+					project.setCvssScoreMax("N/A");
+				}
+			}
+		} else {
+			project.setVulnerabilityResolution("Discovered");
+			if (!project.getCvssScore().equals("0") && !project.getCvssScore().equals("N")) {
+				project.setCvssScoreMax(project.getCvssScore());
+			} else {
+				project.setCvssScoreMax("N/A");
+			}
+		}
+		
+		// update security data for project
+		projectMapper.updateProjectForSecurity(project);
+	}
+
+	@Override
+	public void updatePreparedStatement(List<ProjectIdentification> updateOssComponentList, List<ProjectIdentification> insertOssComponentList, List<OssComponentsLicense> insertOssComponentLicenseList, List<String> deleteRows) {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		PreparedStatement stmt2 = null;
+		PreparedStatement stmt3 = null;
+		
+		String query = "";
+		
+		try{
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			
+			int idx = 1;
+			if (updateOssComponentList != null && updateOssComponentList.size() > 0) {
+				query = "UPDATE OSS_COMPONENTS SET OSS_ID = ?, OSS_NAME = TRIM(?), OSS_VERSION = TRIM(REPLACE(?, 'N/A','')), DOWNLOAD_LOCATION = ?, HOMEPAGE = ?, FILE_PATH = ?, EXCLUDE_YN = ?, BINARY_NAME = ?, BINARY_NOTICE = ?, CUSTOM_BINARY_YN = ?, COPYRIGHT = ?,"
+						+ " OBLIGATION_TYPE = ?, COMMENTS = ?, DEPENDENCIES = ?, REF_OSS_NAME = ?, PACKAGE_URL = ?"
+						+ " WHERE COMPONENT_ID = ?;";
+				stmt = conn.prepareStatement(query);
+				
+				for (ProjectIdentification item : updateOssComponentList) {
+					stmt.setString(1, item.getOssId());
+					stmt.setString(2, item.getOssName());
+					stmt.setString(3, item.getOssVersion());
+					stmt.setString(4, item.getDownloadLocation());
+					stmt.setString(5, item.getHomepage());
+					stmt.setString(6, item.getFilePath());
+					stmt.setString(7, item.getExcludeYn());
+					stmt.setString(8, item.getBinaryName());
+					stmt.setString(9, item.getBinaryNotice());
+					stmt.setString(10, item.getCustomBinaryYn());
+					stmt.setString(11, item.getCopyrightText());
+					stmt.setString(12, isEmpty(item.getObligationType()) ? null : item.getObligationType());
+					stmt.setString(13, item.getComments());
+					stmt.setString(14, isEmpty(item.getDependencies()) ? null : item.getDependencies());
+					stmt.setString(15, isEmpty(item.getRefOssName()) ? null : item.getRefOssName());
+					stmt.setString(16, isEmpty(item.getPackageUrl()) ? null : item.getPackageUrl());
+					stmt.setString(17, item.getComponentId());
+					stmt.addBatch();
+					stmt.clearParameters();
+					
+					if ((idx % 1000) == 0) {
+						stmt.executeBatch();
+						stmt.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+
+				stmt.executeBatch() ;
+				conn.commit();
+			}
+			
+			Map<String, String> componentIdMap = new HashMap<>();
+			Map<String, String> gridMap = new HashMap<>();
+			
+			if (insertOssComponentList != null && insertOssComponentList.size() > 0) {
+				query = "INSERT INTO OSS_COMPONENTS (REFERENCE_ID, REFERENCE_DIV, COMPONENT_IDX, OSS_ID, OSS_NAME, OSS_VERSION, DOWNLOAD_LOCATION, HOMEPAGE, FILE_PATH, EXCLUDE_YN, COPYRIGHT, BINARY_NAME, BINARY_SIZE, BINARY_NOTICE, CUSTOM_BINARY_YN, REF_PARTNER_ID"
+						+ ", REF_PRJ_ID, REF_BAT_ID, REF_COMPONENT_ID, REPORT_FILE_ID, BAT_STRING_MATCH_PERCENTAGE, BAT_PERCENTAGE, BAT_SCORE, OBLIGATION_TYPE, COMMENTS, DEPENDENCIES, REF_OSS_NAME, TLSH, CHECK_SUM, PACKAGE_URL) "
+						+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+				stmt2 = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
+				
+				idx = 1;
+				int rsIdx = 1;
+				
+				for (ProjectIdentification item : insertOssComponentList) {
+					stmt2.setString(1, item.getReferenceId());
+					stmt2.setString(2, item.getReferenceDiv());
+					stmt2.setString(3, item.getComponentIdx());
+					stmt2.setString(4, isEmpty(item.getOssId()) ? null : item.getOssId());
+					stmt2.setString(5, item.getOssName().trim());
+					stmt2.setString(6, item.getOssVersion().equals("N/A") ? "" : item.getOssVersion().trim());
+					stmt2.setString(7, item.getDownloadLocation());
+					stmt2.setString(8, item.getHomepage());
+					stmt2.setString(9, item.getFilePath());
+					stmt2.setString(10, item.getExcludeYn());
+					stmt2.setString(11, item.getCopyrightText());
+					stmt2.setString(12, isEmpty(item.getBinaryName()) ? null : item.getBinaryName());
+					stmt2.setString(13, isEmpty(item.getBinarySize()) ? null : item.getBinarySize());
+					stmt2.setString(14, isEmpty(item.getBinaryNotice()) ? null : item.getBinaryNotice());
+					stmt2.setString(15, isEmpty(item.getCustomBinaryYn()) ? null : item.getCustomBinaryYn());
+					stmt2.setString(16, isEmpty(item.getRefPartnerId()) ? null : item.getRefPartnerId());
+					stmt2.setString(17, isEmpty(item.getRefPrjId()) ? null : item.getRefPrjId());
+					stmt2.setString(18, isEmpty(item.getRefBatId()) ? null : item.getRefBatId());
+					stmt2.setString(19, isEmpty(item.getRefComponentId()) ? null : item.getRefComponentId());
+					stmt2.setString(20, isEmpty(item.getReportFileId()) ? null : item.getReportFileId());
+					stmt2.setString(21, isEmpty(item.getBatStringMatchPercentage()) ? null : item.getBatStringMatchPercentage());
+					stmt2.setString(22, isEmpty(item.getBatPercentage()) ? null : item.getBatPercentage());
+					stmt2.setString(23, isEmpty(item.getBatScore()) ? null : item.getBatScore());
+					stmt2.setString(24, isEmpty(item.getObligationType()) ? null : item.getObligationType());
+					stmt2.setString(25, isEmpty(item.getComments()) ? null : item.getComments());
+					stmt2.setString(26, isEmpty(item.getDependencies()) ? null : item.getDependencies());
+					stmt2.setString(27, isEmpty(item.getRefOssName()) ? null : item.getRefOssName());
+					stmt2.setString(28, isEmpty(item.getTlsh()) ? null : item.getTlsh());
+					stmt2.setString(29, isEmpty(item.getCheckSum()) ? null : item.getCheckSum());
+					stmt2.setString(30, isEmpty(item.getPackageUrl()) ? null : item.getPackageUrl());
+					stmt2.addBatch();
+					gridMap.put(String.valueOf(idx), item.getGridId());
+					
+					if ((idx % 1000) == 0) {
+						stmt2.executeBatch();
+						ResultSet rs = stmt2.getGeneratedKeys();
+						while (rs.next()) {
+							int componentId = rs.getInt(1);
+							componentIdMap.put(String.valueOf(rsIdx), String.valueOf(componentId));
+							deleteRows.add(String.valueOf(componentId));
+							rsIdx++;
+						}
+						
+						stmt2.clearParameters();
+						stmt2.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+
+				stmt2.executeBatch();
+				
+				ResultSet rs = stmt2.getGeneratedKeys();
+				while (rs.next()) {
+					int componentId = rs.getInt(1);
+					componentIdMap.put(String.valueOf(rsIdx), String.valueOf(componentId));
+					deleteRows.add(String.valueOf(componentId));
+					rsIdx++;
+				}
+				
+				stmt2.clearParameters();
+				stmt2.clearBatch();
+				
+				conn.commit();
+			}
+
+			
+			if (insertOssComponentLicenseList != null && insertOssComponentLicenseList.size() > 0) {
+				Map<String, String> ossComponentIdMap = new HashMap<>();
+				for (String key : gridMap.keySet()) {
+					ossComponentIdMap.put(gridMap.get(key), componentIdMap.get(key));
+				}
+				
+				query = "INSERT INTO OSS_COMPONENTS_LICENSE (COMPONENT_ID, LICENSE_ID, LICENSE_NAME, COPYRIGHT_TEXT, EXCLUDE_YN) VALUES (?,?,?,?,?);";
+				stmt3 = conn.prepareStatement(query);
+				
+				idx = 1;
+				for (OssComponentsLicense item : insertOssComponentLicenseList) {
+					String componentId = item.getComponentId();
+					if (componentId.contains(CoConstDef.GRID_NEWROW_DEFAULT_PREFIX) && ossComponentIdMap.containsKey(componentId)) {
+						componentId = ossComponentIdMap.get(componentId);
+					}
+					
+					stmt3.setString(1, componentId);
+					stmt3.setString(2, item.getLicenseId());
+					stmt3.setString(3, item.getLicenseName().trim());
+					stmt3.setString(4, item.getCopyrightText());
+					stmt3.setString(5, item.getExcludeYn());
+					stmt3.addBatch();
+					stmt3.clearParameters();
+					
+					if ((idx % 1000) == 0) {
+						stmt3.executeBatch();
+						stmt3.clearBatch();
+			            conn.commit();
+					}
+					
+					idx++;
+				}
+
+				stmt3.executeBatch() ;
+				conn.commit();
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException se) {}
+			
+			try{
+				if (stmt2 != null) {
+					stmt2.close();
+				}
+			} catch(SQLException se) {}
+			
+			try{
+				if (stmt3 != null) {
+					stmt3.close();
+				}
+			} catch(SQLException se) {}
+			
+			if (conn != null) {
+				try {
+					conn.rollback();
+					conn.close();
+				} catch (Exception e2) {
+					log.error(e2.getMessage(), e2);
+				}
+			}
+		} finally {
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException e) {}
+			
+			try {
+				if (stmt2 != null) {
+					stmt2.close();
+				}
+			} catch(SQLException e) {}
+			
+			try{
+				if (stmt3 != null) {
+					stmt3.close();
+				}
+			} catch(SQLException e) {}
+			
+			try{
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e) {}
+		}
+	}
+	
+	public void deletePreparedStatement(List<OssComponents> componentIdList) {
+		Connection conn = null;
+		PreparedStatement stmt = null;
+		String query = "DELETE FROM OSS_COMPONENTS_LICENSE WHERE COMPONENT_ID = ?";
+		
+		try{
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL,USERNAME,PASSWORD);
+			conn.setAutoCommit(false);
+			
+			stmt = conn.prepareStatement(query);
+			
+			int idx = 1;
+			for (OssComponents item : componentIdList) {
+				stmt.setString(1, item.getComponentId());
+				stmt.addBatch();
+				stmt.clearParameters();
+				
+				if ((idx % 1000) == 0) {
+					stmt.executeBatch();
+					stmt.clearBatch();
+					conn.commit();
+				}
+				
+				idx++;
+			}
+
+			stmt.executeBatch() ;
+			conn.commit();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			try{
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException e1) {}
+			
+			if (conn != null) {
+				try {
+					conn.rollback();
+					conn.close();
+				} catch (Exception e2) {
+					log.error(e2.getMessage(), e2);
+				}
+			}
+		} finally {
+			try {
+				if (stmt != null) {
+					stmt.close();
+				}
+			} catch(SQLException e) {}
+			
+			try{
+				if (conn != null) {
+					conn.close();
+				}
+			} catch(SQLException e) {}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void setLoadToList(Map<String, Object> map, String prjId) {
+		List<OssComponents> rows = (List<OssComponents>) map.get("rows");
+		int idx = 1;
+		
+		for (OssComponents row : rows) {
+			row.setGridId("jqg" + String.valueOf(idx));
+			row.setComponentId(null);
+			row.setRefPartnerId(row.getReferenceId());
+			row.setReferenceId(prjId);
+			row.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
+			
+			idx++;
+		}
+		
+		map.put("rows", rows);
+	}
+	
+	@Override
+	public Map<String, Object> changeProjectStatus(Project project) {
+		Map<String, Object> resultMap = new HashMap<>();
+		String resCd = "";
+		
+		try {
+			resultMap = updateProjectStatus(project, false, false);
+			if (resultMap.containsKey("androidMessage") || resultMap.containsKey("diffMap") || resultMap.containsKey("validMap")) {
+				resCd = "20";
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			resCd = "20";
+		}
+		
+		resultMap.put("resCd", resCd);
+		return resultMap;
 	}
 }

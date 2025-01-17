@@ -30,6 +30,7 @@ public class OssNotice extends ComBean implements Serializable {
 	private String packageFileId;
 	private String packageFileId2;
 	private String packageFileId3;
+	private String packageVulDocFileId;
 	private String userComment;
 
 	private String networkServerFlag = "N";
@@ -64,6 +65,10 @@ public class OssNotice extends ComBean implements Serializable {
 	private String editAppendedYn = "N";
 	private String isSimpleNotice;
 	private String previewOnly = "N";
+	private String[] noticeFileFormat;
+	
+	private String noticeAppendType;
+	private String noticeAppendFileId;
 	
 	/** //OSS_NOTICE_NEW UI 변경 후 사용되는 properties */
 	
@@ -337,5 +342,29 @@ public class OssNotice extends ComBean implements Serializable {
 	}
 	public void setPreviewOnly(String previewOnly) {
 		this.previewOnly = previewOnly;
+	}
+	public String[] getNoticeFileFormat() {
+		return noticeFileFormat;
+	}
+	public void setNoticeFileFormat(String[] noticeFileFormat) {
+		this.noticeFileFormat = noticeFileFormat;
+	}
+	public String getPackageVulDocFileId() {
+		return packageVulDocFileId;
+	}
+	public void setPackageVulDocFileId(String packageVulDocFileId) {
+		this.packageVulDocFileId = packageVulDocFileId;
+	}
+	public String getNoticeAppendType() {
+		return noticeAppendType;
+	}
+	public void setNoticeAppendType(String noticeAppendType) {
+		this.noticeAppendType = noticeAppendType;
+	}
+	public String getNoticeAppendFileId() {
+		return noticeAppendFileId;
+	}
+	public void setNoticeAppendFileId(String noticeAppendFileId) {
+		this.noticeAppendFileId = noticeAppendFileId;
 	}
 }

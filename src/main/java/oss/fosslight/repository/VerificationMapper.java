@@ -5,6 +5,7 @@
 
 package oss.fosslight.repository;
 
+import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.domain.File;
 import java.util.List;
 
@@ -22,7 +23,9 @@ public interface VerificationMapper {
 	OssNotice selectOssNoticeOne(Project project);
 	
 	List<OssComponents> selectVerifyOssList(Project project);
-	
+
+	List<OssDto> selectSelfCheckVerifyOssList(String selfCheckId);
+
 	void updateComment(CommentsHistory commentHistory);
 	
 	void deleteComment(CommentsHistory commentHistory);
@@ -32,6 +35,8 @@ public interface VerificationMapper {
 	List<OssComponents> selectVerificationNotice(OssNotice ossNotice);
 	
 	File selectVerificationFile(String packageFileId);
+	
+	File selectVerificationVulDocFile(String packageVulDocFileId);
 	
 	T2File selectPackageFileName(@Param("prjId") String prjId, @Param("fileIdx") String fileIdx);
 	
@@ -68,4 +73,16 @@ public interface VerificationMapper {
 	int updatePackagingReuseMap(Project project);
 
 	OssComponents checkOssNickName2(OssComponents bean);
+
+	void updatePackageVulDocFile(Project project);
+
+	void deletePackagingFileInfo(T2File file);
+
+	void deleteReuseFileInfo(T2File file);
+
+	int countSameLogiFile(T2File file);
+	
+	void updateNoticeAppendFile(Project project);
+	
+	List<T2File> selectNoticeAppendFile(@Param("noticeAppendFileId") String noticeAppendFileId);
 }

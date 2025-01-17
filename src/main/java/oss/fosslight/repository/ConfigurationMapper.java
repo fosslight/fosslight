@@ -13,4 +13,5 @@ import oss.fosslight.domain.Configuration;
 public interface ConfigurationMapper {
 	void updateDefaultTab(Configuration configuration);
 	void updateDefaultLocale(Configuration configuration);
+	String selectDefaultLocale(Configuration configuration);
 }

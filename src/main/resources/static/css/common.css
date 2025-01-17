@@ -120,6 +120,8 @@ input.btnCLight {height:20px;padding-bottom:1px;line-height:auto;}
 .btnSet.confirm span {background-position:left -32px;}
 .btnSet.review span {background-position:left -62px;}
 .btnSet.reject span {background-position:left -150px;}
+.btnSet.autoReview span {background-position:left -62px;}
+
 /**/
 .smallDelete {display:inline-block;width:9px;height:9px;line-height:1000%;font-size:0 !important;overflow:hidden;cursor:pointer;border:0;background: url("../images/bg_btn.png") no-repeat left -90px;}
 .errorMsgDel {display:inline-block;width:25px;height:25px;line-height:1000%;font-size:0 !important;overflow:hidden;cursor:pointer;border:0;background: url("../images/bg_btn.png") no-repeat right -90px;position:absolute;top:5px;left:94%;}
@@ -323,7 +325,7 @@ body,html {overflow:hidden !important;/*letter-spacing:0.06em;*/background:#efef
 .loading div p {padding:16px 0 0;line-height:20px;}
 /* Pop Common */
 .pop h1 {height:58px;font-family:Verdana;font-size:28px;font-weight:600;line-height:58px !important;color:#ff5a00;letter-spacing:-0.05em;text-align:center;}
-.registPop {margin:-235px 0 0 -225px;padding-bottom:35px;width:450px;/*height:470px;*/}
+.registPop {margin:-235px 0 0 -300px;padding-bottom:35px;width:450px;/*height:470px;*/}
 .registPop h1 {height:80px;}
 .registPop .popdata {padding:40px 70px 0;}
 .registPop table {border-collapse:separate;border-spacing:0;}

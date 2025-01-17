@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -44,7 +45,10 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
@@ -54,12 +58,18 @@ import oss.fosslight.common.ColumnMissingException;
 import oss.fosslight.common.ColumnNameDuplicateException;
 import oss.fosslight.common.CommonFunction;
 import oss.fosslight.config.AppConstBean;
-import oss.fosslight.domain.*;
+import oss.fosslight.domain.LicenseMaster;
+import oss.fosslight.domain.OssAnalysis;
+import oss.fosslight.domain.OssComponents;
+import oss.fosslight.domain.OssComponentsLicense;
+import oss.fosslight.domain.OssMaster;
+import oss.fosslight.domain.Project;
+import oss.fosslight.domain.ProjectIdentification;
+import oss.fosslight.domain.T2File;
+import oss.fosslight.domain.UploadFile;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.service.FileService;
-
-import static oss.fosslight.common.CoConstDef.*;
 
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
@@ -495,6 +505,10 @@ public class ExcelUtil extends CoTopComponent {
 		return value;
 	}
 
+	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, List<OssComponents> list, List<String> errMsgList, Map<String, String> emptyErrMsg) {
+		return readReport(readType, checkId, targetSheetNums, fileSeq, list, errMsgList, emptyErrMsg, false);
+	}
+	
 	/**
 	 * 
 	 * @param readType Report종류(3rd, SRC, BAT ...)
@@ -506,8 +520,8 @@ public class ExcelUtil extends CoTopComponent {
 	 * @return
 	 */
 	public static boolean readReport(String readType, boolean checkId, String[] targetSheetNums, String fileSeq, 
-	        List<OssComponents> list,List<String> errMsgList) {
-		
+	        List<OssComponents> list,List<String> errMsgList, Map<String, String> emptyErrMsg, boolean exactMatchFlag) {
+
 		T2File fileInfo = fileService.selectFileInfo(fileSeq);
 		if (fileInfo == null) {
 			log.error("파일정보를 찾을 수 없습니다. fileSeq : " + avoidNull(fileSeq));
@@ -545,8 +559,6 @@ public class ExcelUtil extends CoTopComponent {
 				Sheet sheet = wb.getSheetAt(Integer.parseInt(targetSheetNums[0]));
 			} catch (Exception e) {
 				
-				String [] types = {"Self-Check", "SRC", "BIN"};
-
 				List<String> sheetNames = new ArrayList<String>();
 				for (int i=0; i<wb.getNumberOfSheets(); i++) {
 					sheetNames.add( wb.getSheetName(i) );
@@ -556,19 +568,22 @@ public class ExcelUtil extends CoTopComponent {
 
 				int idx = 0;
 				for (String sheetName : sheetNames){
-					for (String type : types){
-						if (sheetName.startsWith(type)){
+					if (exactMatchFlag) {
+						if (sheetName.equalsIgnoreCase(readType)) {
+							targetSheetNumsArrayList.add(Integer.toString(idx));
+						}
+					} else {
+						if (sheetName.startsWith(readType)){
 							targetSheetNumsArrayList.add(Integer.toString(idx));
 						}
 					}
 					idx++;
 				}
-				if (targetSheetNumsArrayList.isEmpty()){
-					targetSheetNums[0] = "-1";
-				}else{
+				if (targetSheetNumsArrayList.isEmpty()) {
+					targetSheetNums = new String[] {"-1"};
+				} else {
 					targetSheetNums = targetSheetNumsArrayList.toArray(new String[0]);
 				}
-
 			}
 			
 			if (hasFileListSheet(targetSheetNums, wb)) {
@@ -701,14 +716,16 @@ public class ExcelUtil extends CoTopComponent {
 					newLineYn = true;
 				}
 				if (!isEmpty(emptySheet)) {
-					returnMsg += newLineYn?"<br/><br/>":"";
-					returnMsg += "There are no OSS listed. Sheet Name : [".concat(emptySheet).concat("]");
-					returnMsg += "<br><br>";
-					returnMsg += "사용한 Open Source가 없으면, OSS Name란에 하이픈(\"-\")을 기재하고, License란에서는 \"LGE Proprietary License\" (3rd Party가 자체 개발한 File일 경우, Other Proprietary License)를 선택하십시오.";
-					returnMsg += "<br><br>";	
-					returnMsg += "For the files that do not use open source at all, enter \"-\" on the OSS Name field and select \"LGE Proprietary License\" on the License field (\"Other Proprietary License\" for the file obtained from the 3rd Party).";
+//					returnMsg += newLineYn?"<br/><br/>":"";
+//					returnMsg += "There are no OSS listed. Sheet Name : [".concat(emptySheet).concat("]");
+//					returnMsg += "<br><br>";
+//					returnMsg += "사용한 Open Source가 없으면, OSS Name란에 하이픈(\"-\")을 기재하고, License란에서는 \"LGE Proprietary License\" (3rd Party가 자체 개발한 File일 경우, Other Proprietary License)를 선택하십시오.";
+//					returnMsg += "<br><br>";	
+//					returnMsg += "For the files that do not use open source at all, enter \"-\" on the OSS Name field and select \"LGE Proprietary License\" on the License field (\"Other Proprietary License\" for the file obtained from the 3rd Party).";
+					emptyErrMsg.put("emptyErrMsg", getMessage("msg.common.check.sheet.empty" , new String[]{emptySheet}));
+				} else {
+					throw new ColumnMissingException(returnMsg);
 				}
-				throw new ColumnMissingException(returnMsg);
 			}
 
 		} catch (ColumnNameDuplicateException e) {
@@ -732,7 +749,7 @@ public class ExcelUtil extends CoTopComponent {
 		
 		
 		// 사용자 입력 값을 기준으로 OSS Master 정보를 비교 ID를 설정한다.
-		if (checkId && list != null && !list.isEmpty()) {
+		if (checkId && list != null && !list.isEmpty() && !readType.equalsIgnoreCase("total")) {
 
 			// AutoIdentification  처리중 라이선스명이 사용자설정 명칭(닉네임)이 DB에 등록된 정식명칭등으로 치환되는 내용을 사용자에게 표시하기 위해 
 			// 엑셀 파일의 원본 내용을 보관한다.
@@ -781,7 +798,22 @@ public class ExcelUtil extends CoTopComponent {
 		int spdxIdentifierCol = -1;
 		// Pacakge Identifier
 		int packageIdentifierCol = -1;
-
+		// Dependencies
+		int dependenciesCol = -1;
+		// tlsh
+		int tlshCol = -1;
+		// Check Sum
+		int checkSumCol = -1;
+		// Package URL
+		int packageUrlCol = -1;
+		// CVE ID
+		int cveIdCol = -1;
+		// Vulnerability Resolution
+		int vulnerabilityResolutionCol = -1;
+		// Official CVE Security Patch Link
+		int securityPatchLinkCol = -1;
+		// Security Comments 
+		int securityCommentsCol = -1;
 
 		Map<String, String> errMsg = new HashMap<>();
 		
@@ -873,6 +905,15 @@ public class ExcelUtil extends CoTopComponent {
 						copyrightTextCol = colIdx;
 						
 						break;
+					case "MANIFEST FILE":
+					case "PURL":
+					case "PACKAGE URL":
+						if (packageUrlCol > -1) {
+							dupColList.add(value);
+						}
+						packageUrlCol = colIdx;
+						
+						break;
 					case "PATH OR FILE":
 					case "PATH":
 					case "FILE OR DIRECTORY":
@@ -883,6 +924,8 @@ public class ExcelUtil extends CoTopComponent {
 					case "BINARY NAME OR (IF DELIVERY FORM IS SOURCE CODE) SOURCE PATH":
 					case "FILE NAME OR PATH":
 					case "SOURCE NAME OR PATH":
+					case "SOURCE OR BINARY PATH":
+					case "SOURCE PATH":
 						if (pathOrFileCol > -1) {
 							dupColList.add(value);
 						}
@@ -929,6 +972,7 @@ public class ExcelUtil extends CoTopComponent {
 					case "BINARY FILE":
 					case "BINARY/LIBRARY FILE":
 					case "BINARY NAME":
+					case "BINARY PATH":
 						if (binaryNameCol > -1) {
 							dupColList.add(value);
 						}
@@ -989,6 +1033,57 @@ public class ExcelUtil extends CoTopComponent {
 						}
 						
 						spdxIdentifierCol = colIdx;
+						break;
+					case "DEPENDENCIES":
+					case "DEPENDS ON":
+						if (dependenciesCol > -1) {
+							dupColList.add(value);
+						}
+
+						dependenciesCol = colIdx;
+						break;
+					case "TLSH":
+						if (tlshCol > -1) {
+							dupColList.add(value);
+						}
+
+						tlshCol = colIdx;
+						break;
+					case "SHA1":
+						if (checkSumCol > -1) {
+							dupColList.add(value);
+						}
+
+						checkSumCol = colIdx;
+						break;
+					case "VULNERABILITY RESOLUTION":
+						if (vulnerabilityResolutionCol > -1) {
+							dupColList.add(value);
+						}
+
+						vulnerabilityResolutionCol = colIdx;
+						break;
+					case "SECURITY PATCH LINK FOR INTERNAL":
+						if (securityPatchLinkCol > -1) {
+							dupColList.add(value);
+						}
+
+						securityPatchLinkCol = colIdx;
+						break;
+					case "SECURITY COMMENTS":
+						if (securityCommentsCol > -1) {
+							dupColList.add(value);
+						}
+
+						securityCommentsCol = colIdx;
+						break;
+					case "CVE ID":
+						if (cveIdCol > -1) {
+							dupColList.add(value);
+						}
+
+						cveIdCol = colIdx;
+						break;
 					default:
 						break;
 				}
@@ -1019,7 +1114,7 @@ public class ExcelUtil extends CoTopComponent {
 					colNames.add("OSS VERSION");
 				}
 			}
-			if (!colNames.isEmpty()) {
+			if (!colNames.isEmpty() && !avoidNull(readType).equalsIgnoreCase("total")) {
 				String msg = colNames.toString();
 				msg = "No required fields were found. Sheet Name : [".concat(sheet.getSheetName()).concat("],  Filed Name : ").concat(msg);
 				errMsg.put("reqCol", msg);
@@ -1058,7 +1153,7 @@ public class ExcelUtil extends CoTopComponent {
     				if (ossNameCol < 0) {
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
     					bean.setCopyrightText(copyrightTextCol < 0 ? "" : getCellData(row.getCell(copyrightTextCol)));
-    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)) : getCellData(row.getCell(licenseCol)) + ", " + getCellData(row.getCell(commentCol)));
+    					bean.setComments(commentCol < 0 ? getCellData(row.getCell(licenseCol)).trim() : getCellData(row.getCell(licenseCol)).trim() + ", " + getCellData(row.getCell(commentCol)).trim());
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					if (bean.getCopyrightText() == ""){
     						bean.setCopyrightText(" ");
@@ -1087,23 +1182,32 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setOssName(ossNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossNameCol))).trim().replaceAll("\t", ""));
     					bean.setOssVersion(ossVersionCol < 0 ? "" : avoidNull(getCellData(row.getCell(ossVersionCol))).trim().replaceAll("\t", ""));
     					
-    					String downloadLocation = avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\t", "");
-    					if (downloadLocation.equals("NONE") || downloadLocation.equals("NOASSERTION") || downloadLocationCol < 0) {
+    					if (downloadLocationCol < 0) {
     						bean.setDownloadLocation("");
     					} else {
-    						bean.setDownloadLocation(downloadLocation);
+    						String downloadLocation = avoidNull(getCellData(row.getCell(downloadLocationCol))).trim().replaceAll("\t", "");
+    						if (downloadLocation.equals("NONE") || downloadLocation.equals("NOASSERTION")) {
+    							bean.setDownloadLocation("");
+        					} else {
+        						bean.setDownloadLocation(downloadLocation);
+        					}
     					}
     					
     					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(getCellData(row.getCell(homepageCol))).trim().replaceAll("\t", ""));
     					bean.setFilePath(pathOrFileCol < 0 ? "" : avoidNull(getCellData(row.getCell(pathOrFileCol))).trim().replaceAll("\t", ""));
     					bean.setBinaryName(binaryNameCol < 0 ? "" : avoidNull(getCellData(row.getCell(binaryNameCol))).trim().replaceAll("\t", ""));
     
-    					String copyrightText = getCellData(row.getCell(copyrightTextCol));
-    					if (copyrightText.equals("NONE") || copyrightText.equals("NOASSERTION") || copyrightTextCol < 0) {
+    					if (downloadLocationCol < 0) {
     						bean.setCopyrightText("");
     					} else {
-    						bean.setCopyrightText(copyrightText);
+    						String copyrightText = getCellData(row.getCell(copyrightTextCol));
+        					if (copyrightText.equals("NONE") || copyrightText.equals("NOASSERTION")) {
+        						bean.setCopyrightText("");
+        					} else {
+        						bean.setCopyrightText(copyrightText);
+        					}
     					}
+    					
     					bean.setOssNickName(nickNameCol < 0 ? "" : getCellData(row.getCell(nickNameCol)));
     					bean.setSpdxIdentifier(spdxIdentifierCol < 0 ? "" : getCellData(row.getCell(spdxIdentifierCol)));
     				}
@@ -1119,53 +1223,57 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setReportKey(getCellData(row.getCell(noCol)));
     				}
 
-    				String licenseConcluded = getCellData(row.getCell(licenseCol));
-    				if (isSPDXSpreadsheet(sheet) && (licenseConcluded.contains("AND") || licenseConcluded.contains("OR"))) {
-    					String licenseComment = getCellData(row.getCell(commentCol));
-    					String comment = "";
+    				if (licenseCol > 0) {
+    					String licenseConcluded = getCellData(row.getCell(licenseCol));
+        				if (isSPDXSpreadsheet(sheet) && (licenseConcluded.contains("AND") || licenseConcluded.contains("OR"))) {
+        					String licenseComment = getCellData(row.getCell(commentCol));
+        					String comment = "";
 
-    					if (!licenseConcluded.isEmpty()) {
-    						comment += licenseConcluded;
-    					}
+        					if (!licenseConcluded.isEmpty()) {
+        						comment += licenseConcluded;
+        					}
 
-    					if (!licenseComment.isEmpty()) {
-    						if (licenseConcluded.isEmpty()) {
-    							comment += licenseComment;
-    						} else {
-    							comment += " / " + licenseComment;
-    						}
-    					}
+        					if (!licenseComment.isEmpty()) {
+        						if (licenseConcluded.isEmpty()) {
+        							comment += licenseComment;
+        						} else {
+        							comment += " / " + licenseComment;
+        						}
+        					}
 
-    					bean.setComments(commentCol < 0 ? "" : comment);
-    				} else {
-    					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)));
+        					bean.setComments(commentCol < 0 ? "" : comment.trim());
+        				} else {
+        					bean.setComments(commentCol < 0 ? "" : getCellData(row.getCell(commentCol)).trim());
+        				}
     				}
     
     				// oss Name을 입력하지 않거나, 이전 row와 oss name, oss version이 동일한 경우, 멀티라이선스로 판단
     				OssComponentsLicense subBean = new OssComponentsLicense();
-    				String licenseName = getCellData(row.getCell(licenseCol));
-    				if (isSPDXSpreadsheet(sheet)){
-    					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
-    				} else if (licenseName.contains(",")) {
-    					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
+    				if (licenseCol > 0) {
+    					String licenseName = getCellData(row.getCell(licenseCol));
+        				if (isSPDXSpreadsheet(sheet)){
+        					licenseName = StringUtil.join(Arrays.asList(licenseName.split("\\(|\\)| ")).stream().filter(l -> !isEmpty(l) && !l.equals("AND") && !l.equals("OR")).collect(Collectors.toList()), ",");
+        				} else if (licenseName.contains(",")) {
+        					licenseName = StringUtil.join(Arrays.asList(licenseName.split(",")).stream().filter(l -> !isEmpty(l)).collect(Collectors.toList()), ",");
+        				}
+        				
+        				if (!licenseName.matches("\\A\\p{ASCII}*\\z")) {
+    						byte[] asciiValues = licenseName.getBytes(StandardCharsets.US_ASCII);
+    						byte[] asciiValuesRetry = new byte[asciiValues.length];
+    						for (int i=0; i < asciiValues.length ; i++) {
+    							if (asciiValues[i] == 63) {
+    								asciiValuesRetry[i] = 32;
+    							} else {
+    								asciiValuesRetry[i] = asciiValues[i];
+    							}
+    						}
+    	    				
+    						licenseName = new String(asciiValuesRetry);
+    					}
+        				
+        				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);
+        				subBean.setLicenseText(licenseTextCol < 0 ? "" : getCellData(row.getCell(licenseTextCol)));
     				}
-    				
-    				if (!licenseName.matches("\\A\\p{ASCII}*\\z")) {
-						byte[] asciiValues = licenseName.getBytes(StandardCharsets.US_ASCII);
-						byte[] asciiValuesRetry = new byte[asciiValues.length];
-						for (int i=0; i < asciiValues.length ; i++) {
-							if (asciiValues[i] == 63) {
-								asciiValuesRetry[i] = 32;
-							} else {
-								asciiValuesRetry[i] = asciiValues[i];
-							}
-						}
-	    				
-						licenseName = new String(asciiValuesRetry);
-					}
-    				
-    				subBean.setLicenseName(licenseCol < 0 ? "" : licenseName);
-    				subBean.setLicenseText(licenseTextCol < 0 ? "" : getCellData(row.getCell(licenseTextCol)));
     				
     				if ("false".equals(subBean.getLicenseText()) || "-".equals(subBean.getLicenseText())) {
     					subBean.setLicenseText("");
@@ -1193,6 +1301,8 @@ public class ExcelUtil extends CoTopComponent {
     					bean.setFilePath(_replaceFilePath);
     				}
     				
+    				bean.setPackageUrl(packageUrlCol < 0 ? "" : getCellData(row.getCell(packageUrlCol)));
+    				
     				// empty row check
     				if (isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getBinaryName()) && isEmpty(bean.getFilePath())
     						&& isEmpty(bean.getDownloadLocation()) && isEmpty(bean.getHomepage()) && isEmpty(bean.getCopyrightText())) {
@@ -1209,6 +1319,34 @@ public class ExcelUtil extends CoTopComponent {
     				// default
     				bean.setExcludeYn(avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO));
     
+    				if (dependenciesCol > -1) {
+						bean.setDependencies(dependenciesCol < 0 ? "" : avoidNull(getCellData(row.getCell(dependenciesCol))).trim().replaceAll("\t", ""));
+					}
+    				
+    				if (tlshCol > -1) {
+						bean.setTlsh(tlshCol < 0 ? "" : avoidNull(getCellData(row.getCell(tlshCol))).trim().replaceAll("\t", ""));
+					}
+    				
+    				if (checkSumCol > -1) {
+						bean.setCheckSum(checkSumCol < 0 ? "" : avoidNull(getCellData(row.getCell(checkSumCol))).trim().replaceAll("\t", ""));
+					}
+    				
+    				if (cveIdCol > -1) {
+    					bean.setCveId(cveIdCol < 0 ? "" : avoidNull(getCellData(row.getCell(cveIdCol))).trim());
+    				}
+    				
+    				if (vulnerabilityResolutionCol > -1) {
+    					bean.setVulnerabilityResolution(vulnerabilityResolutionCol < 0 ? "" : avoidNull(getCellData(row.getCell(vulnerabilityResolutionCol))).trim());
+    				}
+    				
+    				if (securityPatchLinkCol > -1) {
+    					bean.setSecurityPatchLink(securityPatchLinkCol < 0 ? "" : avoidNull(getCellData(row.getCell(securityPatchLinkCol))).trim());
+    				}
+
+    				if (securityCommentsCol > -1) {
+    					bean.setSecurityComments(securityCommentsCol < 0 ? "" : avoidNull(getCellData(row.getCell(securityCommentsCol))).trim());
+    				}
+    				
     				// homepage와 download location이 http://로 시작하지 않을 경우 자동으로 체워줌
 //    				if (!isEmpty(bean.getHomepage()) 
 //    						&& !(bean.getHomepage().toLowerCase().startsWith("http://") 
@@ -1312,6 +1450,8 @@ public class ExcelUtil extends CoTopComponent {
 		int noticeHtmlCol = -1;
 		int excludeCol = -1;
 		int commentCol = -1;
+		int tlshCol = -1;
+		int sha1Col = -1;
 		
 		DefaultHeaderRowIndex = findHeaderRowIndex(sheet);
 		
@@ -1394,6 +1534,7 @@ public class ExcelUtil extends CoTopComponent {
 					break;
 				case "BINARY/LIBRARY FILE":
 				case "BINARY NAME":
+				case "BINARY PATH":
 					if (binaryFileCol > -1) {
 						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
 					}
@@ -1403,6 +1544,7 @@ public class ExcelUtil extends CoTopComponent {
 					break;
 				case "DIRECTORY":
 				case "SOURCE CODE PATH":
+				case "SOURCE PATH":
 					if (pathOrFileCol > -1) {
 						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
 					}
@@ -1428,6 +1570,7 @@ public class ExcelUtil extends CoTopComponent {
 					
 					break;
 				case "NOTICE.HTML":
+				case "NOTICE":
 					if (noticeHtmlCol > -1) {
 						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
 					}
@@ -1449,6 +1592,22 @@ public class ExcelUtil extends CoTopComponent {
 					}
 					
 					commentCol = colIdx;
+					
+					break;
+				case "TLSH":
+					if (tlshCol > -1) {
+						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
+					}
+					
+					tlshCol = colIdx;
+					
+					break;
+				case "SHA1":
+					if (sha1Col > -1) {
+						throw new ColumnNameDuplicateException(sheet.getSheetName() + "." + value);
+					}
+					
+					sha1Col = colIdx;
 					
 					break;
 				default:
@@ -1541,6 +1700,9 @@ public class ExcelUtil extends CoTopComponent {
     			if ("false".equals(bean.getCopyrightText())) {
     				bean.setCopyrightText("");
     			}
+    			
+    			bean.setTlsh(tlshCol < 0 ? "" : getCellData(row.getCell(tlshCol)));
+    			bean.setCheckSum(sha1Col < 0 ? "" : getCellData(row.getCell(sha1Col)));
     
     			if (isEmpty(bean.getBinaryName()) && isEmpty(bean.getOssName()) && isEmpty(bean.getOssVersion()) && isEmpty(subBean.getLicenseName()) && isEmpty(bean.getFilePath()) 
     					&& isEmpty(bean.getDownloadLocation()) && isEmpty(bean.getHomepage()) && isEmpty(bean.getCopyrightText())) {
@@ -2009,7 +2171,7 @@ public class ExcelUtil extends CoTopComponent {
 	}
 
 
-	public static List<ProjectIdentification> getVerificationList(MultipartHttpServletRequest req, String localPath) {
+	public static List<OssComponents> getVerificationList(MultipartHttpServletRequest req, List<OssComponents> ossComponents, String localPath) {
 		List<ProjectIdentification> result = new ArrayList<ProjectIdentification>();
 		Iterator<String> fileNames = req.getFileNames();
 		
@@ -2086,7 +2248,32 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 		
-		return result;
+		if ((result != null && !result.isEmpty()) && (ossComponents != null && !ossComponents.isEmpty())) {
+			List<String> duplicateCheckList = new ArrayList<>();
+			for (OssComponents oc : ossComponents) {
+				List<String> licenseNameList = Arrays.asList(oc.getLicenseName().split(","));
+				Collections.sort(licenseNameList);
+				String licenseName = String.join(",", licenseNameList);
+				
+				String key = (oc.getOssName() + "|" + oc.getOssVersion() + "|" + licenseName).toUpperCase();
+				if (!duplicateCheckList.contains(key)) {
+					for (ProjectIdentification pi : result) {
+						List<String> lmList = Arrays.asList(pi.getLicenseName().split(","));
+						Collections.sort(lmList);
+						String lm = String.join(",", lmList);
+						
+						String key2 = (pi.getOssName() + "|" + pi.getOssVersion() + "|" + lm).toUpperCase();
+						if (key.equals(key2)) {
+							oc.setFilePath(pi.getFilePath());
+							duplicateCheckList.add(key);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return ossComponents;
 	}
 
 	/**
@@ -2505,9 +2692,10 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 
+		CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
 		try (
 			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
-			CSVReader csvReader = new CSVReader(csvFile, '|');
+			CSVReader csvReader = new CSVReaderBuilder(csvFile).withCSVParser(parser).build();
 		) {
 			List<String[]> allData = csvReader.readAll();
 			
@@ -2758,7 +2946,7 @@ public class ExcelUtil extends CoTopComponent {
 					bean.setDownloadLocation(downloadLocationCol < 0 ? "" : avoidNull(row[downloadLocationCol]).trim().replaceAll("\t", ""));
 					bean.setHomepage(homepageCol < 0 ? "" : avoidNull(row[homepageCol]).trim().replaceAll("\t", ""));
 					bean.setOssCopyright(copyrightTextCol < 0 ? "" : avoidNull(row[copyrightTextCol]).trim().replaceAll("\t", ""));
-					bean.setComment(commentCol < 0 ? "" : avoidNull(row[commentCol]).trim().replaceAll("\\,", "").replaceAll("\t", ""));
+					bean.setComment(commentCol < 0 ? "" : avoidNull(row[commentCol]).trim().replaceAll("\t", ""));
 					
 					analysisResultList.add(bean);
 				}
@@ -2947,11 +3135,10 @@ public class ExcelUtil extends CoTopComponent {
 	}
 
 	/**Excel 헤더 체크*/
-	public static boolean checkHeaderLicenseColumnValidate(Iterator<Cell> cellIterator) {
-		String[] definedColData = new String[] {"LICENSE NAME", "LICENSE TYPE", "NOTICE", "SOURCE CODE",
+	public static boolean checkHeaderLicenseColumnValidate(Iterator<Cell> cellIterator, Map<Integer, String> columnCheckMap) {
+		List<String> definedColData = Arrays.asList(new String[] {"LICENSE NAME", "LICENSE TYPE", "NOTICE", "SOURCE CODE",
 				"SPDX SHORT IDENTIFIER", "NICKNAME", "WEBSITE FOR THE LICENSE",
-				"USER GUIDE", "LICENSE TEXT", "ATTRIBUTION", "COMMENT"};
-		boolean allColumnsExist = true;
+				"USER GUIDE", "LICENSE TEXT", "ATTRIBUTION", "COMMENT"});
 
 		List<String> firstRowColData = new ArrayList<>();
 		while (cellIterator.hasNext()) {
@@ -2959,16 +3146,16 @@ public class ExcelUtil extends CoTopComponent {
 			firstRowColData.add(getCellData(cell));
 		}
 
-		for (int cIdx = 0; cIdx < definedColData.length; cIdx++) {
+		int validationCnt = 0;
+		for (int cIdx = 0; cIdx < firstRowColData.size(); cIdx++) {
 			String colData = firstRowColData.get(cIdx);
-			if (colData != null && definedColData[cIdx].equals(colData.toUpperCase())){
-				continue;
-			} else {
-				allColumnsExist = false;
-				break;
+			if (colData != null && definedColData.contains(colData.toUpperCase())){
+				validationCnt++;
+				columnCheckMap.put(cIdx, colData.toUpperCase());
 			}
 		}
-		return allColumnsExist;
+		
+		return validationCnt > 0 ? true : false;
 	}
 
 	/**make Grid data to return UI*/
@@ -2990,6 +3177,7 @@ public class ExcelUtil extends CoTopComponent {
 			String extType = ext[ext.length - 1];
 			String codeExt[] = StringUtil.split(codeMapper.selectExtType("11"), ","); // The codeExt array contains the allowed extension types.
 			int count = 0;
+			Map<Integer, String> columnCheckMap = new HashMap<>();
 
 			for (int i = 0; i < codeExt.length; i++) {
 				if (codeExt[i].equalsIgnoreCase(extType)) {
@@ -3008,13 +3196,23 @@ public class ExcelUtil extends CoTopComponent {
 						HSSFRow row = sheet.getRow(rowIndex);
 						if (rowIndex == 0) {
 							//check header in here
-							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator());
+							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator(), columnCheckMap);
 							if (!validHeader){
 								log.info("The order and content of header columns must match.");
 								return null;
 							}
 						} else {
-							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
+							short firstCell = row.getFirstCellNum();
+							short lastCell = row.getLastCellNum();
+							
+							for (short cellIdx = firstCell; cellIdx <= lastCell; cellIdx++) {
+								HSSFCell cell = row.getCell(cellIdx);
+								if (cell == null) {
+									row.createCell(cellIdx);
+								}
+							}
+							
+							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator(), columnCheckMap);
 							if (licenseMaster != null) {
 								licenseMasterList.add(licenseMaster);
 							}
@@ -3037,14 +3235,24 @@ public class ExcelUtil extends CoTopComponent {
 					for (int rowIndex = 0; rowIndex < rowSize; rowIndex++) {
 						XSSFRow row = sheet.getRow(rowIndex);
 						if (rowIndex == 0) {
-							boolean validHeader = checkHeaderColumnValidate(row.cellIterator());
+							boolean validHeader = checkHeaderLicenseColumnValidate(row.cellIterator(), columnCheckMap);
 							if (!validHeader) {
 								log.info("The order and content of header columns must match.");
 								return null;
 							}
 						} else {
+							short firstCell = row.getFirstCellNum();
+							short lastCell = row.getLastCellNum();
+							
+							for (short cellIdx = firstCell; cellIdx <= lastCell; cellIdx++) {
+								XSSFCell cell = row.getCell(cellIdx);
+								if (cell == null) {
+									row.createCell(cellIdx);
+								}
+							}
+							
 							//licenseMaster Object
-							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator());
+							LicenseMaster licenseMaster = getLicenseDataByColumn(row.cellIterator(), columnCheckMap);
 							if (licenseMaster != null) {
 								licenseMasterList.add(licenseMaster);
 							}
@@ -3064,74 +3272,98 @@ public class ExcelUtil extends CoTopComponent {
 		return licenseMasterList;
 	}
 
-	public static LicenseMaster getLicenseDataByColumn(Iterator<Cell> cellIterator) {
+	public static LicenseMaster getLicenseDataByColumn(Iterator<Cell> cellIterator, Map<Integer, String> columnCheckMap) {
 		LicenseMaster licenseMaster = new LicenseMaster();
 		int colIndex = 0;
+		Integer maxKey = Collections.max(columnCheckMap.keySet());
+		
 		for (; cellIterator.hasNext(); colIndex++) {
-			Cell cell = (Cell) cellIterator.next();
-			String value = getCellData(cell);
-			if (colIndex == 0) {
-				if (value == null || value.trim().isEmpty()) {
-					log.debug("License Name must not be null.");
-					return null;
-				} else {
-					licenseMaster.setLicenseName(value);
+			if (colIndex > maxKey) break;
+			
+			if (!columnCheckMap.containsKey(colIndex)) {
+				cellIterator.next();
+				continue;
+			} else {
+				String columnName = columnCheckMap.get(colIndex);
+				
+				Cell cell = (Cell) cellIterator.next();
+				String value = getCellData(cell);
+				
+				switch (columnName) {
+				case "LICENSE NAME" :
+					if (value == null || value.trim().isEmpty()) {
+						log.debug("License Name must not be null.");
+						return null;
+					} else {
+						licenseMaster.setLicenseName(value);
+					}
+					break;
+				case "LICENSE TYPE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setLicenseType(value);
+					break;
+				case "NOTICE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setObligationNotificationYn(value);
+					break;
+				case "SOURCE CODE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setObligationDisclosingSrcYn(value);
+					break;
+				case "SPDX SHORT IDENTIFIER" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setShortIdentifier(value);
+					break;
+				case "NICKNAME" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					String[] nicknames = StringUtil.delimitedStringToStringArray(value, ",");
+					licenseMaster.setLicenseNicknames(nicknames);
+					break;
+				case "WEBSITE FOR THE LICENSE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					String[] webpages = StringUtil.delimitedStringToStringArray(value, ",");
+					Arrays.stream(webpages).forEach((webpage)->{
+						webpage.replaceAll("(\r\n|\r|\n|\n\r)", "");
+					});
+					licenseMaster.setWebpages(webpages);
+					break;
+				case "USER GUIDE" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setDescription(value);
+					break;
+				case "LICENSE TEXT" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setLicenseText(value);
+					break;
+				case "ATTRIBUTION" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setAttribution(value);
+					break;
+				case "COMMENT" :
+					if (value == null || value.trim().isEmpty()) {
+						continue;
+					}
+					licenseMaster.setComment(value);
+					break;
 				}
-			} else if (colIndex == 1) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setLicenseType(value);
-			} else if (colIndex == 2) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setObligationNotificationYn(value);
-			} else if (colIndex == 3) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setObligationDisclosingSrcYn(value);
-			} else if (colIndex == 4) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setShortIdentifier(value);
-			} else if (colIndex == 5) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				String[] nicknames = StringUtil.delimitedStringToStringArray(value, ",");
-				licenseMaster.setLicenseNicknames(nicknames);
-			} else if (colIndex == 6) {
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				String[] webpages = StringUtil.delimitedStringToStringArray(value, ",");
-				Arrays.stream(webpages).forEach((webpage)->{
-					webpage.replaceAll("(\r\n|\r|\n|\n\r)", "");
-				});
-				licenseMaster.setWebpages(webpages);
-			} else if (colIndex == 7) { //userGuide string
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setDescription(value);
-			} else if (colIndex == 8) { //licenseText string
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setLicenseText(value);
-			} else if (colIndex == 9) { //attribute string
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setAttribution(value);
-			} else if (colIndex == 10) { //comment string
-				if (value == null || value.trim().isEmpty()) {
-					continue;
-				}
-				licenseMaster.setComment(value);
 			}
 		}
 		return licenseMaster;
@@ -3153,10 +3385,12 @@ public class ExcelUtil extends CoTopComponent {
 				String header = avoidNull(getCellData(cell)).trim().toUpperCase();
 				switch(header) {
 					case "BINARY/LIBRARY FILE":
+					case "BINARY PATH":
 					case "BINARY NAME": binaryNameCnt++;
 						break;
 						
 					case "DIRECTORY":
+					case "SOURCE PATH":
 					case "SOURCE CODE PATH": sourceCodePathCnt++;
 						break;
 						
@@ -3212,9 +3446,11 @@ public class ExcelUtil extends CoTopComponent {
 			}
 		}
 
+
+		CSVParser parser = new CSVParserBuilder().withSeparator('|').build();
 		try (
 			FileReader csvFile = new FileReader(file); // CSV File만 가능함.
-			CSVReader csvReader = new CSVReader(csvFile, '|');
+				CSVReader csvReader = new CSVReaderBuilder(csvFile).withCSVParser(parser).build();
 		) {
 			List<String[]> allData = csvReader.readAll();
 			if (allData != null) {

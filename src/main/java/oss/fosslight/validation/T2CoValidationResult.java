@@ -51,27 +51,15 @@ public class T2CoValidationResult {
     }
     
     public Map<String, String> getErrorCodeMap(){
-        if (errMap == null){
-            return new HashMap<String, String>();
-        }else{
-            return errMap;
-        }
+        return errMap == null ? new HashMap<String, String>() : errMap;
     }
     
     public Map<String, String> getWarningCodeMap(){
-        if (diffMap == null){
-            return new HashMap<String, String>();
-        }else{
-            return diffMap;
-        }
+        return diffMap == null ? new HashMap<String, String>() : diffMap;
     }
     
     public Map<String, String> getInfoCodeMap(){
-        if (infoMap == null){
-            return new HashMap<String, String>();
-        }else{
-            return infoMap;
-        }
+    	return infoMap == null ? new HashMap<String, String>() : infoMap;
     }
     
     public void setDataMap(Map<String,String> map){
@@ -95,11 +83,7 @@ public class T2CoValidationResult {
     }
     
     public Map<String, String> getValidDataMap(){
-        if (isValid()){
-            return validDataMap;
-        }
-        
-        return new T2CoValidMap<>();
+        return isValid() ? validDataMap : new T2CoValidMap<>();
     }
     
     public boolean isValid(){
@@ -134,7 +118,7 @@ public class T2CoValidationResult {
                     String rootKey = key.replaceFirst("\\.\\d+", "");
                     rule = ruleMap.get(rootKey);
                     
-                    if (rule == null && key.indexOf(".") > -1) {
+                    if (rule == null && key.contains(".")) {
                     	rootKey = key.substring(0, key.indexOf("."));
                     	rule = ruleMap.get(rootKey);
                     }
@@ -170,7 +154,7 @@ public class T2CoValidationResult {
         Iterator<String> itr = errMap.keySet().iterator();
         
         while (itr.hasNext()){
-            String key = (String)itr.next();
+            String key = itr.next();
             String camelKey = key;
             
             if (CoConstDef.VALIDATION_USE_CAMELCASE) {
@@ -194,7 +178,7 @@ public class T2CoValidationResult {
         Iterator<String> itr = errMap.keySet().iterator();
         
         while (itr.hasNext()){
-        	String key = (String)itr.next();
+        	String key = itr.next();
             String camelKey = key;
             
             if (CoConstDef.VALIDATION_USE_CAMELCASE) {
@@ -220,11 +204,11 @@ public class T2CoValidationResult {
         Iterator<String> itr = diffMap.keySet().iterator();
         
         while (itr.hasNext()){
-        	String key = (String)itr.next();
+        	String key = itr.next();
             String camelKey = key;
             
             if (CoConstDef.VALIDATION_USE_CAMELCASE) {
-            	if (camelKey.indexOf(".") > -1) {
+            	if (camelKey.contains(".")) {
             		String _name = StringUtil.convertToCamelCase(camelKey.substring(0, camelKey.indexOf(".")));
             		String _rowId = camelKey.substring(camelKey.indexOf("."));
             		camelKey = _name + _rowId;
@@ -268,7 +252,7 @@ public class T2CoValidationResult {
                     String rootKey = key.replaceFirst("\\.\\d+", "");
                     rule = ruleMap.get(rootKey);
                     
-                    if (rule == null && key.indexOf(".") > -1) {
+                    if (rule == null && key.contains(".")) {
                     	rootKey = key.substring(0, key.indexOf("."));
                     	rule = ruleMap.get(rootKey);
                     }
@@ -288,7 +272,7 @@ public class T2CoValidationResult {
         Iterator<String> itr = infoMap.keySet().iterator();
         
         while (itr.hasNext()){
-        	String key = (String)itr.next();
+        	String key = itr.next();
             String camelKey = key;
             
             if (CoConstDef.VALIDATION_USE_CAMELCASE) {
@@ -331,7 +315,7 @@ public class T2CoValidationResult {
                     String rootKey = key.replaceFirst("\\.\\d+", "");
                     rule = ruleMap.get(rootKey);
                     
-                    if (rule == null && key.indexOf(".") > -1) {
+                    if (rule == null && key.contains(".")) {
                     	rootKey = key.substring(0, key.indexOf("."));
                     	rule = ruleMap.get(rootKey);
                     }
@@ -359,10 +343,10 @@ public class T2CoValidationResult {
     	boolean result = true;
   
 		while (itr.hasNext()){
-			String key = (String)itr.next();
+			String key = itr.next();
 			String componentId = key.split("\\.")[1];
 			
-			if (adminCheckList.indexOf(componentId) == -1) {
+			if (!adminCheckList.contains(componentId)) {
 				result = false;
 			}
 		}

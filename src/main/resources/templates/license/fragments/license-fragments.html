@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="licensePopupFragment">
+    <th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+    <th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+    <div class="hold-transition sidebar-mini">
+        <div class="wrapper">
+            <div class="custom-layout">
+                <div class="grid-area p-2">
+                    <div class="jqGridSet" style="overflow: hidden">
+                        <table id="list">
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <div id="pager"></div>
+                    </div>
+                </div>
+
+                <div class="card m-2" id="informationArea" style="display: none">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="post clearfix" id="userGuideGroup" style="display: none">
+                                            <div class="user-block">
+                                                <span class="username text-primary" style="font-size: .85rem">
+                                                    User Guide
+                                                </span>
+                                            </div>
+                                            <p class="ml-3" id="licenseUserGuideInfo" style="font-size: .85rem"></p>
+                                        </div>
+                                        <div class="post" id="restrictionsGroup" style="display: none">
+                                            <div class="user-block">
+                                                <span class="username text-primary" style="font-size: .85rem">
+                                                    Restrictions
+                                                </span>
+                                            </div>
+                                            <p class="ml-3" id="licenseRestrictionInfo" style="font-size: .85rem"></p>
+                                        </div>
+                                        <div class="post clearfix" id="licenseTextGroup" style="display: none">
+                                            <div class="user-block">
+                                                <span class="username text-primary" style="font-size: .85rem">
+                                                    License text
+                                                </span>
+                                            </div>
+                                            <p class="ml-3" id="licenseTextInfo" style="font-size: .85rem"></p>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script th:inline="javascript">
+        //<![CDATA[
+        /*global $ */
+        var data = {
+            typeCodes: [],
+            tooltipCont: "<div>" +
+                "<span style=\"float:left !important;\"><i class=\"far fa-file-alt fa-1-3x\" title=\"Notice\" style=\"margin-right: 10px !important;\"></i>Notice Obligation</span>" +
+                "</div>" +
+                "<div>" +
+                "<span style=\"float:left !important;\"><i class=\"far fa-file-code fa-1-3x\" title=\"Source Code\" style=\"margin-right: 10px !important;\"></i>Source Code Obligation</span>" +
+                "</div>",
+            existTooltip: false,
+            init: function () {
+            }
+        };
+
+        var pop_fn = {
+            displayObligation: function (cellvalue, options, rowObject) {
+                var display = "";
+                var srcObligation = rowObject["obligationDisclosingSrcYn"];
+                var noticeObligation = rowObject["obligationNotificationYn"];
+
+                if (srcObligation == 'Y') {
+                    display = "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i><i class=\"far fa-file-code fa-1-3x mr-2\" title=\"Source Code\"></i>";
+                } else if (noticeObligation == 'Y') {
+                    display += "<i class=\"far fa-file-alt fa-1-3x mr-1\" title=\"Notice\"></i>";
+                }
+
+                return display;
+            },
+
+            displayLicenseType: function (cellvalue, options, rowObject) {
+                var typeCd = JSON.parse([[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}]]);
+                var licenseType = rowObject["licenseType"];
+                var display = "";
+
+                for (var i = 0; i < typeCd.length; i++) {
+                    if (licenseType == typeCd[i].cdDtlNo) {
+                        display = typeCd[i].cdDtlNm;
+                        break;
+                    }
+                }
+
+                return display;
+            },
+
+            displayNickName: function (cellvalue, options, rowObject) {
+                var nickName = rowObject["licenseNicknameStr"];
+                var display = "";
+
+                if (nickName != undefined && nickName != null && nickName != "") {
+                    var nickNames = nickName.split('|');
+
+                    if (nickNames.length > 0) {
+                        for (var i = 0; i < nickNames.length; i++) {
+                            if (i != nickNames.length - 1) {
+                                display += "#" + nickNames[i] + ", ";
+                            } else {
+                                display += "#" + nickNames[i];
+                            }
+                        }
+                    }
+                }
+
+                return display;
+            },
+            displayLicenseRestriction: function (cellvalue, options, rowObject) {
+                var display = "";
+
+                if (cellvalue != "" && cellvalue != undefined) {
+                    display =
+                        '<span class="badge badge-warning text-xm" data-toggle="tooltip" data-placement="bottom" title="' + cellvalue + '">R</span>';
+                }
+
+                return display;
+            }
+        }
+
+        $(document).ready(function () {
+            const idx = [[${licenseInfo.licenseName}]];
+
+            if ([[${isValid}]] != true) {
+                alertify.alert([[#{msg.selfcheck.info.unconfirmed.license}]], function () {
+                    window.open("about:blank", "_self").close();
+                });
+            } else {
+                $.ajax({
+                    url: "/selfCheck/getLicenseData",
+                    dataType: 'json',
+                    cache: false,
+                    data: {licenseName: [[${licenseInfo.licenseName}]]},
+                    contentType: 'application/json',
+                    success: function (data) {
+                        $('#list').jqGrid({
+                            datatype: 'local',
+                            data: data.licenseList,
+                            jsonReader: {
+                                repeatitems: false,
+                                id: 'licenseId',
+                            },
+                            colNames: ['ID', 'License Name', 'Identifier', 'License Type', 'Obligation', 'Restriction', 'Website', 'Nick Name', 'License Text', 'User Guide'],
+                            colModel: [
+                                {name: 'licenseId', index: 'licenseId', key: true, hidden: true},
+                                {name: 'licenseName', index: 'licenseName', width: 180, align: 'left'},
+                                {name: 'shortIdentifier', index: 'ShortIdentifier', width: 100, align: 'left'},
+                                {
+                                    name: 'licenseType',
+                                    index: 'licenseType',
+                                    width: 50,
+                                    align: 'left',
+                                    formatter: pop_fn.displayLicenseType
+                                },
+                                {
+                                    name: 'obligation',
+                                    index: 'obligation',
+                                    width: 50,
+                                    align: 'left',
+                                    formatter: pop_fn.displayObligation,
+                                    sortable: false
+                                },
+                                {
+                                    name: 'restrictionStr',
+                                    index: 'restrictionStr',
+                                    width: 50,
+                                    align: 'center',
+                                    formatter: pop_fn.displayLicenseRestriction
+                                },
+                                {
+                                    name: 'webpage',
+                                    index: 'webpage',
+                                    width: 50,
+                                    align: 'left',
+                                    formatter: 'link2'
+                                },
+                                {
+                                    name: 'licenseNicknameStr',
+                                    index: 'licenseNicknameStr',
+                                    width: 200,
+                                    align: 'left',
+                                    formatter: pop_fn.displayNickName
+                                },
+                                {
+                                    name: 'licenseText',
+                                    index: 'licenseText',
+                                    width: 200,
+                                    align: 'left',
+                                    hidden: true
+                                },
+                                {
+                                    name: 'description',
+                                    index: 'description',
+                                    width: 300,
+                                    align: 'left',
+                                    hidden: true
+                                },
+                            ],
+                            onSelectRow: function (id) {
+                                var rowLicenseUserGuide = $('#list').jqGrid('getCell', id, 'description');
+                                var rowLicenseRestriction = $('#list').jqGrid('getCell', id, 'restrictionStr');
+                                var rowLicenseText = $('#list').jqGrid('getCell', id, 'licenseText');
+
+                                if (rowLicenseUserGuide) {
+                                    $("#licenseUserGuideInfo").html(rowLicenseUserGuide.replace(/\n/g, '<br>'));
+                                    $("#informationArea").show();
+                                    $("#userGuideGroup").show();
+                                } else {
+                                    $("#userGuideGroup").hide();
+                                }
+
+                                if (rowLicenseRestriction) {
+                                    $("#licenseRestrictionInfo").html($(rowLicenseRestriction).attr("title").replace(/\n/g, '<br>'));
+                                    $("#informationArea").show();
+                                    $("#restrictionsGroup").show();
+                                } else {
+                                    $("#restrictionsGroup").hide();
+                                }
+
+                                if (rowLicenseText) {
+                                    $("#licenseTextInfo").html(rowLicenseText.replace(/\n/g, '<br>'));
+                                    $("#informationArea").show();
+                                    $("#licenseTextGroup").show();
+                                } else {
+                                    $("#licenseTextGroup").hide();
+                                }
+                            },
+                            autowidth: true,
+                            gridview: true,
+                            viewrecords: true,
+                            loadonce: true,
+                            height: 'auto',
+                            rowNum: [[${@CommonFunction.getCoConstDefVal('DISP_PAGENATION_MAX')}]],
+                            sortname: 'licenseId',
+                            sortorder: 'desc',
+                            loadComplete: function (data) {
+                                // 헤더에 버튼 추가
+                                if (!data.existTooltip) {
+                                    $('<i class="fa fa-lg fa-info-circle icon-light-gray ml-2" data-toggle="tooltip" data-html="true" data-placement="bottom"></i>').appendTo($("#jqgh_list_obligation"))
+                                        .attr("title", data.tooltipCont).tooltip({
+                                        content: function () {
+                                            return $(this).prop('title');
+                                        }
+                                    });
+
+                                    data.existTooltip = true;
+                                }
+
+                                if (data.records > 0) {
+                                    var rowIdx = 0
+                                        , rows = this.rows
+                                        , rowsCount = rows.length
+                                        , row, rowid, rowData, className;
+
+                                    for (var _idx = 0; _idx < rowsCount; _idx++) {
+                                        row = rows[_idx];
+                                        className = row.className;
+
+                                        if (className.indexOf('jqgrow') !== -1) {
+                                            rowid = row.id;
+                                            $('#list').jqGrid("setSelection", rowid);
+
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                loading.hide();
+                            }
+                        });
+                    },
+                    error: function () {
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                });
+            }
+        });
+        //]]>
+    </script>
+</th:block>
+</html>

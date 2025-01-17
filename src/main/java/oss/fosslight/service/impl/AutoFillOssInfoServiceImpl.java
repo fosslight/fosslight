@@ -5,6 +5,7 @@
 
 package oss.fosslight.service.impl;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,6 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import oss.fosslight.CoTopComponent;
 import oss.fosslight.common.CoCodeManager;
@@ -155,12 +160,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			prjOssLicenses = projectMapper.getOssFindByNameAndVersion(oss);
 			checkedLicense1 = combineOssLicenses(prjOssLicenses, currentLicense);
 
-			if (!checkedLicense1.isEmpty()) {
-				checkedLicenseList = new ArrayList<>();
-				checkedLicenseList.add(checkedLicense1);
-			}
-
 			if (!downloadLocation.isEmpty()) {
+				oss.setDownloadLocation(URLDecoder.decode(oss.getDownloadLocation()));
 				if (oss.getDownloadLocation().contains(";")) {
 					oss.setDownloadLocation(oss.getDownloadLocation().split(";")[0]);
 				}
@@ -201,11 +202,6 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				prjOssLicenses = projectMapper.getOssFindByVersionAndDownloadLocation(oss);
 				checkedLicense2 = combineOssLicenses(prjOssLicenses, currentLicense);
 
-				if (!checkedLicense2.isEmpty()) {
-					if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
-					checkedLicenseList.add(checkedLicense2);
-				}
-				
 				// Search Priority 3. find by oss download location
 				prjOssLicenses = projectMapper.getOssFindByDownloadLocation(oss).stream()
 						.filter(CommonFunction.distinctByKeys(
@@ -214,53 +210,8 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 						))
 						.collect(Collectors.toList());
 				checkedLicense3 = combineOssLicenses(prjOssLicenses, currentLicense);
-
-				if (!checkedLicense3.isEmpty() && !isEachOssVersionDiff(prjOssLicenses)) {
-					if (checkedLicenseList == null) checkedLicenseList = new ArrayList<>();
-					checkedLicenseList.add(checkedLicense3);
-				}
 			}
 
-			if (checkedLicenseList != null) {
-				boolean permissiveLicenseCheckFlag = false;
-				List<String> currentLicenseList = Arrays.asList(currentLicense.split(","));
-				int currentLicenseListCnt = currentLicenseList.size();
-				
-				fLoop :
-				for (String li : checkedLicenseList) {
-					List<String> checkedLicenses = Arrays.asList(li.split("[|]"));
-					
-					sLoop :
-					for (String chkedLicense : checkedLicenses) {
-						List<String> licenseList = Arrays.asList(chkedLicense.split(","));
-						List<String> permissiveLicenseList = new ArrayList<>();
-						for (String license : licenseList) {
-							LicenseMaster master = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(license).toUpperCase());
-							if (master != null && master.getLicenseType().equals(CoConstDef.CD_LICENSE_TYPE_PMS)) {
-								permissiveLicenseList.add(license);
-							}
-						}
-						
-						if (licenseList.size() == permissiveLicenseList.size()) {
-							int duplicateCnt = permissiveLicenseList.stream()
-																	.filter(permissiveLicense -> currentLicenseList.stream()
-            														.anyMatch(Predicate.isEqual(permissiveLicense)))
-            														.collect(Collectors.toList()).size();
-							if (currentLicenseListCnt == duplicateCnt) {
-								permissiveLicenseCheckFlag = true;
-								break fLoop;
-							}
-						}
-					}
-				}
-				
-				if (permissiveLicenseCheckFlag) {
-					continue;
-				}
-			} else {
-				continue;
-			}
-			
 			oss.setDownloadLocation(downloadLocation);
 			
 			if (!isEmpty(checkedLicense1)) {
@@ -431,13 +382,15 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		return sortedValue;
     }
 	
+	@SuppressWarnings("unchecked")
 	private String requestClearlyDefinedLicenseApi(String requestUri) {
-		String checkedLicense;
+		String checkedLicense = "";
 		try {
-			Mono<Object> mono = requestClearlyDefinedLicense(requestUri);
-			Map<String, Object> ossInfo = (Map<String, Object>) mono.block();
-			Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
-			checkedLicense = licenseInfo.get("declared");
+			Map<String, Object> ossInfo = requestClearlyDefinedLicense(requestUri);
+			if (ossInfo != null && ossInfo.containsKey("licensed")) {
+				Map<String, String> licenseInfo = (Map<String, String>) ossInfo.get("licensed");
+				checkedLicense = licenseInfo.get("declared");
+			}
 		} catch (Exception e) {
 			log.error("Clearly Defined -> " + requestUri + " : " + e.getMessage());
 			checkedLicense = "NONE";
@@ -492,7 +445,7 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 		Map<String, Object> res = new HashMap<>();
 
 		try {
-			res = (Map<String, Object>) requestClearlyDefinedLicense("https://api.clearlydefined.io/").block();
+			res = requestClearlyDefinedLicense("https://api.clearlydefined.io/");
 		} catch(HttpServerErrorException e) {
 			String message = "ClearlyDefined ";
 			if (e.getStatusCode().equals(HttpStatus.FORBIDDEN)) {
@@ -504,7 +457,12 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 				throw new HttpServerErrorException(e.getStatusCode(), message);
 			}
 		}
-		return res.get("status").equals("OK");
+		
+		if (res != null) {
+			return res.get("status").equals("OK");
+		} else {
+			return false;
+		}
 	}
 
 	private String combineOssLicenses(List<ProjectIdentification> prjOssMasters, String currentLicense) {
@@ -566,30 +524,48 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 			.flatMap(response -> response.bodyToMono(Object.class));
 	}
 
-	@Override
-	public ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations) {
-		return Flux.fromIterable(locations)
-				.parallel()
-				.runOn(Schedulers.elastic())
-				.flatMap(this::requestClearlyDefinedLicense);
-	}
+//	@Override
+//	public ParallelFlux<Object> getClearlyDefinedLicenses(List<String> locations) {
+//		return Flux.fromIterable(locations)
+//				.parallel()
+//				.runOn(Schedulers.elastic())
+//				.flatMap(this::requestClearlyDefinedLicense);
+//	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Mono<Object> requestClearlyDefinedLicense(String location) {
-		return webClient.get()
-				.uri(location)
-                .exchange()
-				.flatMap(response -> {
-					HttpStatus statusCode = response.statusCode();
-					if (statusCode.is4xxClientError()) {
-						return Mono.error(new HttpServerErrorException(statusCode));
-					}else if (statusCode.is5xxServerError()) {
-						return Mono.error(new HttpServerErrorException(statusCode));
-					}
-					return Mono.just(response);
-				})
-				.retry (1)
-				.flatMap(response -> response.bodyToMono(Object.class));
+	public Map<String, Object> requestClearlyDefinedLicense(String location) {
+		String responseString = webClient.get().uri(location).exchange()
+			    				.flatMap(response -> {
+			    					HttpStatus statusCode = response.statusCode();
+			    					if (statusCode.is4xxClientError()) {
+			    						return Mono.error(new HttpServerErrorException(statusCode));
+			    					} else if (statusCode.is5xxServerError()) {
+			    						return Mono.error(new HttpServerErrorException(statusCode));
+			    					}
+			    					return Mono.just(response);
+			    				})
+			    				.block()
+			    				.bodyToMono(String.class)
+			    				.retry(1)
+			    				.block();
+		
+		Map<String, Object> returnMap = null;
+		ObjectMapper mapper = new ObjectMapper();
+        
+		if (!isEmpty(responseString) && (responseString.startsWith("{") && !responseString.endsWith("}"))) {
+			responseString += "}";
+		}
+		
+		try {
+			returnMap = mapper.readValue(responseString, Map.class);
+		} catch (JsonMappingException e) {
+			log.error(e.getMessage(), e);
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage(), e);
+		}
+		
+		return returnMap;
 	}
 
 	@Transactional
@@ -618,12 +594,14 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 								
 				String[] checkLicense = paramBean.getCheckLicense().split(",");
 				String licenseDev = checkLicense.length > 1 ? CoConstDef.LICENSE_DIV_MULTI : CoConstDef.LICENSE_DIV_SINGLE;
+				List<OssComponentsLicense> ossComponentsLicenseList = new ArrayList<>();
 				
 				for (String licenseName : checkLicense) {
 					ProjectIdentification comLicense = new ProjectIdentification();
 					comLicense.setComponentId(componentId);
 					comLicense.setLicenseName(licenseName);
 					OssComponentsLicense license = CommonFunction.reMakeLicenseBean(comLicense, licenseDev);
+					ossComponentsLicenseList.add(license);
 					switch(targetName.toUpperCase()) {
 						case CoConstDef.CD_CHECK_OSS_SELF:
 							selfCheckMapper.registComponentLicense(license);
@@ -638,6 +616,9 @@ public class AutoFillOssInfoServiceImpl extends CoTopComponent implements AutoFi
 					
 					updateCnt++;
 				}
+				
+				oc.setObligationType(CommonFunction.checkObligationSelectedLicense(ossComponentsLicenseList));
+				projectMapper.updateBom(oc);
 			}
 			
 			if (CoConstDef.CD_CHECK_OSS_PARTNER.equals(targetName.toUpperCase())

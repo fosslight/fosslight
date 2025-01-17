@@ -29,9 +29,9 @@ public class Project extends ComBean implements Serializable {
 				+ ", completeYn=" + completeYn + ", reviewer=" + reviewer + ", useYn=" + useYn + ", prjIds="
 				+ Arrays.toString(prjIds) + ", category=" + category + ", subcategory=" + subcategory + ", modelName="
 				+ modelName + ", releaseDate=" + releaseDate + ", prjDivision=" + prjDivision + ", prjDivisionName="
-				+ prjDivisionName + ", prjUserId=" + prjUserId + ", prjUserName=" + prjUserName + ", watchers="
-				+ Arrays.toString(watchers) + ", watcherList=" + watcherList + ", modelList=" + modelList + ", copy="
-				+ copy + ", oldId=" + oldId + ", lastModifiedTime=" + lastModifiedTime + ", distributeTarget="
+				+ prjDivisionName + ", prjUserId=" + prjUserId + ", prjUserName=" + prjUserName + ", prjEmail=" + prjEmail 
+				+ ", watchers=" + Arrays.toString(watchers) + ", watcherList=" + watcherList + ", modelList=" + modelList 
+				+ ", copy=" + copy + ", oldId=" + oldId + ", lastModifiedTime=" + lastModifiedTime + ", distributeTarget="
 				+ distributeTarget + ", destributionStatus=" + destributionStatus + ", distributeMasterCategory="
 				+ distributeMasterCategory + ", distributeName=" + distributeName + ", distributeSoftwareType="
 				+ distributeSoftwareType + ", distributeDeployYn=" + distributeDeployYn + ", distributeDeployTime="
@@ -61,6 +61,9 @@ public class Project extends ComBean implements Serializable {
 	/** The prj name. */
 	private String prjName;
 	
+	/** The prj id name. */
+	private String prjIdName;
+	
 	/** The prj version. */
 	private String prjVersion;
 	
@@ -89,6 +92,7 @@ public class Project extends ComBean implements Serializable {
 	private String noticeType;
 	private String noticeTypeEtc;
 
+	private String editNoticeYn;
 	/** The use custom notice yn. */
 	private String useCustomNoticeYn;
 	
@@ -122,6 +126,12 @@ public class Project extends ComBean implements Serializable {
 	/** The allow download SPDX yaml yn. */
 	private String allowDownloadSPDXYamlYn;
 
+	/** The allow download CycloneDX json yn. */
+	private String allowDownloadCDXJsonYn;
+	
+	/** The allow download CycloneDX xml yn. */
+	private String allowDownloadCDXXmlYn;
+	
 	/** The identification status. */
 	private String identificationStatus;
 	
@@ -136,6 +146,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The identification sub status partner. */
 	private String identificationSubStatusPartner;
+	
+	/** The identification sub status dep. */
+	private String identificationSubStatusDep;
 	
 	/** The identification sub status src. */
 	private String identificationSubStatusSrc;
@@ -329,16 +342,12 @@ public class Project extends ComBean implements Serializable {
 	
 	private String ossNameMergeFlag;
 	
+	private String depCsvFileFlag = "N";
 	private String srcCsvFileFlag = "N";
-	
 	private String binCsvFileFlag = "N";
-	
 	private String binBinaryFileFlag = "N";
-	
 	private String srcAndroidCsvFileFlag = "N";
-	
 	private String srcAndroidNoticeFileFlag = "N";
-
 	private String srcAndroidNoticeXmlFileFlag = "N";
 	private String srcAndroidResultFileFlag = "N";
 	
@@ -351,6 +360,18 @@ public class Project extends ComBean implements Serializable {
 	private int statusPermission;
 	
 	private String secCode;
+	private String secCvssScore;
+	
+	private String vulDocInst;
+	private String vulDocInfo;
+
+	private String vulDocSkipYn;
+
+	private Float standardScore;
+	
+	private String copyWatcherLocation;
+	/** add watcher list. */
+	private ArrayList<Map<String, String>> changeWatcherList;
 	
 	public String getIgnoreUserCommentReg() {
 		return ignoreUserCommentReg;
@@ -374,6 +395,9 @@ public class Project extends ComBean implements Serializable {
 	/** The open source file name. */
 	private String openSourceFileName; // 오픈소스 파일명
 
+	/** The bin csv file id. */
+	private String depCsvFileId;
+	
 	/** The src csv file id. */
 	// FILE_ID
 	private String srcCsvFileId;
@@ -396,6 +420,9 @@ public class Project extends ComBean implements Serializable {
 	/** The src android result file id. */
 	private String srcAndroidResultFileId;
 	
+	/** The security csv file id. */
+	private String scrtCsvFileId;
+	
 	/** The notice file id. */
 	private String noticeFileId; // 라이센스 파일ID
 
@@ -406,7 +433,15 @@ public class Project extends ComBean implements Serializable {
 	private String packageFileId; // 오픈소스 파일ID
 	private String packageFileId2; // 오픈소스 파일ID
 	private String packageFileId3; // 오픈소스 파일ID
-	
+	private String packageFileId4; // 오픈소스 파일ID
+	private String packageVulDocFileId;
+	private String noticeAppendFileId;
+
+	private String packageFileType1; // 오픈소스 파일type
+	private String packageFileType2; // 오픈소스 파일type
+	private String packageFileType3; // 오픈소스 파일type
+	private String packageFileType4; // 오픈소스 파일type
+
 	/** The notice file. */
 	private List<T2File> noticeFile; // 라이센스 파일객체
 
@@ -417,6 +452,10 @@ public class Project extends ComBean implements Serializable {
 	private List<T2File> packageFile; // 오픈소스 파일객체
 	private List<T2File> packageFile2; // 오픈소스 파일객체
 	private List<T2File> packageFile3; // 오픈소스 파일객체
+	private List<T2File> packageFile4; // 오픈소스 파일객체
+	
+	/** The dep csv file. */
+	private List<T2File> depCsvFile; // csv 파일 객체
 	
 	/** The csv file. */
 	private List<T2File> csvFile; // csv 파일 객체
@@ -439,6 +478,9 @@ public class Project extends ComBean implements Serializable {
 	/** The android result file. */
 	private List<T2File> androidResultFile; // 안드로이드 Result 파일 객체
 
+	/** The security csv file. */
+	private List<T2File> scrtCsvFile; // csv 파일 객체
+	
 	/** The notice file info. */
 	private T2File noticeFileInfo; // 라이센스 파일객체
 	
@@ -446,6 +488,9 @@ public class Project extends ComBean implements Serializable {
 	private T2File packageFileInfo; // 오픈소스 파일객체
 	private T2File packageFileInfo2; // 오픈소스 파일객체
 	private T2File packageFileInfo3; // 오픈소스 파일객체
+	private T2File packageFileInfo4; // 오픈소스 파일객체
+	private T2File packageVulDocFileInfo;
+	private T2File noticeAppendFileInfo;
 	
 	/** The notice text file id. */
 	private String noticeTextFileId;
@@ -498,6 +543,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The ref partner id. */
 	private String refPartnerId;
+	
+	/** The ref partner name. */
+	private String refPartnerName;
 
 	/** The readme content. */
 	// README 파일 용
@@ -517,6 +565,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The except file content. */
 	private String exceptFileContent;
+
+	/** The binary file yn. */
+	private String binaryFileYn;
 	
 	/** The sch start date. */
 	// OTHER
@@ -616,6 +667,9 @@ public class Project extends ComBean implements Serializable {
 	/** The osdd source file name. */
 	private String osddSourceFileName3;
 	
+	/** The osdd source file name. */
+	private String osddSourceFileName4;
+	
 	/** The osdd source file E-TAG. */
 	private String osddSourceFileEtag;
 	
@@ -624,6 +678,9 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The osdd source file E-TAG. */
 	private String osddSourceFileEtag3;
+	
+	/** The osdd source file E-TAG. */
+	private String osddSourceFileEtag4;
 
 	private String stage;
 	
@@ -631,6 +688,10 @@ public class Project extends ComBean implements Serializable {
 	
 	/** The publicYn. */
 	private String publicYn;
+
+	private String secMailYn;
+
+	private String secMailDesc;
 	
 	/** The viewOnlyFlag. */
 	private String viewOnlyFlag;
@@ -668,6 +729,10 @@ public class Project extends ComBean implements Serializable {
 	private String userRole;
 	
 	private String reuseKeyword;
+	private String reuseRefPrjId1;
+	private String reuseRefPrjId2;
+	private String reuseRefPrjId3;
+	private String reuseRefPrjId4;
 	
 	private String ossAnalysisStatus;
 	
@@ -678,6 +743,17 @@ public class Project extends ComBean implements Serializable {
 	private String changeStatusFlag;
 
 	private String ossNameTemp;
+	
+	private String dependencies;
+	
+	/** The cyclonedx file id. */
+	private String cdxJsonFileId;
+	private String cdxXmlFileId;
+	
+	private String[] noticeFileFormat;
+	
+	private int prjAddIdx;
+	
 	/**
 	 * Gets the upd vuln.
 	 *
@@ -756,6 +832,12 @@ public class Project extends ComBean implements Serializable {
 	
 	private String deleteOsddFlag;
 
+	private String vulnerabilityResolution;
+	
+	private String cvssScoreMax;
+	
+	private int prjRefIdx;
+	
 	/**
 	 * Gets the prj id.
 	 *
@@ -1325,6 +1407,14 @@ public class Project extends ComBean implements Serializable {
 		this.watchers = watchers != null ? watchers.clone() : null;
 	}
 
+	public void setWatchers(String watcher) {
+		if (!isEmpty(watcher)) {
+			this.watchers = new String[] {watcher};
+		} else {
+			this.watchers = null;
+		}
+	}
+	
 	/**
 	 * Gets the watcher list.
 	 *
@@ -2148,6 +2238,24 @@ public class Project extends ComBean implements Serializable {
 	 */
 	public void setExceptFileContent(String exceptFileContent) {
 		this.exceptFileContent = exceptFileContent;
+	}
+
+	/**
+	 * Gets the binary file yn.
+	 *
+	 * @return the binary file yn
+	 */
+	public String getBinaryFileYn() {
+		return binaryFileYn;
+	}
+
+	/**
+	 * Sets the binary file yn.
+	 *
+	 * @param binaryFileYn the new binary file yn
+	 */
+	public void setBinaryFileYn(String binaryFileYn) {
+		this.binaryFileYn = binaryFileYn;
 	}
 
 	/**
@@ -3805,6 +3913,22 @@ public class Project extends ComBean implements Serializable {
 	public void setPublicYn(String publicYn) {
 		this.publicYn = publicYn;
 	}
+
+	public String getSecMailYn() {
+		return secMailYn;
+	}
+
+	public void setSecMailYn(String secMailYn) {
+		this.secMailYn = secMailYn;
+	}
+
+	public String getSecMailDesc() {
+		return secMailDesc;
+	}
+
+	public void setSecMailDesc(String secMailDesc) {
+		this.secMailDesc = secMailDesc;
+	}
 	
 	public String getViewOnlyFlag() {
 		return viewOnlyFlag;
@@ -4255,5 +4379,349 @@ public class Project extends ComBean implements Serializable {
 
 	public void setSecCode(String secCode) {
 		this.secCode = secCode;
+	}
+
+	public String getDependencies() {
+		return dependencies;
+	}
+
+	public void setDependencies(String dependencies) {
+		this.dependencies = dependencies;
+	}
+
+	public String getIdentificationSubStatusDep() {
+		return identificationSubStatusDep;
+	}
+
+	public void setIdentificationSubStatusDep(String identificationSubStatusDep) {
+		this.identificationSubStatusDep = identificationSubStatusDep;
+	}
+
+	public String getDepCsvFileId() {
+		return depCsvFileId;
+	}
+
+	public void setDepCsvFileId(String depCsvFileId) {
+		this.depCsvFileId = depCsvFileId;
+	}
+
+	public List<T2File> getDepCsvFile() {
+		return depCsvFile;
+	}
+
+	public void setDepCsvFile(List<T2File> depCsvFile) {
+		this.depCsvFile = depCsvFile;
+	}
+
+	public String getDepCsvFileFlag() {
+		return depCsvFileFlag;
+	}
+
+	public void setDepCsvFileFlag(String depCsvFileFlag) {
+		this.depCsvFileFlag = depCsvFileFlag;
+	}
+
+	public String getAllowDownloadCDXJsonYn() {
+		return allowDownloadCDXJsonYn;
+	}
+
+	public void setAllowDownloadCDXJsonYn(String allowDownloadCDXJsonYn) {
+		this.allowDownloadCDXJsonYn = allowDownloadCDXJsonYn;
+	}
+
+	public String getAllowDownloadCDXXmlYn() {
+		return allowDownloadCDXXmlYn;
+	}
+
+	public void setAllowDownloadCDXXmlYn(String allowDownloadCDXXmlYn) {
+		this.allowDownloadCDXXmlYn = allowDownloadCDXXmlYn;
+	}
+
+	public String getCdxJsonFileId() {
+		return cdxJsonFileId;
+	}
+
+	public void setCdxJsonFileId(String cdxJsonFileId) {
+		this.cdxJsonFileId = cdxJsonFileId;
+	}
+
+	public String getCdxXmlFileId() {
+		return cdxXmlFileId;
+	}
+
+	public void setCdxXmlFileId(String cdxXmlFileId) {
+		this.cdxXmlFileId = cdxXmlFileId;
+	}
+
+	public String getVulDocInst() {
+		return vulDocInst;
+	}
+
+	public void setVulDocInst(String vulDocInst) {
+		this.vulDocInst = vulDocInst;
+	}
+
+	public String getPackageVulDocFileId() {
+		return packageVulDocFileId;
+	}
+
+	public void setPackageVulDocFileId(String packageVulDocFileId) {
+		this.packageVulDocFileId = packageVulDocFileId;
+	}
+
+	public String getVulDocInfo() {
+		return vulDocInfo;
+	}
+
+	public void setVulDocInfo(String vulDocInfo) {
+		this.vulDocInfo = vulDocInfo;
+	}
+
+	public String getVulDocSkipYn() {
+		return vulDocSkipYn;
+	}
+
+	public void setVulDocSkipYn(String vulDocSkipYn) {
+		this.vulDocSkipYn = vulDocSkipYn;
+	}
+
+	public T2File getPackageVulDocFileInfo() {
+		return packageVulDocFileInfo;
+	}
+
+	public void setPackageVulDocFileInfo(T2File packageVulDocFileInfo) {
+		this.packageVulDocFileInfo = packageVulDocFileInfo;
+	}
+
+	public Float getStandardScore() {
+		return standardScore;
+	}
+
+	public void setStandardScore(Float standardScore) {
+		this.standardScore = standardScore;
+	}
+
+	public String getCopyWatcherLocation() {
+		return copyWatcherLocation;
+	}
+
+	public void setCopyWatcherLocation(String copyWatcherLocation) {
+		this.copyWatcherLocation = copyWatcherLocation;
+	}
+
+	public ArrayList<Map<String, String>> getChangeWatcherList() {
+		return changeWatcherList;
+	}
+
+	public void setChangeWatcherList(ArrayList<Map<String, String>> changeWatcherList) {
+		this.changeWatcherList = changeWatcherList;
+	}
+
+	public String[] getNoticeFileFormat() {
+		return noticeFileFormat;
+	}
+
+	public void setNoticeFileFormat(String[] noticeFileFormat) {
+		this.noticeFileFormat = noticeFileFormat;
+	}
+
+	public String getSecCvssScore() {
+		return secCvssScore;
+	}
+
+	public void setSecCvssScore(String secCvssScore) {
+		this.secCvssScore = secCvssScore;
+	}
+
+	public String getRefPartnerName() {
+		return refPartnerName;
+	}
+
+	public void setRefPartnerName(String refPartnerName) {
+		this.refPartnerName = refPartnerName;
+	}
+
+	public String getReuseRefPrjId1() {
+		return reuseRefPrjId1;
+	}
+
+	public void setReuseRefPrjId1(String reuseRefPrjId1) {
+		this.reuseRefPrjId1 = reuseRefPrjId1;
+	}
+
+	public String getReuseRefPrjId2() {
+		return reuseRefPrjId2;
+	}
+
+	public void setReuseRefPrjId2(String reuseRefPrjId2) {
+		this.reuseRefPrjId2 = reuseRefPrjId2;
+	}
+
+	public String getReuseRefPrjId3() {
+		return reuseRefPrjId3;
+	}
+
+	public void setReuseRefPrjId3(String reuseRefPrjId3) {
+		this.reuseRefPrjId3 = reuseRefPrjId3;
+	}
+	
+	public String getPackageFileType1() {
+		return packageFileType1;
+	}
+
+	public void setPackageFileType1(String packageFileType1) {
+		this.packageFileType1 = packageFileType1;
+	}
+
+	public String getPackageFileType2() {
+		return packageFileType2;
+	}
+
+	public void setPackageFileType2(String packageFileType2) {
+		this.packageFileType2 = packageFileType2;
+	}
+
+	public String getPackageFileType3() {
+		return packageFileType3;
+	}
+
+	public void setPackageFileType3(String packageFileType3) {
+		this.packageFileType3 = packageFileType3;
+	}
+
+	public String getPrjIdName() {
+		return prjIdName;
+	}
+
+	public void setPrjIdName(String prjIdName) {
+		this.prjIdName = prjIdName;
+	}
+
+	public String getEditNoticeYn() {
+		return editNoticeYn;
+	}
+
+	public void setEditNoticeYn(String editNoticeYn) {
+		this.editNoticeYn = editNoticeYn;
+	}
+
+	public String getVulnerabilityResolution() {
+		return vulnerabilityResolution;
+	}
+
+	public void setVulnerabilityResolution(String vulnerabilityResolution) {
+		this.vulnerabilityResolution = vulnerabilityResolution;
+	}
+
+	public String getCvssScoreMax() {
+		return cvssScoreMax;
+	}
+
+	public void setCvssScoreMax(String cvssScoreMax) {
+		this.cvssScoreMax = cvssScoreMax;
+	}
+
+	public String getPackageFileId4() {
+		return packageFileId4;
+	}
+
+	public void setPackageFileId4(String packageFileId4) {
+		this.packageFileId4 = packageFileId4;
+	}
+
+	public String getPackageFileType4() {
+		return packageFileType4;
+	}
+
+	public void setPackageFileType4(String packageFileType4) {
+		this.packageFileType4 = packageFileType4;
+	}
+
+	public List<T2File> getPackageFile4() {
+		return packageFile4;
+	}
+
+	public void setPackageFile4(List<T2File> packageFile4) {
+		this.packageFile4 = packageFile4;
+	}
+
+	public T2File getPackageFileInfo4() {
+		return packageFileInfo4;
+	}
+
+	public void setPackageFileInfo4(T2File packageFileInfo4) {
+		this.packageFileInfo4 = packageFileInfo4;
+	}
+
+	public String getOsddSourceFileName4() {
+		return osddSourceFileName4;
+	}
+
+	public void setOsddSourceFileName4(String osddSourceFileName4) {
+		this.osddSourceFileName4 = osddSourceFileName4;
+	}
+
+	public String getOsddSourceFileEtag4() {
+		return osddSourceFileEtag4;
+	}
+
+	public void setOsddSourceFileEtag4(String osddSourceFileEtag4) {
+		this.osddSourceFileEtag4 = osddSourceFileEtag4;
+	}
+
+	public String getReuseRefPrjId4() {
+		return reuseRefPrjId4;
+	}
+
+	public void setReuseRefPrjId4(String reuseRefPrjId4) {
+		this.reuseRefPrjId4 = reuseRefPrjId4;
+	}
+
+	public String getScrtCsvFileId() {
+		return scrtCsvFileId;
+	}
+
+	public void setScrtCsvFileId(String scrtCsvFileId) {
+		this.scrtCsvFileId = scrtCsvFileId;
+	}
+
+	public List<T2File> getScrtCsvFile() {
+		return scrtCsvFile;
+	}
+
+	public void setScrtCsvFile(List<T2File> scrtCsvFile) {
+		this.scrtCsvFile = scrtCsvFile;
+	}
+	
+	public String getNoticeAppendFileId() {
+		return noticeAppendFileId;
+	}
+
+	public void setNoticeAppendFileId(String noticeAppendFileId) {
+		this.noticeAppendFileId = noticeAppendFileId;
+	}
+
+	public T2File getNoticeAppendFileInfo() {
+		return noticeAppendFileInfo;
+	}
+
+	public void setNoticeAppendFileInfo(T2File noticeAppendFileInfo) {
+		this.noticeAppendFileInfo = noticeAppendFileInfo;
+	}
+
+	public int getPrjAddIdx() {
+		return prjAddIdx;
+	}
+
+	public void setPrjAddIdx(int prjAddIdx) {
+		this.prjAddIdx = prjAddIdx;
+	}
+
+	public int getPrjRefIdx() {
+		return prjRefIdx;
+	}
+
+	public void setPrjRefIdx(int prjRefIdx) {
+		this.prjRefIdx = prjRefIdx;
 	}
 }

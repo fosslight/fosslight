@@ -17,10 +17,18 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -44,16 +52,33 @@ import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFDataValidation;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.cyclonedx.BomGeneratorFactory;
+import org.cyclonedx.CycloneDxSchema;
+import org.cyclonedx.exception.GeneratorException;
+import org.cyclonedx.model.Bom;
+import org.cyclonedx.model.Component;
+import org.cyclonedx.model.Dependency;
+import org.cyclonedx.model.ExternalReference;
+import org.cyclonedx.model.License;
+import org.cyclonedx.model.LicenseChoice;
+import org.cyclonedx.model.Metadata;
+import org.cyclonedx.model.OrganizationalContact;
+import org.cyclonedx.model.OrganizationalEntity;
+import org.cyclonedx.model.Tool;
+import org.cyclonedx.model.vulnerability.Vulnerability.Source;
+import org.spdx.library.SpdxVerificationHelper;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.reflect.TypeToken;
-import com.opencsv.CSVWriter;
+import com.google.gson.reflect.TypeToken;
 
 import lombok.extern.slf4j.Slf4j;
 import oss.fosslight.CoTopComponent;
+import oss.fosslight.api.dto.ExcelData;
+import oss.fosslight.api.dto.LicenseDto;
+import oss.fosslight.api.dto.OssDto;
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CoConstDef;
 import oss.fosslight.common.CommonFunction;
@@ -64,6 +89,7 @@ import oss.fosslight.domain.LicenseMaster;
 import oss.fosslight.domain.OssAnalysis;
 import oss.fosslight.domain.OssComponents;
 import oss.fosslight.domain.OssComponentsLicense;
+import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
 import oss.fosslight.domain.OssNotice;
 import oss.fosslight.domain.PartnerMaster;
@@ -73,10 +99,9 @@ import oss.fosslight.domain.Statistics;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.domain.Vulnerability;
 import oss.fosslight.repository.OssMapper;
-import oss.fosslight.repository.ProjectMapper;
 import oss.fosslight.repository.SelfCheckMapper;
 import oss.fosslight.service.BinaryDataHistoryService;
-import oss.fosslight.service.ComplianceService;
+import oss.fosslight.service.CacheService;
 import oss.fosslight.service.FileService;
 import oss.fosslight.service.LicenseService;
 import oss.fosslight.service.OssService;
@@ -90,35 +115,33 @@ import oss.fosslight.service.VulnerabilityService;
 import oss.fosslight.validation.T2CoValidationResult;
 import oss.fosslight.validation.custom.T2CoProjectValidator;
 
-import org.spdx.library.SpdxVerificationHelper;
-
 @PropertySources(value = {@PropertySource(value=AppConstBean.APP_CONFIG_PROPERTIES_PATH)})
 @Slf4j
 public class ExcelDownLoadUtil extends CoTopComponent {
 	private static String 						downloadpath 	= "";
 	private static String						writepath		= CommonFunction.emptyCheckProperty("export.template.path", "/template");
 	// Service
-	private static PartnerService 				partnerService 	= (PartnerService)	getWebappContext().getBean(PartnerService.class);
-	private static LicenseService 				licenseService 	= (LicenseService)	getWebappContext().getBean(LicenseService.class);
-	private static ProjectService 				projectService 	= (ProjectService)	getWebappContext().getBean(ProjectService.class);
-	private static T2UserService 				userService 	= (T2UserService) 	getWebappContext().getBean(T2UserService.class);
-	private static OssService 					ossService 		= (OssService) 		getWebappContext().getBean(OssService.class);
-	private static FileService					fileService	= (FileService)	getWebappContext().getBean(FileService.class);
-	private static SelfCheckService 			selfCheckService 	= (SelfCheckService)	getWebappContext().getBean(SelfCheckService.class);
-	private static VerificationService 			verificationService 	= (VerificationService)	getWebappContext().getBean(VerificationService.class);
-	private static BinaryDataHistoryService 	binaryDataHistoryService 	= (BinaryDataHistoryService)	getWebappContext().getBean(BinaryDataHistoryService.class);
-	private static VulnerabilityService 		vulnerabilityService 	= (VulnerabilityService)	getWebappContext().getBean(VulnerabilityService.class);
-	private static ComplianceService 			complianceService = (ComplianceService) getWebappContext().getBean(ComplianceService.class);
-	private static StatisticsService 			statisticsService = (StatisticsService) getWebappContext().getBean(StatisticsService.class);
-	private static ProjectService 				prjService	= (ProjectService)	getWebappContext().getBean(ProjectService.class);
+	private static PartnerService 				partnerService 	= getWebappContext().getBean(PartnerService.class);
+	private static LicenseService 				licenseService 	= getWebappContext().getBean(LicenseService.class);
+	private static ProjectService 				projectService 	= getWebappContext().getBean(ProjectService.class);
+	private static T2UserService 				userService 	= getWebappContext().getBean(T2UserService.class);
+	private static OssService 					ossService 		= getWebappContext().getBean(OssService.class);
+	private static FileService					fileService		= getWebappContext().getBean(FileService.class);
+	private static SelfCheckService 			selfCheckService 	= getWebappContext().getBean(SelfCheckService.class);
+	private static VerificationService 			verificationService 	= getWebappContext().getBean(VerificationService.class);
+	private static BinaryDataHistoryService 	binaryDataHistoryService 	= getWebappContext().getBean(BinaryDataHistoryService.class);
+	private static VulnerabilityService 		vulnerabilityService 	= getWebappContext().getBean(VulnerabilityService.class);
+//	private static ComplianceService 			complianceService = getWebappContext().getBean(ComplianceService.class);
+	private static StatisticsService 			statisticsService = getWebappContext().getBean(StatisticsService.class);
+	private static ProjectService 				prjService	= getWebappContext().getBean(ProjectService.class);
+	private static CacheService					cacheService	= getWebappContext().getBean(CacheService.class);
 	
 	// Mapper
-	private static ProjectMapper				projectMapper	= (ProjectMapper)		getWebappContext().getBean(ProjectMapper.class);
-	private static OssMapper					ossMapper		= (OssMapper)			getWebappContext().getBean(OssMapper.class);
-	private static SelfCheckMapper				selfCheckMapper = (SelfCheckMapper)  	getWebappContext().getBean(SelfCheckMapper.class);
+	private static OssMapper					ossMapper		= getWebappContext().getBean(OssMapper.class);
+	private static SelfCheckMapper				selfCheckMapper = getWebappContext().getBean(SelfCheckMapper.class);
 	
 	// Controller
-	private static ProjectController projectController	= (ProjectController)	getWebappContext().getBean(ProjectController.class);
+	private static ProjectController projectController	= getWebappContext().getBean(ProjectController.class);
 	
 	private static final int MAX_RECORD_CNT = 99999;
 	private static final int MAX_RECORD_CNT_LIST = Integer.parseInt(CoCodeManager.getCodeExpString(CoConstDef.CD_EXCEL_DOWNLOAD, CoConstDef.CD_MAX_ROW_COUNT))+1;	
@@ -148,7 +171,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			
 			{
 				if (!isEmpty(projectInfo.getNoticeTypeEtc())) {
-					wb.setSheetName(5, "BIN (" + CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, projectInfo.getNoticeTypeEtc()) + ")");
+					wb.setSheetName(6, "BIN (" + CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, projectInfo.getNoticeTypeEtc()) + ")");
 				}
 				
 				sheet1 = wb.getSheetAt(0);
@@ -169,33 +192,45 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER, wb.getSheetAt(2), projectService.getIdentificationGridList(ossListParam), projectInfo);
 			}
 			
+			//dep
+			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)) {
+				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+				
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_DEP, wb.getSheetAt(3), projectService.getIdentificationGridList(ossListParam), projectInfo);
+			}
+			
 			//src
 			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type)) {
 				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_SRC);
 				
-				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_SRC, wb.getSheetAt(3), projectService.getIdentificationGridList(ossListParam), projectInfo);
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_SRC, wb.getSheetAt(4), projectService.getIdentificationGridList(ossListParam), projectInfo);
 			}
 			
 			//BIN
 			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
 				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BIN);
 				
-				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BIN, wb.getSheetAt(4), projectService.getIdentificationGridList(ossListParam), projectInfo);
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BIN, wb.getSheetAt(5), projectService.getIdentificationGridList(ossListParam), projectInfo);
 			}
 			
 			//BIN(ANDROID)
-			if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
 				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
 				
-				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, wb.getSheetAt(5), projectService.getIdentificationGridList(ossListParam), projectInfo);
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID, wb.getSheetAt(6), projectService.getIdentificationGridList(ossListParam), projectInfo);
 			}
 			
 			//bom
-			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
-				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
+				ossListParam.setReferenceDiv(isEmpty(type) ? CoConstDef.CD_DTL_COMPONENT_ID_BOM : type);
 				ossListParam.setMerge(CoConstDef.FLAG_NO);
 				
-				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BOM, wb.getSheetAt(6), projectService.getIdentificationGridList(ossListParam), projectInfo);
+				Map<String, Object> map = projectService.getIdentificationGridList(ossListParam);
+				if (!CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type)) {
+					map.replace("rows", projectService.setMergeGridData((List<ProjectIdentification>) map.get("rows")));
+				}
+				
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_ID_BOM, wb.getSheetAt(7), map, projectInfo);
 			}
 			
 			// model
@@ -211,7 +246,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			
-			wb.setSheetVisibility(7, SheetVisibility.VERY_HIDDEN);
+			wb.setSheetVisibility(8, SheetVisibility.VERY_HIDDEN);
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 		} finally {
@@ -262,7 +297,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			//Excell export sort
 			T2CoProjectValidator pv = new T2CoProjectValidator();
 
-			if (!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+			if (!CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) && !CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) && !CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				pv.setProcType(pv.PROC_TYPE_IDENTIFICATION_SOURCE);
 				pv.setAppendix("mainList", list);
 				
@@ -356,7 +391,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			String currentGroupKey = null;
 			
 			for (ProjectIdentification bean : list) {
-				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 					if (currentGroupKey != null && currentGroupKey.equals(bean.getGroupingColumn())) {
 						for (String[] editRow : rows) {
 							if (!isEmpty(bean.getOssName()) && !bean.getOssName().equals("-")
@@ -369,12 +404,24 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 									case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
 										referenceDivChk = "3rd";
 										break;
+									case CoConstDef.CD_DTL_COMPONENT_ID_DEP:
+										referenceDivChk = "DEP";
+										break;
 									case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
 										referenceDivChk = "SRC";
 										break;
 									case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
 										referenceDivChk = "BIN";
 										
+										break;
+									case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID:
+										if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("1")) {
+											referenceDivChk = "BIN(ANDROID)";
+										} else if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("2")) {
+											referenceDivChk = "BIN(YOCTO)";
+										}
+									case CoConstDef.CD_DTL_COMPONENT_PARTNER:
+										referenceDivChk = "3rd Party";
 										break;
 									default:
 										break;
@@ -401,7 +448,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					List<String> params = new ArrayList<>();
 					// main 정보
-					params.add(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : "");
+					params.add(isMainRow ? ( CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type) ? bean.getRefComponentIdx() : bean.getComponentIdx() ) : "");
 					params.add(bean.getOssName()); // OSS Name
 					params.add(bean.getOssVersion()); // OSS Version
 					params.add(bean.getLicenseName()); // LICENSE
@@ -433,18 +480,41 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					
 					String refSrcTab = "";
 					String thirdKey = "3rd";
-					switch (avoidNull(bean.getRefDiv())) {
-						case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
-							refSrcTab = thirdKey;
-							break;
-						case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
-							refSrcTab = "SRC";
-							break;
-						case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
-							refSrcTab = "BIN";
-							break;
-						default:
-							break;
+					
+					String[] refDivs = bean.getRefDiv().split("[,]");
+					for (String refDiv : refDivs) {
+						switch (avoidNull(refDiv)) {
+							case CoConstDef.CD_DTL_COMPONENT_ID_PARTNER:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+									refSrcTab += thirdKey;
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_DEP:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+								refSrcTab += "DEP";
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_SRC:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+								refSrcTab += "SRC";
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_BIN:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+								refSrcTab += "BIN";
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_ID_ANDROID:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+								if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("1")) {
+									refSrcTab += "BIN(ANDROID)";
+								} else if (avoidNull(projectInfo.getNoticeTypeEtc()).equals("2")) {
+									refSrcTab += "BIN(YOCTO)";
+								}
+								break;
+							case CoConstDef.CD_DTL_COMPONENT_PARTNER:
+								if (!isEmpty(refSrcTab)) refSrcTab += ",";
+								refSrcTab += "3rd Party";
+								break;
+							default:
+								break;
+						}
 					}
 					if (refSrcTab.contains(thirdKey)) {
 						String[] thirdIds = avoidNull(bean.getRefPartnerId(), "").split(",");
@@ -466,6 +536,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 //					params.add(isMainRow ? bean.getFilePath() : ""); // path
 					// vulnerability
 					params.add(isMainRow ? (new BigDecimal(avoidNull(bean.getCvssScore(), "0.0")).equals(new BigDecimal("0.0")) ? "" : bean.getCvssScore()) : "");
+					// dependencies
+//					params.add(isMainRow ? (isEmpty(bean.getDependencies()) ? "" : bean.getDependencies()) : "");
 					// notice
 					params.add(isMainRow ? ( (CoConstDef.CD_DTL_OBLIGATION_NOTICE.equals(bean.getObligationType()) || CoConstDef.CD_DTL_OBLIGATION_DISCLOSURE.equals(bean.getObligationType())) ? "O" : "")  : "");
 					// source code
@@ -500,7 +572,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 
 					if (!CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
-						params.add(bean.getFilePath()); // path
+						if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)) {
+							params.add(bean.getPackageUrl());
+						} else {
+							params.add(bean.getFilePath()); // path
+						}
 					}
 					
 					if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
@@ -533,6 +609,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					params.add(bean.getCopyrightText());
 					
 					if (!(CoConstDef.CD_DTL_COMPONENT_ID_PARTNER.equals(type)
+							|| CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)
 							|| CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type)
 							|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type))
 						|| isSelfCheck) {
@@ -576,10 +653,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					String _comm = "";
 					
 					if (!isSelfCheck 
-						&& (CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) 
+						&& (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type) 
+							|| CoConstDef.CD_DTL_COMPONENT_ID_SRC.equals(type) 
 							|| CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type) 
 							|| CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type))) {
-						_comm = avoidNull(bean.getComments());
+						_comm = avoidNull(bean.getComments().trim());
 						
 						params.add(_comm); 
 					}
@@ -638,6 +716,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						}
 					}
 					
+					if (CoConstDef.CD_DTL_COMPONENT_ID_DEP.equals(type)){
+						if (!isEmpty(bean.getDependencies())) {
+							params.add(bean.getDependencies());
+						} else {
+							params.add("");
+						}
+					}
+					
 					addColumnWarningMessage(type, bean, vr, params);
 					
 					rows.add(params.toArray(new String[params.size()]));
@@ -652,9 +738,17 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					Font font = WorkbookFactory.create(true).createFont();
 					
 					if (isSelfCheck) {
-						makeSheetAddWarningMsg(sheet, rows, startIdx, false, font);
+						makeSheetAddWarningMsg(type, sheet, rows, startIdx, false, font);
 					} else {
-						makeSheetAddWarningMsg(sheet, rows, startIdx, true, font);
+						makeSheetAddWarningMsg(type, sheet, rows, startIdx, true, font);
+					}
+					
+					if (CoConstDef.CD_DTL_COMPONENT_ID_BIN.equals(type)) {
+						sheet.setColumnHidden(11, true);
+						sheet.setColumnHidden(12, true);
+					} else if (CoConstDef.CD_DTL_COMPONENT_ID_ANDROID.equals(type)) {
+						sheet.setColumnHidden(16, true);
+						sheet.setColumnHidden(17, true);
 					}
 				} catch (IOException e) {
 					log.error(e.getMessage(), e);
@@ -668,7 +762,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		if (!vr.getValidMessageMap().isEmpty()) {
 			String gridId = "";
-			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type)) {
+			if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM.equals(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
 				gridId = bean.getComponentId();
 			} else {
 				gridId = bean.getGridId();
@@ -745,6 +839,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			case "BINARY NAME" :
 			case "BINARY NAME OR SOURCE PATH" :
 				warningMsgCode = "(B) ";
+				break;
+			case "BINARYNOTICE":
+				warningMsgCode = "(N) ";
 				break;
 			default :
 				break;
@@ -850,7 +947,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 	}
 	
-	private static void makeSheetAddWarningMsg(Sheet sheet, List<String[]> rows, int templateRowNum, boolean useLastCellComment, Font font) {
+	private static void makeSheetAddWarningMsg(String type, Sheet sheet, List<String[]> rows, int templateRowNum, boolean useLastCellComment, Font font) {
 		int startRow= 1;
 		int startCol = 0;
 		int endCol = 0;
@@ -1049,24 +1146,43 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		networkServiceOnly.setCellValue(project.getNetworkServerType());
 				
 		// About OSC Process
-		// Distribution Site
-		Cell distributionSite = sheet.getRow(13).getCell(1);
-		distributionSite.setCellType(CellType.STRING);
-		distributionSite.setCellValue(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, project.getDistributeTarget()));
-		// Notice Type		
-		String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, project.getNoticeType());
-		
-		if (!isEmpty(project.getNoticeTypeEtc())) {
-			noticeTypeStr += " (" +CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, project.getNoticeTypeEtc()) + ")";
+		String suffixUrl = CommonFunction.getProperty("fosslight.suffix");
+		if (!isEmpty(suffixUrl)) {
+			// Distribution Site
+			Cell distributionSite = sheet.getRow(13).getCell(1);
+			distributionSite.setCellType(CellType.STRING);
+			distributionSite.setCellValue(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, project.getDistributeTarget()));
+			// Notice Type
+			String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, project.getNoticeType());
+
+			if (!isEmpty(project.getNoticeTypeEtc())) {
+				noticeTypeStr += " (" +CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, project.getNoticeTypeEtc()) + ")";
+			}
+
+			Cell noticeType = sheet.getRow(14).getCell(1);
+			noticeType.setCellType(CellType.STRING);
+			noticeType.setCellValue(noticeTypeStr);
+			// Comment
+			Cell comment = sheet.getRow(15).getCell(1);
+			comment.setCellType(CellType.STRING);
+			comment.setCellValue(CommonFunction.html2text(project.getComment()));
+
+		} else {
+			// Notice Type
+			String noticeTypeStr = CoCodeManager.getCodeString(CoConstDef.CD_NOTICE_TYPE, project.getNoticeType());
+
+			if (!isEmpty(project.getNoticeTypeEtc())) {
+				noticeTypeStr += " (" +CoCodeManager.getCodeString(CoConstDef.CD_PLATFORM_GENERATED, project.getNoticeTypeEtc()) + ")";
+			}
+
+			Cell noticeType = sheet.getRow(13).getCell(1);
+			noticeType.setCellType(CellType.STRING);
+			noticeType.setCellValue(noticeTypeStr);
+			// Comment
+			Cell comment = sheet.getRow(14).getCell(1);
+			comment.setCellType(CellType.STRING);
+			comment.setCellValue(CommonFunction.html2text(project.getComment()));
 		}
-		
-		Cell noticeType = sheet.getRow(14).getCell(1);
-		noticeType.setCellType(CellType.STRING);
-		noticeType.setCellValue(noticeTypeStr);
-		// Comment
-		Cell comment = sheet.getRow(15).getCell(1);
-		comment.setCellType(CellType.STRING);
-		comment.setCellValue(CommonFunction.html2text(project.getComment()));
 	}
 
 	/**
@@ -1169,7 +1285,9 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, CommonFunction.makeOssTypeStr(param.getOssType())
 					, param.getLicenseName()
 					, param.getLicenseType()
+					, param.getRestriction()
 					, CoCodeManager.getCodeString(CoConstDef.CD_OBLIGATION_TYPE, param.getObligationType())
+					, param.getDetectedLicense()
 					, param.getHomepage()
 					, param.getDownloadLocation()
 					, param.getCopyright()
@@ -1255,31 +1373,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				Project param = projectList.get(i);
 				Map<String, String> expandInfo = projectExpandInfo.get(param.getPrjId());
 				String nvdMaxScore = "";
-				
-				List<String> nvdMaxScoreInfoList = projectMapper.findIdentificationMaxNvdInfo(param.getPrjId(), null);
-				List<String> nvdMaxScoreInfoList2 = projectMapper.findIdentificationMaxNvdInfoForVendorProduct(param.getPrjId(), null);
-				
-				
-				if (nvdMaxScoreInfoList != null && !nvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.checkNvdInfoForProduct(ossInfoMap, nvdMaxScoreInfoList);
-					if (conversionCveInfo != null) {
-						customNvdMaxScoreInfoList.add(conversionCveInfo);
-					}
+				String conversionCveInfo = cacheService.findIdentificationMaxNvdInfo(param.getPrjId(), null);
+				if (conversionCveInfo != null) {
+					String[] conversionCveData = conversionCveInfo.split("\\@");
+					nvdMaxScore = conversionCveData[3];
 				}
-				
-				if (nvdMaxScoreInfoList2 != null && !nvdMaxScoreInfoList2.isEmpty()) {
-					customNvdMaxScoreInfoList.addAll(nvdMaxScoreInfoList2);
-				}
-				
-				if (customNvdMaxScoreInfoList != null && !customNvdMaxScoreInfoList.isEmpty()) {
-					String conversionCveInfo = CommonFunction.getConversionCveInfoForList(customNvdMaxScoreInfoList);
-					if (conversionCveInfo != null) {
-						String[] conversionCveData = conversionCveInfo.split("\\@");
-						nvdMaxScore = conversionCveData[3];
-					}
-				}
-				
-				customNvdMaxScoreInfoList.clear();
 				
 				String[] rowParam = {
 					param.getPrjId()
@@ -1297,12 +1395,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, getExpandProjectInfo(expandInfo, "NOTICE_TYPE")
 					, getExpandProjectInfo(expandInfo, "NOTICE_FILE_NAME")
 					, getExpandProjectInfo(expandInfo, "PACKAGE_FILE_NAME")
-					, param.getDestributionStatus()
-					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_TARGET")
-					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_NAME")
-					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_MASTER_CATEGORY")
-					, getExpandProjectInfo(expandInfo, "MODEL_INFO")
-					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_DEPLOY_TIME")
+//					, param.getDestributionStatus()
+//					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_TARGET")
+//					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_NAME")
+//					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_MASTER_CATEGORY")
+//					, getExpandProjectInfo(expandInfo, "MODEL_INFO")
+//					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_DEPLOY_TIME")
 					, nvdMaxScore
 					, param.getDivision()
 					, param.getCreator()
@@ -1453,132 +1551,6 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		return makeExcelFileId(wb,"PartnerList");
-	}
-	
-	private static String getModelStatusExcelId(List<Project> project, Project fileData) throws Exception{
-		Workbook wb = null;
-		Sheet sheet = null;
-		FileInputStream inFile=null;
-
-		try {
-			inFile= new FileInputStream(new File(downloadpath+"/complianceStatus.xlsx"));
-			
-			wb = new XSSFWorkbook(inFile);
-				
-			if (fileData != null){
-				sheet = wb.getSheetAt(0);
-				
-				int idx = 1;
-				List<String[]> rows = new ArrayList<>();
-				int modelListLength = fileData.getModelListInfo().size();
-				int productGroupsLength = fileData.getProductGroups().size();
-				List<String> productGroups = fileData.getProductGroups();
-				List<String> modelInfo = fileData.getModelListInfo();
-				
-				int length = productGroupsLength > modelListLength ? productGroupsLength : modelListLength;
-				
-				for (int i = 0 ; i < length ; i++){
-					List<String> params = new ArrayList<>();
-					
-					// main 정보
-					params.add(Integer.toString(idx++)); // No
-					params.add(productGroupsLength > 0 && productGroupsLength > i ? productGroups.get(i) : ""); // Product Group
-					params.add(modelListLength > 0 && modelListLength > i ? modelInfo.get(i) : ""); // Model(Software) Name
-					
-					rows.add(params.toArray(new String[params.size()]));
-				}
-				
-				//시트 만들기
-				makeSheet2(sheet, rows);
-			}
-			
-			if (project != null && !project.isEmpty()) {
-				sheet = wb.getSheetAt(1);
-				
-				int idx = 1;
-				List<String[]> rows = new ArrayList<>();
-				
-				for (Project bean : project) {
-					List<String> params = new ArrayList<>();
-					
-					// main 정보
-					params.add(Integer.toString(idx++)); 		// No
-					params.add(bean.getModelName()); 	 		// Model(Software) Name
-					params.add(bean.getPrjId()); 		 		// Project ID
-					params.add(bean.getStatus()); 	 	 		// Status
-					params.add(bean.getDistributionType()); 	// Distribution Type
-					params.add(bean.getDestributionStatus()); 	// Distribution Status
-					String distributionDate = avoidNull(bean.getDistributeDeployTime(), "");
-					params.add(isEmpty(bean.getPrjId()) ? "" : CommonFunction.formatDate(distributionDate)); // Distribute Time
-					params.add(isEmpty(bean.getPrjId()) ? CoConstDef.FLAG_NO : CoConstDef.FLAG_YES); // Result
-					params.add(""); 					 		// Comment
-					
-					rows.add(params.toArray(new String[params.size()]));
-				}
-				
-				//시트 만들기
-				makeSheet(sheet, rows);
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e2) {
-				}
-			}
-		}
-		
-		return makeExcelFileId(wb,"Model Status");
-	}
-	
-	private static String getPartnerModelExcelId(List<PartnerMaster> ossList) throws Exception{
-		Workbook wb = null;
-		Sheet sheet = null;
-		FileInputStream inFile=null;
-
-		
-		try {
-			inFile= new FileInputStream(new File(downloadpath+"/complianceStatus.xlsx"));
-			wb = new XSSFWorkbook(inFile);
-			sheet = wb.getSheetAt(2);
-			if (ossList != null && !ossList.isEmpty()) {
-				int idx = 1;
-				List<String[]> rows = new ArrayList<>();
-				
-				for (PartnerMaster bean : ossList) {
-					List<String> params = new ArrayList<>();
-					
-					// main 정보
-					params.add(Integer.toString(idx++)); // No
-					params.add(bean.getPartnerId()); // 3rd Party ID
-					params.add(CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, bean.getStatus())); // Status
-					params.add(bean.getPartnerName()); // 3rd Party Name
-					params.add(bean.getSoftwareName()); // software Name
-					params.add(bean.getSoftwareVersion()); // software Version
-					params.add(bean.getPrjId()); // Used Project ID
-					params.add(CommonFunction.formatDate(bean.getCreatedDate())); // Created Date
-					params.add(""); // Comment
-					
-					rows.add(params.toArray(new String[params.size()]));
-				}
-				
-				//시트 만들기
-				makeSheet(sheet, rows);
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (inFile != null) {
-				try {
-					inFile.close();
-				} catch (Exception e2) {
-				}
-			}
-		}
-		
-		return makeExcelFileId(wb,"3rd Party List");
 	}
 	
 	/**
@@ -1771,66 +1743,66 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return null;
 	}
 	
-	private static String makeCsvFileId(String target, List<String[]> datas) throws IOException {
-		
-		UUID randomUUID = UUID.randomUUID();
-		String fileName = CommonFunction.replaceSlashToUnderline(target)+"_"+CommonFunction.getCurrentDateTime();
-		String logiFileName = fileName + "_" + randomUUID+".csv";
-		String excelFilePath = writepath+"/download/";
-		CSVWriter cw = null;
-		
-		FileWriter fileWriter = null;
-		CSVPrinter csvFilePrinter = null;
-		CSVFormat csvFileFormat = CSVFormat.EXCEL;
-		
-		FileOutputStream outFile = null;
-		
-		try {			
-			fileWriter = new FileWriter(excelFilePath + logiFileName);
-
-			if (!Files.exists(Paths.get(excelFilePath))) {
-				Files.createDirectories(Paths.get(excelFilePath));
-			}
-			
-			csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
-			
-			for (String[] row : datas) {
-				csvFilePrinter.printRecord(Arrays.asList(row));
-			}
-			
-			fileWriter.flush();
-			// db 등록
-			return fileService.registFileDownload(excelFilePath, fileName + ".csv", logiFileName);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		} finally {
-			if (outFile != null) {
-				try {
-					outFile.close();
-				} catch (Exception e2) {}
-			}
-			
-			if (cw != null) {
-				try {
-					cw.close();
-				} catch (Exception e2) {}
-			}
-			
-			if (fileWriter != null) {
-				try {
-					fileWriter.close();
-				} catch (Exception e2) {}
-			}
-			
-			if (csvFilePrinter != null) {
-				try {
-					csvFilePrinter.close();
-				} catch (Exception e2) {}
-			}
-		}
-		
-		return null;
-	}
+//	private static String makeCsvFileId(String target, List<String[]> datas) throws IOException {
+//		
+//		UUID randomUUID = UUID.randomUUID();
+//		String fileName = CommonFunction.replaceSlashToUnderline(target)+"_"+CommonFunction.getCurrentDateTime();
+//		String logiFileName = fileName + "_" + randomUUID+".csv";
+//		String excelFilePath = writepath+"/download/";
+//		CSVWriter cw = null;
+//		
+//		FileWriter fileWriter = null;
+//		CSVPrinter csvFilePrinter = null;
+//		CSVFormat csvFileFormat = CSVFormat.EXCEL;
+//		
+//		FileOutputStream outFile = null;
+//		
+//		try {			
+//			fileWriter = new FileWriter(excelFilePath + logiFileName);
+//
+//			if (!Files.exists(Paths.get(excelFilePath))) {
+//				Files.createDirectories(Paths.get(excelFilePath));
+//			}
+//			
+//			csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
+//			
+//			for (String[] row : datas) {
+//				csvFilePrinter.printRecord(Arrays.asList(row));
+//			}
+//			
+//			fileWriter.flush();
+//			// db 등록
+//			return fileService.registFileDownload(excelFilePath, fileName + ".csv", logiFileName);
+//		} catch (Exception e) {
+//			log.error(e.getMessage(), e);
+//		} finally {
+//			if (outFile != null) {
+//				try {
+//					outFile.close();
+//				} catch (Exception e2) {}
+//			}
+//			
+//			if (cw != null) {
+//				try {
+//					cw.close();
+//				} catch (Exception e2) {}
+//			}
+//			
+//			if (fileWriter != null) {
+//				try {
+//					fileWriter.close();
+//				} catch (Exception e2) {}
+//			}
+//			
+//			if (csvFilePrinter != null) {
+//				try {
+//					csvFilePrinter.close();
+//				} catch (Exception e2) {}
+//			}
+//		}
+//		
+//		return null;
+//	}
 	
 	private static String makeAnalysisListExcelFileId(Workbook wb, String target, String exp, String prjId) throws IOException {
 		UUID randomUUID = UUID.randomUUID();
@@ -1864,10 +1836,36 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return null;
 	}
 
+	private static <T extends ExcelData> String makeExcelDataId(List<T> dataList, String type) throws Exception {
+		Workbook wb = null;
+		Sheet sheet = null;
+		FileInputStream inFile=null;
+
+		try {
+			inFile= new FileInputStream(downloadpath + File.separator + type + ".xlsx");
+			try {wb = new XSSFWorkbook(inFile);} catch (IOException e) {log.error(e.getMessage());}
+            sheet = wb.getSheetAt(0);
+			wb.setSheetName(0, type);
+			List<String[]> rows = dataList.stream().map(ExcelData::toRow).collect(Collectors.toList());
+			makeSheet(sheet, rows);
+		} catch (FileNotFoundException e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			if (inFile != null) {
+				try {
+					inFile.close();
+				} catch (Exception ignored) {
+				}
+			}
+		}
+
+		return makeExcelFileId(wb, type);
+	}
+
 	public static String getExcelDownloadId(String type, String dataStr, String filepath) throws Exception {
 		return getExcelDownloadId(type, dataStr, filepath, null);
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "serial" })
 	public static String getExcelDownloadId(String type, String dataStr, String filepath, String extParam) throws Exception {
 		downloadpath = filepath;
@@ -1900,6 +1898,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				Type 				projectType = new TypeToken<Project>(){}.getType();
 				Project 			project 	= (Project) fromJson(dataStr, projectType);
+				
+				List<String> watcherList = new ArrayList<>();
+				String[] watchers = project.getWatchers();
+				for (String watcher : watchers) {
+					if (!isEmpty(watcher)) watcherList.add(watcher);
+				}
+				project.setWatchers(watcherList.toArray(new String[watcherList.size()]));
+				
 				project.setStartIndex(0);
 				project.setPageListSize(MAX_RECORD_CNT);
 				project.setExcelDownloadFlag(CoConstDef.FLAG_YES);
@@ -1915,6 +1921,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				downloadId = getReportExcelPost(dataStr, null);
 				
 				break;
+			case "dep" :		//DEP List
+				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+				
+				break;
 			case "src" :		//SRC List
 				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_SRC);
 				
@@ -1925,6 +1935,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				break;
 			case "binAndroid" :		//bin android List
 				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				
+				break;
+			case "binAndroidBom" :	//bin android bom List
+				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_ANDROID_BOM);
+				
+				break;
+			case "partner" :		//identification > 3rd List
+				downloadId = getReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_ID_PARTNER);
 				
 				break;
 			case "license" :	//License List
@@ -1965,7 +1983,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				break;
 			case "partnerCheckList" :
-				downloadId = getPartnerChecklistReportExcelPost(dataStr);
+				downloadId = getPartnerChecklistReportExcelPost(dataStr, CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				
+				break;
+			case "partnerBomList" :
+			case "partnerBomList_demo" :
+				downloadId = getPartnerChecklistReportExcelPost(dataStr, null);
 				
 				break;
 			case "spdx" :
@@ -2024,6 +2047,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					}
 				}
 				
+				List<String> partnerWatcherList = new ArrayList<>();
+				String[] partnerWatchers = partner.getWatchers();
+				for (String partnerWatcher : partnerWatchers) {
+					if (!isEmpty(partnerWatcher)) partnerWatcherList.add(partnerWatcher);
+				}
+				partner.setWatchers(partnerWatcherList.toArray(new String[partnerWatcherList.size()]));
+				
 				partner.setStartIndex(0);
 				partner.setPageListSize(MAX_RECORD_CNT);
 				partner.setModelFlag(CoConstDef.FLAG_NO);
@@ -2032,69 +2062,69 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				downloadId	= getPartnerExcelId((List<PartnerMaster>) partnerList.get("rows"));
 				
 				break;
-			case "3rdModel" :		//3rd Party List
-				Type 				partnerModelType = new TypeToken<PartnerMaster>(){}.getType();
-				PartnerMaster 		partnerModel	  = (PartnerMaster) fromJson(dataStr, partnerModelType);
-	
-				if (partnerModel.getStatus() != null) {
-					String statuses = partnerModel.getStatus();
-					
-					if (!isEmpty(statuses)) {
-						String[] arrStatuses = statuses.split(",");
-						partnerModel.setArrStatuses(arrStatuses);
-					}
-				}
-				
-				partnerModel.setStartIndex(0);
-				partnerModel.setPageListSize(MAX_RECORD_CNT);
-				partnerModel.setModelFlag(CoConstDef.FLAG_YES);
-				
-				Map<String, Object> partnerModelList =	 partnerService.getPartnerStatusList(partnerModel);
-				
-				if (isMaximumRowCheck((int) partnerModelList.get("records"))){
-					downloadId	= getPartnerModelExcelId((List<PartnerMaster>) partnerModelList.get("rows"));
-				}
-				
-				break;
-			case "modelStatus":
-				Type 			ProjectModelType = new TypeToken<Project>(){}.getType();
-				Project 		ProjectModel	 = (Project) fromJson(dataStr, ProjectModelType);
-				
-				if (!isEmpty(ProjectModel.getModelName())){
-					String[] modelNames = ProjectModel.getModelName().split(",");
-					String[] productGroups = ProjectModel.getProductGroup().split(",");
-					List<String> modelListInfo = new ArrayList<String>();
-					List<String> productGroupListInfo = new ArrayList<String>();
-					
-					for (String modelName : modelNames){
-						modelListInfo.add(modelName);
-					}
-					
-					for (String productGroup : productGroups){
-						productGroupListInfo.add(productGroup);
-					}
-					
-					ProjectModel.setModelListInfo(modelListInfo);
-					ProjectModel.setProductGroups(productGroupListInfo);
-					ProjectModel.setPageListSize(MAX_RECORD_CNT_LIST);
-					
-					Map<String, Object> map = complianceService.getModelList(ProjectModel);
-					
-					if (isMaximumRowCheck((int) map.get("records"))){
-						downloadId	= getModelStatusExcelId((List<Project>) map.get("rows"), ProjectModel);
-					}
-				} else {
-					downloadId	= getModelStatusExcelId(null, null);
-				}
-				
-				break;
+//			case "3rdModel" :		//3rd Party List
+//				Type 				partnerModelType = new TypeToken<PartnerMaster>(){}.getType();
+//				PartnerMaster 		partnerModel	  = (PartnerMaster) fromJson(dataStr, partnerModelType);
+//	
+//				if (partnerModel.getStatus() != null) {
+//					String statuses = partnerModel.getStatus();
+//					
+//					if (!isEmpty(statuses)) {
+//						String[] arrStatuses = statuses.split(",");
+//						partnerModel.setArrStatuses(arrStatuses);
+//					}
+//				}
+//				
+//				partnerModel.setStartIndex(0);
+//				partnerModel.setPageListSize(MAX_RECORD_CNT);
+//				partnerModel.setModelFlag(CoConstDef.FLAG_YES);
+//				
+//				Map<String, Object> partnerModelList =	 partnerService.getPartnerStatusList(partnerModel);
+//				
+//				if (isMaximumRowCheck((int) partnerModelList.get("records"))){
+//					downloadId	= getPartnerModelExcelId((List<PartnerMaster>) partnerModelList.get("rows"));
+//				}
+//				
+//				break;
+//			case "modelStatus":
+//				Type 			ProjectModelType = new TypeToken<Project>(){}.getType();
+//				Project 		ProjectModel	 = (Project) fromJson(dataStr, ProjectModelType);
+//				
+//				if (!isEmpty(ProjectModel.getModelName())){
+//					String[] modelNames = ProjectModel.getModelName().split(",");
+//					String[] productGroups = ProjectModel.getProductGroup().split(",");
+//					List<String> modelListInfo = new ArrayList<String>();
+//					List<String> productGroupListInfo = new ArrayList<String>();
+//					
+//					for (String modelName : modelNames){
+//						modelListInfo.add(modelName);
+//					}
+//					
+//					for (String productGroup : productGroups){
+//						productGroupListInfo.add(productGroup);
+//					}
+//					
+//					ProjectModel.setModelListInfo(modelListInfo);
+//					ProjectModel.setProductGroups(productGroupListInfo);
+//					ProjectModel.setPageListSize(MAX_RECORD_CNT_LIST);
+//					
+//					Map<String, Object> map = complianceService.getModelList(ProjectModel);
+//					
+//					if (isMaximumRowCheck((int) map.get("records"))){
+//						downloadId	= getModelStatusExcelId((List<Project>) map.get("rows"), ProjectModel);
+//					}
+//				} else {
+//					downloadId	= getModelStatusExcelId(null, null);
+//				}
+//				
+//				break;
 			case "vulnerability" :		//vulnerability 2018-07-26 choye 추가 
 				Type vulnerabilityType = new TypeToken<Vulnerability>(){}.getType();
 				Vulnerability vulnerability = (Vulnerability) fromJson(dataStr, vulnerabilityType);
 				vulnerability.setSidx("cveId");
 				vulnerability.setPageListSize(MAX_RECORD_CNT_LIST);
 				
-				Map<String, Object> vulnerabilityMap =	 vulnerabilityService.getVulnerabilityList(vulnerability, true);
+				Map<String, Object> vulnerabilityMap =	vulnerabilityService.getVulnerabilityList(vulnerability, true);
 				
 				if (isMaximumRowCheck((int) vulnerabilityMap.get("records"))){
 					downloadId = getVulnerabilityExcel((List<Vulnerability>) vulnerabilityMap.get("rows"));
@@ -2132,7 +2162,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				break;
 			case "bomcompare" :
-				downloadId = getBomCompareExcelId(dataStr);
+				downloadId = getBomCompareExcelId(dataStr, true);
+				
+				break;
+			case "3rdParty_bomcompare" :
+				downloadId = getBomCompareExcelId(dataStr, false);
 				
 				break;
 			case "security":
@@ -2143,6 +2177,19 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				
 				downloadId = getSecurityExcelId(result, projectMaster, param.getCode());
 				
+				break;
+			case "lite-oss":
+				Type ossListType = new TypeToken<List<OssDto>>(){}.getType();
+				var liteOssData = (List<OssDto>) fromJson(dataStr, ossListType);
+				downloadId = makeExcelDataId(liteOssData, "OssList");
+				break;
+			case "lite-licenses":
+				Type licenseListType = new TypeToken<List<LicenseDto>>(){}.getType();
+				var liteLicenseData = (List<LicenseDto>) fromJson(dataStr, licenseListType);
+				downloadId = makeExcelDataId(liteLicenseData, "LicenseList");
+			case "cycloneDXJson" :
+			case "cycloneDXXml" :
+				downloadId = getCycloneDXFileId(type, dataStr, extParam.equals("verify") ? true : false);
 				break;
 			default:
 				break;
@@ -2157,9 +2204,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		switch (code) {
 			case "total" : securityGridList = (List<OssComponents>) result.get("totalList");
 				break;
-			case "fixed" : securityGridList = (List<OssComponents>) result.get("fixedList");
-				break;
-			default : securityGridList = (List<OssComponents>) result.get("notFixedList");
+			default : securityGridList = (List<OssComponents>) result.get("fullDiscoveredList");
 				break;
 		}
 		
@@ -2211,12 +2256,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						, bean.getPublDate()
 						, bean.getCvssScore()
 						, bean.getVulnerabilityResolution()
+						, bean.getVulnerabilityLink()
+						, bean.getSecurityComments()
 					};
 					
 					rowDatas.add(rowParam);
 				}
 				
-				makeSecuritySheet(creationHelper, sheet, style, hyperLinkStyle, rowInfoData, rowDatas);
+				makeSecuritySheet(creationHelper, sheet, style, hyperLinkStyle, rowInfoData, rowDatas, true, false);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -2231,16 +2278,17 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return makeExcelFileId(wb, downloadFileName);
 	}
 	
-	private static void makeSecuritySheet(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows) {
+	private static void makeSecuritySheet(CreationHelper creationHelper, Sheet sheet, CellStyle style, CellStyle hyperLinkStyle, List<String[]> infoRows, List<String[]> rows, boolean isProject, boolean isDemo) {
 		int infoStartRow= 1;
 		int startRow= 8;
 		int startCol = 0;
 		int endCol = 0;
-		
+		if (!isProject || isDemo) {
+			startRow = 9;
+		}
 		if (!infoRows.isEmpty()) {
 			endCol = infoRows.get(0).length-1;
 		}
-		
 		int shiftRowNum = infoRows.get(0).length;
 		String[] rowParam = infoRows.get(0);
 		
@@ -2261,16 +2309,48 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		}
 		
 		int rowIndex = 0;
-		for (int i = startRow; i < startRow+rows.size(); i++){
-			Row row = sheet.createRow(i);
-			for (int colNum=startCol; colNum<=endCol; colNum++){
-				Cell cell = row.createCell(colNum);
-				cell.setCellValue(rows.get(rowIndex)[colNum]);
-				cell.setCellStyle(style);
+		if (!isProject) {
+			Hyperlink hyperlink = creationHelper.createHyperlink(HyperlinkType.DOCUMENT);
+			for (int i = startRow; i < startRow+rows.size(); i++){
+				Row row = sheet.createRow(i);
+				for (int colNum=startCol; colNum<=endCol; colNum++){
+					Cell cell = row.createCell(colNum);
+					style.setWrapText(false);
+					if (colNum == 7 || colNum == 8) {
+						String cellData = rows.get(rowIndex)[colNum];
+						if (!isEmpty(cellData)) {
+							if (cellData.contains(",")) {
+								String[] splitData = cellData.split(",");
+								String sData = "";
+								for (int j=0; j<splitData.length; j++) {
+									sData += splitData[j];
+									sData += "\n";
+								}
+								cellData = sData.substring(0, sData.length()-1);
+								hyperLinkStyle.setWrapText(true);
+							}
+							hyperlink.setAddress(cell.getStringCellValue());
+							cell.setCellValue(cellData);
+							cell.setCellStyle(hyperLinkStyle);
+						}
+					} else {
+						cell.setCellValue(rows.get(rowIndex)[colNum]);
+						cell.setCellStyle(style);
+					}
+				}
+				rowIndex++;
 			}
-			rowIndex++;
+		} else {
+			for (int i = startRow; i < startRow+rows.size(); i++){
+				Row row = sheet.createRow(i);
+				for (int colNum=startCol; colNum<=endCol; colNum++){
+					Cell cell = row.createCell(colNum);
+					cell.setCellValue(rows.get(rowIndex)[colNum]);
+					cell.setCellStyle(style);
+				}
+				rowIndex++;
+			}
 		}
-		
 	}
 	/**
 	 * Binary DB excel download
@@ -2342,6 +2422,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		Workbook wb = null;
 		Sheet sheetDoc = null; // Document info
 		Sheet sheetPackage = null; // Package Info
+		Sheet sheetExternalRefs = null; // ExternalRefs
 		Sheet sheetLicense = null; // Extracted License Info
 		Sheet sheetPerFile = null; // Per File Info
 		Sheet sheetRelationships = null; // Relationships
@@ -2363,6 +2444,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			wb = WorkbookFactory.create(inFile);
 			sheetDoc = wb.getSheetAt(0);
 			sheetPackage = wb.getSheetAt(1);
+			sheetExternalRefs = wb.getSheetAt(2);
 			sheetLicense = wb.getSheetAt(3);
 			sheetPerFile = wb.getSheetAt(4);
 			sheetRelationships = wb.getSheetAt(5);
@@ -2375,6 +2457,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			projectInfo.setPrjId(prjId);
 			projectInfo = projectService.getProjectDetail(projectInfo);
 
+			projectInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+			List<OssComponents> dependenciesDataList = projectService.getDependenciesDataList(projectInfo);
+			Map<String, Object> relationshipsMap = new HashMap<>();
+			
 			T2Users userInfo = new T2Users();
 			userInfo.setUserId(projectInfo.getCreator());
 
@@ -2389,7 +2475,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			downloadFileName += FileUtil.makeValidFileName(strPrjName, "_").replaceAll(" ", "").replaceAll("--", "-");
 
 			List<String> packageInfoidentifierList = new ArrayList<>();
-
+			Map<String, String> externalRefsMap = new HashMap<>();
+			
 			//Document Info
 			{
 				Row row = sheetDoc.getRow(1);
@@ -2478,14 +2565,24 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					Cell cellSPDXIdentifier = getCell(row, cellIdx); cellIdx++;
 					String ossName = bean.getOssName().replace("&#39;", "\'"); // ossName에 '가 들어갈 경우 정상적으로 oss Info를 찾지 못하는 증상이 발생하여 현재 값으로 치환.
 
+					String relationshipsKey = bean.getPackageUrl(); // (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
+					String spdxRefId = "";
+					
 					if (ossName.equals("-")) {
+						spdxRefId = "SPDXRef-File-" + bean.getComponentId();
 						cellSPDXIdentifier.setCellValue("SPDXRef-File-" + bean.getComponentId());
 						packageInfoidentifierList.add("SPDXRef-File-" + bean.getComponentId());
 					} else {
+						spdxRefId = "SPDXRef-Package-" + bean.getOssId();
 						cellSPDXIdentifier.setCellValue("SPDXRef-Package-" + bean.getOssId());
 						packageInfoidentifierList.add("SPDXRef-Package-" + bean.getOssId());
 					}
 
+					if (!isEmpty(relationshipsKey)) {
+						relationshipsMap.put(relationshipsKey, spdxRefId);
+						externalRefsMap.put(spdxRefId, relationshipsKey);
+					}
+					
 					// Package Version
 					Cell cellPackageVersion = getCell(row, cellIdx); cellIdx++;
 					cellPackageVersion.setCellValue(hideOssVersionFlag ? "" : avoidNull(bean.getOssVersion()));
@@ -2509,7 +2606,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					Cell cellPackageDownloadLocation = getCell(row, cellIdx); cellIdx++;
 					String downloadLocation = bean.getDownloadLocation();
 
-					if (downloadLocation.isEmpty()) {
+					if (isEmpty(downloadLocation)) {
 						downloadLocation = "NONE";
 					}
 
@@ -2543,12 +2640,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					} else {
 						_ossBean = CoCodeManager.OSS_INFO_UPPER.get( (ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
 						String licenseStr = CommonFunction.makeLicenseExpression(_ossBean.getOssLicenses(), false, true);
-
+						if (licenseStr.contains("LicenseRef-")) {
+							licenseStr = CommonFunction.removeSpecialCharacters(licenseStr, false).replaceAll("\\(", "-").replaceAll("\\)", "");
+						}
 						if (_ossBean.getOssLicenses().size() > 1) {
 							licenseStr = "(" + licenseStr + ")";
 						}
-
-						cellLicenseDeclared.setCellValue(licenseStr);
+						cellLicenseDeclared.setCellValue(CommonFunction.licenseStrToSPDXLicenseFormat(licenseStr));
 						attributionText = avoidNull(_ossBean.getAttribution()); // oss attribution
 					}
 
@@ -2576,8 +2674,11 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 							attributionText += avoidNull(liMaster.getAttribution()); // license attribution
 						}
-
-						liBean.setLicenseName(liBean.getLicenseName().replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll(" ", "-").replaceAll("--", "-"));
+						
+						if (liBean.getLicenseName().startsWith("LicenseRef-")) {
+							liBean.setLicenseName(CommonFunction.removeSpecialCharacters(liBean.getLicenseName(), true).replaceAll("\\(", "-").replaceAll("\\)", ""));
+						}
+						
 						srtLicenseName += liBean.getLicenseName();
 					}
 
@@ -2585,7 +2686,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 						srtLicenseName = "(" + srtLicenseName + ")";
 					}
 
-					cellLicenseConcluded.setCellValue(srtLicenseName);
+					cellLicenseConcluded.setCellValue(CommonFunction.licenseStrToSPDXLicenseFormat(srtLicenseName));
 
 					// License Info From Files
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
@@ -2631,6 +2732,47 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 
+			// External Refs
+			{
+				if (!externalRefsMap.isEmpty()) {
+					int rowIdx = 1;
+
+					for (String key : externalRefsMap.keySet()) {
+						Row row = sheetExternalRefs.getRow(rowIdx);
+
+						if (row == null) {
+							row = sheetExternalRefs.createRow(rowIdx);
+						}
+									
+						int cellIdx = 0;
+
+						// Package ID
+						Cell cellPackageId = getCell(row, cellIdx); cellIdx++;
+						cellPackageId.setCellValue(key);
+									
+						// Category
+						Cell cellCategory = getCell(row, cellIdx); cellIdx++;
+						cellCategory.setCellValue("PACKAGE_MANAGER");
+									
+						// Type
+						Cell cellType = getCell(row, cellIdx); cellIdx++;
+						cellType.setCellValue("purl");
+									
+						// Locator
+						Cell cellLocator = getCell(row, cellIdx); cellIdx++;
+						cellLocator.setCellValue(externalRefsMap.get(key));
+									
+						// Comment
+						cellIdx++;
+									
+						// User Defined
+						cellIdx++;
+						
+						rowIdx++;
+					}
+				}
+			}
+			
 			// Extracted License Info
 			{
 				// BOM에 사용된 OSS Info중 License identifier가 설정되어 있지 않은 license 정보만 출력한다.
@@ -2835,6 +2977,46 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 					rowIdx++;
 				}
+				
+				List<String> duplicateCheckList = new ArrayList<>();
+				for (OssComponents oss : dependenciesDataList) {
+					String key = oss.getPackageUrl(); // (oss.getOssName() + "(" + oss.getOssVersion() + ")").toUpperCase();
+					if (relationshipsMap.containsKey(key)) {
+						String spdxElementId = (String) relationshipsMap.get(key);
+						String[] dependencies = oss.getDependencies().split(",");
+						for (String dependency : dependencies) {
+							if (relationshipsMap.containsKey(dependency)) {
+								String relatedSpdxElement = (String) relationshipsMap.get(dependency);
+								String duplicateKey = spdxElementId + "|" + relatedSpdxElement;
+								if (duplicateCheckList.contains(duplicateKey)) {
+									continue;
+								} else {
+									duplicateCheckList.add(duplicateKey);
+								}
+								
+								int cellIdx = 0;
+
+								Row row = sheetRelationships.getRow(rowIdx);
+								if (row == null) {
+									row = sheetRelationships.createRow(rowIdx);
+								}
+								// SPDX Identifier A
+								Cell spdxIdentifierA = getCell(row, cellIdx); cellIdx++;
+								spdxIdentifierA.setCellValue(spdxElementId);
+
+								// Relationship
+								Cell relationship = getCell(row, cellIdx); cellIdx++;
+								relationship.setCellValue("DEPENDS_ON");
+
+								// SPDX Identifier B
+								Cell spdxIdentifierB = getCell(row, cellIdx); cellIdx++;
+								spdxIdentifierB.setCellValue(relatedSpdxElement);
+
+								rowIdx++;
+							}
+						}
+					}
+				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -2854,6 +3036,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		Workbook wb = null;
 		Sheet sheetDoc = null; // Document info
 		Sheet sheetPackage = null; // Package Info
+		Sheet sheetExternalRefs = null;
 		Sheet sheetLicense = null; // Extracted License Info
 		Sheet sheetPerFile = null; // Per File Info
 		Sheet sheetRelationships = null; // Relationships
@@ -2881,6 +3064,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			wb = WorkbookFactory.create(inFile);
 			sheetDoc = wb.getSheetAt(0);
 			sheetPackage = wb.getSheetAt(1);
+			sheetExternalRefs = wb.getSheetAt(2);
 			sheetLicense = wb.getSheetAt(3);
 			sheetPerFile = wb.getSheetAt(4);
 			sheetRelationships = wb.getSheetAt(5);
@@ -2889,7 +3073,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			String createdTimeFull = CommonFunction.getCurrentDateTime("yyyy-MM-dd hh:mm:ss");
 			Date createdDateTime = DateUtil.getCurrentDate();
 
+			List<OssComponents> dependenciesDataList = null;
 			Map<String, Object> packageInfo = null;
+			Map<String, Object> relationshipsMap = new HashMap<>();
+			
 			String strPrjName = "";
 			String creator = "";
 			T2Users userInfo = new T2Users();
@@ -2905,7 +3092,13 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					strPrjName += "-" + projectInfo.getPrjVersion();
 				}
 				
+				ossNotice.setRefDiv(projectInfo.getReferenceDiv());
 				packageInfo = projectService.getExportDataForSBOMInfo(ossNotice);
+				
+				if (CoConstDef.CD_DTL_COMPONENT_ID_BOM.equals(projectInfo.getReferenceDiv())) {
+					projectInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+					dependenciesDataList = projectService.getDependenciesDataList(projectInfo);
+				}
 			} else {
 				PartnerMaster partner = new PartnerMaster();
 				partner.setPartnerId(prjId);
@@ -2921,6 +3114,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			downloadFileName += FileUtil.makeValidFileName(strPrjName, "_").replaceAll(" ", "").replaceAll("--", "-");
 
 			List<String> packageInfoidentifierList = new ArrayList<>();
+			Map<String, String> externalRefsMap = new HashMap<>();
 
 			//Document Info
 			{
@@ -3017,14 +3211,24 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					Cell cellSPDXIdentifier = getCell(row, cellIdx); cellIdx++;
 					String ossName = bean.getOssName().replace("&#39;", "\'");
 
+//					String relationshipsKey = (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
+					String relationshipsKey = bean.getPackageUrl();
+					String spdxRefId = "";
+					
 					if (ossName.equals("-") || (bean.getOssId() == null || bean.getOssId().isEmpty())) {
-						cellSPDXIdentifier.setCellValue("SPDXRef-File-" + bean.getComponentId());
-						packageInfoidentifierList.add("SPDXRef-File-" + bean.getComponentId());
+						spdxRefId = "SPDXRef-File-";
 					} else {
-						cellSPDXIdentifier.setCellValue("SPDXRef-Package-" + bean.getOssId());
-						packageInfoidentifierList.add("SPDXRef-Package-" + bean.getOssId());
+						spdxRefId = "SPDXRef-Package-";
 					}
-
+					spdxRefId += bean.getComponentId();
+					
+					cellSPDXIdentifier.setCellValue(spdxRefId);
+					packageInfoidentifierList.add(spdxRefId);
+					if (!isEmpty(relationshipsKey)) {
+						relationshipsMap.put(relationshipsKey, spdxRefId);
+						externalRefsMap.put(spdxRefId, relationshipsKey);
+					}
+						
 					// Package Version
 					Cell cellPackageVersion = getCell(row, cellIdx); cellIdx++;
 					cellPackageVersion.setCellValue(hideOssVersionFlag ? "" : avoidNull(bean.getOssVersion()));
@@ -3048,7 +3252,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					Cell cellPackageDownloadLocation = getCell(row, cellIdx); cellIdx++;
 					String downloadLocation = bean.getDownloadLocation();
 
-					if (downloadLocation == null || downloadLocation.isEmpty()) {
+					if (isEmpty(downloadLocation)) {
 						downloadLocation = "NONE";
 					}
 
@@ -3077,14 +3281,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					OssMaster _ossBean = null;
 					if (ossName.equals("-")) {
 						String licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName());
-						cellLicenseDeclared.setCellValue(CommonFunction.removeSpecialCharacters(licenseStr));
+						cellLicenseDeclared.setCellValue(CommonFunction.removeSpecialCharacters(licenseStr, true).replaceAll("\\(", "-").replaceAll("\\)", ""));
 						attributionText = bean.getAttribution();
 					} else {
 						_ossBean = CoCodeManager.OSS_INFO_UPPER.get( (ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
 						if (_ossBean != null) {
 							String licenseStr = CommonFunction.makeLicenseExpression(_ossBean.getOssLicenses(), false, true);
-							licenseStr = CommonFunction.removeSpecialCharacters(licenseStr);
-							licenseStr = licenseStr.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll("_", "").replaceAll(" ", "-").replaceAll("--", "-");
+							licenseStr = CommonFunction.removeSpecialCharacters(licenseStr, false).replaceAll("\\(", "-").replaceAll("\\)", "");
+							
 							if (_ossBean.getOssLicenses().size() > 1) {
 								licenseStr = "(" + licenseStr + ")";
 							}
@@ -3092,8 +3296,46 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							cellLicenseDeclared.setCellValue(licenseStr);
 							attributionText = avoidNull(_ossBean.getAttribution()); // oss attribution
 						} else {
-							String licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName());
-							cellLicenseDeclared.setCellValue(CommonFunction.removeSpecialCharacters(licenseStr));
+							boolean multiFlag = false;
+							String licenseStr = "";
+							
+							if (bean.getLicenseName().contains(",")) {
+								multiFlag = true;
+								for (String license : bean.getLicenseName().split(",")) {
+									if (!isEmpty(license)) {
+										licenseStr += " AND ";
+									}
+									
+									String licenseName = "";
+									
+									if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license).toUpperCase())) {
+										LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(license).toUpperCase());
+										
+										if (!isEmpty(liMaster.getShortIdentifier())) {
+											licenseName = liMaster.getShortIdentifier();
+										} else {
+											licenseName = "LicenseRef-" + license;
+										}
+									} else {
+										licenseName = "LicenseRef-" + license;
+									}
+									
+									if (licenseName.startsWith("LicenseRef-")) {
+										licenseName = CommonFunction.removeSpecialCharacters(licenseName, true).replaceAll("\\(", "-").replaceAll("\\)", "");
+									}
+									
+									licenseStr += licenseName;
+								}
+							} else {
+								if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(bean.getLicenseName()).toUpperCase())) {
+									licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName());
+								} else {
+									licenseStr = "LicenseRef-" + CommonFunction.removeSpecialCharacters(bean.getLicenseName(), true).replaceAll("\\(", "-").replaceAll("\\)", "");
+								}
+							}
+							
+							if (multiFlag) licenseStr = "(" + licenseStr + ")";
+							cellLicenseDeclared.setCellValue(licenseStr);
 							attributionText = bean.getAttribution();
 						}
 					}
@@ -3107,13 +3349,15 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							srtLicenseName += " AND ";
 						}
 
+						String licenseName = "";
+						
 						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(liBean.getLicenseName()).toUpperCase())) {
 							LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(liBean.getLicenseName()).toUpperCase());
 
 							if (!isEmpty(liMaster.getShortIdentifier())) {
-								liBean.setLicenseName(liMaster.getShortIdentifier());
+								licenseName = liMaster.getShortIdentifier();
 							} else {
-								liBean.setLicenseName("LicenseRef-" + liBean.getLicenseName());
+								licenseName = "LicenseRef-" + liBean.getLicenseName();
 							}
 
 							if (!isEmpty(attributionText)) {
@@ -3121,11 +3365,14 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 							}
 
 							attributionText += avoidNull(liMaster.getAttribution()); // license attribution
+						} else {
+							licenseName = "LicenseRef-" + liBean.getLicenseName();
 						}
 						
-						String licenseName = CommonFunction.removeSpecialCharacters(liBean.getLicenseName());
-						liBean.setLicenseName(licenseName.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll("_", "").replaceAll(" ", "-").replaceAll("--", "-"));
-						srtLicenseName += liBean.getLicenseName();
+						if (licenseName.startsWith("LicenseRef-")) {
+							licenseName = CommonFunction.removeSpecialCharacters(licenseName, true).replaceAll("\\(", "-").replaceAll("\\)", "");
+						}
+						srtLicenseName += licenseName;
 					}
 
 					if (!bean.getOssComponentsLicense().isEmpty() && bean.getOssComponentsLicense().size() > 1) {
@@ -3138,11 +3385,10 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					Cell licenseInfoFromFiles = getCell(row, cellIdx); cellIdx++;
 
 					if (ossName.equals("-")) {
-						licenseInfoFromFiles.setCellValue(CommonFunction.licenseStrToSPDXLicenseFormat(CommonFunction.removeSpecialCharacters(bean.getLicenseName())));
+						licenseInfoFromFiles.setCellValue(CommonFunction.licenseStrToSPDXLicenseFormat(CommonFunction.removeSpecialCharacters(bean.getLicenseName(), true).replaceAll("\\(", "-").replaceAll("\\)", "")));
 					} else if (_ossBean != null) {
 						String licenseInfo = CommonFunction.makeLicenseFromFiles(_ossBean, true);
-						licenseInfo = CommonFunction.removeSpecialCharacters(licenseInfo);
-						licenseInfoFromFiles.setCellValue(licenseInfo.replaceAll("\\(", "-").replaceAll("\\)", "").replaceAll("_", "").replaceAll(" ", "-").replaceAll("--", "-")); // Declared & Detected License Info (중복제거)
+						licenseInfoFromFiles.setCellValue(licenseInfo);
 					} else {
 						licenseInfoFromFiles.setCellValue(""); // OSS Info가 없으므로 빈값이 들어감.
 					}
@@ -3182,6 +3428,47 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 
+			// External Refs
+			{
+				if (!externalRefsMap.isEmpty()) {
+					int rowIdx = 1;
+
+					for (String key : externalRefsMap.keySet()) {
+						Row row = sheetExternalRefs.getRow(rowIdx);
+
+						if (row == null) {
+							row = sheetExternalRefs.createRow(rowIdx);
+						}
+									
+						int cellIdx = 0;
+
+						// Package ID
+						Cell cellPackageId = getCell(row, cellIdx); cellIdx++;
+						cellPackageId.setCellValue(key);
+									
+						// Category
+						Cell cellCategory = getCell(row, cellIdx); cellIdx++;
+						cellCategory.setCellValue("PACKAGE_MANAGER");
+									
+						// Type
+						Cell cellType = getCell(row, cellIdx); cellIdx++;
+						cellType.setCellValue("purl");
+									
+						// Locator
+						Cell cellLocator = getCell(row, cellIdx); cellIdx++;
+						cellLocator.setCellValue(externalRefsMap.get(key));
+									
+						// Comment
+						cellIdx++;
+									
+						// User Defined
+						cellIdx++;
+						
+						rowIdx++;
+					}
+				}
+			}
+			
 			// Extracted License Info
 			{
 				// BOM에 사용된 OSS Info중 License identifier가 설정되어 있지 않은 license 정보만 출력한다.
@@ -3363,28 +3650,63 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 
 			// sheetRelationships
 			{
-				int rowIdx = 1;
+				if (dependenciesDataList != null) {
+					int rowIdx = 1;
 
-				for (String _identifierB : packageInfoidentifierList) {
-					int cellIdx = 0;
+					for (String _identifierB : packageInfoidentifierList) {
+						int cellIdx = 0;
 
-					Row row = sheetRelationships.getRow(rowIdx);
-					if (row == null) {
-						row = sheetRelationships.createRow(rowIdx);
+						Row row = sheetRelationships.getRow(rowIdx);
+						if (row == null) {
+							row = sheetRelationships.createRow(rowIdx);
+						}
+						// SPDX Identifier A
+						Cell spdxIdentifierA = getCell(row, cellIdx); cellIdx++;
+						spdxIdentifierA.setCellValue("SPDXRef-DOCUMENT");
+
+						// Relationship
+						Cell relationship = getCell(row, cellIdx); cellIdx++;
+						relationship.setCellValue("DESCRIBES");
+
+						// SPDX Identifier B
+						Cell spdxIdentifierB = getCell(row, cellIdx); cellIdx++;
+						spdxIdentifierB.setCellValue(_identifierB);
+
+						rowIdx++;
 					}
-					// SPDX Identifier A
-					Cell spdxIdentifierA = getCell(row, cellIdx); cellIdx++;
-					spdxIdentifierA.setCellValue("SPDXRef-DOCUMENT");
+					
+					for (OssComponents oss : dependenciesDataList) {
+						String key = oss.getPackageUrl();
+						if (!isEmpty(key) && relationshipsMap.containsKey(key)) {
+							String spdxElementId = (String) relationshipsMap.get(key);
+							String[] dependencies = oss.getDependencies().split(",");
+							for (String dependency : dependencies) {
+								String relatedSpdxElementKey = dependency;
+								if (relationshipsMap.containsKey(relatedSpdxElementKey)) {
+									String relatedSpdxElement = (String) relationshipsMap.get(relatedSpdxElementKey);
+									int cellIdx = 0;
 
-					// Relationship
-					Cell relationship = getCell(row, cellIdx); cellIdx++;
-					relationship.setCellValue("DESCRIBES");
+									Row row = sheetRelationships.getRow(rowIdx);
+									if (row == null) {
+										row = sheetRelationships.createRow(rowIdx);
+									}
+									// SPDX Identifier A
+									Cell spdxIdentifierA = getCell(row, cellIdx); cellIdx++;
+									spdxIdentifierA.setCellValue(spdxElementId);
 
-					// SPDX Identifier B
-					Cell spdxIdentifierB = getCell(row, cellIdx); cellIdx++;
-					spdxIdentifierB.setCellValue(_identifierB);
+									// Relationship
+									Cell relationship = getCell(row, cellIdx); cellIdx++;
+									relationship.setCellValue("DEPENDS_ON");
 
-					rowIdx++;
+									// SPDX Identifier B
+									Cell spdxIdentifierB = getCell(row, cellIdx); cellIdx++;
+									spdxIdentifierB.setCellValue(relatedSpdxElement);
+
+									rowIdx++;
+								}
+							}
+						}
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -3954,7 +4276,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 * @throws InvalidFormatException
 	 * @throws IOException
 	 */
-	private static String getPartnerChecklistReportExcelPost(String prjId) throws InvalidFormatException, IOException {
+	private static String getPartnerChecklistReportExcelPost(String prjId, String type) throws InvalidFormatException, IOException {
 		FileInputStream inFile=null;
 		Workbook wb = null;
 		
@@ -3962,25 +4284,36 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		String downloadFileName = "fosslight-report"; // Default
 
 		try {
+			boolean isDemo = false;
+			if (!isEmpty(prjId) && prjId.endsWith("_demo")) {
+				isDemo = true;
+				prjId = prjId.replace("_demo", "");
+			}
 			//cover
-			PartnerMaster projectInfo = new PartnerMaster();
-			projectInfo.setPartnerId(prjId);
-			projectInfo = partnerService.getPartnerMasterOne(projectInfo);
+			PartnerMaster partnerInfo = new PartnerMaster();
+			partnerInfo.setPartnerId(prjId);
+			partnerInfo = partnerService.getPartnerMasterOne(partnerInfo);
 			
 			ProjectIdentification ossListParam = new ProjectIdentification();
 			ossListParam.setReferenceId(prjId);
-			ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
-			Map<String, Object> resultMap = projectService.getIdentificationGridList(ossListParam);
 			
 			inFile= new FileInputStream(new File(downloadpath+"/OssCheckList.xlsx"));
 			wb = WorkbookFactory.create(inFile);
-			int sheetIdx = wb.getSheetIndex("Open Source Software List");
-			Sheet sheet1 = wb.getSheetAt(sheetIdx); // OSS List sheet
 			
 			//fosslight_report_[date]_3rd-[ID].xlsx
 			downloadFileName += "_" + CommonFunction.getCurrentDateTime() + "_3rd-" + StringUtil.deleteWhitespaceWithSpecialChar(prjId);
 			
-			reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER, sheet1, resultMap, null, false);
+			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER.equals(type)) {
+				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER);
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER, wb.getSheetAt(0), projectService.getIdentificationGridList(ossListParam), null, false);
+			}
+			
+			if (isEmpty(type) || CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM.equals(type)) {
+				ossListParam.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+				ossListParam.setMerge(CoConstDef.FLAG_NO);
+				reportIdentificationSheet(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb.getSheetAt(1), projectService.getIdentificationGridList(ossListParam), null, false);
+				reportSecuritySheet(isDemo, CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM, wb, partnerInfo, partnerService.getSecurityGridList(isDemo, partnerInfo));
+			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		} finally {
@@ -3994,6 +4327,76 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return makeExcelFileId(wb,downloadFileName);
 	}
 
+	private static void reportSecuritySheet(boolean isDemo, String cdDtlComponentPartnerBom, Workbook wb, PartnerMaster partnerMaster, List<OssComponents> securityGridList) {
+		try {
+			CreationHelper creationHelper = wb.getCreationHelper();
+			CellStyle style = wb.createCellStyle();
+			CellStyle hyperLinkStyle = wb.createCellStyle();
+			Font hyperLinkFont = wb.createFont();
+			hyperLinkFont.setUnderline(Font.U_SINGLE);
+			hyperLinkFont.setColor(IndexedColors.BLUE.getIndex());
+			hyperLinkStyle.setFont(hyperLinkFont);
+			Sheet sheet = wb.getSheetAt(2);
+			
+			if (securityGridList != null){
+				List<String[]> rowInfoData = new ArrayList<>();
+				List<String[]> rowDatas = new ArrayList<>();
+				
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				Date now = new Date();
+				String now_dt = format.format(now);
+				
+				String[] rowInfoParam = {
+						now_dt
+						, partnerMaster.getPartnerName()
+						, partnerMaster.getSoftwareVersion()
+						, partnerMaster.getCreatorName() + " (" + CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, partnerMaster.getDivision()) + ")"
+				};
+				
+				rowInfoData.add(rowInfoParam);
+				
+				int num = 1;
+				for (OssComponents bean : securityGridList) {
+					if (!isDemo) {
+						String[] rowParam = {
+								String.valueOf(num++)
+								, bean.getOssName()
+								, bean.getOssVersion()
+								, bean.getCveId()
+								, bean.getPublDate()
+								, bean.getCvssScore()
+								, bean.getVulnerabilityResolution()
+								, bean.getVulnerabilityLink()
+								, bean.getOfficialPatchLink()
+								, bean.getVerStartEndRange()
+								, bean.getSecurityComments()
+							};
+						
+						rowDatas.add(rowParam);
+					} else {
+						String[] rowParam = {
+								String.valueOf(num++)
+								, bean.getOssName()
+								, bean.getOssVersion()
+								, bean.getCveId()
+								, bean.getPublDate()
+								, bean.getCvssScore()
+								, bean.getVulnerabilityResolution()
+								, bean.getVulnerabilityLink()
+								, bean.getSecurityComments()
+							};
+						
+						rowDatas.add(rowParam);
+					}
+				}
+				
+				makeSecuritySheet(creationHelper, sheet, style, hyperLinkStyle, rowInfoData, rowDatas, false, isDemo);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+	
 	public static String getExcelDownloadIdOss(String type, OssMaster oss, String filepath) throws Exception {
 		downloadpath = filepath;
 		String downloadId = null;
@@ -4262,12 +4665,12 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		return true;
 	}
 	
-	@SuppressWarnings({ "unchecked", "serial" })
-	public static String getChartExcel(List<Statistics> chartParams, String filePath) throws Exception {
+	@SuppressWarnings({ "unchecked"})
+	public static String getChartExcel(Statistics chartParams, String filePath) throws Exception {
 		Map<String, Object> chartDataMap = new HashMap<String, Object>();
 		Statistics result = new Statistics();
 		Statistics result2 = new Statistics();
-		Statistics ChartData = chartParams.get(0);
+		Statistics ChartData = chartParams;
 		ChartData.setIsRawData(CoConstDef.FLAG_NO);
 		boolean projectUseFlag = CommonFunction.propertyFlagCheck("menu.project.use.flag", CoConstDef.FLAG_YES);
 		boolean partnerUseFlag = CommonFunction.propertyFlagCheck("menu.partner.use.flag", CoConstDef.FLAG_YES);
@@ -4287,7 +4690,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 			result.getTitleArray().addAll(result2.getTitleArray());
 			chartDataMap.put("divisionalProjectChart", result);
 		}
-		
+
+		ChartData.setPieSize(50);
 		ChartData.setChartType("OSS");
 		ChartData.setCategoryType("REV");
 		chartDataMap.put("mostUsedOssChart", (List<Statistics>) statisticsService.getMostUsedChartData(ChartData).get("chartData"));
@@ -4473,8 +4877,8 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, param.getOssName()
 					, param.getOssVersion()
 					, param.getLicenseName()
-					, param.getDownloadLocation()
-					, param.getHomepage()
+					, param.getDownloadLocation().replaceAll("%40", "@")
+					, param.getHomepage().replaceAll("%40", "@")
 				};
 				
 				rows.add(rowParam);
@@ -4504,7 +4908,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 	 * @용도 bomcompare 엑셀
 	 */
 	@SuppressWarnings("unchecked")
-	private static String getBomCompareExcelId(String dataStr) throws Exception{
+	private static String getBomCompareExcelId(String dataStr, boolean isProject) throws Exception{
 		Workbook wb = null;
 		Sheet sheet = null;
 		FileInputStream inFile=null;
@@ -4514,46 +4918,113 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		try {
 			Map<String, String> map = objMapper.readValue(dataStr, Map.class);
 			
-			String beforePrjId = map.get("beforePrjId").toString();
-			String afterPrjId = map.get("afterPrjId").toString();			
-			
-			ProjectIdentification beforeIdentification = new ProjectIdentification();
-			beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			beforeIdentification.setReferenceId(beforePrjId);
-			beforeIdentification.setMerge("N");
-			
-			ProjectIdentification AfterIdentification = new ProjectIdentification();
-			AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			AfterIdentification.setReferenceId(afterPrjId);
-			AfterIdentification.setMerge("N");
-			
 			Map<String, Object> beforeBom = new HashMap<String, Object>();
 			Map<String, Object> afterBom = new HashMap<String, Object>();
+			List<ProjectIdentification> beforeBomList = null;
+			List<ProjectIdentification> afterBomList = null;
 			
-			try {
-				beforeBom = projectController.getOssComponentDataInfo(beforeIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
+			String beforeId = "";
+			String afterId = "";
+			
+			if (isProject) {
+				String beforePrjId = map.get("beforePrjId").toString();
+				String afterPrjId = map.get("afterPrjId").toString();			
+				
+				beforeId = beforePrjId;
+				afterId = afterPrjId;
+				
+				Project beforePrjInfo = projectService.getProjectBasicInfo(beforePrjId);
+				String beforeReferenceDiv = "";
+				
+				ProjectIdentification beforeIdentification = new ProjectIdentification();
+				beforeIdentification.setReferenceId(beforePrjId);
+				
+				if(!beforePrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+					beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+					beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+					beforeIdentification.setMerge("N");
+				} else {
+					beforeReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
+					beforeIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				}
+				
+				Project afterPrjInfo = projectService.getProjectBasicInfo(afterPrjId);
+				String afterReferenceDiv = "";
+				
+				ProjectIdentification AfterIdentification = new ProjectIdentification();
+				AfterIdentification.setReferenceId(afterPrjId);
+				
+				if(!afterPrjInfo.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
+					afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_BOM;
+					AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_BOM);
+					AfterIdentification.setMerge("N");
+				} else {
+					afterReferenceDiv = CoConstDef.CD_DTL_COMPONENT_ID_ANDROID;
+					AfterIdentification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_ANDROID);
+				}
+				
+				beforeBom = projectController.getOssComponentDataInfo(beforeIdentification, beforeReferenceDiv);
+				if (beforeReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+					if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
+					} else {
+						beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
+					}
+				} else {
+					if (!beforeBom.containsKey("mainData") || (List<ProjectIdentification>) beforeBom.get("mainData") == null) {
+					} else {
+						beforeBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) beforeBom.get("mainData"));
+					}
+				}
+				
+				afterBom = projectController.getOssComponentDataInfo(AfterIdentification, afterReferenceDiv);
+				if (afterReferenceDiv.equals(CoConstDef.CD_DTL_COMPONENT_ID_BOM)) {
+					if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
+					} else {
+						afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
+					}
+				} else {
+					if (!afterBom.containsKey("mainData") || (List<ProjectIdentification>) afterBom.get("mainData") == null) {
+					} else {
+						afterBomList = projectService.setMergeGridDataByAndroid((List<ProjectIdentification>) afterBom.get("mainData"));
+					}
+				}
+			} else {
+				String beforePartnerId = map.get("beforePartnerId").toString();
+				String afterPartnerId = map.get("afterPartnerId").toString();
+				
+				beforeId = "3rd_" + beforePartnerId;
+				afterId = afterPartnerId;
+				
+				ProjectIdentification param = new ProjectIdentification();
+				param.setReferenceId(beforePartnerId);
+				param.setMerge(CoConstDef.FLAG_NO);
+				param.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PARTNER_BOM);
+				
+				beforeBom = projectService.getIdentificationGridList(param, true);
+				if (!beforeBom.containsKey("rows") || (List<ProjectIdentification>) beforeBom.get("rows") == null) {
+				} else {
+					beforeBomList = (List<ProjectIdentification>) beforeBom.get("rows");
+				}
+				
+				param.setReferenceId(afterPartnerId);
+				afterBom = projectService.getIdentificationGridList(param, true);
+				if (!afterBom.containsKey("rows") || (List<ProjectIdentification>) afterBom.get("rows") == null) {
+				} else {
+					afterBomList = (List<ProjectIdentification>) afterBom.get("rows");
+				}
 			}
 			
-			try {
-				afterBom = projectController.getOssComponentDataInfo(AfterIdentification, CoConstDef.CD_DTL_COMPONENT_ID_BOM);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-			
-			if ((List<ProjectIdentification>) beforeBom.get("rows") == null || (List<ProjectIdentification>) afterBom.get("rows") == null) {// before, after값 중 하나라도 null이 있으면 비교 불가함. 
+			if (beforeBomList == null || afterBomList == null) {// before, after값 중 하나라도 null이 있으면 비교 불가함. 
 				throw new Exception(); 
 			}
 			
-			String flag = "excel";
-			List<Map<String, String>> bomCompareListExcel = prjService.getBomCompare((List<ProjectIdentification>) beforeBom.get("rows"), (List<ProjectIdentification>) afterBom.get("rows"), flag);
+			List<Map<String, String>> bomCompareListExcel = prjService.getBomCompare(beforeBomList, afterBomList, "excel");
 			
 			try {
 				inFile= new FileInputStream(new File(downloadpath + "/BOM_Compare.xlsx")); 
 				wb = new XSSFWorkbook(inFile);
 				sheet = wb.getSheetAt(0); 
-				wb.setSheetName(0, "BOM_Compare_"+beforePrjId+"_"+afterPrjId);
+				wb.setSheetName(0, "BOM_Compare_"+beforeId+"_"+afterId);
 			  
 				List<String[]> rows = new ArrayList<String[]>();
 			  
@@ -4579,7 +5050,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 				}
 			}
 			
-			return makeBomCompareExcelFileId(beforePrjId, afterPrjId, wb, "BOM_Compare", "xlsx");
+			return makeBomCompareExcelFileId(beforeId, afterId, wb, "BOM_Compare", "xlsx");
 		} catch (IOException e){
 			log.error(e.getMessage());
 		}
@@ -4615,4 +5086,354 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 		
 		return null;
 	}
+	
+	private static String getCycloneDXFileId(String type, String dataStr, boolean verifyFlag) {
+		// download file name
+		String downloadFileName = "CycloneDX-"; // Default
+		
+		String prjId = dataStr;
+		boolean thirdPartyCheckFlag = false;
+		boolean selfCheckFlag = false;
+		
+		if (prjId.startsWith("3rd_")) {
+			thirdPartyCheckFlag = true;
+			String[] prjIdSplit = dataStr.split("_");
+			prjId = prjIdSplit[1];
+		} else if (prjId.startsWith("self_")) {
+			selfCheckFlag = true;
+			String[] prjIdSplit = prjId.split("_");
+			prjId = prjIdSplit[1];
+		}
+		
+		OssNotice ossNotice = new OssNotice();
+		ossNotice.setPrjId(prjId);
+		ossNotice.setFileType("text");
+		
+		List<OssComponents> dependenciesDataList = null;
+		Map<String, Object> packageInfo = null;
+		
+		String strPrjName = "";
+		String creator = "";
+		
+		Date timeStamp = null;
+		SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+		
+		try {
+			if (!thirdPartyCheckFlag) {
+				Project projectInfo = new Project();
+				projectInfo.setPrjId(prjId);
+				
+				if (!selfCheckFlag) {
+					projectInfo = projectService.getProjectDetail(projectInfo);
+				} else {
+					projectInfo = selfCheckService.getProjectDetail(projectInfo);
+				}
+				
+				String createDate = projectInfo.getCreatedDate();
+				
+				timeStamp = sdformat.parse(createDate.replace(" ", "T") + ".000");
+				
+				creator = projectInfo.getCreator();
+				strPrjName = projectInfo.getPrjName();
+				if (!isEmpty(projectInfo.getPrjVersion())) {
+					strPrjName += "-" + projectInfo.getPrjVersion();
+				}
+				
+				downloadFileName += FileUtil.makeValidFileName(strPrjName, "_").replaceAll(" ", "").replaceAll("--", "-");
+				
+				if (!selfCheckFlag) {
+					if (verifyFlag) {
+						packageInfo = verificationService.getNoticeHtmlInfo(ossNotice);
+					} else {
+						packageInfo = projectService.getExportDataForSBOMInfo(ossNotice);
+					}
+					
+					projectInfo.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_ID_DEP);
+					dependenciesDataList = projectService.getDependenciesDataList(projectInfo);
+				} else {
+					packageInfo = selfCheckService.getExportDataForSBOMInfo(ossNotice);
+				}
+			} else {
+				PartnerMaster partner = new PartnerMaster();
+				partner.setPartnerId(prjId);
+				partner = partnerService.getPartnerMasterOne(partner);
+				
+				timeStamp = sdformat.parse(partner.getCreatedDate().replace(" ", "T") + ".000");
+				
+				creator = partner.getCreator();
+				strPrjName = partner.getPartnerName();
+				
+				downloadFileName += FileUtil.makeValidFileName(strPrjName, "_").replaceAll(" ", "").replaceAll("--", "-");
+				
+				packageInfo = partnerService.getExportDataForSbomInfo(partner);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+		}
+		
+		Bom bom = generatorCycloneDXBOM(packageInfo, dependenciesDataList, timeStamp, creator, verifyFlag);
+		
+		UUID randomUUID = UUID.randomUUID();
+		String fileName = CommonFunction.replaceSlashToUnderline(downloadFileName);
+		String logiFileName = fileName + "_" + randomUUID;
+		String ext = type.toUpperCase().endsWith("JSON") ? ".json" : ".xml";
+		logiFileName += ext;
+		String excelFilePath = writepath+"/download/";
+		
+		String fileId = "";
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(excelFilePath + "/" + logiFileName, true);
+			if (type.toUpperCase().endsWith("JSON")) {
+				fw.write(BomGeneratorFactory.createJson(CycloneDxSchema.Version.VERSION_14, bom).toJsonString());
+			} else {
+				fw.write(BomGeneratorFactory.createXml(CycloneDxSchema.Version.VERSION_14, bom).toXmlString());
+			}
+			fileId = fileService.registFileDownload(excelFilePath, fileName + ext, logiFileName);
+		} catch (IOException | GeneratorException e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			if (fw != null) {
+				try {
+					fw.close();
+				} catch (Exception e2) {}
+			}
+		}
+		
+		return fileId;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static Bom generatorCycloneDXBOM(Map<String, Object> packageInfo, List<OssComponents> dependenciesDataList, Date timeStamp, String creator, boolean verifyFlag) {
+		Bom bom = new Bom();
+		
+		List<OssComponents> noticeList = (List<OssComponents>) packageInfo.get("noticeObligationList");
+		List<OssComponents> sourceList = (List<OssComponents>) packageInfo.get("disclosureObligationList");
+		
+		if (sourceList != null && !sourceList.isEmpty()) {
+			noticeList.addAll(sourceList);
+		}
+
+		if (!verifyFlag && packageInfo.containsKey("notObligationList")) {
+			List<OssComponents> notObligationList = (List<OssComponents>) packageInfo.get("notObligationList");
+			if (notObligationList != null && !notObligationList.isEmpty()) {
+				noticeList.addAll(notObligationList);
+			}
+		}
+		
+		noticeList = verificationService.setMergeGridData(noticeList); // merge Data
+		
+		Map<String, Object> relationshipsMap = new HashMap<>();
+		
+		Metadata meta = new Metadata();
+		meta.setTimestamp(timeStamp);
+		
+		List<Tool> tools = new ArrayList<>();
+		Tool tool = new Tool();
+		tool.setVendor("LG Electronics");
+		tool.setName("FOSSLIhgt Hub");
+		tool.setVersion(CommonFunction.getProperty("project.version"));
+		tools.add(tool);
+		meta.setTools(tools);
+		
+		List<OrganizationalContact> authors = new ArrayList<>();
+		OrganizationalContact organizationalContract = new OrganizationalContact();
+		organizationalContract.setName(creator);
+		authors.add(organizationalContract);
+		meta.setAuthors(authors);
+		
+		OrganizationalEntity organizationalEntity = new OrganizationalEntity();
+		organizationalEntity.setName("LG Electronics");
+		organizationalEntity.setUrls(Arrays.asList(new String[] {"https://opensource.lge.com"}));
+		meta.setSupplier(organizationalEntity);
+		
+		bom.setMetadata(meta);
+		
+		List<Component> componentList = new ArrayList<>();
+		List<org.cyclonedx.model.vulnerability.Vulnerability> vulnerablityList = new ArrayList<>();
+		List<String> checkCveIdList = new ArrayList<>();
+		List<Dependency> dependencyList = new ArrayList<>();
+		boolean distributionFlag = CommonFunction.propertyFlagCheck("distribution.use.flag", CoConstDef.FLAG_YES);
+		
+		for (OssComponents bean : noticeList) {
+			String ossName = bean.getOssName();
+			String ossVersion = bean.getOssVersion();
+			
+			Component component = new Component();
+			ExternalReference external = new ExternalReference();
+			List<ExternalReference> externalList = new ArrayList<>();
+			
+			String relationshipsKey = bean.getPackageUrl(); // (ossName + "(" + avoidNull(bean.getOssVersion()) + ")").toUpperCase();
+			String bomRef = bean.getComponentId();
+			
+			component.setType(org.cyclonedx.model.Component.Type.LIBRARY);
+			component.setBomRef(bomRef);
+			component.setName(ossName);
+			component.setVersion(bean.getOssVersion());
+			
+			if (!isEmpty(relationshipsKey)) {
+				relationshipsMap.put(relationshipsKey, bomRef);
+				component.setPurl(relationshipsKey);
+			}
+			
+			LicenseChoice licenseChoice = new LicenseChoice();
+			List<License> licenseList = new ArrayList<>();
+			
+			OssMaster _ossBean = null;
+			if (ossName.equals("-")) {
+				String licenseStr = CommonFunction.licenseStrToSPDXLicenseFormat(bean.getLicenseName());
+				licenseStr = CommonFunction.removeSpecialCharacters(licenseStr, true).replaceAll("\\(", "-").replaceAll("\\)", "");
+				
+				if (licenseStr.contains(",")) {
+					for (String license : licenseStr.split(",")) {
+						License li = new License();
+						li.setName(license.trim());
+						licenseList.add(li);
+					}
+				} else {
+					License li = new License();
+					li.setName(licenseStr.trim());
+					licenseList.add(li);
+				}
+			} else {
+				_ossBean = CoCodeManager.OSS_INFO_UPPER.get( (ossName + "_" + avoidNull(bean.getOssVersion())).toUpperCase());
+				if (_ossBean != null) {
+					for (OssLicense ossLicense : _ossBean.getOssLicenses()) {
+						License li = new License();
+						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(ossLicense.getLicenseName()).toUpperCase())) {
+							LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(ossLicense.getLicenseName()).toUpperCase());
+							if (!isEmpty(liMaster.getShortIdentifier())) {
+								li.setId(liMaster.getShortIdentifier());
+							} else {
+								li.setName(liMaster.getLicenseName());
+								String internalUrl = CommonFunction.makeLicenseInternalUrl(liMaster, distributionFlag);
+								if (!isEmpty(internalUrl)) li.setUrl(internalUrl);
+							}
+						} else {
+							li.setName(ossLicense.getLicenseName());
+						}
+						
+						licenseList.add(li);
+					}
+				} else {
+					if (bean.getLicenseName().contains(",")) {
+						for (String license : bean.getLicenseName().split(",")) {
+							License li = new License();
+							if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(license).toUpperCase())) {
+								LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(license).toUpperCase());
+								if (!isEmpty(liMaster.getShortIdentifier())) {
+									li.setId(liMaster.getShortIdentifier());
+								} else {
+									li.setName(liMaster.getLicenseName());
+									String internalUrl = CommonFunction.makeLicenseInternalUrl(liMaster, distributionFlag);
+									if (!isEmpty(internalUrl)) li.setUrl(internalUrl);
+								}
+							} else {
+								li.setName(license.trim());
+							}
+							
+							licenseList.add(li);
+						}
+					} else {
+						License li = new License();
+						if (CoCodeManager.LICENSE_INFO_UPPER.containsKey(avoidNull(bean.getLicenseName()).toUpperCase())) {
+							LicenseMaster liMaster = CoCodeManager.LICENSE_INFO_UPPER.get(avoidNull(bean.getLicenseName()).toUpperCase());
+							if (!isEmpty(liMaster.getShortIdentifier())) {
+								li.setId(liMaster.getShortIdentifier());
+							} else {
+								li.setName(liMaster.getLicenseName());
+								String internalUrl = CommonFunction.makeLicenseInternalUrl(liMaster, distributionFlag);
+								if (!isEmpty(internalUrl)) li.setUrl(internalUrl);
+							}
+						} else {
+							li.setName(CommonFunction.removeSpecialCharacters(bean.getLicenseName(), true).replaceAll("\\(", "-").replaceAll("\\)", ""));
+						}
+						licenseList.add(li);
+					}
+				}
+			}
+			
+			licenseChoice.setLicenses(licenseList);
+			component.setLicenseChoice(licenseChoice);
+			
+			String copyrightText = StringUtil.substring(CommonFunction.brReplaceToLine(bean.getCopyrightText()), 0, 32762);
+			if (!copyrightText.isEmpty() && !copyrightText.equals("-")) {
+				component.setCopyright(copyrightText);
+			}
+						
+			// download location
+			String downloadLocation = bean.getDownloadLocation();
+			external.setType(org.cyclonedx.model.ExternalReference.Type.WEBSITE);
+			
+			if (!isEmpty(downloadLocation)) {
+				external.setUrl(downloadLocation);
+			}
+			
+			externalList.add(external);
+			component.setExternalReferences(externalList);
+			componentList.add(component);
+			
+			// vulnerability
+			if (!isEmpty(ossName) && !ossName.equals("-")) {
+				OssMaster param = new OssMaster();
+				param.setOssName(ossName);
+				param.setOssVersion(isEmpty(ossVersion) ? "N/A" : ossVersion);
+				Map<String, Object> vulnMap = vulnerabilityService.getVulnListByOssName(param);
+				List<Vulnerability> vulnList = (List<Vulnerability>) vulnMap.get("rows");
+				if (vulnList != null && !vulnList.isEmpty()) {
+					for (Vulnerability vulnerability : vulnList) {
+						String cveId = vulnerability.getCveId();
+						String key = bomRef + "_" + cveId;
+						if (!checkCveIdList.contains(key)) {
+							org.cyclonedx.model.vulnerability.Vulnerability vuln = new org.cyclonedx.model.vulnerability.Vulnerability();
+							Source vulnSource = new Source();
+							vulnSource.setName("NVD"); // source set name : NVD
+							vulnSource.setUrl("https://nvd.nist.gov/vuln/detail/" + cveId); // source set nvd url
+							vuln.setBomRef(bomRef);
+							vuln.setId(cveId);
+							vuln.setSource(vulnSource);
+							vulnerablityList.add(vuln);
+							checkCveIdList.add(key);
+						}
+					}
+				}
+			}
+		}
+		
+		if (dependenciesDataList != null && !dependenciesDataList.isEmpty()) {
+			List<Dependency> depList = null;
+			// dependency
+			for (OssComponents oss : dependenciesDataList) {
+				String key = oss.getPackageUrl();
+				if (!isEmpty(key) && relationshipsMap.containsKey(key)) {
+					depList = new ArrayList<>();
+					
+					String componentId = (String) relationshipsMap.get(key);
+					String[] dependencies = oss.getDependencies().split(",");
+					Dependency bomRefDep = new Dependency(componentId);
+					
+					for (String dependency : dependencies) {
+						if (relationshipsMap.containsKey(dependency)) {
+							String relatedComponentId = (String) relationshipsMap.get(dependency);
+							Dependency dep = new Dependency(relatedComponentId);
+							bomRefDep.addDependency(dep);
+						}
+					}
+					
+					depList.add(bomRefDep);
+				}
+				
+				if (depList != null) {
+					dependencyList.addAll(depList);
+				}
+			}
+		}
+		
+		bom.setComponents(componentList);
+		if (!dependencyList.isEmpty()) bom.setDependencies(dependencyList);
+		if (!vulnerablityList.isEmpty()) bom.setVulnerabilities(vulnerablityList);
+	
+		return bom;
+	}
 }
+

@@ -5,12 +5,10 @@
 
 package oss.fosslight.common;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.lang.reflect.Type;
+import java.util.*;
 
+import com.google.gson.reflect.TypeToken;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -28,7 +26,7 @@ import oss.fosslight.repository.CodeManagerMapper;
 import oss.fosslight.repository.LicenseMapper;
 import oss.fosslight.repository.OssMapper;
 
-@Component
+@Component("CoCodeManager")
 @Slf4j
 public class CoCodeManager extends CoTopComponent {
 
@@ -112,7 +110,7 @@ public class CoCodeManager extends CoTopComponent {
     }
     
 	public void refreshOssInfo () {
-    	loadOssInfo();
+		loadOssInfo();
     }
     
 	private void loadOssInfo() {
@@ -127,7 +125,7 @@ public class CoCodeManager extends CoTopComponent {
 			if (nickNameList != null) {
 				for (OssMaster bean : nickNameList) {
 					if (bean.getOssNickname() != null) {
-						nickNameMap.put(bean.getOssName(), bean.getOssNickname().split(","));
+						nickNameMap.put(bean.getOssCommonId(), bean.getOssNickname().split(","));
 					}
 				}
 			}
@@ -143,8 +141,8 @@ public class CoCodeManager extends CoTopComponent {
 					} else {
 						targetBean = bean;
 						
-						if (nickNameMap.containsKey(targetBean.getOssNameTemp())) {
-							targetBean.setOssNicknames(nickNameMap.get(targetBean.getOssNameTemp()));
+						if (nickNameMap.containsKey(targetBean.getOssCommonId())) {
+							targetBean.setOssNicknames(nickNameMap.get(targetBean.getOssCommonId()));
 						}
 					}
 					
@@ -197,27 +195,32 @@ public class CoCodeManager extends CoTopComponent {
 					
 					String sourceKey = (bean.getOssNameTemp() + "_" + avoidNull(bean.getOssVersion())).toUpperCase();
 					OssMaster sourceBean = _ossMap.get(sourceKey);
-					
-					bean.setLicenseDiv(sourceBean.getLicenseDiv());
-					bean.setDownloadLocation(sourceBean.getDownloadLocation());
-					bean.setDownloadLocationGroup(sourceBean.getDownloadLocationGroup());
-					bean.setHomepage(sourceBean.getHomepage());
-					bean.setSummaryDescription(sourceBean.getSummaryDescription());
-					bean.setAttribution(sourceBean.getAttribution());
-					bean.setCopyright(sourceBean.getCopyright());
-					bean.setCvssScore(sourceBean.getCvssScore());
-					bean.setCveId(sourceBean.getCveId());
-					bean.setVulnYn(sourceBean.getVulnYn());
-					bean.setVulnRecheck(sourceBean.getVulnRecheck());
-					bean.setVulnDate(sourceBean.getVulnDate());
-					bean.setLicenseType(sourceBean.getLicenseType());
-					bean.setOssLicenses(sourceBean.getOssLicenses());
-					bean.setOssType(sourceBean.getOssType());
-					bean.setMultiLicenseFlag(sourceBean.getMultiLicenseFlag());
-					bean.setDualLicenseFlag(sourceBean.getDualLicenseFlag());
-					bean.setVersionDiffFlag(sourceBean.getVersionDiffFlag());
+					if (sourceBean != null) {
+						bean.setLicenseDiv(sourceBean.getLicenseDiv());
+						bean.setDownloadLocation(sourceBean.getDownloadLocation());
+						bean.setDownloadLocationGroup(sourceBean.getDownloadLocationGroup());
+						bean.setHomepage(sourceBean.getHomepage());
+						bean.setSummaryDescription(sourceBean.getSummaryDescription());
+						bean.setAttribution(sourceBean.getAttribution());
+						bean.setCopyright(sourceBean.getCopyright());
+						bean.setCvssScore(sourceBean.getCvssScore());
+						bean.setCveId(sourceBean.getCveId());
+						bean.setVulnYn(sourceBean.getVulnYn());
+						bean.setVulnRecheck(sourceBean.getVulnRecheck());
+						bean.setVulnDate(sourceBean.getVulnDate());
+						bean.setLicenseType(sourceBean.getLicenseType());
+						bean.setOssLicenses(sourceBean.getOssLicenses());
+						bean.setOssType(sourceBean.getOssType());
+						bean.setMultiLicenseFlag(sourceBean.getMultiLicenseFlag());
+						bean.setDualLicenseFlag(sourceBean.getDualLicenseFlag());
+						bean.setVersionDiffFlag(sourceBean.getVersionDiffFlag());
+						bean.setImportantNotes(sourceBean.getImportantNotes());
+						if (sourceBean.getDetectedLicenses() != null) {
+							bean.setDetectedLicenses(sourceBean.getDetectedLicenses());
+						}
 
-					_ossMap.put(key.toUpperCase(), bean);
+						_ossMap.put(key.toUpperCase(), bean);
+					}
 				}
 			
 			}
@@ -392,7 +395,31 @@ public class CoCodeManager extends CoTopComponent {
             return code != null ? code.getCdDtlNoCdDtlNmPairVector(false) : emptyVector;
         }
     }
-    
+
+
+    public static boolean checkValidCodeDtl(String s, String s1){
+        List<Map<String, Object>> availableDtlValues = CoCodeManager.getCodeDtlValuesArray(s);
+
+        for (Map<String, Object> codeDtlObject: availableDtlValues) {
+            String cdDtlNo = (String)codeDtlObject.get("cdDtlNo");
+            if (Objects.equals(cdDtlNo, s1)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static List<Map<String, Object>> getCodeDtlValuesArray(String s) {
+        String jsonStr = getValuesJson(s, null);
+
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<Map<String, Object>>>(){}.getType();
+        List<Map<String, Object>> jsonArray = gson.fromJson(jsonStr, listType);
+
+        return jsonArray;
+    }
+
     //새로 추가 : hj-kim - 2016-05-31
     public static String getValuesJson(String s) {
     	return getValuesJson(s, null);
@@ -820,5 +847,39 @@ public class CoCodeManager extends CoTopComponent {
         }
             
         return returnStr;
+    }
+    
+    public static Vector<CoCodeDtl> getCodeDtls(String s) {
+    	CoCode code = getCodeInstance(s);
+    	if (code != null) {
+    		Vector<CoCodeDtl> codeDtls = new Vector<>();
+    		for (CoCodeDtl dtl : code.getCodeDtls()) {
+    			if (!dtl.getUseYn().equals(CoConstDef.FLAG_NO)) {
+    				codeDtls.add(dtl);
+    			}
+    		}
+    		return codeDtls;
+    	} else {
+    		return null;
+    	}
+    }
+
+    public static String getSubCodeNoForCodeDtls(String s, String s1) {
+    	CoCode code = getCodeInstance(s);
+        
+    	if (code != null) {
+    		String level = "";
+    		for (CoCodeDtl dtl : code.getCodeDtls()) {
+    			if (!dtl.getUseYn().equals(CoConstDef.FLAG_NO)) {
+    				if (dtl.getCdDtlNo().equals(s1)) {
+    					level = dtl.getCdSubNo();
+    					break;
+    				}
+    			}
+    		}
+    		return level;
+    	} else {
+    		return "";
+    	}
     }
 }

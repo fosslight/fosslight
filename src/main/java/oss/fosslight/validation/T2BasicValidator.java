@@ -10,20 +10,17 @@ import java.util.Map;
 public abstract class T2BasicValidator extends T2CoValidator{
 	protected String PROC_MODE;
 	
-    public void setAppendix(String key, Object obj){
-    	if (!isEmpty(key) && obj != null) {
-    		if ("PROC_MODE".equals(key)) {
-    			this.PROC_MODE = (String) obj;
-    		}
-    	}
+    @Override
+	public void setAppendix(String key, Object obj){
+    	boolean condition = !isEmpty(key) && obj != null && "PROC_MODE".equals(key);
+		if (condition) {
+			this.PROC_MODE = (String) obj;
+		}
     }
     
-    protected String treatment(String paramvalue){
-        if (paramvalue == null) {
-          return null;
-        }
-
-        return paramvalue;
+    @Override
+	protected String treatment(String paramvalue){
+        return paramvalue == null ? null : paramvalue;
     }
     
     protected void customValidation(Map<String, String> map, Map<String, String> errMap){

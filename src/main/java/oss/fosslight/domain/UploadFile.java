@@ -23,7 +23,7 @@ public class UploadFile extends ComBean implements Serializable{
 	private boolean uploadSucc;
 	private int wgetResult;
 	private String fileExt;
-	
+	private String actualFilename;
 	
 	public String getFileExt() {
 		return fileExt;
@@ -98,5 +98,10 @@ public class UploadFile extends ComBean implements Serializable{
 	public void setWgetResult(int wgetResult) {
 		this.wgetResult = wgetResult;
 	}
-	
+	public String getActualFilename() {
+		return actualFilename;
+	}
+	public void setActualFilename(String actualFilename) {
+		this.actualFilename = actualFilename;
+	}
 }

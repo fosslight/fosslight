@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import oss.fosslight.config.HistoryConfig;
+import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.OssAnalysis;
 import oss.fosslight.domain.OssLicense;
 import oss.fosslight.domain.OssMaster;
@@ -61,7 +62,7 @@ public interface OssService extends HistoryConfig{
 	
 	OssMaster getLastModifiedOssInfoByName(OssMaster bean);
 	
-	String checkVdiff(Map<String, Object> reqMap);
+	Map<String, Object> checkVdiff(Map<String, Object> reqMap);
 	
 	String[] checkNickNameRegOss(String ossName, String[] ossNicknames);
 	
@@ -81,6 +82,10 @@ public interface OssService extends HistoryConfig{
 	
 	void registOssDownloadLocation(OssMaster ossMaster);
 	
+	void registOssVersionAlias(OssMaster ossMaster);
+	
+	void registCpeInfo(OssMaster ossMaster);
+	
 	int checkExistsOssByname(OssMaster bean);
 	
 	List<ProjectIdentification> checkOssName(List<ProjectIdentification> list);
@@ -97,9 +102,11 @@ public interface OssService extends HistoryConfig{
 	
 	int getAnalysisListPage(int rows, String prjId);
 	
-	Map<String, Object> startAnalysis(String prjId, String fileId);
+	Map<String, Object> startAnalysis(String prjId, String fileId, String userName);
 	
 	OssAnalysis getNewestOssInfo(OssAnalysis bean);
+
+	OssAnalysis getNewestOssInfo2(OssAnalysis bean);
 	
 	Map<String, Object> updateAnalysisComplete(OssAnalysis bean) throws Exception;
 	
@@ -138,4 +145,22 @@ public interface OssService extends HistoryConfig{
 	List<String> selectVulnInfoForOss(OssMaster ossMaster);
 
 	List<String> checkExistsVendorProductMatchOss(OssMaster ossMaster);
+
+	int checkOssVersionDiff(String ossName);
+
+	boolean checkOssTypeForAnalysisResult(OssAnalysis ossAnalysis);
+
+	Map<String, Object> getCheckOssNameAjax(ProjectIdentification paramBean, String targetName);
+
+	Map<String, Object> getCheckOssLicenseAjax(ProjectIdentification paramBean, String targetName);
+
+	String getOssAnalysisStatus(String prjId);
+
+	void deleteOssAnalysis(String prjId);
+
+	void setVdiffInfoForSentMail(String ossName, CoMail mailBean);
+
+	String getPurlByDownloadLocation(OssMaster ossMaster);
+	
+	void setOssAnalysisStatus(String prjId);
 }

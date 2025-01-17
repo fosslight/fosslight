@@ -156,4 +156,12 @@ public interface PartnerMapper {
 	public List<OssComponents> selectOssComponentsSbomListClassAppend(PartnerMaster partnerMaster);
 
 	public List<OssComponents> checkSelectDownloadFile(PartnerMaster partnerMaster);
+	
+	int existsWatcherByUserDivistion(PartnerMaster project);
+	
+	void updateWatcherDivision(PartnerMaster project);
+
+	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+	
+	int updateOssFileId(PartnerMaster partnerMaster);
 }

@@ -19,6 +19,7 @@ import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -43,6 +44,7 @@ import springfox.documentation.spring.web.json.Json;
 @Configuration
 @EnableWebMvc
 @EnableCaching
+@EnableScheduling
 @ComponentScan(value=AppConstBean.APP_COMPONENT_SCAN_PACKAGE)
 public class WebConfig implements WebMvcConfigurer {
 	private final Gson gson = new GsonBuilder().registerTypeAdapter(Json.class, new SpringfoxJsonToGsonAdapter()).create();

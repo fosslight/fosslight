@@ -11,5 +11,6 @@ import oss.fosslight.domain.Configuration;
 
 public interface ConfigurationService {
 	public void updateDefaultSetting(Configuration configuration);
+	public String updateDefaultLocaleSetting(Configuration configuration);
 //	public void updateDefaultLocale(Configuration configuration);
 }

@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+	<li th:each="vuln : ${lstestScoredVulns}">
+		<div class="row">
+          	<div class="col-lg-11">
+              	<p>
+                  	<strong><a th:href="@{'https://nvd.nist.gov/vuln/detail/' + ${vuln.cveId}}" target="_blank" th:text="${vuln.cveId}"></a></strong>
+                  	[[${vuln.vulnSummary}]]
+                    <br>
+                    <strong th:text="'Published :'"></strong>
+                     [[${#strings.setSplit(vuln.publDate, '.')[0]}]]
+           		</p>
+          	</div>
+            <div class="col-lg-1">
+               	<p id="severity-score-0">
+                  	<span id="cvss3-link-0">
+                  		<em th:if="${not #strings.isEmpty(vuln.baseMetric)}" th:text="${vuln.baseMetric} + ' :'"></em>
+                  		<th:block th:if="${vuln.cvssScore >= 9.0}">
+                  			<span class="badge badge-dark" th:text="${vuln.cvssScore} + ' ' + ${vuln.criticalScore}"></span>
+                  		</th:block>
+                  		<th:block th:if="${vuln.cvssScore >= 7.0 and vuln.cvssScore < 9.0}">
+                  			<span class="badge badge-danger" th:text="${vuln.cvssScore} + ' ' + ${vuln.criticalScore}"></span>
+                  		</th:block>
+                  		<th:block th:if="${vuln.cvssScore >= 4.0 and vuln.cvssScore < 7.0}">
+                  			<span class="badge badge-orange" th:text="${vuln.cvssScore} + ' ' + ${vuln.criticalScore}"></span>
+                  		</th:block>
+                  		<th:block th:if="${vuln.cvssScore < 4.0}">
+                  			<span class="badge badge-yellow2" th:text="${vuln.cvssScore} + ' ' + ${vuln.criticalScore}"></span>
+                  		</th:block>
+                  		<br>
+                    </span>
+               	</p>
+      		</div>
+      	</div>
+	</li>
+</html>

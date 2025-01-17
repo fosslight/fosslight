@@ -122,12 +122,12 @@
 		SELECT 
 		    TITLE
 			, NOTICE
+			, SEQ
 		FROM USER_NOTICE
 		WHERE 1=1
 		AND PUBLISH_YN = 'Y'
 		AND date_format(now(), '%Y%m%d') BETWEEN date_format(S_DATE, '%Y%m%d') AND date_format(E_DATE, '%Y%m%d')
 		ORDER BY MODIFIED_DATE DESC
-		LIMIT 1
 	</select>
 	
 	<select id="selectPublishedNoticeCount" parameterType="oss.fosslight.domain.Notice" resultType="int">

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import oss.fosslight.common.CoConstDef;
 import oss.fosslight.domain.CoMail;
 import oss.fosslight.domain.CoMailManager;
 import oss.fosslight.domain.CommentsHistory;
+import oss.fosslight.common.CommonFunction;
 import oss.fosslight.repository.CommentMapper;
 import oss.fosslight.service.CommentService;
 import oss.fosslight.util.StringUtil;
@@ -30,6 +32,9 @@ public class CommentServiceImpl implements CommentService {
 		List<CommentsHistory> commentsHistoryList = commentMapper.getCommentListHis(bean);
 		
 		for (CommentsHistory commentsHistory : commentsHistoryList) {
+			if (!StringUtils.isEmpty(bean.getRecentFlag())) {
+				commentsHistory.setRecentFlag(bean.getRecentFlag());
+			}
 			commentMapper.updateHistoryReadYn(commentsHistory);
 		}
 		
@@ -53,15 +58,21 @@ public class CommentServiceImpl implements CommentService {
 		boolean isNew = StringUtil.isEmpty(bean.getCommId());
 		
 		if (!StringUtil.isEmpty(bean.getContents()) || !StringUtil.isEmpty(bean.getStatus())){
+			String updatedContents = CommonFunction.addBlankTargetToLink(bean.getContents());
+			bean.setContents(updatedContents);
 			commentMapper.registComment(bean);
 		}
 		
-		boolean isPartner = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS.equals(bean.getReferenceDiv());
+		boolean isPartner = CoConstDef.CD_DTL_COMMENT_PARTNER_HIS.equals(bean.getReferenceDiv()) || CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS.equals(bean.getReferenceDiv());
 		
 		if (deleteUserComment && isNew && (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_HIS.equals(bean.getReferenceDiv())
 				|| CoConstDef.CD_DTL_COMMENT_PARTNER_HIS.equals(bean.getReferenceDiv()) 
-				|| CoConstDef.CD_DTL_COMMENT_PROJECT_HIS.equals(bean.getReferenceDiv()))) {
+				|| CoConstDef.CD_DTL_COMMENT_PROJECT_HIS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_SECURITY_HIS.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_LICENSE.equals(bean.getReferenceDiv())
+				|| CoConstDef.CD_DTL_COMMENT_OSS.equals(bean.getReferenceDiv()))) {
 			switch (bean.getReferenceDiv()) {
 				case CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS:
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICATION_USER);
@@ -79,8 +90,20 @@ public class CommentServiceImpl implements CommentService {
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_USER);
 					
 					break;
+				case CoConstDef.CD_DTL_COMMENT_SECURITY_HIS:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_SECURITY_USER);
+					
+					break;
 				case CoConstDef.CD_DTL_COMMENT_PARTNER_HIS:
 					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
+					
+					break;
+				case CoConstDef.CD_DTL_COMMENT_LICENSE:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_LICENSE_USER);
+					
+					break;
+				case CoConstDef.CD_DTL_COMMENT_OSS:
+					bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_OSS_USER);
 					
 					break;
 				default:
@@ -108,7 +131,7 @@ public class CommentServiceImpl implements CommentService {
 			
 			mailBean.setComment(bean.getContents());
 			
-			if (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv())) {
+			if (CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS.equals(bean.getReferenceDiv()) || CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS.equals(bean.getReferenceDiv())) {
 				mailBean.setStage("Identificaiton");
 			} else if (CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS.equals(bean.getReferenceDiv())) {
 				mailBean.setStage("Packaging");
@@ -118,7 +141,7 @@ public class CommentServiceImpl implements CommentService {
 			
 			mailBean.setReceiveFlag(bean.getMailSendType());
 			
-			if (!StringUtil.isEmpty(bean.getContents())){//comment 내용이 있을시만 메일 발송
+			if (!StringUtil.isEmpty(bean.getContents())) {//comment 내용이 있을시만 메일 발송
 				CoMailManager.getInstance().sendMail(mailBean);
 			}
 		}
@@ -136,12 +159,83 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	@Transactional
 	public int deleteComment(CommentsHistory commentsHistory) {
-		int result = 0;
-		
-		result = commentMapper.deleteComment(commentsHistory);
+		CommentsHistory bean = commentMapper.getCommentInfo(commentsHistory.getCommId());
+		int result = commentMapper.deleteComment(commentsHistory);
+		if (result > 0 && bean != null) {
+			if (bean.getReferenceDiv() != null) {
+				boolean isPartner = false;
+				String paramOssId = null;
+				String paramLicenseId = null;
+				
+				switch (bean.getReferenceDiv()) {
+					case CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS:
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_IDENTIFICATION_USER);
+						bean.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_DELETED_COMMENT);
+						
+						break;
+					case CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS:
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_USER);
+						bean.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_PACKAGING_DELETED_COMMENT);
+						
+						break;
+					case CoConstDef.CD_DTL_COMMENT_PROJECT_HIS:
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PROJECT_USER);
+						bean.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_DELETED_COMMENT);
+						
+						break;
+					case CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_HIS:
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_DISTRIBUTION_USER);
+						bean.setMailType(CoConstDef.CD_MAIL_TYPE_PROJECT_DISTRIBUTE_DELETED_COMMENT);
+						
+						break;
+					case CoConstDef.CD_DTL_COMMENT_PARTNER_HIS:
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
+						bean.setMailType(CoConstDef.CD_MAIL_TYPE_PARTER_DELETED_COMMENT);
+						isPartner = true;
+						break;
+					case CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS:
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER);
+						bean.setMailType(CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_DELETED_COMMENT);
+						isPartner = true;
+						break;
+					case CoConstDef.CD_DTL_COMMENT_LICENSE:
+						bean.setMailType(CoConstDef.CD_MAIL_TYPE_LICENSE_DELETED_COMMENT);
+						paramLicenseId = bean.getReferenceId();
+						
+						break;
+					case CoConstDef.CD_DTL_COMMENT_OSS:
+						bean.setMailType(CoConstDef.CD_MAIL_TYPE_OSS_DELETED_COMMENT);
+						paramOssId = bean.getReferenceId();
+						
+						break;
+					default:
+						return result;
+				}
+				
+				CoMail mailBean = new CoMail(bean.getMailType());
+				mailBean.setParamExpansion1(bean.getContents());
+				mailBean.setParamExpansion2("");
+				mailBean.setReceiveFlag(bean.getMailSendType());
+				
+				if (isPartner) {
+					mailBean.setParamPartnerId(bean.getReferenceId());
+				} else if (!StringUtil.isEmpty(paramLicenseId)) {
+					mailBean.setParamLicenseId(paramLicenseId);
+				} else if (!StringUtil.isEmpty(paramOssId)) {
+					mailBean.setParamOssId(paramOssId);
+				} else {
+					mailBean.setParamPrjId(bean.getReferenceId());
+				}
+				
+				CoMailManager.getInstance().sendMail(mailBean);
+			}
+		}
 		
 		return result;
 	}
+
+	@Override
+	public String getContents(String commId) { return commentMapper.getContent(commId); }
 
 	@Override
 	public int updateComment(CommentsHistory bean) {
@@ -183,6 +277,11 @@ public class CommentServiceImpl implements CommentService {
 					case CoConstDef.CD_DTL_COMMENT_PARTNER_HIS:
 						bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_USER);
 						bean.setMailType(CoConstDef.CD_MAIL_TYPE_PARTER_MODIFIED_COMMENT);
+						isPartner = true;
+						break;
+					case CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS:
+						bean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER);
+						bean.setMailType(CoConstDef.CD_MAIL_TYPE_PARTER_IDENTIFICATION_MODIFIED_COMMENT);
 						isPartner = true;
 						break;
 					case CoConstDef.CD_DTL_COMMENT_LICENSE:

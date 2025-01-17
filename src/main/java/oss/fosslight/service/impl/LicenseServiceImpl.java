@@ -75,6 +75,16 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 
 	@Override
 	public int selectLicenseMasterTotalCount(LicenseMaster licenseMaster) {
+		if (licenseMaster.getRestrictions() != null) {
+			String restrictions = licenseMaster.getRestrictions();
+						
+			if (!isEmpty(restrictions)){
+				String[] arrRestrictions = restrictions.split(",");
+				
+				licenseMaster.setArrRestriction(arrRestrictions);
+			}
+		}
+		
 		return licenseMapper.selectLicenseMasterTotalCount(licenseMaster);
 	}
 	
@@ -124,6 +134,12 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 			if (!isEmpty(item.getRestriction())){
 				item.setRestriction(CommonFunction.setLicenseRestrictionList(item.getRestriction()));
 			}
+
+			if(!isEmpty(item.getWebpage())) {
+				if (!item.getWebpage().contains("http://") && !item.getWebpage().contains("https://")) {
+					item.setWebpage("http://" + item.getWebpage());
+				}
+			}
 		}
 		
 		map.put("page", licenseMaster.getCurPage());
@@ -146,13 +162,21 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		
 		List<LicenseMaster> licenseWebPageList = licenseMapper.selectLicenseWebPageList(licenseMaster);
 		List<String> webPage = new ArrayList<>();
+		if (!isEmpty(licenseMaster.getWebpage())) {
+			webPage.add(licenseMaster.getWebpage().trim());
+		}
+		
 		for (LicenseMaster bean : licenseWebPageList) {
-			webPage.add(bean.getWebpage());
+			String webpageString = bean.getWebpage();
+			if (!isEmpty(webpageString)) {
+				webpageString = webpageString.trim();
+				if (!webPage.contains(webpageString)) webPage.add(webpageString);
+			}
 		}
 
 		// 일반 user 화면 일 경우 restriction을 full name으로 화면 출력
 		// admin 화면 일 경우 restriction code를 사용하여 체크박스로 구성
-		if (!"ROLE_ADMIN".equals(loginUserRole())) {
+		// if (!"ROLE_ADMIN".equals(loginUserRole())) {
 			if (licenseMaster.getRestriction() != null) {
 				T2CodeDtl t2CodeDtl = new T2CodeDtl();
 				List<T2CodeDtl> t2CodeDtlList = new ArrayList<>(); 
@@ -163,18 +187,27 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 					log.error(e.getMessage());
 				}
 				List<String> restrictionList = Arrays.asList(licenseMaster.getRestriction().split(","));
+				List<String> restrictionCdNoList = new ArrayList<>();
 				String restrictionStr = "";
 				
 				for (T2CodeDtl item: t2CodeDtlList){
 					if (restrictionList.contains(item.getCdDtlNo())) {
 						restrictionStr += (!isEmpty(restrictionStr) ? ", " : "") + item.getCdDtlNm();
+						restrictionCdNoList.add(item.getCdDtlNo());
 					}
 				}
 				
 				licenseMaster.setRestriction(restrictionStr);
+				licenseMaster.setRestrictionCdNoList(restrictionCdNoList);
 			}
-		}
+		//}
 		
+		if (!isEmpty(licenseMaster.getDisclosingSrc())) {
+			String disclosingSrcStr = CoCodeManager.getCodeString(CoConstDef.CD_SOURCE_CODE_DISCLOSURE_SCOPE, licenseMaster.getDisclosingSrc());
+			licenseMaster.setDisclosingSrcCdNo(licenseMaster.getDisclosingSrc());
+			licenseMaster.setDisclosingSrc(disclosingSrcStr);
+		}
+			
 		licenseMaster.setLicenseNicknames(nickNames.toArray(new String[nickNames.size()]));
 		licenseMaster.setWebpages(webPage.toArray(new String[webPage.size()]));
 
@@ -398,7 +431,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		}
 		
 		model.put("licenseText", CommonFunction.lineReplaceToBR(bean.getLicenseText()));
-		model.put("templateURL", "/template/notice/license.html");
+		model.put("templateURL", "notice/license.html");
 		
 		return CommonFunction.VelocityTemplateToString(model);
 	}
@@ -417,6 +450,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 				} else if (CoConstDef.FLAG_YES.equals(avoidNull(bean.getObligationNotificationYn()))) {
 					bean.setObligationCode(CoConstDef.CD_DTL_OBLIGATION_NOTICE);
 				}
+				bean.setRestriction(CommonFunction.setLicenseRestrictionList(bean.getRestriction()));
 			}
 		}
 		
@@ -578,7 +612,6 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 
 		if(!isNew) {
 			beforeBean = getLicenseMasterOne(licenseMaster);
-			System.out.println("beforeBean = " + beforeBean);
 		}
 
 		// webpages이 n건일때 0번째 값은 oss Master로 저장.
@@ -599,7 +632,7 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		result = registLicenseMaster(licenseMaster);
 
 		if(!isNew) {
-			afterBean =  getLicenseMasterOne(licenseMaster);
+			afterBean = getLicenseMasterOne(licenseMaster);
 
 			// licnese type이 변경된 경우, 해당 라이선스를 사용하는 oss의 license type을 재확인 한다.
 			if(!avoidNull(beforeBean.getLicenseType()).equals(avoidNull(afterBean.getLicenseType()))) {
@@ -717,3 +750,4 @@ public class LicenseServiceImpl extends CoTopComponent implements LicenseService
 		return resMap;
 	}
 }
+

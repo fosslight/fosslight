@@ -198,6 +198,21 @@ public class PartnerMaster extends ComBean implements Serializable{
 	
 	private String[] partnerIds;
 	
+	private ArrayList<Map<String, String>> changeWatcherList;
+	
+	private String copyWatcherLocation;
+	
+	private int permission;
+	
+	private int statusPermission;
+	
+	private String resetFlag;
+	
+	/** The reference div. */
+	private String referenceDiv;
+	
+	private String ossFileSheetNo;
+	
 	/*
 	 * Gets the partner id.
 	 *
@@ -1191,6 +1206,62 @@ public class PartnerMaster extends ComBean implements Serializable{
 
 	public void setPartnerIds(String[] partnerIds) {
 		this.partnerIds = partnerIds;
+	}
+
+	public ArrayList<Map<String, String>> getChangeWatcherList() {
+		return changeWatcherList;
+	}
+
+	public void setChangeWatcherList(ArrayList<Map<String, String>> changeWatcherList) {
+		this.changeWatcherList = changeWatcherList;
+	}
+
+	public String getCopyWatcherLocation() {
+		return copyWatcherLocation;
+	}
+
+	public void setCopyWatcherLocation(String copyWatcherLocation) {
+		this.copyWatcherLocation = copyWatcherLocation;
+	}
+
+	public int getPermission() {
+		return permission;
+	}
+
+	public void setPermission(int permission) {
+		this.permission = permission;
+	}
+
+	public int getStatusPermission() {
+		return statusPermission;
+	}
+
+	public void setStatusPermission(int statusPermission) {
+		this.statusPermission = statusPermission;
+	}
+
+	public String getResetFlag() {
+		return resetFlag;
+	}
+
+	public void setResetFlag(String resetFlag) {
+		this.resetFlag = resetFlag;
+	}
+
+	public String getReferenceDiv() {
+		return referenceDiv;
+	}
+
+	public void setReferenceDiv(String referenceDiv) {
+		this.referenceDiv = referenceDiv;
+	}
+
+	public String getOssFileSheetNo() {
+		return ossFileSheetNo;
+	}
+
+	public void setOssFileSheetNo(String ossFileSheetNo) {
+		this.ossFileSheetNo = ossFileSheetNo;
 	}
 	
 }

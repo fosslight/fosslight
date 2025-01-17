@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="3rdScript">
+<script th:inline="javascript">
+var userRole = [[${#authentication.authorities[0].authority}]];
+var ossNames = [];
+var objs = [];
+var licenseNames = [];
+var isStatusChangeFlag = false;
+var isSort = false;
+var delDocumentsFile = [];
+var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+var partnerData = [[${detail}]];
+var sampleFile = [[${@CoCodeManager.getAllValuesJson(@CommonFunction.getCoConstDefVal('CD_SAMPLE_FILE'))}]];
+var ossAnalysisStatus;
+var analysisStartDate;
+var _popupCheckOssName = null;
+var _popupCheckOssLicense = null;
+var ossFileObj;
+var partnerStatus = [[${detail.status}]];
+var partnerId = [[${detail.partnerId}]];
+
+//prevent clicking the OK button on Enter
+let keyCode;
+$(document).on('keydown', function (event) {
+	keyCode = event.keyCode;
+});
+
+//party 그리드 데이터 전역 변수
+var partyMainData;
+var partySubData;
+var partyValidMsgData_e = []; //초기화
+var partyDiffMsgData_e = []; //초기화
+var partyInfoMsgData_e = []; // 초기화
+var party_evt = {
+	init : function () {
+		party_evt.getPartyGridData();
+		
+		// ossNames auto complete
+		fn_grid_com.griOssNames().success(function(data, status, headers, config){
+			if(data != null){
+				data.forEach(function(obj){
+					ossNames.push(obj.ossName);
+				});
+			}
+		});
+		
+		// licenseNames auto complete
+		commonAjax.getLicenseTags().success(function(data, status, headers, config){
+			if(data != null){
+				var tag = "";
+				
+				data.forEach(function(obj){
+					if(obj!=null) {
+						tag = {
+							value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
+							label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
+							type : obj.licenseType,
+							obligation : obj.obligation,
+							obligationChecks : obj.obligationChecks
+						}
+						
+						licenseNames.push(tag);
+					}
+				});
+			}
+		});
+	},
+	// party 그리드 데이터
+	getPartyGridData : function(){
+		loading.show();
+		
+		$.ajax({
+			url : '/project/identificationGrid/'+[[${detail.partnerId}]]+'/20',
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			data : {referenceId : [[${detail.partnerId}]]},
+			contentType : 'application/json',
+			success : function(data){
+				loading.hide();
+				
+				partyMainData = data.mainData;
+				partyValidMsgData_e = []; //초기화
+				partyDiffMsgData_e = []; //초기화
+				partyInfoMsgData_e = [];
+				
+				if (data.validData) {
+					partyValidMsgData_e = data.validData;
+				}
+				if (data.diffData) {
+					partyDiffMsgData_e = data.diffData;
+				}
+				if(data.infoData) {
+					partyInfoMsgData_e = data.infoData;	
+				}
+	
+				// 리로드 대신 그리드 삭제 후 다시 그리기
+				$("#list").jqGrid('GridUnload');
+				
+				grid.init();
+	
+				fn_grid_com.addEtcKeyDownEvent($('#list'), partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	}
+}
+
+var modifyCommentId = [[${detail.comment}]];
+var commentIdx= [[${detail.comment}]];
+var evt = {
+	init : function(){
+		$('div.multiTxtSet2 .smallDelete').on('click', function(){
+			$(this).parent().remove();
+		});
+
+		fn.ossUploadFile();
+		
+		// file uploader hide in CONF status
+        if ('CONF' == [[${detail.status}]]) {
+            $(".ajax-upload-dragdrop").hide();
+        }
+	},
+	tabInit: function(){
+		if("CONF" != [[${detail.status}]] ) {
+			src_fn_com.autoReviewStatus('3rd_' + [[${detail.partnerId}]]);
+		}
+		var tabContent = $(".tabContent");
+		var tabMenuA = $(".tabMenu a");
+		
+		tabContent.hide();
+		tabMenuA.click(function () {
+			$(".tabMenu a span").remove();
+			tabMenuA.eq("0").text("3rd party");
+			if ([[${batFlag}]]) {
+				tabMenuA.eq("1").text("BAT(Optional)");
+			}
+			
+			var tag = "<span>"+$(this).text()+"</span>";
+			$(this).html(tag);
+			
+			tabContent.hide();
+			activeTabText = $(this).text();
+			activeTab = $(this).attr("rel");
+			
+			$("#" + activeTab).show();
+
+			if(activeTab == "batDiv") {
+				$(".projdecBtn").hide();
+			} else {
+				$(".projdecBtn").show();
+			}
+			
+			// _mainLastsel 꼬이는것 방지
+			if(activeTab == "0") {
+				_mainLastsel = $('#list').jqGrid('getGridParam', "selrow" );
+			} else if(activeTab == "batDiv") {}
+			
+			// 선택된 로우가 없을경우 _mainLastsel 초기화
+			if(typeof(_mainLastsel)!="string") {
+				_mainLastsel = -1;
+			}
+		});
+		
+		tabMenuA.eq("0").click(); 
+	}
+};
+
+var fn = {
+	changeMode : function (mode, resetFlag, status) {
+		var targetId = $("#menu-tab").find(".active").attr("aria-controls");
+		var tabDiv = targetId.split("-")[1];
+		
+		$.ajax({
+	    	url: "/partner/" + mode + "/" + partnerData.partnerId,
+	       	type: 'POST',
+	    	dataType: 'html',
+	        cache: false,
+	       	success: function (data) {
+	  			$("#" + targetId).empty();
+				$("#" + targetId).html(data);
+				
+				fn.ossUploadFile();
+				
+				// file uploader hide in CONF status
+				if ('CONF' == [[${detail.status}]]) {
+			     	$(".ajax-upload-dragdrop").hide();
+			  	}
+	      	}
+		});
+	},
+	ossUploadFile : function () {
+		//파일업로드
+		var accept2 = '';
+		var fileAccept2 = [[${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal("CD_FILE_ACCEPT"))}]];
+		for (var i in fileAccept2) {
+			if ('22' == fileAccept2[i].cdDtlNo) {
+				accept2 = fileAccept2[i].cdDtlExp;
+			}
+		}
+		
+		$('#ossFile').uploadFile({
+			url : '/partner/ossFile?excel=Y',
+			multiple:false,
+			dragDrop:true,
+			allowedTypes:accept2,
+			fileName:'myfile',
+			sequential:true,
+			sequentialCount:1,
+			onSuccess:function(files,data,xhr,pd){
+				// 161102 jy-seo 파일 업로드 에러처리
+				var result = jQuery.parseJSON(data);
+				
+				if (result == null) {
+					alertify.error([[#{msg.common.valid}]], 0);
+				} else {
+					if (result[0] == "FILE_SIZE_LIMIT_OVER") {
+						alertify.alert(result[1], function() {});
+					} else if(result[2] == "CSV_FILE") {
+						var result_ = result[0][0];
+
+						if (result && result_.uploadSucc) {
+							fn.makeFileTag(result[0][0], 'ossFile');
+							fn.getCsvData();
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+						}
+					} else if(result[2] == "EXCEL_FILE") {
+						var result_ = result[0][0];
+						
+						if (result && result_.uploadSucc) {
+							if (result[1] && result[1].length != 0) {
+								for(var i = 0; i < result[1].length; i++){
+									var num = i+1;
+									var checkedTxt = "";
+									var sheetName = result[1][i].name.toUpperCase().trim();
+
+									if (sheetName == "OSS LIST" || sheetName == "OPEN SOURCE SOFTWARE LIST") {
+										checkedTxt = "checked";
+									}
+									
+									var sheetTr = '<tr><td class="text-center"><input type="checkbox" name="sheetNameSelect" value="'+result[1][i].no+'" id="sheet'+result[1][i].no+'" class="form-check-input" '+checkedTxt+'>'
+												+'<label class="form-check-label text-blue-gray" for="sheet'+result[1][i].no+'"></label></td>';
+									sheetTr += '<td class="text-left">'+result[1][i].name+'</td></tr>'
+									$("#sheetBody").append(sheetTr);
+								}
+								
+								const sheetHtml = $(".sheetSelectPop").html();
+								$("#sheetBody").empty();
+								
+								if(!alertify.selectSheet){
+									alertify.dialog('selectSheet', function() {
+										return {
+											setup: function() {
+												var settings = alertify.confirm().settings;
+												
+												for (var prop in settings) {
+													this.settings[prop] = settings[prop];
+												}
+												
+												var setup = alertify.confirm().setup();
+												setup.buttons = [];
+												setup.focus.element = 0;
+												
+												return setup;
+											},
+										    hooks: {
+										    	onshow: function() {
+										        	this.elements.dialog.style.maxWidth = 'none';
+										          	this.elements.dialog.style.width = '365px';
+										        }
+											}
+										};
+									}, false, 'alert');
+			                	}
+								
+								alertify.selectSheet(sheetHtml).set('title', 'Select Sheet');
+								
+								$('.ajax-file-upload-statusbar').fadeOut('slow');
+								$('.ajax-file-upload-statusbar').remove();
+								
+								ossFileObj = result_;
+							}
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+						}
+					} else if(result[2] == "SPDX_SPREADSHEET_FILE") {
+						var result_ = result[0][0];
+						if (result && result_.uploadSucc) {
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+							
+							fn.makeFileTag(result_, 'ossFile');
+							fn.getSpdxSpreadsheetData();
+						} else {
+							alertify.alert([[#{msg.common.upload.failed}]], function(){});
+							$('.ajax-file-upload-statusbar').fadeOut('slow');
+							$('.ajax-file-upload-statusbar').remove();
+						}
+					} else {
+						alertify.error([[#{msg.common.valid}]], 0);
+						$('.ajax-file-upload-statusbar').fadeOut('slow');
+						$('.ajax-file-upload-statusbar').remove();
+					}
+				}
+			}
+		});
+	},
+	save : function(){
+		if (com_fn.checkStatus()){
+			com_fn.exitCell(_mainLastsel, "list");
+			
+			if (partnerId == null || (partnerId != null && isStatusChangeFlag)) {
+				if (typeof alertify.parSaveDialog === 'undefined') {
+					alertify.dialog('parSaveDialog', function() {
+						return {
+							setup: function() {
+								var settings = alertify.confirm().settings;
+								
+								for (var prop in settings) {
+									this.settings[prop] = settings[prop];
+								}
+								
+								var setup = alertify.confirm().setup();
+								setup.focus.element = 0;
+								
+								return setup;
+							},
+						    hooks: {
+						    	onshow: function() {
+						        	this.elements.dialog.style.maxWidth = 'none';
+						          	this.elements.dialog.style.width = '650px';
+						        }
+							}
+						};
+					}, false, 'confirm');
+	        	}
+				
+	           	var innerHtml = "";
+           		if (isStatusChangeFlag) {
+					innerHtml = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.request', true)}]];
+				} else {
+					innerHtml = [[${@CommonFunction.getCustomMessage('msg.common.enter.comment.save', 'msg.common.enter.comment.field.save', true)}]];
+				}
+           		innerHtml += '<br><textarea id="parSaveEditor"></textarea>';
+           		
+           		alertify.parSaveDialog()
+	       		.set('onok', function(e) {
+	       			// prevent clicking the OK button on Enter
+					if (typeof keyCode !== 'undefined' && keyCode == 13) {
+						keyCode = undefined;
+						return false;
+					}
+	       			
+	       			if (e) {
+	       				var comment = $("#parSaveEditor").summernote('code');
+	       					if ("" != $(comment).text().trim() && !isStatusChangeFlag) {
+	       					$("#userComment").val(comment);
+	       				} else {
+	       					$('#userComment').val("");
+	       				}
+	       				
+	       				fn.saveSubmit();
+	       			} else {
+	       				return false;
+	       			}
+	       		})
+	       		.set('title', 'Save').setContent(innerHtml)
+	       		.set('onshow', function(e){
+	       			$("#parSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"}).on('summernote.keydown', function(we, event) {
+			           	if (event.keyCode == "9") {
+			           		event.preventDefault();
+			           	}
+			      	});
+	       			
+	       			const parameter = {
+	    		   		"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_USER')}]],
+	    		       	"referenceId" : $('input[name=partnerId]').val()
+	    		  	}
+	    		    var draftUserComment = draftUserComments(parameter);
+	    		    if (typeof draftUserComment !== "undefined" && "" != draftUserComment) {
+	    		       	$("#parSaveEditor").summernote('code', "<p>" + draftUserComment + "</p>");
+	    		    }
+	       		})
+				.show();
+           	} else {
+           		alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+					if (e) {
+						fn.saveSubmit();
+					} else {
+						return false;
+					}
+				});
+           	}
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	saveSubmit : function () {
+		cleanErrMsg("list");
+		$("div.retxt").hide();
+		
+		com_fn.exitRow("list");
+		
+		fn_grid_com.totalGridSaveMode('list');
+		
+		var target = $("#list");
+		var mainData = target.jqGrid('getGridParam','data'); // 메인 그리드
+		
+ 		mainData.forEach( function(_rowData){
+ 			var _rowId = _rowData['gridId'];
+ 			
+ 			if(_rowData["obligationLicense"] == "90") {
+ 				if(_rowData["notify"] == "Y") {
+ 					if(_rowData["source"] == "Y") {
+ 						_rowData["obligationType"] = "11";
+ 					} else {
+ 						_rowData["obligationType"] = "10";
+ 					}
+ 				} else if(_rowData["notify"] == "N") {
+ 					_rowData["obligationType"] = "99";
+ 				}
+ 			}
+ 		});
+ 		
+		var prjId = [[${detail.partnerId}]];
+		var postData = {"mainData" : JSON.stringify(mainData), "prjId" : prjId};
+		
+		var ossFileId = $("input[name='ossFileId']").val();
+		if (typeof ossFileId === "undefined") {
+			ossFileId = "";
+		}
+		var finalData = {
+			partnerId : prjId,
+			mainData : JSON.stringify(mainData),
+			ossFileId : ossFileId,
+			resetFlag : "N"
+		}
+		
+		loadingIden.show();
+		
+		$.ajax({
+			url : '/project/nickNameValid/20',
+			type : 'POST',
+			data : JSON.stringify(postData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				fn.makeNickNamePopup(data, finalData);
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	makeNickNamePopup : function(obj, finalData) {
+		if ("REQ" == [[${detail.status}]]) {
+			src_fn_com.autoReviewStart("3rd_"+ [[${detail.partnerId}]], false);
+		}
+
+		if (obj.validMsg && obj.validMsg.length != 0) {
+			loadingIden.hide();
+			
+			alertify.alert(obj.validMsg, function () {
+				fn.exeSave(finalData, false);
+			});
+		} else {
+			fn.exeSave(finalData, false);
+		}
+	},
+	exeSave : function (finalData, reset) {
+		loadingIden.show();
+		
+		$.ajax({
+			url : '/partner/saveParty',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			contentType : 'application/json',
+			cache : false,
+			success: fn.onRegistSuccess,
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	reset : function(){
+		if (com_fn.checkStatus()){
+			alertify.confirm([[#{msg.partner.check.reset}]], function (e) {
+				if (e) {
+					$('.ossUpload').empty();
+					
+					var mode = $("#mode").val();
+					if ("edit" == mode) {
+						fn.ossUploadFile();
+					} else {
+						var appendHtml = "<li><span>No File</span></li>";
+						$('.ossUpload').append(appendHtml);
+					}
+					
+					$("#list").jqGrid('clearGridData');
+					fn_grid_com.totalGridSaveMode('list');
+					var mainData = $("#list").jqGrid('getGridParam','data'); // 메인 그리드
+					
+			 		var finalData = {
+			 			partnerId : [[${detail.partnerId}]],
+			 			mainData : JSON.stringify(mainData),
+			 			ossFileId : "",
+			 			resetFlag : "Y"
+			 		}
+					
+			 		fn.exeSave(finalData, true);
+				} else {
+					return false;
+				}
+			});
+		} else {
+			alertify.alert([[#{msg.partner.warning}]], function(){});
+		}
+	},
+	onRegistSuccess : function(data) {
+		loadingIden.hide();
+		
+		_mainLastsel = -1;
+		if ("false" == data.isValid) {
+			if("99" == data.resCd) { //중복 처리
+				alertify.alert([[#{msg.value.duplicate.partner}]]);
+				fn.partnerGridValidMsg(data.dupData);
+
+				return;
+			}
+
+			if ("" != data.validMsg) {
+				alertify.error([[#{msg.common.valid}]], 0);
+				fn.partnerGridValidMsg(data.resultData);
+				
+				return;
+			}
+			
+			if(data.ossFileId){
+				$("div.retxt.ossFileId").text(data.ossFileId).show();
+			}
+			
+			partyValidMsgData_e = data;
+			
+			alertify.error([[#{msg.common.valid}]], 0);
+		} else {
+			if ("10" == data.resCd) {
+				if (isStatusChangeFlag) {
+					var comment = $("#parSaveEditor").summernote('code');
+       				if ("" == $(comment).text().trim()) {
+       					comment = "";
+					}
+					
+					var param = {status : 'REQ', partnerId : [[${detail.partnerId}]], userComment : comment};
+					checkObligationFlag = false;
+					var _list = $("#list");
+					var mainData = _list.jqGrid('getGridParam','data');
+
+					mainData.forEach( function(_rowData){
+						if( _rowData['obligationLicense'] == "90" && _rowData['notify'] == "") {
+							checkObligationFlag = true;
+						}
+					});
+					
+					if (checkObligationFlag) {
+						alert([[#{msg.warn.include.needcheck.license}]]);
+						return false;
+					}
+					
+					isStatusChangeFlag = false;
+					$.ajax({
+						url : '/partner/changeStatus',
+						type : 'POST',
+						data : param,
+						dataType : 'json',
+						cache : false,
+						success : function(data){
+							if (data.isValid == "false") {
+								alertify.alert(com_fn.setMessage([[#{msg.project.validation.error}]]), function(){});
+								
+								gridCleanErrMsg("list");
+								partyValidMsgData_e = data.externalData;
+								partyDiffMsgData_e = data.externalData2;
+								partyInfoMsgData_e = data.externalData3;
+								
+								if (partyValidMsgData_e) {
+									gridValidMsgNew(partyValidMsgData_e, "list");
+								}
+								
+								if (partyDiffMsgData_e) {
+									gridDiffMsg(partyDiffMsgData_e, "list");
+								}
+								
+								if (partyInfoMsgData_e) {
+									gridInfoMsg(partyInfoMsgData_e, "list");
+								}
+							} else {
+								reloadTabInframe('/partner/list');
+								alertify.alert([[#{msg.common.success}]], function(){
+									deleteTabInFrame("/partner/identification/" + [[${detail.partnerId}]]);
+									createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', "/partner/identification/" + [[${detail.partnerId}]]);
+								});
+							}
+						},
+						error : function(){
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				} else {
+					alertify.success([[#{msg.common.success}]]);
+					saveFlag = true;
+					party_evt.getPartyGridData();
+					
+				}
+			} else {
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		}
+	},
+	deleteOssFile : function(obj){
+		$('.ossUpload').empty();
+		$(".ossUploader").attr("style", "display: flex !important");
+		
+		evt.init();
+	},
+	makeOssList : function(data){
+		// 서브 그리드 url 전송 설정(false 전송 안함)
+		partyMainData = data.mainData;
+		partySubData = data.subData;
+		
+		// 리로드 대신 그리드 삭제 후 다시 그리기
+		$("#list").jqGrid('GridUnload');
+		
+		grid.init();
+	},
+	displayButton : function(cellvalue){
+		var icon1 = "<input type=\"button\" value=\"Delete\" class=\"btnCLight gray wauto\" onclick=\"fn.deleteOssComponents(this)\"/>";
+
+		return icon1;
+	},
+	deleteOssComponents : function(obj){
+		var id = $(obj).parent().parent().attr('id');
+
+		$('#list').jqGrid('delRowData',id);
+	},
+	closePop : function(){
+		$('.ajs-close').trigger("click");
+	},
+	getSheetData : function(){
+		fn.closePop();
+		
+		var sheetNum = [];
+		$('input:checkbox[name="sheetNameSelect"]').each(function(){
+			if($(this).is(':checked')){
+				sheetNum.push($(this).val());
+			}
+		});
+		
+		var fileSeq = ossFileObj.registSeq;
+		
+		if (sheetNum.length == 0) {
+			alertify.alert([[#{msg.common.check.sheet}]], function(){});
+			
+			return;
+		} else {
+			loading.show();
+			
+			fn_grid_com.totalGridSaveMode('list');
+			cleanErrMsg("list");
+			
+			var target = $("#list");
+			var mainData = target.jqGrid('getGridParam','data');
+			var finalData = {"readType":"partner","prjId" : [[${detail.partnerId}]], "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+			
+			fn.exeLoadReportData(finalData);
+		}
+	},
+	getCsvData : function(){
+		loading.show();
+
+		fn_grid_com.totalGridSaveMode('list');
+		cleanErrMsg("list");
+
+		var fileSeq = $('input[name=ossFileId]').val();
+		var sheetNum = ["0"];
+		var target = $("#list");
+		var mainData = target.jqGrid('getGridParam','data');
+		var finalData = {"readType":"partner","prjId" : [[${detail.partnerId}]], "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+
+		fn.exeLoadReportData(finalData);
+	},
+	getSpdxSpreadsheetData : function(){
+		loading.show();
+
+		fn_grid_com.totalGridSaveMode('list');
+		cleanErrMsg("list");
+
+		var fileSeq = $('input[name=ossFileId]').val();
+		var sheetNum = ["1", "4"];
+		var target = $("#list");
+		var mainData = target.jqGrid('getGridParam','data');
+		var finalData = {"readType":"partner","prjId" : [[${detail.partnerId}]], "sheetNums" : sheetNum , "fileSeq" : ""+fileSeq, "mainData" : JSON.stringify(mainData)};
+
+		fn.exeLoadReportData(finalData);
+	},
+	exeLoadReportData : function(finalData){
+		$.ajax({
+			url : '/project/getSheetData',
+			type : 'POST',
+			data : JSON.stringify(finalData),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function(data){
+				if ("false" == data.isValid) {
+					if(data.validMsg) {
+						$('#ossFileId').val(ossFileObj.registSeq);
+						fn.makeFileTag(ossFileObj, 'ossFile');
+						ossFileObj = undefined;
+						
+						alertify.alert(data.validMsg, function(){});
+					} else {
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				} else {
+					if (data.externalData) {
+						// validData 표시
+						partyValidMsgData_e = data.externalData;
+						//gridValidMsgNew(partyValidMsgData_e, "list");
+					}
+
+					if (data.externalData2) {
+						// validData 표시
+						partyDiffMsgData_e = data.externalData2;
+						//gridDiffMsg(partyDiffMsgData_e, "list");
+					}
+					
+					if (data.externalData3) {
+						partyInfoMsgData_e = data.externalData3;
+					}
+					
+					fn.makeOssList(data.resultData);
+					
+					$('#ossFileId').val(ossFileObj.registSeq);
+					fn.makeFileTag(ossFileObj, 'ossFile');
+					ossFileObj = undefined;
+					
+					if (data.validMsg) {
+						alertify.alert(data.validMsg, function(){});
+					} else if(data.resultData.systemChangeHisStr && data.resultData.systemChangeHisStr != "") {
+						alertify.alert(data.resultData.systemChangeHisStr, function(){});
+					}
+				}
+			},
+			error: function(data){
+				loading.hide();
+				$('.ossUpload').children().remove();
+				
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	// 그리드 체크 메세지( gridStr 그리드 문자열 )
+	partnerGridValidMsg : function(msgData) {
+		$.each(msgData,function(key,value) {
+			if ("isValid" != key) {
+				if ($('input[name=' + key + ']').length > 0) {
+					$('input[name=' + key + ']').addClass("is-invalid");
+					$('input[name=' + key + ']').next("div.retxt").html(value).show();
+				} else if ($('textarea[name=' + key + ']').length > 0) {
+					$('textarea[name=' + key + ']').addClass("is-invalid");
+					$('textarea[name=' + key + ']').next("div.retxt").html(value).show();
+				} 
+			}
+		});
+	},
+	//sample download
+	sampleDownload : function(type){
+		var logiPath = "";
+		var fileName = "";
+
+		if(sampleFile.length > 0) {
+			for(var i=0; i < sampleFile.length; i++) {
+				if(type == "arg" && sampleFile[i].cdDtlNo == '10') {
+					logiPath = sampleFile[i].cdDtlExp ;
+					fileName = sampleFile[i].cdDtlNm;
+
+					break;
+				} else if(type == "chk" && sampleFile[i].cdDtlNo == '11') {
+					logiPath = sampleFile[i].cdDtlExp ;
+					fileName = sampleFile[i].cdDtlNm;
+
+					break;
+				}
+			}
+			location.href = '/partner/sampleDownload?fileName='+fileName+'&logiPath='+logiPath;
+		} else {
+			alertify.error([[#{msg.common.valid2}]], 0);
+		}
+	},
+	downloadExcel : function() {
+		$.ajax({
+			type: "POST",
+			url: '/exceldownload/getExcelPost',
+			data: JSON.stringify({"type":"partnerCheckList", "parameter":[[${detail.partnerId}]]}),
+			dataType : 'json',
+			cache : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if("false" == data.isValid) {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					window.location = '/exceldownload/getFile?id='+data.validMsg;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+    downloadYaml: function () {
+        var params = {'partnerId': [[${detail.partnerId}]], 'partnerName': [[${detail.partnerName}]]};
+
+        $.ajax({
+            type: "POST",
+            url: '/partner/makeYaml',
+            data: JSON.stringify(params),
+            dataType: 'json',
+            cache: false,
+            contentType: 'application/json',
+            success: function (data) {
+                if ("false" == data.isValid) {
+                    alertify.error([[#{msg.common.valid2}]], 0);
+                } else {
+                    window.location = '/exceldownload/getFile?id='+data.validMsg;
+                }
+            },
+            error: function (data) {
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        });
+    },
+	displayNotify : function(cellvalue, options, rowObject){
+		var display = "";
+		var obligationLicense = rowObject["obligationLicense"];
+		var obligationType = rowObject["obligationType"];
+		
+		if(obligationLicense == 10 || obligationLicense == 11) {
+			display="<i class=\"fas fa-check fa-2xs mr-1\" title=\"Notice\"></i>";
+		} else if(obligationLicense == 90) {
+			display = '<select id="'+options.rowId+'_notify" onchange="fn.onNotifyCboxClick(' + options.rowId + ')">'
+				+ '<option value=""></option>'
+				+ '<option value="Y" '+((rowObject["obligationType"]=='10' || rowObject["obligationType"]=='11') ? ' selected="selected"' : '') +'>O</option>'
+				+ '<option value="N" '+((rowObject["obligationType"]=='99') ? ' selected="selected"' : '') +'>X</option>'
+				+ '</select>';
+		}
+		
+		return display;
+	},
+	displaySource : function(cellvalue, options, rowObject){
+		var display = "";
+		var obligationLicense = rowObject["obligationLicense"];
+		var obligationType = rowObject["obligationType"];
+		
+		if(obligationLicense == 11) {
+			display="<i class=\"fas fa-check fa-2xs\" title=\"Source Code\"></i>";
+		} else if(obligationLicense == 90) {
+			display = '<select id="'+options.rowId+'_source" onchange="fn.onSourceCboxClick(' + options.rowId + ')">'
+				+ '<option value=""></option>'
+				+ '<option value="Y" '+((rowObject["obligationType"]=='11') ? ' selected="selected"' : '') +'>O</option>'
+				+ '<option value="N" '+((rowObject["obligationType"]=='99' || rowObject["obligationType"]=='10') ? ' selected="selected"' : '') +'>X</option>'
+				+ '</select>';
+		}
+		
+		return display;
+	},
+	unDisplayNotify : function(cellvalue, options, rowObject){
+		var display = $("#"+options.rowId+"_notify").val();
+
+		return display;
+	},
+	unDisplaySource : function(cellvalue, options, rowObject){
+		var display = $("#"+options.rowId+"_source").val();
+
+		return display;
+	},
+	onNotifyCboxClick : function(rowId){
+		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
+		var selectedVal = $("#"+id+"_notify").val();
+		var selectedVal2 = $("#"+id+"_source").val();
+
+		fn_grid_com.saveCellData("list",id,'notify',selectedVal,partyValidMsgData_e, partyDiffMsgData_e);
+
+		if(selectedVal) {
+			if(selectedVal == "N") {
+				selectedVal2 = "N";
+			}
+			
+			$("#"+id+"_notify").parent().css("background", "");
+			
+			if($("#"+id+"_source").val()) {
+				$("#"+id+"_source").parent().css("background", "");
+			}
+		} else {
+			selectedVal2 = "";
+			$("#"+id+"_notify").parent().css("background", "CornflowerBlue");
+			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
+		}
+		
+		if(selectedVal2 != $("#"+id+"_source").val()) {
+			$("#"+id+"_source").val(selectedVal2).trigger('change');
+		}
+	},
+	onSourceCboxClick : function(rowId){
+		var id = (typeof(rowId) == 'object') ? rowId.id : rowId;
+		var selectedVal = $("#"+id+"_source").val();
+		var selectedVal2 = $("#"+id+"_notify").val();
+		
+		fn_grid_com.saveCellData("list",id,'source',selectedVal,partyValidMsgData_e, partyDiffMsgData_e);
+		
+		if(selectedVal) {
+			if(selectedVal == "Y") {
+				selectedVal2 = "Y";
+			}
+			
+			$("#"+id+"_source").parent().css("background", "");
+			
+			if($("#"+id+"_notify").val()) {
+				$("#"+id+"_notify").parent().css("background", "");
+			}
+		} else {
+			selectedVal2 = "";
+			
+			$("#"+id+"_notify").parent().css("background", "CornflowerBlue");
+			$("#"+id+"_source").parent().css("background", "CornflowerBlue");
+		}
+		
+		if (selectedVal2 != $("#"+id+"_notify").val()) {
+			$("#"+id+"_notify").val(selectedVal2).trigger('change');
+		}
+	},
+	chkListValidation : function(listKind, listId){
+		if (listKind == "") {
+			// TODO : 추후 문구 수정예정
+			alertify.error([[#{msg.project.watcher.selectlist}]], 0);
+
+			return false;
+		}
+		
+		if (listId == "") {
+			// TODO : 추후 문구 수정예정
+			alertify.error([[#{msg.project.watcher.required.copyid}]], 0);
+
+			return false;
+		}
+		
+		return true;
+	},
+	CheckChar : function(){
+		if (event.keyCode == 64){//@ 특수문자 체크
+    		alertify.alert([[#{msg.login.check.char}]], function(){});
+    		event.returnValue = false;
+    	}
+	},
+	analysisValidation : function(){
+		if (com_fn.checkStatus()){
+			var checkList = $("#list").getRowData().filter(function(c){
+			    return c.gridId.indexOf("jqg") > -1;
+			});
+			
+			if(checkList.length > 0){
+				alertify.alert("Please Save first.", function(){});
+				
+				return false;
+			}
+
+			var alertMsg = "";
+			
+			switch(ossAnalysisStatus.toUpperCase()){
+				case "PROGRESS":
+					if(analysisStartDate != "") {
+						alertMsg = "This analysis has been started at " + analysisStartDate + "<br>It has not been completed yet";
+						alertify.alert(alertMsg, function(){});
+					} else {
+						fn.showOssAutoAnalysis(ossAnalysisStatus);
+					}
+					
+					break;
+				case "SUCCESS":
+					if(!alertify.commentDialog) {
+						//define a new dialog
+						alertify.dialog('commentDialog',function factory(){
+							return {
+								main:function(message){
+									this.message = message;
+								},
+								setup:function(){
+									return { 
+										focus: { element:0 }
+									};
+								},
+								prepare:function(){
+										this.setContent(this.message);
+								}
+							}
+						});
+					}
+					
+					// status가 success일때 다시 자동분석을 할때? -> 기존 list를 활용할 것인지? or 기존 list는 제거 이후 새로 list를 만들 것인지?
+					alertMsg = 'Do you really reset the analyzed result and start the Auto Analysis again?';
+
+					var btnHtml = '<br><b>'+alertMsg+'</b><br><br>';
+					btnHtml += '<input type="button" value="Reset & Load" class="btnCancel btn-dark" style="height:30px;width:100px;"onclick="fn.showOssAutoAnalysis(\''+ossAnalysisStatus+'-reset\')"/>&nbsp;&nbsp;&nbsp;';
+					btnHtml +='<input type="button" value="Cancel" class="btnCancel btn-outline-dark" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>';
+					
+					alertify.commentDialog(btnHtml);
+					$(".ajs-dialog").css("mainAxisSize", "MainAxisSize.min");
+					
+					break;
+				case "FAIL":
+					if(!alertify.commentDialog){
+						//define a new dialog
+						alertify.dialog('commentDialog',function factory(){
+							return {
+								main:function(message){
+									this.message = message;
+								},
+								setup:function(){
+									return { 
+										focus: { element:0 }
+									};
+								},
+								prepare:function(){
+										this.setContent(this.message);
+								}
+							}
+						});
+					}
+					
+					// status가 success일때 다시 자동분석을 할때? -> 기존 list를 활용할 것인지? or 기존 list는 제거 이후 새로 list를 만들 것인지?
+					alertMsg = 'The Auto analysis of this project was recently failed.<br>If you want to restart the Auto Analysis. click the \'Restart\' button';
+					var btnHtml = '<br><b>'+alertMsg+'</b><br><br>';
+					btnHtml += '<input type="button" value="Restart" class="btnCancel btnColor red" style="height:30px;width:100px;"onclick="fn.showOssAutoAnalysis(\''+ossAnalysisStatus+'\')"/>&nbsp;&nbsp;&nbsp;';
+					btnHtml +='<input type="button" value="Cancel" class="btnCancel btnColor" style="height:30px;width:120px;" onclick="$(\'.ajs-close\').trigger(\'click\')"/>';
+					
+					alertify.commentDialog(btnHtml);
+					
+					break;
+				default:
+					fn.showOssAutoAnalysis("NEW");
+				
+					break;
+			}
+		} else {
+			alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+		}
+	},
+	showOssAutoAnalysis : function(status){
+		if(status.toUpperCase().indexOf("SUCCESS") > -1 || status.toUpperCase().indexOf("FAIL") > -1){
+			$('.ajs-close').trigger('click');
+		}
+
+		if(status.toUpperCase().indexOf("LOAD") > -1){ // status : success & load
+			var partnerId = '3rd_'+ [[${detail.partnerId}]];
+			_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId=' + partnerId, 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
+
+			if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		}
+
+		// status : (success & reset), progress 
+		if(status.toUpperCase().indexOf("RESET") > -1 
+				|| status.toUpperCase().indexOf("PROGRESS") > -1 
+				|| status.toUpperCase().indexOf("FAIL") > -1
+				|| status.toUpperCase().indexOf("NEW") > -1) {
+
+			var data = {
+				'partnerId' : [[${detail.partnerId}]]
+			};
+			
+			$.ajax({
+				url : '/partner/getFilteredList',
+				type : 'POST',
+				dataType : 'json',
+				cache : false,
+				data : data,
+				success : function(json){
+					if ('false' == json.isValid){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					} else {
+						fn.insertAnalysisList(json.componentIdList);
+					}
+				},
+				error : function(){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+			});
+		}
+	},
+	insertAnalysisList : function(componentIdList){
+		var data = {
+				'componentIdList' : componentIdList
+			  , 'prjId' : [[${detail.partnerId}]]
+			  , 'referenceDiv' : '20'
+		};
+		
+		$.ajax({
+			url : '/oss/saveOssAnalysisList/view',
+			dataType : 'json',
+			type : 'POST',
+			cache : false,
+			data : JSON.stringify(data),
+			contentType : 'application/json',
+			success : function(data){
+				_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId=3rd_' + [[${detail.partnerId}]], 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
+
+				if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed == 'undefined') {
+					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	showAnalysisResult : function(){
+		if (com_fn.checkStatus()){
+			var partnerId = '3rd_'+[[${detail.partnerId}]];
+			_popupOssAutoAnalysis = window.open('/oss/ossAutoAnalysis?prjId='+partnerId+'&ossAnalysisStatus=result', 'OSS Auto Analysis', 'width=1550, height=814, toolbar=no, location=no, resizable=yes, scrollbars=yes');
+
+			if(!_popupOssAutoAnalysis || _popupOssAutoAnalysis.closed || typeof _popupOssAutoAnalysis.closed=='undefined') {
+				alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+			}
+		}else{
+			alertify.alert('Status of the 3rd party software is being changed by another user. Please contact the reviewer for detailed information.', function(){});
+		}
+	},
+	CheckOssViewPage : function(){
+		if ([[${detail.status}]] != 'REQ' && [[${detail.status}]] != 'CONF' && 
+				([[${detail.loginUserRole}]] == 'ROLE_ADMIN' || ([[${detail.loginUserRole}]] != 'ROLE_ADMIN' && [[${detail.status}]] != 'REV')) && [[${detail.viewOnlyFlag}]] != 'Y') {
+			if(saveFlag) {
+				if(_popupCheckOssName != null){
+					_popupCheckOssName.close();
+				}
+				
+				_popupCheckOssName = window.open("/oss/checkOssName?prjId=" + [[${detail.partnerId}]] + "&referenceDiv=20&targetName=partner", "Check OSS Name", "width=1600, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+
+				if(!_popupCheckOssName || _popupCheckOssName.closed || typeof _popupCheckOssName.closed=='undefined') {
+					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+				}
+			} else {
+				alertify.alert([[#{msg.project.required.checkOssName}]], function(){});
+
+				return false;
+			}
+		}
+	},
+	CheckOssLicenseViewPage : function(){
+		if ([[${detail.status}]] != 'REQ' && [[${detail.status}]] != 'CONF' && 
+				([[${detail.loginUserRole}]] == 'ROLE_ADMIN' || ([[${detail.loginUserRole}]] != 'ROLE_ADMIN' && [[${detail.status}]] != 'REV')) && [[${detail.viewOnlyFlag}]] != 'Y') {
+			if(saveFlag) {
+				if(_popupCheckOssLicense != null){
+					_popupCheckOssLicense.close();
+				}
+				
+				_popupCheckOssLicense = window.open("/oss/checkOssLicense?prjId="+[[${detail.partnerId}]]+"&referenceDiv=20&targetName=partner", "Check License", "width=1100, height=550, toolbar=no, location=no, left=100, top=100, resizable=yes, scrollbars=yes");
+
+				if(!_popupCheckOssLicense || _popupCheckOssLicense.closed || typeof _popupCheckOssLicense.closed=='undefined') {
+					alertify.alert([[#{msg.common.window.allowpopup}]], function(){});
+				}
+			} else {
+				alertify.alert([[#{msg.project.required.checkOssLicense}]], function(){});
+
+				return false;
+			}
+		}
+	},
+	selectDownloadFile : function(target) {
+    	// download file
+    	if ("report_sub" === target) {
+    		fn.downloadExcel();
+    	} else {
+    		var status = [[${detail.status}]];
+        	if ('CONF' != status) {
+        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+    				if (e) {
+    					fn.selectDownloadFileValidation(target);
+    				} else {
+    					return false;
+    				}
+    			});
+        	} else {
+        		fn.selectDownloadFileValidation(target);
+        	}
+    	}
+    },
+    selectDownloadFileValidation : function(target) {
+    	if (fn.checkSelectDownloadFile()) {
+    		fn.downloadYaml();
+		} else {
+    		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+    	}
+    },
+	checkSelectDownloadFile : function() {
+		var checkEmptyFlag = false;
+		
+		$.ajax({
+    		type: "POST",
+			url: '/partner/checkSelectDownloadFile',
+			data: JSON.stringify({"partnerId":[[${detail.partnerId}]]}),
+			dataType : 'json',
+			cache : false,
+			async : false,
+			contentType : 'application/json',
+			success: function (data) {
+				if (data.isValid) {
+					checkEmptyFlag = true;
+				}
+			},
+			error: function(data){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+    	});
+    	
+    	return checkEmptyFlag;
+	},
+	makeFileTag : function(obj, flag) {
+		var appendHtml = '<br>'+obj.createdDate;
+		var _url = '/download/'+obj.registSeq+'/'+obj.fileName;
+		var uploadFileTag = '<li><a class="ajax-file-upload-filename" href="'+_url+'">'+obj.originalFilename+'</a>';
+		
+		if ("ossFile" == flag) {
+			uploadFileTag += '<span class="badge bg-danger" style="cursor:pointer;" onclick="fn.deleteOssFile(this)">X</span>'+appendHtml+'</li>';
+			uploadFileTag += '<input type="hidden" name="ossFileId" value="'+obj.registSeq+'"/>';
+			$('.ossUpload').append(uploadFileTag);
+			$(".ossUploader").attr("style", "display: none !important");
+		}
+	},
+	handleUserCommentPopupOpen : function() {
+		if ([[${detail.permission}]] > 0) {
+			// 코멘트 팝업
+		    const param = {
+		   		"referenceDiv" : [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER')}]],
+		    	"referenceId" : [[${detail.partnerId}]]
+		  	}
+
+			getAjaxJsonData(param, "/comment/getDivUserComment", "html", function (res) {
+		        if (!alertify.editDialog) {
+		        	commonAlertifyDialog('editDialog');
+		   		}
+		        alertify.editDialog().set('onshow', function(e) {
+	        		$(".ajs-ok").hide();
+	        		$(".ajs-cancel").hide();
+	        	}).setContent(res).show();
+		   	},
+		  	null,
+		   	function () {
+		       	$("#modifiedCommentInPjtEditor").summernote({
+		           	height: 180,
+		           	callbacks: {
+		               	onInit: function () {
+		                   	$(this).summernote('code', $("#userContents").val());
+		               	}
+		           	}
+		       	});
+		  	});
+		} else {
+			alertify.alert([[#{msg.common.not.permission}]], function(){});
+		}
+	},
+	sendEditor : function(type){
+		//코멘트 저장
+	    var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+	   	if (!editorVal || editorVal == "") {
+	    	alertify.alert([[#{msg.project.enter.comment}]], function(){});
+	        return false;
+	  	}
+
+	   	var param = {referenceId : [[${detail.partnerId}]], referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_HIS')}]], contents : editorVal, mailSendType : type, expansion1 : $(".nav-link.active").text()};
+
+	   	$.ajax({
+			url : '/partner/sendComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if (json.isValid == 'false') {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+	           		alertify.success([[#{msg.project.sent.comments.success}]]);
+	                $("#modifiedCommentInPjtEditor").summernote('code', '<p></p>');
+	                $("#userContents").val('');
+	                $('.ajs-close').trigger("click");
+	                fn_comment.getCommentList(commentsParam);
+	                  
+	                if (_popupComment == null || _popupComment.closed) {
+	                } else {
+	                  	_popupComment.callbackFunction();
+	        		}
+				}	
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	},
+	saveEditor : function(){
+		//코멘트 임시저장
+		var editorVal = replaceWithLink($("#modifiedCommentInPjtEditor").summernote('code'));
+		var param = {referenceId : [[${detail.partnerId}]], referenceDiv :[[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_PARTNER_IDENTIFICATION_USER')}]], contents : editorVal};
+		
+		$.ajax({
+			url : '/project/saveComment',
+			type : 'POST',
+			dataType : 'json',
+			cache : false,
+			data : param,
+			success : function(json){
+				if (json.isValid == 'false') {
+					alertify.error([[#{msg.common.valid2}]], 0);
+				} else {
+					alertify.success([[#{msg.common.success}]]);
+					$("#userContents").val(editorVal);
+					$('.ajs-close').trigger("click");
+				}
+			},
+			error : function(){
+				alertify.error([[#{msg.common.valid2}]], 0);
+			}
+		});
+	}
+}
+
+var datas = {
+	init : function(){
+		if ([[${detail.partnerId}]] != null) {
+			if ([[${detail.permission}]] > 0) {
+				fn.getPartyGridData();
+			}
+			ossAnalysisStatus = [[${detail.ossAnalysisStatus}]];
+			analysisStartDate = [[${detail.analysisStartDate}]]
+		} else {
+			grid.init();
+			partyMainData = [];
+			partySubData = [];
+		}
+	}
+}
+var grid = {
+	init : function(){
+		var currentOssName = '';
+		var ondblClickRowBln = false;
+		var partnerList = $("#list");
+		
+		partnerList.jqGrid({
+			datatype: 'local',
+			data : partyMainData,
+			colNames: ['gridId', 'ID_KEY', 'ID', 'ReferenceId', 'ReferenceDiv', 'OssId', 'Source or Binary Path', 'OSS Name','OSS Version','LicenseId','License','Download Location'
+					   ,'Homepage','Copyright Text', 'CVE ID', 'Vulnera<br/>bility','<input type="checkbox" onclick="fn_grid_com.onCboxClickAll(this,\'list\');">Exclude','Comment','LicenseDiv','obligationLicense','ObligationType','Notice','Source','Restriction','customBinaryYn', 'Tlsh', 'Check Sum'],
+			colModel: [
+				{name: 'gridId', index: 'gridId', editable:false, hidden:true, key:true},
+				{name: 'componentId', index: 'componentId', width: 40, align: 'center', hidden:true},
+				{name: 'componentIdx', index: 'componentIdx', width: 40, align: 'center', sorttype: 'int', search: false},
+				{name: 'referenceId', index: 'referenceId', width: 29, align: 'center', hidden:true},
+				{name: 'referenceDiv', index: 'referenceDiv', width: 29, align: 'center', hidden:true},
+				{name: 'ossId', index: 'ossId', width: 29, align: 'center', editable:true, hidden:true},
+				{name: 'binaryName', index: 'binaryName', width: 140, align: 'left', editable:true, template: searchStringOptions, 
+					editoptions: {
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+								});
+							}
+					}
+				},
+				{name: 'ossName', index: 'ossName', width: 140, align: 'left', editable:true, edittype:'text', template: searchStringOptions, 
+						editoptions: {
+							dataInit:
+								function (e) { 
+									// ossName auto complete
+									$(e).autocomplete({
+										source: ossNames
+										, minLength: 3 // IE 스크립트 성능이슈로 0->3 으로 변경 yuns
+										, open: function() { $(this).attr('state', 'open');}
+										, close: function () { $(this).attr('state', 'closed');}
+									}).focus(function() {
+										if ($(this).attr('state') != 'open') {
+											$(this).autocomplete("search");
+										}
+									}).on('autocompletechange', function() {
+										if(e.value!=""){
+											var rowid = (e.id).split('_')[0];
+											fn_grid_com.griOssVersions($('#'+rowid+'_ossVersion')[0], e.value, 'list');
+											fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+										}
+									}).dblclick(function(){
+										var rowid = (e.id).split('_')[0];
+										var licenseName = com_fn.getLicenseName(partnerList.getRowData(rowid));
+										
+										partnerList.jqGrid("setCell", rowid, "licenseName", licenseName);
+										fn_grid_com.saveCellData(partnerList.attr("id"), rowid, "licenseName", licenseName, null, null);
+										partnerList.jqGrid('saveRow',rowid);
+										
+										fn_grid_com.mvOssPage(partnerList, rowid);
+									});
+									
+									currentOssName = e.value;
+								}
+						}
+				},
+				{name: 'ossVersion', index: 'ossVersion', width: 80, align: 'center', editable:true, edittype:'text', template: searchStringOptions, 
+					editoptions: {
+						dataInit:
+							function (e) { 
+								fn_grid_com.griOssVersions(e, currentOssName, 'list');
+								
+								$(e).on( "autocompletechange", function() {
+									var rowid = (e.id).split('_')[0];
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+								});
+							}
+					}
+				},
+				{name: 'licenseId', index: 'licenseId', width: 50, align: 'center', editable:true, edittype:'text', hidden:true},
+				{name: 'licenseName', index: 'licenseName', width: 150, align: 'left', editable:false, edittype:'text', template: searchStringOptions,
+					editoptions: {
+						dataInit: function (e) {
+								var licenseNameId = $(e).attr("id").split('_')[0];
+								var licenseNameTd = $(e).parent();
+
+								var displayLicenseNameCell = '<div style="width:100%; display:table; table-layout:fixed;">';
+								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameDiv" style="width:60px; display:table-cell; vertical-align:middle;"></div>';
+								displayLicenseNameCell += '<div id="'+licenseNameId+'_licenseNameBtn" style="display:table-cell; vertical-align:middle;"></div>';
+								displayLicenseNameCell += '</div>';
+					
+								$(licenseNameTd).empty();
+								$(licenseNameTd).html(displayLicenseNameCell);
+								$('#'+licenseNameId+'_licenseNameDiv').append(e);
+							
+								// licenseName auto complete
+								$(e).autocomplete({
+									source: licenseNames
+									, minLength: 0
+									, open: function() { $(this).attr('state', 'open'); }
+									, close: function () { $(this).attr('state', 'closed'); }
+								}).focus(function() {
+									if ($(this).attr('state') != 'open') {
+										$(this).autocomplete("search");
+									}
+								});
+								
+								// set license data
+								$(e).on( "autocompletechange", function() {
+									var rowid = (e.id).split('_')[0];
+									var mult = null;
+									var multText = null;
+									let li = e.value;
+									
+									for(var i in licenseNames){
+										if("" != e.value && e.value == licenseNames[i].value){
+											var licenseIds = $('#'+rowid+'_licenseId').val();
+											mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+
+											multText = licenseNames[i].value;
+											break;
+										}
+									}
+									
+									if (mult == null) {
+										mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+
+										multText = e.value;
+									}
+									
+									var rowLicenseNames = [];
+									$('#'+rowid+'_licenseNameBtn').find('.btn.btn-outline-secondary.btn-sm').each(function(i, item){
+										var licenseName = $(this).text();
+										rowLicenseNames.push(licenseName.slice(0, -1));
+									});
+									
+									if (multText != null){
+										if(rowLicenseNames.length > 0){
+											var duplicateFlag = false;
+											for(var i in rowLicenseNames){
+												if(multText == rowLicenseNames[i]){
+													duplicateFlag = true;
+													break;
+												}
+											}
+											
+											if(!duplicateFlag){
+												$('#'+rowid+'_licenseNameBtn').append(mult);
+											}
+										} else {
+											$('#'+rowid+'_licenseNameBtn').append(mult);
+										}
+									}
+									
+									$('#'+rowid+'_licenseName').val("");
+									
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+									
+									if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
+										alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
+	                                        if (e) {
+	                                        	fn_grid_com.saveCellDataForLicense("list", rowid, "-", null, null);
+	                                        } else {
+	                                        	return false;
+	                                        }
+										});
+									}
+								}).on("keypress", function(evt){
+									if(evt.keyCode == 13){
+										var rowid = (e.id).split('_')[0];
+										var mult = null;
+										var multText = null;
+										let li = e.value;
+										
+										for(var i in licenseNames){
+											if("" != e.value && e.value == licenseNames[i].value){
+												var licenseIds = $('#'+rowid+'_licenseId').val();
+												mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + licenseNames[i].value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>"
+												multText = licenseNames[i].value;
+												break;
+											}
+										}
+										
+										if(mult == null && "" != e.value){
+											mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + e.value + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+											multText = e.value;
+										}
+										
+										var rowLicenseNames = [];
+										$('#'+rowid+'_licenseNameBtn').find('.btn.btn-outline-secondary.btn-sm').each(function(i, item){
+											var licenseName = $(this).text();
+											rowLicenseNames.push(licenseName.slice(0, -1));
+										});
+										
+										if (multText != null){
+											if(rowLicenseNames.length > 0){
+												var duplicateFlag = false;
+												for(var i in rowLicenseNames){
+													if(multText == rowLicenseNames[i]){
+														duplicateFlag = true;
+														break;
+													}
+												}
+												
+												if(!duplicateFlag){
+													$('#'+rowid+'_licenseNameBtn').append(mult);
+												}
+											} else {
+												$('#'+rowid+'_licenseNameBtn').append(mult);
+											}
+										}
+										
+										$('#'+rowid+'_licenseName').val("");
+
+										fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+										
+										if ("LGE Proprietary License" == li || "Other Proprietary License" == li) {
+											alertify.confirm([[#{msg.project.confirm.load.proprietary.license}]], function (e) {
+		                                        if (e) {
+		                                        	fn_grid_com.saveCellDataForLicense("list", rowid, "-", null, null);
+		                                        } else {
+		                                        	return false;
+		                                        }
+											});
+										}
+									}
+								});
+							}
+					}
+				},
+				{name: 'downloadLocation', index: 'downloadLocation', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+					editoptions: {
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+										$("#"+rowid+"_downloadLocation").val(value);
+									}
+									
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+								}).on("blur", function() {
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+										$("#"+e.id).val(value);
+									}
+								});
+							}
+					}
+				},
+				{name: 'homepage', index: 'homepage', width: 100, align: 'left', editable:true, formatter: fn_grid_com.displayUrl, unformat: fn_grid_com.unDisplayUrl, template: searchStringOptions, 
+					editoptions: {
+						dataInit:
+							function (e) { 
+								$(e).on("change", function() {
+									var rowid = (e.id).split('_')[0];
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+										$("#"+rowid+"_homepage").val(value);
+									}
+									
+									fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e, partyDiffMsgData_e);
+								}).on("blur", function() {
+									var value = e.value;
+									
+									if(value.charAt(value.length-1) == "/"){
+										value = value.slice(0, -1); // 마지막 문자열 제거
+										$("#"+e.id).val(value);
+									}
+								});
+							}
+					}
+				},
+				{name: 'copyrightText', index: 'copyrightText', width: 140, align: 'left', editable:false, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
+					dataInit:
+						function (e) { 
+							$(e).on("change", function() {
+								var rowid = (e.id).split('_')[0];
+								
+								fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e);
+							});
+						}
+					}
+				},
+				
+				{name: 'cveId', index: 'cveId', hidden:true},
+				{name: 'cvssScore', index: 'cvssScore', width: 80, align: 'center', formatter:fn_grid_com.displayVulnerability, unformatter:fn_grid_com.unformatter, sortable : true, sorttype:'float', template: searchNumberOptions},
+				{name: 'excludeYn', index: 'excludeYn', width: 50, align: 'center', formatter: fn_grid_com.cboxFormatter, unformat: fn_grid_com.cboxUnFormatter, search: false},
+				{name: 'comments', index: 'comments', width: 150, align: 'left', editable:true, template: searchStringOptions, edittype:"textarea", editoptions:{rows:"5",cols:"24", 
+					dataInit:
+						function (e) {
+							$(e).on("change", function() {
+								var rowid = (e.id).split('_')[0];
+
+								fn_grid_com.saveCellData("list",rowid,e.name,e.value,partyValidMsgData_e,partyDiffMsgData_e);
+							});
+						}
+					}
+				},
+				{name: 'licenseDiv', index: 'licenseDiv', width: 100, align: 'left', editable:false, hidden:true},
+				{name: 'obligationLicense', index: 'obligationLicense', width: 40, align: 'center', hidden:true},
+				{name: 'obligationType', index: 'obligation', width: 40, align: 'center', hidden:true},
+				{name: 'notify', index: 'notify', width: 40, align: 'center', formatter: fn.displayNotify, unformat: fn.unDisplayNotify, sortable : true, search : false,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.obligationType;
+						if (rtnVal == '10' || rtnVal == '11') {
+							return 0;
+						} else {
+							return 99;
+						}
+                    }
+				},
+				{name: 'source', index: 'source', width: 40, align: 'center', formatter: fn.displaySource, unformat: fn.unDisplaySource, sortable : true, search : false,
+					sorttype: function (cell, rowData) {
+						var rtnVal = rowData.obligationType;
+						if (rtnVal == '11') {
+							return 0;
+						} else {
+							return 99;
+						}
+                    }
+				},
+				{name: 'restriction', index: 'restriction', width: 70, align: 'center', formatter: fn_grid_com.displayLicenseRestriction, unformat: fn_grid_com.unformatter, sortable : false, search : false, hidden : true},
+				{name: 'customBinaryYn', index: 'customBinaryYn', editable:false, hidden:true},
+				{name: 'tlsh', index: 'tlsh', editable:false, hidden:true},
+				{name: 'checkSum', index: 'checkSum', editable:false, hidden:true}
+			],
+			autoencode: true,
+			editurl:'clientArray',
+			autowidth: true,
+			height: 'auto',
+			gridview: true,
+			pager: '#pager',
+			rowNum: 200,
+			rowList: [200, 500, 1000, 5000],
+			recordpos:'right',
+			toppager:true,
+			loadonce:true,
+			cellEdit : true,
+			cellsubmit : 'clientArray',
+			ignoreCase: true,
+			multiselect: true,
+			multiselectWidth: 35,
+			onSortCol: function (index, columnIndex, sortOrder) {
+				isSort = true;
+			},
+			loadComplete: function(data) {
+				_mainLastsel = -1;
+				
+				if (data.records > 0) {
+					let binaryCheckList = data.rows.filter(function(cur) {
+						return (typeof cur.checkSum !== "undefined" && "" != cur.checkSum) && (typeof cur.tlsh !== "undefined" && "" != cur.tlsh);
+					});
+					if (binaryCheckList.length > 0) {
+						$("#ignoreBinaryDbArea").show();
+					}
+					
+					var multRowIds = []; 
+					var rowIdx = 0, rows = this.rows, rowsCount = rows.length, row, rowid, rowData, className;
+					for(var _idx=0;_idx<rowsCount;_idx++) {
+						row = rows[_idx];
+						className = row.className;
+						if (className.indexOf('jqgrow') !== -1) {
+							rowid = row.id;
+							rowData = data.rows[rowIdx++];
+							
+							if(rowData.licenseDiv != "M") {
+								className = className + ' singleLicenseClass';
+								
+								$("#" + rowid).next("tr.ui-subgrid").hide();
+							} else {
+								multRowIds.push(rowid);
+							}
+							
+							if(rowData.excludeYn == "Y" && className.indexOf('excludeRow') === -1) {
+								className= className + ' excludeRow';
+							}
+							
+							row.className = className;
+							
+						} else if(className.indexOf('ui-subgrid') !== -1){
+							rowIdx++;
+						}
+
+						// checkbox click event
+						$("#"+row.id).find("input[type=checkbox]").removeClass("cbox");
+					}
+					
+					// 한번에 처리
+					$("#list tr.singleLicenseClass").find("td:first").removeClass("sgexpanded sgcollapsed").find("a").hide();
+				}
+				
+				// 상태에 따른 화면 처리
+//				fn.modeForStatus([[${detail.status}]]);
+				
+				if(isSort){
+					isSort = false;
+				}
+				
+				// append button event
+				if ($("#list_toppager_left").find('button').length == 0) {
+					var permission = partnerData.statusPermission == 1 || partnerData.partnerId == null;
+					var status = partnerData.status;
+					
+	            	var appendBtn = "";
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridAddFunc('3rdParty', 'list', "+permission+", '"+status+"')\">";
+					if (!permission || "CONF" == status || 'REQ' == status) {
+						appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+            		} else {
+            			if ('ROLE_USER' == userRole && 'REV' == status) {
+    						appendBtn += "<i class=\"fas fa-plus gridIconDisabled\"></i></button>";
+            			} else {
+                			appendBtn += "<i class=\"fas fa-plus\"></i></button>";
+            			}
+            		}
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.gridDelFunc('3rdParty', 'list', 'main', "+permission+", '"+status+"')\">";
+	            	if (!permission || "CONF" == status || 'REQ' == status) {
+						appendBtn += "<i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
+            		} else {
+            			if ('ROLE_USER' == userRole && 'REV' == status) {
+    						appendBtn += "<i class=\"far fa-trash-alt gridIconDisabled\"></i></button>";
+            			} else {
+                			appendBtn += "<i class=\"far fa-trash-alt\"></i></button>";
+            			}
+            		}
+	            	appendBtn += "<button type=\"button\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" onclick=\"com_fn.bulkEdit("+permission+", '"+status+"')\">";
+	            	if (!permission || "CONF" == status || 'REQ' == status) {
+						appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+            		} else {
+            			if ('ROLE_USER' == userRole && 'REV' == status) {
+    						appendBtn += "<i class=\"fas fa-pencil-alt gridIconDisabled\"></i></button>";
+            			} else {
+                			appendBtn += "<i class=\"fas fa-pencil-alt\"></i></button>";
+            			}
+            		}
+            		
+	            	appendBtn += "<button type=\"button\" id=\"exportDropdown\" class=\"btn btn-sm btn-grid-light-gray float-left ml-1\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\")\"><i class=\"fas fa-download\"></i></button>";
+	            	appendBtn += "<div class=\"dropdown-menu\" aria-labelledby=\"exportDropdown\">";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('report_sub')\">FOSSLight Report (Spreadsheet)</span>";
+	            	appendBtn += "<span class=\"dropdown-item pointer\" onclick=\"fn.selectDownloadFile('YAML')\">FOSSLight Report (YAML)</span></div>";
+	               	
+	                $("#list_toppager_left").append(appendBtn);
+	            }
+			},
+			onSelectRow: function(rowid,status,eventObject) {
+			},
+			beforeSelectRow: function(rowid, e) {
+				var $self = $(this), iCol, cm,
+			    $td = $(e.target).closest("tr.jqgrow>td"),
+			    $tr = $td.closest("tr.jqgrow"),
+			    p = $self.jqGrid("getGridParam");
+
+			    if ($(e.target).is("input[type=checkbox]") && $td.length > 0) {
+			       iCol = $.jgrid.getCellIndex($td[0]);
+			       cm = p.colModel[iCol];
+			       if (cm != null && cm.name === "cb") {
+			           // multiselect checkbox is clicked
+			           $self.jqGrid("setSelection", $tr.attr("id"), true ,e);
+			       }
+			    }
+				// 경고 클래스 설정
+			    fn_grid_com.setWarningClass(partnerList,rowid,["ossName","licenseName"]);
+			    return false;
+			},
+			onCellSelect: function(rowid,iCol,cellcontent,e) {
+				if (iCol=="3") {
+					com_fn.exitCell(_mainLastsel, "list");
+					
+					fn_grid_com.showOssViewPage(partnerList, rowid, true, partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
+				}
+			},
+			ondblClickRow: function(rowid,iRow,iCol,e) {
+				var permission = partnerData.permission == 1;
+				
+				if (iCol!="17" && (permission && "CONF" != partnerStatus && 'REQ' != partnerStatus)) {
+					if ('ROLE_USER' == userRole && 'REV' == partnerStatus) {
+					} else {
+						cleanErrMsg("list", rowid);
+						fn_grid_com.setCellEdit(partnerList, rowid, partyValidMsgData_e, partyDiffMsgData_e, partyInfoMsgData_e, com_fn.getLicenseName);
+
+						// 서브 그리드 제외
+						ondblClickRowBln = false;
+						
+						$('#'+rowid+'_licenseName').addClass('autoCom');
+						$('#'+rowid+'_licenseName').css({'width' : '60px'});
+						var result = $('#'+rowid+'_licenseName').val().split(",");
+
+						result.forEach(function(cur,idx){
+							if(cur != ""){
+								var mult = "<button class=\"btn btn-outline-secondary btn-sm ml-3 mb-1\" ondblclick=\"com_fn.showLicenseInfo(this)\">" + cur + "<span class=\"badge bg-danger\" style=\"margin-left: 3px;\" onclick=\"com_fn.deleteLicenseRenewal(this)\">x</span></button><br/>";
+
+								$('#'+rowid+'_licenseNameBtn').append(mult);
+							}
+						});
+						
+						$('#'+rowid+'_licenseName').val("");
+	                    var nextCol = partnerList.jqGrid('getGridParam', 'colModel')[iCol].name;
+	                    var nextRow = rowid;
+	                    $('#'+nextRow+"_"+nextCol).focus();
+					}
+				}
+			},
+			onPaging: function(action) {
+				cleanErrMsg("list");
+				fn_grid_com.totalGridSaveMode('list');
+			},
+			gridComplete : function() {
+				cleanErrMsg("list");
+				
+				if (partyValidMsgData_e) {
+					gridValidMsgNew(partyValidMsgData_e, "list");
+				}
+
+				if (partyDiffMsgData_e) {
+					gridDiffMsg(partyDiffMsgData_e, "list");
+				}
+				
+				if (partyInfoMsgData_e) {
+					gridInfoMsg(partyInfoMsgData_e, "list");
+				}
+				
+				var arr = [];
+				arr = partnerList.jqGrid('getDataIDs');
+
+				for (var i in arr){
+					if(partnerList.jqGrid('getCell',arr[i],'obligationType') == 90) {
+						$("#"+arr[i]+"_source").parent().css("background", "CornflowerBlue");
+						$("#"+arr[i]+"_notify").parent().css("background", "CornflowerBlue");
+					}
+				}
+				
+				updateGridRowCount('list', 'pager'); 
+			},
+			removeHighLight : true
+		});
+		partnerList.jqGrid('filterToolbar',{stringResult: true, searchOnEnter: true, searchOperators: true, defaultSearch: "cn",
+			beforeSearch: function () {
+				if (_mainLastsel != -1) {
+					fn_grid_com.setGridBeforeSearch(partnerList, com_fn.getLicenseName);
+            	}
+			},
+			afterSearch : function () {
+				updateGridRowCount('list', 'pager'); 
+			}
+		});
+		
+		$('#list').closest(".ui-jqgrid-bdiv").children(":first").css({"height":"500px"});
+	}
+}
+</script>
+</th:block>

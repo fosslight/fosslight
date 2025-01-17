@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+    //<![CDATA[
+    /*global $ */
+    /*jslint browser: true, nomen: true */
+    //var defaultLocale = '${sessUserInfo.defaultLocale}';
+    let defaultTab = [[${sessUserInfo?.defaultTab}]];
+
+    $(document).ready(function(){
+        'use strict';
+        data.init();
+        evt.init();
+
+        $(".select2").select2();
+        $('#division').select2({placeholder: "Division", allowClear: true});
+    });
+
+    let commentTemp = '';
+    let data = {
+        init : function(){
+            if(!defaultTab) {
+                $("[name='defaultTab']:eq(0)").attr("checked", true); // 첫번째 항목을 선택하도록 변경
+            } else {
+                $.each(defaultTab.split(","), function(idx, val){
+                    $("#defaultTab" + val).attr('checked', true);
+                });
+            }
+            $('#configurationForm_01 select[name="defaultLocale"]').trigger('change');
+            $('#userInfoArea select[name="division"]').trigger('change');
+
+            let userDivision = $('#userInfoArea select[name="division"]');
+            if([[${sessUserInfo?.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+                for(var i=0;i<userDivision.children().length;i++){
+                    if(userDivision.children()[i].value == [[${sessUserInfo.division}]]) {
+                        break;
+                    }
+                    if(userDivision.children().length - 1 == i ) {
+                        let divisionName = [[${@CoCodeManager.getCodeString(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), sessUserInfo?.division)}]];
+                        userDivision.append("<option value='" + [[${sessUserInfo.division}]] + "' >" + divisionName+ "</option>");
+                        $('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
+                        $('#userInfoArea select[name="division"] option:last').change();
+                    }
+                }
+            }
+
+            userDivision = $('#userInfoArea select[name="division"]');
+            for(var i=0;i<userDivision.children().length;i++){
+                if(userDivision.children()[i].value == [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+                    break;
+                }
+                if(userDivision.children().length - 1 == i ) {
+                    let optionVal = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
+                    userDivision.append(`<option value="` + optionVal + `" ></option>`);
+                    if([[${sessUserInfo.division}]] != [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]]) {
+                        $('#userInfoArea select[name="division"] option:last').attr("selected", "selected");
+                        $('#userInfoArea select[name="division"] option:last').change();
+                    }
+                }
+            }
+        },
+    };
+
+    let evt = {
+        init : function(){
+            /* set select2 */
+            $("#division, #defaultSearch").select2({
+                placeholder: "",
+                allowClear: true,
+            });
+
+            $("#saveDefaultLocaleButton").on('click',function(){
+                alertify.confirm([[#{msg.common.confirm.save2}]], function (e) {
+                    if (e) {
+                        fn.updateDefaultLocale();
+                    } else {
+                        return false;
+                    }
+                });
+            });
+
+            $("#saveDefaultListTabButton").on('click',function(){
+                if($('input:checkbox[name="defaultTab"]:checked').length == 0){
+                    alertify.alert([[#{msg.configuration.required.selectDefaultTab}]], function(){});
+                    return false;
+                }
+
+                alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+                    if (e) {
+                        fn.updateDefaultTabList();
+                    } else {
+                        return false;
+                    }
+                });
+            });
+
+            $("#passwordEnabled").on('change', function(){
+                var isChecked = $('#passwordEnabled').is(":checked");
+                $("#password").attr("disabled", !isChecked);
+                $("#password").val('');
+            });
+        }
+    };
+
+    let fn = {
+        loadSearchCondition: function(){
+            var searchAreaFlag = $("#defaultSearch option:selected").val();
+            $("#searchConditionArea").fadeOut(300);
+            $("#searchConditionBtnArea").fadeOut(300);
+
+            if(searchAreaFlag != "") {
+                $.ajax({
+                    url : "/configuration/loadDefaultSearchCondition",
+                    dataType : 'html',
+                    cache : false,
+                    data : {'defaultSearchType' : searchAreaFlag},
+                    success : function(detailResult){
+                        $("#searchConditionArea").html(detailResult);
+                        $("#searchConditionArea").fadeIn(300);
+                        $("#searchConditionBtnArea").fadeIn(300);
+                    },
+                    error : function(request,status,error){
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                        $("#defaultSearch").val("");
+                    }
+                });
+
+            }
+
+        },
+        updateSearchCondition: function(){
+            // multiple checkbox values to comma separate
+            var chkElArr = ["restrictions", "statuses", "status", "priority"];
+            $.each(chkElArr, function(index, item){
+
+                var selectedValues  = "";
+
+                $('#searchConditionForm select[name="'+item+'"]').find(':selected').each(function() {
+                    if (selectedValues.length === 0) {
+                        selectedValues += $(this).val();
+                    } else {
+                        selectedValues += "," + $(this).val();
+                    }
+                });
+
+                if(selectedValues.length > 0) {
+                    fn.appendFormCheckboxValuesEl(item, selectedValues);
+                }
+            });
+
+            $("#searchConditionForm").ajaxForm({
+                url : "/configuration/updateDefaultSearchCondition",
+                type : 'POST',
+                dataType:"json",
+                cache : false,
+                success: fn.onUpdateSuccess,
+                error : fn.onError
+            }).submit();
+        },
+        appendFormCheckboxValuesEl(item, selectedValues) {
+            $('#searchConditionForm input[name="chk_'+item+'"]').remove();
+            var addEl = '<input type="hidden" name="chk_'+item+'" value="'+ selectedValues +'" />';
+            $("#searchConditionForm").append(addEl);
+        },
+        updateDefaultLocale : function () {
+            $("#configurationLocaleForm").ajaxForm({
+                url : "/configuration/updateDefaultLocale",
+                type : 'POST',
+                dataType:"json",
+                cache : false,
+                success: function(json, status){
+                    loading.hide();
+                    if(json.resCd == '10'){
+                        var data = {
+                            link: "/index?lang=" + json.result,
+                            action: 'changeURL'
+                        };
+                        parent.postMessage(JSON.stringify(data), "*");
+                    }else{
+                        alertify.error([[#{msg.common.valid2}]], 0);
+                    }
+                },
+                error : fn.onError
+            }).submit();
+        },
+        updateDefaultTabList : function(eId){
+            $("#configurationListForm").ajaxForm({
+                url : "/configuration/saveAjax",
+                type : 'POST',
+                dataType:"json",
+                cache : false,
+                success: fn.onUpdateSuccess,
+                error : fn.onError
+            }).submit();
+        },
+        onUpdateSuccess : function(json, status){
+            loading.hide();
+            if(json.resCd == '10'){
+                alertify.success([[#{msg.common.success}]]);
+            }else{
+                alertify.error([[#{msg.common.valid2}]], 0);
+            }
+        },
+        onError : function(data, status){
+            alertify.error([[#{msg.common.valid2}]], 0);
+        },
+        changePassword : function(){
+            var params = {};
+            var password = $("#password").val();
+            var userName = $('input[name="userName"]').val();
+            var division = $("#division").val();
+            
+            if (division == null){
+                alertify.alert([[#{msg.configuration.notice.devision}]], function(){});
+                return false;
+            }
+            
+            alertify.confirm([[#{msg.common.confirm.save}]], function (e) {
+                if (e) {
+                    $.ajax({
+                        type: 'POST',
+                        url : "/system/user/updateUserNameAndDivision",
+                        data: JSON.stringify({'userName':userName, 'division':division, 'password': password}),
+                        contentType : 'application/json',
+                        success: function (data) {
+                            if("true" != data.isValid) {
+                                if(data.validMsg) {
+                                    alertify.alert(data.validMsg, function(){});
+                                } else {
+                                    alertify.error([[#{msg.common.valid2}]], 0);
+                                }
+                            } else {
+                                alertify.success([[#{msg.common.success}]]);
+                            }
+                        },
+                        error : fn.onError
+                    });
+                } else {
+                    return false;
+                }
+            });
+        }
+    };
+    //]]>
+</script>
+</th:block>

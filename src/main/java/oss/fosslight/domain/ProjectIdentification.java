@@ -80,6 +80,9 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	/** The file path. */
 	private String filePath;
 	
+	/** The package url */
+	private String packageUrl;
+	
 	/** The binary name. */
 	private String binaryName;
 	
@@ -340,6 +343,18 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	private String checkOssList = "N";
 	private String publDate;
 	private String patchLink;
+	
+	private String dependencies;
+	private String refOssName;
+	private String changeFlag;
+	private String addFlag;
+	
+	private String tlsh;
+	private String checkSum;
+	
+	private List<ProjectIdentification> deduplicatedComponentLicenseList;
+	
+	private Float standardScore;
 	
 	public String getRedirectLocation() {
 		return redirectLocation;
@@ -2089,5 +2104,77 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setOssVersionEmptyFlag(String ossVersionEmptyFlag) {
 		this.ossVersionEmptyFlag = ossVersionEmptyFlag;
+	}
+
+	public String getDependencies() {
+		return dependencies;
+	}
+
+	public void setDependencies(String dependencies) {
+		this.dependencies = dependencies;
+	}
+
+	public String getRefOssName() {
+		return refOssName;
+	}
+
+	public void setRefOssName(String refOssName) {
+		this.refOssName = refOssName;
+	}
+
+	public String getChangeFlag() {
+		return changeFlag;
+	}
+
+	public void setChangeFlag(String changeFlag) {
+		this.changeFlag = changeFlag;
+	}
+
+	public String getAddFlag() {
+		return addFlag;
+	}
+
+	public void setAddFlag(String addFlag) {
+		this.addFlag = addFlag;
+	}
+
+	public List<ProjectIdentification> getDeduplicatedComponentLicenseList() {
+		return deduplicatedComponentLicenseList;
+	}
+
+	public void setDeduplicatedComponentLicenseList(List<ProjectIdentification> deduplicatedComponentLicenseList) {
+		this.deduplicatedComponentLicenseList = deduplicatedComponentLicenseList;
+	}
+
+	public String getTlsh() {
+		return tlsh;
+	}
+
+	public void setTlsh(String tlsh) {
+		this.tlsh = tlsh;
+	}
+
+	public String getCheckSum() {
+		return checkSum;
+	}
+
+	public void setCheckSum(String checkSum) {
+		this.checkSum = checkSum;
+	}
+
+	public String getPackageUrl() {
+		return packageUrl;
+	}
+
+	public void setPackageUrl(String packageUrl) {
+		this.packageUrl = packageUrl;
+	}
+
+	public Float getStandardScore() {
+		return standardScore;
+	}
+
+	public void setStandardScore(Float standardScore) {
+		this.standardScore = standardScore;
 	}
 }

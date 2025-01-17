@@ -4,6 +4,22 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="oss.fosslight.repository.ApiProjectMapper">
+	<sql id="limitPage">
+		<choose>
+			<when test="offset != null and countPerPage != null">
+				LIMIT #{offset}, #{countPerPage}
+			</when>
+			<when test="offset == null and countPerPage != null">
+				LIMIT 0, #{countPerPage}
+			</when>
+			<when test="offset != null and countPerPage == null">
+				LIMIT #{offset}, 10
+			</when>
+			<otherwise>
+				LIMIT 0, 10
+			</otherwise>
+		</choose>
+	</sql>
 	
 	<select id="selectProjectTotalCount" parameterType="oss.fosslight.domain.Project" resultType="int">
 		/* ProjectMapper.selectProjectTotalCount */
@@ -46,6 +62,14 @@
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateTo)">
 				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{updateDateTo},'%Y%m%d')
 			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+	                AND T1.PRJ_NAME = #{prjName}
+	            </if>
+				<if test="!@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+					AND T1.PRJ_NAME LIKE CONCAT('%', #{prjName}, '%')
+				</if>
+			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 				AND (
 						T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
@@ -75,8 +99,115 @@
 			    </foreach>
 			</if>
 	</select>
-	
+
 	<select id="selectProject" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		/* ProjectMapper.selectProject */
+		SELECT A.PRJ_ID
+		, A.PRJ_NAME
+		, A.PRJ_VERSION
+		, DATE_FORMAT(A.MODIFIED_DATE,'%Y-%m-%d') AS UPDATE_DATE
+		, DATE_FORMAT(A.CREATED_DATE,'%Y-%m-%d') AS CREATE_DATE
+		, A.IDENTIFICATION_STATUS
+		, A.VERIFICATION_STATUS
+		, A.DESTRIBUTION_STATUS AS DISTRIBUTION_STATUS
+		, A.DISTRIBUTION_TYPE
+		, A.NETWORK_SERVER_TYPE AS NETWORK_SERVICE
+		, A.NOTICE_TYPE AS NOTICE
+		, A.NOTICE_TYPE_ETC AS NOTICE_PLATFORM
+		, A.PRIORITY
+		, A.STATUS
+		, A.SRC_CSV_FILE_ID
+		, A.BIN_CSV_FILE_ID
+		, A.BIN_BINARY_FILE_ID
+		FROM (
+		SELECT T1.PRJ_ID
+		, T1.PRJ_NAME
+		, T1.PRJ_VERSION
+		, T1.CREATED_DATE
+		, T1.MODIFIED_DATE
+		, IFNULL((SELECT USER_NAME FROM T2_USERS WHERE T1.CREATOR = USER_ID), T1.CREATOR) AS CREATOR
+		, CASE
+		WHEN T1.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
+		WHEN T1.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
+		WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV'
+		WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ'
+		WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'FREV'
+		WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
+		WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
+		ELSE 'PROG'
+		END STATUS
+		, T1.PRIORITY
+		, IFNULL(T1.IDENTIFICATION_STATUS, '') AS IDENTIFICATION_STATUS
+		, IFNULL(T1.VERIFICATION_STATUS, '') AS VERIFICATION_STATUS
+		, IFNULL(T1.DESTRIBUTION_STATUS, '') AS DESTRIBUTION_STATUS
+		, T1.DISTRIBUTION_TYPE
+		, T1.SRC_CSV_FILE_ID
+		, T1.BIN_CSV_FILE_ID
+		, T1.BIN_BINARY_FILE_ID
+		, T3.CD_DTL_NM
+		, T3.CD_DTL_NO
+		, IF(T1.NETWORK_SERVER_TYPE IS NULL OR T1.NETWORK_SERVER_TYPE = '', 'NO', 'YES') AS NETWORK_SERVER_TYPE
+		, T4.NOTICE_TYPE
+		, T4.NOTICE_TYPE_ETC
+		FROM PROJECT_MASTER T1
+		LEFT JOIN T2_USERS T2 ON T1.CREATOR = T2.USER_ID
+		LEFT JOIN (SELECT * FROM T2_CODE_DTL WHERE CD_NO = '200') T3 ON T1.DIVISION = T3.CD_DTL_NO
+		LEFT JOIN OSS_NOTICE T4 ON T1.PRJ_ID = T4.PRJ_ID
+		WHERE T1.USE_YN = 'Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateFrom)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{createDateFrom},'%Y%m%d')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(createDateTo)">
+			AND DATE_FORMAT(T1.CREATED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{createDateTo},'%Y%m%d')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateFrom)">
+			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[>=]]> DATE_FORMAT(#{updateDateFrom},'%Y%m%d')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateTo)">
+			AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{updateDateTo},'%Y%m%d')
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+			<if test="@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+				AND T1.PRJ_NAME = #{prjName}
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+				AND T1.PRJ_NAME LIKE CONCAT('%', #{prjName}, '%')
+			</if>
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
+			AND (
+			T1.CREATOR IN (SELECT X.USER_ID FROM T2_USERS X WHERE X.USER_NAME LIKE CONCAT('%',#{creator},'%'))
+			OR T1.CREATOR LIKE CONCAT('%',#{creator},'%')
+			)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(modelName)">
+			AND EXISTS (SELECT 1
+			FROM PROJECT_MODEL M
+			WHERE T1.PRJ_ID = M.PRJ_ID
+			AND MODEL_NAME LIKE CONCAT('%',REGEXP_REPLACE(#{modelName}, '_', '\\\\_'),'%'))
+		</if>
+		) A
+		WHERE 1=1
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(status)">
+			AND A.STATUS = #{status}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(division)">
+			AND (
+			A.CD_DTL_NM = #{division}
+			OR A.CD_DTL_NO = #{division}
+			)
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjIdList)">
+			<foreach item="item" index="index" collection="prjIdList" open=" AND (" close=")" separator="OR">
+				A.PRJ_ID = #{item}
+			</foreach>
+		</if>
+		ORDER BY A.PRJ_ID DESC
+		<include refid="limitPage"/>
+	</select>
+
+	<select id="selectProject_V1" parameterType="hashMap" resultType="oss.fosslight.domain.CamelMap">
+		/* NOTE: This method needs to be removed when V1 API is fade out */
 		/* ProjectMapper.selectProject */
 		SELECT A.PRJ_ID
 			 , A.PRJ_NAME
@@ -92,6 +223,9 @@
 		     , A.NOTICE_TYPE_ETC AS NOTICE_PLATFORM
 		     , A.PRIORITY
 		     , A.STATUS
+		     , A.SRC_CSV_FILE_ID
+			 , A.BIN_CSV_FILE_ID
+			 , A.BIN_BINARY_FILE_ID
 		  FROM (
 			SELECT T1.PRJ_ID
 				 , T1.PRJ_NAME
@@ -104,9 +238,9 @@
 						WHEN T1.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
 						WHEN T1.IDENTIFICATION_STATUS = 'REV' OR T1.VERIFICATION_STATUS = 'REV'	THEN 'REV' 
 						WHEN T1.IDENTIFICATION_STATUS = 'REQ' OR T1.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y'	THEN 'REQ' 
-						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
-					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
-					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'REV'
+						WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'DONE' THEN 'FREV'
+					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'CONF' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
+					 	WHEN T1.IDENTIFICATION_STATUS = 'CONF' AND T1.VERIFICATION_STATUS = 'NA' AND T1.DESTRIBUTION_STATUS = 'NA' THEN 'FREV'
 						ELSE 'PROG'
 					END STATUS
 				 , T1.PRIORITY
@@ -114,6 +248,9 @@
 				 , IFNULL(T1.VERIFICATION_STATUS, '') AS VERIFICATION_STATUS
 				 , IFNULL(T1.DESTRIBUTION_STATUS, '') AS DESTRIBUTION_STATUS
 				 , T1.DISTRIBUTION_TYPE
+				 , T1.SRC_CSV_FILE_ID
+				 , T1.BIN_CSV_FILE_ID
+				 , T1.BIN_BINARY_FILE_ID
 				 , T3.CD_DTL_NM
 				 , T3.CD_DTL_NO
                  , IF(T1.NETWORK_SERVER_TYPE IS NULL OR T1.NETWORK_SERVER_TYPE = '', 'NO', 'YES') AS NETWORK_SERVER_TYPE
@@ -135,6 +272,14 @@
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(updateDateTo)">
 				AND DATE_FORMAT(T1.MODIFIED_DATE,'%Y%m%d') <![CDATA[<=]]> DATE_FORMAT(#{updateDateTo},'%Y%m%d')
+			</if>
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+				 <if test="@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+					 AND T1.PRJ_NAME = #{prjName}
+				 </if>
+				 <if test="!@oss.fosslight.util.StringUtil@equals('Y', prjNameExactYn)">
+					 AND T1.PRJ_NAME LIKE CONCAT('%', #{prjName}, '%')
+				 </if>
 			</if>
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(creator)">
 				AND (
@@ -167,6 +312,40 @@
 		ORDER BY A.PRJ_ID DESC
 		LIMIT 0, 1000
 	</select>
+
+	<select id="checkProjectExist" parameterType="hashMap" resultType="boolean">
+		SELECT IF(COUNT(*) = 1, 1, 0)
+		FROM PROJECT_MASTER T1
+		WHERE T1.USE_YN='Y'
+		<choose>
+			<when test="@oss.fosslight.util.StringUtil@equals('ROLE_ADMIN', userRole)">
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', needToUploadReport)">
+					AND (T1.IDENTIFICATION_STATUS != 'CONF' OR T1.IDENTIFICATION_STATUS IS NULL)
+				</if>
+			</when>
+			<otherwise>
+				AND (
+					T1.CREATOR = #{userId}
+					OR EXISTS (
+						SELECT 1
+						FROM PROJECT_WATCHER A1
+						<!-- INNER JOIN T2_USERS A2 ON A2.USE_YN = 'Y' AND A2.USER_ID = #{userId} -->
+						WHERE
+						A1.PRJ_ID = T1.PRJ_ID
+						AND (
+							A1.USER_ID = #{userId}
+							OR (A1.USER_ID = 'all' AND A1.DIVISION = (SELECT DIVISION FROM T2_USERS A2 WHERE A2.USER_ID = #{userId}) )
+						)
+					)
+				)
+				<if test="@oss.fosslight.util.StringUtil@equals('Y', needToUploadReport)">
+					AND (T1.IDENTIFICATION_STATUS = 'PROG' OR T1.IDENTIFICATION_STATUS IS NULL)
+				</if>
+			</otherwise>
+		</choose>
+		AND T1.PRJ_ID = #{prjId}
+	</select>
+
 	
 	<select id="selectProjectCount" parameterType="hashMap" resultType="int">
 		/* ProjectMapper.selectProjectCount */
@@ -345,7 +524,7 @@
 			, #{osType}
 			, #{osTypeEtc}
 			, #{distributionSite}
-			, ''
+			, #{comment}
 			, #{loginUserName}
 			, #{loginUserName}
 			, (SELECT DIVISION FROM T2_USERS WHERE USER_ID = #{loginUserName})
@@ -413,7 +592,7 @@
 					WHEN RTN.REFERENCE_DIV = '13' AND RTN.MERGE_PRE_DIV = '10' THEN 14 
 					ELSE 99 
 				 END AS MERGE_ORDER 
-			 , RTN.LICENSE_ID, RTN.LICENSE_NAME, RTN.COPYRIGHT AS COPYRIGHT_TEXT
+			 , RTN.LICENSE_ID, RTN.LICENSE_NAME, GROUP_CONCAT(RTN.COPYRIGHT SEPARATOR '|') AS COPYRIGHT_TEXT
 			 , RTN.CVSS_SCORE_MAX
 			 , RTN.CVSS_SCORE_MAX1
 			 , RTN.CVSS_SCORE_MAX2
@@ -495,7 +674,38 @@
 					ON A1.COMPONENT_ID = A2.COMPONENT_ID 
 						AND  A2.EXCLUDE_YN <![CDATA[<>]]> 'Y'
 				LEFT OUTER JOIN LICENSE_MASTER A3 ON A2.LICENSE_ID = A3.LICENSE_ID AND A3.USE_YN = 'Y'
-				LEFT OUTER JOIN OSS_MASTER A4 ON A1.OSS_NAME = A4.OSS_NAME AND A1.OSS_VERSION = A4.OSS_VERSION AND A4.USE_YN = 'Y'
+				LEFT OUTER JOIN (
+        				SELECT
+    						OV.OSS_ID,
+		    				OC.OSS_COMMON_ID,
+		    				OC.OSS_NAME,
+		    				OV.OSS_VERSION,
+		    				OC.HOMEPAGE,
+							OC.DOWNLOAD_LOCATION,
+		    				OC.SUMMARY_DESCRIPTION,
+		    				OV.LICENSE_DIV,
+		    				OV.USE_YN,
+		    				OV.VULN_CPE_NM,
+		    				OV.CVSS_SCORE,
+		    				OV.CVE_ID,
+		    				OV.VULN_YN,
+		    				OV.VULN_RECHECK,
+		    				OV.VULN_DATE,
+		    				OV.LICENSE_TYPE,
+		    				OV.OBLIGATION_TYPE,
+		    				OV.COPYRIGHT,
+		    				OV.ATTRIBUTION,
+							OC.DEACTIVATE_FLAG,
+							OV.CREATOR,
+							OV.CREATED_DATE,
+							OV.MODIFIER,
+							OV.MODIFIED_DATE,
+							OV.RESTRICTION,
+							OV.IN_CPE_MATCH_FLAG
+						FROM OSS_COMMON OC
+						LEFT OUTER JOIN OSS_VERSION OV
+						ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+				) A4 ON A1.OSS_NAME = A4.OSS_NAME AND A1.OSS_VERSION = A4.OSS_VERSION AND A4.USE_YN = 'Y'
 				LEFT OUTER JOIN (SELECT PRODUCT
 									  , VERSION
 									  , CVSS_SCORE
@@ -568,7 +778,7 @@
 				, T1.DESCRIPTION as description
 				, T1.LICENSE_TEXT as licenseText
 				, T1.ATTRIBUTION as attribution
-				, (SELECT GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') FROM LICENSE_NICKNAME T2 WHERE T1.LICENSE_NAME = T2.LICENSE_NAME ) AS licenseNicknameStr
+				, (SELECT GROUP_CONCAT(T2.LICENSE_NICKNAME SEPARATOR '|') FROM LICENSE_NICKNAME T2 WHERE T1.LICENSE_ID = T2.LICENSE_ID ) AS licenseNicknameStr
 				, T1.RESTRICTION as restriction
 			FROM LICENSE_MASTER T1
 			WHERE T1.USE_YN = 'Y'
@@ -876,6 +1086,8 @@
 			, A.IDENTIFICATION_SUB_STATUS_ANDROID  
 			, A.COMPLETE_YN 
 			, A.DROP_YN
+			, A.SECMAIL_YN
+		    , A.SECMAIL_DESC
 			, A.REVIEWER 
 			, A.USE_YN 
 			, A.COPY_PRJ_ID
@@ -904,6 +1116,7 @@
 	        , A.DISTRIBUTE_OSD_KEY
 			
 			/** FILE_ID **/
+			, A.DEP_CSV_FILE_ID
 			, A.SRC_CSV_FILE_ID
 			, A.SRC_ANDROID_CSV_FILE_ID
 			, A.SRC_ANDROID_NOTICE_FILE_ID
@@ -922,6 +1135,7 @@
 			, A.README_FILE_NAME
 			, A.VERIFY_FILE_CONTENT
 			, A.EXCEPT_FILE_CONTENT
+			, A.BINARY_FILE_YN
 			, A.CREATOR 
 			, A.CREATED_DATE
 			, A.MODIFIER 
@@ -983,6 +1197,38 @@
 		 WHERE T1.USE_YN = 'Y'
 		   AND T1.PRJ_ID = #{prjId}
 	</select>
+
+	<select id="getProjectInfo"  parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.Project">
+		SELECT T1.*
+			, T2.NOTICE_TYPE
+			, T2.NOTICE_TYPE_ETC
+		FROM PROJECT_MASTER T1
+		LEFT OUTER JOIN OSS_NOTICE T2 ON T1.PRJ_ID = T2.PRJ_ID
+		WHERE USE_YN ='Y'
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(identificationStatus)">
+			AND T1.IDENTIFICATION_STATUS = #{identificationStatus}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjId)">
+			AND T1.PRJ_ID = #{prjId}
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjName)">
+			AND T1.PRJ_NAME = #{prjName} 
+		</if>
+		<if test="!@oss.fosslight.util.StringUtil@isEmpty(prjVersion)">
+			AND T1.PRJ_VERSION = #{prjVersion}
+		</if>
+	</select>
+
+	<select id="selectOssComponentsList" parameterType="oss.fosslight.domain.Project" resultType="oss.fosslight.domain.ProjectIdentification">
+		SELECT
+			*
+		FROM
+			OSS_COMPONENTS
+		WHERE
+			REFERENCE_ID = #{referenceId}
+			AND REFERENCE_DIV = #{referenceDiv}
+		ORDER BY COMPONENT_ID
+	</select>
 	
 	<update id="updateIdentifcationProgress" parameterType="hashMap">
 		UPDATE PROJECT_MASTER SET IDENTIFICATION_STATUS = #{identificationStatus} WHERE PRJ_ID = #{prjId}
@@ -1029,7 +1275,7 @@
 				<when test='merge != null and merge == "N"'>RTN.OBLIGATION_TYPE as obligationType,</when>
 				<otherwise>
 					CASE 
-						WHEN IFNULL(RTN.OBLIGATION_TYPE, '') = '' AND IFNULL(RTN.OSS_ID, '') <![CDATA[<>]]> '' THEN ( SELECT B1.OBLIGATION_TYPE FROM OSS_MASTER B1 WHERE RTN.OSS_ID = B1.OSS_ID) 
+						WHEN IFNULL(RTN.OBLIGATION_TYPE, '') = '' AND IFNULL(RTN.OSS_ID, '') <![CDATA[<>]]> '' THEN ( SELECT B1.OBLIGATION_TYPE FROM OSS_VERSION B1 WHERE RTN.OSS_ID = B1.OSS_ID) 
 						ELSE  RTN.OBLIGATION_TYPE END AS obligationType, 
 				</otherwise>
 			</choose>
@@ -1046,7 +1292,7 @@
 					ELSE 99 END AS mergeOrder, 
 			RTN.LICENSE_ID as licenseId, 
 			RTN.LICENSE_NAME as licenseName, 
-			RTN.COPYRIGHT AS copyrightText, 
+			GROUP_CONCAT(RTN.COPYRIGHT SEPARATOR '|') AS copyrightText,
 			RTN.LICENSE_TYPE_IDX as licenseTypeIdx, 
 			RTN.CVSS_SCORE_MAX as cvssScoreMax,
 			RTN.CVSS_SCORE_MAX1 as cvssScoreMax1,
@@ -1127,7 +1373,38 @@
 					ON A1.COMPONENT_ID = A2.COMPONENT_ID 
 						AND  A2.EXCLUDE_YN <![CDATA[<>]]> 'Y'
 				LEFT OUTER JOIN LICENSE_MASTER A3 ON A2.LICENSE_ID = A3.LICENSE_ID AND A3.USE_YN = 'Y'
-				LEFT OUTER JOIN OSS_MASTER A4 ON A1.OSS_NAME = A4.OSS_NAME AND A1.OSS_VERSION = A4.OSS_VERSION AND A4.USE_YN = 'Y' 
+				LEFT OUTER JOIN (
+		        		SELECT
+		    				OV.OSS_ID,
+		    				OC.OSS_COMMON_ID,
+		    				OC.OSS_NAME,
+		    				OV.OSS_VERSION,
+		    				OC.HOMEPAGE,
+							OC.DOWNLOAD_LOCATION,
+		    				OC.SUMMARY_DESCRIPTION,
+		    				OV.LICENSE_DIV,
+		    				OV.USE_YN,
+		    				OV.VULN_CPE_NM,
+		    				OV.CVSS_SCORE,
+		    				OV.CVE_ID,
+		    				OV.VULN_YN,
+		    				OV.VULN_RECHECK,
+		    				OV.VULN_DATE,
+		    				OV.LICENSE_TYPE,
+		    				OV.OBLIGATION_TYPE,
+		    				OV.COPYRIGHT,
+		    				OV.ATTRIBUTION,
+							OC.DEACTIVATE_FLAG,
+							OV.CREATOR,
+							OV.CREATED_DATE,
+							OV.MODIFIER,
+							OV.MODIFIED_DATE,
+							OV.RESTRICTION,
+							OV.IN_CPE_MATCH_FLAG
+						FROM OSS_COMMON OC
+						LEFT OUTER JOIN OSS_VERSION OV
+						ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+				) A4 ON A1.OSS_NAME = A4.OSS_NAME AND A1.OSS_VERSION = A4.OSS_VERSION AND A4.USE_YN = 'Y' 
 			 	WHERE A1.REFERENCE_ID = #{referenceId}
 					<if test='noticeFlag != null and noticeFlag == "Y"'>
 						AND A1.OBLIGATION_TYPE IN ('10', '11')
@@ -1191,7 +1468,8 @@
 			PROJECT_MASTER
 		SET
 			EXCEPT_FILE_CONTENT = #{exceptFileContent},
-			VERIFY_FILE_CONTENT = #{verifyFileContent}
+			VERIFY_FILE_CONTENT = #{verifyFileContent},
+			BINARY_FILE_YN = #{binaryFileYn}
 		WHERE
 			PRJ_ID	= #{prjId}
 	</update>
@@ -1209,4 +1487,30 @@
 	<insert id="insertWatcher" parameterType="hashMap">
 		INSERT INTO PROJECT_WATCHER (PRJ_ID, DIVISION, USER_ID, EMAIL) VALUES (#{prjId}, #{division}, #{userId}, #{prjEmail})
 	</insert>
+	
+	<update id="updateProjectSubStatus" parameterType="hashMap">
+		UPDATE 
+			PROJECT_MASTER
+		SET 
+			<if test='identificationSubStatusPartner != null'>
+			IDENTIFICATION_SUB_STATUS_PARTNER = #{identificationSubStatusPartner}
+			</if>
+			<if test='identificationSubStatusSrc != null'>
+			IDENTIFICATION_SUB_STATUS_SRC = #{identificationSubStatusSrc}
+			</if>
+			<if test='identificationSubStatusBin != null'>
+			IDENTIFICATION_SUB_STATUS_BIN = #{identificationSubStatusBin}
+			</if>
+		WHERE
+			PRJ_ID = #{prjId}
+	</update>
+	
+	<delete id="resetOssComponentsAndLicense">
+		/* ApiProjectMapper.resetOssComponentsAndLicense */
+		DELETE COMPONENT, LICENSE 
+		FROM OSS_COMPONENTS COMPONENT 
+			LEFT JOIN OSS_COMPONENTS_LICENSE LICENSE ON COMPONENT.COMPONENT_ID = LICENSE.COMPONENT_ID
+		WHERE
+		 COMPONENT.REFERENCE_ID = #{referenceId} AND COMPONENT.REFERENCE_DIV = #{referenceDiv}
+	</delete>
 </mapper>

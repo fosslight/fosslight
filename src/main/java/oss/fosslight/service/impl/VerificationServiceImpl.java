@@ -14,18 +14,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,9 +61,9 @@ import oss.fosslight.service.VerificationService;
 import oss.fosslight.util.DateUtil;
 import oss.fosslight.util.ExcelDownLoadUtil;
 import oss.fosslight.util.FileUtil;
+import oss.fosslight.util.PdfUtil;
 import oss.fosslight.util.SPDXUtil2;
 import oss.fosslight.util.StringUtil;
-import oss.fosslight.util.PdfUtil;
 
 @Service
 @Slf4j
@@ -85,13 +85,15 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	private static String VERIFY_PATH_OUTPUT = CommonFunction.emptyCheckProperty("verify.output.path", "/verify/output");
 	private static String NOTICE_PATH = CommonFunction.emptyCheckProperty("notice.path", "/notice");
 	private static String EXPORT_TEMPLATE_PATH = CommonFunction.emptyCheckProperty("export.template.path", "/template");
+	private static String REVIEW_REPORT_PATH = CommonFunction.emptyCheckProperty("reviewReport.path", "/reviewReport");
+	private static String FOSSLIGHT_BINARY_SCANNER_PATH = CommonFunction.emptyCheckProperty("verify.fosslight.binary.scanner.path", "/fosslight_binary");
 	
 	@Override
 	public Map<String, Object> getVerificationOne(Project project) {
 		// 1. Verification정보
 		// 2. Comment 정보
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		Project prj = projectMapper.selectProjectMaster(project);
+		Project prj = projectMapper.selectProjectMaster(project.getPrjId());
 
 		String comment = prj != null ? prj.getComment() : null;
 		String content = commentMapper.getContent(comment);
@@ -130,10 +132,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String packageFileId3 = fileSeqs.size() > 2 ? fileSeqs.get(2) : null;
 		
 		int result = verificationMapper.checkPackagingFileId(prjId,packageFileId, packageFileId2, packageFileId3);
-		
+
 		if (result > 0){
 			return false;
-		}else{
+		} else {
 			return true;
 		}
 	}
@@ -146,10 +148,12 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			List<String> gridComponentIds =	(List<String>)map.get("gridComponentIds");
 			List<String> gridFilePaths =	(List<String>)map.get("gridFilePaths");
 			List<String> fileSeqs =	(List<String>) map.get("fileSeqs");
+			List<String> fileTypeSeqs =	(List<String>) map.get("fileTypeSeqs");
 			String prjId = (String) map.get("prjId");
 			String deleteFlag = (String) map.get("deleteFlag");
 			String verifyFlag = (String) map.get("statusVerifyYn");
 			String deleteFiles = (String) map.get("deleteFiles");
+			String vulDocSkipYn = (String) map.get("vulDocSkipYn");
 			String deleteComment = "";
 			String uploadComment = "";
 			
@@ -179,23 +183,36 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				newPackagingFileIdList.add(fileSeqs.size() > 0 ? fileSeqs.get(0) : null);
 				newPackagingFileIdList.add(fileSeqs.size() > 1 ? fileSeqs.get(1) : null);
 				newPackagingFileIdList.add(fileSeqs.size() > 2 ? fileSeqs.get(2) : null);
+				newPackagingFileIdList.add(fileSeqs.size() > 3 ? fileSeqs.get(3) : null);
 				prjParam.setPackageFileId(newPackagingFileIdList.get(0));
 				prjParam.setPackageFileId2(newPackagingFileIdList.get(1));
 				prjParam.setPackageFileId3(newPackagingFileIdList.get(2));
+				prjParam.setPackageFileId4(newPackagingFileIdList.get(3));
+				
+				ArrayList<String> newPackagingFileTypeList = new ArrayList<String>();
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 0 ? fileTypeSeqs.get(0) : null);
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 1 ? fileTypeSeqs.get(1) : null);
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 2 ? fileTypeSeqs.get(2) : null);
+				newPackagingFileTypeList.add(fileTypeSeqs.size() > 3 ? fileTypeSeqs.get(3) : null);
+				prjParam.setPackageFileType1(newPackagingFileTypeList.get(0));
+				prjParam.setPackageFileType2(newPackagingFileTypeList.get(1));
+				prjParam.setPackageFileType3(newPackagingFileTypeList.get(2));
+				prjParam.setPackageFileType4(newPackagingFileTypeList.get(3));
 				
 				if (deleteFiles.equals(CoConstDef.FLAG_YES)){
 					prjParam.setStatusVerifyYn(CoConstDef.FLAG_NO);
 				}			
 				
-				List<T2File> deleteFileList = new ArrayList<>();
+				List<T2File> deletePhysicalFileList = new ArrayList<>();
 				
 				// packaging File comment
 				try {
-					Project project = projectMapper.selectProjectMaster(prjParam);
+					Project project = projectMapper.selectProjectMaster(prjParam.getPrjId());
 					ArrayList<String> origPackagingFileIdList = new ArrayList<String>();
 					origPackagingFileIdList.add(project.getPackageFileId());
 					origPackagingFileIdList.add(project.getPackageFileId2());
 					origPackagingFileIdList.add(project.getPackageFileId3());
+					origPackagingFileIdList.add(project.getPackageFileId4());
 					
 					int idx = 0;
 					
@@ -206,7 +223,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							fileInfo.setFileSeq(fileId);
 							fileInfo = fileMapper.getFileInfo(fileInfo);
 							deleteComment += "Packaging file, "+fileInfo.getOrigNm()+", was deleted by "+loginUserName()+". <br>";
-							deleteFileList.add(fileInfo);
+
+							log.info("[Prj " + prjId + "] fileSeq(" +  fileInfo.getFileSeq() + ") " + deleteComment);
+
+							if (verificationMapper.countSameLogiFile(fileInfo) == 1) {
+								deletePhysicalFileList.add(fileInfo);
+							}
+							//delete logic path
+							verificationMapper.deletePackagingFileInfo(fileInfo);
+							verificationMapper.deleteReuseFileInfo(fileInfo);
+
 						}
 						
 						if (!isEmpty(newPackagingFileIdList.get(idx)) && !newPackagingFileIdList.get(idx).equals(fileId)){
@@ -216,8 +242,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							
 							if (CoConstDef.FLAG_YES.equals(result.getReuseFlag())){
 								uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was loaded from Project ID: "+result.getRefPrjId()+" by "+loginUserName()+". <br>";
+								log.info("[Prj " + prjId + "] fileSeq(" +  fileInfo.getFileSeq() + ") " + uploadComment);
 							}else{
 								uploadComment += "Packaging file, "+fileInfo.getOrigNm()+", was uploaded by "+loginUserName()+". <br>";
+								log.info("[Prj " + prjId + "] fileSeq(" +  fileInfo.getFileSeq() + ") " + uploadComment);
 							}
 						}
 						
@@ -234,19 +262,24 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					log.error(e.getMessage());
 				}
 				
-				verificationMapper.updatePackagingReuseMap(prjParam);
+//				verificationMapper.updatePackagingReuseMap(prjParam);
 				verificationMapper.updatePackageFile(prjParam);
 				
 				// delete physical file
-				for (T2File delFile : deleteFileList){
-					if (verificationMapper.selectVerificationFile(delFile.getFileSeq()) == null) {
-						fileService.deletePhysicalFile(delFile, "VERIFY");
-					}
+				for (T2File delFile : deletePhysicalFileList){
+					fileService.deletePhysicalFile(delFile, "VERIFY");
+					log.info("[Prj " + prjId + "] "+ "Remove physical file for " + delFile.getOrigNm() + " : "
+							+ delFile.getLogiPath() + "/" + delFile.getLogiNm());
 				}
 				
 				if (CoConstDef.FLAG_YES.equals(deleteFlag)){
 					projectMapper.updateReadmeContent(prjParam); // README Clear
 					projectMapper.updateVerifyContents(prjParam); // File List, Banned List Clear
+				}
+
+				if(vulDocSkipYn != null) {
+					prjParam.setVulDocSkipYn(vulDocSkipYn);
+					projectMapper.updateVulDocSkipYn(prjParam);
 				}
 			}
 		} catch (Exception e) {
@@ -279,21 +312,27 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 
 	@Override
-	public boolean getReviewReportPdfFile(OssNotice ossNotice) throws IOException {
-		return getReviewReportPdfFile(ossNotice, null);
+	public boolean getReviewReportPdfFile(String prjId) throws IOException {
+		return getReviewReportPdfFile(prjId, null);
 	}
 
 	@Override
-	public boolean getReviewReportPdfFile(OssNotice ossNotice, String contents) throws IOException {
-		Project prjInfo = projectService.getProjectBasicInfo(ossNotice.getPrjId());
+	public boolean getReviewReportPdfFile(String prjId, String contents) throws IOException {
+		Project prjInfo = projectService.getProjectBasicInfo(prjId);
 
-		// OSS Notice가 N/A이면 고지문을 생성하지 않는다.
-		if (CoConstDef.CD_NOTICE_TYPE_NA.equals(prjInfo.getNoticeType())) {
-			return true;
+		try {
+			contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(prjId));
+			if(contents == null) {
+				Project projectParam = new Project();
+				projectParam.setPrjId(prjId);
+				projectParam.setReviewReportFileId(null);
+				verificationMapper.updateReviewReportFileInfo(projectParam);
+				return false;
+			}
+		}catch(Exception e){
+			log.error(e.getMessage());
+			return false;
 		}
-
-		prjInfo.setUseCustomNoticeYn(!isEmpty(contents) ? CoConstDef.FLAG_YES : CoConstDef.FLAG_NO);
-		contents = avoidNull(contents, PdfUtil.getInstance().getReviewReportHtml(ossNotice.getPrjId()));
 
 		if ("binAndroid".equals(contents)) {
 			return getAndroidNoticeVelocityTemplateFile(prjInfo); // file Content 옮기는 기능에서 files.copy로 변경
@@ -424,9 +463,9 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 		try {
 			// file path and name 설정
-			// 파일 path : <upload_home>/notice/
+			// 파일 path : <upload_home>/reviewReport/
 			// 파일명 : 임시: 프로젝트ID_yyyyMMdd\
-			String filePath = NOTICE_PATH + "/" + project.getPrjId();
+			String filePath = REVIEW_REPORT_PATH + "/" + project.getPrjId();
 
 			// 이전에 생성된 pdf 파일은 모두 삭제한다.
 			Path rootPath = Paths.get(filePath);
@@ -444,6 +483,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 						if (returnSuccess > 0){
 							log.debug(filePath + "/" + _fName + " is delete success.");
+							fileService.deletePhysicalFile(file, "verify");
 						}else{
 							log.debug(filePath + "/" + _fName + " is delete failed.");
 						}
@@ -489,7 +529,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				ossNotice.setNetworkServerFlag(prjInfo.getNetworkServerType());
 
 				// Convert Map to Apache Velocity Template
-				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice));
+				return CommonFunction.VelocityTemplateToString(getNoticeHtmlInfo(ossNotice, true));
 			}
 		}
 	}
@@ -591,7 +631,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			projectNm +="_"+Integer.toString(packagingFileIdx)+"("+(file.getOrigNm()).replace(" ", "@@")+")";
 			
-			String commandStr = VERIFY_BIN_PATH+"/verify "+filePath+" "+prjId+" "+exceptionWordsPatten+" "+projectNm+" "+packagingFileIdx+" "+VERIFY_HOME_PATH;
+			String commandStr = VERIFY_BIN_PATH+"/verify "+filePath+" "+prjId+" "+exceptionWordsPatten+" "+projectNm+" "+packagingFileIdx+" "+VERIFY_HOME_PATH+" "+FOSSLIGHT_BINARY_SCANNER_PATH ;
 			log.info("VERIFY COMMAND : " + commandStr);
 
 			log.info("VERIFY START : " + prjId);
@@ -639,25 +679,28 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (rePath.indexOf(".tar") > -1){
 				rePath = rePath.substring(0, rePath.lastIndexOf(".tar"));
 			}
-			
+			if (rePath.indexOf(".zip") > -1){
+				rePath = rePath.substring(0, rePath.lastIndexOf(".zip"));
+			}
 			String decompressionDirName = "/" + rePath;
 			
 			String packageFileName = rePath;
 			String decompressionRootPath = "";
-			
-			boolean parenthesisCheckFlag = false;
-			if (packageFileName.contains("(") || packageFileName.contains(")")) parenthesisCheckFlag = true;
+			List<String> collectDataDeCompResultList = new ArrayList<>();
+			String firstPathName = "";
 			
 			// 사용자 입력과 packaging 파일의 디렉토리 정보 비교를 위해
 			// 분석 결과를 격납 (dir or file n	ame : count)
 			Map<String, Integer> deCompResultMap = new HashMap<>();
+			Map<String, Integer> deCompResultFileMap = new HashMap<>();
+			Map<String, Integer> secondDeCompResultMap = new HashMap<>();
+			Map<String, Integer> secondDeCompResultFileMap = new HashMap<>();
 			List<String> readmePathList = new ArrayList<String>();
 			if (result != null) {
 				boolean isFirst = true;
 				
 				for (String s : result) {
 					if (s.contains("?")) s = s.replaceAll("[?]", "0x3F");
-					if (s.startsWith(packageFileName) && parenthesisCheckFlag) s = s.replace(packageFileName, "");
 					
 					if (!isEmpty(s) && !(s.contains("(") && s.contains(")"))) {
 						// packaging file name의 경우 Path로 인식하지 못하도록 처리함.
@@ -668,6 +711,29 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						
 						if (s.startsWith("/")) {
 							s = s.substring(1);
+						}
+						
+						if (s.startsWith(packageFileName)) {
+							String removePackageFileName = s.replace(packageFileName, "");
+							if (removePackageFileName.startsWith("/")) {
+								removePackageFileName = removePackageFileName.substring(1);
+							}
+							if (!deCompResultMap.containsKey(removePackageFileName)) collectDataDeCompResultList.add(removePackageFileName);
+						} else {
+							String addPackageFileName = packageFileName + "/" + s;
+							if (!deCompResultMap.containsKey(addPackageFileName)) collectDataDeCompResultList.add(addPackageFileName);
+						}
+						
+						if (!isEmpty(firstPathName) && !packageFileName.equals(firstPathName)) {
+							if (s.startsWith(firstPathName)) {
+								String removeFirstPathName = s.replace(firstPathName, "");
+								if (removeFirstPathName.startsWith("/")) {
+									removeFirstPathName = removeFirstPathName.substring(1);
+								}
+								if (!deCompResultMap.containsKey(removeFirstPathName)) {
+									collectDataDeCompResultList.add(removeFirstPathName);
+								}
+							}
 						}
 						
 						if (s.endsWith("*")) {
@@ -688,6 +754,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 						}
 						
 						int cnt = 0;
+						boolean isNotDir = false;
 						
 						//파일 path인 경우, 상위 dir의 파일 count를 +1 한다.
 						if (isFile){
@@ -699,73 +766,280 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 							
 							if (s.indexOf("/") > -1) {
 								_dir = s.substring(0, s.lastIndexOf("/"));
+								if (isEmpty(firstPathName) && !isEmpty(s)) {
+									firstPathName = _dir;
+								}
 							}
 							
-							if (deCompResultMap.containsKey(_dir)) {
-								cnt = deCompResultMap.get(_dir);
-							}
-							
-							cnt++;
+//							if (deCompResultMap.containsKey(_dir)) {
+//								cnt = deCompResultMap.get(_dir);
+//							}
+//							
+//							cnt++;
 							
 							deCompResultMap.put(_dir, cnt);
+							
+							if (!_dir.equalsIgnoreCase(s)) {
+								isNotDir = true;
+							}
+						} else {
+							deCompResultMap.put(s, 0);
 						}
 						
-						deCompResultMap.put(s, 0);
+						if (isNotDir) {
+							int fileCnt = 0;
+							
+							if (deCompResultFileMap.containsKey(s)) {
+								fileCnt = deCompResultFileMap.get(s);
+							}
+							
+							fileCnt++;
+							
+							deCompResultFileMap.put(s, fileCnt);
+						}
+					}
+				}
+				
+				result = null;
+			}
+			
+			if (collectDataDeCompResultList != null && !collectDataDeCompResultList.isEmpty()) {
+				for (String s : collectDataDeCompResultList) {
+					boolean isFile = s.endsWith("*");
+					
+					if (s.startsWith("/")) {
+						s = s.substring(1);
+					}
+					
+					if (s.endsWith("*")) {
+						s = s.substring(0, s.length()-1);
+					}
+					
+					if (s.endsWith("/")) {
+						s = s.substring(0, s.length() -1);
+					}
+					
+					int cnt = 0;
+					boolean isNotDir = false;
+					
+					if (!deCompResultMap.containsKey(s)) {
+						if (isFile){
+							String _dir = s;
+							
+							if (s.toUpperCase().indexOf("README") > -1) {
+								continue;
+							}
+							
+							if (s.indexOf("/") > -1) {
+								_dir = s.substring(0, s.lastIndexOf("/"));
+							}
+							
+//							if (secondDeCompResultMap.containsKey(_dir)) {
+//								cnt = secondDeCompResultMap.get(_dir);
+//							}
+//							
+//							cnt++;
+							
+							secondDeCompResultMap.put(_dir, cnt);
+							
+							if (!_dir.equalsIgnoreCase(s)) {
+								isNotDir = true;
+							}
+						} else {
+							secondDeCompResultMap.put(s, 0);
+						}
+						
+						if (isNotDir) {
+							int fileCnt = 0;
+							
+							if (secondDeCompResultFileMap.containsKey(s)) {
+								fileCnt = secondDeCompResultFileMap.get(s);
+							}
+							
+							fileCnt++;
+							
+							secondDeCompResultFileMap.put(s, fileCnt);
+						}
+					}
+				}
+				
+				collectDataDeCompResultList = null;
+			}
+			
+			if (!secondDeCompResultMap.isEmpty()) {
+				for (String path : secondDeCompResultMap.keySet()) {
+					if (!deCompResultMap.containsKey(path)) {
+						deCompResultMap.put(path, secondDeCompResultMap.get(path));
 					}
 				}
 			}
 			
-			List<String> paths = sortByValue(deCompResultMap);
+			secondDeCompResultMap.clear();
 			
-			for (String path : paths){
-				if (deCompResultMap.get(path) != null){
-					deCompResultMap = setAddFileCount(deCompResultMap, path, (int)deCompResultMap.get(path));
+			if (!secondDeCompResultFileMap.isEmpty()) {
+				for (String path : secondDeCompResultFileMap.keySet()) {
+					if (!deCompResultFileMap.containsKey(path)) {
+						deCompResultFileMap.put(path, secondDeCompResultFileMap.get(path));
+					}
 				}
 			}
 			
+			secondDeCompResultFileMap.clear();
+			
+			List<String> paths = sortByValue(deCompResultFileMap);
+			
+			for (String path : paths){
+				deCompResultMap = setAddFileCount(deCompResultMap, path, deCompResultFileMap.get(path));
+			}
+			
+			deCompResultMap.putAll(deCompResultFileMap);
+			
+			deCompResultFileMap.clear();
+			
+			paths = null;
+			
 			// 결과 file path에 대해서 4가지 허용 패턴으로 검사한다.
+//			Map<String, Integer> checkResultMap = new HashMap<>();
+//			List<String> pathCheckList1 = new ArrayList<>();
+//			List<String> pathCheckList2 = new ArrayList<>();
+//			List<String> pathCheckList3 = new ArrayList<>();
+//			List<String> pathCheckList4 = new ArrayList<>();
+//			
+//			List<String> pathCheckList11 = new ArrayList<>();
+//			List<String> pathCheckList21 = new ArrayList<>();
+//			List<String> pathCheckList31 = new ArrayList<>();
+//			List<String> pathCheckList41 = new ArrayList<>();
+//			
+//			List<String> pathCheckList12 = new ArrayList<>();
+//			List<String> pathCheckList22 = new ArrayList<>();
+//			List<String> pathCheckList32 = new ArrayList<>();
+//			List<String> pathCheckList42 = new ArrayList<>();
+//			
+//			List<String> pathCheckList13 = new ArrayList<>();
+//			List<String> pathCheckList23 = new ArrayList<>();
+//			List<String> pathCheckList33 = new ArrayList<>();
+//			List<String> pathCheckList43 = new ArrayList<>();
+//			
+//			List<String> pathCheckList14 = new ArrayList<>();
+//			List<String> pathCheckList24 = new ArrayList<>();
+//			List<String> pathCheckList34 = new ArrayList<>();
+//			List<String> pathCheckList44 = new ArrayList<>();
+//			
+//			List<String> pathCheckList15 = new ArrayList<>();
+//			List<String> pathCheckList25 = new ArrayList<>();
+//			List<String> pathCheckList35 = new ArrayList<>();
+//			List<String> pathCheckList45 = new ArrayList<>();
+//
+//			List<String> pathCheckList16 = new ArrayList<>();
+//			List<String> pathCheckList26 = new ArrayList<>();
+//			List<String> pathCheckList36 = new ArrayList<>();
+//			List<String> pathCheckList46 = new ArrayList<>();
+			
+//			for (String path : deCompResultMap.keySet()) {
+//				pathCheckList1.add(path);
+//				pathCheckList2.add("/" + path);
+//				pathCheckList3.add(path + "/");
+//				pathCheckList4.add("/"+path + "/");
+
+//				String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+//				
+//				if (replaceFilePath.startsWith("/")) {
+//					replaceFilePath = replaceFilePath.substring(1);
+//				}
+//				
+//				if (replaceFilePath.endsWith("/")) {
+//					replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
+//				}
+//				
+//				pathCheckList11.add(replaceFilePath);
+//				pathCheckList21.add("/" + replaceFilePath);
+//				pathCheckList31.add(replaceFilePath + "/");
+//				pathCheckList41.add("/"+replaceFilePath + "/");
+//				
+//				String addRootDir = decompressionDirName + "/" + path;
+//				
+//				if (addRootDir.startsWith("/")) {
+//					addRootDir = addRootDir.substring(1);
+//				}
+//				
+//				if (addRootDir.endsWith("/")) {
+//					addRootDir = addRootDir.substring(0, addRootDir.length()-1);
+//				}
+//				
+//				pathCheckList12.add(addRootDir);
+//				pathCheckList22.add("/" + addRootDir);
+//				pathCheckList32.add(addRootDir + "/");
+//				pathCheckList42.add("/"+addRootDir + "/");
+//				
+//				String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+//				
+//				if (addRootDirReplaceFilePath.startsWith("/")) {
+//					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
+//				}
+//				
+//				if (addRootDirReplaceFilePath.endsWith("/")) {
+//					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
+//				}
+//				
+//				pathCheckList13.add(addRootDirReplaceFilePath);
+//				pathCheckList23.add("/" + addRootDirReplaceFilePath);
+//				pathCheckList33.add(addRootDirReplaceFilePath + "/");
+//				pathCheckList43.add("/"+addRootDirReplaceFilePath + "/");
+//
+//				String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
+//				if (replaceRootDir.startsWith("/")) {
+//					replaceRootDir = replaceRootDir.substring(1);
+//				}
+//				
+//				if (replaceRootDir.endsWith("/")) {
+//					replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
+//				}
+//				
+//				pathCheckList14.add(replaceRootDir);
+//				pathCheckList24.add("/" + replaceRootDir);
+//				pathCheckList34.add(replaceRootDir + "/");
+//				pathCheckList44.add("/"+replaceRootDir + "/");
+//				
+//				String replaceRootDirReplaceFilePath = replaceRootDir;
+//				
+//				if (replaceRootDirReplaceFilePath.endsWith("*")) {
+//					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+//				}
+//				
+//				if (replaceRootDirReplaceFilePath.endsWith("/")) {
+//					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+//				}
+//				
+//				pathCheckList15.add(replaceRootDirReplaceFilePath);
+//				pathCheckList25.add("/" + replaceRootDirReplaceFilePath);
+//				pathCheckList35.add(replaceRootDirReplaceFilePath + "/");
+//				pathCheckList45.add("/"+replaceRootDirReplaceFilePath + "/");
+//				
+//				String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
+//				
+//				if (replaceDecomFileRootDir.startsWith("/")) {
+//					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
+//				}
+//				
+//				if (replaceDecomFileRootDir.endsWith("/")) {
+//					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
+//				}
+//				
+//				pathCheckList16.add(replaceDecomFileRootDir);
+//				pathCheckList26.add("/" + replaceDecomFileRootDir);
+//				pathCheckList36.add(replaceDecomFileRootDir + "/");
+//				pathCheckList46.add("/"+replaceDecomFileRootDir + "/");
+//			}
+			
+			// 통합 Map 에 모든 허용 패턴을 저장
 			Map<String, Integer> checkResultMap = new HashMap<>();
-			List<String> pathCheckList1 = new ArrayList<>();
-			List<String> pathCheckList2 = new ArrayList<>();
-			List<String> pathCheckList3 = new ArrayList<>();
-			List<String> pathCheckList4 = new ArrayList<>();
 			
-			List<String> pathCheckList11 = new ArrayList<>();
-			List<String> pathCheckList21 = new ArrayList<>();
-			List<String> pathCheckList31 = new ArrayList<>();
-			List<String> pathCheckList41 = new ArrayList<>();
-			
-			List<String> pathCheckList12 = new ArrayList<>();
-			List<String> pathCheckList22 = new ArrayList<>();
-			List<String> pathCheckList32 = new ArrayList<>();
-			List<String> pathCheckList42 = new ArrayList<>();
-			
-			List<String> pathCheckList13 = new ArrayList<>();
-			List<String> pathCheckList23 = new ArrayList<>();
-			List<String> pathCheckList33 = new ArrayList<>();
-			List<String> pathCheckList43 = new ArrayList<>();
-			
-			List<String> pathCheckList14 = new ArrayList<>();
-			List<String> pathCheckList24 = new ArrayList<>();
-			List<String> pathCheckList34 = new ArrayList<>();
-			List<String> pathCheckList44 = new ArrayList<>();
-			
-			List<String> pathCheckList15 = new ArrayList<>();
-			List<String> pathCheckList25 = new ArrayList<>();
-			List<String> pathCheckList35 = new ArrayList<>();
-			List<String> pathCheckList45 = new ArrayList<>();
-
-			List<String> pathCheckList16 = new ArrayList<>();
-			List<String> pathCheckList26 = new ArrayList<>();
-			List<String> pathCheckList36 = new ArrayList<>();
-			List<String> pathCheckList46 = new ArrayList<>();
-			
-			for (String path : deCompResultMap.keySet()) {
-				pathCheckList1.add(path);
-				pathCheckList2.add("/" + path);
-				pathCheckList3.add(path + "/");
-				pathCheckList4.add("/"+path + "/");
-
+			for (String s : deCompResultMap.keySet()) {
+				String path = s;
+				String path2 = "/" + path;
+				String path3 = path + "/";
+				String path4 = "/"+ path + "/";
+				
 				String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
 				
 				if (replaceFilePath.startsWith("/")) {
@@ -776,10 +1050,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
 				}
 				
-				pathCheckList11.add(replaceFilePath);
-				pathCheckList21.add("/" + replaceFilePath);
-				pathCheckList31.add(replaceFilePath + "/");
-				pathCheckList41.add("/"+replaceFilePath + "/");
+				String path5 = replaceFilePath;
+				String path6 = "/" + replaceFilePath;
+				String path7 = replaceFilePath + "/";
+				String path8 = "/"+ replaceFilePath + "/";
 				
 				String addRootDir = decompressionDirName + "/" + path;
 				
@@ -791,10 +1065,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					addRootDir = addRootDir.substring(0, addRootDir.length()-1);
 				}
 				
-				pathCheckList12.add(addRootDir);
-				pathCheckList22.add("/" + addRootDir);
-				pathCheckList32.add(addRootDir + "/");
-				pathCheckList42.add("/"+addRootDir + "/");
+				String path9 = addRootDir;
+				String path10 = "/" + addRootDir;
+				String path11 = addRootDir + "/";
+				String path12 = "/" + addRootDir + "/";
 				
 				String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
 				
@@ -806,10 +1080,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
 				}
 				
-				pathCheckList13.add(addRootDirReplaceFilePath);
-				pathCheckList23.add("/" + addRootDirReplaceFilePath);
-				pathCheckList33.add(addRootDirReplaceFilePath + "/");
-				pathCheckList43.add("/"+addRootDirReplaceFilePath + "/");
+				String path13 = addRootDirReplaceFilePath;
+				String path14 = "/" + addRootDirReplaceFilePath;
+				String path15 = addRootDirReplaceFilePath + "/";
+				String path16 = "/" + addRootDirReplaceFilePath + "/";
 
 				String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
 				if (replaceRootDir.startsWith("/")) {
@@ -820,10 +1094,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
 				}
 				
-				pathCheckList14.add(replaceRootDir);
-				pathCheckList24.add("/" + replaceRootDir);
-				pathCheckList34.add(replaceRootDir + "/");
-				pathCheckList44.add("/"+replaceRootDir + "/");
+				String path17 = replaceRootDir;
+				String path18 = "/" + replaceRootDir;
+				String path19 = replaceRootDir + "/";
+				String path20 = "/"+replaceRootDir + "/";
 				
 				String replaceRootDirReplaceFilePath = replaceRootDir;
 				
@@ -835,10 +1109,10 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
 				}
 				
-				pathCheckList15.add(replaceRootDirReplaceFilePath);
-				pathCheckList25.add("/" + replaceRootDirReplaceFilePath);
-				pathCheckList35.add(replaceRootDirReplaceFilePath + "/");
-				pathCheckList45.add("/"+replaceRootDirReplaceFilePath + "/");
+				String path21 = replaceRootDirReplaceFilePath;
+				String path22 = "/" + replaceRootDirReplaceFilePath;
+				String path23 = replaceRootDirReplaceFilePath + "/";
+				String path24 = "/"+replaceRootDirReplaceFilePath + "/";
 				
 				String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
 				
@@ -850,68 +1124,68 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
 				}
 				
-				pathCheckList16.add(replaceDecomFileRootDir);
-				pathCheckList26.add("/" + replaceDecomFileRootDir);
-				pathCheckList36.add(replaceDecomFileRootDir + "/");
-				pathCheckList46.add("/"+replaceDecomFileRootDir + "/");
-			}
-			
-			// 통합 Map 에 모든 허용 패턴을 저장
-			int idx = 0;
-			
-			for (String s : pathCheckList1) {
+				String path25 = replaceDecomFileRootDir;
+				String path26 = "/" + replaceDecomFileRootDir;
+				String path27 = replaceDecomFileRootDir + "/";
+			    String path28 = "/"+replaceDecomFileRootDir + "/";
+				
 				checkResultMap.put(s, deCompResultMap.containsKey(s) ? deCompResultMap.get(s) : 0);
-				checkResultMap.put(pathCheckList2.get(idx), deCompResultMap.containsKey(pathCheckList2.get(idx)) ? deCompResultMap.get(pathCheckList2.get(idx)) : 0);
-				checkResultMap.put(pathCheckList3.get(idx), deCompResultMap.containsKey(pathCheckList3.get(idx)) ? deCompResultMap.get(pathCheckList3.get(idx)) : 0);
-				checkResultMap.put(pathCheckList4.get(idx), deCompResultMap.containsKey(pathCheckList4.get(idx)) ? deCompResultMap.get(pathCheckList4.get(idx)) : 0);
+				checkResultMap.put(path2, deCompResultMap.containsKey(path2) ? deCompResultMap.get(path2) : 0);
+				checkResultMap.put(path3, deCompResultMap.containsKey(path3) ? deCompResultMap.get(path3) : 0);
+				checkResultMap.put(path4, deCompResultMap.containsKey(path4) ? deCompResultMap.get(path4) : 0);
 
-				checkResultMap.put(pathCheckList11.get(idx), deCompResultMap.containsKey(pathCheckList11.get(idx)) ? deCompResultMap.get(pathCheckList11.get(idx)) : 0);
-				checkResultMap.put(pathCheckList21.get(idx), deCompResultMap.containsKey(pathCheckList21.get(idx)) ? deCompResultMap.get(pathCheckList21.get(idx)) : 0);
-				checkResultMap.put(pathCheckList31.get(idx), deCompResultMap.containsKey(pathCheckList31.get(idx)) ? deCompResultMap.get(pathCheckList31.get(idx)) : 0);
-				checkResultMap.put(pathCheckList41.get(idx), deCompResultMap.containsKey(pathCheckList41.get(idx)) ? deCompResultMap.get(pathCheckList41.get(idx)) : 0);
+				checkResultMap.put(path5, deCompResultMap.containsKey(path5) ? deCompResultMap.get(path5) : 0);
+				checkResultMap.put(path6, deCompResultMap.containsKey(path6) ? deCompResultMap.get(path6) : 0);
+				checkResultMap.put(path7, deCompResultMap.containsKey(path7) ? deCompResultMap.get(path7) : 0);
+				checkResultMap.put(path8, deCompResultMap.containsKey(path8) ? deCompResultMap.get(path8) : 0);
 
-				checkResultMap.put(pathCheckList12.get(idx), deCompResultMap.containsKey(pathCheckList12.get(idx)) ? deCompResultMap.get(pathCheckList12.get(idx)) : 0);
-				checkResultMap.put(pathCheckList22.get(idx), deCompResultMap.containsKey(pathCheckList22.get(idx)) ? deCompResultMap.get(pathCheckList22.get(idx)) : 0);
-				checkResultMap.put(pathCheckList32.get(idx), deCompResultMap.containsKey(pathCheckList32.get(idx)) ? deCompResultMap.get(pathCheckList32.get(idx)) : 0);
-				checkResultMap.put(pathCheckList42.get(idx), deCompResultMap.containsKey(pathCheckList42.get(idx)) ? deCompResultMap.get(pathCheckList42.get(idx)) : 0);
+				checkResultMap.put(path9, deCompResultMap.containsKey(path9) ? deCompResultMap.get(path9) : 0);
+				checkResultMap.put(path10, deCompResultMap.containsKey(path10) ? deCompResultMap.get(path10) : 0);
+				checkResultMap.put(path11, deCompResultMap.containsKey(path11) ? deCompResultMap.get(path11) : 0);
+				checkResultMap.put(path12, deCompResultMap.containsKey(path12) ? deCompResultMap.get(path12) : 0);
 
-				checkResultMap.put(pathCheckList13.get(idx), deCompResultMap.containsKey(pathCheckList13.get(idx)) ? deCompResultMap.get(pathCheckList13.get(idx)) : 0);
-				checkResultMap.put(pathCheckList23.get(idx), deCompResultMap.containsKey(pathCheckList23.get(idx)) ? deCompResultMap.get(pathCheckList23.get(idx)) : 0);
-				checkResultMap.put(pathCheckList33.get(idx), deCompResultMap.containsKey(pathCheckList33.get(idx)) ? deCompResultMap.get(pathCheckList33.get(idx)) : 0);
-				checkResultMap.put(pathCheckList43.get(idx), deCompResultMap.containsKey(pathCheckList43.get(idx)) ? deCompResultMap.get(pathCheckList43.get(idx)) : 0);
+				checkResultMap.put(path13, deCompResultMap.containsKey(path13) ? deCompResultMap.get(path13) : 0);
+				checkResultMap.put(path14, deCompResultMap.containsKey(path14) ? deCompResultMap.get(path14) : 0);
+				checkResultMap.put(path15, deCompResultMap.containsKey(path15) ? deCompResultMap.get(path15) : 0);
+				checkResultMap.put(path16, deCompResultMap.containsKey(path16) ? deCompResultMap.get(path16) : 0);
 
-				checkResultMap.put(pathCheckList14.get(idx), deCompResultMap.containsKey(pathCheckList14.get(idx)) ? deCompResultMap.get(pathCheckList14.get(idx)) : 0);
-				checkResultMap.put(pathCheckList24.get(idx), deCompResultMap.containsKey(pathCheckList24.get(idx)) ? deCompResultMap.get(pathCheckList24.get(idx)) : 0);
-				checkResultMap.put(pathCheckList34.get(idx), deCompResultMap.containsKey(pathCheckList34.get(idx)) ? deCompResultMap.get(pathCheckList34.get(idx)) : 0);
-				checkResultMap.put(pathCheckList44.get(idx), deCompResultMap.containsKey(pathCheckList44.get(idx)) ? deCompResultMap.get(pathCheckList44.get(idx)) : 0);
+				checkResultMap.put(path17, deCompResultMap.containsKey(path17) ? deCompResultMap.get(path17) : 0);
+				checkResultMap.put(path18, deCompResultMap.containsKey(path18) ? deCompResultMap.get(path18) : 0);
+				checkResultMap.put(path19, deCompResultMap.containsKey(path19) ? deCompResultMap.get(path19) : 0);
+				checkResultMap.put(path20, deCompResultMap.containsKey(path20) ? deCompResultMap.get(path20) : 0);
 
-				checkResultMap.put(pathCheckList15.get(idx), deCompResultMap.containsKey(pathCheckList15.get(idx)) ? deCompResultMap.get(pathCheckList15.get(idx)) : 0);
-				checkResultMap.put(pathCheckList25.get(idx), deCompResultMap.containsKey(pathCheckList25.get(idx)) ? deCompResultMap.get(pathCheckList25.get(idx)) : 0);
-				checkResultMap.put(pathCheckList35.get(idx), deCompResultMap.containsKey(pathCheckList35.get(idx)) ? deCompResultMap.get(pathCheckList35.get(idx)) : 0);
-				checkResultMap.put(pathCheckList45.get(idx), deCompResultMap.containsKey(pathCheckList45.get(idx)) ? deCompResultMap.get(pathCheckList45.get(idx)) : 0);
+				checkResultMap.put(path21, deCompResultMap.containsKey(path21) ? deCompResultMap.get(path21) : 0);
+				checkResultMap.put(path22, deCompResultMap.containsKey(path22) ? deCompResultMap.get(path22) : 0);
+				checkResultMap.put(path23, deCompResultMap.containsKey(path23) ? deCompResultMap.get(path23) : 0);
+				checkResultMap.put(path24, deCompResultMap.containsKey(path24) ? deCompResultMap.get(path24) : 0);
 
-				
-				String _tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList16.get(idx)), pathCheckList16.get(idx));
-				checkResultMap.put(pathCheckList16.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList26.get(idx)), pathCheckList26.get(idx));
-				checkResultMap.put(pathCheckList26.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList36.get(idx)), pathCheckList36.get(idx));
-				checkResultMap.put(pathCheckList36.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(pathCheckList46.get(idx)), pathCheckList46.get(idx));
-				checkResultMap.put(pathCheckList46.get(idx), deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
-				
-				idx ++;
+				String _tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path25), path25);
+				checkResultMap.put(path25, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path26), path26);
+				checkResultMap.put(path26, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path27), path27);
+				checkResultMap.put(path27, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
+				_tmp = addDecompressionRootPath(decompressionRootPath, deCompResultMap.containsKey(path28), path28);
+				checkResultMap.put(path28, deCompResultMap.containsKey(_tmp) ? deCompResultMap.get(_tmp) : 0);
 			}
 
+			deCompResultMap.clear();
 			
 			int gridIdx = 0;
 			ArrayList<String> gValidIdxlist = new ArrayList<>();
+			ArrayList<String> checkSourcePathlist = new ArrayList<>();
+			ArrayList<String> emptySourcePathlist = new ArrayList<>();
 			HashMap<String,Object> gFileCountMap = new HashMap<>();
 			boolean separatorErrFlag = false;
 			
 			log.info("VERIFY Path Check START -----------------");
 			
 			for (String gridPath : gridFilePaths){
+				if (isEmpty(gridPath)) {
+					emptySourcePathlist.add(gridComponentIds.get(gridIdx));
+					continue;
+				}
+				
 				if (gridPath.contains("?")) {
 					gridPath = gridPath.replaceAll("[?]", "0x3F");
 				}
@@ -920,51 +1194,56 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					separatorErrFlag = gridPath.contains("\\") ? true : false;
 				}
 				
-				//사용자가 * 입력했을때
-				if (!gridPath.trim().equals("/*") && !gridPath.trim().equals("/")){
-					if (gridPath.endsWith("*")) {
-						gridPath = gridPath.substring(0, gridPath.length()-1);
-					}
-					if (gridPath.startsWith(".")) {
-						gridPath = gridPath.substring(1, gridPath.length());
-					}
-					// 앞뒤 path구분 제거
-					if (gridPath.endsWith("/")) {
-						gridPath = gridPath.substring(0, gridPath.length()-1);
-					}
-					if (gridPath.startsWith("/")) {
-						gridPath = gridPath.substring(1);
-					}
-					
-					int gFileCount = 0;
-					
-					/*
-					 * SUB_STEP 1. verify 결과 배열을 받아온 grid filepath와 비교하여 실제로 그 path가 존재하는지 확인후 
-					 * 존재하지 않을 경우 grid index 저장 
-					 */
-					boolean resultFlag = false;
-					
-					if (checkResultMap.containsKey(gridPath)) {
-						resultFlag = true;
-						gFileCount = checkResultMap.get(gridPath);
-					}
-					
-					if (!resultFlag) {//path가 존재하지않을 때
-						gValidIdxlist.add(gridComponentIds.get(gridIdx));
-					} else {//path가 존재할 때
-						// file을 직접 비교하는 경우 count되지 않기 때문에, 1로 고정
-						// resultFlag == true 인경우는 존재하기 해당 path or file 대상이 존재한다는 의미이기 때문에 0이 될 수 없다.
-						if (gFileCount == 0) {
-							gFileCount = 1;
-						}
-						gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(gFileCount));
-					}
+				if (gridPath.equals("/")) {
+					checkSourcePathlist.add(gridComponentIds.get(gridIdx));
 				} else {
-					gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(allFileCount));
+					//사용자가 * 입력했을때
+					if (!gridPath.trim().equals("/*") && !gridPath.trim().equals("/")){
+						if (gridPath.endsWith("*")) {
+							gridPath = gridPath.substring(0, gridPath.length()-1);
+						}
+						if (gridPath.startsWith(".")) {
+							gridPath = gridPath.substring(1, gridPath.length());
+						}
+						// 앞뒤 path구분 제거
+						if (gridPath.endsWith("/")) {
+							gridPath = gridPath.substring(0, gridPath.length()-1);
+						}
+						if (gridPath.startsWith("/")) {
+							gridPath = gridPath.substring(1);
+						}
+						
+						int gFileCount = 0;
+						
+						/*
+						 * SUB_STEP 1. verify 결과 배열을 받아온 grid filepath와 비교하여 실제로 그 path가 존재하는지 확인후 
+						 * 존재하지 않을 경우 grid index 저장 
+						 */
+						boolean resultFlag = false;
+						if (checkResultMap.containsKey(gridPath)) {
+							resultFlag = true;
+							gFileCount = checkResultMap.get(gridPath);
+						}
+						
+						if (!resultFlag) {//path가 존재하지않을 때
+							gValidIdxlist.add(gridComponentIds.get(gridIdx));
+						} else {//path가 존재할 때
+							// file을 직접 비교하는 경우 count되지 않기 때문에, 1로 고정
+							// resultFlag == true 인경우는 존재하기 해당 path or file 대상이 존재한다는 의미이기 때문에 0이 될 수 없다.
+							if (gFileCount == 0) {
+								gFileCount = 1;
+							}
+							gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(gFileCount));
+						}
+					} else {
+						gFileCountMap.put(gridComponentIds.get(gridIdx), Integer.toString(allFileCount));
+					}
 				}
 				
 				gridIdx++;
 			}
+			
+			checkResultMap.clear();
 			
 			log.info("VERIFY Path Check END -----------------");
 			
@@ -1099,6 +1378,21 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				
 				log.info("VERIFY writeFile verify_chk_list file END -----------------");
 			}
+
+			log.info("VERIFY Read fosslight_binary result file START -----------------");
+			String binaryFile = VERIFY_PATH_OUTPUT +"/" + prjId + "/binary.txt";
+			File f = new File(binaryFile);
+			if(f.exists() && !f.isDirectory()) {
+				project.setBinaryFileYn(CoConstDef.FLAG_YES);
+			} else {
+				project.setBinaryFileYn("");
+			}
+
+			if (doUpdate) {
+				projectService.registVerifyContents(project);
+			}
+
+			log.info("VERIFY Read fosslight_binary result file END -----------------");
 			
 			resCd="10";
 			if (separatorErrFlag) {
@@ -1108,11 +1402,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 			
 			resMap.put("verifyValid", gValidIdxlist);
+			resMap.put("verifyCheckSourcePath", checkSourcePathlist);
+			resMap.put("verifyEmptySourcePath", emptySourcePathlist);
 			resMap.put("verifyValidMsg", "path not found.");
+			resMap.put("verifyCheckSourcePathMsg", getMessage("msg.package.check.source.code.path"));
+			resMap.put("verifyEmptySourcePathMsg", "This field is required");
 			resMap.put("fileCounts", gFileCountMap);
 			resMap.put("verifyReadme", readmeFileName);
 			resMap.put("verifyCheckList", !isEmpty(verify_chk_list) ? CoConstDef.FLAG_YES : "");
 			resMap.put("verifyProprietary", !isEmpty(exceptFileContent) ? CoConstDef.FLAG_YES : "");
+			resMap.put("verifyBinary", project.getBinaryFileYn().equals(CoConstDef.FLAG_YES) ? CoConstDef.FLAG_YES : "");
 			
 			//path not found.가 1건이라도 있으면 status_verify_yn의 flag는 N으로 저장함.
 			// packagingFileId, filePath는 1번만 저장하며, gValidIdxlist의 값때문에 마지막 fileSeq일때 저장함.
@@ -1136,6 +1435,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					prjParam.setPackageFileId(fileSeqs.get(0));
 					prjParam.setPackageFileId2(fileSeqs.size() >= 2 ? fileSeqs.get(1) : null);
 					prjParam.setPackageFileId3(fileSeqs.size() >= 3 ? fileSeqs.get(2) : null);
+					prjParam.setPackageFileId4(fileSeqs.size() >= 4 ? fileSeqs.get(3) : null);
 
 					if (!isEmpty(prjInfo.getDestributionStatus())){
 						prjParam.setStatusVerifyYn("C");
@@ -1179,12 +1479,153 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		return resMap;
 	}
 	
+	private int checkGridPath(String gridPath, Iterator<String> deCompResultMapKeys, Map<String, Integer> deCompResultMap, String decompressionDirName, String packageFileName, String decompressionRootPath, String firstPathName) {
+		List<String> checkPathList = new ArrayList<>();
+		String matchPath = "";
+		int fileCount = 0;
+		
+		while (deCompResultMapKeys.hasNext()) {
+			boolean matchFlag = false;
+			
+			String path = deCompResultMapKeys.next();
+			checkPathList.add(path);
+			checkPathList.add("/" + path);
+			checkPathList.add(path + "/");
+			checkPathList.add("/"+ path + "/");
+			
+			String replaceFilePath = path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+			
+			if (replaceFilePath.startsWith("/")) {
+				replaceFilePath = replaceFilePath.substring(1);
+			}
+			
+			if (replaceFilePath.endsWith("/")) {
+				replaceFilePath = replaceFilePath.substring(0, replaceFilePath.length()-1);
+			}
+			
+			checkPathList.add(replaceFilePath);
+			checkPathList.add("/" + replaceFilePath);
+			checkPathList.add(replaceFilePath + "/");
+			checkPathList.add("/"+ replaceFilePath + "/");
+			
+			String addRootDir = decompressionDirName + "/" + path;
+			
+			if (addRootDir.startsWith("/")) {
+				addRootDir = addRootDir.substring(1);
+			}
+			
+			if (addRootDir.endsWith("/")) {
+				addRootDir = addRootDir.substring(0, addRootDir.length()-1);
+			}
+			
+			checkPathList.add(addRootDir);
+			checkPathList.add("/" + addRootDir);
+			checkPathList.add(addRootDir + "/");
+			checkPathList.add("/"+ addRootDir + "/");
+			
+			String addRootDirReplaceFilePath = decompressionDirName + "/" + path.substring(0, path.endsWith("*") ? path.length()-1 : path.length());
+			
+			if (addRootDirReplaceFilePath.startsWith("/")) {
+				addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(1);
+			}
+			
+			if (addRootDirReplaceFilePath.endsWith("/")) {
+				addRootDirReplaceFilePath = addRootDirReplaceFilePath.substring(0, addRootDirReplaceFilePath.length());
+			}
+			
+			checkPathList.add(addRootDirReplaceFilePath);
+			checkPathList.add("/" + addRootDirReplaceFilePath);
+			checkPathList.add(addRootDirReplaceFilePath + "/");
+			checkPathList.add("/"+ addRootDirReplaceFilePath + "/");
+
+			String firstPathDir = path.replaceFirst(firstPathName, "").replaceAll("//", "/");
+			if (firstPathDir.startsWith("/")) {
+				firstPathDir = firstPathDir.substring(1);
+			}
+			
+			if (firstPathDir.endsWith("/")) {
+				firstPathDir = firstPathDir.substring(0, firstPathDir.length()-1);
+			}
+			
+			checkPathList.add(firstPathDir);
+			checkPathList.add("/" + firstPathDir);
+			checkPathList.add(firstPathDir + "/");
+			checkPathList.add("/"+ firstPathDir + "/");
+			
+			String replaceRootDir = path.replaceFirst(packageFileName, "").replaceAll("//", "/");
+			if (replaceRootDir.startsWith("/")) {
+				replaceRootDir = replaceRootDir.substring(1);
+			}
+			
+			if (replaceRootDir.endsWith("/")) {
+				replaceRootDir = replaceRootDir.substring(0, replaceRootDir.length()-1);
+			}
+			
+			checkPathList.add(replaceRootDir);
+			checkPathList.add("/" + replaceRootDir);
+			checkPathList.add(replaceRootDir + "/");
+			checkPathList.add("/"+ replaceRootDir + "/");
+			
+			String replaceRootDirReplaceFilePath = replaceRootDir;
+			
+			if (replaceRootDirReplaceFilePath.endsWith("*")) {
+				replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+			}
+			
+			if (replaceRootDirReplaceFilePath.endsWith("/")) {
+				replaceRootDirReplaceFilePath = replaceRootDirReplaceFilePath.substring(0, replaceRootDirReplaceFilePath.length()-1);
+			}
+			
+			checkPathList.add(replaceRootDirReplaceFilePath);
+			checkPathList.add("/" + replaceRootDirReplaceFilePath);
+			checkPathList.add(replaceRootDirReplaceFilePath + "/");
+			checkPathList.add("/"+ replaceRootDirReplaceFilePath + "/");
+			
+			String replaceDecomFileRootDir = path.replaceFirst(decompressionRootPath, "").replaceAll("//", "/");
+			
+			if (replaceDecomFileRootDir.startsWith("/")) {
+				replaceDecomFileRootDir = replaceDecomFileRootDir.substring(1);
+			}
+			
+			if (replaceDecomFileRootDir.endsWith("/")) {
+				replaceDecomFileRootDir = replaceDecomFileRootDir.substring(0, replaceDecomFileRootDir.length()-1);
+			}
+			
+			checkPathList.add(replaceDecomFileRootDir);
+			checkPathList.add("/" + replaceDecomFileRootDir);
+			checkPathList.add(replaceDecomFileRootDir + "/");
+			checkPathList.add("/"+ replaceDecomFileRootDir + "/");
+			
+			checkPathList.add(decompressionRootPath + "/" + replaceDecomFileRootDir);
+			checkPathList.add(decompressionRootPath + "/" + replaceDecomFileRootDir + "/");
+			
+			if (checkPathList != null && !checkPathList.isEmpty()) checkPathList = checkPathList.stream().distinct().collect(Collectors.toList());
+			
+			for (String checkPath : checkPathList) {
+				if (checkPath.equalsIgnoreCase(gridPath)) {
+					matchPath = checkPath;
+					matchFlag = true;
+					break;
+				}
+			}
+			
+			checkPathList.clear();
+			if (matchFlag) break;
+		}
+		
+		if (!isEmpty(matchPath) && deCompResultMap.containsKey(matchPath)) {
+			fileCount = deCompResultMap.get(matchPath);
+		}
+		
+		return fileCount;
+	}
+
 	private String addDecompressionRootPath(String path, boolean flag, String val) {
 		return flag ? val : path + "/" + val;
 	}
 
 	@Override
-	public void updateVerifyFileCount(HashMap<String,Object> fileCounts) {
+	public void updateVerifyFileCount(Map<String,Object> fileCounts) {
 		for (String componentId : fileCounts.keySet()){
 			OssComponents param = new OssComponents();
 			param.setComponentId(componentId);
@@ -1195,7 +1636,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	}
 	
 	@Override
-	public void updateVerifyFileCount(ArrayList<String> fileCounts) {
+	public void updateVerifyFileCountReset(List<String> fileCounts) {
 		for (String componentId : fileCounts){
 			OssComponents param = new OssComponents();
 			param.setComponentId(componentId);
@@ -1234,7 +1675,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception {
 		if (copyConfirmFlag) {
 			projectMapper.updateConfirmCopyVerificationDestributionStatus(project);
-		}else {
+		} else {
 			updateProjectStatus(project);
 		}
 		
@@ -1463,6 +1904,91 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 		}
 		
+		// cycloneDX
+		String cdxJsonFileId = null;
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXJsonYn())) {
+			if (isEmpty(cdxJsonFileId)) {
+				cdxJsonFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXJson", project.getPrjId(), EXPORT_TEMPLATE_PATH, "verify");
+			}
+			
+			if (!isEmpty(cdxJsonFileId)) {
+				T2File jsonFileInfo = fileService.selectFileInfo(cdxJsonFileId);
+				String jsonFullPath = jsonFileInfo.getLogiPath();
+				
+				if (!jsonFullPath.endsWith("/")) {
+					jsonFullPath += "/";
+				}
+				
+				jsonFullPath += jsonFileInfo.getLogiNm();
+				String targetFileName = FilenameUtils.getBaseName(jsonFileInfo.getLogiNm())+".json";
+				String resultFileName = FilenameUtils.getBaseName(jsonFileInfo.getOrigNm())+".json";
+				String tagFullPath = jsonFileInfo.getLogiPath();
+				
+				if (!tagFullPath.endsWith("/")) {
+					tagFullPath += "/";
+				}
+				
+				tagFullPath += targetFileName;
+				File cdxJsonFile = new File(tagFullPath);
+				
+				if (cdxJsonFile.exists() && cdxJsonFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
+						spdxComment += "<br>";
+					}
+					
+					spdxComment += getMessage("cyclonedx.json.failure"); 
+				}
+				
+				String filePath = NOTICE_PATH + "/" + project.getPrjId();
+				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
+				project.setCdxJsonFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
+				
+				makeZipFile = true;
+			}
+		}
+		
+		String cdxXmlFileId = null;
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXXmlYn())) {
+			if (isEmpty(cdxXmlFileId)) {
+				cdxXmlFileId = ExcelDownLoadUtil.getExcelDownloadId("cycloneDXXml", project.getPrjId(), EXPORT_TEMPLATE_PATH, "verify");
+			}
+			
+			if (!isEmpty(cdxXmlFileId)) {
+				T2File xmlFileInfo = fileService.selectFileInfo(cdxXmlFileId);
+				String xmlFullPath = xmlFileInfo.getLogiPath();
+				
+				if (!xmlFullPath.endsWith("/")) {
+					xmlFullPath += "/";
+				}
+				
+				xmlFullPath += xmlFileInfo.getLogiNm();
+				String targetFileName = FilenameUtils.getBaseName(xmlFileInfo.getLogiNm())+".xml";
+				String resultFileName = FilenameUtils.getBaseName(xmlFileInfo.getOrigNm())+".xml";
+				String tagFullPath = xmlFileInfo.getLogiPath();
+				
+				if (!tagFullPath.endsWith("/")) {
+					tagFullPath += "/";
+				}
+				
+				tagFullPath += targetFileName;
+				File cdxXmlFile = new File(tagFullPath);
+				
+				if (cdxXmlFile.exists() && cdxXmlFile.length() <= 0) {
+					if (!isEmpty(spdxComment)) {
+						spdxComment += "<br>";
+					}
+					
+					spdxComment += getMessage("cyclonedx.xml.failure"); 
+				}
+				
+				String filePath = NOTICE_PATH + "/" + project.getPrjId();
+				FileUtil.moveTo(tagFullPath, filePath, resultFileName);
+				project.setCdxXmlFileId(fileService.registFileDownload(filePath, resultFileName, resultFileName));
+				
+				makeZipFile = true;
+			}
+		}
+		
 		// zip파일 생성
 		if (makeZipFile) {
 			String noticeRootDir = NOTICE_PATH;
@@ -1495,9 +2021,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Override
 	public void changePackageFileNameDistributeFormat(String prjId) {
 		// 프로젝트 기본정보 취득
-		Project prjBean = new Project();
-		prjBean.setPrjId(prjId);
-		prjBean = projectMapper.selectProjectMaster2(prjBean);
+		Project prjBean = projectMapper.selectProjectMaster2(prjId);
 		List<String> packageFileIds = new ArrayList<String>();
 		
 		if (!isEmpty(prjBean.getPackageFileId())) {
@@ -1520,7 +2044,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			packageFileInfo = fileMapper.getFileInfo(packageFileInfo);
 			
 			if (packageFileInfo != null) {
-				String orgFileName = packageFileInfo.getOrigNm();
 				// Packaging > Confirm시 Packaging 파일명 변경 건
 				String paramSeq = (packageFileIds.size() > 1 ? Integer.toString(fileSeq++) : ""); 
 				String chgFileName = getPackageFileName(prjBean.getPrjName(), prjBean.getPrjVersion(), packageFileInfo.getOrigNm(), paramSeq);
@@ -1528,16 +2051,55 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				packageFileInfo.setOrigNm(chgFileName);
 				
 				fileMapper.upateOrgFileName(packageFileInfo);
-				
-				// 이력을 남긴다.
-				CommentsHistory commHisBean = new CommentsHistory();
-				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-				commHisBean.setReferenceId(prjId);
-				commHisBean.setContents("Changed File Name (\""+orgFileName+"\") to \""+chgFileName+"\"  ");
-				
-				commentService.registComment(commHisBean);
 			}
 		}
+	}
+
+	@Override
+	public String changePackageFileNameCombine(String prjId) {
+
+		String contents = "";
+		// 프로젝트 기본정보 취득
+		Project prjBean = projectMapper.selectProjectMaster2(prjId);
+		List<String> packageFileIds = new ArrayList<String>();
+
+		if (!isEmpty(prjBean.getPackageFileId())) {
+			packageFileIds.add(prjBean.getPackageFileId());
+		}
+
+		if (!isEmpty(prjBean.getPackageFileId2())) {
+			packageFileIds.add(prjBean.getPackageFileId2());
+		}
+
+		if (!isEmpty(prjBean.getPackageFileId3())) {
+			packageFileIds.add(prjBean.getPackageFileId3());
+		}
+		
+		if (!isEmpty(prjBean.getPackageFileId4())) {
+			packageFileIds.add(prjBean.getPackageFileId4());
+		}
+
+		int fileSeq = 1;
+
+		for (String packageFileId : packageFileIds){
+			T2File packageFileInfo = new T2File();
+			packageFileInfo.setFileSeq(packageFileId);
+			packageFileInfo = fileMapper.getFileInfo(packageFileInfo);
+
+			if (packageFileInfo != null) {
+				String orgFileName = packageFileInfo.getOrigNm();
+				// Packaging > Confirm시 Packaging 파일명 변경 건
+				String paramSeq = (packageFileIds.size() > 1 ? Integer.toString(fileSeq++) : "");
+				String chgFileName = getPackageFileName(prjBean.getPrjName(), prjBean.getPrjVersion(), packageFileInfo.getOrigNm(), paramSeq);
+
+				packageFileInfo.setOrigNm(chgFileName);
+
+				fileMapper.upateOrgFileName(packageFileInfo);
+
+				contents += "<p>Changed File Name (\""+orgFileName+"\") to \""+chgFileName+"\" </p> ";
+			}
+		}
+		return contents;
 	}
 	
 	private String getPackageFileName(String prjName, String prjVersion, String orgFileName, String fileSeq) {
@@ -1581,9 +2143,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String resMsg="none.";
 		
 		try{
-			Project project = new Project();
-			project.setPrjId(ossNotice.getPrjId());
-			project = projectMapper.selectProjectMaster(project);
+			Project project = projectMapper.selectProjectMaster(ossNotice.getPrjId());
 			
 			Map<String, Object> result = projectMapper.getNoticeType(ossNotice.getPrjId());
 			
@@ -1769,9 +2329,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String fileName = "";
 		String filePath = rESOURCE_PUBLIC_DOWNLOAD_NOTICE_FILE_PATH_PREFIX;
 
-		Project project = new Project();
-		project.setPrjId(prjId);
-		project = projectMapper.selectProjectMaster(project);
+		Project project = projectMapper.selectProjectMaster(prjId);
 		
 		oss.fosslight.domain.File noticeFile = null;
 		
@@ -1794,17 +2352,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String fileName = "";
 		String filePath = rESOURCE_PUBLIC_DOWNLOAD_REVIEW_REPORT_FILE_PATH_PREFIX;
 
-		Project project = new Project();
-		project.setPrjId(prjId);
-		project = projectMapper.selectProjectMaster(project);
+		Project project = projectMapper.selectProjectMaster(prjId);
 
 		oss.fosslight.domain.File reviewReportFile = null;
 
-		if (!isEmpty(project.getZipFileId())) {
-			reviewReportFile = verificationMapper.selectVerificationFile(project.getZipFileId());
-			fileName =  reviewReportFile.getOrigNm();
-			filePath += File.separator+fileName;
-		} else {
+		if (!isEmpty(project.getReviewReportFileId())) {
 			reviewReportFile = verificationMapper.selectVerificationFile(project.getReviewReportFileId());
 			fileName =  reviewReportFile.getOrigNm();
 			filePath += File.separator+prjId+File.separator+fileName;
@@ -1815,6 +2367,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 
 	@Override
 	public Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice) {
+		return getNoticeHtmlInfo(ossNotice, false);
+	}
+	
+	@Override
+	public Map<String, Object> getNoticeHtmlInfo(OssNotice ossNotice, boolean isProtocol) {
 		Map<String, Object> model = new HashMap<String, Object>();
 		
 		String noticeType = "";
@@ -1864,15 +2421,18 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		for (OssComponents bean : ossComponentList) {
 			OssComponents oc = verificationMapper.checkOssNickName2(bean);
 			if (oc != null) {
-				String copyright = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId()).getCopyright();
-				String homepage = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId()).getHomepage();
-				
-				if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
-					bean.setCopyrightText(copyright);
-				}
-				
-				if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
-					bean.setHomepage(homepage);
+				OssMaster om = CoCodeManager.OSS_INFO_BY_ID.get(oc.getOssId());
+				if (om != null) {
+					String copyright = om.getCopyright();
+					String homepage = om.getHomepage();
+					
+					if (isEmpty(bean.getCopyrightText()) && !isEmpty(copyright)) {
+						bean.setCopyrightText(copyright);
+					}
+					
+					if (isEmpty(bean.getHomepage()) && !isEmpty(homepage)) {
+						bean.setHomepage(homepage);
+					}
 				}
 			}
 			
@@ -2111,13 +2671,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		for (OssComponents bean : noticeInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 
 			if (!isEmpty(bean.getOssAttribution()) && !ossAttributionMap.containsKey(avoidNull(bean.getOssName()) + "_" + avoidNull(bean.getOssVersion()))) {
@@ -2127,6 +2687,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
+			
+			if (isProtocol && !isEmpty(bean.getHomepage()) && !bean.getHomepage().contains("://")) bean.setHomepage("http://" + bean.getHomepage());
 			
 			noticeList.add(bean);
 		}
@@ -2142,13 +2704,13 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		for (OssComponents bean : srcInfo.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getOssAttribution()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
-				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getOssAttribution()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
+				bean.setOssAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getOssAttribution()))));
 			}
 			
 
@@ -2159,6 +2721,8 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			if (!isEmpty(bean.getOssName())) {
 				bean.setOssName(StringUtil.replaceHtmlEscape(bean.getOssName()));
 			}
+			
+			if (isProtocol && !bean.getHomepage().contains("://")) bean.setHomepage("//" + bean.getHomepage());
 			
 			srcList.add(bean);
 		}
@@ -2180,11 +2744,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		
 		for (OssComponentsLicense bean : licenseTreeMap.values()) {
 			if (isTextNotice) {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.unescapeHtml4(avoidNull(bean.getLicenseText()))));
 			} else {
-				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getCopyrightText()))));
-				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getLicenseText()))));
+				bean.setCopyrightText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getCopyrightText()))));
+				bean.setLicenseText(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml4(avoidNull(bean.getLicenseText()))));
 			}
 			
 			// 배포사이트 license text url
@@ -2207,7 +2771,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 
 			if (!isEmpty(bean.getAttribution())) {
-				bean.setAttribution(CommonFunction.lineReplaceToBR(StringEscapeUtils.escapeHtml(avoidNull(bean.getAttribution()))));
+				bean.setAttribution(CommonFunction.lineReplaceToBR(avoidNull(bean.getAttribution())));
 				attributionList.add(bean);
 			}
 		}
@@ -2223,14 +2787,56 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		String companyNameFull = ossNotice.getCompanyNameFull();
 		String distributionSiteUrl = ossNotice.getDistributionSiteUrl();
 		String email = ossNotice.getEmail();
+		String noticeAppendType = ossNotice.getNoticeAppendType();
 		String appendedContentsTEXT = ossNotice.getAppendedTEXT();
-		String appendedContents = ossNotice.getAppended();
+		String appendedContents = "";;
+		
+		if (avoidNull(noticeAppendType).equals("F") && !isEmpty(project.getNoticeAppendFileId())) {
+			List<T2File> appendFileInfoList = verificationMapper.selectNoticeAppendFile(project.getNoticeAppendFileId());
+			if (!CollectionUtils.isEmpty(appendFileInfoList)) {
+				String customAppendedContents = "";
+				for (int i=0; i<appendFileInfoList.size(); i++) {
+					if (appendFileInfoList.get(i).getExt().equalsIgnoreCase("txt")) {
+						if ("text".equals(ossNotice.getFileType())){
+							customAppendedContents += CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm(), false);
+							if (i < appendFileInfoList.size()-1) {
+								customAppendedContents += "<br>_________________________________________________________________________________________________________________________<br><br>";
+							}
+						} else {
+							customAppendedContents += "<p class='bdTop'>" + CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm(), false) + "</p>";
+						}
+					} else {
+						if ("text".equals(ossNotice.getFileType())){
+							customAppendedContents += CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm());
+							if (i < appendFileInfoList.size()-1) {
+								customAppendedContents += "<br>_________________________________________________________________________________________________________________________<br><br>";
+							}
+						} else {
+							customAppendedContents += "<p class='bdTop'>" + CommonFunction.getStringFromFile(appendFileInfoList.get(i).getLogiPath() + "/" + appendFileInfoList.get(i).getLogiNm()) + "</p>";
+						}
+					}
+				}
+				appendedContents = customAppendedContents;
+			}
+		} else {
+			appendedContents = "<p class='bdTop'>" + ossNotice.getAppended() + "</p>";
+		}
 		
 		if (!isEmpty(distributionSiteUrl) && !(distributionSiteUrl.startsWith("http://") || distributionSiteUrl.startsWith("https://") || distributionSiteUrl.startsWith("ftp://"))) {
 			distributionSiteUrl = "http://" + distributionSiteUrl;
 		}
+		
+		String noticeTitle = CommonFunction.getNoticeFileName(prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType());
+		String noticeFileName = "";
+		if (noticeTitle.endsWith(".txt")) {
+			noticeFileName = noticeTitle.substring(0, noticeTitle.length()-4);
+		} else {
+			noticeFileName = noticeTitle;
+		}
+		
 		model.put("noticeType", noticeType);
-		model.put("noticeTitle", CommonFunction.getNoticeFileName(prjId, prjName, prjVersion, CommonFunction.getCurrentDateTime("yyMMdd"), ossNotice.getFileType()));
+		model.put("noticeTitle", noticeTitle);
+		model.put("noticeFileName", noticeFileName);
 		model.put("companyNameFull", companyNameFull);
 		model.put("distributionSiteUrl", distributionSiteUrl);
 		model.put("email", email);
@@ -2257,7 +2863,11 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 		model.put("ossAttributionList", ossAttributionList.isEmpty() ? null : ossAttributionList);
 		
 		if ("text".equals(ossNotice.getFileType())){
-			model.put("appended", avoidNull(appendedContentsTEXT, "").replaceAll("&nbsp;", " "));
+			if (!isEmpty(appendedContentsTEXT)) {
+				model.put("appended", avoidNull(appendedContentsTEXT, "").replaceAll("&nbsp;", " "));
+			} else {
+				model.put("appended", avoidNull(appendedContents, "").replaceAll("&nbsp;", " "));
+			}
 		} else {
 			model.put("appended", appendedContents);
 		}
@@ -2435,57 +3045,75 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	public void setUploadFileSave(String prjId, String fileSeq, String registFileId) throws Exception {
 		Project prjParam = new Project(); 
 		prjParam.setPrjId(prjId);
-		  
-		Project project = projectMapper.selectProjectMaster(prjParam);
 		
-		if (fileSeq.equals("1")) {
-			prjParam.setPackageFileId(registFileId);
-			prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
-			prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
-		}else if (fileSeq.equals("2")) {
-			prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
-			prjParam.setPackageFileId2(registFileId);
-			prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
-		}else {
-			prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
-			prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
-			prjParam.setPackageFileId3(registFileId);
-		}
-				
-		List<String> fileSeqs = new ArrayList<String>(); 
-		if (prjParam.getPackageFileId() != null) {
-			fileSeqs.add(prjParam.getPackageFileId()); 
-		}  
-		if (prjParam.getPackageFileId2() != null) {
-			fileSeqs.add(prjParam.getPackageFileId2()); 
-		} 
-		if (prjParam.getPackageFileId3() != null) {
-			fileSeqs.add(prjParam.getPackageFileId3()); 
-		}
-					
-		Map<Object, Object> map = new HashMap<Object, Object>();
-		map.put("prjId", prjId);
-		map.put("fileSeqs", fileSeqs);
-		
-		String packagingComment = "";
-		
-		try {
-			packagingComment = fileService.setClearFiles(map);
-		}catch(Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		prjParam.setStatusVerifyYn("N");
-		// project_master packageFileId update
-		verificationMapper.updatePackageFile(prjParam);
-		
-		// commentHistory regist
-		if (!packagingComment.equals("")) {
-			CommentsHistory commHisBean = new CommentsHistory();
-			commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
-			commHisBean.setReferenceId(prjId); 
-			commHisBean.setContents(packagingComment);
+		if (fileSeq.equals("6")) {
+			prjParam.setNoticeAppendFileId(registFileId);
+			verificationMapper.updateNoticeAppendFile(prjParam);
+		} else if (fileSeq.equals("5")) {
+			prjParam.setPackageVulDocFileId(registFileId);
+			verificationMapper.updatePackageVulDocFile(prjParam);
+		} else {
+			Project project = projectMapper.selectProjectMaster(prjParam.getPrjId());
 			
-			commentService.registComment(commHisBean, false);
+			if (fileSeq.equals("1")) {
+				prjParam.setPackageFileId(registFileId);
+				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
+			} else if (fileSeq.equals("2")) {
+				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+				prjParam.setPackageFileId2(registFileId);
+				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
+			} else if (fileSeq.equals("3")) {
+				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+				prjParam.setPackageFileId3(registFileId);
+				prjParam.setPackageFileId4(project.getPackageFileId4() != null ? project.getPackageFileId4() : null);
+			} else {
+				prjParam.setPackageFileId(project.getPackageFileId() != null ? project.getPackageFileId() : null);
+				prjParam.setPackageFileId2(project.getPackageFileId2() != null ? project.getPackageFileId2() : null);
+				prjParam.setPackageFileId3(project.getPackageFileId3() != null ? project.getPackageFileId3() : null);
+				prjParam.setPackageFileId4(registFileId);
+			}
+					
+			List<String> fileSeqs = new ArrayList<String>(); 
+			if (prjParam.getPackageFileId() != null) {
+				fileSeqs.add(prjParam.getPackageFileId()); 
+			}  
+			if (prjParam.getPackageFileId2() != null) {
+				fileSeqs.add(prjParam.getPackageFileId2()); 
+			} 
+			if (prjParam.getPackageFileId3() != null) {
+				fileSeqs.add(prjParam.getPackageFileId3()); 
+			}
+			if (prjParam.getPackageFileId4() != null) {
+				fileSeqs.add(prjParam.getPackageFileId4()); 
+			}
+			Map<Object, Object> map = new HashMap<Object, Object>();
+			map.put("prjId", prjId);
+			map.put("fileSeqs", fileSeqs);
+			
+			String packagingComment = "";
+			
+			try {
+				packagingComment = fileService.setClearFiles(map);
+			}catch(Exception e) {
+				log.error(e.getMessage(), e);
+			}
+			prjParam.setStatusVerifyYn("N");
+			// project_master packageFileId update
+			verificationMapper.updatePackageFile(prjParam);
+			
+			// commentHistory regist
+			if (!packagingComment.equals("")) {
+				CommentsHistory commHisBean = new CommentsHistory();
+				commHisBean.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
+				commHisBean.setReferenceId(prjId); 
+				commHisBean.setContents(packagingComment);
+				
+				commentService.registComment(commHisBean, false);
+			}
 		}
 	}
 	
@@ -2535,15 +3163,21 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			bitFlag |= CoConstDef.FLAG_I;
 		}
 		
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXJsonYn())) {
+			bitFlag |= CoConstDef.FLAG_J;
+		}
+
+		if (CoConstDef.FLAG_YES.equals(project.getAllowDownloadCDXXmlYn())) {
+			bitFlag |= CoConstDef.FLAG_K;
+		}
+		
 		return bitFlag;
 	}
 	
 	@Override
 	public void registOssNoticeConfirmStatus(OssNotice ossNotice) {
 		try{
-			Project project = new Project();
-			project.setPrjId(ossNotice.getPrjId());
-			project = projectMapper.selectProjectMaster(project);
+			Project project = projectMapper.selectProjectMaster(ossNotice.getPrjId());
 			
 			// android project는 notice를 사용하지 않음.
 			if (!CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED.equalsIgnoreCase(project.getNoticeType())) {
@@ -2555,6 +3189,75 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			}
 		}catch(Exception e){
 			log.error(e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public void deleteFile(Map<Object, Object> map) {
+		String delFileSeq = (String) map.get("delFileSeq");
+		String prjId = (String) map.get("prjId");
+		String gubn = (String) map.get("gubn");
+		T2File file = fileService.selectFileInfo(delFileSeq);
+		
+		// delete logical file
+		fileMapper.updateFileDelYn(new String[] {delFileSeq});
+		// delete physical file
+		fileService.deletePhysicalFile(file, "VERIFY");
+		// update file id
+		Project project = new Project();
+		project.setPrjId(prjId);
+		if (gubn.equals("VDF")) {
+			project.setPackageVulDocFileId(null);
+			verificationMapper.updatePackageVulDocFile(project);
+		} else {
+			Project prjInfo = projectMapper.getProjectBasicInfo(project);
+			List<T2File> noticeAppendFile = verificationMapper.selectNoticeAppendFile(prjInfo.getNoticeAppendFileId());
+			if (noticeAppendFile == null || noticeAppendFile.isEmpty()) {
+				project.setNoticeAppendFileId(null);
+				verificationMapper.updateNoticeAppendFile(project);
+			}
+		}
+	}
+
+	@Override
+	public void updateFileWhenVerificationCopyConfirm(Project project, Project copyProject, List<String> packageFileSeqList) throws IOException {
+		Project param = new Project();
+		param.setPrjId(project.getPrjId());
+		
+		// update package file seq
+		int fileSize = packageFileSeqList.size();
+		switch (fileSize) {
+			case 1 : param.setPackageFileId(packageFileSeqList.get(0));
+					param.setPackageFileType1(copyProject.getPackageFileType1());
+				break;
+			case 2 : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1));
+					param.setPackageFileType2(copyProject.getPackageFileType2());
+				break;
+			case 3 : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2));
+					param.setPackageFileType3(copyProject.getPackageFileType3());
+				break;
+			default : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2)); param.setPackageFileId4(packageFileSeqList.get(3));
+					param.setPackageFileType4(copyProject.getPackageFileType4());
+				break;
+		}
+		
+		verificationMapper.updatePackageFile(param);
+		
+		// update verify result file
+		param.setReadmeContent(copyProject.getReadmeContent());
+		param.setReadmeFileName(copyProject.getReadmeFileName());
+		param.setReadmeYn(copyProject.getReadmeYn());
+		param.setExceptFileContent(copyProject.getExceptFileContent());
+		param.setVerifyFileContent(copyProject.getVerifyFileContent());
+		
+		boolean isCopyDir = !isEmpty(param.getReadmeContent()) || !isEmpty(param.getExceptFileContent()) || !isEmpty(param.getVerifyFileContent());
+		if (isCopyDir) {
+			File srcDir = new File(VERIFY_PATH_OUTPUT + "/" + copyProject.getPrjId());
+			File destDir = new File(VERIFY_PATH_OUTPUT + "/" + param.getPrjId());
+			FileUtils.copyDirectory(srcDir, destDir);
+			
+			projectService.registReadmeContent(param);
+			projectService.registVerifyContents(param);
 		}
 	}
 }

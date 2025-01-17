@@ -4,11 +4,14 @@
  */
 package oss.fosslight.service.impl;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
@@ -70,8 +73,130 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
         if (filterString == null) {
             return null;
         }
-        return new Gson().fromJson(filterString, Project.class);
+        return (Project) makeSearchFilterObject(filterString, SearchType.PROJECT.getName());
     }
+
+
+    @SuppressWarnings("unchecked")
+	private Object makeSearchFilterObject(String filterString, String searchType) {
+    	Object obj = new Object();
+    	ObjectMapper mapper = new ObjectMapper();
+    	Map<String, String> map = new HashMap<>();
+    	
+    	try {
+			map = mapper.readValue(filterString, Map.class);
+    	} catch (JsonProcessingException e) {
+			log.error(e.getMessage());
+		}
+    	
+    	if (searchType.equals(SearchType.PROJECT.getName())) {
+    		Project project = new Project();
+        	
+    		for (String key : map.keySet()) {
+				String value = map.get(key);
+				if (!isEmpty(value)) {
+					switch (key) {
+						case "prjId" : project.setPrjId(value);
+							break;
+						case "prjName" : project.setPrjName(value);
+							break;
+						case "schStartDate" : project.setSchStartDate(value);
+							break;
+						case "schEndDate" : project.setSchEndDate(value);
+							break;
+						case "prjDivision" : project.setPrjDivision(value);
+							break;
+						case "creator" : project.setCreator(value);
+							break;
+						case "reviewer" : project.setReviewer(value);
+							break;
+						case "watchers" : project.setWatchers(new String[] {value});
+							break;
+						case "distributionType" : project.setDistributionType(value);
+							break;
+						case "networkServerType" : project.setNetworkServerType(value);
+							break;
+						case "modelName" : project.setModelName(value );
+							break;
+						case "statuses" : project.setStatuses(value);
+							break;
+						case "priority" : project.setPriority(value);
+							break;
+						case "publicYn" : project.setPublicYn(value);
+							break;
+						case "schBinaryName" : project.setSchBinaryName(value);
+							break;
+						case "ossName" : project.setOssName(value);
+							break;
+						case "ossVersion" : project.setOssVersion(value);
+							break;
+						case "comment" : project.setComment(value);
+							break;
+						case "userComment" : project.setUserComment(value);
+							break;
+						case "licenseName" : project.setLicenseName(value);
+							break;
+						case "refPartnerName" : project.setRefPartnerName(value);
+							break;
+						default : break;
+					}
+				}
+			}
+			
+			obj = project;
+    	} else {
+    		PartnerMaster partner = new PartnerMaster();
+    		
+    		for (String key : map.keySet()) {
+				String value = map.get(key);
+				if (!isEmpty(value)) {
+					switch (key) {
+						case "partnerId" : partner.setPartnerId(value);
+							break;
+						case "partnerName" : partner.setPartnerName(value);
+							break;
+						case "softwareName" : partner.setSoftwareName(value);
+							break;
+						case "softwareVersion" : partner.setSoftwareVersion(value);
+							break;
+						case "division" : partner.setDivision(value);
+							break;
+						case "createdDate1" : partner.setCreatedDate1(value);
+							break;
+						case "createdDate2" : partner.setCreatedDate2(value);
+							break;
+						case "creator" : partner.setCreator(value);;
+							break;
+						case "reviewer" : partner.setReviewer(value);
+							break;
+						case "watchers" : partner.setWatchers(new String[] {value});
+							break;
+						case "status" : partner.setStatus(value);
+							break;
+						case "publicYn" : partner.setPublicYn(value);
+							break;
+						case "ossName" : partner.setOssName(value);
+							break;
+						case "ossVersion" : partner.setOssVersion(value);
+							break;
+						case "licenseName" : partner.setLicenseName(value);
+							break;
+						case "binaryName" : partner.setBinaryName(value);
+							break;
+						case "userComment" : partner.setUserComment(value);
+							break;
+						case "description" : partner.setDescription(value);
+							break;
+						default : break;
+					}
+				}
+			}
+			
+			obj = partner;
+    	}
+        
+        return obj;
+	}
 
 
     @Override
@@ -145,7 +270,7 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
         if (filterString == null) {
             return null;
         }
-        return new Gson().fromJson(filterString, PartnerMaster.class);
+        return (PartnerMaster) makeSearchFilterObject(filterString, SearchType.THIRD_PARTY.getName());
     }
 
 
@@ -179,10 +304,17 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
                     break;
 
             }
-        }else{
+        } else{
             return null;
         }
-        return new Gson().fromJson(jsonString, resultClass);
+        
+        if (SearchType.valueOf(type).equals(SearchType.PROJECT)) {
+        	return makeSearchFilterObject(jsonString, SearchType.PROJECT.getName());
+        } else if (SearchType.valueOf(type).equals(SearchType.THIRD_PARTY)) {
+        	return makeSearchFilterObject(jsonString, SearchType.THIRD_PARTY.getName());
+        } else {
+        	return new Gson().fromJson(jsonString, resultClass);
+        }
     }
     
 	@Override
@@ -216,10 +348,28 @@ public class SearchServiceImpl extends CoTopComponent implements SearchService {
 		return "N";
 	}
 
-
 	@Override
     public History work(Object param) {
         return null;
     }
+
+	@Override
+	public String getUserColumns(Map<String, Object> params, String userId) {
+		String listType = (String)params.get("listType");
+		params.replace("listType", SearchType.valueOf(listType).getName());
+		params.put("userId", userId);
+
+		return searchMapper.selectUserColumns(params);
+	}
+
+	@Override
+	public void saveUserColumns(Map<String, Object> params, String userId) {
+		String listType = (String)params.get("listType");
+		params.replace("listType", SearchType.valueOf(listType).getName());
+		params.put("userId", userId);
+
+		searchMapper.insertUserColumns(params);
+	}
+
 
 }

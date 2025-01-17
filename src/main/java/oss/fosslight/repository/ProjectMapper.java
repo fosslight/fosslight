@@ -35,7 +35,7 @@ public interface ProjectMapper {
 	
 	List<String> selectCategoryCode(String code); 
 
-	Project selectProjectMaster(Project project);
+	Project selectProjectMaster(String prjId);
 	
 	List<Project> selectModelList(String prjId);
 	
@@ -95,11 +95,11 @@ public interface ProjectMapper {
 
 	void updateFileId(Project project);
 
-	List<T2File> selectCsvFile(Project project);
+	List<T2File> selectCsvFile(@Param("csvFileId") String csvFileId);
 	
-	List<T2File> selectBinCsvFile(Project project);
-
 	void deleteFileBySeq(T2File file);
+
+	void updateDeleteYNByFileSeq(T2File file);
 
 	List<T2File> selectAndroidCsvFile(Project project);
 
@@ -112,6 +112,8 @@ public interface ProjectMapper {
 	void deleteComment(CommentsHistory commentsHistory);
 
 	List<ProjectIdentification> selectBomList(ProjectIdentification projectIdentification);
+	
+	List<ProjectIdentification> selectOtherBomList(ProjectIdentification projectIdentification);
 	
 	List<OssComponents> selectOssRefPrjList1(OssMaster ossMaster);
 	
@@ -135,13 +137,15 @@ public interface ProjectMapper {
 
 	void insertOssComponentsLicense(OssComponentsLicense ossComponentsLicense);
 
-	Project selectProjectMaster2(Project project);
+	Project selectProjectMaster2(String prjId);
 
 	void updateProjectMaster(Project project);
 
 	void updateReadmeContent(Project project);
 
 	void updateVerifyContents(Project project);
+
+	void updateVulDocSkipYn(Project project);
 	
 	List<ProjectIdentification> identificationSubGrid(ProjectIdentification identification);
 
@@ -179,6 +183,8 @@ public interface ProjectMapper {
 	
 	List<Project> getProjectVersionList(Project project);
 
+	List<Project> getProjectDivisionList(Project project);
+	
 	void registPackageFileId(Project project);
 	
 	void updatePartnerOssList(OssComponents bean);
@@ -282,6 +288,8 @@ public interface ProjectMapper {
 	void deleteProjectModelWithModelName(Project project);
 
 	void updateFilePath(OssComponents newBean);
+	
+	void updateFilePathWithFileCount(OssComponents newBean);
 
 	void updateDistributeTarget(Project project);
 
@@ -341,6 +349,8 @@ public interface ProjectMapper {
 	
 	int selectAdminCheckCnt(ProjectIdentification projectIdentification);
 	
+	List<ProjectIdentification> selectAdminCheckList(@Param("prjId") String prjId);
+	
 	List<Project> selectPartnerRefPrjList(PartnerMaster partner);
 	
 	void updateFileId2(Project project);
@@ -382,4 +392,34 @@ public interface ProjectMapper {
 	void copySecurityDataForProject(Project project);
 	
 	List<OssComponents> checkSelectDownloadFile(Project project);
+	
+	List<ProjectIdentification> checkSelectDownloadFileForBOM(Project project);
+
+	List<OssComponents> getDependenciesDataList(Project project);
+
+	int checkProjectDistributeHis(Project project);
+
+	Float getCvssScoreForNotFixed(String prjId);
+
+	List<ProjectIdentification> selectSecurityListForProject(ProjectIdentification identification);
+	
+	void updateProjectForSecurity(Project project);
+
+	int resetOssComponentsAndLicense(@Param("referenceId")String referenceId, @Param("referenceDiv")String referenceDiv);
+	
+	int resetSecurityData(@Param("prjId")String prjId);
+	
+	void insertOssComponentListWithComponentId(@Param("list")List<ProjectIdentification> OssComponentList);
+
+	void insertOssComponentList(@Param("list") List<ProjectIdentification> OssComponentList);
+
+	void insertOssComponentLicenseList(@Param("list")List<OssComponentsLicense> ossComponentLicenseList);
+
+	List<Map<String, Object>> getCpeInfoAndRangeForProject(ProjectIdentification identification);
+
+	String selectNvdInfoWithOutVer(OssMaster ossMaster);
+	
+	List<ProjectIdentification> selectOssComponentsThirdCopy(OssComponents ossComponents);
+	
+	List<OssComponentsLicense> selectOssComponentsLicenseThirdCopy(OssComponents ossComponents);
 }

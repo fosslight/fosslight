@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="viewScript">
+<script th:inline="javascript">
+	var isSort = false;
+	var prjList = [[${prjList}]];
+
+	$(document).ready(function() {
+    	data.init();
+  	});
+	
+	var data = {
+		init : function() {
+			data.init();
+		}
+	}
+	
+	var data = {
+		init : function() {
+			fn.displayPartnerInfo();
+			
+			if (prjList == null) {
+				prjList = new Array();
+			}
+			dataTable.load();
+		}
+	}
+	
+	var dataTable = {
+		load : function() {
+			var prjDataList = $('#prjTable').DataTable({
+		   		paging : false,
+		   		searching : false,
+		   		info : false,
+		   		autoWidth : false,
+		   		responsive : true,
+		   		lengthChange : true,
+		   		ordering : false,
+		   		data : prjList,
+		   		columns : [ {
+		 				data : "prjId"
+		  			}, {
+		   		  		data : "prjName",
+    					render : function(data, type, row, meta){
+    					var display = data;
+    						if ("" != row.prjVersion) {
+    							display + " (" + row.prjVersion + ")";
+    						}
+    						return display;
+    					}
+		   			}],
+		    	columnDefs : [
+		        	{
+		        		targets : [0],
+		        		className : "text-center"
+		        	}
+		        ]
+		 	});
+			
+			$("#prjTable > tbody").on('dblclick', 'tr', function () {
+				var data = prjDataList.row(this).data();
+				if ("Y" != data.oldSystemFlag) {
+					var url = '/project/edit/' + data.prjId;
+					createTabInFrame(data.prjId + '_Project', url);
+				}
+			});
+		}
+	}
+	
+	var fn = {
+		displayPartnerInfo : function () {
+			var display = "";
+			
+			var softwareName = [[${detail.softwareName}]];
+			var softwareVersion = [[${detail.softwareVersion}]];
+			if ("" != softwareVersion && softwareVersion != null) {
+				softwareName += " (" + softwareVersion + ")";
+			}
+			
+			var partnerName = "<span class=\"text-dark-gray text-bold hover-line goToEditLink\">" + softwareName + "</span>";
+			display += partnerName
+			
+			var status = "<span class=\"ml-2\"> | </span>";
+			var partnerStatus = [[${detail.status}]];
+			
+			switch(partnerStatus){
+				case "REQ" :
+					status += "<span class=\"text-pink text-bold ml-2\">Request</span>";
+					
+					break;
+				case "REV" :
+					status += "<span class=\"text-yellow text-bold ml-2\">Review</span>";
+
+					break;
+				case "CONF" :
+					status += "<span class=\"text-dark text-bold ml-2\">Confirm</span>";
+					
+					break;
+				default :
+					status += "<span class=\"text-success text-bold ml-2\">Progress</span>";
+					
+					break;
+			}
+			
+			display += status;
+			
+			var oscProgress = "<span class=\"ml-2\"> | </span>";
+			
+			let request = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REQUEST')}]];
+			let review = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_REVIEW')}]];
+			let confirm = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_CONFIRM')}]];
+			let progress = [[${@CommonFunction.getCoConstDefVal('CD_DTL_IDENTIFICATION_STATUS_PROGRESS')}]];
+			
+			switch (partnerStatus) {
+				case confirm : oscProgress += "<span type=\"button\" class='badge badge-outline-dark-blue hover-light-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+					break;
+				case request : oscProgress += "<span type=\"button\" class='badge badge-pink hover-pink-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+					break;
+				case review : oscProgress += "<span type=\"button\" class='badge badge-yellow hover-yellow-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+					break;
+				case progress :
+				default : oscProgress += "<span type=\"button\" class='badge btn-success hover-success-btn size-sm width-6rem px-1 ml-2' onclick=\"fn.mvIdentification()\">Identification</span>";
+					break;
+			}
+			
+			display += oscProgress;
+			
+			$("#displayPartnerInfo").html(display);
+				
+			if ($(".goToEditLink").width() > 300) {
+				$(".goToEditLink").addClass("ellipsis");
+			}
+		},
+		mvIdentification : function () {
+			if ([[${detail.permission}]] > 0) {
+				createTabInFrame([[${detail.partnerId}]] + '_3rdParty_Identify', '/partner/identification/' + [[${detail.partnerId}]]);
+			} else {
+				alertify.alert([[${@CommonFunction.getCustomMessage('msg.project.check.division.permissions', '3rd parties')}]], function(){});
+			}
+		},
+		selectDownloadFile : function(target) {
+			if ([[${detail.statusPermission}]] == 0) {
+				alertify.alert([[#{msg.common.not.permission}]], function(){});
+				return false;
+			}
+			
+	    	// download file
+	    	if ("report_sub" === target) {
+	    		fn.downloadExcel();
+	    	} else {
+	    		var status = [[${detail.status}]];
+	        	if ('CONF' != status) {
+	        		alertify.confirm([[#{msg.common.check.sbom.export}]], function (e) {
+	    				if (e) {
+	    					fn.selectDownloadFileValidation(target);
+	    				} else {
+	    					return false;
+	    				}
+	    			});
+	        	} else {
+	        		fn.selectDownloadFileValidation(target);
+	        	}
+	    	}
+	    },
+	    selectDownloadFileValidation : function(target) {
+	    	if (fn.checkSelectDownloadFile()) {
+	    		if (target === "Spreadsheet_sub") fn.downloadSpdxSpreadSheetExcel();
+		        else if (target === "RDF_sub") fn.downloadSpdxRdf();
+		        else if (target === "TAG_sub") fn.downloadSpdxTag();
+		        else if (target === "JSON_sub") fn.downloadSpdxJson();
+		        else if (target === "YAML_sub") fn.downloadSpdxYaml();
+		        else if (target === "YAML") fn.downloadYaml();
+			} else {
+	    		alertify.error([[#{msg.common.check.sbom.export2}]], 0);
+	    	}
+	    },
+		checkSelectDownloadFile : function() {
+			var checkEmptyFlag = false;
+			
+			$.ajax({
+	    		type: "POST",
+				url: '/partner/checkSelectDownloadFile',
+				data: JSON.stringify({"partnerId":[[${detail.partnerId}]]}),
+				dataType : 'json',
+				cache : false,
+				async : false,
+				contentType : 'application/json',
+				success: function (data) {
+					if (data.isValid) {
+						checkEmptyFlag = true;
+					}
+				},
+				error: function(data){
+					alertify.error([[#{msg.common.valid2}]], 0);
+				}
+	    	});
+	    	
+	    	return checkEmptyFlag;
+		},
+		downloadSpdxSpreadSheetExcel : function(){
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdx", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		downloadSpdxRdf : function() {
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdxRdf", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		downloadSpdxTag : function() {
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",				   
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdxTag", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		downloadSpdxJson : function() {
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdxJson", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		},
+		downloadSpdxYaml : function() {
+			var partnerId = [[${detail.partnerId}]];
+			if ("" !== partnerId) {
+				partnerId = "3rd_" + partnerId;
+				
+				$.ajax({
+					type: "POST",
+					url: '/spdxdownload/getSPDXPost',
+					data: JSON.stringify({"type":"spdxYaml", "prjId":partnerId, "dataStr":"spdx_sbom"}),
+					dataType : 'json',
+					cache : false,
+					contentType : 'application/json',
+					success: function (data) {
+						if("false" == data.isValid) {
+							alertify.error([[#{msg.common.valid2}]], 0);
+						} else {
+							window.location = '/spdxdownload/getFile?id='+data.validMsg;
+						}
+					},
+					error: function(data){
+						alertify.error([[#{msg.common.valid2}]], 0);
+					}
+				});
+			}
+		}
+	}
+</script>
+</th:block>

@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div class="requestToOpenPop" style="display: none;">
+		<div class="row">
+			<div class="col-12">
+				<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+        			<div class="row" id="reqToOpenDiv"></div>
+					<div class="row" id="reqToOpenDiv2"></div>
+				</div>
+			</div>
+			<div th:if="${@CommonFunction.isAdmin()}" class="col-12">
+				<div class="card p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+					<div class="row" id="reqToOpenDiv3"></div>
+				</div>
+			</div>
+		</div>
+		<div class="row custom-layout">
+			<div class="col-12">
+				<button th:if="${@CommonFunction.isAdmin()}" type="button" class="btn btn-outline-lg-red btn-sm width-6rem mr-xm px-3 float-left" style="margin-left: 3px;" th:text="Ignore" th:onclick="|fn.commentsIgnore()|"></button>
+				<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3 float-right" style="margin-left: 3px;" th:text="Cancel" th:onclick="|fn.closeAlertifyView()|"></button>
+				<button type="button" class="btn btn-dark btn-sm width-6rem px-3 float-right" th:text="Ok" th:onclick="|fn.rejectRegist()|"></button>
+			</div>
+		</div>
+	</div>
+	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+</body>
+</html>

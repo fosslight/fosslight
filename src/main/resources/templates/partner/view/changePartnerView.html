@@ -1,0 +1,115 @@
+<th:block th:if="${#strings.equals(code, 'division')}">
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div class="row">
+		<div class="col-12">
+			<div class="card card-dark p-2" style="background-color: #f5f4f3; margin-top: 1rem;">
+				<table class="table table-hover text-nowrap" style="margin-top: 1rem;">
+					<tbody>
+						<tr>
+							<td class="text-center" style="vertical-align:middle;" th:text="'Division'"></td>
+							<td id="partnerChangeDivisionPop">
+								<select class="form-control select2" name="partnerDivision" style="width: 100%;">
+									<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+										<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+									</th:block>
+								</select>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="row float-right custom-layout">
+		<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|fn.closeAlertify()|"></button>
+		<button type="button" class="btn btn-dark btn-sm width-6rem px-3" th:text="OK" th:onclick="|fn.changeDivisionSave()|"></button>
+	</div>
+	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+</body>
+</html>
+</th:block>
+<th:block th:if="${#strings.equals(code, 'watcher')}">
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="card card-dark custom-layout" style="background-color: #f5f4f3;">
+				<div class="card-body submit-form">
+					<label th:text="#{msg.common.field.watcher}"></label>
+					<div class="row my-1">
+						<div class="col-4">
+             	        	<select class="form-control select2" style="width: 100%;" th:id="parDivision" th:name="parDivision" th:onchange="|fn.selectDivision(this)|">
+          	     	         	<option th:value="''" th:text="'Select Division'"></option>
+           	        	     	<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'))}">
+                    	     		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                    	      	</th:block>
+                    	 	</select>
+                  		</div>
+                  		<div class="col-7">
+							<select class="form-control select2" style="width: 100%;" th:id="parUserId" th:name="parUserId">
+								<option th:value="''" th:text="'Select User'"></option>
+							</select>
+                  		</div>
+                 		<div class="col-1">
+                 			<button type="button" class="btn btn-outline-dark" th:text="Add" th:onclick="|fn.addWatcherClick()|"></button>
+                 		</div>
+					</div>
+					<div class="row my-1">
+						<div class="col-4">
+                    		<input class="form-control" type="text" id="adId" name="adId" placeholder="Input email" th:onKeypress="|fn.CheckChar()|">
+               			</div>
+               			<div class="col-7" th:with="useDomainFlag=${(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN')) != null 
+                                        			&& #lists.size(@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))) > 0) ? true : false}">
+               			<th:block th:if="${useDomainFlag}">
+                    		<select class="form-control select2" name="parDomain" style="width: 100%;" th:onchange="|fn.selectDomain()|">
+                    			<option th:value="''" th:text="'Select Domain'"></option>
+                        		<th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'))}">
+                            		<th:block th:if="${#strings.contains(option.cdDtlNm, '직접입력')}">
+                                		<option th:value="${option.cdDtlNo}" th:text="${option.cdDtlNm}"></option>
+                             		</th:block>
+                              		<th:block th:if="${!#strings.contains(option.cdDtlNm, '직접입력')}">
+                                		<option th:value="${option.cdDtlNo}" th:text="|@${option.cdDtlNm}|"></option>
+                              		</th:block>
+                        		</th:block>
+                    		</select>
+                       		<input type="text" id="emailTemp" name="emailTemp" class="w220" style="display:none;" th:value="${@CoCodeManager.getCodeExpString(@CommonFunction.getCoConstDefVal('CD_REGIST_DOMAIN'), @CommonFunction.getCoConstDefVal('CD_DTL_DEFAULT_DOMAIN'))}"/>
+                		</th:block>
+                  		<th:block th:if="${!useDomainFlag}">
+                    		<input class="form-control" type="text" id="emailTemp" name="emailTemp" placeholder="Input your Email Domain" th:onKeypress="|fn.CheckChar()|">
+                 		</th:block>
+            			</div>
+               			<div class="col-1">
+                    		<button type="button" class="btn btn-outline-dark" th:text="Add" th:onclick="|fn.addEmail()|"></button>
+                 		</div>
+					</div>
+					<div class="row my-1">
+						<div class="col-4">
+                   			<select id="listKind" name="listKind" class="form-control select2" style="width: 100%;">
+                     			<option th:value="''" th:text="'Select List'"></option>
+                     			<option th:text="'3rd Party List'" th:value="par"></option>
+                   			</select>
+                		</div>
+                  		<div class="col-7">
+                    		<input class="form-control" type="text" id="listId" name="listId" placeholder="Input ID you want to copy"/>
+               			</div>
+                 		<div class="col-1">
+                   			<button type="button" class="btn btn-outline-dark" th:text="Add" th:onclick="|fn.addList()|"></button>
+                 		</div>
+					</div>
+					<div class="form-group my-1">
+                		<div id="multiDiv" class="external-events row"></div>
+              		</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row float-right custom-layout">
+		<button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|fn.closeAlertify()|"></button>
+		<button type="button" class="btn btn-dark btn-sm width-6rem mr-xm px-3" th:text="Delete" th:onclick="|fn.changeWatcherDelete()|"></button>
+		<button type="button" class="btn btn-dark btn-sm width-6rem px-3" th:text="Add" th:onclick="|fn.changeWatcherAdd()|"></button>
+	</div>
+</body>
+</html>
+</th:block>

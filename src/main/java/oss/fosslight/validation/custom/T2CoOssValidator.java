@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import oss.fosslight.common.CoCodeManager;
 import oss.fosslight.common.CommonFunction;
@@ -63,7 +63,7 @@ public class T2CoOssValidator extends T2CoValidator {
 		} else if (VALID_TYPE == VALID_DOWNLOADLOCATION){ // DOWNLOAD LOCATION URL을 중복으로 작성한 경우
 			targetName = "DOWNLOAD_LOCATION";
 			
-			if (isEmpty(ossId) && !errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
+			if (!errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
 				OssMaster param = new OssMaster();
 				param.setDownloadLocation(map.get(targetName));
 				param.setOssName((String) map.get("OSS_NAME"));
@@ -96,7 +96,7 @@ public class T2CoOssValidator extends T2CoValidator {
 		} else if (VALID_TYPE == VALID_DOWNLOADLOCATIONS){
 			targetName = "DOWNLOAD_LOCATIONS";
 			
-			if (isEmpty(ossId) && !errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
+			if (!errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
 				String[] downloadLocations = map.get(targetName).split("\t");
 				targetName = "DOWNLOAD_LOCATION";
 				List<String> result = new ArrayList<String>();
@@ -138,7 +138,7 @@ public class T2CoOssValidator extends T2CoValidator {
 			}
 		} else if (VALID_TYPE == VALID_HOMEPAGE){ // HOMEPAGE URL을 중복으로 작성한 경우
 			targetName = "HOMEPAGE";
-			if (isEmpty(ossId) && !errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
+			if (!errMap.containsKey(targetName) && map.containsKey(targetName) && !isEmpty(map.get(targetName))) {
 				OssMaster param = new OssMaster();
 				param.setHomepage(map.get(targetName));
 				param.setOssName((String) map.get("OSS_NAME"));
@@ -745,7 +745,11 @@ public class T2CoOssValidator extends T2CoValidator {
 			// homepage
 			basicKey = "HOMEPAGE";
 			gridKey = StringUtil.convertToCamelCase(basicKey);
-			errCd = checkBasicError(basicKey, gridKey, analysisBean.getHomepage().trim(), true);
+			
+			String homepage = analysisBean.getHomepage();
+			if (!isEmpty(homepage)) homepage = homepage.trim();
+			
+			errCd = checkBasicError(basicKey, gridKey, homepage, true);
 			
 			if (!isEmpty(errCd)) {
 				errMap.put(basicKey + (useGridSeq ? "."+analysisBean.getGridId() : ""), errCd);
@@ -757,7 +761,7 @@ public class T2CoOssValidator extends T2CoValidator {
 					param.setOssName(CoCodeManager.OSS_INFO_UPPER_NAMES.get(analysisBean.getOssName().trim().toUpperCase()));
 				}
 				
-				param.setHomepage(analysisBean.getHomepage().trim());
+				param.setHomepage(homepage);
 				Map<String, Object> paramMap = ossService.checkExistsOssHomepage(param);
 				List<OssMaster> list = (List<OssMaster>) paramMap.get("homepage");
 				

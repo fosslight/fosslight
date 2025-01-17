@@ -41,6 +41,8 @@ import oss.fosslight.service.T2UserService;
 @RequestMapping(value = "/api/v1")
 public class ApiPartnerController extends CoTopComponent {
 	
+	private boolean ldapCheckFlag = CoConstDef.FLAG_YES.equals(avoidNull(CommonFunction.getProperty("ldap.check.flag"))) ? true : false;
+	
 	private final ResponseService responseService;
 	
 	private final T2UserService userService;
@@ -123,7 +125,13 @@ public class ApiPartnerController extends CoTopComponent {
 			if (searchFlag) {
 				if (emailList != null) {
 					for (String email : emailList) {
-						boolean ldapCheck = apiPartnerService.existLdapUserToEmail(email);
+						boolean ldapCheck = false;
+						if (ldapCheckFlag) {
+							ldapCheck = apiPartnerService.existLdapUserToEmail(email);
+						} else {
+							ldapCheck = true;
+						}
+						
 						if (ldapCheck) {
 							boolean watcherFlag = apiPartnerService.existsWatcherByEmail(partnerId, email);
 							if (watcherFlag) {

@@ -26,8 +26,8 @@ public class OssAnalysis extends ComBean implements Serializable {
 		this.ossNickname = ossNickname;
 		this.licenseName = licenseName;
 		this.ossCopyright = ossCopyright;
-		this.downloadLocation = downloadLocation;
-		this.homepage = homepage;
+		this.downloadLocation = avoidNull(downloadLocation);
+		this.homepage = avoidNull(homepage);
 		this.summaryDescription = summaryDescription;
 		this.comment = comment;
 		this.result = result;
@@ -60,4 +60,26 @@ public class OssAnalysis extends ComBean implements Serializable {
 	private String completeYn;
 	private String referenceOssId;
 	private String useYn;
+	private String ossType;
+	private String ossId;
+	private String ossCommonId;
+	private String[] ossVersionAliases;
+	private String[] includeCpes;
+	private String[] excludeCpes;
+
+	public String getHomepage() {
+		return avoidNull(homepage);
+	}
+
+	public void setHomepage(String homepage) {
+		this.homepage = avoidNull(homepage);
+	}
+
+	public String getDownloadLocation() {
+		return avoidNull(downloadLocation);
+	}
+
+	public void setDownloadLocation(String downloadLocation) {
+		this.downloadLocation = avoidNull(downloadLocation);
+	}
 }

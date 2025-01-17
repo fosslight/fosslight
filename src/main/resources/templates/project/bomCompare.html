@@ -1,0 +1,57 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<th:block th:replace="fragments/gridCommonFn :: gridCommonFn"></th:block>
+<th:block th:replace="project/bomCompare-script :: script"></th:block>
+<body class="hold-transition sidebar-mini" style="height: 100%;">
+    <div class="wrapper">
+        <div class="content-wrapper custom-layout">
+        	<section class="content-header">
+            	<div class="container-fluid">
+                	<form id="bomcompareSearch" name="bomcompareSearch">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card card-dark card-outline collapsed-card search-form mb-3">
+                                    <div class="card-header" style="border-bottom: none;">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                	<input class="form-control" placeholder="Before Project id" type="text" id="beforePrjId" name="beforePrjId" th:onKeyup="this.value=this.value.replace(/[^0-9]/g,'')">
+                                              	</div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                 	<input class="form-control" placeholder="After Project id" type="text" id="afterPrjId" name="afterPrjId" th:onKeyup="this.value=this.value.replace(/[^0-9]/g,'')">
+                                              	</div>
+                                            </div>
+                                            <div class="col-md-1">
+                                            	<div class="form-group" style="margin-top: .5rem; margin-bottom: .5rem;">
+                                                	<button type="button" class="btn btn-default" id="search"><i class="fa fa-search"></i></button></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                 	</form>
+                 	<!-- 
+                 	<div class="row">
+                 		<div class="col-12">
+                 			<button type="button" class="btn btn-lg-light-gray btn-sm width-6rem mr-xm px-3 float-right" th:onclick="|fn.downloadExcel()|"><i class="far fa-file-excel mr-2"></i>Export</button>
+                 		</div>
+                 	</div>
+                 	 -->
+                  	<div class="row mt-3 mb-2">
+                      	<div class="col-12 jqGridSet">
+                          	<table id="list"><tr><td></td></tr></table>
+                           	<div id="pager"></div>
+                      	</div>
+                  	</div>
+             	</div>
+             	
+             	<th:block th:replace="fragments/common-fragments :: loadingWrapFragment"></th:block>
+         	</section>
+        </div>
+    </div>
+</body>
+</html>

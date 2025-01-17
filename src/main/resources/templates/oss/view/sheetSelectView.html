@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/html" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div class="sheetSelectPop" style="display: none;">
+		<div class="row">
+			<div class="col-12">
+				<table class="table table-hover text-nowrap sheetTable">
+					<tbody id="sheetBody"></tbody>
+				</table>
+			</div>
+		</div>
+		<div class="row custom-layout">
+			<div class="col-12" style="maring-left: auto;">
+				<button type="button" class="btn btn-outline-dark btn-sm width-6rem px-1 ml-1 float-right" th:text="Cancel" th:onclick="|grid_fn.closePop()|"></button>
+				<button type="button" class="btn btn-dark btn-sm width-6rem px-1 float-right" th:text="Ok" th:onclick="|grid_fn.selectChangedOssName()|"></button>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

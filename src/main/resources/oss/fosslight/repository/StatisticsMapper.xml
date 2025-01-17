@@ -6,13 +6,13 @@
 <mapper namespace="oss.fosslight.repository.StatisticsMapper">
 	<select id="getChartTitle" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
 		<if test="@oss.fosslight.util.StringUtil@equals('STT', categoryType)">
-			SELECT CD_DTL_NO AS TITLE_NM
+			SELECT CD_DTL_NM AS TITLE_NM
 			  FROM T2_CODE_DTL 
 			 WHERE CD_NO = '205' 
 			 ORDER BY CD_ORDER ASC
 		</if>
 		<if test="@oss.fosslight.util.StringUtil@equals('3rdSTT', categoryType)">
-			SELECT CD_DTL_NO AS TITLE_NM
+			SELECT CD_DTL_NM AS TITLE_NM
 			  FROM T2_CODE_DTL 
 			 WHERE CD_NO = '211' 
 			 ORDER BY CD_ORDER ASC
@@ -23,7 +23,7 @@
 			 INNER JOIN T2_AUTHORITIES AUTH
 			    ON USR.USER_ID = AUTH.USER_ID 
 			   AND AUTH.AUTHORITY='ROLE_ADMIN' 
-			   AND USR.USER_ID NOT IN ('oscAdmin', 'sungwon.yun')
+			   AND USR.USER_ID NOT IN ('sungwon.yun')
 			   AND USR.USE_YN = 'Y'
 		 </if>
 		 <if test="@oss.fosslight.util.StringUtil@equals('DST', categoryType)">
@@ -40,7 +40,7 @@
 		 INNER JOIN T2_AUTHORITIES AUTH
 		    ON USR.USER_ID = AUTH.USER_ID 
 		   AND AUTH.AUTHORITY='ROLE_ADMIN' 
-		   AND (USR.USER_ID IN ('oscAdmin', 'sungwon.yun')
+		   AND (USR.USER_ID IN ('sungwon.yun')
 		   		OR USR.USE_YN = 'N')
 	</select>
 	<select id="getDivisionalProjectChartData" parameterType="oss.fosslight.domain.Statistics" resultType="oss.fosslight.domain.Statistics">
@@ -66,9 +66,16 @@
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
-					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = #{user}
-					  </foreach>
+					<choose>
+						<when test="noneUser != null and noneUser.size() > 0">
+							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+								STAT.CATEGORY = #{user}
+							</foreach>
+						</when>
+						<otherwise>
+							1 = 0
+						</otherwise>
+					</choose>
 					  , COUNT(1), 0) AS CATEGORY#{categorySize}
 	  			  </if>
 				  FROM (SELECT CD_DTL_NM
@@ -79,14 +86,14 @@
 			<if test="@oss.fosslight.util.StringUtil@equals('STT', categoryType)">
 				  LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
 				  				  , CASE 
-										WHEN PM.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'COMP'
-										WHEN PM.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'DROP'
-										WHEN PM.IDENTIFICATION_STATUS = 'REV' OR PM.VERIFICATION_STATUS = 'REV' THEN 'REV'
-										WHEN PM.IDENTIFICATION_STATUS = 'REQ' OR PM.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y' THEN 'REQ'
-										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'DONE' THEN 'REV'
-										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'REV' 
-										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'NA' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'REV' 
-										ELSE 'PROG' 
+										WHEN PM.COMPLETE_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'Complete'
+										WHEN PM.DROP_YN = 'Y' AND STATUS_REQUEST_YN = 'N' THEN 'Drop'
+										WHEN PM.IDENTIFICATION_STATUS = 'REV' OR PM.VERIFICATION_STATUS = 'REV' THEN 'Review'
+										WHEN PM.IDENTIFICATION_STATUS = 'REQ' OR PM.VERIFICATION_STATUS = 'REQ' OR STATUS_REQUEST_YN = 'Y' THEN 'Request'
+										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'DONE' THEN 'Final Review'
+										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'CONF' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'Final Review' 
+										WHEN PM.IDENTIFICATION_STATUS = 'CONF' AND PM.VERIFICATION_STATUS = 'NA' AND PM.DESTRIBUTION_STATUS = 'NA' THEN 'Final Review' 
+										ELSE 'Progress' 
 								  	END CATEGORY 
 							   FROM PROJECT_MASTER PM
 							   <!-- 
@@ -290,16 +297,23 @@
 			<foreach collection="titleArray" item="item" index="index">
 			 , MAX(RTN.CATEGORY#{index}) AS CATEGORY#{index}_CNT
 			</foreach>
-			 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT
+<!-- 		 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT -->
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
 	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
-	  			  	 , IF(
-				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = #{user}
-				  </foreach>
-				     , COUNT(1), 0) AS CATEGORY#{categorySize}
+<!--   			  	 , IF(
+					<choose>
+						<when test="noneUser != null and noneUser.size() > 0">
+							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+								STAT.CATEGORY = #{user}
+							</foreach>
+						</when>
+						<otherwise>
+							1 = 0
+						</otherwise>
+					</choose>
+				     , COUNT(1), 0) AS CATEGORY#{categorySize} -->
 				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
@@ -313,7 +327,20 @@
 				  				  , CONCAT(YEAR(OM.MODIFIED_DATE), LPAD(MONTH(OM.MODIFIED_DATE), 2, '0')) AS DATE
 				  				</otherwise>
 				  			</choose>
-							   FROM OSS_MASTER OM
+							   FROM (
+								SELECT
+							    	OV.OSS_ID,
+							    	OC.OSS_COMMON_ID,
+							    	OC.OSS_NAME,
+							    	OV.OSS_VERSION,
+									OV.CREATOR,
+									OV.CREATED_DATE,
+									OV.MODIFIER,
+									OV.MODIFIED_DATE
+								FROM OSS_COMMON OC
+								LEFT OUTER JOIN OSS_VERSION OV
+								ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID AND OV.USE_YN = 'Y'
+							 ) OM
 							   
 							  INNER JOIN T2_USERS T1
 							     ON OM.MODIFIER = T1.USER_ID
@@ -331,11 +358,11 @@
 							 				  ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
 					<choose>
 						<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
-							  	 ON OM.CREATOR = ADMIN.USER_ID AND OM.USE_YN = 'Y'
+							  	 ON OM.CREATOR = ADMIN.USER_ID
 							  WHERE DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')) STAT
 						</when>
 						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
-							  	 ON OM.MODIFIER = ADMIN.USER_ID AND OM.USE_YN = 'Y'
+							  	 ON OM.MODIFIER = ADMIN.USER_ID
 							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')
 								AND DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') != DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d')) STAT
 						</when>
@@ -352,16 +379,23 @@
 			<foreach collection="titleArray" item="item" index="index">
 			 , MAX(RTN.CATEGORY#{index}) AS CATEGORY#{index}_CNT
 			</foreach>
-			 , MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT
+<!-- 		, MAX(RTN.CATEGORY#{categorySize}) AS CATEGORY#{categorySize}_CNT -->
 		  FROM (SELECT A.DATE
 			 	  <foreach collection="titleArray" item="item" index="index">
 	  			 	 , IF(STAT.CATEGORY = #{item}, COUNT(1), 0) AS CATEGORY#{index}
 	  			  </foreach>
-	  			     , IF(
-				  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-				  	   STAT.CATEGORY = #{user}
-				  </foreach>
-				     , COUNT(1), 0) AS CATEGORY#{categorySize}
+<!-- 	  		     , IF(
+ 					<choose>
+ 						<when test="noneUser != null and noneUser.size() > 0">
+ 							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+ 								STAT.CATEGORY = #{user}
+ 							</foreach>
+ 						</when>
+ 						<otherwise>
+ 							1 = 0
+ 						</otherwise>
+ 					</choose>
+				     , COUNT(1), 0) AS CATEGORY#{categorySize} -->
 				  FROM (SELECT DATE_FORMAT(DATE_ADD(#{startDate}, INTERVAL (@num := @num + 1)-1 MONTH), '%Y%m') AS DATE
 					  	  FROM INFORMATION_SCHEMA.TABLES TAB
 					     	 , (select @num := 0) NUM
@@ -379,7 +413,21 @@
 							<if test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
 							  INNER JOIN (
 							  		SELECT OLD.LICENSE_ID
-							  	  	  FROM OSS_MASTER OM
+							  	  	  FROM (
+									SELECT
+								    	OV.OSS_ID,
+								    	OC.OSS_COMMON_ID,
+								    	OC.OSS_NAME,
+								    	OV.OSS_VERSION,
+								    	OV.USE_YN,
+										OV.CREATOR,
+										OV.CREATED_DATE,
+										OV.MODIFIER,
+										OV.MODIFIED_DATE
+									FROM OSS_COMMON OC
+									LEFT OUTER JOIN OSS_VERSION OV
+									ON OC.OSS_COMMON_ID = OV.OSS_COMMON_ID
+								 ) OM
 							  	INNER JOIN OSS_LICENSE_DECLARED OLD
 							  	        ON OM.OSS_ID = OLD.OSS_ID
 							  	     WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')
@@ -441,9 +489,16 @@
 	  			  </foreach>
 	  			  <if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 	  			  	  , IF(
-					  <foreach collection="noneUser" item="user" index="index" separator=" OR ">
-					  	   STAT.CATEGORY = #{user}
-					  </foreach>
+					<choose>
+						<when test="noneUser != null and noneUser.size() > 0">
+							<foreach collection="noneUser" item="user" index="index" separator=" OR ">
+								STAT.CATEGORY = #{user}
+							</foreach>
+						</when>
+						<otherwise>
+							1 = 0
+						</otherwise>
+					</choose>
 					  , COUNT(1), 0) AS CATEGORY#{categorySize}
 	  			  </if>
 				  FROM (SELECT CD_DTL_NM
@@ -454,8 +509,14 @@
 			<if test="@oss.fosslight.util.StringUtil@equals('3rdSTT', categoryType)">
 				  LEFT JOIN (SELECT 
 				  				(SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
-								  , PM.STATUS AS CATEGORY 
+								  , CASE 
+										WHEN PM.STATUS = 'CONF' THEN 'Confirm'
+										WHEN PM.STATUS = 'REQ' THEN 'Request'
+										WHEN PM.STATUS = 'REV' THEN 'Review'
+										ELSE 'Progress' 
+								  	END CATEGORY 
 							   FROM PARTNER_MASTER PM
+							   WHERE PM.USE_YN = 'Y'
 							   <!-- 
 							  INNER JOIN T2_USERS T1
 								 ON PM.CREATOR = T1.USER_ID AND PM.USE_YN = 'Y'
@@ -466,7 +527,7 @@
 										     AND USE_YN = 'Y') T2
 								 ON T1.DIVISION = T2.CD_DTL_NO
 								  -->
-							  WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
+							  AND PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
 				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
 				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>
@@ -493,7 +554,8 @@
 						 				  INNER JOIN T2_AUTHORITIES AUTH
 						    				 ON USR.USER_ID = AUTH.USER_ID AND AUTH.AUTHORITY='ROLE_ADMIN') ADMIN
 						        ON PM.REVIEWER = ADMIN.USER_ID
-						     WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
+						     WHERE PM.USE_YN = 'Y'
+						       AND PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}) STAT
 		    	   ON A.CD_DTL_NM = STAT.CD_DTL_NM
 		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
 			</if>

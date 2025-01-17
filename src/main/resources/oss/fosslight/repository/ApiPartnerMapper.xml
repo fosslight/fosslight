@@ -4,6 +4,13 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="oss.fosslight.repository.ApiPartnerMapper">
+	<sql id="limitPage">
+		<if test="countPerPage != 0">
+			LIMIT
+			#{offset},
+			#{countPerPage}
+		</if>
+	</sql>
 	
 	<select id="selectPartnerMasterCount" parameterType="hashMap" resultType="int">
 		SELECT COUNT(*) FROM (
@@ -75,15 +82,20 @@
 		SELECT RESULT.PARTNER_ID
 		     , RESULT.PARTNER_NAME
 		     , RESULT.SOFTWARE_NAME
+		     , IFNULL(RESULT.SOFTWARE_VERSION, '') AS SOFTWARE_VERSION
 		     , RESULT.STATUS
 		     , DATE_FORMAT(RESULT.MODIFIED_DATE, '%Y-%m-%d') AS MODIFIED_DATE
 		     , DATE_FORMAT(RESULT.CREATED_DATE, '%Y-%m-%d') AS CREATED_DATE
-		     , RESULT.USER_NAME AS CREATOR
-		     , RESULT.DIVISION
+		     , RESULT.DELIVERY_FORM
+		     , IFNULL(RESULT.DESCRIPTION, '') AS DESCRIPTION
+		     , RESULT.CREATOR
+		     , IFNULL(RESULT.REVIEWER, '') AS REVIEWER
+		     , IFNULL(RESULT.DIVISION, '') AS DIVISION
 		     , IFNULL(RESULT.PRJ_ID, '') AS PRJ_ID
      	  FROM (SELECT t1.PARTNER_ID
 					 , t1.PARTNER_NAME
 					 , t1.SOFTWARE_NAME
+     	             , t1.SOFTWARE_VERSION
 					 , CASE
 					 		WHEN t1.STATUS = 'PROG' THEN 'Progress'
 							WHEN t1.STATUS = 'REQ' THEN 'Request'
@@ -92,8 +104,11 @@
 						END AS STATUS
 					 , t1.MODIFIED_DATE								
 					 , t1.CREATED_DATE
+     	             , t1.DELIVERY_FORM
+     	             , t1.DESCRIPTION
 					 , t1.CREATOR
 					 , t2.USER_NAME
+     	             , t1.REVIEWER
 					 , t3.CD_DTL_NM AS DIVISION
 					 , (SELECT GROUP_CONCAT(DISTINCT PRJ_ID) FROM PROJECT_PARTNER_MAP WHERE PARTNER_ID = t1.PARTNER_ID) AS PRJ_ID
 				  FROM PARTNER_MASTER t1
@@ -141,7 +156,7 @@
 		    </foreach>
 		</if>
 		ORDER BY RESULT.PARTNER_ID DESC
-		LIMIT 0, 1000
+		<include refid="limitPage"/>
 	</select>
 	
 	<select id="existPartnertCnt" parameterType="hashMap" resultType="int">

@@ -1,0 +1,180 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="fragments/common-script :: commonScriptFragment"></th:block>
+<th:block th:replace="oss/ossBulkEditPopup-script :: contentScript"></th:block>
+<body>
+<div class="card-body">
+	<form name="bulkEditForm" id="bulkEditForm">
+		<div class="row pl-2" style="width: 100%;">
+			<input type="hidden" id="rowId" name="rowId" th:value="${rowId}"/>
+			<input type="hidden" id="target" name="target" th:value="${target}"/>
+			<table class="table table-bordered table-hover dtr-inline">
+            	<thead style="background-color: #f5f4f3;">
+                	<tr>
+                     	<th class="text-center" style="width:35%;" th:text="Attributes"></th>
+                      	<th class="text-center" th:text="Contents"></th>
+                   	</tr>
+           		</thead>
+           		<tbody>
+           			<tr th:if="${target =='depList' or target == 'srcList' or menu == 'selfCheck' or target == 'list'}">
+           				<th th:if="${target =='depList'}" th:text="'Manifest file'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<th th:if="${menu != 'selfCheck' and target == 'srcList'}" th:text="'Source Name or Path'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<th th:unless="${target == 'depList' or (menu != 'selfCheck' and target == 'srcList')}" th:text="'Binary Name or Source Path'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<td>
+           					<div class="row">
+           						<div class="col-md-10">
+           							<input type="text" id="filePath" name="filePath" class="form-control" style="height: 30px;" />
+           						</div>
+           						<div class="col-md-2">
+           							<div class="icheck-primary d-inline">
+           								<input type="checkbox" id="filePathCheck" class="bulkEditCheck" value="filePathCheck"/>
+           								<label for="filePathCheck" style="vertical-align: middle;"></label>
+           							</div>
+           						</div>
+           					</div>
+           				</td>
+           			</tr>
+           			<tr th:if="${target == 'binList'}">
+           				<th th:text="'Binary Name'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<td>
+           					<div class="row">
+           						<div class="col-md-10">
+           							<input type="text" id="binaryName" name="binaryName" class="form-control" style="height: 30px;" />
+           						</div>
+           						<div class="col-md-2">
+           							<div class="icheck-primary d-inline">
+           								<input type="checkbox" id="binaryNameCheck" class="bulkEditCheck" value="binaryNameCheck"/>
+           								<label for="binaryNameCheck" style="vertical-align: middle;"></label>
+           							</div>
+           						</div>
+           					</div>
+           				</td>
+           			</tr>
+           			<tr>
+           				<th th:text="'OSS Name'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<td>
+           					<div class="row">
+           						<div class="col-md-10">
+           							<input type="text" id="ossName" name="ossName" class="form-control" style="height: 30px;" />
+           						</div>
+           						<div class="col-md-2">
+           							<div class="icheck-primary d-inline">
+           								<input type="checkbox" id="ossNameCheck" class="bulkEditCheck" value="ossNameCheck"/>
+           								<label for="ossNameCheck" style="vertical-align: middle;"></label>
+           							</div>
+           						</div>
+           					</div>
+           				</td>
+           			</tr>
+           			<tr>
+           				<th th:text="'OSS Version'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<td>
+           					<div class="row">
+           						<div class="col-md-10">
+           							<input type="text" id="ossVersion" name="ossVersion" class="form-control" style="height: 30px;" />
+           						</div>
+           						<div class="col-md-2">
+           							<div class="icheck-primary d-inline">
+           								<input type="checkbox" id="ossVersionCheck" class="bulkEditCheck" value="ossVersionCheck"/>
+           								<label for="ossVersionCheck" style="vertical-align: middle;"></label>
+           							</div>
+           						</div>
+           					</div>
+           				</td>
+           			</tr>
+           			<tr>
+           				<th th:text="'License'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<td>
+           					<div class="row">
+           						<div class="col-md-10">
+           							<input type="text" id="licenseNameSelect" name="licenseNameSelect" class="form-control" style="height: 30px;" />
+           							<input type="hidden" id="licenseName" name="licenseName" />
+           						</div>
+           						<div class="col-md-2">
+           							<div class="icheck-primary d-inline">
+           								<input type="checkbox" id="licenseNameCheck" class="bulkEditCheck" value="licenseNameCheck"/>
+           								<label for="licenseNameCheck" style="vertical-align: middle;"></label>
+           							</div>
+           						</div>
+           					</div>
+           					<div class="row">
+           						<div class="col-md-12" id="licenseNameBtn" style="vertical-align:middle;"></div>
+           					</div>
+           				</td>
+           			</tr>
+           			<tr>
+           				<th th:text="'Download Location'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<td>
+           					<div class="row">
+           						<div class="col-md-10">
+           							<input type="text" id="downloadLocation" name="downloadLocation" class="form-control" style="height: 30px;" />
+           						</div>
+           						<div class="col-md-2">
+           							<div class="icheck-primary d-inline">
+           								<input type="checkbox" id="downloadLocationCheck" class="bulkEditCheck" value="downloadLocationCheck"/>
+           								<label for="downloadLocationCheck" style="vertical-align: middle;"></label>
+           							</div>
+           						</div>
+           					</div>
+           				</td>
+           			</tr>
+           			<tr th:if="${menu != 'selfCheck'}">
+           				<th th:text="'Home Page'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<td>
+           					<div class="row">
+           						<div class="col-md-10">
+           							<input type="text" id="homepage" name="homepage" class="form-control" style="height: 30px;" />
+           						</div>
+           						<div class="col-md-2">
+           							<div class="icheck-primary d-inline">
+           								<input type="checkbox" id="homepageCheck" class="bulkEditCheck" value="homepageCheck"/>
+           								<label for="homepageCheck" style="vertical-align: middle;"></label>
+           							</div>
+           						</div>
+           					</div>
+           				</td>
+           			</tr>
+           			<tr>
+           				<th th:text="'Copyright Text'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<td>
+           					<div class="row">
+           						<div class="col-md-10">
+           							<input type="text" id="copyrightText" name="copyrightText" class="form-control" style="height: 30px;" />
+           						</div>
+           						<div class="col-md-2">
+           							<div class="icheck-primary d-inline">
+           								<input type="checkbox" id="copyrightTextCheck" class="bulkEditCheck" value="copyrightTextCheck"/>
+           								<label for="copyrightTextCheck" style="vertical-align: middle;"></label>
+           							</div>
+           						</div>
+           					</div>
+           				</td>
+           			</tr>
+           			<tr th:if="${menu != 'selfCheck'}">
+           				<th th:text="'Comment'" style="vertical-align: middle; font-size: .9rem;"></th>
+           				<td>
+           					<div class="row">
+           						<div class="col-md-10">
+           							<input type="text" id="comments" name="comments" class="form-control" style="height: 30px;" />
+           						</div>
+           						<div class="col-md-2">
+           							<div class="icheck-primary d-inline">
+           								<input type="checkbox" id="commentsCheck" class="bulkEditCheck" value="commentsCheck"/>
+           								<label for="commentsCheck" style="vertical-align: middle;"></label>
+           							</div>
+           						</div>
+           					</div>
+           				</td>
+           			</tr>
+           		</tbody>
+			</table>
+		</div>
+	</form>
+	<div class="row pl-2 float-right custom-layout" style="margin-top: 10px;">
+        <button type="button" class="btn btn-outline-dark btn-sm width-6rem mr-xm px-3" th:text="Cancel" th:onclick="|fn.bulkEditClose()()|"></button>
+		<button type="button" class="btn btn-dark btn-sm width-6rem mr-xm px-3" th:text="Delete" th:onclick="|fn.bulkEditDelete()|"></button>
+		<button type="button" class="btn btn-dark btn-sm width-6rem px-3" th:text="Change" th:onclick="|fn.bulkEditChange()|"></button>
+    </div>
+</div>
+</body>
+</html>

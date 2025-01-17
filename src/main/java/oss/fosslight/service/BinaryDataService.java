@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -53,14 +53,18 @@ public class BinaryDataService  extends CoTopComponent {
 	public Map<String, Object> getBinaryList(String page, String rows , BinaryData vo) {
 		int records = 0;
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		
+
+		String filterCondition = CommonFunction.getFilterToString(vo.getFilters());
+		vo.setFilterCondition(filterCondition);
+
 		if(!StringUtil.isEmpty(vo.getFileName()) && vo.getFileName().indexOf("/") > -1) {
 			String[] splitFileName = vo.getFileName().split("/");
 			vo.setFileName(splitFileName[splitFileName.length-1]);
 		}
 		
 		records = binaryDataMapper.countBinaryList(vo);
-				
+		vo.setTotListSize(records);
+
 		if(CoConstDef.FLAG_NO.equals(vo.getBinaryPopupFlag())) {
 			vo.setCurPage(Integer.parseInt( StringUtil.isNotEmpty(page) ? page : "1"));
 			vo.setPageListSize(Integer.parseInt( StringUtil.isNotEmpty(rows) ? rows : "20"));
@@ -197,148 +201,170 @@ public class BinaryDataService  extends CoTopComponent {
 	}
 	
 	public void insertBatConfirmBinOssWithChecksum(String gubn, String prjName, String platformName, String platformVer, T2File binaryTextFile, List<ProjectIdentification> list) {
+		Map<String, String[]> checksumInfoMap = new HashMap<>();
+		Map<String, String[]> checksumInfoMapByBinaryPath = new HashMap<>();
 		
-		//bin binary.txt 파일 정보를 추출한다.
-		if(binaryTextFile != null) {
-			String _contents = avoidNull(CommonFunction.getStringFromFile(binaryTextFile.getLogiPath() + "/" + binaryTextFile.getLogiNm()));
-//			Binary	sha256sum	tlsh
-//			./tlsh_unittest	404b0e9fad52eecd8c342779e8cddff9385d7c094a9e3a29142aa4ef3e2398ea	46B3DE93D364FEAFDA28FBFC598A78D9C4C5A0522DF00A4B65461F9A00CE1D06B453ED
-//			./rand_tags	40d2efb42d536f0a1afb2cbcac8e0b38994a8caa3d50d95fa663a852ea655725	B9B3CD93D364FEAFDA28FAFC598978D9C4CAD4122DF00A5B65021F9A04CD2D06B453ED
-//			./tlsh_version	ee2a667560664b50a13414db878ef31a826f627b11bce658d3b74421140d6253	39021FC7A3E1CAAFCC9822BD085F077532B3D4B2436383120A0AA7741F41BD91F59999
-//			./simple_unittest	79a24b0c4dbcef50e1f59dd078e913d06d0ad5115a459a9ddd743b909a8edf89	90939A93D364FE9FEA28EAFC598978D9C4C994132DF00A5B65421F9A40CE1D03B453EE
-			
-			Map<String, String[]> checksumInfoMap = new HashMap<>();
-			Map<String, String[]> checksumInfoMapByBinaryPath = new HashMap<>();
-			boolean isHeader = true;
-			for(String line : _contents.split(System.lineSeparator())) {
-				if(isHeader) {
-					isHeader = false;
-					continue;
-				}
-				
-				// binary name을 key로 sha256sum과 tlsh 를 격납한다.
-				String[] data = line.split("\t", -1);
-				if(data == null || data.length !=3
-						|| isEmpty(data[0]) || isEmpty(data[1])/* || isEmpty(data[2])*/) {
-					log.warn("unexpected format Bin binary text ("+prjName+") : " + line);
-					continue;
-				}
-				String binaryName = data[0].trim();
-				if(binaryName.endsWith("/") || binaryName.endsWith("\\")) {
-					log.warn("unexpected format Bin binary text (is not file) ("+prjName+") : " + line);
-					continue;
-				}
-				if(binaryName.indexOf("/") > -1) {
-					binaryName = binaryName.substring(binaryName.lastIndexOf("/") + 1);
-				}
-				if(binaryName.indexOf("\\") > -1) {
-					binaryName = binaryName.substring(binaryName.lastIndexOf("\\") + 1);
-				}
-				if(isEmpty(binaryName)) {
-					continue;
-				}
-				
-				checksumInfoMapByBinaryPath.put(data[0].trim(), new String[]{data[1], avoidNull(data[2], "0")});
-				checksumInfoMap.put(binaryName, new String[]{data[1], avoidNull(data[2], "0")});
+		for (ProjectIdentification bean : list) {
+			if (isEmpty(bean.getBinaryName()) || isEmpty(bean.getCheckSum())) {
+				continue;
 			}
 			
-
+			String binaryName = bean.getBinaryName();
+			if (binaryName.endsWith("/") || binaryName.endsWith("\\")) {
+				continue;
+			}
+			if (binaryName.indexOf("/") > -1) {
+				binaryName = binaryName.substring(binaryName.lastIndexOf("/") + 1);
+			}
+			if (binaryName.indexOf("\\") > -1) {
+				binaryName = binaryName.substring(binaryName.lastIndexOf("\\") + 1);
+			}
+			if (isEmpty(binaryName)) {
+				continue;
+			}
 			
-			// checksum 정보가 존재하는 경우
-			// bat db 등록을 위해 oss list에서 checksum 정보에 존재하는 oss 정보를 격납한다.
-			Map<String, BinaryAnalysisResult> batInfoMap = new HashMap<>();
-			if(!checksumInfoMap.isEmpty() || !checksumInfoMapByBinaryPath.isEmpty()) {
-				for(ProjectIdentification bean : list) {
-					if(CoConstDef.FLAG_YES.equals(bean.getExcludeYn()) || isEmpty(bean.getBinaryName()) || bean.getBinaryName().endsWith("/") || bean.getBinaryName().endsWith("\\")) {
+			checksumInfoMapByBinaryPath.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), avoidNull(bean.getTlsh(), "0")});
+			checksumInfoMap.put(binaryName, new String[]{bean.getCheckSum(), avoidNull(bean.getTlsh(), "0")});
+		}
+		
+		if (checksumInfoMap.isEmpty() && checksumInfoMapByBinaryPath.isEmpty()) {
+			//bin binary.txt 파일 정보를 추출한다.
+			if(binaryTextFile != null) {
+				String _contents = avoidNull(CommonFunction.getStringFromFile(binaryTextFile.getLogiPath() + "/" + binaryTextFile.getLogiNm()));
+//				Binary	sha256sum	tlsh
+//				./tlsh_unittest	404b0e9fad52eecd8c342779e8cddff9385d7c094a9e3a29142aa4ef3e2398ea	46B3DE93D364FEAFDA28FBFC598A78D9C4C5A0522DF00A4B65461F9A00CE1D06B453ED
+//				./rand_tags	40d2efb42d536f0a1afb2cbcac8e0b38994a8caa3d50d95fa663a852ea655725	B9B3CD93D364FEAFDA28FAFC598978D9C4CAD4122DF00A5B65021F9A04CD2D06B453ED
+//				./tlsh_version	ee2a667560664b50a13414db878ef31a826f627b11bce658d3b74421140d6253	39021FC7A3E1CAAFCC9822BD085F077532B3D4B2436383120A0AA7741F41BD91F59999
+//				./simple_unittest	79a24b0c4dbcef50e1f59dd078e913d06d0ad5115a459a9ddd743b909a8edf89	90939A93D364FE9FEA28EAFC598978D9C4C994132DF00A5B65421F9A40CE1D03B453EE
+				
+				boolean isHeader = true;
+				for(String line : _contents.split(System.lineSeparator())) {
+					if(isHeader) {
+						isHeader = false;
 						continue;
 					}
-					String[] checkSumData = null;
-					String binaryName = bean.getBinaryName();
+					
+					// binary name을 key로 sha256sum과 tlsh 를 격납한다.
+					String[] data = line.split("\t", -1);
+					if(data == null || data.length !=3
+							|| isEmpty(data[0]) || isEmpty(data[1])/* || isEmpty(data[2])*/) {
+						log.warn("unexpected format Bin binary text ("+prjName+") : " + line);
+						continue;
+					}
+					String binaryName = data[0].trim();
+					if(binaryName.endsWith("/") || binaryName.endsWith("\\")) {
+						log.warn("unexpected format Bin binary text (is not file) ("+prjName+") : " + line);
+						continue;
+					}
 					if(binaryName.indexOf("/") > -1) {
 						binaryName = binaryName.substring(binaryName.lastIndexOf("/") + 1);
 					}
-					
 					if(binaryName.indexOf("\\") > -1) {
 						binaryName = binaryName.substring(binaryName.lastIndexOf("\\") + 1);
 					}
-					
-					if(checksumInfoMapByBinaryPath.containsKey(bean.getBinaryName())) { // full path로 검색해서 있다면 해당 정보를 담는다.
-						checkSumData = checksumInfoMapByBinaryPath.get(bean.getBinaryName());
+					if(isEmpty(binaryName)) {
+						continue;
 					}
 					
-					if(ArrayUtils.isEmpty(checkSumData) && checksumInfoMap.containsKey(binaryName)) { // full path로 검색해서 존재하지 않는 정보라면 binary name으로 검색을 하고 누적된 제일 마지막 정보를 담는다.
-						checkSumData = checksumInfoMap.get(binaryName);
-					}
-					
-					if(!ArrayUtils.isEmpty(checkSumData)){
-						BinaryAnalysisResult _updateBean = new BinaryAnalysisResult();
-						_updateBean.setBinaryName(binaryName);
-						_updateBean.setFilePath(bean.getBinaryName());
-						_updateBean.setCheckSum(checkSumData[0]);
-						_updateBean.setTlsh(checkSumData[1]);
-						_updateBean.setOssName(bean.getOssName());
-						_updateBean.setOssVersion(bean.getOssVersion());
-						_updateBean.setLicense(CommonFunction.getSelectedLicenseString(bean.getComponentLicenseList()));
-						_updateBean.setParentname(prjName);
-						
-						_updateBean.setPlatformname(platformName);
-						_updateBean.setPlatformversion(platformVer);
-						
-						_updateBean.setDownloadLocation(bean.getDownloadLocation());
-						_updateBean.setPrjId(bean.getReferenceId());
-						
-						batInfoMap.put(_updateBean.getBinaryName() + "|" + _updateBean.getCheckSum()+ "|" +avoidNull(_updateBean.getOssName())+ "|" +avoidNull(_updateBean.getOssVersion())+ "|" +avoidNull(_updateBean.getLicense()), _updateBean);
-					}
+					checksumInfoMapByBinaryPath.put(data[0].trim(), new String[]{data[1], avoidNull(data[2], "0")});
+					checksumInfoMap.put(binaryName, new String[]{data[1], avoidNull(data[2], "0")});
 				}
 			}
-			
-			// db 등록
-			if(!batInfoMap.isEmpty()) {
-				try {
-					mergeBinaryOssInfo(batInfoMap);
+		}
+		
+		// checksum 정보가 존재하는 경우
+		// bat db 등록을 위해 oss list에서 checksum 정보에 존재하는 oss 정보를 격납한다.
+		Map<String, BinaryAnalysisResult> batInfoMap = new HashMap<>();
+		if(!checksumInfoMap.isEmpty() || !checksumInfoMapByBinaryPath.isEmpty()) {
+			for(ProjectIdentification bean : list) {
+				if(CoConstDef.FLAG_YES.equals(bean.getExcludeYn()) || isEmpty(bean.getBinaryName()) || bean.getBinaryName().endsWith("/") || bean.getBinaryName().endsWith("\\")) {
+					continue;
+				}
+				String[] checkSumData = null;
+				String binaryName = bean.getBinaryName();
+				if(binaryName.indexOf("/") > -1) {
+					binaryName = binaryName.substring(binaryName.lastIndexOf("/") + 1);
+				}
+				
+				if(binaryName.indexOf("\\") > -1) {
+					binaryName = binaryName.substring(binaryName.lastIndexOf("\\") + 1);
+				}
+				
+				if(checksumInfoMapByBinaryPath.containsKey(bean.getBinaryName())) { // full path로 검색해서 있다면 해당 정보를 담는다.
+					checkSumData = checksumInfoMapByBinaryPath.get(bean.getBinaryName());
+				}
+				
+				if(ArrayUtils.isEmpty(checkSumData) && checksumInfoMap.containsKey(binaryName)) { // full path로 검색해서 존재하지 않는 정보라면 binary name으로 검색을 하고 누적된 제일 마지막 정보를 담는다.
+					checkSumData = checksumInfoMap.get(binaryName);
+				}
+				
+				if(!ArrayUtils.isEmpty(checkSumData)){
+					BinaryAnalysisResult _updateBean = new BinaryAnalysisResult();
+					_updateBean.setBinaryName(binaryName);
+					_updateBean.setFilePath(bean.getBinaryName());
+					_updateBean.setCheckSum(checkSumData[0]);
+					_updateBean.setTlsh(checkSumData[1]);
+					_updateBean.setOssName(bean.getOssName());
+					_updateBean.setOssVersion(bean.getOssVersion());
+					_updateBean.setLicense(CommonFunction.getSelectedLicenseString(bean.getComponentLicenseList()));
+					_updateBean.setParentname(prjName);
 					
-					String mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT;
+					_updateBean.setPlatformname(platformName);
+					_updateBean.setPlatformversion(platformVer);
 					
-					if(!isEmpty(gubn)) {
-						mailType = CoConstDef.CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT;
-					}
+					_updateBean.setDownloadLocation(bean.getDownloadLocation());
+					_updateBean.setPrjId(bean.getReferenceId());
 					
-					String comment = "Data is added to the Binary DB. : Success";
-					CoMail mailBean = new CoMail(mailType);
-					
-					if(!isEmpty(gubn)) {
-						mailBean.setParamPartnerId(batInfoMap.get(batInfoMap.keySet().toArray()[0]).getPrjId());
-					} else {
-						mailBean.setParamPrjId(batInfoMap.get(batInfoMap.keySet().toArray()[0]).getPrjId());
-					}
-					
-					mailBean.setComment(comment);
-					mailBean.setBinaryCommitResult("Success");
-					//CoMailManager.getInstance().sendMail(mailBean);
-					
-				} catch (Exception e) {
-					log.error(e.getMessage(), e);
-					String mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT;
-					
-					if(!isEmpty(gubn)) {
-						mailType = CoConstDef.CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT;
-					}
-					
-					String comment = "Data is added to the Binary DB. : Failed";
-					CoMail mailBean = new CoMail(mailType);
-					
-					if(!isEmpty(gubn)) {
-						mailBean.setParamPartnerId(batInfoMap.get(batInfoMap.keySet().toArray()[0]).getPrjId());
-					} else {
-						mailBean.setParamPrjId(batInfoMap.get(batInfoMap.keySet().toArray()[0]).getPrjId());
-					}
-					
-					mailBean.setComment(comment);
-					mailBean.setBinaryCommitResult("Failed");
-					//CoMailManager.getInstance().sendMail(mailBean);
+					batInfoMap.put(_updateBean.getBinaryName() + "|" + _updateBean.getCheckSum()+ "|" +avoidNull(_updateBean.getOssName())+ "|" +avoidNull(_updateBean.getOssVersion())+ "|" +avoidNull(_updateBean.getLicense()), _updateBean);
 				}
 			}
-			
+		}
+		
+		// db 등록
+		if(!batInfoMap.isEmpty()) {
+			try {
+				mergeBinaryOssInfo(batInfoMap);
+				
+				String mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT;
+				
+				if(!isEmpty(gubn)) {
+					mailType = CoConstDef.CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT;
+				}
+				
+				String comment = "Data is added to the Binary DB. : Success";
+				CoMail mailBean = new CoMail(mailType);
+				
+				if(!isEmpty(gubn)) {
+					mailBean.setParamPartnerId(batInfoMap.get(batInfoMap.keySet().toArray()[0]).getPrjId());
+				} else {
+					mailBean.setParamPrjId(batInfoMap.get(batInfoMap.keySet().toArray()[0]).getPrjId());
+				}
+				
+				mailBean.setComment(comment);
+				mailBean.setBinaryCommitResult("Success");
+				//CoMailManager.getInstance().sendMail(mailBean);
+				
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				String mailType = CoConstDef.CD_MAIL_TYPE_PROJECT_IDENTIFICATION_BINARY_DATA_COMMIT;
+				
+				if(!isEmpty(gubn)) {
+					mailType = CoConstDef.CD_MAIL_TYPE_PARTNER_BINARY_DATA_COMMIT;
+				}
+				
+				String comment = "Data is added to the Binary DB. : Failed";
+				CoMail mailBean = new CoMail(mailType);
+				
+				if(!isEmpty(gubn)) {
+					mailBean.setParamPartnerId(batInfoMap.get(batInfoMap.keySet().toArray()[0]).getPrjId());
+				} else {
+					mailBean.setParamPrjId(batInfoMap.get(batInfoMap.keySet().toArray()[0]).getPrjId());
+				}
+				
+				mailBean.setComment(comment);
+				mailBean.setBinaryCommitResult("Failed");
+				//CoMailManager.getInstance().sendMail(mailBean);
+			}
 		}
 	}
 	
@@ -1101,8 +1127,7 @@ public class BinaryDataService  extends CoTopComponent {
 	}
 	
 	@Transactional
-	private void addOssComponentByBinaryInfoAndroid(List<OssComponents> componentList,
-			Map<String, List<BinaryData>> binaryRegInfoMap) {
+	private void addOssComponentByBinaryInfoAndroid(List<OssComponents> componentList, Map<String, List<BinaryData>> binaryRegInfoMap) {
 
 		for(OssComponents bean : componentList) {
 			String binaryName = avoidNull(bean.getBinaryName());
@@ -1312,12 +1337,12 @@ public class BinaryDataService  extends CoTopComponent {
 			
 	}
 
-	public Map<String, List<BinaryData>> getBinaryListFromBinaryDB(boolean isAndroid, Project projectInfo) {
+	public Map<String, List<BinaryData>> getBinaryListFromBinaryDB(boolean isAndroid, Project projectInfo, Map<String, String[]> checkSumInfoMap) {
 		Map<String, List<BinaryData>> listMap = new HashMap<>();
 		
 		if(projectInfo != null ) {
 			if(isAndroid) {
-				if(!isEmpty(projectInfo.getSrcAndroidResultFileId())) {
+				if ((checkSumInfoMap == null || checkSumInfoMap.isEmpty()) && !isEmpty(projectInfo.getSrcAndroidResultFileId())) {
 
 					T2File binaryTextFile = fileService.selectFileInfoById(projectInfo.getSrcAndroidResultFileId());
 					
@@ -1325,7 +1350,6 @@ public class BinaryDataService  extends CoTopComponent {
 						Map<String, Object> readFileData = CommonFunction.getAndroidResultFileInfo(binaryTextFile, new ArrayList<String>());
 						
 						if(readFileData != null && readFileData.containsKey("addCheckList")) {
-							Map<String, String[]> checksumInfoMap = new HashMap<>();
 							List<OssComponents> _loadlist = (List<OssComponents>) readFileData.get("addCheckList");
 							
 							for(OssComponents bean : _loadlist) {
@@ -1344,43 +1368,46 @@ public class BinaryDataService  extends CoTopComponent {
 									continue;
 								}
 
-								checksumInfoMap.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), bean.getTlsh(), avoidNull(bean.getSourceCodePath())});
+								checkSumInfoMap.put(bean.getBinaryName(), new String[]{bean.getCheckSum(), bean.getTlsh(), avoidNull(bean.getSourceCodePath())});
 							}
-							
-							try {
-								for(String binaryname : checksumInfoMap.keySet()) {
-									String[] datas = checksumInfoMap.get(binaryname);
-									
-									List<BinaryData> _list = autoIDService.findOssInfoWithBinaryName(binaryname, datas[0], datas[1]);
-								
-									if(listMap.containsKey(binaryname) && _list != null) {
-										List<BinaryData> resultList = listMap.get(binaryname);
-										if(resultList != null){
-											resultList.addAll(_list);
-											listMap.put(binaryname, resultList);
-										}
-										
-									} else {
-										listMap.put(binaryname, _list);
-									}
-								}
-							} catch (Exception e) {
-								log.error(e.getMessage(), e);
-							}							
 						}
 					}
-					
+				}
+				
+				if (checkSumInfoMap != null && !checkSumInfoMap.isEmpty()) {
+					try {
+						for(String binaryname : checkSumInfoMap.keySet()) {
+							String[] datas = checkSumInfoMap.get(binaryname);
+							
+							List<BinaryData> _list = autoIDService.findOssInfoWithBinaryName(binaryname, datas[0], datas[1]);
+						
+							if(listMap.containsKey(binaryname) && _list != null) {
+								List<BinaryData> resultList = listMap.get(binaryname);
+								if(resultList != null){
+									resultList.addAll(_list);
+									listMap.put(binaryname, resultList);
+								}
+								
+							} else {
+								listMap.put(binaryname, _list);
+							}
+						}
+					} catch (Exception e) {
+						log.error(e.getMessage(), e);
+					}	
 				}
 			} else {
-				if(!isEmpty(projectInfo.getBinBinaryFileId())) {
+				if ((checkSumInfoMap == null || checkSumInfoMap.isEmpty()) &&!isEmpty(projectInfo.getBinBinaryFileId())) {
 					T2File binaryTextFile = fileService.selectFileInfoById(projectInfo.getBinBinaryFileId());
 					
-					Map<String, String[]> loadDataMap = loadBinaryText(binaryTextFile, true);
-					
-					if(loadDataMap != null && !loadDataMap.isEmpty()) {
+					checkSumInfoMap = loadBinaryText(binaryTextFile, true);
+				}
+				
+				if (checkSumInfoMap != null && !checkSumInfoMap.isEmpty()) {
+					if (checkSumInfoMap != null && !checkSumInfoMap.isEmpty()) {
 						try {
-							for(String binaryname : loadDataMap.keySet()) {
-								String[] datas = loadDataMap.get(binaryname);
+							for(String binaryname : checkSumInfoMap.keySet()) {
+								String[] datas = checkSumInfoMap.get(binaryname);
 								
 								List<BinaryData> _list = autoIDService.findOssInfoWithBinaryName(binaryname, datas[0], datas[1]);
 								

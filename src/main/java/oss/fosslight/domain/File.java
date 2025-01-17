@@ -30,7 +30,9 @@ public class File extends ComBean implements Serializable{
 	private String logiThumbPath;		// 저장된 파일 경로(썸네일)
 	private String ext;						// 확장자
 	private String size;						// 크기
-	private String etpId;	
+	private String etpId;
+	private String delYn;
+	private String createdDate;
 	
 	private int width;
 	private int height;
@@ -166,5 +168,17 @@ public class File extends ComBean implements Serializable{
 	}
 	public void setRefPrjId(String refPrjId) {
 		this.refPrjId = refPrjId;
+	}
+	public String getDelYn() {
+		return delYn;
+	}
+	public void setDelYn(String delYn) {
+		this.delYn = delYn;
+	}
+	public String getCreatedDate() {
+		return createdDate;
+	}
+	public void setCreatedDate(String createdDate) {
+		this.createdDate = createdDate;
 	}
 }	

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<th:block th:fragment="contentScript">
+<script th:inline="javascript">
+var ossNames = [];
+var licenseNames = [];
+
+$(document).ready(function() {
+	data.init();
+
+	$("#ossName").autocomplete({
+		source: ossNames
+		, minLength: 3 // IE 스크립트 성능이슈로 0->3 으로 변경 yuns
+		, open: function() { $(this).attr('state', 'open');}
+		, close: function () { $(this).attr('state', 'closed');}
+	}).focus(function() {
+		if ($(this).attr('state') != 'open') {
+			$(this).autocomplete("search");
+		}
+	}).on('autocompletechange', function() {
+		var value = $("#ossName").val();
+		if(value != ""){
+			fn.getOssVersions($("#ossVersion"), value);
+		}
+	});
+	
+	$("#licenseNameSelect").autocomplete({
+		source: licenseNames
+		, minLength: 0
+		, open: function() { 
+			$(this).attr('state', 'open');
+			$(this).autocomplete("widget").css({"width": 410});
+		}
+		, close: function () { $(this).attr('state', 'closed'); }
+	}).focus(function(){
+		if ($(this).attr('state') != 'open') {
+			$(this).autocomplete("search");
+		}
+	});
+
+	$("#licenseNameSelect").on( "autocompletechange", function() {
+		var val = $("#licenseNameSelect").val();
+		var licenseName = $("#licenseName").val();
+		var mult = null;
+
+		for (var i in licenseNames){
+			if("" != val && val == licenseNames[i].value){
+				mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'>" + licenseNames[i].value + "<button onclick='fn.bulkEditDeleteLicense(this)'>x</button></span>";
+				if(licenseName != ""){
+					licenseName += "," + licenseNames[i].value;
+					$("#licenseName").val(licenseName);
+				}else{
+					$("#licenseName").val(licenseNames[i].value);
+				}
+				break;
+			}
+		}
+
+		if(mult == null){
+			mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'>" + val + "<button onclick='fn.bulkEditDeleteLicense(this)'>x</button></span>";
+			if(licenseName != ""){
+				licenseName += "," + val;
+				$("#licenseName").val(licenseName);
+			}else{
+				$("#licenseName").val(val);
+			}
+		}
+		
+		$('#licenseNameBtn').append(mult);
+		$('#licenseNameSelect').val("");
+		
+	}).on("keypress", function(evt){
+		if(evt.keyCode == 13){
+			var val = $("#licenseNameSelect").val();
+			var licenseName = $("#licenseName").val();
+			var mult = null;
+
+			for (var i in licenseNames){
+				if("" != val && val == licenseNames[i].value){
+					mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'>" + licenseNames[i].value + "<button onclick='fn.bulkEditDeleteLicense(this)'>x</button></span>";
+					if(licenseName != ""){
+						licenseName += "," + licenseNames[i].value;
+						$("#licenseName").val(licenseName);
+					}else{
+						$("#licenseName").val(licenseNames[i].value);
+					}
+					break;
+				}
+			}
+
+			if(mult == null){
+				mult = "<span class=\"btnMulti\" style='margin-bottom:2px;'>" + val + "<button onclick='fn.bulkEditDeleteLicense(this)'>x</button></span>";
+				if(licenseName != ""){
+					licenseName += "," + licenseNames[i].value;
+					$("#licenseName").val(licenseName);
+				}else{
+					$("#licenseName").val(licenseNames[i].value);
+				}
+			}
+
+			$('#licenseNameBtn').append(mult);
+			$('#licenseNameSelect').val("");
+		}
+	});
+});
+
+var data = {
+	init : function(){
+		// ossNames auto complete
+		fn.getOssNames().success(function(data, status, headers, config){
+			if(data != null && ossNames == ""){
+				data.forEach(function(obj){
+					ossNames.push(obj.ossName);
+				})
+			}
+		});
+
+		// licenseNames auto complete
+		commonAjax.getLicenseTags().success(function(data, status, headers, config){
+			if(data != null && licenseNames == ""){
+				var tag = "";
+				data.forEach(function(obj){
+					if(obj!=null) {
+						tag ={
+							value : obj.shortIdentifier.length > 0 ? obj.shortIdentifier : obj.licenseName,
+							label : obj.licenseName + (obj.shortIdentifier.length > 0 ? (" (" + obj.shortIdentifier + ")") : ""),
+							type : obj.licenseType,
+							obligation : obj.obligation,
+							obligationChecks : obj.obligationChecks
+						}
+						
+						licenseNames.push(tag);
+					}
+				});
+			}
+		});
+	}
+}
+
+var fn = {
+	getOssNames : function(data){
+		return $.ajax({
+			type: 'GET',
+			url: "/project/getOssNames",
+			data: data,
+			headers: {
+				'Content-Type': 'application/json'
+			},
+		});
+	},
+	getOssVersions : function(e, ossName){
+		var ossVersions = [];
+		if(ossName=="") return false;
+
+		return $.ajax({
+			type: 'GET',
+			url: '/project/getOssVersions',
+			async: false,
+			data: {ossName : ossName},
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			success : 
+				function(data, status, headers, config){
+	 				if(data != null){
+ 						data.forEach(function(obj){
+ 							ossVersions.push(obj.ossVersion);
+ 						});
+						$(e).autocomplete({
+							source: ossVersions
+							, minLength: 0
+							, open: function() { $(this).attr('state', 'open');}
+							, close: function () { $(this).attr('state', 'closed');}
+						}).focus(function() {
+							if ($(this).attr('state') != 'open') {
+								$(this).autocomplete("search");
+							}
+						});
+	 					ossVersions = [];
+	 					$(e).focus();
+					}
+				}
+		});
+	},
+	bulkEditDeleteLicense : function(target){
+		$(target).text("|");
+		var delLicenseName = $(target).parent().text();
+		delLicenseName = delLicenseName.replace("|", "");
+		
+		var licenseName = $("#licenseName").val();
+		
+		if (licenseName.indexOf(",") > -1){
+			var reMarkLicenseName = licenseName.split(",");
+			for(var i=0; i<reMarkLicenseName.length; i++){
+				if(reMarkLicenseName[i] == delLicenseName){
+					reMarkLicenseName.splice(i, 1);
+					break;
+				}
+			}
+
+			$("#licenseName").val(reMarkLicenseName);
+		} else {
+			$("#licenseName").val("");
+		}
+
+		$(target).parent().remove();
+	},
+	bulkEditChange : function(){
+		var notCheckedArr = [];
+		var checkedArr = [];
+
+		$(".bulkEditCheck:not(:checked)").each(function(){
+			var val = $(this).val().replace("Check", "");
+			notCheckedArr.push(val);
+		});
+		
+		$(".bulkEditCheck:checked").each(function(){
+			var val = $(this).val().replace("Check", "");
+			checkedArr.push(val);
+		});
+		
+		if(checkedArr.length > 0){
+			var obj = $("#bulkEditForm").serializeObject();
+
+			delete obj["licenseNameSelect"];
+
+			if(notCheckedArr.length > 0){
+				for(var i=0; i<notCheckedArr.length; i++){
+					delete obj[notCheckedArr[i]];
+				}
+			}
+			
+			if(obj["target"] == ("selfCheck")){
+				obj["target"] = "srcList";
+			}
+			
+			alertify.confirm([[#{msg.oss.change.bulkedit}]], function (e) {
+				if (e){
+					$(".loading").show();
+
+					setTimeout(function(){
+						opener.com_fn.bulkEditOssInfo(obj);
+						$(".loading").hide();
+						self.close();
+					}, 300);
+				}else{
+					return false;
+				}
+			});
+		}else{
+			alertify.alert([[#{msg.oss.select.attribute.bulkedit}]], function(){});
+		}
+	},
+	bulkEditDelete : function(){
+		var target = $("#target").val();
+		if(target == "selfCheck"){
+			target = "srcList";
+		}
+		var rowId = $("#rowId").val();
+
+		alertify.confirm([[#{msg.oss.delete.bulkedit}]], function (e) {
+			if (e){
+				$(".loading").show();
+
+				setTimeout(function(){
+					opener.com_fn.bulkEditDelRow(target, rowId, 'main');
+					$(".loading").hide();
+					self.close();
+				}, 300);
+			}else{
+				return false;
+			}
+		});
+	},
+	bulkEditClose : function(){
+		self.close();
+	}
+}
+</script>
+</th:block>
+</html>

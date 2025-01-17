@@ -61,6 +61,8 @@ public class OssMaster extends ComBean implements Serializable{
 
 	/** The download location. */
 	private String[] downloadLocations;
+	
+	private String[] existDownloadLocations;
 
 	private List<String> detectedLicenses;
 
@@ -70,11 +72,20 @@ public class OssMaster extends ComBean implements Serializable{
 	/** The homepage. */
 	private String homepage;
 	
+	private String existHomepage;
+	
 	/** The homepage link format. */
 	private String homepageLinkFormat;
 	
 	/** The summary description. */
 	private String summaryDescription;
+	
+	private String existSummaryDescription;
+	
+	/** The important notes. */
+	private String importantNotes;
+	
+	private String existImportantNotes;
 	
 	/** The oss type. */
 	private String ossType;
@@ -309,6 +320,53 @@ public class OssMaster extends ComBean implements Serializable{
 	private Float securityStandardScore;
 	private Float standardScore;
 	
+	// Added when improving OSORI DB function
+	private String ossCommonId;
+	
+	private String ossVersionAlias;
+	
+	private String[] ossVersionAliasWithColon;
+	
+	private String[] ossVersionAliases;
+	
+	private String purl;
+	
+	private String[] purls;
+	
+	private String[] existPurls;
+	
+	private String includeCpe;
+	
+	private String[] includeCpes;
+	
+	private String excludeCpe;
+	
+	private String[] excludeCpes;
+	
+	private String[] existIncludeCpes;
+	
+	private String[] existExcludeCpes;
+	
+	private String includeCpeAllSearchFlag;
+	
+	private String excludeCpeAllSearchFlag;
+	
+	private String purlJson;
+	
+	private int ossDlIdx;
+	
+	private int ossPurlIdx;
+	
+	private String restriction;
+	
+	private String[] arrRestriction;
+	
+	private String[] existArrRestriction;
+ 	
+	private List<String> restrictionCdNoList;
+	
+	private String inCpeMatchFlag;
+		
 	public int[] getCsvComponentIdList() {
 		return csvComponentIdList;
 	}
@@ -368,15 +426,13 @@ public class OssMaster extends ComBean implements Serializable{
 	 * @param ossCopyright the oss copyright
 	 * @param licenseDiv the license div
 	 */
-	public OssMaster(String ossLicenseIdx, String ossId, String licenseId, String licenseName, String ossLicenseComb, String ossLicenseText,
-			String ossCopyright, String licenseDiv) {
+	public OssMaster(String ossLicenseIdx, String ossId, String licenseId, String licenseName, String ossLicenseComb, String ossCopyright, String licenseDiv) {
 		super();
 		this.ossLicenseIdx = ossLicenseIdx;
 		this.ossId = ossId;
 		this.licenseId = licenseId;
 		this.licenseName = licenseName;
 		this.ossLicenseComb = ossLicenseComb;
-		this.ossLicenseText = ossLicenseText;
 		this.ossCopyright = ossCopyright;
 		this.licenseDiv = licenseDiv;
 	}
@@ -1776,7 +1832,7 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setDownloadLocationGroup(String downloadLocationGroup) {
 		// OSS를 삭제하면서 다른 OSS로 rename시, "This oss has multiple version"이라 뜨며 에러 발생. / NullPointException
-		if (!isEmpty(downloadLocationGroup)){
+		if (!isEmpty(downloadLocationGroup)) {
 			this.downloadLocations = downloadLocationGroup.split(",");
 		}
 		
@@ -2127,5 +2183,229 @@ public class OssMaster extends ComBean implements Serializable{
 
 	public void setStandardScore(Float standardScore) {
 		this.standardScore = standardScore;
+	}
+
+	public String getPurlJson() {
+		return purlJson;
+	}
+
+	public void setPurlJson(String purlJson) {
+		this.purlJson = purlJson;
+	}
+
+	public String getOssCommonId() {
+		return ossCommonId;
+	}
+
+	public void setOssCommonId(String ossCommonId) {
+		this.ossCommonId = ossCommonId;
+	}
+
+	public int getOssDlIdx() {
+		return ossDlIdx;
+	}
+
+	public void setOssDlIdx(int ossDlIdx) {
+		this.ossDlIdx = ossDlIdx;
+	}
+
+	public int getOssPurlIdx() {
+		return ossPurlIdx;
+	}
+
+	public void setOssPurlIdx(int ossPurlIdx) {
+		this.ossPurlIdx = ossPurlIdx;
+	}
+
+	public String getPurl() {
+		return purl;
+	}
+
+	public void setPurl(String purl) {
+		this.purl = purl;
+	}
+
+	public String getIncludeCpe() {
+		return includeCpe;
+	}
+
+	public void setIncludeCpe(String includeCpe) {
+		this.includeCpe = includeCpe;
+	}
+
+	public String[] getIncludeCpes() {
+		return includeCpes;
+	}
+
+	public void setIncludeCpes(String[] includeCpes) {
+		this.includeCpes = includeCpes;
+	}
+
+	public String getExcludeCpe() {
+		return excludeCpe;
+	}
+
+	public void setExcludeCpe(String excludeCpe) {
+		this.excludeCpe = excludeCpe;
+	}
+
+	public String[] getExcludeCpes() {
+		return excludeCpes;
+	}
+
+	public void setExcludeCpes(String[] excludeCpes) {
+		this.excludeCpes = excludeCpes;
+	}
+
+	public String getOssVersionAlias() {
+		return ossVersionAlias;
+	}
+
+	public void setOssVersionAlias(String ossVersionAlias) {
+		this.ossVersionAlias = ossVersionAlias;
+	}
+
+	public String[] getOssVersionAliases() {
+		return ossVersionAliases;
+	}
+
+	public void setOssVersionAliases(String[] ossVersionAliases) {
+		this.ossVersionAliases = ossVersionAliases;
+	}
+
+	public String getRestriction() {
+		return restriction;
+	}
+
+	public void setRestriction(String restriction) {
+		this.restriction = restriction;
+	}
+
+	public List<String> getRestrictionCdNoList() {
+		return restrictionCdNoList;
+	}
+
+	public void setRestrictionCdNoList(List<String> restrictionCdNoList) {
+		this.restrictionCdNoList = restrictionCdNoList;
+	}
+
+	public String getInCpeMatchFlag() {
+		return inCpeMatchFlag;
+	}
+
+	public void setInCpeMatchFlag(String inCpeMatchFlag) {
+		this.inCpeMatchFlag = inCpeMatchFlag;
+	}
+
+	public String[] getExistIncludeCpes() {
+		return existIncludeCpes;
+	}
+
+	public void setExistIncludeCpes(String[] existIncludeCpes) {
+		this.existIncludeCpes = existIncludeCpes;
+	}
+
+	public String[] getExistExcludeCpes() {
+		return existExcludeCpes;
+	}
+
+	public void setExistExcludeCpes(String[] existExcludeCpes) {
+		this.existExcludeCpes = existExcludeCpes;
+	}
+
+	public String[] getArrRestriction() {
+		return arrRestriction;
+	}
+
+	public void setArrRestriction(String[] arrRestriction) {
+		this.arrRestriction = arrRestriction;
+	}
+
+	public String[] getExistArrRestriction() {
+		return existArrRestriction;
+	}
+
+	public void setExistArrRestriction(String[] existArrRestriction) {
+		this.existArrRestriction = existArrRestriction;
+	}
+
+	public String[] getOssVersionAliasWithColon() {
+		return ossVersionAliasWithColon;
+	}
+
+	public void setOssVersionAliasWithColon(String[] ossVersionAliasWithColon) {
+		this.ossVersionAliasWithColon = ossVersionAliasWithColon;
+	}
+
+	public String getIncludeCpeAllSearchFlag() {
+		return includeCpeAllSearchFlag;
+	}
+
+	public void setIncludeCpeAllSearchFlag(String includeCpeAllSearchFlag) {
+		this.includeCpeAllSearchFlag = includeCpeAllSearchFlag;
+	}
+
+	public String getExcludeCpeAllSearchFlag() {
+		return excludeCpeAllSearchFlag;
+	}
+
+	public void setExcludeCpeAllSearchFlag(String excludeCpeAllSearchFlag) {
+		this.excludeCpeAllSearchFlag = excludeCpeAllSearchFlag;
+	}
+	
+	public String getImportantNotes() {
+		return importantNotes;
+	}
+
+	public void setImportantNotes(String importantNotes) {
+		this.importantNotes = importantNotes;
+	}
+
+	public String[] getPurls() {
+		return purls;
+	}
+
+	public void setPurls(String[] purls) {
+		this.purls = purls;
+	}
+
+	public String[] getExistDownloadLocations() {
+		return existDownloadLocations;
+	}
+
+	public void setExistDownloadLocations(String[] existDownloadLocations) {
+		this.existDownloadLocations = existDownloadLocations;
+	}
+
+	public String getExistHomepage() {
+		return existHomepage;
+	}
+
+	public void setExistHomepage(String existHomepage) {
+		this.existHomepage = existHomepage;
+	}
+
+	public String getExistSummaryDescription() {
+		return existSummaryDescription;
+	}
+
+	public void setExistSummaryDescription(String existSummaryDescription) {
+		this.existSummaryDescription = existSummaryDescription;
+	}
+
+	public String getExistImportantNotes() {
+		return existImportantNotes;
+	}
+
+	public void setExistImportantNotes(String existImportantNotes) {
+		this.existImportantNotes = existImportantNotes;
+	}
+
+	public String[] getExistPurls() {
+		return existPurls;
+	}
+
+	public void setExistPurls(String[] existPurls) {
+		this.existPurls = existPurls;
 	}
 }

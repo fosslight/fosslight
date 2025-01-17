@@ -1,0 +1,451 @@
+<th:block th:replace="fragments/detail-script :: detailScriptFragment"></th:block>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var selectElArr = ["obligationType", "licenseType", "prjDivision", "distributionType", "priority", "networkServerType", "division"];
+        $.each(selectElArr, function (index, item) {
+            var selectEl = $('#searchConditionForm select[name="' + item + '"]');
+            if (selectEl.length > 0) {
+                $(selectEl).trigger('change');
+            }
+        });
+
+        $('#restrictionSelect').select2({
+            placeholder: "Restriction",
+            allowClear: true,
+        });
+
+        $('#licenseTypeSelect').select2({
+            placeholder: "License Type",
+            allowClear: true,
+        });
+
+        $('#obligationTypeSelect').select2({
+            placeholder: "Obligation Type",
+            allowClear: true,
+        });
+
+        $('#prjDivisionSelect').select2({
+            placeholder: "Division",
+            allowClear: true,
+        });
+
+        $('#distributionTypeSelect').select2({
+            placeholder: "Distribution Type",
+            allowClear: true,
+        });
+
+        $('#networkServerTypeSelect').select2({
+            placeholder: "Network Service",
+            allowClear: true,
+        })
+
+        $('#prioritySelect').select2({
+            placeholder: "Priority",
+            allowClear: true,
+        })
+
+        $('#divisionSelect').select2({
+            placeholder: "Division",
+            allowClear: true,
+        })
+
+        $("#prjStatusSelect").select2({
+            placeholder: "Status",
+            allowClear: true,
+        })
+
+        $("#statusSelect").select2({
+            placeholder: "Status",
+            allowClear: true,
+        });
+    });
+</script>
+<div style="padding-top: 10px;">
+    <fieldset class="listSearch">
+        <form id="searchConditionForm" name="searchConditionForm">
+            <input name="defaultSearchType" th:value="${defaultSearchType}" type="hidden"/>
+            <hr class="my-3">
+            <div class="row text-bold text-primary my-3 ml-1">Basic Search Area</div>
+            <th:block th:if="${#strings.equals(defaultSearchType, 'LICENSE')}">
+                <div class="row form-group mb-2">
+                    <div class="col-md-8">
+                        <input class="form-control" name="licenseName" placeholder="Licence Name"
+                               th:value="${searchBean?.licenseName}" type="text"/>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="icheck-primary text-md">
+                            <input id="licenseNameAllSearchFlag" name="licenseNameAllSearchFlag" th:checked="${searchBean?.licenseNameAllSearchFlag == 'Y'}"
+                                   type="checkbox" value="Y"/>
+                            <label for="licenseNameAllSearchFlag" style="font-weight: normal"
+                                   th:text="|Exact Match|"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mb-2">
+                    <textarea class="form-control" name="licenseText" placeholder="License Text" rows="1"
+                              th:text="${searchBean?.licenseText}"></textarea>
+                </div>
+                <div class="form-group mb-2">
+                    <select class="select2" id="licenseTypeSelect" name="licenseType" style="width: 100%;">
+                        <option disabled selected value=""></option>
+                        <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_TYPE'))}">
+                            <option th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}" th:selected="${code.cdDtlNo == searchBean?.licenseType}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <select class="select2" id="restrictionSelect" multiple="multiple" name="restrictions"
+                            style="width: 100%;">
+                        <option th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_LICENSE_RESTRICTION'))}"
+                                th:selected="${searchBean?.restrictions != null and #arrays.contains(searchBean?.restrictions, code.cdDtlNo)}"
+                                th:text="${code.cdDtlNm}"
+                                th:value="${code.cdDtlNo}">
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <textarea class="form-control" name="description" placeholder="User Guide" rows="3"
+                              th:text="${searchBean?.description}"></textarea>
+                </div>
+                <div class="form-group mb-2">
+                    <input class="form-control" name="webpage" placeholder="Website" th:value="${searchBean?.webpage}"
+                           type="text">
+                </div>
+                <div class="form-group mb-2">
+                    <select class="select2" id="obligationTypeSelect" name="obligationType" style="width: 100%;">
+                        <option value=""></option>
+                        <th:block th:each="code : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_OBLIGATION_TYPE'))}">
+                            <option th:selected="${code.cdDtlNo == searchBean?.obligationType}" th:text="${code.cdDtlNm}" th:value="${code.cdDtlNo}"></option>
+                        </th:block>
+                        <option th:selected="${searchBean?.obligationType == 'NONE'}" th:text="NONE" th:value="NONE"></option>
+                    </select>
+                </div>
+            </th:block>
+            <th:block th:if="${#strings.equals(defaultSearchType, 'OSS')}">
+                <div class="form-group mb-2">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input class="form-control" name="ossName" placeholder="Oss Name"
+                                   th:value="${searchBean.ossName}" type="text"/>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="icheck-primary text-md">
+                                <input id="ossNameAllSearchFlag" name="ossNameAllSearchFlag" th:checked="${searchBean?.ossNameAllSearchFlag == 'Y'}"
+                                       type="checkbox" value="Y"/>
+                                <label for="ossNameAllSearchFlag" style="font-weight: normal"
+                                       th:text="|Exact Match|"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mb-2">
+                    <textarea class="form-control" name="copyright" placeholder="Copyright Text" rows="1"
+                              th:utext="${searchBean.copyright}"></textarea>
+                </div>
+                <div class="form-group mb-2">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input class="form-control" name="licenseName" placeholder="License Name"
+                                   th:value="${searchBean.licenseName}" type="text"/>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="icheck-primary text-md">
+                                <input id="licenseNameAllSearchFlag" name="licenseNameAllSearchFlag" th:checked="${searchBean?.licenseNameAllSearchFlag == 'Y'}"
+                                       type="checkbox" value="Y"/>
+                                <label for="licenseNameAllSearchFlag" style="font-weight: normal"
+                                       th:text="|Exact Match|"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group mb-2">
+                    <textarea class="form-control" name="summaryDescription" placeholder="Description" rows="1"
+                              th:utext="${searchBean.summaryDescription}"></textarea>
+                </div>
+                <div class="form-group mb-2">
+                    <input class="form-control" name="homepage" placeholder="Website" th:value="${searchBean.homepage}"
+                           type="text">
+                </div>
+                <div class="form-group mb-2">
+                    <input class="form-control" name="cvssScore" placeholder="Vulnerability (>=)"
+                           th:value="${searchBean.cvssScore}" type="text">
+                </div>
+                <div class="form-group mb-2">
+                    <div class="icheck-primary">
+                        <input id="deactivateFlag" name="deactivateFlag" th:checked="${searchBean?.deactivateFlag == 'Y'}"
+                               type="checkbox" value="Y"/>
+                        <label for="deactivateFlag" style="font-weight: normal" th:text="|Deactivate|"></label>
+                    </div>
+                </div>
+            </th:block>
+
+            <th:block th:if="${#strings.equals(defaultSearchType, 'PROJECT')}">
+                <div class="form-group mb-2">
+                    <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean?.prjId}" type="text"/>
+                </div>
+                <div class="form-group mb-2">
+                    <input class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}"
+                           type="text"/>
+                </div>
+                <div class="form-group mb-2">
+                    <div class="input-group" style="width: 100%;">
+                        <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="far fa-calendar-alt"></i>
+                                                </span>
+                        </div>
+                        <input class="form-control" id="createdDate" placeholder="Created Date" type="text">
+                        <input id="schStartDate" name="schStartDate" th:value="${searchBean?.schStartDate}" type="hidden"/>
+                        <input id="schEndDate" name="schEndDate" th:value="${searchBean?.schEndDate}" type="hidden"/>
+                    </div>
+                    <script>
+                        var startDate = String([[${searchBean.schStartDate}]]);
+                        var endDate = String([[${searchBean.schEndDate}]]);
+
+                        if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+                            var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                            var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                            $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+                        }
+
+                        $("#createdDate").daterangepicker({
+                            autoUpdateInput: false
+                        }).on('apply.daterangepicker', function (ev, picker) {
+                            $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                            $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                            $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                        }).on('cancel.daterangepicker', function (ev, picker) {
+                            $("#createdDate").val("");
+                            $("input[name='schStartDate']").val("");
+                            $("input[name='schEndDate']").val("");
+                        });
+                    </script>
+                </div>
+                <div class="form-group mb-2">
+                    <select class="select2" id="prjDivisionSelect" name="prjDivision" style="width: 100%;">
+                        <option value=""></option>
+                        <th:block
+                                th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), searchBean?.prjDivision)}"></th:block>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <input class="form-control" name="creator" placeholder="Creator" th:value="${searchBean?.creator}" type="text"/>
+                </div>
+                <div class="form-group mb-2">
+                    <input class="form-control" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}"
+                           type="text"/>
+                </div>
+                <div class="form-group mb-2">
+                    <input class="form-control" name="watchers" placeholder="Watchers"
+                           th:value="${searchBean?.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
+                </div>
+                <div class="form-group mb-2">
+                    <select class="select2" id="distributionTypeSelect" name="distributionType" style="width: 100%;">
+                        <option value=""></option>
+                        <th:block
+                                th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_DISTRIBUTION_TYPE'), searchBean?.distributionType)}"></th:block>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <select class="select2" id="networkServerTypeSelect" name="networkServerType" style="width: 100%;">
+                        <option value=""></option>
+                        <option th:selected="${searchBean?.networkServerType == 'Y'}" th:text="|Yes|" value="Y"></option>
+                        <option th:selected="${searchBean?.networkServerType == 'N'}" th:text="|No|" value="N"></option>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <input class="form-control" name="modelName" placeholder="Model Name" th:value="${searchBean?.modelName}"
+                           type="text"/>
+                </div>
+                <div class="form-group mb-2">
+                    <th:block th:with="statusArray=${#strings.arraySplit(searchBean.statuses, ',')}">
+                        <select class="form-control select2" id="prjStatusSelect" multiple="multiple" name="statuses"
+                                style="width: 100%;">
+                            <option th:value="''"></option>
+                            <option th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_STATUS'))}"
+                                    th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}"
+                                    th:text="${option.cdDtlNm}"
+                                    th:value="${option.cdDtlNo}">
+                            </option>
+                        </select>
+                    </th:block>
+                </div>
+                <div class="form-group mb-2">
+                    <select class="form-control select2" id="prioritySelect" name="priority" style="width: 100%;">
+                    	<option th:value="''"></option>
+                        <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_PROJECT_PRIORITY'))}">
+                            <option th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}" th:selected="${searchBean?.priority != null && option.cdDtlNo == searchBean.priority}"></option>
+                        </th:block>
+                    </select>
+                </div>
+                <th:block sec:authorize="!hasRole('ROLE_ADMIN')">
+                    <div class="form-group mb-2">
+                        <div class="icheck-primary">
+                            <input id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" type="checkbox" value="N"/>
+                            <label for="publicYn" style="font-weight: normal" th:text="|View My Projects Only|"></label>
+                        </div>
+                    </div>
+                </th:block>
+            </th:block>
+
+            <th:block th:if="${#strings.equals(defaultSearchType, 'THIRD_PARTY')}">
+                <div class="card-body">
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="partnerId" placeholder="ID" th:value="${searchBean?.partnerId}"
+                               type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="partnerName" placeholder="3rd Party Name"
+                               th:value="${searchBean?.partnerName}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="softwareName" placeholder="3rd Party Software Name"
+                               th:value="${searchBean?.softwareName}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="softwareVersion" placeholder="3rd Party Software Version"
+                               th:value="${searchBean?.softwareVersion}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <select class="select2" id="divisionSelect" name="division" style="width: 100%;">
+                            <option value=""></option>
+                            <th:block
+                                    th:utext="${@CoCodeManager.genOption(@CommonFunction.getCoConstDefVal('CD_USER_DIVISION'), searchBean?.division)}"></th:block>
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <th:block th:with="statusArray=${#strings.arraySplit(searchBean.status, ',')}">
+                            <select class="form-control select2" id="statusSelect" multiple="multiple" name="status"
+                                    style="width: 100%;">
+                                <option th:value="''"></option>
+                                <th:block th:each="option : ${@CoCodeManager.getCodeDtls(@CommonFunction.getCoConstDefVal('CD_IDENTIFICATION_STATUS'))}">
+                                    <option th:unless="${option.cdDtlNo == 'NA'}" th:selected="${statusArray != null and #arrays.contains(statusArray, option.cdDtlNo)}" th:text="${option.cdDtlNm}" th:value="${option.cdDtlNo}"></option>
+                                </th:block>
+                            </select>
+                        </th:block>
+                    </div>
+                    <div class="form-group mb-2">
+                        <div class="input-group" style="width: 100%;">
+                            <div class="input-group-prepend">
+                            	<span class="input-group-text">
+                                 	<i class="far fa-calendar-alt"></i>
+                              	</span>
+                            </div>
+                            <input class="form-control" id="createdDate" placeholder="Created Date" type="text">
+                            <input id="createdDate1" name="createdDate1" th:value="${searchBean?.createdDate1}" type="hidden"/>
+                            <input id="createdDate2" name="createdDate2" th:value="${searchBean?.createdDate2}" type="hidden"/>
+                        </div>
+                        <script>
+                            var startDate = String([[${searchBean.createdDate1}]]);
+                            var endDate = String([[${searchBean.createdDate2}]]);
+
+                            if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+                                var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+                            }
+
+                            $("#createdDate").daterangepicker({
+                                autoUpdateInput: false
+                            }).on('apply.daterangepicker', function (ev, picker) {
+                                $("input[name='createdDate1']").val(picker.startDate.format('YYYYMMDD'));
+                                $("input[name='createdDate2']").val(picker.endDate.format('YYYYMMDD'));
+                                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                            }).on('cancel.daterangepicker', function (ev, picker) {
+                                $(this).val("");
+                                $("input[name='createdDate1']").val("");
+                                $("input[name='createdDate2']").val("");
+                            });
+                        </script>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="creator" placeholder="Creator" th:value="${searchBean?.creator}"
+                               type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="reviewer" placeholder="Reviewer" th:value="${searchBean?.reviewer}"
+                               type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="watchers" placeholder="Watcher"
+                               th:value="${searchBean?.watchers != null} ? ${searchBean.watchers[0]}" type="text"/>
+                    </div>
+                    <th:block sec:authorize="!hasRole('ROLE_ADMIN')">
+                        <div class="form-group mb-2">
+                            <div class="icheck-primary">
+                                <input id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" type="checkbox"
+                                       value="N"/>
+                                <label for="publicYn" style="font-weight: normal" th:text="|View My 3rd Parties Only|"></label>
+                            </div>
+                        </div>
+                    </th:block>
+                </div>
+            </th:block>
+
+            <th:block th:if="${#strings.equals(defaultSearchType, 'SELF_CHECK')}">
+                <div class="card-body">
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="prjId" placeholder="ID" th:value="${searchBean?.prjId}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="prjName" placeholder="Project Name" th:value="${searchBean?.prjName}"
+                               type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control autoComOss" name="ossName" placeholder="OSS Name"
+                               th:value="${searchBean?.ossName}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <div class="input-group" style="width: 100%;">
+                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="far fa-calendar-alt"></i>
+                                                </span>
+                            </div>
+                            <input class="form-control" id="createdDate" placeholder="Created Date" type="text">
+                            <input id="schStartDate" name="schStartDate" th:value="${searchBean?.schStartDate}" type="hidden"/>
+                            <input id="schEndDate" name="schEndDate" th:value="${searchBean?.schEndDate}" type="hidden"/>
+                        </div>
+                        <script>
+                            var startDate = String([[${searchBean?.schStartDate}]]);
+                            var endDate = String([[${searchBean?.schEndDate}]]);
+
+                            if (startDate && startDate != 'null' && endDate && endDate != 'null') {
+                                var formattedStartDate = moment(startDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                var formattedEndDate = moment(endDate, 'YYYYMMDD').format('MM/DD/YYYY');
+                                $("#createdDate").val(formattedStartDate + ' - ' + formattedEndDate);
+                            }
+
+                            $("#createdDate").daterangepicker({
+                                autoUpdateInput: false
+                            }).on('apply.daterangepicker', function (ev, picker) {
+                                $("input[name='schStartDate']").val(picker.startDate.format('YYYYMMDD'));
+                                $("input[name='schEndDate']").val(picker.endDate.format('YYYYMMDD'));
+                                $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+                            }).on('cancel.daterangepicker', function (ev, picker) {
+                                $(this).val("");
+                                $("input[name='schStartDate']").val("");
+                                $("input[name='schEndDate']").val("");
+                            });
+                        </script>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control" name="licenseName" placeholder="License Name"
+                               th:value="${searchBean?.licenseName}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input class="form-control autoComCreatorDivision" name="creator" placeholder="Creator"
+                               th:value="${searchBean?.creator}" type="text"/>
+                    </div>
+                    <div class="form-group mb-2">
+                        <div class="icheck-primary">
+                            <input id="publicYn" name="publicYn" th:checked="${searchBean?.publicYn == 'N'}" type="checkbox"
+                                   value="N"/>
+                            <label for="publicYn" style="font-weight: normal" th:text="|View My Project Only|"></label>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </form>
+    </fieldset>
+</div>
