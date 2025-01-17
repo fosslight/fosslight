@@ -55,7 +55,7 @@ public class NvdDataService {
 	private final String NVD_META_REST_URL = "https://services.nvd.nist.gov/rest/json/cpematch/2.0";
 	private final String NVD_CVE_REST_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0";
 	private final String NVD_API_KEY = CommonFunction.getProperty("nvd.nist.gov.api.key");
-	
+
 	private final int BATCH_SIZE = 1000;
 	private static final String NVD_REST_BASE_URL = "https://services.nvd.nist.gov";
 	private static final String NVD_REST_CPE_MATCH_URL = "/rest/json/cpematch/2.0";
@@ -65,9 +65,9 @@ public class NvdDataService {
 	
 	private String lastModStartDate;
 	private String lastModEndDate;
-	
+
 	boolean initializeFlag = false;
-	
+
 	@Autowired NvdDataMapper nvdDataMapper;
 	@Autowired CodeMapper codeMapper;
 	@Autowired Environment env;
@@ -79,26 +79,26 @@ public class NvdDataService {
 		if ("Y".equalsIgnoreCase(codeMapper.getCodeDtlNm("990", "100")) ) {
 			initializeFlag = true;
 		}
-		
+
 		if (!initializeFlag) {
 			Date today = new Date();
 			SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 		    sdformat.setTimeZone(TimeZone.getTimeZone("UTC"));
-			
+
 			Calendar cal = Calendar.getInstance();
 		    cal.setTime(today);
 		    cal.add(Calendar.HOUR, -1);
-			
+
 		    String endTime = sdformat.format(cal.getTime());
-		    
+
 			Calendar mon = Calendar.getInstance();
 		    mon.add(Calendar.MONTH, -1);
 		    String startTime = sdformat.format(mon.getTime());
-			
+
 			lastModStartDate = startTime + "%2B01:00";
 			lastModEndDate = endTime + "%2B01:00";
 		}
-		
+
 		try {
 			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_META_REST_URL, 1, 0);
 			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
@@ -114,7 +114,7 @@ public class NvdDataService {
 			schlog.error(e.getMessage(), e);
 			return "91";
 		}
-		
+    
 		try {
 			Map<String, Object> rtnMap = nvdMetaDataApiCheckJob(NVD_CVE_REST_URL, 1, 0);
 			if (rtnMap.containsKey("checkUrlFlag") && !(boolean) rtnMap.get("checkUrlFlag")) {
@@ -130,8 +130,8 @@ public class NvdDataService {
 			schlog.error(e.getMessage(), e);
 			return "92";
 		}
-		
-		if (initializeFlag) {
+    
+    if (initializeFlag) {
 			codeMapper.updateCodeDtlNm("990", "100", "N");
 			initializeFlag = false;
 		}
@@ -146,7 +146,7 @@ public class NvdDataService {
 		
 		return "00";
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Transactional
 	public Map<String, Object> nvdCveDataApiJob(String restApiUrl, Map<String, Object> rtnMap) {
@@ -157,7 +157,7 @@ public class NvdDataService {
 		
 		Map<String, Object> responseMap = new HashMap<>();
 		boolean httpsUrlConnectionFlag = false;
-		
+
 		List<Map<String, Object>> vulnerabilities = null;
 		Map<String, Object> cveInfo = null;
 		List<Map<String, Object>> cpe_match_all = null;
@@ -193,7 +193,7 @@ public class NvdDataService {
 						break;
 					}
 				}
-
+        
 				if (httpsUrlConnectionFlag) {
 					if (responseMap.containsKey("vulnerabilities")) {
 						vulnerabilities = (List<Map<String, Object>>) responseMap.get("vulnerabilities");
@@ -203,7 +203,7 @@ public class NvdDataService {
 								if (cveInfo == null || cveInfo.isEmpty()) {
 									continue;
 								}
-								
+                
 								cveId = (String) cveInfo.get("cveId");
 								
 								mapper.insertCveInfoV3Temp(cveInfo);
@@ -225,11 +225,11 @@ public class NvdDataService {
 									// 정보에서 Version Range 조건을 고려하여 Cpe match 정보로 부터 최종적요으로 적용할 모든 대상 cpe23uri를 취득한다.
 									// Version Range 조건 취득
 									// 검색 조건 설정
-//									Map<String, String> _matchNameParams = new HashMap<>();
+//								Map<String, String> _matchNameParams = new HashMap<>();
 									final String criteria = (String) cpe_match_data.get("criteria");
 									final String matchCriteriaId = (String) cpe_match_data.get("matchCriteriaId");
-//									_matchNameParams.put("cpe23Uri", criteria);
-//									_matchNameParams.put("matchCriteriaId", matchCriteriaId);
+//								_matchNameParams.put("cpe23Uri", criteria);
+//								_matchNameParams.put("matchCriteriaId", matchCriteriaId);
 									
 
 									// configurations의 operator (AND/OR)에 따라 동일한 CVE ID에 matchCriteriaId 가 여러번 등장할 수 있음
@@ -244,7 +244,7 @@ public class NvdDataService {
 									String versionEndIncluding = null;
 									String versionStartExcluding = null;
 									String versionEndExcluding = null;
-									
+
 									if (cpe_match_data.containsKey("versionStartIncluding")) {
 										versionStartIncluding = (String) cpe_match_data.get("versionStartIncluding");
 //										_matchNameParams.put("versionStartIncluding", versionStartIncluding);
@@ -311,7 +311,7 @@ public class NvdDataService {
 
 									mapper.insertNvdDataConfigurationsTemp(configurationInsertParam);
 								}
-								
+
 								cvePatchList = (List<Map<String, Object>>) cveInfo.get("cvePatchList");
 								if (!CollectionUtils.isEmpty(cvePatchList)) {
 									for (Map<String, Object> cvePatchInfo : cvePatchList) {
@@ -319,8 +319,7 @@ public class NvdDataService {
 										_patchInfo.put("cveId", cveId);
 										_patchInfo.put("patchLink", cvePatchInfo.get("url"));
 										_patchInfo.put("publDate", cveInfo.get("publDate"));
-										
-										mapper.insertNvdDataPatchLinkTemp(_patchInfo);
+                    mapper.insertNvdDataPatchLinkTemp(_patchInfo);
 									}
 									cvePatchList = null;
 								}
@@ -371,18 +370,18 @@ public class NvdDataService {
 				schlog.info("Vendor Product Nvd Data V3 Update Count : {}", vendorProductNvdDataV3Cnt);
 				nvdDataMapper.updateVendorProductNvdDataV3();
 			}
-			
+
 			// success data insert > nvd_meta table
 			HashMap<String, Object> param = new HashMap<String, Object>();
 			param.put("fileNm", fileNm);
 			param.put("fileType", format);
 			param.put("modiDate", urlConnTimestamp);
-			
+
 			nvdDataMapper.insertNewMetaDataUrlConnection(param);
 			log.info("nvdCveDataApiJob end");
 			schlog.info("nvdCveDataApiJob end");
 		}
-		
+
 		responseMap.put("connectionFlag", httpsUrlConnectionFlag);
 		return responseMap;
 	}
@@ -474,14 +473,14 @@ public class NvdDataService {
 		resultMap.put("baseMetric", baseMetric);
 		resultMap.put("cpe_match_all", cpe_match_all);
 		resultMap.put("cvePatchList", cvePatchList);
-	
+    
 		return resultMap;
 	}
 
 	private Map<String, Object> nvdMetaDataApiCheckJob(String restApiUrl, int resultsPerPage, int startIndex) throws IOException {
 		Map<String, Object> responseMap = new HashMap<>();
 		String fileNm = restApiUrl.replace("https://services.nvd.nist.gov", "");
-		
+
 		try {
 			for (int i=0; i<5; i++) {
 				responseMap = getDataForRestApiConnection(restApiUrl, resultsPerPage, startIndex, i);
@@ -489,7 +488,7 @@ public class NvdDataService {
 					break;
 				}
 			}
-			
+
 			if ((boolean) responseMap.get("connectionFlag")) {
 				// check url connection timestamp
 				HashMap<String, Object> param = new HashMap<String, Object>();
@@ -503,7 +502,7 @@ public class NvdDataService {
 			schlog.error(e.getMessage());
 			responseMap.put("connectionFlag", false);
 		}
-		
+
 		return responseMap;
 	}
 
@@ -555,6 +554,7 @@ public class NvdDataService {
 						break;
 					}
 				}
+
 //				String searchUrl = MessageFormat.format(NVD_REST_CPE_MATCH_URL + "?resultsPerPage={0}&startIndex={1}", API_MATCH_CHUNK_SIZE, API_MATCH_CHUNK_SIZE*limitIndex);
 //				if (!initializeFlag) {
 //					searchUrl += "&lastModStartDate=" + lastModStartDate + "&lastModEndDate=" + lastModEndDate;
@@ -566,13 +566,13 @@ public class NvdDataService {
 					if (responseMap.containsKey("matchStrings")) {
 						matchStrings = (List<Map<String, Object>>) responseMap.get("matchStrings");
 						if (matchStrings != null) {
-							
+              
 							for (Map<String, Object> matchStringObj : matchStrings) {
 								if (matchStringObj.containsKey("matchString")) {
 									Map<String, Object> matchString = (Map<String, Object>) matchStringObj.get("matchString");
 									String matchCriteriaId = (String) matchString.get("matchCriteriaId");
 									String cpe23Uri = (String) matchString.get("criteria");
-									
+
 									Map<String, Object> cpeMatchMap = new HashMap<>();
 									cpeMatchMap.put("matchCriteriaId", matchCriteriaId);
 									cpeMatchMap.put("cpe23Uri", cpe23Uri);
@@ -597,7 +597,7 @@ public class NvdDataService {
 									} else {
 										cpeMatchMap.put("versionEndExcluding", null);
 									}
-									
+                  
 									mapper.insertCpeMatchData(cpeMatchMap);
 									
 									if (matchString.containsKey("matches")) {
@@ -660,22 +660,21 @@ public class NvdDataService {
 			nvdDataMapper.copyNvdDataMatchNameFromTemp();
 			nvdDataMapper.truncateCpeMatchTemp();
 			nvdDataMapper.truncateCpeMatchNameTemp();
-			
+
 			// success data insert > nvd_meta table
 			HashMap<String, Object> param = new HashMap<>();
 			param.put("fileNm", fileNm);
 			param.put("fileType", format);
 			param.put("modiDate", urlConnTimestamp);
-			
+
 			nvdDataMapper.insertNewMetaDataUrlConnection(param);
 			log.info("nvdMetaDataApiJob end");
 			schlog.info("nvdMetaDataApiJob end");
 		}
-		
+
 		responseMap.put("connectionFlag", httpsUrlConnectionFlag);
 		return responseMap;
 	}
-
 
 	private Map<String, Object> getDataForRestApiConnection(String restApiUrl, int resultsPerPage, int startIndex, int cnt) {
 		HttpsURLConnection httpsURLConnection = null;
@@ -684,9 +683,9 @@ public class NvdDataService {
 		if (!initializeFlag) {
 			urlString += "&lastModStartDate=" + lastModStartDate + "&lastModEndDate=" + lastModEndDate;
 		}
-		
+
 		boolean connectionFlag = true;
-		
+
 		try {
 			URL url = new URL(urlString);
 			ignoreSsl();
@@ -694,7 +693,7 @@ public class NvdDataService {
 			httpsURLConnection.setRequestMethod("GET");
 			httpsURLConnection.addRequestProperty("x-api-key", NVD_API_KEY);
 			httpsURLConnection.setConnectTimeout(1000 * 15);
-			
+
 			if (httpsURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
 				Map<String, Object> convertMap = getFromJSONObjectToMap(bufferedReader);
@@ -731,7 +730,7 @@ public class NvdDataService {
 				}
 			}
 		}
-		
+
 		rtnMap.put("connectionFlag", connectionFlag);
 		return rtnMap;
 	}
@@ -751,7 +750,7 @@ public class NvdDataService {
 		} else {
 			log.error("url connection response buffered reader null");
 		}
-        
+
 		return map;
 	}
 
@@ -763,7 +762,7 @@ public class NvdDataService {
 //		HashMap<String, Object> param = new HashMap<String, Object>();
 //		param.put("fileType", "CVE");
 //		List<HashMap<String, Object>> waitList = nvdDataMapper.selectWaitJobData(param);
-//		
+//
 //		boolean updateFlag = restApiFlag;
 //		// 2. Json File -> DB Insert
 //		for (Map<String, Object> wMetaMap : waitList){
@@ -773,7 +772,7 @@ public class NvdDataService {
 //			param.put("jobStatus", "G");
 //			// JobStatus가 W인 대상이 작업이 들어갔다면 G로 변경을 하여 추후에 다시 loop 돌지 않도록 처리함.
 //			nvdDataMapper.updateJobStatus(param);
-//			
+//
 //			String NVD_CVE_PATH = env.getProperty("root.dir");
 //			if (StringUtil.isEmpty(NVD_CVE_PATH)) {
 //				NVD_CVE_PATH = new FileSystemResource("").getFile().getAbsolutePath();
@@ -781,16 +780,16 @@ public class NvdDataService {
 //			NVD_CVE_PATH = Paths.get(NVD_CVE_PATH, "nvd/cve").toString();
 //
 //			updateFlag = updateNvdData(NVD_CVE_PATH, (String) wMetaMap.get("fileNm"));
-//			
+//
 //			param.put("jobStatus", "C");
 //			nvdDataMapper.updateJobStatus(param);
-//		
+//
 //		}
-		
+
 		// NVD 관련 Data 중복표시(cpe_nm의 마이너 버전이 포함됨), 및 성능 개선을 위해 별도의 테이블을 추가
 		// truncate and insert 처리
 		// 위험성 : truncate는 transaction 으로 관리 할 수 없다. truncate이후에 insert 실패시 data 없을 수 있음
-		
+
 		if (restApiFlag){
 			// temp table에 data insert 이후, real table로 copy
 			nvdDataMapper.createTableNvdDavaScoreV3Temp();
@@ -821,14 +820,14 @@ public class NvdDataService {
 				sqlSession.flushStatements();
 				sqlSession.commit();
 			}
-			
+
 			nvdDataMapper.deleteNvdDataScoreV3();
 			nvdDataMapper.insertNvdDataScoreV3();
 			nvdDataMapper.deleteNvdDataScoreV3Temp();
 
 			log.info("End CVE Data Sync Job");
 		}
-		
+
 		int nickNameMgrCnt = nvdDataMapper.selectNickNameMgrtNvdDataScoreV3();
 		if (nickNameMgrCnt > 0) {
 			log.info("Nickname Migration Count : " + nickNameMgrCnt);
@@ -837,7 +836,7 @@ public class NvdDataService {
 		}else{
 			log.info("Nickname Migration Count : 0");
 		}
-		
+
 		int MaxCvssScoreCnt = nvdDataMapper.selectMaxCvssScoreNvdDataScoreV3();
 		if (MaxCvssScoreCnt > 0) {
 			log.info("MaxCvssScore Added Count : " + MaxCvssScoreCnt);
@@ -846,7 +845,7 @@ public class NvdDataService {
 		}else{
 			log.info("MaxCvssScore Added Count : 0");
 		}
-		
+
 		int diffCvssScoreCnt = nvdDataMapper.ossNameNickNameCvssScoreDiffCnt();
 		if (diffCvssScoreCnt > 0){
 			log.info("NickName -> ossName cvssScore Diff Count : " + diffCvssScoreCnt);
@@ -854,7 +853,7 @@ public class NvdDataService {
 		} else{
 			log.info("NickName -> ossName cvssScore Diff Count : 0");
 		}
-		
+
 		int ossNameToNickDiffCvssScoreCnt = nvdDataMapper.ossNameToNickMgrtCvssScoreDiffCnt();
 		if (ossNameToNickDiffCvssScoreCnt > 0){
 			log.info("ossName -> NickName cvssScore Diff Count : " + ossNameToNickDiffCvssScoreCnt);
@@ -862,17 +861,16 @@ public class NvdDataService {
 		} else{
 			log.info("ossName -> NickName cvssScore Diff Count : 0");
 		}
-		
+
 		int vendorProductNvdDataScoreV3Cnt = nvdDataMapper.selectVendorProductNvdDataScoreV3Cnt();
 		if (vendorProductNvdDataScoreV3Cnt > 0) {
 			log.info("Vendor Product NVD Data Score V3 Update Count : " + vendorProductNvdDataScoreV3Cnt);
 			nvdDataMapper.updateVendorProductNvdDataScoreV3();
 		}
-		
+
 		return resCd;
 	}
-	
-	
+  
 	private void ignoreSsl() {
 		HostnameVerifier hv = new HostnameVerifier() {
 			public boolean verify(String urlHostName, SSLSession session) {
@@ -895,25 +893,25 @@ public class NvdDataService {
         sc.init(null, trustAllCerts, null);
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     }
-	
+
 	static class miTM implements TrustManager,X509TrustManager {
         public X509Certificate[] getAcceptedIssuers() {
             return null;
         }
- 
+
         public boolean isServerTrusted(X509Certificate[] certs) {
             return true;
         }
- 
+
         public boolean isClientTrusted(X509Certificate[] certs) {
             return true;
         }
- 
+
         public void checkServerTrusted(X509Certificate[] certs, String authType)
                 throws CertificateException {
             return;
         }
- 
+
         public void checkClientTrusted(X509Certificate[] certs, String authType)
                 throws CertificateException {
             return;
