@@ -22,6 +22,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
@@ -3215,6 +3216,48 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 				project.setNoticeAppendFileId(null);
 				verificationMapper.updateNoticeAppendFile(project);
 			}
+		}
+	}
+
+	@Override
+	public void updateFileWhenVerificationCopyConfirm(Project project, Project copyProject, List<String> packageFileSeqList) throws IOException {
+		Project param = new Project();
+		param.setPrjId(project.getPrjId());
+		
+		// update package file seq
+		int fileSize = packageFileSeqList.size();
+		switch (fileSize) {
+			case 1 : param.setPackageFileId(packageFileSeqList.get(0));
+					param.setPackageFileType1(copyProject.getPackageFileType1());
+				break;
+			case 2 : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1));
+					param.setPackageFileType2(copyProject.getPackageFileType2());
+				break;
+			case 3 : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2));
+					param.setPackageFileType3(copyProject.getPackageFileType3());
+				break;
+			default : param.setPackageFileId(packageFileSeqList.get(0)); param.setPackageFileId2(packageFileSeqList.get(1)); param.setPackageFileId3(packageFileSeqList.get(2)); param.setPackageFileId4(packageFileSeqList.get(3));
+					param.setPackageFileType4(copyProject.getPackageFileType4());
+				break;
+		}
+		
+		verificationMapper.updatePackageFile(param);
+		
+		// update verify result file
+		param.setReadmeContent(copyProject.getReadmeContent());
+		param.setReadmeFileName(copyProject.getReadmeFileName());
+		param.setReadmeYn(copyProject.getReadmeYn());
+		param.setExceptFileContent(copyProject.getExceptFileContent());
+		param.setVerifyFileContent(copyProject.getVerifyFileContent());
+		
+		boolean isCopyDir = !isEmpty(param.getReadmeContent()) || !isEmpty(param.getExceptFileContent()) || !isEmpty(param.getVerifyFileContent());
+		if (isCopyDir) {
+			File srcDir = new File(VERIFY_PATH_OUTPUT + "/" + copyProject.getPrjId());
+			File destDir = new File(VERIFY_PATH_OUTPUT + "/" + param.getPrjId());
+			FileUtils.copyDirectory(srcDir, destDir);
+			
+			projectService.registReadmeContent(param);
+			projectService.registVerifyContents(param);
 		}
 	}
 }

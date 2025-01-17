@@ -1376,7 +1376,7 @@ public class ProjectController extends CoTopComponent {
 				prjBean.setPrjId(project.getPrjId());
 				prjBean.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
 				try {
-					Map<String, Object> resultMap = projectService.updateProjectStatus(project, false);
+					Map<String, Object> resultMap = projectService.updateProjectStatus(project, false, false);
 					updateProjectNotification(project, resultMap);
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
@@ -1388,7 +1388,7 @@ public class ProjectController extends CoTopComponent {
 					prjBean.setIgnoreBinaryDbFlag(CoConstDef.FLAG_NO);
 					
 					try {
-						Map<String, Object> resultMap = projectService.updateProjectStatus(prjBean, true);
+						Map<String, Object> resultMap = projectService.updateProjectStatus(prjBean, true, false);
 						updateProjectNotification(prjBean, resultMap);
 					} catch (Exception e) {
 						log.error(e.getMessage(), e);
@@ -1450,6 +1450,7 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> returnMap = new HashMap<String, Object>();
 		boolean identificationStatusRequest = false;
 		boolean identificationStatusConfirm = false;
+		boolean isVerificationConfirm = false;
 		
 		if (!project.getNoticeType().equals(CoConstDef.CD_NOTICE_TYPE_PLATFORM_GENERATED)) {
 			ProjectIdentification identification = new ProjectIdentification();
@@ -1470,7 +1471,7 @@ public class ProjectController extends CoTopComponent {
 				project.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
 				
 				try {
-					Map<String, Object> resultMap = projectService.updateProjectStatus(project, false);
+					Map<String, Object> resultMap = projectService.updateProjectStatus(project, false, false);
 					resultMap.put("userComment", "");
 					updateProjectNotification(project, resultMap);
 				} catch (Exception e) {
@@ -1521,7 +1522,7 @@ public class ProjectController extends CoTopComponent {
 				project.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
 				
 				try {
-					Map<String, Object> resultMap = projectService.updateProjectStatus(project, false);
+					Map<String, Object> resultMap = projectService.updateProjectStatus(project, false, false);
 					resultMap.put("userComment", "");
 					updateProjectNotification(project, resultMap);
 				} catch (Exception e) {
@@ -1535,12 +1536,18 @@ public class ProjectController extends CoTopComponent {
 			}
 		}
 		
+		Project prjInfo = projectService.getProjectBasicInfo(project.getPrjId());
+		Project copyPrjInfo = projectService.getProjectBasicInfo(project.getCopyPrjId());
+		boolean networkServerType = project.getNetworkServerType().equals(copyPrjInfo.getNetworkServerType());
+		
 		if (identificationStatusRequest) {
 			project.setIdentificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
 			project.setIgnoreBinaryDbFlag(CoConstDef.FLAG_NO);
-			
+			if (confirmStatusCopy.equals("verificationConf") && networkServerType) {
+				isVerificationConfirm = true;
+			}
 			try {
-				Map<String, Object> resultMap = projectService.updateProjectStatus(project, true);
+				Map<String, Object> resultMap = projectService.updateProjectStatus(project, true, isVerificationConfirm);
 				resultMap.put("userComment", "");
 				updateProjectNotification(project, resultMap);
 			} catch (Exception e) {
@@ -1554,10 +1561,7 @@ public class ProjectController extends CoTopComponent {
 		}
 		
 		if (identificationStatusConfirm && confirmStatusCopy.equals("verificationConf")) {
-			Project prjInfo = projectService.getProjectBasicInfo(project.getPrjId());
-			Project copyPrjInfo = projectService.getProjectBasicInfo(project.getCopyPrjId());
-			
-			if (!project.getNetworkServerType().equals(copyPrjInfo.getNetworkServerType())) {
+			if (!networkServerType) {
 				returnMap.put("result", "false");
 				returnMap.put("step", "verificationProgress");
 				return returnMap;
@@ -1567,57 +1571,14 @@ public class ProjectController extends CoTopComponent {
 			List<String> fileSeqsList = projectService.getPackageFileList(project, filePath);
 			
 			if (fileSeqsList.size() > 0) {
-				ProjectIdentification identification = new ProjectIdentification();
-				identification.setReferenceId(project.getPrjId());
-				identification.setReferenceDiv(CoConstDef.CD_DTL_COMPONENT_PACKAGING);
-				
-				// verify
-				T2File file = new T2File();
-				file.setCreator(loginUserName());
-				
-				List<Map<String, Object>> verifyResult = new ArrayList<Map<String,Object>>();
-				Map<String, Object> resMap = null;
-				List<String> filePathList = new ArrayList<>();
-				List<String> componentIdList = new ArrayList<>();
-				
-				List<ProjectIdentification> ocList = projectService.selectIdentificationGridList(identification);
-				for (ProjectIdentification pi : ocList) {
-					filePathList.add(pi.getFilePath());
-					componentIdList.add(pi.getComponentId());
-				}
-				Map<Object, Object> map = new HashMap<>();
-				map.put("prjId", project.getPrjId());
-				map.put("fileSeqs", fileSeqsList);
-				map.put("gridFilePaths", filePathList);
-				map.put("gridComponentIds", componentIdList);
-				map.put("copyConfirm", CoConstDef.FLAG_YES);
-				
 				try {
-					boolean isChangedPackageFile = verificationService.getChangedPackageFile(project.getPrjId(), fileSeqsList);
-					int seq = 1;
-					
-					for (String fileSeq : fileSeqsList){
-						map.put("fileSeq", fileSeq);
-						map.put("packagingFileIdx", seq++);
-						map.put("isChangedPackageFile", isChangedPackageFile);
-						verifyResult.add(verificationService.processVerification(map, file, project));
-					}
-					
-					resMap = verifyResult.get(0);
-					
-					if (fileSeqsList.size() > 1){
-						resMap.put("verifyValid", verifyResult.get(verifyResult.size()-1).get("verifyValid"));
-						resMap.put("fileCounts", verifyResult.get(verifyResult.size()-1).get("fileCounts"));
-					}
-					
-					verificationService.updateVerifyFileCountReset((ArrayList<String>) resMap.get("verifyValid"));
-					verificationService.updateVerifyFileCount((HashMap<String,Object>) resMap.get("fileCounts"));
-				} catch(Exception e) {
-					log.error(e.getMessage(), e);
+					verificationService.updateFileWhenVerificationCopyConfirm(prjInfo, copyPrjInfo, fileSeqsList);
+				} catch (IOException e1) {
+					log.error(e1.getMessage(), e1);
 					returnMap.put("result", "false");
 					returnMap.put("step", "verificationProgress");
 					return returnMap;
-				} 
+				}
 			}
 			
 			OssNotice ossNotice = verificationService.selectOssNoticeOne(project.getCopyPrjId());
@@ -1647,7 +1608,7 @@ public class ProjectController extends CoTopComponent {
 			prjInfo.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
 			
 			try {
-				Map<String, Object> resultMap = projectService.updateProjectStatus(prjInfo, false);
+				Map<String, Object> resultMap = projectService.updateProjectStatus(prjInfo, false, false);
 				resultMap.put("userComment", "");
 				updateProjectNotification(prjInfo, resultMap);
 			} catch (Exception e) {
@@ -2984,7 +2945,7 @@ public class ProjectController extends CoTopComponent {
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		try {
-			 resultMap = projectService.updateProjectStatus(project, false);
+			 resultMap = projectService.updateProjectStatus(project, false, false);
 			 
 			 if (resultMap.containsKey("androidMessage")) {
 				 return makeJsonResponseHeader(false, getMessage("msg.project.android.valid"));

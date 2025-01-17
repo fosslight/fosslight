@@ -4636,6 +4636,9 @@
 		UPDATE OSS_COMPONENTS SET FILE_PATH = #{filePath} WHERE COMPONENT_ID = #{componentId}
 	</update>
 	
+	<update id="updateFilePathWithFileCount" parameterType="oss.fosslight.domain.OssComponents">
+		UPDATE OSS_COMPONENTS SET FILE_PATH = #{filePath}, VERIFY_FILE_COUNT = #{verifyFileCount} WHERE COMPONENT_ID = #{componentId}
+	</update>
 	
 	<update id="updateDistributeTarget" parameterType="oss.fosslight.domain.Project">
 		UPDATE PROJECT_MASTER

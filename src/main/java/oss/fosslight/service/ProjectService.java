@@ -63,7 +63,7 @@ public interface ProjectService extends HistoryConfig{
 	
 	public void checkProjectReviewer(Project project);
 	
-	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm) throws Exception;
+	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm, boolean isVerificationConfirm) throws Exception;
 	
 	public List<ProjectIdentification> getBomListExcel(ProjectIdentification bom);
 	
@@ -102,7 +102,7 @@ public interface ProjectService extends HistoryConfig{
 
 	List<UploadFile> selectAndroidFileDetail(Project project);
 	
-	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm);
+	void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm);
 	
 	public Map<String, Object> getOssIdCheck(ProjectIdentification projectIdentification);
 

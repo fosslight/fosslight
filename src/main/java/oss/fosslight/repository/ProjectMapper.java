@@ -288,6 +288,8 @@ public interface ProjectMapper {
 	void deleteProjectModelWithModelName(Project project);
 
 	void updateFilePath(OssComponents newBean);
+	
+	void updateFilePathWithFileCount(OssComponents newBean);
 
 	void updateDistributeTarget(Project project);
 

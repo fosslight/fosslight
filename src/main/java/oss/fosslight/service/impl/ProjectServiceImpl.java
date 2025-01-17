@@ -3841,7 +3841,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@Override
 	@Transactional
 	@CacheEvict(value="autocompleteProjectCache", allEntries=true)
-	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm) throws Exception {
+	public Map<String, Object> updateProjectStatus(Project project, boolean isCopyConfirm, boolean isVerificationConfirm) throws Exception {
 		Map<String, Object> resultMap = new HashMap<>();
 		
 		String commentDiv = isEmpty(project.getReferenceDiv()) ? CoConstDef.CD_DTL_COMMENT_IDENTIFICAITON_HIS
@@ -3978,7 +3978,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			}
 			
 			project.setModifier(project.getLoginUserName());
-			updateProjectIdentificationConfirm(project, isCopyConfirm);
+			updateProjectIdentificationConfirm(project, isCopyConfirm, isVerificationConfirm);
 			
 			// network server 이면서 notice 생성 대상이 없을 경우
 			if ( hasNotificationOss
@@ -4189,7 +4189,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm) {
+	public void updateProjectIdentificationConfirm(Project project, boolean isCopyConfirm, boolean isVerificationConfirm) {
 		Map<String, Object> map = null;
 		ProjectIdentification param = new ProjectIdentification();
 		param.setReferenceId(project.getPrjId());
@@ -4368,7 +4368,12 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						
 						if (copiedPackageInfoMap.containsKey(key)) {
 							newBean.setFilePath(copiedPackageInfoMap.get(key).getFilePath());
-							projectMapper.updateFilePath(newBean);
+							if (isVerificationConfirm) {
+								newBean.setVerifyFileCount(copiedPackageInfoMap.get(key).getVerifyFileCount());
+								projectMapper.updateFilePathWithFileCount(newBean);
+							} else {
+								projectMapper.updateFilePath(newBean);
+							}
 						}
 					}
 				}
@@ -7957,7 +7962,7 @@ String splitOssNameVersion[] = ossNameVersion.split("/");
 		String resCd = "";
 		
 		try {
-			resultMap = updateProjectStatus(project, false);
+			resultMap = updateProjectStatus(project, false, false);
 			if (resultMap.containsKey("androidMessage") || resultMap.containsKey("diffMap") || resultMap.containsKey("validMap")) {
 				resCd = "20";
 			}
