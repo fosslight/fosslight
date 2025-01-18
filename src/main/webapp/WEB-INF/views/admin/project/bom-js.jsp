@@ -988,7 +988,9 @@ var bom_data = {
 							
 							if(referenceDivList[idx] =="10") {
 								referenceName += "3rd";
-							} else if(referenceDivList[idx] =="11") {
+							} else if(referenceDivList[idx] =="16") {
+                                referenceName += "DEP";
+                            } else if(referenceDivList[idx] =="11") {
 								referenceName += "SRC";
 							} else if(referenceDivList[idx] =="15") {
 								referenceName += "BIN";
