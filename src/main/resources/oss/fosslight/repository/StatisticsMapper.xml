@@ -220,7 +220,7 @@
 				 WHERE OC.REFERENCE_DIV IN ('13', '14')
 				   AND PM.IDENTIFICATION_STATUS = 'CONF'
 				   AND OC.OSS_NAME NOT IN ('', '-')
-				   AND PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate}
+				   AND DATE_FORMAT(PM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}
 				   AND PM.USE_YN = 'Y'
 				   AND OC.EXCLUDE_YN = 'N'
 				 GROUP BY OC.REFERENCE_ID, OC.OSS_NAME 
@@ -359,11 +359,11 @@
 					<choose>
 						<when test="@oss.fosslight.util.StringUtil@equals('ADD', updateType)">
 							  	 ON OM.CREATOR = ADMIN.USER_ID
-							  WHERE DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')) STAT
+							  WHERE DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}) STAT
 						</when>
 						<when test="@oss.fosslight.util.StringUtil@equals('MOD', updateType)">
 							  	 ON OM.MODIFIER = ADMIN.USER_ID
-							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN DATE_FORMAT(#{startDate}, '%Y%m%d') AND DATE_FORMAT(#{endDate}, '%Y%m%d')
+							  WHERE DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}
 								AND DATE_FORMAT(OM.CREATED_DATE, '%Y%m%d') != DATE_FORMAT(OM.MODIFIED_DATE, '%Y%m%d')) STAT
 						</when>
 					</choose>    
