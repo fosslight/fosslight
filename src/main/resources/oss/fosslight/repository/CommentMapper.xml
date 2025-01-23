@@ -18,7 +18,10 @@
 			, STATUS_CODE
 			, CONTENTS
 			, CREATOR
-			, MODIFIER
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('30', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('40', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('42', referenceDiv)">
+				, MODIFIER
+				, MODIFIED_DATE
+			</if>
 			, EXPANSION1
 		)
 		VALUES
@@ -32,7 +35,10 @@
 			, #{statusCode}
 			, #{contents}
 			, #{loginUserName}
-			, #{loginUserName}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('30', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('40', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('42', referenceDiv)">
+				, #{loginUserName}
+				, now()
+			</if>
 			, #{expansion1}
 		) ON DUPLICATE KEY UPDATE
 			<if test="!@oss.fosslight.util.StringUtil@isEmpty(commId)">
@@ -41,7 +47,10 @@
 			REFERENCE_ID = #{referenceId}
 			, REFERENCE_DIV = #{referenceDiv}
 			, CONTENTS = #{contents}
-			, MODIFIER = #{loginUserName}
+			<if test="!@oss.fosslight.util.StringUtil@isEmpty(referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('30', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('40', referenceDiv) and @oss.fosslight.util.StringUtil@notEquals('42', referenceDiv)">
+				, MODIFIER = #{loginUserName}
+				, MODIFIED_DATE = now()
+			</if>
 	</insert>
 
 	<select id="getCommentList" parameterType="oss.fosslight.domain.CommentsHistory" resultType="oss.fosslight.domain.CommentsHistory">
@@ -83,7 +92,7 @@
 	UPDATE 
 		COMMENTS_HISTORY
 	SET 
-		USE_YN= 'N', MODIFIER = #{loginUserName}
+		USE_YN= 'N', MODIFIER = #{loginUserName}, MODIFIED_DATE = now()
 	WHERE 
 		COMM_ID = #{commId}
 	</update>
@@ -103,7 +112,7 @@
 	UPDATE 
 		COMMENTS_HISTORY
 	SET 
-		USE_YN= 'N', MODIFIER = #{loginUserName}
+		USE_YN= 'N', MODIFIER = #{loginUserName}, MODIFIED_DATE = now()
 	WHERE 
 		REFERENCE_ID = #{referenceId}
 		AND REFERENCE_DIV = #{referenceDiv}
@@ -206,9 +215,8 @@
 	
 	<update id="updateComment" parameterType="oss.fosslight.domain.CommentsHistory">
 		UPDATE COMMENTS_HISTORY 
-		SET CONTENTS = #{contents}, MODIFIER = #{loginUserName}
+		SET CONTENTS = #{contents}, MODIFIER = #{loginUserName}, MODIFIED_DATE = now()
 		WHERE COMM_ID = #{commId}
-			 
 	</update>
 	
 	<update id="updateHistoryReadYn" parameterType="oss.fosslight.domain.CommentsHistory">
