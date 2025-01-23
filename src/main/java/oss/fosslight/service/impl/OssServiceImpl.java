@@ -1043,7 +1043,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		try {
 			if (isEmpty(ossMaster.getOssCommonId())) {
 				OssMaster bean = ossMapper.checkExistsOssname(ossMaster);
-				if (bean != null) ossMaster.setOssCommonId(bean.getOssCommonId());
+				if (bean != null) {
+					ossMaster.setOssCommonId(bean.getOssCommonId());
+				}
 			}
 			
 			String[] ossNicknames = ossMaster.getOssNicknames();
@@ -2979,7 +2981,7 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		Map<String, List<OssMaster>> updateOssNameVersionDiffMergeObject = null;
 		try {
 			History h;
-			if (("Y").equals(ossMaster.getOssCopyFlag())) {
+			if (CoConstDef.FLAG_YES.equals(avoidNull(ossMaster.getOssCopyFlag()))) {
 				ossMaster.setOssId(null);
 				isNew = true;
 			}
@@ -3062,6 +3064,8 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 						ossMaster.setExistSummaryDescription(ossBean.getSummaryDescription());
 						ossMaster.setExistImportantNotes(ossBean.getImportantNotes());
 					}
+				} else {
+					ossMaster.setOssCommonId(null);
 				}
 				ossId = registOssMaster(ossMaster);
 				
