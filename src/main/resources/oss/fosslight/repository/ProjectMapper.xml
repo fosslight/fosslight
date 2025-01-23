@@ -5568,22 +5568,12 @@
 											 WHERE IDENTIFICATION_STATUS = 'CONF'
 											   AND PRJ_ID = #{prjId}
 											   AND USE_YN = 'Y')
-					   AND REFERENCE_DIV IN ('13','14')
+					   AND REFERENCE_DIV = #{referenceDiv}
 					   AND OSS_NAME NOT IN ('','-')
 					   AND EXCLUDE_YN = 'N'
-				  GROUP BY REFERENCE_ID, OSS_NAME, OSS_VERSION) T1
+				  GROUP BY REFERENCE_ID, OSS_NAME) T1
 					 INNER JOIN PROJECT_MASTER T2
 						ON T1.REFERENCE_ID = T2.PRJ_ID
-						<!-- 
-					 INNER JOIN T2_USERS T3
-						ON T2.CREATOR = T3.USER_ID
-			 		 INNER JOIN (SELECT CD_DTL_NO
-							  		  , CD_DTL_NM
-						   		   FROM T2_CODE_DTL
-						  		  WHERE CD_NO = '200'
-									AND USE_YN = 'Y') T4
-						ON T3.DIVISION = T4.CD_DTL_NO
-						 -->
 	</insert>
 
 	<insert id="insertStatisticsMostUsedLicenseInfo" parameterType="oss.fosslight.domain.Project">
@@ -5611,32 +5601,20 @@
 												WHERE IDENTIFICATION_STATUS = 'CONF'
 												AND PRJ_ID = #{prjId}
 												AND USE_YN = 'Y')
-							   AND REFERENCE_DIV IN ('13','14')
+							   AND REFERENCE_DIV = #{referenceDiv}
 							   AND OSS_NAME NOT IN ('', '-')
 							   AND EXCLUDE_YN = 'N'
-						  GROUP BY COMPONENT_ID, REFERENCE_ID, OSS_NAME, OSS_VERSION) T1
+						  GROUP BY COMPONENT_ID, REFERENCE_ID) T1
 						     INNER JOIN OSS_COMPONENTS_LICENSE T2
 								ON T1.COMPONENT_ID = T2.COMPONENT_ID
 							   AND UPPER(T2.LICENSE_NAME) NOT IN ('', 'LGE PROPRIETARY LICENSE', 'OTHER PROPRIETARY LICENSE')
-						  GROUP BY T1.REFERENCE_ID, T1.OSS_NAME, T1.OSS_VERSION, T2.LICENSE_NAME) OC
+						  GROUP BY T1.REFERENCE_ID, T2.LICENSE_NAME) OC
 			     	 INNER JOIN PROJECT_MASTER PM
 				    	ON OC.REFERENCE_ID = PM.PRJ_ID
-				    	<!-- 
-				 	 INNER JOIN T2_USERS T1
-				    	ON PM.CREATOR = T1.USER_ID
-				    	
-				 	 INNER JOIN (SELECT CD_DTL_NO
-				 	 				  , CD_DTL_NM
-							   	   FROM T2_CODE_DTL
-							   	  WHERE CD_NO = '200'
-							    	AND USE_YN = 'Y') T2
-						ON T1.DIVISION = T2.CD_DTL_NO
-						 -->
 	</insert>
 
 	<delete id="deleteStatisticsMostUsedInfo" parameterType="oss.fosslight.domain.Project">
-		DELETE FROM STATISTICS_MOSTUSED
-		WHERE PRJ_ID = #{prjId}
+		DELETE FROM STATISTICS_MOSTUSED WHERE PRJ_ID = #{prjId}
 	</delete>
 	
 	<select id="selectAdminCheckCnt" parameterType="oss.fosslight.domain.ProjectIdentification" resultType="int">
