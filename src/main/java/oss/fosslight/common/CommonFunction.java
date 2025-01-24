@@ -2993,7 +2993,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	}
 
 	public static String makeLicenseInternalUrl(LicenseMaster licenseMaster, boolean distributionFlag) {
-		if (licenseMaster != null) {
+		if (licenseMaster != null && !isEmpty(licenseMaster.getLicenseText())) {
 			String filePath = appEnv.getProperty("internal.url.dir.path");
 			String licenseName = !isEmpty(licenseMaster.getShortIdentifier()) ? licenseMaster.getShortIdentifier() : !isEmpty(licenseMaster.getLicenseNameTemp()) ? licenseMaster.getLicenseNameTemp() : licenseMaster.getLicenseName();
 			

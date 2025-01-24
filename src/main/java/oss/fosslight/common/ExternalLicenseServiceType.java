@@ -28,10 +28,15 @@ public enum ExternalLicenseServiceType {
 			"Clearly Defined definitions api",
 			Arrays.asList(
 					DependencyType.NPM,
+					DependencyType.NPM2,
 					DependencyType.MAVEN_CENTRAL,
 					DependencyType.MAVEN_GOOGLE,
 					DependencyType.PYPI,
-					DependencyType.COCOAPODS
+					DependencyType.COCOAPODS,
+					DependencyType.GOOGLESOURCE,
+					DependencyType.NUGET,
+					DependencyType.STACKOVERFLOW,
+					DependencyType.CRATES
 			)
 	);
 
