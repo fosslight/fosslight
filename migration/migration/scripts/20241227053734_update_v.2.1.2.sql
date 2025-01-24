@@ -30,3 +30,8 @@ ALTER TABLE `PRE_PROJECT_MASTER` DROP COLUMN `OS_TYPE_ETC`;
 ALTER TABLE `PRE_PROJECT_MASTER` DROP COLUMN `DISTRIBUTION_TYPE`;
 
 ALTER TABLE `COMMENTS_HISTORY` MODIFY `MODIFIED_DATE` DATETIME NULL;
+
+INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('Hompage_Link', 'Main', NULL, 'https://fosslight.org/hub-guide-en/', 'Y');
+INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('Newsletter_Link', 'Main', NULL, 'https://fosslight.org/news/', 'Y');
+INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('Support_Link', 'Main', NULL, 'https://github.com/fosslight/fosslight/issues', 'Y');
+INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('Tips_Link', 'Main', NULL, 'https://www.youtube.com/@LGEOSPO', 'Y');
