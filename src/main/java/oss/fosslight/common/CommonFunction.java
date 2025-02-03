@@ -1051,8 +1051,15 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	
 	private static String splitExceptionWords(String temp, List<String> checkList) {
 		String tmp = "";
+		String filePath = "";
+		
 		int tempLength = temp.length();
 		boolean checkFlag = false;
+		int filePathIdx = temp.indexOf(":", 0);
+		
+		if (filePathIdx > -1) {
+			filePath = temp.substring(0, filePathIdx);
+		}
 		for (String s : checkList) {
 			if (temp.toUpperCase().contains(s.toUpperCase())) {
 				int idx = temp.toUpperCase().indexOf(s.toUpperCase(), 0);
@@ -1065,7 +1072,11 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					front = temp.substring(idx-30, idx);
 					end = temp.substring(idx-1, idx+30);
 				}
-				tmp = front + end;
+				if (!isEmpty(filePath)) {
+					tmp = filePath + ":" + front + end;
+				} else {
+					tmp = front + end;
+				}
 				checkFlag = true;
 				break;
 			}
