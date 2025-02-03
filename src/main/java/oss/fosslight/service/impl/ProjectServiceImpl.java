@@ -4174,6 +4174,28 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			projectMapper.updateProjectMaster(project);
 			
 			if (!isEmpty(project.getVerificationStatus())) {
+				OssNotice ossNotice = null;
+				if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REVIEW.equals(project.getVerificationStatus())) {
+					ossNotice = verificationService.selectOssNoticeOne(project.getPrjId());
+					if (ossNotice != null) {
+						ossNotice.setEditNoticeYn(project.getEditNoticeYn());
+						if (CoConstDef.FLAG_YES.equals(avoidNull(project.getWithoutVerifyYn()))) {
+							ossNotice.setWithoutVerifyYn(CoConstDef.FLAG_YES);
+						}
+						verificationService.registOssNotice(ossNotice);
+					}
+				} else if (CoConstDef.CD_DTL_IDENTIFICATION_STATUS_PROGRESS.equals(project.getVerificationStatus())) {
+					ossNotice = new OssNotice();
+					ossNotice.setPrjId(project.getPrjId());
+					ossNotice.setWithoutVerifyYn(null);
+					projectMapper.updateWithoutVerifyYn(ossNotice);
+				}
+				
+				if (project.getNoticeFileFormat() != null) {
+					List<String> noticeFileFormatList = Arrays.asList(project.getNoticeFileFormat());
+					setNoticeFileFormat(project, noticeFileFormatList);
+				}
+				
 				verificationService.updateProjectAllowDownloadBitFlag(project);
 			}
 		}

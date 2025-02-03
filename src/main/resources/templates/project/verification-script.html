@@ -206,17 +206,13 @@
             ossList: [[${ossList}]],
             noticeFileFormat : [],
             init: function () {
-            	if (datas.ossList == null) datas.ossList = new Array();
+            	if (datas.ossList == null) {
+            		datas.ossList = new Array();
+            	}
             	
                 modifyCommentId = datas.verify.data.commentIdx;
                 commentIdx = datas.verify.data.commentIdx;
                 if (isAdmin) {
-                    if ("Y" == [[${project.withoutVerifyYn}]]) {
-                        $("#approve").prop("checked", true);
-                    } else {
-                        $("#approve").prop("checked", false);
-                    }
-
                     $("#approve").click(function () {
                         if ($("#approve").is(":checked")) {
                             $("input[name=withoutVerifyYn]").val($("#approve").val());
@@ -740,6 +736,7 @@
                             , "userComment": [[${project.userComment}]]
                             , "referenceDiv": "12"
                             , "noticeFileFormat": datas.noticeFileFormat
+                            , "withoutVerifyYn" : $("input[name='withoutVerifyYn']").val()
                         };
 
                         fn.exeProjectStatus(data, "REV");
@@ -1109,7 +1106,7 @@
                 $("[name='btnEditOssNotice']").change(function (e) {
                     var checked = ($("[name='btnEditOssNotice']:checked").val() == "Y");
                     $("#editNoticeYn").val(checked ? "Y" : "N");
-                    fn.defaultNotice(checked);
+                    fn.changeNotice(checked);
                 });
 
                 $("#companyName").click(function (e) {
@@ -2762,6 +2759,27 @@
                     $("#editAppend").hide();
                 }
             },
+            changeNotice : function (checked) {
+            	let isHideOssVersion = $("#hideOssVersion").prop("checked");
+            	let isAppend = $("#append").prop("checked");
+            	
+            	if (checked) {
+            		$("#companyName").prop("checked", true);
+                    $("#ossDistributionSite").prop("checked", true);
+                    $("#email").prop("checked", true);
+            	} else {
+            		$("#companyName").prop("checked", false);
+                    $("#ossDistributionSite").prop("checked", false);
+                    $("#email").prop("checked", false);
+                    if (isHideOssVersion) {
+                    	$("#hideOssVersion").trigger("click");
+                    }
+                    if (isAppend) {
+                    	$("#append").trigger("click");
+                    }
+            	}
+            	fn.defaultNotice(checked);
+            },
             defaultNotice: function (checked, type) {
             	if (checked) {
                     $("#companyName").attr("disabled", !checked);
@@ -2867,29 +2885,29 @@
 
                     if (editNoticeYn == "Y") {
                         $("[name='btnEditOssNotice']").trigger("click").attr("checked", true);
-                    }
-
-                    if (editCompanyYn == "Y") {
-                        $("#companyName").trigger("click").attr("checked", true);
-                    }
-
-                    if (editDistributionSiteUrlYn == "Y") {
-                        $("#ossDistributionSite").trigger("click").attr("checked", true);
-                    }
-
-                    if (editEmailYn == "Y") {
-                        $("#email").trigger("click").attr("checked", true);
-                    }
-
-                    if (hideOssVersionYn == "Y") {
-                        $("#hideOssVersion").trigger("click").attr("checked", true);
-                    }
-
-                    if (editAppendedYn == "Y") {
-                        $("#append").trigger("click").attr("checked", true);
                         
-                        if (!appendReadOnlyFlag) {
-                        	$('#editor2').summernote('enable');
+                        if (editCompanyYn == "Y") {
+                            $("#companyName").trigger("click").attr("checked", true);
+                        }
+
+                        if (editDistributionSiteUrlYn == "Y") {
+                            $("#ossDistributionSite").trigger("click").attr("checked", true);
+                        }
+
+                        if (editEmailYn == "Y") {
+                            $("#email").trigger("click").attr("checked", true);
+                        }
+
+                        if (hideOssVersionYn == "Y") {
+                            $("#hideOssVersion").trigger("click").attr("checked", true);
+                        }
+
+                        if (editAppendedYn == "Y") {
+                            $("#append").trigger("click").attr("checked", true);
+                            
+                            if (!appendReadOnlyFlag) {
+                            	$('#editor2').summernote('enable');
+                            }
                         }
                     }
                 }, 1);
@@ -2951,7 +2969,12 @@
                     , "referenceDiv": "12"
                     , "noticeFileFormat": datas.noticeFileFormat
                 };
-
+                
+                if ("Y" == $("input[name='withoutVerifyYn']").val()) {
+                	data["withoutVerifyYn"] = "Y";
+                	data["userComment"] = "<p>By Pass is checked</p>";
+                }
+                
                 //공개의무 리스트가 있고 파일업로드가 완료된 상태이며 verify가 완료 되었을때
                 var fileSeq = $("input[name='fileSeq_1']").val();
                 var withoutVerifyYn = $('input[name=withoutVerifyYn]').val();
