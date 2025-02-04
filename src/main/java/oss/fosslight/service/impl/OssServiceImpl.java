@@ -458,24 +458,19 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 					bean.addDetectedLicense(detectedLicense);
 				}
 				
-				param.setOssId(ossId);
-				List<OssMaster> ossDownloadLocation = ossMapper.selectOssDownloadLocationList(param);
-				if (ossDownloadLocation.size() > 0) {
-					StringBuilder sb = new StringBuilder();
-					StringBuilder sb1 = new StringBuilder();
-					
-					for (OssMaster location : ossDownloadLocation) {
-						sb.append(location.getDownloadLocation()).append(",");
-						sb1.append(location.getPurl()).append(",");
-					}
-					
-					String[] ossDownloadLocations = new String(sb).split("[,]");
-					bean.setDownloadLocations(ossDownloadLocations);
-					bean.setPurl(sb1.toString());
-				} else {
-					if (!isEmpty(bean.getDownloadLocation())) {
-						String purl = generatePurlByDownloadLocation(bean);
-						bean.setPurl(purl);
+				if (!isEmpty(bean.getDownloadLocation())) {
+					bean.setDownloadLocations(bean.getDownloadLocation().split(","));
+					if (isEmpty(bean.getPurl())) {
+						StringBuilder sb = new StringBuilder();
+						OssMaster ossMaster = new OssMaster();
+						
+						for (String downloadLocation : bean.getDownloadLocations()) {
+							ossMaster.setDownloadLocation(downloadLocation);
+							String purl = generatePurlByDownloadLocation(bean);
+							sb.append(purl).append(",");
+						}
+						
+						bean.setPurl(sb.toString());
 					}
 				}
 				
@@ -2996,11 +2991,17 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 				List<String> excludeCpeList = ossMapper.selectOssExcludeCpeList(ossMaster);
 				
 				List<String> newIncludeCpes = new ArrayList<>();
-				if (ossMaster.getIncludeCpes() != null) newIncludeCpes = Arrays.asList(ossMaster.getIncludeCpes());
+				if (ossMaster.getIncludeCpes() != null) {
+					newIncludeCpes = Arrays.asList(ossMaster.getIncludeCpes());
+				}
 				List<String> newExcludeCpes = new ArrayList<>();
-				if (ossMaster.getExcludeCpes() != null) newExcludeCpes = Arrays.asList(ossMaster.getExcludeCpes());
+				if (ossMaster.getExcludeCpes() != null) {
+					newExcludeCpes = Arrays.asList(ossMaster.getExcludeCpes());
+				}
 				List<String> newNicknames = null;
-				if (ossMaster.getOssNicknames() != null) newNicknames = Arrays.asList(ossMaster.getOssNicknames());
+				if (ossMaster.getOssNicknames() != null) {
+					newNicknames = Arrays.asList(ossMaster.getOssNicknames());
+				}
 				
 				if (!Objects.equals(includeCpeList, newIncludeCpes) || !Objects.equals(excludeCpeList, newExcludeCpes) || !Objects.equals(nicknames, newNicknames)
 						|| !ossMaster.getOssName().equals(beforeBean.getOssName()) || !ossMaster.getOssVersion().equals(beforeBean.getOssVersion())) {
