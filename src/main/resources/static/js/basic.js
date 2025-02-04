@@ -2869,7 +2869,7 @@ function findAndReplace(match) {
     } else if (third.test(match)) {
         url += "/partner/shareUrl/" + id;
     }
-    return "<a href=" + url + " class='urlLink2' target='_blank' onclick='window.open(this.href)'>" + match + "</a>";
+    return "<a href=\"" + url + "\" class='urlLink2' target='_blank' onclick='window.open(this.href)'>" + match + "</a>";
 }
 
 function popUpHelpGuide(id, _step) {
