@@ -374,6 +374,7 @@
 			
 			if (copyFlag) {
 				$("input[name=ossId]").val("");
+				$("input[name=ossCommonId]").val("");
 				$(".multiDownloadLocationSet > div > span > input[name='downloadLocations']").each(function(idx, cur){
 					$(cur).attr("onblur", "fn.urlDuplication(this)");
 				});
