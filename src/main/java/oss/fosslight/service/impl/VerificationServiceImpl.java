@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1347,8 +1348,16 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			
 			//STEP 8 : Verify 동작 후 Except File Result DB 저장
 			log.info("VERIFY Read exceptFileContent file START -----------------");
+			File targetFile = new File(VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result_" + packagingFileIdx);
+			if (targetFile.exists()) {
+				if (packagingFileIdx == 1) {
+					File copiedFile = new File(VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result");
+					Files.copy(targetFile.toPath(), copiedFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				} else {
+					FileUtil.addFileContents(VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result", VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result_" + packagingFileIdx);
+				}
+			}
 			
-			String existExceptFileContent = CommonFunction.getStringFromFile(VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result");
 			exceptFileContent = CommonFunction.getStringFromFile(VERIFY_PATH_OUTPUT +"/"+prjId+"/except_file_result", VERIFY_PATH_DECOMP +"/" + prjId +"/", checkExceptionWordsList, checkExceptionIgnoreWorksList);
 			
 			log.info("VERIFY Read exceptFileContent file END -----------------");
@@ -1366,10 +1375,6 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 			// 서버 디렉토리를 replace한 내용으로 새로운 파일로 다시 쓴다.
 			if (!isEmpty(exceptFileContent)) {
 				log.info("VERIFY writeFile exceptFileContent file START -----------------");
-				if (!isEmpty(existExceptFileContent)) {
-					existExceptFileContent += System.lineSeparator() + exceptFileContent;
-					exceptFileContent = existExceptFileContent;
-				}
 				FileUtil.writeFile(VERIFY_PATH_OUTPUT +"/" + prjId, CoConstDef.PACKAGING_VERIFY_FILENAME_PROPRIETARY, exceptFileContent.replaceAll(VERIFY_PATH_DECOMP +"/" + prjId +"/", ""));
 				
 				log.info("VERIFY writeFile exceptFileContent file END -----------------");
