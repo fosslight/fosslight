@@ -35,3 +35,5 @@ INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) V
 INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('Newsletter_Link', 'Main', NULL, 'https://fosslight.org/news/', 'Y');
 INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('Support_Link', 'Main', NULL, 'https://github.com/fosslight/fosslight/issues', 'Y');
 INSERT INTO `PROCESS_GUIDE` (`ID`, `PAGE_TARGET`, `CONTENTS`, `URL`, `USE_YN`) VALUES ('Tips_Link', 'Main', NULL, 'https://www.youtube.com/@LGEOSPO', 'Y');
+
+ALTER TABLE `PROJECT_MASTER` CHANGE `DESTRIBUTION_STATUS` `DISTRIBUTION_STATUS` VARCHAR(6);
