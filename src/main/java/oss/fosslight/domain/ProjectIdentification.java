@@ -333,6 +333,8 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 	
 	private String adminCheckYn;
 	
+	private String notAdminCheck;
+	
 	private String ossNickName;
 	
 	private String attribution;
@@ -2176,5 +2178,13 @@ public class ProjectIdentification extends ComBean implements Serializable, Comp
 
 	public void setStandardScore(Float standardScore) {
 		this.standardScore = standardScore;
+	}
+
+	public String getNotAdminCheck() {
+		return notAdminCheck;
+	}
+
+	public void setNotAdminCheck(String notAdminCheck) {
+		this.notAdminCheck = notAdminCheck;
 	}
 }
