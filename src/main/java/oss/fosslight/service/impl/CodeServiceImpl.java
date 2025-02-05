@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,13 @@ import oss.fosslight.domain.T2CodeDtl;
 import oss.fosslight.repository.CodeMapper;
 import oss.fosslight.service.CodeService;
 import oss.fosslight.service.LicenseService;
+import oss.fosslight.service.T2UserService;
 
 @Service
 public class CodeServiceImpl extends CoTopComponent implements CodeService {
 	@Autowired CodeMapper codeMapper;
 	@Autowired LicenseService licenseService;
+	@Autowired T2UserService userService;
 
 	/**
 	 * 코드 목록 조회
@@ -132,6 +135,15 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 									(before.getCdDtlNm()).equalsIgnoreCase(after.getCdDtlNm()) && before.getUseYn().equals(after.getUseYn()) && !before.getCdDtlNo().equals(after.getCdDtlNo())).collect(Collectors.toList()).size() > 0
 							).collect(Collectors.toList());
 
+			List<T2CodeDtl> filteredUnusedCodeDetailList = dtlList
+					.stream()
+					.filter(before->
+							beforeCodeDetailList
+								.stream()
+								.filter(after->
+									(before.getCdDtlNm()).equalsIgnoreCase(after.getCdDtlNm()) && before.getCdDtlNo().equals(after.getCdDtlNo()) && CoConstDef.FLAG_YES.equalsIgnoreCase(after.getUseYn()) && CoConstDef.FLAG_NO.equalsIgnoreCase(before.getUseYn())).collect(Collectors.toList()).size() > 0
+							).collect(Collectors.toList());
+			
 			// update division_no value of statistics_MostUsed table
 			for (T2CodeDtl cdDtl : filteredCodeDetailList) {
 				for (T2CodeDtl cdDtlAfter : filteredAfterCodeDetailList) {
@@ -142,6 +154,12 @@ public class CodeServiceImpl extends CoTopComponent implements CodeService {
 						codeMapper.updateStatisticsMostUsed(codeDtl);
 					}
 				}
+			}
+			
+			if (!CollectionUtils.isEmpty(filteredUnusedCodeDetailList)) {
+				List<String> unusedDivisionList = filteredUnusedCodeDetailList.stream().map(e -> e.getCdDtlNo()).distinct().collect(Collectors.toList());
+				String[] unusedDivisions = unusedDivisionList.toArray(new String[unusedDivisionList.size()]);
+				userService.sendMailForUnusedDivision(unusedDivisions);
 			}
 		}
 

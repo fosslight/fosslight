@@ -11,11 +11,13 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.directory.Attributes;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -857,5 +859,17 @@ public class T2UserServiceImpl implements T2UserService {
 		param.setUserId(userId);
 		
 		return checkPassword(rawPassword, param);
+	}
+
+	@Override
+	public void sendMailForUnusedDivision(String[] unusedDivisions) {
+		List<T2Users> unusedDivisionUserList = userMapper.selectUnusedDivisionUserList(unusedDivisions);
+		if (!CollectionUtils.isEmpty(unusedDivisionUserList)) {
+			List<String> userIdList = unusedDivisionUserList.stream().map(e -> e.getUserId()).distinct().collect(Collectors.toList());
+			String[] toIds = userIdList.toArray(new String[userIdList.size()]);
+			CoMail mailBean = new CoMail(CoConstDef.CD_MAIL_TYPE_REQUIRED_USER_DIVISION);
+			mailBean.setToIds(toIds);
+			CoMailManager.getInstance().sendMail(mailBean);
+		}
 	}
 }
