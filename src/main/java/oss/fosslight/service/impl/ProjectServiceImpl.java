@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -577,9 +578,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
 						ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
 					}
-//					listLicense = projectMapper.selectBomLicense(ll);
-//					ll.setOssComponentsLicenseList(listLicense);
-//					ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(listLicense));
+
+					if (!isEmpty(ll.getLicenseId())) {
+						boolean licenseTextFlag = false;
+						for (String licenseId : ll.getLicenseId().split(",")) {
+							LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_BY_ID.get(licenseId);
+							if (licenseMaster != null && !isEmpty(licenseMaster.getLicenseText())) {
+								licenseTextFlag = true;
+								break;
+							}
+						}
+						if (!licenseTextFlag) {
+							ll.setNotAdminCheck(CoConstDef.FLAG_YES);
+						} else {
+							ll.setNotAdminCheck(CoConstDef.FLAG_NO);
+						}
+					}
 					
 					if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
 						if (obligationTypeMergeMap.containsKey(ll.getComponentId())) {
@@ -914,6 +928,22 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					if (bomLicenseMap.containsKey(ll.getComponentId())) {
 						ll.setOssComponentsLicenseList(bomLicenseMap.get(ll.getComponentId()));
 						ll.setObligationLicense(CoConstDef.FLAG_YES.equals(ll.getAdminCheckYn()) ? CoConstDef.CD_DTL_OBLIGATION_NEEDSCHECK : CommonFunction.checkObligationSelectedLicense(bomLicenseMap.get(ll.getComponentId())));
+					}
+					
+					if (!isEmpty(ll.getLicenseId())) {
+						boolean licenseTextFlag = false;
+						for (String licenseId : ll.getLicenseId().split(",")) {
+							LicenseMaster licenseMaster = CoCodeManager.LICENSE_INFO_BY_ID.get(licenseId);
+							if (licenseMaster != null && !isEmpty(licenseMaster.getLicenseText())) {
+								licenseTextFlag = true;
+								break;
+							}
+						}
+						if (!licenseTextFlag) {
+							ll.setNotAdminCheck(CoConstDef.FLAG_YES);
+						} else {
+							ll.setNotAdminCheck(CoConstDef.FLAG_NO);
+						}
 					}
 					
 					if (CoConstDef.FLAG_YES.equals(reqMergeFlag)) {
@@ -3541,7 +3571,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 		
 		if (bomList != null && !bomList.isEmpty()) {
 			for (ProjectIdentification pi : bomList) {
-				if (pi.getAdminCheckYn().equals(CoConstDef.FLAG_YES)) adminCheckComponentIds.add(pi.getRefComponentId());
+				if (pi.getAdminCheckYn().equals(CoConstDef.FLAG_YES)) {
+					adminCheckComponentIds.add(pi.getRefComponentId());
+				}
 				
 				String key = (pi.getOssName() + "_" + avoidNull(pi.getOssVersion())).toUpperCase();
 				boolean setCveInfoFlag = false;
