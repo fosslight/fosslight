@@ -1395,7 +1395,7 @@ public class ExcelDownLoadUtil extends CoTopComponent {
 					, getExpandProjectInfo(expandInfo, "NOTICE_TYPE")
 					, getExpandProjectInfo(expandInfo, "NOTICE_FILE_NAME")
 					, getExpandProjectInfo(expandInfo, "PACKAGE_FILE_NAME")
-//					, param.getDestributionStatus()
+//					, param.getDistributionStatus()
 //					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_TARGET")
 //					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_NAME")
 //					, getExpandProjectInfo(expandInfo, "DISTRIBUTE_MASTER_CATEGORY")

@@ -236,9 +236,9 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						// Verification Status
 						bean.setVerificationStatus(CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, bean.getVerificationStatus()));
 						// Distribute Status
-						String distributionStatus = CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS.equals(bean.getDestributionStatus()) 
-														? CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROGRESS : bean.getDestributionStatus();
-						bean.setDestributionStatus(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));
+						String distributionStatus = CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROCESS.equals(bean.getDistributionStatus()) 
+														? CoConstDef.CD_DTL_DISTRIBUTE_STATUS_PROGRESS : bean.getDistributionStatus();
+						bean.setDistributionStatus(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, distributionStatus));
 						// DIVISION
 						bean.setDivision(CoCodeManager.getCodeString(CoConstDef.CD_USER_DIVISION, bean.getDivision()));
 						
@@ -2015,11 +2015,11 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 			Project result = projectMapper.getProjectBasicInfo(project);
 			
 			if ("CONF".equals(result.getVerificationStatus()) 
-					&& isEmpty(result.getDestributionStatus())
+					&& isEmpty(result.getDistributionStatus())
 					&& CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(project.getDistributeTarget())) {
 				projectMapper.updateProjectDistributionStatus(project.getPrjId(), CoConstDef.CD_DTL_DISTRIBUTE_NA);
 			} else if ("CONF".equals(result.getVerificationStatus()) 
-					&& CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(result.getDestributionStatus())
+					&& CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(result.getDistributionStatus())
 					&& !CoConstDef.CD_DTL_DISTRIBUTE_NA.equals(project.getDistributeTarget())) {
 				String distributionType = codeMapper.getCodeDetail(CoConstDef.CD_DISTRIBUTION_TYPE, result.getDistributionType()).getCdDtlExp();
 				if ("T".equalsIgnoreCase(avoidNull(distributionType))
@@ -3987,7 +3987,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (!isNetworkRestriction) {
 					project.setSkipPackageFlag(CoConstDef.FLAG_YES);
 					project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA);
-					project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+					project.setDistributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
 				}
 			} else {
 				if (isAndroidModel) {
@@ -3997,7 +3997,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					// package, distribute를 N/A 처리한다.
 					project.setSkipPackageFlag(CoConstDef.FLAG_YES);
 					project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA);
-					project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+					project.setDistributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
 				}
 			}
 			
@@ -4005,7 +4005,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 				if (!hasSourceOss) {
 					project.setSkipPackageFlag(CoConstDef.FLAG_YES);
 					project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA);
-					project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+					project.setDistributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
 				}
 			}
 			
@@ -4019,7 +4019,7 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 					&& verificationService.checkNetworkServer(prjInfo.getPrjId()) ) {
 				project.setSkipPackageFlag(CoConstDef.FLAG_YES);
 				project.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_NA);
-				project.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
+				project.setDistributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
 				updateIdentificationConfirmSkipPackaing(project);
 				
 				hasNotificationOss = false;

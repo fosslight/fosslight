@@ -1809,7 +1809,7 @@ public class ApiProjectServiceImpl extends CoTopComponent implements ApiProjectS
 					prjParam.put("prjId", prjId);
 					prjParam.put("packageFileId", fileSeqs.get(0));
 					
-					if (prjInfo.containsKey("destributionStatus") && prjInfo.get("destributionStatus") != null && !("").equals(prjInfo.get("destributionStatus"))){
+					if (prjInfo.containsKey("distributionStatus") && prjInfo.get("distributionStatus") != null && !("").equals(prjInfo.get("distributionStatus"))){
 						prjParam.put("statusVerifyYn", "C");
 					} else {
 						prjParam.put("statusVerifyYn", CoConstDef.FLAG_YES);

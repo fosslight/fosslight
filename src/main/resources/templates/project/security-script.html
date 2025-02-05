@@ -569,10 +569,7 @@ var com_fn = {
 		var prjId = [[${project.prjId}]];
 		var tabMenu = target;
 
-        console.log("aaa");
-        console.log(`prjId: ${prjId} / ${tabMenu}`);
-		if (sec_com_fn.checkReqEntrySecurity(prjId, tabMenu)) {
-            console.log("bbb")
+        if (sec_com_fn.checkReqEntrySecurity(prjId, tabMenu)) {
 			com_fn.downloadExcel(tabMenu);
 		} else {
 			loading.hide();
@@ -916,7 +913,7 @@ var total = {
 			formData:{"registFileId" : $('#scrtCsvFileId').val(), "tabNm" : "SECURITY"},
 			onSuccess:function(files,data,xhr,pd) {
 				var result = jQuery.parseJSON(data);
-				console.log("result", result);
+				
 				if (result[1] == null) {
 					if (result[0] == "TAB_GUBN_ERROR") {
 						alertify.error([[#{msg.common.upload.failed.separator}]], 0);

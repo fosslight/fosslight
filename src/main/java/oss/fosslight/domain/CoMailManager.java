@@ -3433,7 +3433,7 @@ public class CoMailManager extends CoTopComponent {
 			bean.setReviewer(makeUserNameFormatWithDivision(avoidNull((String) dataMap.get("REVIEWER")))); 
 			bean.setIdentificationStatus(avoidNull((String) dataMap.get("IDENTIFICATION_STATUS"))); 
 			bean.setVerificationStatus(avoidNull((String) dataMap.get("VERIFICATION_STATUS"))); 
-			bean.setDestributionStatus(avoidNull((String) dataMap.get("DESTRIBUTION_STATUS")));
+			bean.setDistributionStatus(avoidNull((String) dataMap.get("DESTRIBUTION_STATUS")));
 			bean.setNoticeType(avoidNull((String) dataMap.get("NOTICE_TYPE")));
 			bean.setNoticeTypeEtc(avoidNull((String) dataMap.get("NOTICE_TYPE_ETC")));
 			bean.setPriority(avoidNull((String) dataMap.get("PRIORITY")));
@@ -3490,8 +3490,8 @@ public class CoMailManager extends CoTopComponent {
 			if (!isEmpty(bean.getVerificationStatus())) {
 				bean.setVerificationStatus(CoCodeManager.getCodeString(CoConstDef.CD_IDENTIFICATION_STATUS, bean.getVerificationStatus()));
 			}
-			if (!isEmpty(bean.getDestributionStatus())) {
-				bean.setDestributionStatus(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, bean.getDestributionStatus()));
+			if (!isEmpty(bean.getDistributionStatus())) {
+				bean.setDistributionStatus(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_STATUS, bean.getDistributionStatus()));
 			}
 			if (!isEmpty(bean.getDistributeTarget())) {
 				bean.setDistributeTarget(CoCodeManager.getCodeString(CoConstDef.CD_DISTRIBUTE_CODE, bean.getDistributeTarget()));

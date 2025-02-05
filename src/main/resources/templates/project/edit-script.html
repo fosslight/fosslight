@@ -10,7 +10,7 @@
 	var isCheckT = false;
 	var modelData;
 	var gDateKeyup = false;
-	var distributionStatus = [[${project.destributionStatus}]];
+	var distributionStatus = [[${project.distributionStatus}]];
 	var etcDomain = [[${@CommonFunction.getCoConstDefVal('CD_DTL_ECT_DOMAIN')}]];
 	var osTypeEtc = [[${@CommonFunction.getCoConstDefVal('CD_OS_TYPE_ETC')}]];
 	var divisionEmptyCd = [[${@CommonFunction.getCoConstDefVal('CD_USER_DIVISION_EMPTY')}]];
@@ -49,7 +49,7 @@
 		showHelpLink("Project_List_BasicInfo_Oss_Notice", "helpLink_ossNotice");
 		showHelpLink("Project_List_BasicInfo_Priority", "helpLink_priority");
 		
-		if([[${project.destributionStatus}]] == 'NA' && [[${project.completeYn}]] == 'Y'){
+		if([[${project.distributionStatus}]] == 'NA' && [[${project.completeYn}]] == 'Y'){
 			$("#saveModel").show();
 		}
 
@@ -1284,7 +1284,7 @@
 									deleteTabInFrame('/project/edit');
 									createTabInFrame(json.resultData.prjId + '_Project', '/project/edit/' + json.resultData.prjId);
 								} else {
-									var status = data.detail.destributionStatus;
+									var status = data.detail.distributionStatus;
 									var flag = "false";
 									
 									if (json.resultData) {

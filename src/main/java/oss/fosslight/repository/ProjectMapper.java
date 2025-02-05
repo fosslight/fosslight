@@ -323,7 +323,7 @@ public interface ProjectMapper {
 	
 	void updateProjectAllowDownloadBitFlag(Project project);
 	
-	void updateProjectDistributionStatus(@Param("prjId") String prjId, @Param("destributionStatus") String destributionStatus);
+	void updateProjectDistributionStatus(@Param("prjId") String prjId, @Param("distributionStatus") String distributionStatus);
 	
 	List<String> getDeleteOssComponentsLicenseIds(OssComponents bean);
 	
@@ -357,7 +357,7 @@ public interface ProjectMapper {
 
 	void updateCopyConfirmStatusProjectStatus(Project project);
 
-	void updateConfirmCopyVerificationDestributionStatus(Project project);
+	void updateConfirmCopyVerificationDistributionStatus(Project project);
 
 	void updateProjectDivision(Project project);
 	

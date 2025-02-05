@@ -1260,11 +1260,11 @@
 			<choose>
 				<when test="@oss.fosslight.util.StringUtil@equals('Y', skipPackageFlag)">
 					,VERIFICATION_STATUS = #{verificationStatus}
-					,DESTRIBUTION_STATUS = #{destributionStatus}
+					,DISTRIBUTION_STATUS = #{distributionStatus}
 				</when>
 				<otherwise>
 					,VERIFICATION_STATUS = NULL
-					,DESTRIBUTION_STATUS = NULL
+					,DISTRIBUTION_STATUS = NULL
 				</otherwise>
 			</choose>
 		WHERE 

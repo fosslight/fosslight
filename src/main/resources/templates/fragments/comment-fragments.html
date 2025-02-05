@@ -77,21 +77,6 @@
                         		<div class="col-lg-12">
                         			<span class="text-dark-gray text-smaller pt-2 pl-2" th:text="'Project : '"></span><span th:text="${'[' + project.prjId + ']'}"></span><span class="ml-1" th:text="${project.prjName}"></span>
                         		</div>
-<!--                      		<div class="col-lg-10">
-                        			<span class="description-percentage text-lg text-blue-gray text-bold">
-                                		<b><span th:text="${'[' + project.prjId + ']'}"></span><span class="ml-1" th:text="${project.prjName}"></span></b>
-                            		</span>
-                          			<span class="text-lg-gray text-smaller ml-2">
-                            			<span class="badge badge-info text-sm px-2 py-1 callOpener pointer" id="basicInfoPrj">Basic Information</span>
-                              			<span th:if="${project.prjId != null}" class="badge badge-orange text-sm px-2 py-1 callOpener pointer" id="identification">Identification</span>
-                              			<th:block th:if="${project.identificationStatus == 'CONF' and project.verificationStatus != 'NA'}">
-                                			<span class="badge badge-success text-sm px-2 py-1 callOpener pointer" id="packaging">Packaging</span>
-                              			</th:block>
-                              			<th:block th:if="${project.verificationStatus == 'CONF' and project.destributionStatus != 'NA'}">
-                                 			<span class="badge badge-danger text-sm px-2 py-1 callOpener pointer" id="distribution" >Distribution</span>
-                               			</th:block>
-                            		</span>
-                        		</div> -->
                         	</div>
                         </div>
                     </th:block>

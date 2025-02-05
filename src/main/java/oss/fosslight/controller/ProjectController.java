@@ -1604,7 +1604,7 @@ public class ProjectController extends CoTopComponent {
 			prjInfo.setIdentificationStatus(null);
 			prjInfo.setCompleteYn(null);
 			prjInfo.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_REQUEST);
-			prjInfo.setDestributionStatus(null);
+			prjInfo.setDistributionStatus(null);
 			prjInfo.setReferenceDiv(CoConstDef.CD_DTL_COMMENT_PACKAGING_HIS);
 			
 			try {
@@ -1619,29 +1619,7 @@ public class ProjectController extends CoTopComponent {
 			}
 			
 			prjInfo.setVerificationStatus(CoConstDef.CD_DTL_IDENTIFICATION_STATUS_CONFIRM);
-			prjInfo.setDestributionStatus(null);
-
-/*			if ("T".equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, project.getDistributionType())).trim().toUpperCase())
-					|| (CoConstDef.FLAG_NO.equals(avoidNull(CoCodeManager.getCodeExpString(CoConstDef.CD_DISTRIBUTION_TYPE, project.getDistributionType())).trim().toUpperCase()) 
-							&& verificationService.checkNetworkServer(ossNotice.getPrjId())
-					)
-					|| CoConstDef.CD_NOTICE_TYPE_NA.equals(project.getNoticeType())
-					) {
-				prjInfo.setDestributionStatus(CoConstDef.CD_DTL_DISTRIBUTE_STATUS_NA);
-			} else {
-				ossNotice.setDomain(CommonFunction.getDomain(req));
-				
-				try {
-					verificationService.getNoticeHtmlFile(ossNotice);
-				} catch(Exception e) {
-					log.error(e.getMessage(), e);
-					returnMap.put("result", "false");
-					returnMap.put("step", "verificationProgress");
-					return returnMap;
-				}
-				
-				prjInfo.setDestributionStatus(null);
-			} */
+			prjInfo.setDistributionStatus(null);
 			prjInfo.setModifier(loginUserName());
 
 			try {
@@ -4156,7 +4134,7 @@ public class ProjectController extends CoTopComponent {
 		project.setDistributeDeployYn(null);
 		project.setDistributeDeployModelYn(null);
 		project.setVerificationStatus(null);
-		project.setDestributionStatus(null);
+		project.setDistributionStatus(null);
 		project.setCopyFlag(CoConstDef.FLAG_YES);
 		project.setCompleteYn(CoConstDef.FLAG_NO);
 		
@@ -4775,7 +4753,7 @@ public class ProjectController extends CoTopComponent {
 		if (code.equals("status")) {
 //			Map<String, String> map = new HashMap<String, String>();
 //			Project prjBean = projectService.getProjectDetail(project);
-//			String distributionStatus = avoidNull(prjBean.getDestributionStatus()).toUpperCase();
+//			String distributionStatus = avoidNull(prjBean.getDistributionStatus()).toUpperCase();
 //			
 //			map.put("projectStatus", avoidNull(prjBean.getStatus()).toUpperCase());
 //			map.put("identificationStatus", avoidNull(prjBean.getIdentificationStatus()).toUpperCase());
@@ -4808,7 +4786,7 @@ public class ProjectController extends CoTopComponent {
 		map.put("projectStatus", avoidNull(prjBean.getStatus()));
 		map.put("identificationStatus", avoidNull(prjBean.getIdentificationStatus()));
 		map.put("verificationStatus", avoidNull(prjBean.getVerificationStatus()));
-		map.put("distributionStatus", avoidNull(prjBean.getDestributionStatus()));
+		map.put("distributionStatus", avoidNull(prjBean.getDistributionStatus()));
 		map.put("distributeDeployYn", avoidNull(prjBean.getDistributeDeployYn()));
 		map.put("distributeDeployTime", avoidNull(prjBean.getDistributeDeployTime()));
 		map.put("completeFlag", avoidNull(prjBean.getCompleteYn(), CoConstDef.FLAG_NO));

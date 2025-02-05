@@ -1446,7 +1446,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 					prjParam.setPackageFileId3(fileSeqs.size() >= 3 ? fileSeqs.get(2) : null);
 					prjParam.setPackageFileId4(fileSeqs.size() >= 4 ? fileSeqs.get(3) : null);
 
-					if (!isEmpty(prjInfo.getDestributionStatus())){
+					if (!isEmpty(prjInfo.getDistributionStatus())){
 						prjParam.setStatusVerifyYn("C");
 					} else {
 						prjParam.setStatusVerifyYn(CoConstDef.FLAG_YES);
@@ -1683,7 +1683,7 @@ public class VerificationServiceImpl extends CoTopComponent implements Verificat
 	@Transactional
 	public void updateStatusWithConfirm(Project project, OssNotice ossNotice, boolean copyConfirmFlag) throws Exception {
 		if (copyConfirmFlag) {
-			projectMapper.updateConfirmCopyVerificationDestributionStatus(project);
+			projectMapper.updateConfirmCopyVerificationDistributionStatus(project);
 		} else {
 			updateProjectStatus(project);
 		}
