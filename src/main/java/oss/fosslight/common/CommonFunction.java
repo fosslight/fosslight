@@ -1052,25 +1052,40 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 	private static String splitExceptionWords(String temp, List<String> checkList) {
 		String tmp = "";
 		String filePath = "";
+		String filePathTemp = "";
 		
-		int tempLength = temp.length();
 		boolean checkFlag = false;
 		int filePathIdx = temp.indexOf(":", 0);
 		
 		if (filePathIdx > -1) {
 			filePath = temp.substring(0, filePathIdx);
+			filePathTemp = temp.substring(filePathIdx+1, temp.length());
+		} else {
+			filePathTemp = temp;
 		}
+		
+		int tempLength = filePathTemp.length();
+		
 		for (String s : checkList) {
-			if (temp.toUpperCase().contains(s.toUpperCase())) {
-				int idx = temp.toUpperCase().indexOf(s.toUpperCase(), 0);
+			if (filePathTemp.toUpperCase().contains(s.toUpperCase())) {
+				int idx = filePathTemp.toUpperCase().indexOf(s.toUpperCase(), 0);
+				int subIdx = tempLength - idx;
 				String front = "";
 				String end = "";
-				if (tempLength - idx < 30) {
-					front = temp.substring(idx-30, idx);
-					end = temp.substring(idx-1, tempLength);
+				
+				if (idx <= 30) {
+					front = filePathTemp.substring(0, idx);
 				} else {
-					front = temp.substring(idx-30, idx);
-					end = temp.substring(idx-1, idx+30);
+					front = filePathTemp.substring(idx-30, idx);
+				}
+				if (subIdx <= 30) {
+					if (subIdx == tempLength) {
+						end = filePathTemp.substring(idx, tempLength);
+					} else {
+						end = filePathTemp.substring(idx-1, tempLength);
+					}
+				} else {
+					end = filePathTemp.substring(idx-1, idx+30);
 				}
 				if (!isEmpty(filePath)) {
 					tmp = filePath + ":" + front + end;
@@ -1082,7 +1097,7 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 			}
 		}
 		if (!checkFlag) {
-			tmp = temp;
+			tmp = filePathTemp;
 		}
 		return tmp;
 	}
