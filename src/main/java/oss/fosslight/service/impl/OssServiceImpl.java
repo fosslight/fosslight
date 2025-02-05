@@ -3530,14 +3530,12 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 			oss_auto_analysis_log.info("ANALYSIS START PRJ ID : "+prjId+" ANALYSIS file ID : " + fileSeq);
 			
 			fileInfo = fileMapper.selectFileInfo(fileSeq);
-			
-			String EMAIL_VAL = ""; // reviewer와 loginUser의 email
+
 			String loginUserName = userName != null ? userName : loginUserName();
-			if (prjId.toUpperCase().indexOf("3RD") > -1){
-				EMAIL_VAL = partnerMapper.getReviewerEmail(prjId, loginUserName);
-			} else {
-				EMAIL_VAL = projectMapper.getReviewerEmail(prjId, loginUserName);
-			}
+			T2Users user = new T2Users();
+			user.setUserId(loginUserName);
+			user = userMapper.getUser(user);
+			String EMAIL_VAL = user.getEmail();
 
 			String analysisCommand = MessageFormat.format(CommonFunction.getProperty("autoanalysis.ssh.command"), (isProd ? "live" : "dev"), prjId, fileInfo.getLogiNm(), EMAIL_VAL, (isProd ? 0 : 1), 1);
 			
