@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -3290,7 +3291,10 @@ public class ProjectController extends CoTopComponent {
 		Type srcType = new TypeToken<List<ProjectIdentification>>() {}.getType();
 		List<ProjectIdentification> srcData = new ArrayList<ProjectIdentification>();
 		srcData = (List<ProjectIdentification>) fromJson(srcMainGrid, srcType);
-
+		if (!CollectionUtils.isEmpty(srcData)) {
+			srcData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+		}
+		
 		List<List<ProjectIdentification>> srcSubData = CommonFunction.setOssComponentLicense(srcData);
 		
 		if(srcSubData != null && !srcSubData.isEmpty()) {
@@ -3303,7 +3307,10 @@ public class ProjectController extends CoTopComponent {
 		}.getType();
 		List<ProjectIdentification> binData = new ArrayList<ProjectIdentification>();
 		binData = (List<ProjectIdentification>) fromJson(binMainGrid, binType);
-
+		if (!CollectionUtils.isEmpty(binData)) {
+			binData.sort(Comparator.comparing(ProjectIdentification::getComponentId));
+		}
+		
 		List<List<ProjectIdentification>> binSubData = CommonFunction.setOssComponentLicense(binData);
 		
 		if(binSubData != null && !binSubData.isEmpty()) {
