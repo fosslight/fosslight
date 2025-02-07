@@ -5190,40 +5190,42 @@ public class ProjectServiceImpl extends CoTopComponent implements ProjectService
 						list.add(key);
 					}
 				} else if (subData != null) {
-					if (CoConstDef.LICENSE_DIV_SINGLE.equals(avoidNull(bean.getLicenseDiv(), CoConstDef.LICENSE_DIV_SINGLE))) {
-						String key = type;
-						key += "|" + avoidNull(bean.getOssName()).trim();
-						key += "|" + avoidNull(bean.getOssVersion()).trim();
-						key += "|" + avoidNull(convertLicenseShortName(bean.getLicenseName(), convertShortLicenseName)).trim();
-						key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
-						key += "|" + CoConstDef.FLAG_NO;
-						key = key.toUpperCase();
-						
-						list.add(key);
-					} else {
-						if (bean.getComponentLicenseList() != null) {
-							for (ProjectIdentification license : bean.getComponentLicenseList()) {
-								String key = type;
-								key += "|" + avoidNull(bean.getOssName()).trim();
-								key += "|" + avoidNull(bean.getOssVersion()).trim();
-								key += "|" + avoidNull(convertLicenseShortName(license.getLicenseName(), convertShortLicenseName)).trim();
-								key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
-								key += "|" + avoidNull(license.getExcludeYn(), CoConstDef.FLAG_NO);
-								key = key.toUpperCase();
-								
-								list.add(key);
-							}
-						} else {
+//					if (CoConstDef.LICENSE_DIV_SINGLE.equals(avoidNull(bean.getLicenseDiv(), CoConstDef.LICENSE_DIV_SINGLE))) {
+//						String key = type;
+//						key += "|" + avoidNull(bean.getOssName()).trim();
+//						key += "|" + avoidNull(bean.getOssVersion()).trim();
+//						key += "|" + avoidNull(convertLicenseShortName(bean.getLicenseName(), convertShortLicenseName)).trim();
+//						key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
+//						key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
+//						key = key.toUpperCase();
+//					
+//						list.add(key);
+//					} else {
+//					
+//					}
+				
+					if (bean.getComponentLicenseList() != null) {
+						for (ProjectIdentification license : bean.getComponentLicenseList()) {
 							String key = type;
 							key += "|" + avoidNull(bean.getOssName()).trim();
 							key += "|" + avoidNull(bean.getOssVersion()).trim();
-							key += "|" + avoidNull("").trim();
+							key += "|" + avoidNull(convertLicenseShortName(license.getLicenseName(), convertShortLicenseName)).trim();
 							key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
-							key += "|" + CoConstDef.FLAG_NO;
+							key += "|" + avoidNull(license.getExcludeYn(), CoConstDef.FLAG_NO);
 							key = key.toUpperCase();
 							
 							list.add(key);
-						}						
+						}
+					} else {
+						String key = type;
+						key += "|" + avoidNull(bean.getOssName()).trim();
+						key += "|" + avoidNull(bean.getOssVersion()).trim();
+						key += "|" + avoidNull("").trim();
+						key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
+						key += "|" + avoidNull(bean.getExcludeYn(), CoConstDef.FLAG_NO);
+						key = key.toUpperCase();
+						
+						list.add(key);
 					}
 				}
 			}
