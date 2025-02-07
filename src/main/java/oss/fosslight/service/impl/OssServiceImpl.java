@@ -2281,7 +2281,9 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		if(ossNameList != null) {
 			for (OssMaster ossBean : ossNameList) {
 				if(ossBean != null) {
-					checkName.add(ossBean.getOssName());
+					for(String name : ossBean.getOssName().split(",")){
+						checkName.add(name);
+					}
 				}
 			}
 		}
