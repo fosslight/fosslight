@@ -2657,6 +2657,54 @@ const CHART_COLORS = {
   grey: 'rgb(201, 203, 207)'
 };
 
+function customGetBarChart(target, obj) {
+	const labels = new Array();
+	const totals = new Array();
+	
+	for (var i in obj.labels) {
+		let label = obj.labels[i];
+		totals.push(label.split("|")[1]);
+		label = label.split("|")[0];
+		labels.push(label);
+	}
+	
+	return new Chart(target, {
+		type: 'bar',
+		data: {labels:labels, datasets:obj.datasets},
+		options: {
+			responsive: true,
+			interaction: {
+			  intersect: false,
+			},
+			scales: {
+			  x: {
+			    stacked: true,
+			  },
+			  y: {
+			    stacked: true
+			  }
+			},
+			plugins: {
+				tooltip: {
+					callbacks: {
+						label: function(context) {
+							let dataLabel = context.dataset.label || '';
+							let total = totals[context.dataIndex];
+							let currentValue = context.raw;
+							let percentage = 0;
+							if (total > 0) {
+								percentage = Math.floor(((currentValue/total) * 100)+0.5);
+							}
+							let value = ': ' + context.formattedValue + '(' + percentage + '%)';
+							return dataLabel += value;
+						}
+					}
+				}				
+			}
+		}
+	});
+}
+
 function getBarChart(target, obj) {
 	
 	return new Chart(target, {

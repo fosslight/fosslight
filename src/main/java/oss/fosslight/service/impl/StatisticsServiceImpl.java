@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -154,9 +155,28 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 			result.put("chartData", list);
 			result.put("titleArray", titleArray);
 		} else {
-
 			addCategoryCnt2(chartData, list);
 			chartData.setTitleArray(titleArray); // Chart Title
+			
+			if (!CollectionUtils.isEmpty(chartData.getDataArray())) {
+				List<Integer> dataSumList = new ArrayList<>();
+				int size = 0;
+				for (List<Integer> cntList : chartData.getDataArray()) {
+					if (size == 0) {
+						size = cntList.size();
+						for (int i=0; i<size; i++) {
+							dataSumList.add(cntList.get(i));
+						}
+					} else {
+						for (int i=0; i<size; i++) {
+							int sum = dataSumList.get(i);
+							sum += cntList.get(i);
+							dataSumList.set(i, sum);
+						}
+					}
+				}
+				chartData.setDataSumArray(dataSumList);
+			}
 			
 			result.put("chartData", chartData);
 		}
@@ -209,6 +229,26 @@ public class StatisticsServiceImpl extends CoTopComponent implements StatisticsS
 		} else {
 			addCategoryCnt2(chartData, list);
 			chartData.setTitleArray(titleArray); // Chart Title
+			
+			if (!CollectionUtils.isEmpty(chartData.getDataArray())) {
+				List<Integer> dataSumList = new ArrayList<>();
+				int size = 0;
+				for (List<Integer> cntList : chartData.getDataArray()) {
+					if (size == 0) {
+						size = cntList.size();
+						for (int i=0; i<size; i++) {
+							dataSumList.add(cntList.get(i));
+						}
+					} else {
+						for (int i=0; i<size; i++) {
+							int sum = dataSumList.get(i);
+							sum += cntList.get(i);
+							dataSumList.set(i, sum);
+						}
+					}
+				}
+				chartData.setDataSumArray(dataSumList);
+			}
 			
 			result.put("chartData", chartData);
 		}

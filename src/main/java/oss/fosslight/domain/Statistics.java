@@ -19,6 +19,7 @@ public class Statistics extends ComBean implements Serializable {
 
 	private String[] colorArray; // 추후 관리가 필요함
 	private List<String> titleArray;
+	private List<Integer> dataSumArray;
 	private ArrayList<ArrayList<Integer>> dataArray = new ArrayList<ArrayList<Integer>>();
 	private String chartType;
 	private String categoryType;

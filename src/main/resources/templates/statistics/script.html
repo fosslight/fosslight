@@ -392,7 +392,13 @@ var chart_fn = {
 						idx++;
 					}
 
-       				obj["labels"] = data.categoryList;
+					var customLabels = new Array();
+					for (var i in data.categoryList) {
+						let key = data.categoryList[i] + "|" + data.dataSumArray[i];
+						customLabels.push(key);
+					}
+					
+       				obj["labels"] = customLabels;
        				obj["datasets"] = datasets;
 					
        				if(updatedOssChartObject) {
@@ -400,7 +406,7 @@ var chart_fn = {
        					updatedOssChartObject.data.datasets = obj["datasets"];
        					updatedOssChartObject.update();
        				} else {
-       					updatedOssChartObject = getBarChart($('#updatedOssChart').get(0).getContext('2d'), obj);
+       					updatedOssChartObject = customGetBarChart($('#updatedOssChart').get(0).getContext('2d'), obj);
        				}
 				},
 				error: function(data){
@@ -435,6 +441,12 @@ var chart_fn = {
 						idx++;
 					}
 
+					var customLabels = new Array();
+					for (var i in data.categoryList) {
+						let key = data.categoryList[i] + "|" + data.dataSumArray[i];
+						customLabels.push(key);
+					}
+					
        				obj["labels"] = data.categoryList;
        				obj["datasets"] = datasets;
 					
@@ -443,7 +455,7 @@ var chart_fn = {
        					updatedLicenseChartObject.data.datasets = obj["datasets"];
        					updatedLicenseChartObject.update();
        				} else {
-       					updatedLicenseChartObject = getBarChart($('#updatedLicenseChart').get(0).getContext('2d'), obj);
+       					updatedLicenseChartObject = customGetBarChart($('#updatedLicenseChart').get(0).getContext('2d'), obj);
        				}
 				},
 				error: function(data){
