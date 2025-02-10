@@ -2911,7 +2911,7 @@ var createTabNew = function (tabNm, tabLk) {
     var tabName = tabNm.replace(pattern, '-');
 	
     if ($(".content-wrapper.iframe-mode").children(".nav").children(".navbar-nav").find('#tab--' + tabName).length > 0) {
-    	if ("BOM_Compare" == tabName || "History" == tabName || "3rdParty_BOM_Compare" == tabName) {
+    	if ("PRJ_BOM_Compare" == tabName || "History" == tabName || "3rdParty_BOM_Compare" == tabName) {
 			deleteTabNew(tabName);
 			createTabFnc(tabNm, tabName, tabLk);
 		} else {
@@ -4164,7 +4164,7 @@ function commonAlertifyDialog(target) {
 				}
 				
 				var setup = alertify.confirm().setup();
-				setup.focus.element = 0;
+				setup.focus.element = 1;
 				setup.buttons[0].key = 0;
 
 				return setup;
