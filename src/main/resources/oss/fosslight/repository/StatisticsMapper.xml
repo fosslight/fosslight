@@ -108,7 +108,7 @@
 								  -->
 							  WHERE DATE_FORMAT(PM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y') STAT
 				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
-				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+				 GROUP BY A.CD_DTL_NM, A.CD_ORDER, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 				 LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
@@ -134,7 +134,7 @@
 						        ON PM.REVIEWER = ADMIN.USER_ID
 						     WHERE PM.CREATED_DATE BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y') STAT
 		    	   ON A.CD_DTL_NM = STAT.CD_DTL_NM
-		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+		 	    GROUP BY A.CD_DTL_NM, A.CD_ORDER, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('DST', categoryType)">
 				LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
@@ -155,7 +155,7 @@
 							WHERE DATE_FORMAT(PM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y'
 							) STAT
 		    	  ON A.CD_DTL_NM = STAT.CD_DTL_NM
-		 	   GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+		 	   GROUP BY A.CD_DTL_NM, A.CD_ORDER, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('NET', categoryType)">
 				LEFT JOIN (SELECT (SELECT CD_DTL_NM FROM T2_CODE_DTL WHERE CD_NO = '200' AND CD_DTL_NO = IF(PM.DIVISION = '', '999', PM.DIVISION)) AS CD_DTL_NM
@@ -174,7 +174,7 @@
 							WHERE DATE_FORMAT(PM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate} AND PM.USE_YN ='Y'
 							) STAT
 		    	  ON A.CD_DTL_NM = STAT.CD_DTL_NM
-		 	   GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+		 	   GROUP BY A.CD_DTL_NM, A.CD_ORDER, STAT.CATEGORY
 			</if>
 			 ) RTN
 		 GROUP BY RTN.CD_DTL_NM
@@ -519,7 +519,7 @@
 							   WHERE PM.USE_YN = 'Y'
 							  AND DATE_FORMAT(PM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}) STAT
 				    ON A.CD_DTL_NM = STAT.CD_DTL_NM
-				 GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+				 GROUP BY A.CD_DTL_NM, A.CD_ORDER, STAT.CATEGORY
 			</if>
 			<if test="@oss.fosslight.util.StringUtil@equals('REV', categoryType)">
 				 LEFT JOIN (SELECT 
@@ -537,7 +537,7 @@
 						     WHERE PM.USE_YN = 'Y'
 						       AND DATE_FORMAT(PM.CREATED_DATE, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}) STAT
 		    	   ON A.CD_DTL_NM = STAT.CD_DTL_NM
-		 	    GROUP BY A.CD_DTL_NM, STAT.CATEGORY
+		 	    GROUP BY A.CD_DTL_NM, A.CD_ORDER, STAT.CATEGORY
 			</if>
 			 ) RTN
 		 GROUP BY RTN.CD_DTL_NM
@@ -560,7 +560,7 @@
 		  		(
 		  			SELECT DIVISION.CD_DTL_NM
 						  , USR.USER_ID
-						  , CASE WHEN PM.CREATOR IS NULL THEN NULL ELSE COUNT(PM.CREATOR) END AS CNT
+						  , CASE WHEN PM.CREATOR IS NULL THEN NULL ELSE 1 END AS CNT
 					   FROM T2_USERS USR
 					   LEFT JOIN PROJECT_MASTER PM
 						 ON USR.USER_ID = PM.CREATOR AND PM.USE_YN = 'Y'
