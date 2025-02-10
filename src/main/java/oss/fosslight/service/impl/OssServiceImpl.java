@@ -302,9 +302,15 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		List<String> excludeCpeList = ossMapper.selectOssExcludeCpeList(ossMaster);
 		List<String> ossVersionAliasList = ossMapper.selectOssVersionAliases(ossMaster);
 		
-		if (includeCpeList != null && !includeCpeList.isEmpty()) ossMaster.setIncludeCpes(includeCpeList.toArray(new String[includeCpeList.size()]));
-		if (excludeCpeList != null && !excludeCpeList.isEmpty()) ossMaster.setExcludeCpes(excludeCpeList.toArray(new String[excludeCpeList.size()]));
-		if (ossVersionAliasList != null && !ossVersionAliasList.isEmpty()) ossMaster.setOssVersionAliases(ossVersionAliasList.toArray(new String[ossVersionAliasList.size()]));
+		if (includeCpeList != null && !includeCpeList.isEmpty()) {
+			ossMaster.setIncludeCpes(includeCpeList.toArray(new String[includeCpeList.size()]));
+		}
+		if (excludeCpeList != null && !excludeCpeList.isEmpty()) {
+			ossMaster.setExcludeCpes(excludeCpeList.toArray(new String[excludeCpeList.size()]));
+		}
+		if (ossVersionAliasList != null && !ossVersionAliasList.isEmpty()) {
+			ossMaster.setOssVersionAliases(ossVersionAliasList.toArray(new String[ossVersionAliasList.size()]));
+		}
 		
 		String totLicenseTxt = CommonFunction.makeLicenseExpression(ossLicenses);
 		ossMaster.setTotLicenseTxt(totLicenseTxt);
