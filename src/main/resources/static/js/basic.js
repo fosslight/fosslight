@@ -2657,7 +2657,7 @@ const CHART_COLORS = {
   grey: 'rgb(201, 203, 207)'
 };
 
-function customGetBarChart(target, obj) {
+function getBarChart(target, obj) {
 	const labels = new Array();
 	const totals = new Array();
 	
@@ -2703,48 +2703,6 @@ function customGetBarChart(target, obj) {
 			}
 		}
 	});
-}
-
-function getBarChart(target, obj) {
-	
-	return new Chart(target, {
-		type: 'bar',
-		data: {labels:obj.labels, datasets:obj.datasets},
-		options: {
-			responsive: true,
-			interaction: {
-			  intersect: false,
-			},
-			scales: {
-			  x: {
-			    stacked: true,
-			  },
-			  y: {
-			    stacked: true
-			  }
-			},
-			plugins: {
-				tooltip: {
-					callbacks: {
-						label: function(context) {
-							let dataLabel = context.dataset.label || '';
-							let total = context.dataset.data.reduce(function(previousValue, currentValue, currentIndex, array) {
-							        return previousValue + currentValue;
-							      });
-							let currentValue = context.raw;
-							let percentage = 0;
-							if (total > 0) {
-								percentage = Math.floor(((currentValue/total) * 100)+0.5);
-							}
-							let value = ': ' + context.formattedValue + '(' + percentage + '%)';
-							return dataLabel += value;
-						}
-					}
-				}				
-			}
-		}
-	});
-
 }
 
 function getPieChart(target, obj) {
