@@ -18,15 +18,28 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -51,8 +64,15 @@ public class RequestUtil {
 	 * @return the rest template
 	 */
 	public static RestTemplate getRestTemplate(final HttpClientContext context) {
+		return getRestTemplate(context, false);
+	}
+	
+	public static RestTemplate getRestTemplate(final HttpClientContext context, boolean isHttps) {
 		HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
 		factory.setReadTimeout(5000); // milliseconds
+		if (isHttps) {
+			factory.setHttpClient(makeHttpClient());
+		}
 		RestTemplate restOperations = new RestTemplate(factory);
 		restOperations.setRequestFactory(new HttpComponentsClientHttpRequestFactory() {
 			@Override
@@ -70,6 +90,29 @@ public class RequestUtil {
 		});
 
 		return restOperations;
+	}
+
+	private static HttpClient makeHttpClient() {
+		// 모든 인증서를 신뢰하도록 설정한다
+		TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
+		SSLContext sslContext = null;
+		try {
+			sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		// Https 인증 요청시 호스트네임 유효성 검사를 진행하지 않게 한다.
+		SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+
+		Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+					.register("https", sslsf)
+					.register("http", new PlainConnectionSocketFactory()).build();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+
+		HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+		httpClientBuilder.setConnectionManager(connectionManager);
+		return httpClientBuilder.build();
 	}
 
 	/**
@@ -99,7 +142,12 @@ public class RequestUtil {
 	public static String post(String url, MultiValueMap<String, Object> parts, String charset) {
 		log.debug("url:{}, param:{}, charset:{}", new Object[] { url, parts, charset });
 		HttpClientContext context = HttpClientContext.create();
-		RestTemplate restOperations = RequestUtil.getRestTemplate(context);
+		RestTemplate restOperations = null;
+		if (url.startsWith("https://")) {
+			restOperations = RequestUtil.getRestTemplate(context, true);
+		} else {
+			restOperations = RequestUtil.getRestTemplate(context);
+		}
 		restOperations.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName(charset)));
 		HttpHeaders headers = RequestUtil.getHeaders();
 		ResponseEntity<String> exchange = restOperations.exchange(url, HttpMethod.POST,
@@ -132,7 +180,12 @@ public class RequestUtil {
 	 */
 	public static String get(String url, String charset) {
 		HttpClientContext context = HttpClientContext.create();
-		RestTemplate restOperations = RequestUtil.getRestTemplate(context);
+		RestTemplate restOperations = null;
+		if (url.startsWith("https://")) {
+			restOperations = RequestUtil.getRestTemplate(context, true);
+		} else {
+			restOperations = RequestUtil.getRestTemplate(context);
+		}
 		restOperations.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName(charset)));
 		HttpHeaders headers = RequestUtil.getHeaders();
 		ResponseEntity<String> exchange = restOperations.exchange(url, HttpMethod.GET, new HttpEntity<Object>(headers),
