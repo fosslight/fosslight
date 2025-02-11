@@ -1082,10 +1082,10 @@ public static String makeRecommendedLicenseString(OssMaster ossmaster, ProjectId
 					if (subIdx == tempLength) {
 						end = filePathTemp.substring(idx, tempLength);
 					} else {
-						end = filePathTemp.substring(idx-1, tempLength);
+						end = filePathTemp.substring(idx > 0 ? idx-1 : idx, tempLength);
 					}
 				} else {
-					end = filePathTemp.substring(idx-1, idx+30);
+					end = filePathTemp.substring(idx > 0 ? idx-1 : idx, idx+30);
 				}
 				if (!isEmpty(filePath)) {
 					tmp = filePath + ":" + front + end;
