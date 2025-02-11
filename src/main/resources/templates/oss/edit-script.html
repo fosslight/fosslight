@@ -3127,6 +3127,7 @@
    		
    		alertify.ossRenameDialog()
    		.set('onshow', function(e){
+   			$(".ajs-primary").empty();
    			$(".ajs-primary").append('<button class="ajs-button" style="color: #3593d2;" onclick="fn.closeAlertifyDialog();">CANCEL</button>');
    			$(".ajs-primary").append('<button class="ajs-button" style="color: #3593d2;" onclick="fn.registOssRename();">SAVE</button>');
    		})
