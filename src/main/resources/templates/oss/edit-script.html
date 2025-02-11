@@ -13,12 +13,14 @@
 	var detectedLicenseValid = true;
 	var deactivateFlag = "N";
 	var renameFlag = "N";
+	var renameCheckFlag = false;
 	var nickNameClone;
 	var commentsParam = {referenceId : [[${ossId}]], referenceDiv : 'oss'};
     var ossId = [[${ossId}]] || null;
     var isReadOnly = [[${isReadOnly}]] || null;
     var userRole = [[${#authentication.authorities[0].authority}]];
     var isSaveButtonClicked = false;
+    var backupFormData = null;
     
  	//데이터 객체
 	var data = {
@@ -30,6 +32,9 @@
 		clone : '',
 		typeCodes : [],
 		copyData : [[${copyData}]],
+		backupFormValue : function() {
+			backupFormData = $('#ossForm').serialize();
+		},
 		init : function(){
 			if (data.list == null) {
 				data.list = new Array();
@@ -147,7 +152,9 @@
                         }
                     }
                 }
-            })
+            });
+            
+            data.backupFormValue();
 		},
 		syncData : function(syncData, copyFlag){
 			$.each(syncData, function(k, v){
@@ -511,12 +518,6 @@
 			
 			//oss 등록
 			$("#save").on('click',function(){
-				fn.save();
-			});
-			
-			$("#rename").on('click',function(){
-				renameFlag = 'Y';
-				$('input[name=renameFlag]').val(renameFlag);
 				fn.save();
 			});
 			
@@ -1865,6 +1866,7 @@
 	function registSubmit(){
 		if(validationDataSet()){
 			fn.checkAddData();
+			$("input[name=ossName]").prop("disabled", false);
 			
 			$("#ossForm").ajaxForm({
 				url :'/oss/validation',
@@ -2057,20 +2059,20 @@
 				}
 				
 				alertify.alert(_alertMsg, function(){});
-			} else if(json.validMsg == "rename"){
-				if (typeof json.resultData !== 'undefined') {
-					var data = json.resultData;
-					var _alertMsg  = [[#{msg.oss.check.rename}]];
-					for(var i in data){
-						_alertMsg += '<br> - ' + data[i];
-					}
-					alertify.alert(_alertMsg, function(){});
-				} else {
-					alertify.alert('The OSS is the same, so it cannot be changed.', function(){});
-				}
+// 			} else if(json.validMsg == "rename"){
+// 				if (typeof json.resultData !== 'undefined') {
+// 					var data = json.resultData;
+// 					var _alertMsg  = [[#{msg.oss.check.rename}]];
+// 					for(var i in data){
+// 						_alertMsg += '<br> - ' + data[i];
+// 					}
+// 					alertify.alert(_alertMsg, function(){});
+// 				} else {
+// 					alertify.alert('The OSS is the same, so it cannot be changed.', function(){});
+// 				}
 				
-				renameFlag = 'N';
-				$('input[name=renameFlag]').val(renameFlag);
+// 				renameFlag = 'N';
+// 				$('input[name=renameFlag]').val(renameFlag);
 			} else if(json.validMsg == "notChange"){
 				alertify.alert([[#{msg.oss.name.nickname.sametime.notchange}]], function(){});
 			} else if(json.resultData) {
@@ -2350,30 +2352,39 @@
 	//등록성공콜백함수
 	function onRegistSuccess(json, status){
 		loading.hide();
-		if(json.resCd == '10'){
-			alertify.alert([[#{msg.common.success}]], function(){
-				if(opener){
-					// 현재 창이 팝업인 경우
-					self.opener = null;self.close();
-				} else {
-                    if (ossId != null) {
-                    	if (data.copyData != null) {
-                    		deleteTabInFrame('/oss/copy/'+ossId);
-                    	} else {
-                    		deleteTabInFrame('/oss/edit/'+json.ossId);
-                    	}
-                        
-                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
-                    } else {
-                        deleteTabInFrame('/oss/edit');
-                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
-                    }
+		$("input[name='ossName']").prop("disabled", true);
+		
+		if (json.resCd == '10') {
+			if (renameCheckFlag) {
+				$("input[name='ossName']").prop("disabled", true);
+				renameCheckFlag = false;
+				fn.ossRename();
+			} else {
+				alertify.alert([[#{msg.common.success}]], function(){
+					if(opener){
+						// 현재 창이 팝업인 경우
+						self.opener = null;self.close();
+					} else {
+	                    if (ossId != null) {
+	                    	if (data.copyData != null) {
+	                    		deleteTabInFrame('/oss/copy/'+ossId);
+	                    	} else {
+	                    		deleteTabInFrame('/oss/edit/'+json.ossId);
+	                    	}
+	                        
+	                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
+	                    } else {
+	                        deleteTabInFrame('/oss/edit');
+	                        createTabInFrame(json.ossId + '_Opensource', '/oss/edit/'+json.ossId);
+	                    }
 
-                    reloadTabInframe('/oss/list');
-				}
-			});
-		}else{
+	                    reloadTabInframe('/oss/list');
+					}
+				});
+			}
+		} else {
 			alertify.error([[#{msg.common.valid2}]], 0);
+			renameCheckFlag = false;
 			renameFlag = 'N';
 			$('input[name=renameFlag]').val(renameFlag);
 		}
@@ -2714,6 +2725,7 @@
 				$(target).parent().parent().next().find("span.retxt").css("display", "none");
 				
 				$("input[name=validationType]").val('DOWNLOADLOCATION');
+				$("input[name=ossName]").prop("disabled", false);
 	    		$("[name='downloadLocation']").val(value);
 				$("#ossForm").ajaxForm({
 					url :'/oss/urlDuplicateValidation',
@@ -2721,6 +2733,7 @@
 	            	dataType:"json",
 	           	 	cache : false,
 		        	success : function(json) {
+		        		$("input[name=ossName]").prop("disabled", true);
 		        		if (json.externalData2) {
 		        			if (typeof json.externalData2.downloadLocation !== 'undefined') {
 			        			var downloadLocation = json.externalData2.downloadLocation;
@@ -2767,12 +2780,14 @@
 			
 			if (patternCnt == 0) {
 				$("input[name=validationType]").val('DOWNLOADLOCATIONS');
+				$("input[name=ossName]").prop("disabled", false);
 				$("#ossForm").ajaxForm({
 					url :'/oss/urlDuplicateValidation',
 	            	type : 'POST',
 	           		dataType:"json",
 	            	cache : false,
 		        	success : function(json) {
+		        		$("input[name=ossName]").prop("disabled", true);
 		        		if (json.externalData2){
 		        			var diffMsg = json.externalData2.downloadLocations.split("||");
 						
@@ -2821,6 +2836,7 @@
 				$(target).next().next("span.retxt").empty();
 				$(target).next().next("span.retxt").css("display", "none");
 				
+				$("input[name=ossName]").prop("disabled", false);
 				$("input[name=validationType]").val('HOMEPAGE');
 				
 				$("#ossForm").ajaxForm({
@@ -2829,6 +2845,8 @@
 	            	dataType:"json",
 	            	cache : false,
 		        	success : function(json) {
+		        		$("input[name=ossName]").prop("disabled", true);
+		        		
 		        		if (json.externalData2) {
 		        			if (typeof json.externalData2.homepage !== 'undefined') {
 		        				var homepageHtml = json.externalData2.homepage;
@@ -3052,9 +3070,171 @@
 				.show();
 		}
 	},
+	isChangedFormValue : function () {
+		let currentFormData = $("#ossForm").serialize();
+		if (backupFormData != currentFormData) {
+			return true;
+		} else {
+			return false;
+		}
+	},
+	checkOssRename : function () {
+		// 기존 데이터 변경 여부 확인
+		if (fn.isChangedFormValue()) {
+			if (typeof alertify.renameCheckDialog === 'undefined') {
+				commonAlertifyDialog('renameCheckDialog');
+	    	}
+			
+			alertify.renameCheckDialog([[#{msg.oss.check.before.rename.save}]]).set('labels', {ok: 'SAVE'})
+			.set('onok', function(e) {
+				if (e) {
+					renameCheckFlag = true;
+					
+					var referenceDiv = [[${@CommonFunction.getCoConstDefVal('CD_DTL_COMMENT_OSS')}]];
+			        $("input[name='referenceDiv']").val(referenceDiv);
+       				
+					$('#_licenseChoice').jqGrid('saveRow',lastsel);
+       				$("input[name='ossName']").prop("disabled", false);
+					
+					registSubmit();
+				} else {
+					renameCheckFlag = false;
+					return false;
+				}
+			}).show();
+		} else {
+			fn.ossRename();
+		}
+	},
+	ossRename : function () {
+		if (typeof alertify.ossRenameDialog === 'undefined') {
+			alertifyWithoutButtons('ossRenameDialog');
+    	}
+		
+		let innerHtml 	= [[#{msg.oss.check.rename.save}]];
+   		innerHtml 		+= '<br><div class="row col-lg-12 mt-3"><label class="d-flex-align mb-0">' + [[#{msg.common.field.OSS.name}]] + '</label><input class="form-control ml-2" id="ossRename" style="width: 400px;" placeholder="OSS Name (to-be)"/><span class="retxt text-danger text-sm" style="margin-left: 85px;"></span></div>';
+   		
+   		alertify.ossRenameDialog()
+   		.set('onshow', function(e){
+   			$(".ajs-primary").append('<button class="ajs-button" style="color: #3593d2;" onclick="fn.closeAlertifyDialog();">CANCEL</button>');
+   			$(".ajs-primary").append('<button class="ajs-button" style="color: #3593d2;" onclick="fn.registOssRename();">SAVE</button>');
+   		})
+   		.setContent(innerHtml).show();
+	},
+	registOssRename : function () {
+		var ossName = $("input[name='ossName']").val();
+		fn.checkValidMsg();
+		
+		loadingIden.show();
+		setTimeout(function() {
+			let ossRenameVal = $("#ossRename").val();
+			if ("" != ossRenameVal) {
+				if (ossName == ossRenameVal) {
+					loadingIden.hide();
+					alertify.alert([[#{msg.oss.check.same.ossName}]], function(){});
+				} else {
+					let ossId = $("input[name='ossId']").val();
+					let dataIds = $('#_licenseChoice').jqGrid('getDataIDs');
+					
+					let newRows = new Array();
+					let checkLicenses = new Array();
+					dataIds.forEach(function(dataId){
+						var rowData = $('#_licenseChoice').jqGrid('getRowData',dataId);
+						var licenseName = rowData.licenseName;
+						if( licenseName.indexOf('<div') > -1){
+							rowData['licenseName'] = '';
+						}
+						checkLicenses.push(rowData.licenseNameEx);
+						newRows.push(rowData);
+					});
+					
+					let form = document.createElement('form');
+					let input = document.createElement('input');
+				    input.setAttribute('type', 'hidden');
+				    input.setAttribute('name', 'ossId');
+				    input.setAttribute('value', ossId);
+				 	form.appendChild(input);
+				 	
+				 	let input2 = document.createElement('input');
+				 	input2.setAttribute('type', 'hidden');
+					input2.setAttribute('name', 'ossName');
+					input2.setAttribute('value', ossRenameVal);
+				 	form.appendChild(input2);
+				 	
+				 	let input3 = document.createElement('input');
+				 	input3.setAttribute('type', 'hidden');
+					input3.setAttribute('name', 'renameFlag');
+					input3.setAttribute('value', 'Y');
+				 	form.appendChild(input3);
+				 	
+				 	let input4 = document.createElement('input');
+				 	input4.setAttribute('type', 'hidden');
+					input4.setAttribute('name', 'ossLicensesJson');
+					input4.setAttribute('value', JSON.stringify(newRows));
+				 	form.appendChild(input4);
+				    
+					const renameFormData = new FormData(form);
+					
+					$.ajax({
+						url : suffix + '/oss/validation',
+						type : 'POST',
+						data : renameFormData,
+						cache : false,
+						async : false,
+						contentType: false,
+						processData: false,
+						success : function(data){
+							loadingIden.hide();
+							
+							if (typeof data.isValid !== "undefined") {
+								if (data.isValid == 'false') {
+									if (data.validMsg == "rename"){
+										let ossInfo = data.resultData.split("|");
+										let targetOssId = ossInfo[0];
+										let targetOssName = ossInfo[1];
+										let msg = targetOssName + " are Duplicated by <a class=\"tabLink\" href=\"#none\" onclick=\"fn.mvEdit('/oss/edit/" + targetOssId + "','" + targetOssId + "');\">< " + targetOssName + " ></a>";
+										$("#ossRename").addClass("is-invalid");
+										$("#ossRename").next().html(msg).show();
+									}
+								} else {
+									fn.closeAlertifyDialog();
+	 								renameFlag = 'Y';
+	 				   	   			$('input[name=renameFlag]').val(renameFlag);
+	 				   	   			$("input[name=ossName]").val(ossRenameVal);
+	 				   				fn.save();
+								}
+							} else {
+								alertify.error([[#{msg.common.valid2}]], 0);
+							}
+						},
+						error : function(){
+							loading.hide();
+							alertify.error([[#{msg.common.valid2}]], 0);
+						}
+					});
+				}
+			} else {
+				loadingIden.hide();
+				alertify.alert([[#{msg.oss.check.enter.ossName}]], function(){});
+			}
+		}, 200);
+	},
+	checkValidMsg : function () {
+		$("#ossRename").removeClass("is-invalid");
+		$("#ossRename").next().empty();
+	},
+	mvEdit : function (url, ossId) {
+		createTabInFrame(ossId+'_Opensource', url);
+	},
+	closeAlertifyDialog : function () {
+		if (typeof alertify.ossRenameDialog !== 'undefined') {
+			$(alertify.ossRenameDialog).find(".ajs-primary").empty();
+		}
+		$(".ajs-close").trigger("click");
+	},
 	showOssViewPage : function (obj) {
-        var ossName = $(obj).parent().find('input[name="ossName"]').val();
-		var ossVersion = $(obj).parent().parent().parent().next().find('input').val();
+		let ossName = $(obj).parent().parent().parent().prev().find('input[name="ossName"]').val();
+		let ossVersion = $(obj).parent().find('input[name="ossVersion"]').val();
 		fn.showDetailPopup(ossName, ossVersion);
 	},
 	loadUrl : function (target, url) {

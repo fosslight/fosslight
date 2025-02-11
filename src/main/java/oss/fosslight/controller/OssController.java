@@ -591,66 +591,12 @@ public class OssController extends CoTopComponent{
 		T2CoValidationResult vr = validator.validateObject(reqMap, list, "OSS"); 
 		
 		if (CoConstDef.FLAG_YES.equals(ossMaster.getRenameFlag())) {
-			boolean sameNameFlag = false;
-			boolean ossNicknameFlag= false;
-			
 			OssMaster ossInfo = ossService.getOssInfo(ossMaster.getOssId(), false);
 			
-			if (ossInfo != null && ossInfo.getOssName().equals(ossMaster.getOssName())) {
-				if (ossMaster.getOssNicknames() != null) {
-					if (ossInfo.getOssNicknames() != null) {
-						if (ossMaster.getOssNicknames().length == ossInfo.getOssNicknames().length) {
-							List<String> duplicateOssNicknames = Arrays.asList(ossMaster.getOssNicknames()).stream().filter(e -> !Arrays.asList(ossInfo.getOssNicknames()).contains(e.toString())).collect(Collectors.toList());
-							if (duplicateOssNicknames == null || duplicateOssNicknames.size() == 0) {
-								ossNicknameFlag = true;
-							}
-						}
-					}
-				}else {
-					if (ossInfo.getOssNicknames() == null) {
-						ossNicknameFlag = true;
-					}
-				}
-				
-				if (ossNicknameFlag) {
-					return makeJsonResponseHeader(false, "rename");
-				}
-			}
-			
-			List<String> checkList = new ArrayList<>();
-			List<String> duplicatedList = new ArrayList<>();
-			
-			checkList.add(ossMaster.getOssName());
-			
-			if (CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
-				duplicatedList.add(ossMaster.getOssName());
-				return makeJsonResponseHeader(false, "rename", duplicatedList);
-			}
-			
-			if (ossMaster.getOssNicknames() != null) {
-				for (String _nick : ossMaster.getOssNicknames()) {
-					if (!isEmpty(_nick)) {
-						if (ossMaster.getOssName().equals(_nick) || checkList.contains(_nick)) {
-							duplicatedList.add(_nick + " (The same OSS Name or Nick Name exists.)");
-							sameNameFlag = true;
-							break;
-						}
-						
-						if (checkList.isEmpty() || !checkList.contains(_nick)) {
-							checkList.add(_nick);
-						}
-					}
-				}
-			}
-			
-			if (sameNameFlag) {
-				return makeJsonResponseHeader(false, "rename", duplicatedList);
-			}
-			
-			duplicatedList = ossService.getOssNicknameListWithoutOwn(ossInfo, checkList, duplicatedList);
-			
-			if (duplicatedList != null && duplicatedList.size() > 0) {
-				return makeJsonResponseHeader(false, "rename", duplicatedList);
+			if (!ossInfo.getOssName().equals(ossMaster.getOssName()) && CoCodeManager.OSS_INFO_UPPER_NAMES.containsKey(ossMaster.getOssName().toUpperCase())) {
+				String ossName = CoCodeManager.OSS_INFO_UPPER_NAMES.get(ossMaster.getOssName().toUpperCase());
+				OssMaster bean = ossService.getOssInfo(null, ossName, false);
+				return makeJsonResponseHeader(false, "rename", bean.getOssId() + "|" + ossMaster.getOssName());
 			}
 			
 			if (!vr.isValid()) {
@@ -664,123 +610,124 @@ public class OssController extends CoTopComponent{
 				}
 				
 				vr.setErrorCodeMap(checkErrMap);
-			}
-		}
-		
-		if (!vr.isValid()) {
-			return makeJsonResponseHeader(vr.getValidMessageMap());
-		}
-		
-		if (isEmpty(ossMaster.getOssId())) {
-			OssMaster checkOssInfo = ossService.getOssInfo(ossMaster.getOssId(), ossMaster.getOssName(), false);
-			
-			if (checkOssInfo != null && CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
-				return makeJsonResponseHeader(false, "deactivate");
-			} else {
-				// 신규 등록인 경우 nick name 체크(변경된 사항이 있는 경우, 삭제는 불가)
-				String[] _mergeNicknames = ossService.checkNickNameRegOss(ossMaster.getOssName(), ossMaster.getOssNicknames());
-				
-				// 삭제는 불가능하기 때문에, 건수가 다르면 기존에 등록된 닉네임이 있다는 의미
-				// null을 반환하지는 않는다.
-				if (_mergeNicknames.length > 0) {
-					return makeJsonResponseHeader(false, null, _mergeNicknames);
-				}
+				return makeJsonResponseHeader(vr.getValidMessageMap());
 			}
 		} else {
-			// 수정이면서 oss name이 변경되었고, 변경하려고 하는 oss에 nick name이 등록되어 있는 경우, 사용자 confirm 필요
-			// 변경전 정보를 취득
-			OssMaster orgBean = ossService.getOssInfo(ossMaster.getOssId(), false);
-			
-			if (CoConstDef.FLAG_YES.equals(ossMaster.getDeactivateFlag()) 
-					&& CoConstDef.FLAG_YES.equals(orgBean.getDeactivateFlag())) {
-				return makeJsonResponseHeader(false, "deactivate");
+			if (!vr.isValid()) {
+				return makeJsonResponseHeader(vr.getValidMessageMap());
 			}
 			
-			// oss name 변경 여부 확인
-			if (orgBean != null && !ossMaster.getOssName().equalsIgnoreCase(orgBean.getOssNameTemp())) {
-				// 기존 oss name 이 변경되었는데, oss nick name 까지 동시에 변경 할 경우 제외
-				String[] orgNickNames = ossService.getOssNickNameListByOssName(orgBean.getOssNameTemp());
-				if (orgNickNames != null && orgNickNames.length > 0) {
-					boolean ossNameCheck = false;
+			if (isEmpty(ossMaster.getOssId())) {
+				OssMaster checkOssInfo = ossService.getOssInfo(ossMaster.getOssId(), ossMaster.getOssName(), false);
+				
+				if (checkOssInfo != null && CoConstDef.FLAG_YES.equals(checkOssInfo.getDeactivateFlag())) {
+					return makeJsonResponseHeader(false, "deactivate");
+				} else {
+					// 신규 등록인 경우 nick name 체크(변경된 사항이 있는 경우, 삭제는 불가)
+					String[] _mergeNicknames = ossService.checkNickNameRegOss(ossMaster.getOssName(), ossMaster.getOssNicknames());
 					
-					if (ossMaster.getOssNicknames() != null) {
-						if (orgNickNames.length != ossMaster.getOssNicknames().length) {
-							ossNameCheck = true;
-						} else {
-							if (!Arrays.equals(orgNickNames, ossMaster.getOssNicknames())){
-								ossNameCheck = true;
-							}
-						}
-					} else {
-						ossNameCheck = true;
-					}
-					
-					if (ossNameCheck) {
-						return makeJsonResponseHeader(false, "notChange");
+					// 삭제는 불가능하기 때문에, 건수가 다르면 기존에 등록된 닉네임이 있다는 의미
+					// null을 반환하지는 않는다.
+					if (_mergeNicknames.length > 0) {
+						return makeJsonResponseHeader(false, null, _mergeNicknames);
 					}
 				}
+			} else {
+				// 수정이면서 oss name이 변경되었고, 변경하려고 하는 oss에 nick name이 등록되어 있는 경우, 사용자 confirm 필요
+				// 변경전 정보를 취득
+				OssMaster orgBean = ossService.getOssInfo(ossMaster.getOssId(), false);
 				
-				List<String> orgNickList = new ArrayList<>();
-				List<String> delNickList = new ArrayList<>();
-				// oss name이 변경 되었고, 변경 후 oss name이 이미 등록되어 있는 경우
-				Map<String, List<String>> diffMap = new HashMap<>();
-				String[] orgNicks = ossService.getOssNickNameListByOssName(ossMaster.getOssName());
-				
-				if (orgNicks != null && orgNicks.length > 0) {
-					for (String s : orgNicks) {
-						orgNickList.add(s);
-					}
+				if (CoConstDef.FLAG_YES.equals(ossMaster.getDeactivateFlag()) 
+						&& CoConstDef.FLAG_YES.equals(orgBean.getDeactivateFlag())) {
+					return makeJsonResponseHeader(false, "deactivate");
 				}
 				
-				// 기존 oss name에 물려있는 nick name이 존재하는 경우, nick name은 무시됨
-				// 변경 후 oss name에 nick name이 존재하는 경우 이관됨
-				if (ossMaster.getOssNicknames() != null) {
-					for (String _nick : ossMaster.getOssNicknames()) {
-						if (!isEmpty(_nick)) {
-							// 삭제되는 oss
-							if (orgNickList.isEmpty() || !orgNickList.contains(_nick)) {
-								delNickList.add(_nick);
-							}
-						}
-					}
-				}
-				
-				// 변경하려는 oss name에 nick name이 등록되어 있는 상태이면 merge 해야함
-				if (!orgNickList.isEmpty()) {
-					boolean isChange = !delNickList.isEmpty();
-					
-					if (!isChange) {
-						// 대상 nick name과 현재 oss name이 동일하면 pass
-						List<String> currNickNameList = new ArrayList<>();
+				// oss name 변경 여부 확인
+				if (orgBean != null && !ossMaster.getOssName().equalsIgnoreCase(orgBean.getOssNameTemp())) {
+					// 기존 oss name 이 변경되었는데, oss nick name 까지 동시에 변경 할 경우 제외
+					String[] orgNickNames = ossService.getOssNickNameListByOssName(orgBean.getOssNameTemp());
+					if (orgNickNames != null && orgNickNames.length > 0) {
+						boolean ossNameCheck = false;
 						
 						if (ossMaster.getOssNicknames() != null) {
-							for (String _nick : ossMaster.getOssNicknames()) {
-								if (!isEmpty(_nick)) {
-									currNickNameList.add(_nick);
+							if (orgNickNames.length != ossMaster.getOssNicknames().length) {
+								ossNameCheck = true;
+							} else {
+								if (!Arrays.equals(orgNickNames, ossMaster.getOssNicknames())){
+									ossNameCheck = true;
+								}
+							}
+						} else {
+							ossNameCheck = true;
+						}
+						
+						if (ossNameCheck) {
+							return makeJsonResponseHeader(false, "notChange");
+						}
+					}
+					
+					List<String> orgNickList = new ArrayList<>();
+					List<String> delNickList = new ArrayList<>();
+					// oss name이 변경 되었고, 변경 후 oss name이 이미 등록되어 있는 경우
+					Map<String, List<String>> diffMap = new HashMap<>();
+					String[] orgNicks = ossService.getOssNickNameListByOssName(ossMaster.getOssName());
+					
+					if (orgNicks != null && orgNicks.length > 0) {
+						for (String s : orgNicks) {
+							orgNickList.add(s);
+						}
+					}
+					
+					// 기존 oss name에 물려있는 nick name이 존재하는 경우, nick name은 무시됨
+					// 변경 후 oss name에 nick name이 존재하는 경우 이관됨
+					if (ossMaster.getOssNicknames() != null) {
+						for (String _nick : ossMaster.getOssNicknames()) {
+							if (!isEmpty(_nick)) {
+								// 삭제되는 oss
+								if (orgNickList.isEmpty() || !orgNickList.contains(_nick)) {
+									delNickList.add(_nick);
+								}
+							}
+						}
+					}
+					
+					// 변경하려는 oss name에 nick name이 등록되어 있는 상태이면 merge 해야함
+					if (!orgNickList.isEmpty()) {
+						boolean isChange = !delNickList.isEmpty();
+						
+						if (!isChange) {
+							// 대상 nick name과 현재 oss name이 동일하면 pass
+							List<String> currNickNameList = new ArrayList<>();
+							
+							if (ossMaster.getOssNicknames() != null) {
+								for (String _nick : ossMaster.getOssNicknames()) {
+									if (!isEmpty(_nick)) {
+										currNickNameList.add(_nick);
+									}
+								}
+							}
+							
+							if (orgNickList.size() != currNickNameList.size()) {
+								isChange = true;
+							}
+							
+							for (String s : orgNickList) {
+								if (!currNickNameList.contains(s)) {
+									isChange = true;
+									break;
 								}
 							}
 						}
 						
-						if (orgNickList.size() != currNickNameList.size()) {
-							isChange = true;
-						}
-						
-						for (String s : orgNickList) {
-							if (!currNickNameList.contains(s)) {
-								isChange = true;
-								break;
+						if (isChange) {
+							diffMap.put("addNickArr", orgNickList);
+							
+							if (!delNickList.isEmpty()) {
+								diffMap.put("delNickArr", delNickList);
 							}
-						}
+							return makeJsonResponseHeader(false, "hasDelNick", diffMap);
+						}					
 					}
-					
-					if (isChange) {
-						diffMap.put("addNickArr", orgNickList);
-						
-						if (!delNickList.isEmpty()) {
-							diffMap.put("delNickArr", delNickList);
-						}
-						return makeJsonResponseHeader(false, "hasDelNick", diffMap);
-					}					
 				}
 			}
 		}
