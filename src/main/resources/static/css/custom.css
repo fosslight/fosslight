@@ -827,7 +827,8 @@ div.jqcloud span.w1 { color: #feb24c; }
 
 .ui-jqgrid tr.jqgrow td {
 	overflow: hidden;
-	white-space: pre;
+	white-space: nowrap;
+	text-overflow : ellipsis;
 }
 
 .ui-jqgrid tr.jqgrow td .btnCLight {
@@ -1200,3 +1201,4 @@ div .retxtg {padding-top:2px; font-size:13px; color:gray !important;}
 .note-editor.note-frame table {border: 1px solid #ddd;}
 .note-editor.note-frame table th {border: 1px solid #ddd;}
 .note-editor.note-frame table td {border: 1px solid #ddd;}
+.checkBulkEdit {background-color: #fbf9ee;}
