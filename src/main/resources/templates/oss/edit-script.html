@@ -33,7 +33,7 @@
 		typeCodes : [],
 		copyData : [[${copyData}]],
 		backupFormValue : function() {
-			backupFormData = $('#ossForm').serialize();
+			backupFormData = $('#ossForm').serializeObject();
 		},
 		init : function(){
 			if (data.list == null) {
@@ -3071,8 +3071,19 @@
 		}
 	},
 	isChangedFormValue : function () {
-		let currentFormData = $("#ossForm").serialize();
-		if (backupFormData != currentFormData) {
+		let currentFormData = $("#ossForm").serializeObject();
+		let isChanged = false;
+		
+		for (var key in currentFormData){
+			let backupValue = backupFormData[key];
+			let currentValue = currentFormData[key];
+			if (backupValue != currentValue) {
+				isChanged = true;
+				break;
+			}
+		}
+		
+		if (isChanged) {
 			return true;
 		} else {
 			return false;
