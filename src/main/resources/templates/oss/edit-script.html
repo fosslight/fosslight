@@ -3139,9 +3139,22 @@
    		
    		alertify.ossRenameDialog()
    		.set('onshow', function(e){
-   			$(".ajs-primary").empty();
-   			$(".ajs-primary").append('<button class="ajs-button" style="color: #3593d2;" onclick="fn.closeAlertifyDialog();">CANCEL</button>');
-   			$(".ajs-primary").append('<button class="ajs-button" style="color: #3593d2;" onclick="fn.registOssRename();">SAVE</button>');
+			$(alertify.ossRenameDialog().elements.buttons.primary).empty();
+   			
+   			const cancelBtn = document.createElement('button');
+   			cancelBtn.setAttribute("class", "ajs-button");
+   			cancelBtn.setAttribute("style", "color: #3593d2;");
+   			cancelBtn.setAttribute("onclick", "fn.closeAlertifyDialog()");
+   			cancelBtn.innerText = "CANCEL";
+   			
+   			const saveBtn = document.createElement('button');
+   			saveBtn.setAttribute("class", "ajs-button");
+   			saveBtn.setAttribute("style", "color: #3593d2;");
+   			saveBtn.setAttribute("onclick", "fn.registOssRename()");
+   			saveBtn.innerText = "SAVE";
+   			
+   			alertify.ossRenameDialog().elements.buttons.primary.appendChild(cancelBtn);
+   			alertify.ossRenameDialog().elements.buttons.primary.appendChild(saveBtn);
    		})
    		.setContent(innerHtml).show();
 	},
