@@ -94,12 +94,14 @@ public final class PdfUtil extends CoTopComponent {
     public String getReviewReportHtml(String prjId) throws Exception
     {
         Map<String,Object> convertData = new HashMap<>();
-        List<OssMaster> ossReview = new ArrayList<>();
+        List<OssMaster> ossReviewSummary = new ArrayList<>();
+        List<OssMaster> ossReviewImportantNotes = new ArrayList<>();
         List<LicenseMaster> licenseReview = new ArrayList<>();
         List<Vulnerability> vulnerabilityReview = new ArrayList<>();
         Map<String,LicenseMaster> licenseMasterMap = new HashMap<>();
         Map<String,Vulnerability> vulnerabilityMap = new HashMap<>();
-        Map<String,OssMaster> ossMasterMap = new HashMap<>();
+        Map<String,OssMaster> ossMasterMapSummary = new HashMap<>();
+        Map<String,OssMaster> ossMasterMapImportantNotes = new HashMap<>();
         String type = "";
 
 
@@ -140,8 +142,14 @@ public final class PdfUtil extends CoTopComponent {
                 OssMaster oss = CoCodeManager.OSS_INFO_BY_ID.get(projectIdentification.getOssId());
                 if (oss != null && !isEmpty(oss.getOssName())) {
                     if (!avoidNull(oss.getSummaryDescription()).equals("")) {
-                        if(!ossMasterMap.containsKey(oss.getOssName().toUpperCase())) {
-                            ossMasterMap.put(oss.getOssName().toUpperCase(), oss);
+                        if(!ossMasterMapSummary.containsKey(oss.getOssName().toUpperCase())) {
+                            ossMasterMapSummary.put(oss.getOssName().toUpperCase(), oss);
+                        }
+                    }
+
+                    if(!avoidNull(oss.getImportantNotes()).equals("")) {
+                        if(!ossMasterMapImportantNotes.containsKey(oss.getOssName().toUpperCase())) {
+                            ossMasterMapImportantNotes.put(oss.getOssName().toUpperCase(), oss);
                         }
                     }
 
@@ -185,11 +193,18 @@ public final class PdfUtil extends CoTopComponent {
             }
         }
         
-        for(OssMaster ossMaster : ossMasterMap.values()) {
+        for(OssMaster ossMaster : ossMasterMapSummary.values()) {
             OssMaster oss = new OssMaster();
             oss.setOssName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") +"/oss/list/" + ossMaster.getOssName() + "' target='_blank'>" + ossMaster.getOssName() + "</a>");
             oss.setSummaryDescription(ossMaster.getSummaryDescription());
-            ossReview.add(oss);
+            ossReviewSummary.add(oss);
+        }
+
+        for(OssMaster ossMaster : ossMasterMapImportantNotes.values()) {
+            OssMaster oss = new OssMaster();
+            oss.setOssName("<a href='" + CommonFunction.emptyCheckProperty("server.domain", "http://fosslight.org") +"/oss/list/" + ossMaster.getOssName() + "' target='_blank'>" + ossMaster.getOssName() + "</a>");
+            oss.setImportantNotes(ossMaster.getImportantNotes());
+            ossReviewImportantNotes.add(oss);
         }
 
         for (LicenseMaster licenseMaster : licenseMasterMap.values()) {
@@ -205,9 +220,15 @@ public final class PdfUtil extends CoTopComponent {
             vulnerabilityReview.add(vulnerability);
         }
 
-        if(ossReview.size() > 0) {
-            for(OssMaster om : ossReview) {
+        if(ossReviewSummary.size() > 0) {
+            for(OssMaster om : ossReviewSummary) {
                 om.setSummaryDescription(CommonFunction.lineReplaceToBR(om.getSummaryDescription()));
+            }
+        }
+
+        if(ossReviewImportantNotes.size() > 0) {
+            for(OssMaster om : ossReviewImportantNotes) {
+                om.setImportantNotes(CommonFunction.lineReplaceToBR(om.getImportantNotes()));
             }
         }
 
@@ -218,10 +239,11 @@ public final class PdfUtil extends CoTopComponent {
             }
         }
 
-        if(ossReview.size() == 0 && licenseReview.size() == 0 && vulnerabilityReview.size() == 0 ) {
+        if(ossReviewSummary.size() == 0 && licenseReview.size() == 0 && vulnerabilityReview.size() == 0 && ossReviewImportantNotes.size() == 0) {
             return null;
         } else {
-            convertData.put("OssReview", ossReview);
+            convertData.put("OssReviewSummary", ossReviewSummary);
+            convertData.put("OssReviewImportantNotes", ossReviewImportantNotes);
             convertData.put("LicenseReview", licenseReview);
             convertData.put("VulnerabilityReview", vulnerabilityReview);
             convertData.put("templateURL", "report/reviewReport.html");
