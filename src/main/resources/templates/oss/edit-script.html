@@ -2725,7 +2725,9 @@
 				$(target).parent().parent().next().find("span.retxt").css("display", "none");
 				
 				$("input[name=validationType]").val('DOWNLOADLOCATION');
-				$("input[name=ossName]").prop("disabled", false);
+				if ("" != $("input[name='ossName']").val()) {
+					$("input[name=ossName]").prop("disabled", false);
+				}
 	    		$("[name='downloadLocation']").val(value);
 				$("#ossForm").ajaxForm({
 					url :'/oss/urlDuplicateValidation',
@@ -2733,7 +2735,9 @@
 	            	dataType:"json",
 	           	 	cache : false,
 		        	success : function(json) {
-		        		$("input[name=ossName]").prop("disabled", true);
+		        		if ("" != $("input[name='ossName']").val()) {
+		        			$("input[name=ossName]").prop("disabled", true);
+		        		}
 		        		if (json.externalData2) {
 		        			if (typeof json.externalData2.downloadLocation !== 'undefined') {
 			        			var downloadLocation = json.externalData2.downloadLocation;
@@ -2780,14 +2784,18 @@
 			
 			if (patternCnt == 0) {
 				$("input[name=validationType]").val('DOWNLOADLOCATIONS');
-				$("input[name=ossName]").prop("disabled", false);
+				if ("" != $("input[name='ossName']").val()) {
+					$("input[name=ossName]").prop("disabled", false);
+				}
 				$("#ossForm").ajaxForm({
 					url :'/oss/urlDuplicateValidation',
 	            	type : 'POST',
 	           		dataType:"json",
 	            	cache : false,
 		        	success : function(json) {
-		        		$("input[name=ossName]").prop("disabled", true);
+		        		if ("" != $("input[name='ossName']").val()) {
+		        			$("input[name=ossName]").prop("disabled", true);
+		        		}
 		        		if (json.externalData2){
 		        			var diffMsg = json.externalData2.downloadLocations.split("||");
 						
@@ -2835,8 +2843,9 @@
 			} else {
 				$(target).next().next("span.retxt").empty();
 				$(target).next().next("span.retxt").css("display", "none");
-				
-				$("input[name=ossName]").prop("disabled", false);
+				if ("" != $("input[name='ossName']").val()) {
+					$("input[name=ossName]").prop("disabled", false);
+				}
 				$("input[name=validationType]").val('HOMEPAGE');
 				
 				$("#ossForm").ajaxForm({
@@ -2845,7 +2854,9 @@
 	            	dataType:"json",
 	            	cache : false,
 		        	success : function(json) {
-		        		$("input[name=ossName]").prop("disabled", true);
+		        		if ("" != $("input[name='ossName']").val()) {
+		        			$("input[name=ossName]").prop("disabled", true);
+		        		}
 		        		
 		        		if (json.externalData2) {
 		        			if (typeof json.externalData2.homepage !== 'undefined') {
