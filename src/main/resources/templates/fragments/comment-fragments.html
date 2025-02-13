@@ -501,8 +501,7 @@
 						commonAlertifyDialog('addBtnDialog');
 					}
                    	alertify.addBtnDialog().set('onshow', function(e) {
-                		$(".ajs-ok").hide();
-                		$(".ajs-cancel").hide();
+                   		$(alertify.addBtnDialog().elements.buttons.primary).empty();
                 	}).setContent(res).show();
 				},
 				null,

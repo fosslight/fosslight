@@ -1441,8 +1441,7 @@
 		        		commonAlertifyDialog('editDialog');
 		    		}
 		        	alertify.editDialog().set('onshow', function(e) {
-		        		$(".ajs-ok").hide();
-		        		$(".ajs-cancel").hide();
+		        		$(alertify.editDialog().elements.buttons.primary).empty();
 		        	}).setContent(res).show();
 		      	},
 		       	null,
