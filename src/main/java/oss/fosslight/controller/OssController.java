@@ -1801,6 +1801,9 @@ public class OssController extends CoTopComponent{
 				OssMaster bean = ossService.getOssInfo(null, oa.getOssName(), false);
 				if (bean != null) {
 					oa.setOssId(bean.getOssId());
+					if (!isEmpty(bean.getImportantNotes())) {
+						oa.setImportantNotes(bean.getImportantNotes());
+					}
 				}
 			}
 		}

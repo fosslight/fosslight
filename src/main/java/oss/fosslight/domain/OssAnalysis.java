@@ -55,6 +55,7 @@ public class OssAnalysis extends ComBean implements Serializable {
 	private String homepage;
 	private String ossCopyright;
 	private String summaryDescription;
+	private String importantNotes;
 	private String comment;
 	private String analysisYn;
 	private String completeYn;
