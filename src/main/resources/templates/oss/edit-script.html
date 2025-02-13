@@ -3265,7 +3265,7 @@
 	},
 	closeAlertifyDialog : function () {
 		if (typeof alertify.ossRenameDialog !== 'undefined') {
-			$(alertify.ossRenameDialog).find(".ajs-primary").empty();
+			$(alertify.ossRenameDialog().elements.buttons.primary).empty();
 		}
 		$(".ajs-close").trigger("click");
 	},
