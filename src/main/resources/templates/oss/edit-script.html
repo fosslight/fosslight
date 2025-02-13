@@ -17,6 +17,7 @@
 	var nickNameClone;
 	var commentsParam = {referenceId : [[${ossId}]], referenceDiv : 'oss'};
     var ossId = [[${ossId}]] || null;
+    var isDisabled = $("input[name='ossName']").prop("disabled");
     var isReadOnly = [[${isReadOnly}]] || null;
     var userRole = [[${#authentication.authorities[0].authority}]];
     var isSaveButtonClicked = false;
@@ -2725,7 +2726,7 @@
 				$(target).parent().parent().next().find("span.retxt").css("display", "none");
 				
 				$("input[name=validationType]").val('DOWNLOADLOCATION');
-				if ("" != $("input[name='ossName']").val()) {
+				if (isDisabled) {
 					$("input[name=ossName]").prop("disabled", false);
 				}
 	    		$("[name='downloadLocation']").val(value);
@@ -2735,7 +2736,7 @@
 	            	dataType:"json",
 	           	 	cache : false,
 		        	success : function(json) {
-		        		if ("" != $("input[name='ossName']").val()) {
+		        		if (isDisabled) {
 		        			$("input[name=ossName]").prop("disabled", true);
 		        		}
 		        		if (json.externalData2) {
@@ -2784,7 +2785,7 @@
 			
 			if (patternCnt == 0) {
 				$("input[name=validationType]").val('DOWNLOADLOCATIONS');
-				if ("" != $("input[name='ossName']").val()) {
+				if (isDisabled) {
 					$("input[name=ossName]").prop("disabled", false);
 				}
 				$("#ossForm").ajaxForm({
@@ -2793,7 +2794,7 @@
 	           		dataType:"json",
 	            	cache : false,
 		        	success : function(json) {
-		        		if ("" != $("input[name='ossName']").val()) {
+		        		if (isDisabled) {
 		        			$("input[name=ossName]").prop("disabled", true);
 		        		}
 		        		if (json.externalData2){
@@ -2843,7 +2844,7 @@
 			} else {
 				$(target).next().next("span.retxt").empty();
 				$(target).next().next("span.retxt").css("display", "none");
-				if ("" != $("input[name='ossName']").val()) {
+				if (isDisabled) {
 					$("input[name=ossName]").prop("disabled", false);
 				}
 				$("input[name=validationType]").val('HOMEPAGE');
@@ -2854,7 +2855,7 @@
 	            	dataType:"json",
 	            	cache : false,
 		        	success : function(json) {
-		        		if ("" != $("input[name='ossName']").val()) {
+		        		if (isDisabled) {
 		        			$("input[name=ossName]").prop("disabled", true);
 		        		}
 		        		
