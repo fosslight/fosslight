@@ -3095,15 +3095,20 @@
 		}
 	},
 	isChangedFormValue : function () {
-		let currentFormData = $("#ossForm").serializeObject();
 		let isChanged = false;
 		
-		for (var key in currentFormData){
-			let backupValue = backupFormData[key];
-			let currentValue = currentFormData[key];
-			if (backupValue != currentValue) {
-				isChanged = true;
-				break;
+		if (isDisabled) {
+			$("input[name='ossName']").prop("disabled", false);
+			let currentFormData = $("#ossForm").serializeObject();
+			$("input[name='ossName']").prop("disabled", true);
+			
+			for (var key in currentFormData){
+				let backupValue = backupFormData[key];
+				let currentValue = currentFormData[key];
+				if (backupValue != currentValue) {
+					isChanged = true;
+					break;
+				}
 			}
 		}
 		
