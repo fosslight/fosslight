@@ -13,12 +13,18 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
@@ -30,7 +36,6 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.conn.ssl.TrustStrategy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -88,13 +93,47 @@ public class RequestUtil {
 	}
 
 	private static void makeHttpClient(HttpComponentsClientHttpRequestFactory factory) throws Exception {
-		TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
-        SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+		HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+			public boolean verify(String urlHostName, SSLSession session) {
+	    		return true;
+	    	}
+		};
+		
+		TrustManager[] trustAllCerts = new TrustManager[1];
+        TrustManager tm = new miTM();
+        trustAllCerts[0] = tm;
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, trustAllCerts, null);
+        
         SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).build();
+        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).setSSLHostnameVerifier(hostnameVerifier).build();
         factory.setHttpClient(httpClient);
 	}
+	
+	static class miTM implements TrustManager,X509TrustManager {
+        public X509Certificate[] getAcceptedIssuers() {
+            return null;
+        }
 
+        public boolean isServerTrusted(X509Certificate[] certs) {
+            return true;
+        }
+
+        public boolean isClientTrusted(X509Certificate[] certs) {
+            return true;
+        }
+
+        public void checkServerTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+
+        public void checkClientTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            return;
+        }
+    }
+	
 	/**
 	 * Gets the headers.
 	 *
