@@ -9,16 +9,16 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-    	ORDER BY TBL.DEACTIVATE_FLAG ASC, 
+    	ORDER BY  
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 			CASE
     	    WHEN TBL.OSS_NAME = #{ossName} THEN 1
 			WHEN TBL.OSS_NAME LIKE CONCAT('%', #{ossName}, '%') THEN 2
 			ELSE 3
-			END ASC,
+			END ASC
     	</if>
     	<choose>
-    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)"> TBL.OSS_ID desc</when>
+    		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">DATE_FORMAT(TBL.MODIFIED_DATE, '%Y%m%d') DESC</when>
    			<otherwise>
 				<choose>
 					<when test="@oss.fosslight.util.StringUtil@equals('OSS_ID', sidx)">
@@ -85,6 +85,7 @@
 				</if>
 			</otherwise>
     	</choose>
+    	, TBL.DEACTIVATE_FLAG ASC
     </sql>
     
 	<insert id="insertCommonOssMaster" parameterType="oss.fosslight.domain.OssMaster" useGeneratedKeys="true" keyProperty="ossCommonId" >
@@ -3988,7 +3989,7 @@
            AND T1.REFERENCE_DIV IN ('20', '23')
     		</when>
     		<otherwise>
-           AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','50')
+           AND T1.REFERENCE_DIV IN ('10','11','12','13','14','15','16','50')
     		</otherwise>
     	</choose>
            AND T1.ADMIN_CHECK_YN	!= 'Y'
