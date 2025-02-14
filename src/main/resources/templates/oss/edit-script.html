@@ -34,7 +34,11 @@
 		typeCodes : [],
 		copyData : [[${copyData}]],
 		backupFormValue : function() {
-			backupFormData = $('#ossForm').serializeObject();
+			if (isDisabled) {
+				$("input[name='ossName']").prop("disabled", false);
+				backupFormData = $('#ossForm').serializeObject();
+				$("input[name='ossName']").prop("disabled", true);
+			}
 		},
 		init : function(){
 			if (data.list == null) {
@@ -3074,6 +3078,14 @@
            			} else {
            				return false;
            			}
+           		})
+           		.set('oncancel', function(e) {
+       				if ("Y" == renameFlag) {
+       					let ossName = backupFormData["ossName"];
+           				$("input[name='ossName']").val(ossName);
+       					renameFlag = 'N';
+       					$('input[name=renameFlag]').val(renameFlag);
+       				}
            		})
            		.set('onshow', function(e){
            			$("#ossSaveEditor").summernote({height: 180, minHeight: null, maxHeight: null, lang: "ko-KR"});
