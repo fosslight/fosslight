@@ -13,25 +13,16 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -60,19 +51,8 @@ public class RequestUtil {
 	 * @return the rest template
 	 */
 	public static RestTemplate getRestTemplate(final HttpClientContext context) {
-		return getRestTemplate(context, false);
-	}
-	
-	public static RestTemplate getRestTemplate(final HttpClientContext context, boolean isHttps) {
 		HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
 		factory.setReadTimeout(5000); // milliseconds
-		if (isHttps) {
-			try {
-				makeHttpClient(factory);
-			} catch (Exception e) {
-				log.error(e.getMessage(), e);
-			}
-		}
 		RestTemplate restOperations = new RestTemplate(factory);
 		restOperations.setRequestFactory(new HttpComponentsClientHttpRequestFactory() {
 			@Override
@@ -92,48 +72,6 @@ public class RequestUtil {
 		return restOperations;
 	}
 
-	private static void makeHttpClient(HttpComponentsClientHttpRequestFactory factory) throws Exception {
-		HostnameVerifier hostnameVerifier = new HostnameVerifier() {
-			public boolean verify(String urlHostName, SSLSession session) {
-	    		return true;
-	    	}
-		};
-		
-		TrustManager[] trustAllCerts = new TrustManager[1];
-        TrustManager tm = new miTM();
-        trustAllCerts[0] = tm;
-        SSLContext sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(null, trustAllCerts, null);
-        
-        SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(csf).setSSLHostnameVerifier(hostnameVerifier).build();
-        factory.setHttpClient(httpClient);
-	}
-	
-	static class miTM implements TrustManager,X509TrustManager {
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-
-        public boolean isServerTrusted(X509Certificate[] certs) {
-            return true;
-        }
-
-        public boolean isClientTrusted(X509Certificate[] certs) {
-            return true;
-        }
-
-        public void checkServerTrusted(X509Certificate[] certs, String authType)
-                throws CertificateException {
-            return;
-        }
-
-        public void checkClientTrusted(X509Certificate[] certs, String authType)
-                throws CertificateException {
-            return;
-        }
-    }
-	
 	/**
 	 * Gets the headers.
 	 *
@@ -161,12 +99,7 @@ public class RequestUtil {
 	public static String post(String url, MultiValueMap<String, Object> parts, String charset) {
 		log.debug("url:{}, param:{}, charset:{}", new Object[] { url, parts, charset });
 		HttpClientContext context = HttpClientContext.create();
-		RestTemplate restOperations = null;
-		if (url.startsWith("https://")) {
-			restOperations = RequestUtil.getRestTemplate(context, true);
-		} else {
-			restOperations = RequestUtil.getRestTemplate(context);
-		}
+		RestTemplate restOperations = RequestUtil.getRestTemplate(context);
 		restOperations.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName(charset)));
 		HttpHeaders headers = RequestUtil.getHeaders();
 		ResponseEntity<String> exchange = restOperations.exchange(url, HttpMethod.POST,
@@ -199,12 +132,7 @@ public class RequestUtil {
 	 */
 	public static String get(String url, String charset) {
 		HttpClientContext context = HttpClientContext.create();
-		RestTemplate restOperations = null;
-		if (url.startsWith("https://")) {
-			restOperations = RequestUtil.getRestTemplate(context, true);
-		} else {
-			restOperations = RequestUtil.getRestTemplate(context);
-		}
+		RestTemplate restOperations = RequestUtil.getRestTemplate(context);
 		restOperations.getMessageConverters().add(0, new StringHttpMessageConverter(Charset.forName(charset)));
 		HttpHeaders headers = RequestUtil.getHeaders();
 		ResponseEntity<String> exchange = restOperations.exchange(url, HttpMethod.GET, new HttpEntity<Object>(headers),
