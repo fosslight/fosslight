@@ -2227,11 +2227,14 @@ public class OssServiceImpl extends CoTopComponent implements OssService {
 		String customDownloadlocationUrl = "";
 		if (downloadlocationUrl.contains("?")) {
 			customDownloadlocationUrl = downloadlocationUrl.split("[?]")[0];
-		} else if(downloadlocationUrl.contains("/-/")){
-			customDownloadlocationUrl = downloadlocationUrl.split("/-/")[0];
-		}else {
+		} else {
 			customDownloadlocationUrl = downloadlocationUrl;
 		}
+
+		if(urlSearchSeq == 12 && downloadlocationUrl.contains("/-/")){
+			customDownloadlocationUrl = downloadlocationUrl.split("/-/")[0];
+		}
+
 		Matcher ossNameMatcher = p.matcher("https://" + customDownloadlocationUrl);
 		while (ossNameMatcher.find()){
 			switch(urlSearchSeq) {
