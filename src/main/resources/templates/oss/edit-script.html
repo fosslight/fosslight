@@ -17,7 +17,7 @@
 	var nickNameClone;
 	var commentsParam = {referenceId : [[${ossId}]], referenceDiv : 'oss'};
     var ossId = [[${ossId}]] || null;
-    var isDisabled = $("input[name='ossName']").prop("disabled");
+    var isDisabled = ossId != null ? true : false;
     var isReadOnly = [[${isReadOnly}]] || null;
     var userRole = [[${#authentication.authorities[0].authority}]];
     var isSaveButtonClicked = false;
