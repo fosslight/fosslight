@@ -242,20 +242,21 @@ var chart_fn = {
 						idx++;
 					}
 					
-					var customLabels = new Array();
-					for (var i in divisionList) {
-						let key = divisionList[i] + "|" + data.dataSumArray[i];
-						customLabels.push(key);
-					}
+					obj["datasets"] = datasets;
 					
-       				obj["labels"] = customLabels;
-       				obj["datasets"] = datasets;
-					
-       				if(divisionalProjectChartObject) {
+       				if (divisionalProjectChartObject) {
+       					obj["labels"] = divisionList;
        					divisionalProjectChartObject.data.labels = obj["labels"];
        					divisionalProjectChartObject.data.datasets = obj["datasets"];
        					divisionalProjectChartObject.update();
        				} else {
+       					var customLabels = new Array();
+    					for (var i in divisionList) {
+    						let key = divisionList[i] + "|" + data.dataSumArray[i];
+    						customLabels.push(key);
+    					}
+    					
+           				obj["labels"] = customLabels;
        					divisionalProjectChartObject = getBarChart($('#divisionalProjectChart').get(0).getContext('2d'), obj);
        				}
 				},
@@ -495,20 +496,21 @@ var chart_fn = {
 						idx++;
 					}
 
-					var customLabels = new Array();
-					for (var i in divisionList) {
-						let key = divisionList[i] + "|" + data.dataSumArray[i];
-						customLabels.push(key);
-					}
+					obj["datasets"] = datasets;
 					
-       				obj["labels"] = customLabels;
-       				obj["datasets"] = datasets;
-					
-       				if(trdPartyRelatedChartObject) {
+       				if (trdPartyRelatedChartObject) {
+       					obj["labels"] = divisionList;
        					trdPartyRelatedChartObject.data.labels = obj["labels"];
        					trdPartyRelatedChartObject.data.datasets = obj["datasets"];
        					trdPartyRelatedChartObject.update();
        				} else {
+       					var customLabels = new Array();
+    					for (var i in divisionList) {
+    						let key = divisionList[i] + "|" + data.dataSumArray[i];
+    						customLabels.push(key);
+    					}
+    					
+           				obj["labels"] = customLabels;
        					trdPartyRelatedChartObject = getBarChart($('#trdPartyRelatedChart').get(0).getContext('2d'), obj);
        				}
 				},
