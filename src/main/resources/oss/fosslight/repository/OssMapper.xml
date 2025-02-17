@@ -9,13 +9,13 @@
 		LIMIT #{startIndex}, #{pageListSize}
 	</sql>
     <sql id="orderby">
-    	ORDER BY  
+    	ORDER BY
     	<if test="!@oss.fosslight.util.StringUtil@isEmpty(ossName)">
 			CASE
     	    WHEN TBL.OSS_NAME = #{ossName} THEN 1
 			WHEN TBL.OSS_NAME LIKE CONCAT('%', #{ossName}, '%') THEN 2
 			ELSE 3
-			END ASC
+			END ASC,
     	</if>
     	<choose>
     		<when test="@oss.fosslight.util.StringUtil@isEmpty(sidx)">DATE_FORMAT(TBL.MODIFIED_DATE, '%Y%m%d') DESC</when>
