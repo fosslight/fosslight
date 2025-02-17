@@ -7,19 +7,8 @@ package oss.fosslight.controller;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.LinkedMultiValueMap;
@@ -35,6 +24,7 @@ import oss.fosslight.common.Url;
 import oss.fosslight.domain.T2Users;
 import oss.fosslight.service.T2UserService;
 import oss.fosslight.util.RequestUtil;
+import oss.fosslight.util.HttpsRequestUtil;
 import oss.fosslight.util.StringUtil;
 
 @RestController
@@ -65,7 +55,12 @@ public class ScannerController {
 			
 			String resBody = "";
  			if (scanServiceUrl.startsWith("https://")) {
- 				resBody = getDataForRestApiConnection(prjId, wgetUrl, scanServiceUrl, adminToken, user);
+ 				Map<String, String> parts = new HashMap<>();
+ 				parts.put("pid", prjId);
+ 				parts.put("link", wgetUrl);
+ 				parts.put("email", user.getEmail());
+ 				parts.put("admin", adminToken);
+ 				resBody = HttpsRequestUtil.makePostRequest(scanServiceUrl, parts);
  			} else {
  				MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
  				parts.add("pid", prjId);
@@ -83,79 +78,4 @@ public class ScannerController {
 			return responseService.getFailResult(CoConstDef.CD_OPEN_API_UNKNOWN_ERROR_MESSAGE, e.getMessage());
 		}
 	}
-
-	private String getDataForRestApiConnection(String prjId, String wgetUrl, String scanServiceUrl, String adminToken, T2Users user) {
-		String urlString = scanServiceUrl + "?pid=" + prjId + "&link=" + wgetUrl + "&email=" + user.getEmail() + "&admin=" + adminToken;
-		HttpsURLConnection httpsURLConnection = null;
-		String body = "";
-		
-		try {
-			URL url = new URL(urlString);
-			ignoreSsl();
-			httpsURLConnection = (HttpsURLConnection) url.openConnection();
-			httpsURLConnection.setRequestMethod("POST");
-			httpsURLConnection.setConnectTimeout(1000 * 15);
-			
-			if (httpsURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-				BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
-				String inputLine;
-				StringBuffer response = new StringBuffer();
-				while ((inputLine = in.readLine()) != null) {
-					response.append(inputLine);
-				}
-				body = response.toString();
-			}
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		
-		return body;
-	}
-	
-	private void ignoreSsl() {
-		HostnameVerifier hv = new HostnameVerifier() {
-			public boolean verify(String urlHostName, SSLSession session) {
-	    		return true;
-	    	}
-		};
-		try {
-			trustAllHttpsCertificates();
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		HttpsURLConnection.setDefaultHostnameVerifier(hv);
-	}
-	
-	private static void trustAllHttpsCertificates() throws Exception {
-        TrustManager[] trustAllCerts = new TrustManager[1];
-        TrustManager tm = new miTM();
-        trustAllCerts[0] = tm;
-        SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, trustAllCerts, null);
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-    }
-	
-	static class miTM implements TrustManager,X509TrustManager {
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-
-        public boolean isServerTrusted(X509Certificate[] certs) {
-            return true;
-        }
-
-        public boolean isClientTrusted(X509Certificate[] certs) {
-            return true;
-        }
-
-        public void checkServerTrusted(X509Certificate[] certs, String authType)
-                throws CertificateException {
-            return;
-        }
-
-        public void checkClientTrusted(X509Certificate[] certs, String authType)
-                throws CertificateException {
-            return;
-        }
-    }
 }

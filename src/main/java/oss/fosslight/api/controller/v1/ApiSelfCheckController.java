@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -229,7 +230,7 @@ public class ApiSelfCheckController extends CoTopComponent {
 				Map<String, Object> result = apiProjectService.getSheetData(bean, prjId, sheetNm, sheet, sheetNamesEmptyFlag);
 				Map<String, Object> resultMap = getSheetDataResult(result);
 								
-				if (!resultMap.isEmpty()) {
+				if (!MapUtils.isEmpty(resultMap)) {
 					rtnMap = resultMap;
 					if (rtnMap.containsKey(CoConstDef.CD_OPEN_API_FILE_DATA_EMPTY_MESSAGE)) {
 						rtnMap = null;

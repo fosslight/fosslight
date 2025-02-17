@@ -2347,8 +2347,11 @@ var src_fn = {
 			dataType : 'json',
 			cache : false,
 			success : function(data){
-				if(data.success) {
-					alertify.success([[#{msg.common.success}]]);						
+				if (data.success) {
+					alertify.success([[#{msg.common.success}]]);
+					
+					deleteTabInFrame('/selfCheck/edit/' + [[${project.prjId}]]);
+					createTabInFrame([[${project.prjId}]] + '_selfCheck', "/selfCheck/edit/" + [[${project.prjId}]]);
 				} else {
 					alertify.error([[#{msg.common.valid2}]], 0);
 					if(data.msg) {
