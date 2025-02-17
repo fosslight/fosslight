@@ -5700,7 +5700,7 @@
 			PRJ_ID = #{prjId}
 	</update>
 	
-	<update id="updateConfirmCopyVerificationdistributionStatus" parameterType="oss.fosslight.domain.Project">
+	<update id="updateConfirmCopyVerificationDistributionStatus" parameterType="oss.fosslight.domain.Project">
 		UPDATE
 			PROJECT_MASTER
 		SET
