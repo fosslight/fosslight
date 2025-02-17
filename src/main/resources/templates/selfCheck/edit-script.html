@@ -2348,10 +2348,10 @@ var src_fn = {
 			cache : false,
 			success : function(data){
 				if (data.success) {
-					alertify.success([[#{msg.common.success}]]);
-					
-					deleteTabInFrame('/selfCheck/edit/' + [[${project.prjId}]]);
-					createTabInFrame([[${project.prjId}]] + '_selfCheck', "/selfCheck/edit/" + [[${project.prjId}]]);
+					alertify.alert([[#{msg.common.success}]], function() {
+						deleteTabInFrame('/selfCheck/edit/' + [[${project.prjId}]]);
+						createTabInFrame([[${project.prjId}]] + '_selfCheck', "/selfCheck/edit/" + [[${project.prjId}]]);
+					});
 				} else {
 					alertify.error([[#{msg.common.valid2}]], 0);
 					if(data.msg) {
