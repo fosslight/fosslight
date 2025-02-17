@@ -556,7 +556,9 @@
                         loading.show();
 
                         $('input[name=comment]').val($("#deleteOssEditor").summernote('code'));
-
+                        if (isDisabled) {
+    						$("input[name='ossName']").prop("disabled", false);
+    					}
                         if (validationDataSet()) {
                             $("#ossForm").ajaxForm({
                                 url : '/oss/validation',
@@ -720,11 +722,17 @@
 			});
 
 			$("#sync").on('click',function(){
+				if (isDisabled) {
+					$("input[name='ossName']").prop("disabled", false);
+				}
 				var ossName = $("input[name=ossName]").val();
 				var ossVersion = $("input[name=ossVersion]").val();
 				var ossId = $("input[name=ossId]").val();
 
-				if(ossName!=""){
+				if ("" != ossName) {
+					if (isDisabled) {
+						$("input[name='ossName']").prop("disabled", true);
+					}
 					onAjaxLoadingHide = true;
 					$.ajax({
 						url : '/oss/getOssListByName',
@@ -1897,6 +1905,9 @@
 			success : function(data){
 				if (parseInt(data) > 0) {
 					loading.hide();
+					if (isDisabled) {
+						$("input[name='ossName']").prop("disabled", true);
+					}
 					$('.ossSelectPop').show();
 				} else if (parseInt(data) == 0) {
 					deleteOssByOne();
@@ -2241,7 +2252,7 @@
 		if (json.isValid == 'false') {
 			loading.hide();
 			
-			if(json.validMsg == "hasDelNick") {
+			if (json.validMsg == "hasDelNick") {
 				// oss name을 변경하면서 nick name을 다시 확인 할 필요가 있는 경우
 				
 				// nick name 필드 초기화

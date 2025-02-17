@@ -202,7 +202,9 @@ public class CoMailManager extends CoTopComponent {
     			OssMaster oss_basic_info = bean.getParamOssInfo();
     			String result = appendChangeStyleLinkFormatArray(oss_basic_info.getDownloadLocation());
 				oss_basic_info.setDownloadLocation(result);
-				
+				if (oss_basic_info.getPurl() != null && oss_basic_info.getPurls() == null) {
+					oss_basic_info.setPurls(oss_basic_info.getPurl().split(","));
+				}
     			convertDataMap.put(CoCodeManager.getCodeString(CoConstDef.CD_MAIL_COMPONENT_NAME, CoConstDef.CD_MAIL_COMPONENT_OSSBASICINFO), oss_basic_info); // oss_basic_info
     		}
     		
