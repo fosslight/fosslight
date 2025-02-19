@@ -29,6 +29,8 @@
 
 * Project
   - Added codelinaro type to Pre-review
+
+* Use httpstatus class to print http status code @parkcoldroad (https://github.com/fosslight/fosslight/pull/863)
  
 ## Changes
 * Project
