@@ -2688,7 +2688,7 @@ function getBarChart(target, obj) {
 				tooltip: {
 					callbacks: {
 						label: function(context) {
-							let dataLabel = context.dataset.label || '';
+							let dataLabel = context.label || '';
 							let total = totals[context.dataIndex];
 							let currentValue = context.raw;
 							let percentage = 0;
@@ -2703,6 +2703,48 @@ function getBarChart(target, obj) {
 			}
 		}
 	});
+}
+
+function barChartOption(data) {
+	var totals = new Array();
+	for (var i in data) {
+		let label = data[i];
+		totals.push(label.split("|")[1]);
+	}
+	
+	var barChartOptions = {
+		responsive: true,
+		interaction: {
+		  intersect: false,
+		},
+		scales: {
+		  x: {
+		    stacked: true,
+		  },
+		  y: {
+		    stacked: true
+		  }
+		},
+		plugins: {
+			tooltip: {
+				callbacks: {
+					label: function(context) {
+						let dataLabel = context.label || '';
+						let total = totals[context.dataIndex];
+						let currentValue = context.raw;
+						let percentage = 0;
+						if (total > 0) {
+							percentage = Math.floor(((currentValue/total) * 100)+0.5);
+						}
+						let value = ': ' + context.formattedValue + '(' + percentage + '%)';
+						return dataLabel += value;
+					}
+				}
+			}				
+		}
+	}
+	
+	return barChartOptions;
 }
 
 function getPieChart(target, obj) {
